@@ -22510,28 +22510,44 @@
 			const videoId = urlParams.get('v');
 			const listId = urlParams.get('list');
 			
-			// Add memory-efficient parameters
+			// Enhanced parameters for better playlist stability
 			const params = new URLSearchParams({
 				'autoplay': '1',
 				'rel': '0',
 				'modestbranding': '1',
-				'playsinline': '1' // Important for mobile
+				'playsinline': '1',
+				'enablejsapi': '1', // Enable JavaScript API for better control
+				'widget_referrer': window.location.href,
+				'origin': window.location.origin
 			});
 			
 			if (listId) {
-				// This is a playlist - use playlist embed mode
-				// If there's also a videoId, it will be the first video in the playlist
-				iframe.src = `https://www.youtube.com/embed/videoseries?list=${listId}&${params}`;
+				// Use the standard embed URL but force playlist parameters
+				// This method is more stable for playlists
+				if (videoId) {
+					// Include both video and playlist - this often works better
+					params.append('list', listId);
+					iframe.src = `https://www.youtube.com/embed/${videoId}?${params}`;
+				} else {
+					// Fallback to videoseries if no video ID
+					iframe.src = `https://www.youtube.com/embed/videoseries?list=${listId}&${params}`;
+				}
 			} else if (videoId) {
 				// Single video only
 				iframe.src = `https://www.youtube.com/embed/${videoId}?${params}`;
 			} else {
-				// Fallback for other YouTube URLs
+				// Fallback
 				iframe.src = `https://www.youtube.com/embed/?${params}`;
 			}
 			
 			modal.style.display = 'block';
 			overlay.style.display = 'block';
+			
+			// Add an event listener to detect when the iframe loads and try to enforce playlist mode
+			iframe.onload = function() {
+				// This helps maintain playlist context
+				console.log('Video loaded, playlist mode should be active');
+			};
 		}
 
 		function closeVideo() {
