@@ -1,0 +1,4781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>🔰網頁書籤管理工具 | Bookmarks Manager</title>
+    
+	<meta name="description" content="🔰網頁書籤管理工具 (Bookmarks Manager) - 提供書籤管理及篩選功能。迪遜的免費工具平台。">
+	<meta name="keywords" content="☕迪遜咖啡廳, ☕迪逊咖啡厅, ☕ Diczon's Cafe, ☕Diczon's Cafe, 迪遜咖啡廳, 迪逊咖啡厅, Diczon's Cafe, 迪遜, 迪逊, Diczon, 音樂分享, 遊戲預告, 動畫戲劇, 🔰網頁書籤管理工具, 網頁書籤管理工具, 🔰网页书签管理工具, 网页书签管理工具, 網頁書籤, 書籤管理", "bookmark", "bookmarks", "bookmarks manager">
+    <meta name="author" content="迪遜 Diczon">
+	
+    <!--Open Graph Meta Tags for Social Sharing-->
+    <meta property="og:title" content="🔰網頁書籤管理工具 | Bookmarks Manager">
+    <meta property="og:description" content="輕鬆管理和組織您的網路書籤">
+    <meta property="og:image" content="pics/bookmark_manager.jpg">
+    <meta property="og:url" content="https://diczon.infinityfreeapp.com/bookmarks_manager">
+    <meta property="og:type" content="website">
+	<meta property="og:site_name" content="網頁書籤管理工具">
+	<meta property="og:locale" content="zh_Hant">
+    
+    <!--Twitter Card Meta Tags-->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="🔰網頁書籤管理工具 | Bookmarks Manager">
+    <meta name="twitter:description" content="輕鬆管理和組織您的網路書籤">
+    <meta name="twitter:image" content="pics/bookmark_manager.jpg">
+    
+	<script type="application/ld+json">
+	{
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "🔰網頁書籤管理工具",
+      "alternateName": ["網頁書籤管理工具", "🔰网页书签管理工具", "网页书签管理工具", "🔰 Bookmarks Manager", "🔰Bookmarks Manager", "迪遜", "迪逊", "Diczon"],
+      "url": "https://diczon.infinityfreeapp.com/",
+      "description": "網頁書籤管理工具 - 輕鬆管理和組織您的網路書籤",
+      "inLanguage": "zh-Hant"
+    }
+	</script>
+	
+    <style>
+        :root {
+            --bg-color: #f0f0f0;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --header-bg: #ffffff;
+            --border-color: #ddd;
+            --button-bg: #4CAF50;
+            --button-hover: #45a049;
+            --close-btn-bg: #ff4444;
+            --close-btn-hover: #cc0000;
+            --scroll-btn-bg: #4CAF50;
+            --modal-bg: white;
+            --version-btn-bg: #4CAF50;
+            --thumbnail-overlay: rgba(0,0,0,0.7);
+            --highlight-color: rgba(66, 153, 225, 0.5);
+            --shadow-color: rgba(0,0,0,0.1);
+            --utility-bg: #2196F3;
+            --load-more-btn: #388E3C;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --card-bg: #1e1e1e;
+            --header-bg: #1e1e1e;
+            --border-color: #333;
+            --button-bg: #388E3C;
+            --button-hover: #2E7D32;
+            --close-btn-bg: #d32f2f;
+            --close-btn-hover: #b71c1c;
+            --scroll-btn-bg: #388E3C;
+            --modal-bg: #2d2d2d;
+            --version-btn-bg: #388E3C;
+            --thumbnail-overlay: rgba(0,0,0,0.8);
+            --highlight-color: rgba(100, 181, 246, 0.5);
+            --shadow-color: rgba(0,0,0,0.3);
+            --utility-bg: #1976D2;
+            --load-more-btn: #2E7D32;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            position: relative;
+            padding-bottom: 60px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Header styles */
+        header {
+            position: relative;
+            padding: 20px 60px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--header-bg);
+            box-shadow: 0 2px 4px var(--shadow-color);
+            transition: background-color 0.3s ease;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--text-color);
+            margin: 0 auto;
+            font-size: 1.8em;
+            transition: color 0.3s ease;
+            width: calc(100% - 120px);
+            text-align: center;
+        }
+
+        /* Search and filter container */
+        .search-container {
+            margin: 20px;
+        }
+
+        #search {
+            width: calc(100% - 40px);
+            margin: 0 20px;
+            box-sizing: border-box;
+            padding: 12px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        /* Updated responsive filter container */
+        .filter-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 20px;
+            width: 100%;
+			margin: 20px auto;
+        }
+
+        /* Updated dropdown styling */
+        #languageSelect, #tagFilter, #utilitySelect, #channelSelect {
+            width: 100%;
+			max-width: 100%;
+            box-sizing: border-box;
+            padding: 12px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        #tagFilter optgroup {
+            font-weight: bold;
+        }
+
+        #tagFilter option {
+            padding: 8px;
+        }
+
+        #tagFilter option[value^="music_"],
+        #tagFilter option[value^="game_"] {
+            padding-left: 20px;
+            font-style: italic;
+            color: var(--text-color);
+        }
+
+        /* New slideshow styles */
+        .new-cards-slideshow {
+            margin: 20px;
+            padding: 15px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            transition: all 0.3s ease;
+        }
+
+        .slideshow-header {
+            font-size: 1.2em;
+            color: var(--button-bg);
+            margin-bottom: 15px;
+            transition: color 0.3s ease;
+			position: relative;
+			padding-right: 30px;
+        }
+		
+		.slideshow-close-btn {
+			position: absolute;
+			right: 0;
+			top: 50%;
+			transform: translateY(-50%);
+			cursor: pointer;
+			width: 24px;
+			height: 24px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: 50%;
+			background: var(--close-btn-bg);
+			color: white;
+			transition: background-color 0.3s ease;
+		}
+
+		.slideshow-close-btn:hover {
+			background: var(--close-btn-hover);
+		}
+
+        .slideshow-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 15px;
+            padding-bottom: 10px;
+        }
+
+        .slide-item {
+			flex: 0 0 200px;
+			position: relative;
+			border-radius: 8px;
+			overflow: hidden;
+			box-shadow: 0 2px 4px var(--shadow-color);
+			cursor: pointer;
+			transition: transform 0.2s ease;
+			display: flex;
+			flex-direction: column;
+		}
+
+		.slide-item.card {
+			background: var(--card-bg);
+		}
+
+		.slide-item:hover {
+			transform: translateY(-2px);
+		}
+
+		.slide-item.dragging {
+			opacity: 0.8;
+			transform: scale(1.02);
+			box-shadow: 0 5px 15px var(--shadow-color);
+			z-index: 1000;
+		}
+
+        .slide-thumbnail {
+            width: 100%;
+            height: 113px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* Style slide-info to have rounded bottom corners */
+		.slide-info {
+			padding: 8px;
+			background: var(--thumbnail-overlay);
+			color: white;
+			border-bottom-left-radius: 8px; /* Round bottom corners */
+			border-bottom-right-radius: 8px;
+			flex-grow: 1; /* Ensure it takes remaining space */
+		}
+
+		/* Adjust slide-date-anchor for proper display */
+		.slide-date-anchor {
+			display: flex;
+			flex-direction: column;
+			color: #ccc;
+			gap: 5px;
+		}
+		
+		.slide-date-anchor .slide-date {
+			font-size: 0.8em;
+			color: var(--text-color-secondary);
+		}
+
+		.slide-date-anchor a {
+			font-size: 0.9em;
+			color: white;
+			text-decoration: none;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		.slide-date-anchor a:hover {
+			text-decoration: underline;
+		}
+
+        .slide-title {
+            font-size: 0.9em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Card container */
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 0 20px;
+        }
+
+        .card {
+			position: relative;
+			background: var(--card-bg);
+			border-radius: 8px;
+			box-shadow: 0 2px 4px var(--shadow-color);
+			cursor: pointer;
+			transition: transform 0.2s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+			-webkit-user-select: none;
+			-moz-user-select: none;
+			user-select: none;
+			overflow: hidden; /* Ensure child elements respect rounded corners */
+			display: flex;
+			flex-direction: column;
+		}
+
+        .card.dragging {
+            opacity: 0.8;
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px var(--shadow-color);
+            z-index: 1000;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        .card:target {
+            animation: highlight 1.5s ease-out;
+        }
+
+        @keyframes highlight {
+            0% { box-shadow: 0 0 0 10px var(--highlight-color); }
+            50% { box-shadow: 0 0 0 15px var(--highlight-color); }
+            100% { box-shadow: 0 0 0 0 transparent; }
+        }
+
+        /* Ensure thumbnail-container has no extra margin or padding */
+		.thumbnail-container {
+			position: relative;
+			width: 100%;
+			padding-bottom: 56.25%; /* Maintain aspect ratio */
+			overflow: hidden;
+			margin-bottom: 0;
+		}
+
+		/* Ensure thumbnail fills container */
+		.thumbnail {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-size: cover;
+			background-position: center;
+			border-top-left-radius: 8px; /* Match card's top corners */
+			border-top-right-radius: 8px;
+		}
+
+        .thumbnail-title {
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			background: var(--thumbnail-overlay);
+			color: white;
+			padding: 8px;
+			margin: 0;
+			border-radius: 0 0 4px 4px;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			overflow: hidden;
+		}
+
+        .thumbnail-title a {
+            color: white;
+            text-decoration: none;
+			display: block; /* Make anchor block-level */
+            white-space: nowrap; /* Prevent wrapping */
+            overflow: hidden; /* Hide overflow */
+            text-overflow: ellipsis; /* Add ellipsis */
+            flex: 1; /* Take available space */
+        }
+
+        .thumbnail-title a:hover {
+            text-decoration: underline;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--close-btn-bg);
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: var(--close-btn-hover);
+        }
+		
+		/* New styles for load more button */
+        .load-more-container {
+			display: flex;
+            justify-content: center;
+            margin: 20px 0 40px;
+            width: 100%;
+            clear: both;
+        }
+		
+		 #loadMoreBtn {
+            background-color: var(--load-more-btn);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 12px 24px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: inline-block;
+            margin: 0 auto;
+        }
+
+        #loadMoreBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            background-color: var(--button-hover);
+        }
+
+        #loadMoreBtn:active {
+            transform: translateY(0);
+        }
+
+        #loadMoreBtn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Scroll buttons */
+        #scrollTopBtn {
+            position: fixed;
+            bottom: 120px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            background: transparent;
+            color: white;
+            border: none;
+            cursor: pointer;
+            z-index: 99;
+            transition: background-color 0.3s ease;
+        }
+
+        #scrollBottomBtn {
+            position: fixed;
+            bottom: 60px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            background: transparent;
+            color: white;
+            border: none;
+            cursor: pointer;
+            z-index: 1001;
+            transition: background-color 0.3s ease;
+        }
+
+        #scrollTopBtn:hover, #scrollBottomBtn:hover {
+            background: #ffcc00;
+        }
+
+        /* Controls section */
+        .controls-section {
+            margin: 20px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            transition: all 0.3s ease;
+        }
+
+        summary {
+            padding: 15px;
+            cursor: pointer;
+            list-style: none;
+            font-weight: bold;
+            color: var(--button-bg);
+            transition: color 0.3s ease;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .controls {
+            padding: 0 15px 15px 15px;
+        }
+
+        .input-group {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .input-group input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .button-group button {
+            flex: 1;
+            padding: 12px;
+            background: var(--button-bg);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .button-group button:hover {
+            background: var(--button-hover);
+        }
+
+        /* Footer */
+        footer {
+            z-index: 1000;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--header-bg);
+            padding: 15px;
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        footer p {
+            margin: 0;
+        }
+
+        /* Theme toggle button */
+        .theme-toggle {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--utility-bg);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            transition: background-color 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: #1565C0;
+        }
+
+        /* Clock button */
+        .clock-btn {
+            position: absolute;
+            left: 70px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--utility-bg);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            transition: background-color 0.3s ease;
+        }
+
+        .clock-btn:hover {
+            background: #1565C0;
+        }
+
+        /* Help button - matches version button style */
+        .help-btn {
+            position: absolute;
+            right: 70px; /* Positioned left of version button */
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--version-btn-bg); /* Using utility blue color */
+            color: white;
+            border: none;
+            border-radius: 20px; /* Slightly rounded like version button */
+            padding: 0px;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            z-index: 1001;
+            transition: background-color 0.3s ease;
+        }
+
+        .help-btn:hover {
+            background: var(--button-hover);
+        }
+        
+        /* Version button */
+        .version-btn {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--version-btn-bg);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 0px;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            z-index: 1001;
+            transition: background-color 0.3s ease;
+        }
+
+        .version-btn:hover {
+            background: var(--button-hover);
+        }
+        
+        .help-content {
+            line-height: 1.6;
+        }
+
+        .help-content h3 {
+            margin-top: 20px;
+            color: var(--button-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+
+        .help-content p {
+            margin: 10px 0;
+        }
+        
+        /* Modal styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .video-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+        }
+
+        .video-container {
+            position: relative;
+            width: 80%;
+            height: 80%;
+            margin: 5% auto;
+            background: var(--modal-bg);
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        .video-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 8px;
+        }
+
+        .video-close-btn {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            background: var(--close-btn-bg);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            z-index: 1002;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .video-close-btn:hover {
+            background: var(--close-btn-hover);
+        }
+
+        /* Unified modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--modal-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px var(--shadow-color);
+            z-index: 1001;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+
+        .modal h2 {
+            margin-top: 0;
+            color: var(--button-bg);
+            transition: color 0.3s ease;
+        }
+
+        /* Help content styles */
+        .help-content {
+            line-height: 1.6;
+        }
+
+        .help-content h3 {
+            margin-top: 20px;
+            color: var(--button-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+
+        .help-content p {
+            margin: 10px 0;
+        }
+        
+        /* Clock Modal */
+        .clock-display {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 20px 0;
+            color: var(--button-bg);
+            font-family: 'Courier New', monospace;
+        }
+
+        .date-display {
+            font-size: 1.2em;
+            color: var(--text-color);
+            margin-bottom: 20px;
+        }
+		
+		/* Analog Clock Styles */
+		.clock-container {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			margin: 20px 0;
+		}
+
+		.analog-clock {
+			width: 150px;
+			height: 150px;
+			border-radius: 50%;
+			background-color: var(--card-bg);
+			border: 2px solid var(--border-color);
+			position: relative;
+			box-shadow: 0 2px 10px var(--shadow-color);
+		}
+
+		.clock-center {
+			position: absolute;
+			width: 10px;
+			height: 10px;
+			background-color: var(--text-color);
+			border-radius: 50%;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			z-index: 10;
+		}
+
+		.hour-hand, .minute-hand, .second-hand {
+			position: absolute;
+			transform-origin: bottom center;
+			left: 50%;
+			bottom: 50%;
+		}
+
+		.hour-hand {
+			width: 4px;
+			height: 40px;
+			background-color: var(--text-color);
+			margin-left: -2px;
+			z-index: 6;
+			border-radius: 4px;
+		}
+
+		.minute-hand {
+			width: 3px;
+			height: 60px;
+			background-color: var(--text-color);
+			margin-left: -1.5px;
+			z-index: 7;
+			border-radius: 3px;
+		}
+
+		.second-hand {
+			width: 2px;
+			height: 70px;
+			background-color: var(--close-btn-bg);
+			margin-left: -1px;
+			z-index: 8;
+			border-radius: 2px;
+		}
+
+		.clock-number {
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			text-align: center;
+			font-size: 14px;
+			font-weight: bold;
+			color: var(--text-color);
+		}
+
+		.clock-number span {
+			position: absolute;
+			display: block;
+		}
+
+		/* Weather Widget Styles */
+		.weather-widget-container {
+			width: 100%;
+			height: 100%;
+			border: none;
+			overflow: hidden;
+		}
+
+        /* Enhanced Calculator styles */
+        .calculator {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            max-width: 320px;
+            margin: 0 auto;
+            border: 1px solid var(--border-color);
+        }
+
+        .calculator-display {
+            grid-column: span 4;
+            padding: 20px 15px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            text-align: right;
+            margin-bottom: 15px;
+            font-size: 1.7em;
+			font-weight: bold;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            font-family: 'Courier New', monospace;
+            color: var(--text-color);
+            overflow: hidden;
+        }
+
+        .calculator-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .calc-btn {
+            padding: 15px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 8px;
+            background: var(--button-bg);
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: bold;
+            aspect-ratio: 1/1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .calc-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px var(--shadow-color);
+        }
+
+        .calc-btn:active {
+            transform: translateY(0);
+        }
+
+        .calc-btn.operator {
+            background: var(--utility-bg);
+        }
+
+        .calc-btn.special {
+            background: #FF9800;
+        }
+
+        .calc-btn.equals {
+            background: #4CAF50;
+            grid-column: span 1;
+        }
+
+        .calculator-footer {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: var(--text-color);
+            opacity: 0.8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .coffee-icon {
+            font-size: 1.2em;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* QR Generator styles */
+        .qr-generator {
+            text-align: center;
+        }
+
+        #qrInput {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        #qrCode {
+            margin: 10px auto;
+            padding: 10px;
+            background: white;
+            max-width: 100%;
+        }
+
+        /* Weather styles */
+        .weather-display {
+            text-align: center;
+            width: 100%;
+        }
+
+        .weather-iframe {
+            width: 100%;
+            height: 400px;
+            border: none;
+            border-radius: 8px;
+        }
+
+        /* Version history styles */
+        .version-history {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .version-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: var(--bg-color);
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Timer and Stopper styles */
+        .timer-container, .stopper-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .time-display {
+            font-size: 2.5em; /* Slightly smaller to fit milliseconds */
+			font-family: 'Courier New', monospace;
+			margin: 20px 0;
+			color: var(--button-bg);
+        }
+
+        .timer-controls, .stopper-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .timer-controls button, .stopper-controls button {
+            padding: 10px 20px;
+            background: var(--button-bg);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .timer-controls button:hover, .stopper-controls button:hover {
+            background: var(--button-hover);
+        }
+
+        .timer-input {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+
+        .timer-input input {
+            width: 60px;
+            padding: 8px;
+            text-align: center;
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        .timer-input span {
+            display: flex;
+            align-items: center;
+            font-size: 1.2em;
+        }
+
+        .lap-times {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+            padding: 10px;
+            background: var(--bg-color);
+            border-radius: 4px;
+        }
+
+        .lap-time {
+            padding: 5px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+		/* YouTube Thumbnail Downloader Styles */
+		.youtube-thumbnails-container {
+			margin: 20px 0;
+		}
+
+		.youtube-thumbnails-container .url-input-container {
+			display: flex;
+			gap: 10px;
+			margin-bottom: 15px;
+		}
+
+		.youtube-thumbnails-container #youtube-url {
+			flex: 1;
+			padding: 12px;
+			background: var(--card-bg);
+			color: var(--text-color);
+			border: 1px solid var(--border-color);
+			border-radius: 4px;
+			transition: all 0.3s ease;
+		}
+		
+		.youtube-thumbnails-container #youtube-url:focus {
+			background: var(--bg-color);
+			box-shadow: 0 0 0 2px var(--button-bg);
+		}
+
+		.youtube-thumbnails-container #fetch-btn {
+			padding: 12px 20px;
+			background: var(--button-bg);
+			color: white;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+			transition: background-color 0.3s ease;
+		}
+
+		.youtube-thumbnails-container #fetch-btn:hover {
+			background: var(--button-hover);
+		}
+
+		.youtube-thumbnails-container .examples {
+			font-size: 0.9em;
+			color: var(--text-color);
+			opacity: 0.7;
+			margin-bottom: 15px;
+		}
+
+		.youtube-thumbnails-container .error-message {
+			display: none;
+			background: rgba(255, 0, 0, 0.1);
+			border-left: 4px solid var(--close-btn-bg);
+			padding: 10px;
+			margin: 10px 0;
+			border-radius: 4px;
+			color: var(--text-color);
+		}
+
+		.youtube-thumbnails-container .thumbnails-section {
+			display: none;
+			margin-top: 20px;
+		}
+
+		.youtube-thumbnails-container .section-title {
+			font-size: 1.3em;
+			margin-bottom: 15px;
+			color: var(--button-bg);
+			text-align: center;
+		}
+
+		.youtube-thumbnails-container .thumbnails-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+			gap: 15px;
+			margin-top: 15px;
+		}
+
+		.thumbnail-card {
+			background: var(--card-bg);
+			border-radius: 8px;
+			overflow: hidden;
+			box-shadow: 0 2px 8px var(--shadow-color);
+			transition: transform 0.2s ease;
+		}
+
+		.thumbnail-card:hover {
+			transform: translateY(-2px);
+		}
+
+		.thumbnail-img {
+			width: 100%;
+			height: 120px;
+			object-fit: cover;
+			display: block;
+		}
+
+		.thumbnail-info {
+			padding: 10px;
+		}
+
+		.thumbnail-quality {
+			font-weight: bold;
+			margin-bottom: 5px;
+			color: var(--button-bg);
+			font-size: 0.9em;
+		}
+
+		.thumbnail-dimensions {
+			font-size: 0.8em;
+			color: var(--text-color);
+			opacity: 0.7;
+			margin-bottom: 10px;
+		}
+
+		.download-btn {
+			display: block;
+			width: 100%;
+			padding: 8px;
+			background: var(--utility-bg);
+			color: white;
+			border: none;
+			border-radius: 4px;
+			font-size: 0.9em;
+			cursor: pointer;
+			transition: background-color 0.3s ease;
+			text-decoration: none;
+			text-align: center;
+		}
+
+		.download-btn:hover {
+			background: #1565C0;
+		}
+		
+        /* Mobile responsive adjustments */
+        @media (max-width: 768px) {
+            .filter-container {
+                grid-template-columns: repeat(2, 1fr); /* Show 2 columns */
+            }
+            
+            header {
+                padding: 20px 50px;
+            }
+            
+            h1 {
+                font-size: 1.5em;
+                width: calc(100% - 100px);
+                padding: 0 10px;
+            }
+            
+            .theme-toggle {
+                left: 10px;
+                width: 36px;
+                height: 36px;
+            }
+            
+            .clock-btn {
+                left: 56px;
+                width: 36px;
+                height: 36px;
+            }
+            
+            .help-btn {
+                right: 56px;
+                width: 36px;
+                height: 36px;
+            }
+            
+            .version-btn {
+                right: 10px;
+                width: 36px;
+                height: 36px;
+            }
+            
+            #languageSelect, #tagFilter, #utilitySelect, #channelSelect {
+                padding: 10px;
+                font-size: 14px;
+            }
+
+            .weather-iframe {
+                height: 300px;
+            }
+
+            .clock-display {
+                font-size: 2.5em;
+            }
+
+            .video-container {
+                width: 95%;
+                height: 60%;
+                margin: 20% auto;
+            }
+
+            .video-close-btn {
+                top: -10px;
+                right: -10px;
+                width: 30px;
+                height: 30px;
+                font-size: 16px;
+            }
+
+            @media (max-width: 480px) {
+                .search-container {
+                    margin: 10px;
+                }
+                
+                #search {
+                    margin: 0 10px;
+                    padding: 10px;
+                }
+                
+                .filter-container {
+                    grid-template-columns: repeat(2, 1fr); /* Show 2 columns */
+                }
+                
+                header {
+                    padding: 15px 40px;
+                }
+                
+                h1 {
+                    font-size: 1.3em;
+                    width: calc(100% - 80px);
+                }
+                
+                .new-cards-slideshow {
+                    margin: 10px;
+                }
+                
+                .card-container {
+                    margin: 0 10px;
+                }
+                
+                .theme-toggle,
+                .clock-btn {
+                    width: 32px;
+                    height: 32px;
+                    font-size: 18px;
+                }
+                
+                .clock-btn {
+                    left: 52px;
+                }
+                
+                .help-btn {
+                    right: 52px;
+                    width: 32px;
+                    height: 32px;
+                    font-size: 18px;
+                }
+				
+				.version-btn {
+					right: 10px;
+					width: 32px;
+					height: 32px;
+					font-size: 18px;
+				}
+                
+                .controls-section summary {
+                    padding: 10px;
+                    font-size: 0.9em;
+                }
+                
+                .button-group button {
+                    padding: 10px;
+                    font-size: 0.9em;
+                }
+
+                .weather-iframe {
+                    height: 250px;
+                }
+
+                .clock-display {
+                    font-size: 2em;
+                }
+
+                .video-container {
+                    height: 50%;
+                    margin: 30% auto;
+                }
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+        <button class="clock-btn" id="clockBtn" onclick="showClockModal()">🕒</button>
+        <h1><a href="https://diczon.infinityfreeapp.com/index.html" target="_parent" style="text-decoration:none; color:green;">🔰網頁書籤管理工具</a></h1>
+        <button class="help-btn" onclick="showHelpModal()">❓</button>
+        <button class="version-btn" onclick="showVersionModal()">💡</button>
+    </header>
+
+    <div class="search-container">
+        <input type="text" id="search" placeholder="🔍音樂/歌曲/動畫/戲劇/電影/預告/漫畫/小說/人工智能/工具/教學/即時遊戲/遊戲攻略/遊戲紀錄/影片網誌/資訊/新聞……">
+        <div class="filter-container">
+            <select id="languageSelect">
+                <option value="trd_chi">🌐語言</option>
+                <option value="trd_chi">🌐繁體中文</option>
+                <option value="sim_chi">🌐简体中文</option>
+                <option value="eng">🌐English</option>
+                <option value="jap">🌐日本語</option>
+                <option value="kor">🌐한국어</option>
+            </select>
+            <select id="tagFilter">
+                <option value="All">🗃️篩選</option>
+                <option value="All">💯全部</option>
+				<option value="bookmark">⭐我的最愛</option>
+				<optgroup label="🎧音樂">
+					<option value="music">全部音樂</option>
+					<option value="music_rip">☠️R.I.P.</option>
+				</optgroup>
+                <optgroup label="🎤歌曲">
+                    <option value="song">全部歌曲</option>
+					<option value="song_male">👨男歌手</option>
+					<option value="song_female">👩女歌手</option>
+					<option value="song_group">👫組合</option>
+                    <option value="song_hk">↳ 廣東歌</option>
+                    <option value="song_pth">↳ 國語歌</option>
+                    <option value="song_jap">↳ 日語歌</option>
+                    <option value="song_kor">↳ 韓語歌</option>
+                    <option value="song_eng">↳ 英語歌</option>
+                    <option value="song_es">↳ 西班牙語歌</option>
+                    <option value="song_ro">↳ 羅馬尼亞語歌</option>
+                    <option value="song_ti">↳ 藏語歌</option>
+                </optgroup>
+                <optgroup label="🎨動畫">
+                    <option value="animation">全部動畫</option>
+                    <option value="animation_hk">↳ 粵語番劇</option>
+                    <option value="animation_pth">↳ 國語番劇</option>
+                    <option value="animation_jap">↳ 日語番劇</option>
+                    <option value="animation_kor">↳ 韓語番劇</option>
+                    <option value="animation_eng">↳ 英語番劇</option>
+                </optgroup>
+                <optgroup label="🎬戲劇">
+                    <option value="drama">全部戲劇</option>
+                    <option value="drama_hk">↳ 粵語戲劇</option>
+                    <option value="drama_pth">↳ 國語戲劇</option>
+                    <option value="drama_jap">↳ 日語戲劇</option>
+                    <option value="drama_kor">↳ 韓語戲劇</option>
+                    <option value="drama_eng">↳ 英語戲劇</option>
+                </optgroup>
+                <optgroup label="📽️電影">
+                    <option value="movie">全部電影</option>
+                    <option value="movie_hk">↳ 粵語電影</option>
+                    <option value="movie_pth">↳ 國語電影</option>
+                    <option value="movie_jap">↳ 日語電影</option>
+                    <option value="movie_kor">↳ 韓語電影</option>
+					<option value="movie_ta">↳ 泰米爾語電影</option>
+                    <option value="movie_eng">↳ 英語電影</option>
+                </optgroup>
+				<optgroup label="🎥預告">
+                    <option value="trailer">所有紀錄</option>
+                    <option value="trailer_movie">↳ 電影預告</option>
+                    <option value="trailer_game">↳ 遊戲預告</option>
+					<option value="trailer_rip">☠️R.I.P.</option>
+                </optgroup>
+				<optgroup label="📖漫畫">
+                    <option value="comic">所有漫畫</option>
+                    <option value="comic_hk">↳ 粵語漫畫</option>
+                    <option value="comic_pth">↳ 國語漫畫</option>
+                    <option value="comic_eng">↳ 英語漫畫</option>
+                </optgroup>
+				<optgroup label="📗小說">
+                    <option value="novel">所有小說</option>
+                    <option value="novel_hk">↳ 粵語小說</option>
+                    <option value="novel_pth">↳ 國語小說</option>
+                    <option value="novel_eng">↳ 英語小說</option>
+                </optgroup>
+				<optgroup label="🤖人工智能">
+                    <option value="ai">全部人工智能</option>
+                    <option value="ai_no login">↳ 毋需登入</option>
+                    <option value="ai_login">↳ 需登入</option>
+                </optgroup>
+                <optgroup label="🔨工具">
+                    <option value="tool">全部工具</option>
+                    <option value="tool_no login">↳ 毋需登入</option>
+                    <option value="tool_login">↳ 需登入</option>
+                </optgroup>
+				<optgroup label="📚教學">
+                    <option value="education">所有教學</option>
+					<option value="education_no login">↳ 毋需登入</option>
+                    <option value="education_login">↳ 需登入</option>
+                    <option value="education_hk">↳ 粵語教學</option>
+                    <option value="education_pth">↳ 國語教學</option>
+					<option value="education_jap">↳ 日語教學</option>
+                    <option value="education_eng">↳ 英語教學</option>
+                </optgroup>
+                <optgroup label="🎮即時遊戲">
+                    <option value="game">全部遊戲</option>
+					<option value="game_login">↳ 需登入</option>
+					<option value="game_no login">↳ 免登入</option>
+					<option value="game_portal">🚪遊戲入口</option>
+                    <option value="game_dual platform">📱💻雙平台遊戲</option>
+                    <option value="game_mobile">📱手機遊戲</option>
+                    <option value="game_computer">💻電腦遊戲</option>
+                    <option value="game_multiplayer">👥多人遊戲</option>
+                    <option value="game_single player">👤單機遊戲</option>
+					<option value="game_gb">📱Game Boy</option>
+					<option value="game_gbc">📱GBC</option>
+					<option value="game_gba">📱GBA</option>
+					<option value="game_ngp">📱NGP</option>
+					<option value="game_ngpc">📱NGPC</option>
+					<option value="game_NDS">📱NDS</option>
+					<option value="game_ws">📱WonderSwan</option>
+					<option value="game_wsc">📱WSC</option>
+					<option value="game_j2me">📱J2ME</option>
+					<option value="game_nes">📱紅白機</option>
+					<option value="game_snes">📱超級任天堂</option>
+					<option value="game_n64">📱任天堂64</option>
+					<option value="game_arcade">📱街機</option>
+					<option value="game_playstation">📱Playstation</option>
+					<option value="game_flash player">📱Flash Player</option>
+					<option value="game_action">🏃動作</option>
+					<option value="game_horizontally scrolling">👉橫向捲軸</option>
+					<option value="game_vertically scrolling">👆縱向捲軸</option>
+					<option value="game_shooting">🔫射擊</option>
+					<option value="game_racing">🚗競速</option>
+					<option value="game_turn">♻️回合制</option>
+					<option value="game_rts">⌛即時策略</option>
+					<option value="game_match">💥消除</option>
+					<option value="game_tycoon">💵經營</option>
+					<option value="game_sport">🏊運動</option>
+					<option value="game_gamble">💸賭博</option>
+					<option value="game_horror">👻恐怖</option>
+                </optgroup>
+                <option value="walkthrough">🎯遊戲攻略</option>
+				<optgroup label="🕹️遊戲紀錄">
+                    <option value="gameplay">所有紀錄</option>
+                    <option value="gameplay_diczon">↳ Diczon</option>
+                    <option value="gameplay_tony gaming hk">↳ Tony Gaming HK</option>
+					<option value="gameplay_bht x wmb">↳ BHT x Wmb</option>
+					<option value="gameplay_jc gameplay">↳ JC Gameplay</option>
+                </optgroup>
+                <optgroup label="🤳影片網誌">
+                    <option value="vlog">所有網紅</option>
+					<option value="vlog_male">👨男網紅</option>
+					<option value="vlog_female">👩女網紅</option>
+                    <option value="vlog_hk">↳ 粵語網紅</option>
+                    <option value="vlog_pth">↳ 國語網紅</option>
+                    <option value="vlog_eng">↳ 英語網紅</option>
+                </optgroup>
+                <optgroup label="🧠資訊">
+                    <option value="info">所有資訊</option>
+					<option value="info_article">📰文章資訊</option>
+					<option value="info_video">📺影片資訊</option>
+                    <option value="info_hk">↳ 粵語資訊</option>
+                    <option value="info_pth">↳ 國語資訊</option>
+                    <option value="info_jap">↳ 日語資訊</option>
+                    <option value="info_eng">↳ 英語資訊</option>
+                </optgroup>
+                <optgroup label="📰新聞">
+                    <option value="news">所有新聞</option>
+                    <option value="news_hk">↳ 粵語新聞</option>
+                    <option value="news_pth">↳ 國語新聞</option>
+                    <option value="news_eng">↳ 英語新聞</option>
+                </optgroup>
+				<optgroup label="🔞成人">
+                    <option value="18+">↳ 18+</option>
+                </optgroup>
+				<optgroup label="🌈多元">
+                    <option value="lgbtq">↳ DEI</option>
+                </optgroup>
+            </select>
+            <select id="utilitySelect">
+                <option value="">⚙️工具</option>
+                <option value="weather">⛅天氣預報</option>
+                <option value="calculator">🧮計算機</option>
+                <option value="qr">📎二維碼生成器</option>
+				<option value="youtube_thumbnails">📥YouTube 預覽圖下載</option>
+                <option value="timer">⏲️計時器</option>
+                <option value="stopper">⏱️秒錶</option>
+				<optgroup label="🎮小遊戲">
+                    <option value="">↳ 敬請期待</option>
+                </optgroup>
+            </select>
+        </div>
+    </div>
+
+    <!-- New slideshow section -->
+    <div class="new-cards-slideshow" id="recentSlideshow" style="display: none;">
+		<div class="slideshow-header">
+			✨最近
+			<span class="slideshow-close-btn" onclick="closeSlideshow('recentSlideshow')">×</span>
+		</div>
+		<div class="slideshow-container" id="slideshowContainer"></div>
+	</div>
+
+	<div class="new-cards-slideshow" id="recommendedSlideshow" style="display: none;">
+		<div class="slideshow-header">
+			👍推介
+			<span class="slideshow-close-btn" onclick="closeSlideshow('recommendedSlideshow')">×</span>
+		</div>
+		<div class="slideshow-container" id="recommendedContainer"></div>
+	</div>
+
+    <div class="card-container" id="cardContainer"></div>
+	
+	<div class="load-more-container">
+        <button id="loadMoreBtn">🔰顯示所有</button>
+    </div>
+
+    <details class="controls-section">
+        <summary>🔰新增/儲存/載入書籤</summary>
+        <div class="controls">
+            <div class="input-group">
+                <input type="text" id="title" placeholder="🏷️名字">
+                <input type="url" id="url" placeholder="📎網址">
+                <input type="url" id="thumbnail" placeholder="🖼️預覽圖網址">
+                <input type="text" id="category" placeholder="🗃️分類(music, song, animation, drama, movie, trailer, comic, novel, ai, tool, education, game, walkthrough, gameplay, vlog, info, news)">
+                <input type="text" id="tags" placeholder="🔖標籤(hk,pth,eng,jap,kor,login,no login,male,female,18+)">
+            </div>
+            <div class="button-group">
+                <button onclick="addCard()">➕新增書籤</button>
+                <button onclick="saveCards()">💾儲存書籤</button>
+                <button onclick="loadCards()">📂載入書籤</button>
+            </div>
+        </div>
+    </details>
+
+    <button id="scrollTopBtn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">🔺</button>
+    <button id="scrollBottomBtn" onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})">🔻</button>
+    
+    <!-- Clock Modal -->
+	<div class="modal-overlay" id="clockModalOverlay" onclick="closeClockModal()"></div>
+	<div class="modal" id="clockModal">
+		<div class="clock-display" id="clockDisplay"></div>
+		<div class="date-display" id="dateDisplay"></div>
+		<div class="clock-container">
+			<div class="analog-clock">
+				<div class="hour-hand" id="hourHand"></div>
+				<div class="minute-hand" id="minuteHand"></div>
+				<div class="second-hand" id="secondHand"></div>
+				<div class="clock-center"></div>
+				<div class="clock-number">
+					<span style="transform: translate(-50%, -50%); top: 10%; left: 50%;">12</span>
+					<span style="transform: translate(-50%, -50%); top: 50%; left: 90%;">3</span>
+					<span style="transform: translate(-50%, -50%); top: 90%; left: 50%;">6</span>
+					<span style="transform: translate(-50%, -50%); top: 50%; left: 10%;">9</span>
+				</div>
+			</div>
+		</div>
+	</div>
+
+    <!-- Enhanced Calculator Modal -->
+    <div class="modal-overlay" id="calculatorModalOverlay" onclick="closeCalculatorModal()"></div>
+    <div class="modal" id="calculatorModal">
+        <h2>🧮計算機</h2>
+        <div class="calculator">
+            <div class="calculator-display" id="calcDisplay">0</div>
+            <div class="calculator-buttons">
+                <button class="calc-btn special" onclick="calcInput('(')">(</button>
+				<button class="calc-btn special" onclick="calcInput(')')">)</button>
+				<button class="calc-btn special" onclick="clearDisplay()">C</button>
+				<button class="calc-btn operator" onclick="calcInput('/')">÷</button>
+				
+				<button class="calc-btn" onclick="calcInput('7')">7</button>
+				<button class="calc-btn" onclick="calcInput('8')">8</button>
+				<button class="calc-btn" onclick="calcInput('9')">9</button>
+				<button class="calc-btn operator" onclick="calcInput('*')">×</button>
+				
+				<button class="calc-btn" onclick="calcInput('4')">4</button>
+				<button class="calc-btn" onclick="calcInput('5')">5</button>
+				<button class="calc-btn" onclick="calcInput('6')">6</button>
+				<button class="calc-btn operator" onclick="calcInput('-')">−</button>
+				
+				
+				<button class="calc-btn" onclick="calcInput('1')">1</button>
+				<button class="calc-btn" onclick="calcInput('2')">2</button>
+				<button class="calc-btn" onclick="calcInput('3')">3</button>
+				<button class="calc-btn operator" onclick="calcInput('+')">+</button>
+				
+				<button class="calc-btn" onclick="calcInput('0')">0</button>
+				<button class="calc-btn" onclick="calcInput('.')">.</button>
+				<button class="calc-btn special" onclick="deleteLastCharacter()">Del</button>
+				<button class="calc-btn equals" onclick="calculate()">=</button>
+            </div>
+        </div>
+        <div class="calculator-footer">
+            <span class="coffee-icon">☕</span> 迪遜咖啡廳專用計算機
+        </div>
+    </div>
+
+    <!-- Weather Modal -->
+    <div class="modal-overlay" id="weatherModalOverlay" onclick="closeWeatherModal()"></div>
+	<div class="modal" id="weatherModal">
+		<div class="weather-widget-container">
+			<a class="weatherwidget-io" href="https://forecast7.com/zh-tw/22d32114d18/kowloon/" data-label_1="九龍" data-label_2="天氣" data-font="微軟正黑體 (Microsoft JhengHei)" data-theme="original" >九龍 天氣</a>
+			<script>
+			!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
+			</script>
+		</div>
+	</div>
+
+    <!-- QR Generator Modal -->
+    <div class="modal-overlay" id="qrModalOverlay" onclick="closeQRModal()"></div>
+    <div class="modal" id="qrModal">
+        <div class="qr-generator">
+            <input type="text" id="qrInput" placeholder="輸入以產生二維碼">
+            <button onclick="generateQR()" style="width:100%;margin-bottom:10px;">📎產生二維碼</button>
+            <div id="qrCode"></div>
+        </div>
+    </div>
+
+    <!-- Timer Modal -->
+    <div class="modal-overlay" id="timerModalOverlay" onclick="closeTimerModal()"></div>
+    <div class="modal" id="timerModal">
+        <h2>⏲️計時器</h2>
+        <div class="timer-container">
+            <div class="timer-input">
+                <input type="number" id="timerHours" min="0" max="23" value="0">
+                <span>:</span>
+                <input type="number" id="timerMinutes" min="0" max="59" value="0">
+                <span>:</span>
+                <input type="number" id="timerSeconds" min="0" max="59" value="0">
+            </div>
+            <div class="time-display" id="timerDisplay">00:00:00</div>
+            <div class="timer-controls">
+                <button onclick="startTimer()">▶️開始</button>
+                <button onclick="pauseTimer()">⏸️暫停</button>
+                <button onclick="resetTimer()">⏹️重置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stopper Modal -->
+    <div class="modal-overlay" id="stopperModalOverlay" onclick="closeStopperModal()"></div>
+	<div class="modal" id="stopperModal">
+		<h2>⏱️秒錶</h2>
+		<div class="stopper-container">
+			<div class="time-display" id="stopperDisplay">00:00:00.000</div>
+			<div class="stopper-controls">
+				<button onclick="startStopper()">▶️開始</button>
+				<button onclick="pauseStopper()">⏸️暫停</button>
+				<button onclick="resetStopper()">⏹️重置</button>
+				<button onclick="recordLap()">⏱️計圈</button>
+			</div>
+			<div class="lap-times" id="lapTimes"></div>
+		</div>
+	</div>
+	
+	<!-- YouTube Thumbnail Downloader Modal -->
+	<div class="modal-overlay" id="youtubeThumbnailsModalOverlay" onclick="closeYoutubeThumbnailsModal()"></div>
+	<div class="modal" id="youtubeThumbnailsModal" style="max-width: 800px;">
+		<h2>📥YouTube 預覽圖下載</h2>
+		<div class="youtube-thumbnails-container">
+			<div class="url-input-container">
+				<input type="text" id="youtube-url" placeholder="Paste YouTube video URL here...">
+				<button id="fetch-btn">預覽圖下載</button>
+			</div>
+			<p class="examples">例子︰https://www.youtube.com/watch?v=VIDEO_ID 或 https://youtu.be/VIDEO_ID</p>
+			<div id="error-message" class="error-message">
+				地址有問題！
+			</div>
+			
+			<div id="thumbnails-section" class="thumbnails-section">
+				<h3 class="section-title">可供下載預覽圖</h3>
+				<div id="thumbnails-grid" class="thumbnails-grid"></div>
+			</div>
+		</div>
+	</div>
+
+    <!-- Version History Modal -->
+    <div class="modal-overlay" id="versionModalOverlay" onclick="closeVersionModal()"></div>
+    <div class="modal" id="versionModal">
+        <h2>💡版本更新 (v2.1.4)</h2>
+        <ul class="version-history">
+			<li class="version-item">
+                <strong>2025-10-21 v2.1.4</strong>
+                <ul>
+					<li>《☕迪遜咖啡廳》新增《🔒敏感內容設置》開關。</li>
+                </ul>
+            </li>
+			<li class="version-item">
+                <strong>2025-10-21 v2.1.3</strong>
+                <ul>
+					<li>《▶YouTube 影片》手機版網頁修復長期播放後網頁崩潰問題。</li>
+                </ul>
+            </li>
+			<li class="version-item">
+                <strong>2025-10-20 v2.1.2</strong>
+                <ul>
+					<li>《▶YouTube 影片》現在一打開就能自動播放了！</li>
+                </ul>
+            </li>
+			<li class="version-item">
+                <strong>2025-10-19 v2.1.1</strong>
+                <ul>
+					<li>《⚙️工具》增加《📥YouTube 預覽圖下載》功能。</li>
+                </ul>
+            </li>
+			<li class="version-item">
+                <strong>2025-10-18 v2.1.0</strong>
+                <ul>
+					<li>《🗃️篩選》的《📚教學》選項增加《↳ 毋需登入》及《↳ 需登入》分類。</li>
+                </ul>
+            </li>
+			<li class="version-item">
+                <strong>2025-10-12 v2.0.9</strong>
+                <ul>
+					<li>《🗃️篩選》的《📽️電影》選項增加《↳ 泰米爾語電影》分類。</li>
+                </ul>
+            </li>
+			<li class="version-item">
+                <strong>2025-09-24 v2.0.8</strong>
+                <ul>
+					<li>《🗃️篩選》的《🎮即時遊戲》選項增加《📱Flash Player》分類。</li>
+					<li>《🗃️篩選》的《🎮即時遊戲》選項增加《📱J2ME》分類。</li>
+                </ul>
+            </li>
+			<li class="version-item">
+                <strong>2025-08-02 v2.0.7</strong>
+                <ul>
+					<li>修復網址#瞄點顯示功能。</li>
+                </ul>
+            </li>
+			<li class="version-item">
+                <strong>2025-07-15 v2.0.6</strong>
+                <ul>
+					<li>《☕迪遜咖啡廳》的《✨最近》及《👍推介》不顯示🙈敏感內容。</li>
+					<li>《☕迪遜咖啡廳》的《👍推介》顯示🌐相關語言。</li>
+                </ul>
+            </li>
+			<li class="version-item">
+                <strong>2025-06-22 v2.0.5</strong>
+                <ul>
+					<li>《☕迪遜咖啡廳》新增《🗃️篩選》主題顯示。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2025-06-12 v2.0.4</strong>
+                <ul>
+					<li>《☕迪遜咖啡廳》更新《👍推介》顯示方式為標題與預覽圖分別顯示。</li>
+					<li>《☕迪遜咖啡廳》及《🔰網頁書籤管理工具》更新主要書籤顯示方式為標題與預覽圖分別顯示。</li>
+                </ul>
+            </li>
+			<li class="version-item">
+                <strong>2025-06-11 v2.0.3</strong>
+                <ul>
+					<li>《☕迪遜咖啡廳》更新《✨最近》及《👍推介》書籤顯示方式為可直接打開。</li>
+                </ul>
+            </li>
+			<li class="version-item">
+                <strong>2025-06-10 v2.0.2</strong>
+                <ul>
+					<li>解決書籤長標題顯示問題。</li>
+					<li>修復書籤黑邊問題。</li>
+                </ul>
+            </li>
+			<li class="version-item">
+                <strong>2025-06-09 v2.0.1</strong>
+                <ul>
+					<li>《☕迪遜咖啡廳》及《🔰網頁書籤管理工具》新增《🔰顯示所有》按鈕。</li>
+					<li>更新《❓網站使用指南》</li>
+                </ul>
+            </li>
+			<li class="version-item">
+                <strong>2025-05-22 v2.0.0</strong>
+                <ul>
+					<li>《☕迪遜咖啡廳》增加《👍推介》功能。</li>
+					<li>《✨最近》及《👍推介》增加關閉按鈕。</li>
+					<li>優化《⚙️工具》的《🧮計算機》。</li>
+                </ul>
+            </li>
+			<li class="version-item">
+                <strong>2025-05-18 v1.9.9</strong>
+                <ul>
+					<li>《🗃️篩選》的《🎮即時遊戲》選項增加《🚪遊戲入口》分類。</li>
+                </ul>
+            </li>
+			<li class="version-item">
+                <strong>2025-05-03 v1.9.8</strong>
+                <ul>
+					<li>《🗃️篩選》增加《⭐我的最愛》分類。</li>
+					<li>《🗃️篩選》的《🎮即時遊戲》選項增加《👉橫向捲軸》及《👆縱向捲軸》分類。</li>
+					<li>《⚙️小工具》更名為《⚙️工具》，增加選項《🎮小遊戲》。</li>
+					<li>《🕹️遊戲紀錄》的《↳ JC288》更名為《↳ JC Gameplay》。</li>
+                </ul>
+            </li>
+			<li class="version-item">
+                <strong>2025-04-21 v1.9.7</strong>
+                <ul>
+					<li>《🗃️篩選》的《🧠資訊》選項增加《📰文章資訊》及《📺影片資訊》分類。</li>
+                </ul>
+            </li>
+			<li class="version-item">
+                <strong>2025-04-17 v1.9.6</strong>
+                <ul>
+					<li>《🗃️篩選》的《🎮即時遊戲》選項增加《↳ 需登入》及《↳ 免登入》分類。</li>
+                </ul>
+            </li>
+			<li class="version-item">
+                <strong>2025-04-10 v1.9.5</strong>
+                <ul>
+					<li>《🔍搜尋列》及《🔰新增書籤欄》更新提示詞。</li>
+					<li>《🗃️篩選》選項增加《👨男》及《👩女》分類。</li>
+					<li>《↑回到頁首》/《↓去到頁尾》圖示變更為《🔺》和《🔻》</li>
+                    <li>《🗃️篩選》選項增加《🔞成人》及《🌈多元》分類。</li>
+					<li>《☕迪遜咖啡廳》的《📰新聞》、《🔞成人》、《🌈多元》內容預設隱藏。</li>
+                </ul>
+            </li>
+			<li class="version-item">
+                <strong>2025-04-06 v1.9.4</strong>
+                <ul>
+                    <li>《🗃️篩選》選項增加《☠️R.I.P.》及大量《🎮即時遊戲》分類。</li>
+                </ul>
+            </li>
+			<li class="version-item">
+                <strong>2025-04-03 v1.9.3</strong>
+                <ul>
+                    <li>《☕迪遜咖啡廳》及《🔰網頁書籤管理工具》新增《⏲️計時器》及《⏱️秒錶》小工具。</li>
+					<li>《☕迪遜咖啡廳》及《🔰網頁書籤管理工具》新增《🕒指針時鐘》及《⛅天氣預報》小工具。</li>
+					<li>《🗃️篩選》選項增加《📽️電影》、《📖漫畫》、《📗小說》以及《📚教學》。</li>
+                </ul>
+            </li>
+			<li class="version-item">
+                <strong>2025-04-02 v1.9.2</strong>
+                <ul>
+                    <li>《☕迪遜咖啡廳》及《🔰網頁書籤管理工具》新增全部《🗃️篩選》選項。</li>
+					<li>新增《❓網站使用指南》功能。</li>
+					<li>優化《🧮計算機》小工具介面。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2025-04-01 v1.9.1</strong>
+                <ul>
+                    <li>《☕迪遜咖啡廳》新增「📡頻道」功能。</li>
+                    <li>《☕迪遜咖啡廳》及《🔰網頁書籤管理工具》解決功能失靈問題。</li>
+                    <li>《☕迪遜咖啡廳》及《🔰網頁書籤管理工具》介面優化。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2025-03-31 v1.9.0</strong>
+                <ul>
+                    <li>《☕迪遜咖啡廳》及《🔰網頁書籤管理工具》解決手機版「🤏書籤拖放」問題。</li>
+                    <li>《☕迪遜咖啡廳》及《🔰網頁書籤管理工具》介面專業化。</li>
+                    <li>《☕迪遜咖啡廳》及《🔰網頁書籤管理工具》新增「⚓書籤錨點」功能。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2025-03-30 v1.8.9</strong>
+                <ul>
+                    <li>《🔰網頁書籤管理工具》新增「▶️YouTube 播放列表偵測」功能。</li>
+                    <li>《🔰網頁書籤管理工具》新增「模態框」功能。</li>
+                    <li>《🔰網頁書籤管理工具》改良「模態框關閉」功能。</li>
+                    <li>《🔰網頁書籤管理工具》新增「🕓時鐘」、「🧮計算機」、「⛅天氣預報」、「📎二維碼生成器」小工具。</li>
+                    <li>《🔰網頁書籤管理工具》優化「🗃️書籤分類」功能。</li>
+                    <li>《🔰網頁書籤管理工具》新增「↑回到頁首/↓去到頁尾」功能。</li>
+                    <li>《🔰網頁書籤管理工具》優化「🔰新增/儲存/載入書籤 Add/Save/Load Cards」功能。</li>
+                    <li>《🔰網頁書籤管理工具》優化介面。</li>
+                    <li>推出新版《☕迪遜咖啡廳》。</li>
+                    <li>《🔰網頁書籤管理工具》移除「✨書籤幻燈片」功能。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2025-03-29 v1.8.8</strong>
+                <ul>
+                    <li>《網頁書籤工具》更名為《🔰網頁書籤管理工具》。</li>
+                    <li>《🔰網頁書籤管理工具》改良「🤏書籤拖放」功能。</li>
+                    <li>《🔰網頁書籤管理工具》新增「🌙深色模式」及「☀️淺色模式」切換。</li>
+                    <li>《🔰網頁書籤管理工具》新增「💡版本更新」系統。</li>
+                    <li>《🔰網頁書籤管理工具》新增「✨書籤時間戳」紀錄。</li>
+                    <li>《🔰網頁書籤管理工具》新增「✨書籤幻燈片」功能。</li>
+                    <li>《🔰網頁書籤管理工具》提升分享體驗。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2025-03-28 v1.8.7</strong>
+                <ul>
+                    <li>《網頁書籤工具》新增「🌐多語言數據儲存」功能。</li>
+                    <li>《網頁書籤工具》新增「🌐多語言選擇」功能。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2025-03-27 v1.8.6</strong>
+                <ul>
+                    <li>《網頁書籤工具》新增「🤏書籤拖放」功能。</li>
+                    <li>《網頁書籤工具》新增「🔍書籤搜尋」功能。</li>
+                    <li>《網頁書籤工具》實裝「🗃️書籤分類」功能。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2025-03-26 v1.8.5</strong>
+                <ul>
+                    <li>《網頁書籤工具》新增「➕建立書籤」功能。</li>
+                    <li>《網頁書籤工具》新增「💾儲存/📂載入書籤」功能。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2025-03-23 v1.8.4</strong>
+                <ul>
+                    <li>優化《☕迪遜咖啡廳》網頁排版。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2025-03-22 v1.8.3</strong>
+                <ul>
+                    <li>新增《網頁書籤工具》網頁。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2025-03-06 v1.8.2</strong>
+                <ul>
+                    <li>網頁移除《🏰迪遜基地》、《🎮迪遜遊戲廳》、《🎯迪遜攻略》、《☕迪遜咖啡廳》、《🎤迪遜演唱會》、《🎥迪遜預告片》、《🎨迪遜動畫室》、《🎬迪遜影院》、《🧠迪遜資訊台》。</li>
+                    <li>《🏡迪遜之家》更名為《☕迪遜咖啡廳》。</li>
+                    <li>《📡迪遜頻道》移除《🏰迪遜基地》、《🎮迪遜遊戲廳》、《🎯迪遜攻略》、《🎤迪遜演唱會》、《🎥迪遜預告片》、《🎨迪遜動畫室》、《🎬迪遜影院》、《🧠迪遜資訊台》。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2024-11-16 v1.8.1</strong>
+                <ul>
+                    <li>增加《🎯迪遜攻略》網頁！《📡迪遜頻道》增加《🎯迪遜攻略》選項！</li>
+                    <li>頁首增加《🎯迪遜攻略》篩選按鈕！</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2023-10-25 v1.8.0</strong>
+                <ul>
+                    <li>《☕迪遜咖啡廳》已更名為《🏡迪遜之家》！</li>
+                    <li>《📡迪遜頻道》分拆為︰《🏡迪遜之家》、《🏰迪遜基地》、《🎮迪遜遊戲廳》、《☕迪遜咖啡廳》、《🎤迪遜演唱會》、《🎥迪遜預告片》、《🎨迪遜動畫室》、《🎬迪遜影院》、《🧠迪遜資訊台》、《📰迪遜新聞台》。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2023-08-30 v1.7.9</strong>
+                <ul>
+                    <li>新增《👻 恐怖類》分類篩選鍵。</li>
+                    <li>部份分類篩選鍵問題修復。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2023-04-07 v1.7.8</strong>
+                <ul>
+                    <li>所有《🎮即玩遊戲》去除《📱💻👤👥》標示，改為以《🎮》標示。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2023-04-03 v1.7.7</strong>
+                <ul>
+                    <li>左上浮動工具列「☰」->《️☕️迪遜咖啡廳》，將《💡更新》分拆為《🏗結構更新》及《💡內容更新》。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2023-04-02 v1.7.6</strong>
+                <ul>
+                    <li>優化首頁分類篩選鍵，增加下拉選單。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2023-04-01 v1.7.5</strong>
+                <ul>
+                    <li>優化左上浮動工具列「☰」顯示，歸納為《️☕️迪遜咖啡廳》，《️💠Windows》，《️🛍️Android》，《️🍎Mac》，《️🐧Linux》，《🗃篩選器》六大類。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2023-03-12 v1.7.4</strong>
+                <ul>
+                    <li>修復搜尋器問題。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2023-03-11 v1.7.3</strong>
+                <ul>
+                    <li>優化預覽圖顯示比例。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2023-02-21 v1.7.2</strong>
+                <ul>
+                    <li>解決篩選後顯示空格問題。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2023-02-20 v1.7.1</strong>
+                <ul>
+                    <li>左上浮動工具列「☰」新增《🔨迪遜工具》，放我制作的工具！</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2023-02-19 v1.7.0</strong>
+                <ul>
+                    <li>《攻略》篩選鍵更名為《玩法》篩選鍵。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2023-02-18 v1.6.9</strong>
+                <ul>
+                    <li>網頁加載一次後不用重新加載。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2023-02-15 v1.6.8</strong>
+                <ul>
+                    <li>增加《加載中……》顯示。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2023-02-14 v1.6.7</strong>
+                <ul>
+                    <li>更新《🧮迪遜計算機》。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2023-02-05 v1.6.6</strong>
+                <ul>
+                    <li>左上浮動工具列「☰」新增「影片篩選-廣、普、英、日」。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2023-02-04 v1.6.5</strong>
+                <ul>
+                    <li>首頁新增「攻略」篩選鍵，優化篩選鍵顯示。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2023-01-29 v1.6.4</strong>
+                <ul>
+                    <li>首頁新增分類篩選鍵。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2022-12-30 v1.6.3</strong>
+                <ul>
+                    <li>增強「🔍搜尋」功能，現可搜尋「音樂/歌曲/即時遊戲/番劇/戲劇/預告片/影片網誌/資訊/新聞」等等。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2022-12-29 v1.6.2</strong>
+                <ul>
+                    <li>增加《🧠迪遜資訊台》。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2022-12-28 v1.6.1</strong>
+                <ul>
+                    <li>網頁當眼處增加「🎬戲劇」、「🎨番劇」、「🎥預告」、及「🤳網誌」篩選鍵以方便用戶選台！</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2022-12-27 v1.6.0</strong>
+                <ul>
+                    <li>新增「🎬戲劇」、「🎨番劇」、「🎥預告片」分類及內容！更新浮動工具列篩選欄！</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2022-12-26 v1.5.9</strong>
+                <ul>
+                    <li>新增「🤳影片網誌」分類！浮動工具列增加「🤳影片網誌」篩選欄！</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2022-12-25 v1.5.8</strong>
+                <ul>
+                    <li>網頁當眼處增加「💯全部」、「🎧音樂」、「🎤歌曲」、及「🎮遊戲」篩選鍵以方便用戶選台！</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2022-12-04 v1.5.7</strong>
+                <ul>
+                    <li>整理及改良浮動工具列「☰」中選項的顯示方式並增加「時鐘」及「香港天氣預告」！</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2022-10-31 v1.5.6</strong>
+                <ul>
+                    <li>整理及改良浮動工具列「☰」中選項的顯示方式並增加下拉選單！</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2022-08-22 v1.5.5</strong>
+                <ul>
+                    <li>改良浮動工具列「☰」位置，增加「🎮遊戲角落」！</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2022-08-19 v1.5.4</strong>
+                <ul>
+                    <li>改良浮動工具列「☰」開與關設計。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2022-08-17 v1.5.3</strong>
+                <ul>
+                    <li>新增浮動工具列「☰」(左上)及浮動快速到頂鍵「▲」(右下)！</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2022-08-16 v1.5.2</strong>
+                <ul>
+                    <li>側欄新增「👾獲得限時免費遊戲」選項，一起來撿遊戲吧！</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2022-08-13 v1.5.1</strong>
+                <ul>
+                    <li>側欄新增「🎮即時遊戲」選項，免安裝即可遊玩，電腦、手機均適用！你也來試試吧！</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2022-08-11 v1.5.0</strong>
+                <ul>
+                    <li>改良頂欄介面設計，轉為側欄顯示，並再次大幅增強「🔍搜尋」功能。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2022-08-01 v1.4.9</strong>
+                <ul>
+                    <li>大幅增強「🔍搜尋」功能，建立資料庫，簡化後台程式結構，重新載入部分播放列表。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2022-03-14 v1.4.8</strong>
+                <ul>
+                    <li>新增「用戶登入」介面。</li>
+					<li>「迪遜影院🎥」更名為「遊戲預告片🎮」。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2022-02-21 v1.4.7</strong>
+                <ul>
+                    <li>新增「迪遜影院🎥」網頁。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2021-12-30 v1.4.6</strong>
+                <ul>
+                    <li>新增「🧠資訊」分類。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2021-12-29 v1.4.5</strong>
+                <ul>
+                    <li>新增「🎬追劇」分類。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2021-12-26 v1.4.4</strong>
+                <ul>
+                    <li>取消「✨新片提示」功能，改為於訊息欄顯示。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2021-10-25 v1.4.3</strong>
+                <ul>
+                    <li>新增「✨新片提示」功能。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2021-10-24 v1.4.2</strong>
+                <ul>
+                    <li>更新了標題圖案。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2021-10-16 v1.4.1</strong>
+                <ul>
+                    <li>新增「👒影片網誌」分類。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2021-10-04 v1.4.0</strong>
+                <ul>
+                    <li>新增「藏語歌」分類。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2021-09-24 v1.3.9</strong>
+                <ul>
+                    <li>新增播放列表識別碼以方便收藏播放列表到書籤/我的最愛。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2021-09-05 v1.3.8</strong>
+                <ul>
+                    <li>「迪遜之家💎」已更名為「☕️迪遜咖啡廳」。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2021-09-04 v1.3.7</strong>
+                <ul>
+                    <li>增加歌曲搜尋功能。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2021-08-23 v1.3.6</strong>
+                <ul>
+                    <li>增加「西班牙語歌」分類。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2021-07-31 v1.3.5</strong>
+                <ul>
+                    <li>音樂連結增加所屬遊戲分類。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2021-06-20 v1.3.4</strong>
+                <ul>
+                    <li>修復首頁影片壞連結。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-10-09 v1.3.3</strong>
+                <ul>
+                    <li>修復首頁訊息未能關閉之問題。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-09-24 v1.3.2</strong>
+                <ul>
+                    <li>網頁加速顥示，修正介面錯誤以提升使用體驗。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-09-17 v1.3.1</strong>
+                <ul>
+                    <li>遊戲預告片及咖啡廳網頁與主頁結合。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-08-16 v1.3.0</strong>
+                <ul>
+                    <li>遊戲預告片與咖啡廳網頁介面增加互通連結。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-08-13 v1.2.9</strong>
+                <ul>
+                    <li>遊戲預告片與咖啡廳網頁介面更新及錯誤修正。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-08-12 v1.2.8</strong>
+                <ul>
+                    <li>更新遊戲預告片網頁介面。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-08-11 v1.2.7</strong>
+                <ul>
+                    <li>美化主頁介面，增加瀏覽人數計數器到所有頁面。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-08-10 v1.2.6</strong>
+                <ul>
+                    <li>所有舊主頁功能完成移植到新主頁。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-08-09 v1.2.5</strong>
+                <ul>
+                    <li>更新主頁介面。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-07-15 v1.2.4</strong>
+                <ul>
+                    <li>更新咖啡廳網頁介面。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-05-19 v1.2.3</strong>
+                <ul>
+                    <li>新增咖啡廳網頁。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-05-18 v1.2.2</strong>
+                <ul>
+                    <li>遊戲預告片/音樂網頁選單顯示更新為預設隱藏。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-05-12 v1.2.1</strong>
+                <ul>
+                    <li>遊戲預告片/音樂網頁大更新，載入時間由 30 秒縮短為 3 秒以內。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-04-12 v1.2.0</strong>
+                <ul>
+                    <li>縮短網頁貼文距離以讓用戶可一次過看到更多貼文，增加漸變背景顏色。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-04-10 v1.1.9</strong>
+                <ul>
+                    <li>優化遊戲預告片及音樂網站介面，增加「資料載入」顯示及新增影片分類。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-04-09 v1.1.8</strong>
+                <ul>
+                    <li>優化首頁文章顯示方式，增加文章主題縮圖，側欄之「計算機小工具」及「網站前行足跡」整合為同頁顯示。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-04-08 v1.1.7</strong>
+                <ul>
+                    <li>增設計算機小工具。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-04-07 v1.1.6</strong>
+                <ul>
+                    <li>優化首頁側欄介面設計。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-04-06 v1.1.5</strong>
+                <ul>
+                    <li>增設分享網址時所顯示的縮圖。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-04-05 v1.1.4</strong>
+                <ul>
+                    <li>優化首頁標題設計。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-03-28 v1.1.3</strong>
+                <ul>
+                    <li>更新提示數字到側欄。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-03-27 v1.1.2</strong>
+                <ul>
+                    <li>遷移計數器到側欄並改良計數器設計。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-03-26 v1.1.1</strong>
+                <ul>
+                    <li>新增計數器到首頁。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-03-25 v1.1.0</strong>
+                <ul>
+                    <li>優化首頁介面。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-03-24 v1.0.9</strong>
+                <ul>
+                    <li>更新每日文章與遊戲預告片及音樂網站。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-03-23 v1.0.8</strong>
+                <ul>
+                    <li>遊戲預告片及音樂網站升級介面並每日更新文章。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-03-22 v1.0.7</strong>
+                <ul>
+                    <li>網站首頁改造為資訊分享熱點並每日更新文章。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-03-21 v1.0.6</strong>
+                <ul>
+                    <li>改良網站設計</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-03-20 v1.0.5</strong>
+                <ul>
+                    <li>改進主網頁外觀，更新紀錄置頂顯示，添置瀏覽人數顯示。</li>
+                    <li>增加 2 位合作 Youtubers 到首頁。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-03-19 v1.0.4</strong>
+                <ul>
+                    <li>移除過期網頁。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-03-18 v1.0.3</strong>
+                <ul>
+                    <li>更新「Facebook 遊戲工具 Beta」網頁標題連結。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-03-17 v1.0.2</strong>
+                <ul>
+                    <li>升級主要網頁以支援手機版網頁。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-03-16 v1.0.1</strong>
+                <ul>
+                    <li>建立「迪遜之家」網頁。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2020-03-15 v1.0.0</strong>
+                <ul>
+                    <li>整合舊「迪遜之家」及「Facebook 𨘋戲入口網站」網頁。</li>
+                    <li>重新設計新「迪遜之家」網頁。</li>
+                </ul>
+            </li>
+            <li class="version-item">
+                <strong>2017-2020 v0.0.0-v0.9.9</strong>
+                <ul>
+                    <li>建立首個「迪遜之家」網頁。</li>
+                    <li>建立首個「Facebook 𨘋戲入口網站」網頁。</li>
+                    <li>建立首個「Flash 𨘋戲入口網站」網頁。</li>
+                    <li>建立首個「小𨘋戲入口網站」網頁。</li>
+                    <li>建立首個「線上𨘋戲入口網站」網頁。</li>
+                    <li>建立首個「網上𨘋戲入口網站」網頁。</li>
+                    <li>建立首個「單機𨘋戲入口網站」網頁。</li>
+                    <li>建立首個「YouTube 播放列表集合網站」網頁。</li>
+                    <li>建立首個「天外 Online 遊戲介紹」網頁。</li>
+                    <li>多次更新多個網頁。</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+    
+    <!-- Help Modal -->
+    <div class="modal-overlay" id="helpModalOverlay" onclick="closeHelpModal()"></div>
+    <div class="modal" id="helpModal">
+        <h2>❓網站使用指南</h2>
+        <div class="help-content">
+            <h3>基本功能</h3>
+			<p>1. <strong>🔍搜尋</strong>: 在頂部🔍搜尋欄輸入關鍵字可篩選書籤</p>
+            <p>2. <strong>🌐語言</strong>: 使用下拉選單按🌐語言設換書籤名字語言</p>
+            <p>3. <strong>📡頻道</strong>: 使用下拉選單按📡頻道以選擇其他📡頻道</p>
+			<p>4. <strong>🗃️篩選</strong>: 使用下拉選單按🗃️篩選以篩選書籤</p>
+			<p>5. <strong>🔰顯示所有</strong>: 按下🔰顯示所有按鈕以顯示所有書籤</p>
+            
+            <h3>書籤管理</h3>
+            <p>1. <strong>➕新增書籤</strong>: 展開"🔰新增/儲存/載入書籤"面板填寫資訊</p>
+			<p>2. <strong>💾儲存書籤</strong>: 展開"🔰新增/儲存/載入書籤"面板按💾儲存書籤</p>
+			<p>3. <strong>📂載入書籤</strong>: 展開"🔰新增/儲存/載入書籤"面板按📂載入書籤</p>
+            <p>4. <strong>拖放排序</strong>: 長按(手機)或拖動(電腦)書籤可重新排序</p>
+            <p>5. <strong>刪除書籤</strong>: 點擊書籤右上角的❌按鈕</p>
+            
+            <h3>小工具</h3>
+            <p>1. <strong>🕒時鐘</strong>: 點擊🕒按鈕查看當前時間</p>
+            <p>2. <strong>⛅天氣預報</strong>: 在⚙️小工具下拉選單中選擇⛅天氣預報</p>
+			<p>3. <strong>🧮計算機</strong>: 在⚙️小工具下拉選單中選擇🧮計算機</p>
+            <p>4. <strong>📎二維碼生成器</strong>: 在⚙️小工具下拉選單中選擇📎二維碼生成器</p>
+			<p>5. <strong>📥YouTube 預覽圖下載</strong>: 在⚙️小工具下拉選單中選擇📥YouTube 預覽圖下載</p>
+            <p>6. <strong>⏱️計時器</strong>: 在⚙️小工具下拉選單中選擇⏱️計時器以倒數</p>
+            <p>7. <strong>⏱️秒錶</strong>: 在⚙️小工具下拉選單中選擇⏱️秒錶以記錄時間</p>
+            
+            <h3>主題切換</h3>
+            <p>點擊🌙/🌞按鈕可切換淺色/深色模式</p>
+        </div>
+    </div>
+    
+    <!-- Video Modal -->
+    <div class="modal-overlay" id="videoModalOverlay" onclick="closeVideo()"></div>
+    <div class="video-modal" id="videoModal">
+        <div class="video-container">
+            <button class="video-close-btn" onclick="closeVideo()">×</button>
+            <iframe class="video-iframe" allowfullscreen 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+            </iframe>
+        </div>
+    </div>
+    
+    <footer>
+        <p>© 2025 🔰網頁書籤管理工具，版權所有。</p>
+    </footer>
+
+    <script>
+		let cards = [
+            {
+                "title": "Deepseek",
+                "trd_chi": "Deepseek",
+                "sim_chi": "Deepseek",
+                "eng": "Deepseek",
+                "jap": "Deepseek",
+                "kor": "Deepseek",
+                "icon": "🤖",
+                "category": "ai",
+                "tags": ["ai", "artificial intelligence", "人工智能", "人工智慧", "機器智慧", "人工知能", "인공지능", "login", "bookmark"],
+                "anchor": "Deepseek_AI",
+                "url": "https://chat.deepseek.com/",
+                "thumbnail": "https://img.youtube.com/vi/7GlXg5fHRmc/0.jpg",
+                "dateAdded": "2025-03-30T00:00:00.000Z"
+            },
+            {
+                "title": "Grok",
+                "trd_chi": "Grok",
+                "sim_chi": "Grok",
+                "eng": "Grok",
+                "jap": "Grok",
+                "kor": "Grok",
+                "icon": "🤖",
+                "category": "ai",
+                "tags": ["ai", "artificial intelligence", "人工智能", "人工智慧", "機器智慧", "人工知能", "인공지능", "no login"],
+                "anchor": "Grok_AI",
+                "url": "https://grok.com/",
+                "thumbnail": "https://img.youtube.com/vi/_aQKLAwMMEk/0.jpg",
+                "dateAdded": "2025-03-30T00:00:00.000Z"
+            },
+            {
+                "title": "文心一言",
+                "trd_chi": "文心一言",
+                "sim_chi": "文心一言",
+                "eng": "Ernie Bot",
+                "jap": "アーニー・ボット",
+                "kor": "어니봇",
+                "icon": "🤖",
+                "category": "ai",
+                "tags": ["ai", "artificial intelligence", "人工智能", "人工智慧", "機器智慧", "人工知能", "인공지능", "login"],
+                "anchor": "Ernie_Bot_AI",
+                "url": "https://yiyan.baidu.com/X1",
+                "thumbnail": "https://img.youtube.com/vi/PO3upH0Bzdo/0.jpg",
+                "dateAdded": "2025-03-30T00:00:00.000Z"
+            },
+            {
+                "title": "通义千問",
+                "trd_chi": "通義千問",
+                "sim_chi": "通义千問",
+                "eng": "Tongyi Qianwen",
+                "jap": "Qwen",
+                "kor": "Qwen",
+                "icon": "🤖",
+                "category": "ai",
+                "tags": ["ai", "artificial intelligence", "人工智能", "人工智慧", "機器智慧", "人工知能", "인공지능", "login"],
+                "anchor": "Tongyi_Qianwen_AI",
+                "url": "https://tongyi.aliyun.com/",
+                "thumbnail": "https://img.youtube.com/vi/EDpFhtVMa44/0.jpg",
+                "dateAdded": "2025-03-30T00:00:00.000Z"
+            },
+            {
+                "title": "ChatGPT",
+                "trd_chi": "ChatGPT",
+                "sim_chi": "ChatGPT",
+                "eng": "ChatGPT",
+                "jap": "ChatGPT",
+                "kor": "ChatGPT",
+                "icon": "🤖",
+                "category": "ai",
+                "tags": ["ai", "artificial intelligence", "人工智能", "人工智慧", "機器智慧", "人工知能", "인공지능", "login"],
+                "anchor": "ChatGPT_AI",
+                "url": "https://poe.com/ChatGPT",
+                "thumbnail": "https://img.youtube.com/vi/F6W4RtJ6u9c/0.jpg",
+                "dateAdded": "2025-03-30T00:00:00.000Z"
+            },
+            {
+                "title": "Perplexity",
+                "trd_chi": "Perplexity",
+                "sim_chi": "Perplexity",
+                "eng": "Perplexity",
+                "jap": "Perplexity",
+                "kor": "Perplexity",
+                "icon": "🤖",
+                "category": "ai",
+                "tags": ["ai", "artificial intelligence", "人工智能", "人工智慧", "機器智慧", "人工知能", "인공지능", "no login"],
+                "anchor": "Perplexity_AI",
+                "url": "https://www.perplexity.ai/",
+                "thumbnail": "https://img.youtube.com/vi/ZC3L94U0_sc/0.jpg",
+                "dateAdded": "2025-05-13T00:00:00.000Z"
+            },
+			{
+                "title": "Copilot",
+                "trd_chi": "Copilot",
+                "sim_chi": "Copilot",
+                "eng": "Copilot",
+                "jap": "Copilot",
+                "kor": "Copilot",
+                "icon": "🤖",
+                "category": "ai",
+                "tags": ["ai", "artificial intelligence", "人工智能", "人工智慧", "機器智慧", "人工知能", "인공지능", "no login"],
+                "anchor": "Copilot_AI",
+                "url": "https://copilot.microsoft.com/",
+                "thumbnail": "https://img.youtube.com/vi/saFRg-jC9FQ/0.jpg",
+                "dateAdded": "2025-03-30T00:00:00.000Z"
+            },
+            {
+                "title": "Gemini",
+                "trd_chi": "Gemini",
+                "sim_chi": "Gemini",
+                "eng": "Gemini",
+                "jap": "Gemini",
+                "kor": "Gemini",
+                "icon": "🤖",
+                "category": "ai",
+                "tags": ["ai", "artificial intelligence", "人工智能", "人工智慧", "機器智慧", "人工知能", "인공지능", "login"],
+                "anchor": "Gemini_AI",
+                "url": "https://poe.com/Gemini-2.0-Flash",
+                "thumbnail": "https://img.youtube.com/vi/w0-L2kl_3cU/0.jpg",
+                "dateAdded": "2025-03-30T00:00:00.000Z"
+            },
+            {
+                "title": "Claude",
+                "trd_chi": "Claude",
+                "sim_chi": "Claude",
+                "eng": "Claude",
+                "jap": "Claude",
+                "kor": "Claude",
+                "icon": "🤖",
+                "category": "ai",
+                "tags": ["ai", "artificial intelligence", "人工智能", "人工智慧", "機器智慧", "人工知能", "인공지능", "login"],
+                "anchor": "Claude_AI",
+                "url": "https://poe.com/Claude-3.7-Sonnet",
+                "thumbnail": "https://img.youtube.com/vi/x2WtHZciC74/0.jpg",
+                "dateAdded": "2025-03-30T00:00:00.000Z"
+            },
+            {
+                "title": "Llama",
+                "trd_chi": "Llama",
+                "sim_chi": "Llama",
+                "eng": "Llama",
+                "jap": "Llama",
+                "kor": "Llama",
+                "icon": "🤖",
+                "category": "ai",
+                "tags": ["ai", "artificial intelligence", "人工智能", "人工智慧", "機器智慧", "人工知能", "인공지능", "login"],
+                "anchor": "Llama_AI",
+                "url": "https://poe.com/Llama-3.3-70B-FP16",
+                "thumbnail": "https://img.youtube.com/vi/-dnGa6Oms5I/0.jpg",
+                "dateAdded": "2025-03-30T00:00:00.000Z"
+            },
+            {
+                "title": "Poe",
+                "trd_chi": "Poe",
+                "sim_chi": "Poe",
+                "eng": "Poe",
+                "jap": "Poe",
+                "kor": "Poe",
+                "icon": "🤖",
+                "category": "ai",
+                "tags": ["ai", "artificial intelligence", "人工智能", "人工智慧", "機器智慧", "人工知能", "인공지능", "login"],
+                "anchor": "Poe_AI",
+                "url": "https://poe.com/",
+                "thumbnail": "https://img.youtube.com/vi/ke-zcg4btGM/0.jpg",
+                "dateAdded": "2025-03-30T00:00:00.000Z"
+            },
+            {
+                "title": "商量",
+                "trd_chi": "商量",
+                "sim_chi": "商量",
+                "eng": "SenseChat",
+                "jap": "商量",
+                "kor": "商量",
+                "icon": "🤖",
+                "category": "ai",
+                "tags": ["ai", "artificial intelligence", "人工智能", "人工智慧", "機器智慧", "人工知能", "인공지능", "login"],
+                "anchor": "SenseChat_AI",
+                "url": "https://chat.sensetime.com/",
+                "thumbnail": "https://img.youtube.com/vi/HIKAA-Hqh1E/0.jpg",
+                "dateAdded": "2025-03-30T00:00:00.000Z"
+            },
+			{
+                "title": "納米AI搜尋",
+                "trd_chi": "納米AI搜尋",
+                "sim_chi": "纳米AI搜索",
+                "eng": "Nano AI Search Engine",
+                "jap": "ナノAI検索",
+                "kor": "나노 AI 검색",
+                "icon": "🤖",
+                "category": "ai",
+                "tags": ["ai", "artificial intelligence", "人工智能", "人工智慧", "機器智慧", "人工知能", "인공지능", "no login"],
+                "anchor": "Nano_AI_Search_Engine_AI",
+                "url": "https://www.n.cn/",
+                "thumbnail": "https://img.youtube.com/vi/heNnkWP1-gc/0.jpg",
+                "dateAdded": "2025-04-17T00:00:00.000Z"
+            },
+			{
+				"title": "AI speaker",
+				"trd_chi": "AI speaker",
+				"sim_chi": "AI speaker",
+				"eng": "AI speaker",
+				"jap": "AI speaker",
+				"kor": "AI speaker",
+				"icon": "💬",
+				"category": "ai",
+				"tags": ["ai", "artificial intelligence", "人工智能", "人工智慧", "機器智慧", "人工知能", "인공지능", "no login"],
+				"anchor": "AI_speaker_AI",
+				"url": "https://ai-speaker.net/tw",
+				"thumbnail": "https://img.youtube.com/vi/PLmtWK83h40/0.jpg",
+				"dateAdded": "2025-04-03T00:00:00.000Z"
+			},
+			{
+				"title": "SUNO",
+				"trd_chi": "SUNO",
+				"sim_chi": "SUNO",
+				"eng": "SUNO",
+				"jap": "SUNO",
+				"kor": "SUNO",
+				"icon": "🎼",
+				"category": "ai",
+				"tags": ["ai", "artificial intelligence", "人工智能", "人工智慧", "機器智慧", "人工知能", "인공지능", "login"],
+				"anchor": "SUNO_AI",
+				"url": "https://suno.com/",
+				"thumbnail": "https://img.youtube.com/vi/TlRUg9lCKYY/0.jpg",
+				"dateAdded": "2025-04-20T00:00:00.000Z"
+			},
+			{
+				"title": "Vocal Remover",
+				"trd_chi": "Vocal Remover",
+				"sim_chi": "Vocal Remover",
+				"eng": "Vocal Remover",
+				"jap": "Vocal Remover",
+				"kor": "Vocal Remover",
+				"icon": "🤐",
+				"category": "ai",
+				"tags": ["ai", "artificial intelligence", "人工智能", "人工智慧", "機器智慧", "人工知能", "인공지능", "no login"],
+				"anchor": "Vocal_Remover_AI",
+				"url": "https://vocalremover.org/",
+				"thumbnail": "https://img.youtube.com/vi/ykOKwz3eRUQ/0.jpg",
+				"dateAdded": "2025-04-03T00:00:00.000Z"
+			},
+			{
+				"title": "NightCafe AI Art",
+				"trd_chi": "NightCafe AI Art",
+				"sim_chi": "NightCafe AI Art",
+				"eng": "NightCafe AI Art",
+				"jap": "NightCafe AI Art",
+				"kor": "NightCafe AI Art",
+				"icon": "🖼️",
+				"category": "ai",
+				"tags": ["ai", "artificial intelligence", "人工智能", "人工智慧", "機器智慧", "人工知能", "인공지능", "login"],
+				"anchor": "NightCafe_AI",
+				"url": "https://creator.nightcafe.studio/",
+				"thumbnail": "https://img.youtube.com/vi/ZnvfEw73PgY/0.jpg",
+				"dateAdded": "2025-04-20T00:00:00.000Z"
+			},
+			{
+				"title": "Canva",
+				"trd_chi": "Canva",
+				"sim_chi": "Canva",
+				"eng": "Canva",
+				"jap": "Canva",
+				"kor": "Canva",
+				"icon": "🖼️",
+				"category": "ai",
+				"tags": ["ai", "artificial intelligence", "人工智能", "人工智慧", "機器智慧", "人工知能", "인공지능", "login"],
+				"anchor": "Canva_AI",
+				"url": "https://www.canva.com/",
+				"thumbnail": "https://img.youtube.com/vi/NBPH6G5bEMI/0.jpg",
+				"dateAdded": "2025-04-20T00:00:00.000Z"
+			},
+			{
+				"title": "AI Background Remover",
+				"trd_chi": "AI Background Remover",
+				"sim_chi": "AI Background Remover",
+				"eng": "AI Background Remover",
+				"jap": "AI Background Remover",
+				"kor": "AI Background Remover",
+				"icon": "⬜",
+				"category": "ai",
+				"tags": ["ai", "artificial intelligence", "人工智能", "人工智慧", "機器智慧", "人工知能", "인공지능", "no login"],
+				"anchor": "AI_Background_Remover_AI",
+				"url": "https://removal.ai/",
+				"thumbnail": "https://img.youtube.com/vi/cPlSe-Vd1Zw/0.jpg",
+				"dateAdded": "2025-04-03T00:00:00.000Z"
+			},
+			{
+				"title": "GAMMA",
+				"trd_chi": "GAMMA",
+				"sim_chi": "GAMMA",
+				"eng": "GAMMA",
+				"jap": "GAMMA",
+				"kor": "GAMMA",
+				"icon": "📝",
+				"category": "ai",
+				"tags": ["ai", "artificial intelligence", "人工智能", "人工智慧", "機器智慧", "人工知能", "인공지능", "login"],
+				"anchor": "GAMMA_AI",
+				"url": "https://gamma.app/zh-tw",
+				"thumbnail": "https://img.youtube.com/vi/MCprmKO_3EA/0.jpg",
+				"dateAdded": "2025-04-20T00:00:00.000Z"
+			},
+			{
+				"title": "ChatPDF",
+				"trd_chi": "ChatPDF",
+				"sim_chi": "ChatPDF",
+				"eng": "ChatPDF",
+				"jap": "ChatPDF",
+				"kor": "ChatPDF",
+				"icon": "📑",
+				"category": "ai",
+				"tags": ["ai", "artificial intelligence", "人工智能", "人工智慧", "機器智慧", "人工知能", "인공지능", "no login"],
+				"anchor": "ChatPDF_AI",
+				"url": "https://www.chatpdf.com/zh-TW",
+				"thumbnail": "https://img.youtube.com/vi/pSugBrM8npA/0.jpg",
+				"dateAdded": "2025-04-03T00:00:00.000Z"
+			},
+            {
+				"title": "香港天文台",
+				"trd_chi": "香港天文台",
+				"sim_chi": "香港天文台",
+				"eng": "Hong Kong Observatory",
+				"jap": "香港天文台",
+				"kor": "홍콩 천문대",
+				"icon": "⛅️",
+				"category": "tool",
+				"tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "weather", "no login"],
+				"anchor": "Hong_Kong_Observatory_Tool",
+				"url": "https://www.hko.gov.hk/tc/",
+				"thumbnail": "https://img.youtube.com/vi/Fo_YfKqgYoQ/0.jpg",
+				"dateAdded": "2025-04-15T00:00:00.000Z"
+			},
+			{
+				"title": "空氣質素健康指數",
+				"trd_chi": "空氣質素健康指數",
+				"sim_chi": "空气质素健康指数",
+				"eng": "Air Quality Health Index",
+				"jap": "大気質健康指数",
+				"kor": "대기질 건강 지수",
+				"icon": "🏭",
+				"category": "tool",
+				"tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "aqhi", "no login"],
+				"anchor": "Air_Quality_Health_Index_Tool",
+				"url": "https://www.aqhi.gov.hk/tc/index.html",
+				"thumbnail": "https://img.youtube.com/vi/Mhst9qHKeW8/0.jpg",
+				"dateAdded": "2025-04-16T00:00:00.000Z"
+			},
+			{
+                "title": "CyberDefender 守網者",
+                "trd_chi": "CyberDefender 守網者",
+                "sim_chi": "CyberDefender 守网者",
+                "eng": "CyberDefender",
+                "jap": "サイバーディフェンダー",
+                "kor": "사이버디펜더",
+                "icon": "🛡️",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "防騙視伏器", "防骗视伏器", "no login"],
+                "anchor": "CyberDefender_Tool",
+                "url": "https://cyberdefender.hk/",
+                "thumbnail": "https://img.youtube.com/vi/TNskkX-TloQ/hqdefault.jpg",
+                "dateAdded": "2025-04-20T00:00:00.000Z"
+            },
+			{
+                "title": "iplocation",
+                "trd_chi": "iplocation",
+                "sim_chi": "iplocation",
+                "eng": "iplocation",
+                "jap": "iplocation",
+                "kor": "iplocation",
+                "icon": "🌐",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "no login"],
+                "anchor": "iplocation_Tool",
+                "url": "https://www.iplocation.net/",
+                "thumbnail": "https://img.youtube.com/vi/0kBvY6MWuhQ/0.jpg",
+                "dateAdded": "2025-04-20T00:00:00.000Z"
+            },
+			{
+                "title": "Virustotal",
+                "trd_chi": "Virustotal",
+                "sim_chi": "Virustotal",
+                "eng": "Virustotal",
+                "jap": "Virustotal",
+                "kor": "Virustotal",
+                "icon": "🛡️",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "no login"],
+                "anchor": "Virustotal_Tool",
+                "url": "https://www.virustotal.com/gui/home/upload",
+                "thumbnail": "https://img.youtube.com/vi/4Eu8wrEejUI/0.jpg",
+                "dateAdded": "2025-04-20T00:00:00.000Z"
+            },
+			{
+                "title": "OFCA",
+                "trd_chi": "OFCA",
+                "sim_chi": "OFCA",
+                "eng": "OFCA",
+                "jap": "OFCA",
+                "kor": "OFCA",
+                "icon": "📶",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "no login"],
+                "anchor": "OFCA_Tool",
+                "url": "https://speedtest.ofca.gov.hk/speedtest.html",
+                "thumbnail": "https://img.youtube.com/vi/KOXREHjIgsU/0.jpg",
+                "dateAdded": "2025-04-20T00:00:00.000Z"
+            },
+			{
+                "title": "Fast",
+                "trd_chi": "Fast",
+                "sim_chi": "Fast",
+                "eng": "Fast",
+                "jap": "Fast",
+                "kor": "Fast",
+                "icon": "📶",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "no login"],
+                "anchor": "Fast_Tool",
+                "url": "https://fast.com/",
+                "thumbnail": "https://img.youtube.com/vi/1ec3u6qN1lU/0.jpg",
+                "dateAdded": "2025-04-20T00:00:00.000Z"
+            },
+			{
+                "title": "Ookla",
+                "trd_chi": "Ookla",
+                "sim_chi": "Ookla",
+                "eng": "Ookla",
+                "jap": "Ookla",
+                "kor": "Ookla",
+                "icon": "📶",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "no login"],
+                "anchor": "Ookla_Tool",
+                "url": "https://www.speedtest.net/",
+                "thumbnail": "https://img.youtube.com/vi/pzZByvOC890/0.jpg",
+                "dateAdded": "2025-06-26T00:00:00.000Z"
+            },
+			{
+                "title": "Random Password Generator",
+                "trd_chi": "Random Password Generator",
+                "sim_chi": "Random Password Generator",
+                "eng": "Random Password Generator",
+                "jap": "Random Password Generator",
+                "kor": "Random Password Generator",
+                "icon": "🔏",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "no login"],
+                "anchor": "Random_Password_Generator_Tool",
+                "url": "https://www.avast.com/random-password-generator",
+                "thumbnail": "https://img.youtube.com/vi/ZLSpzhRye6w/0.jpg",
+                "dateAdded": "2025-04-21T00:00:00.000Z"
+            },
+			{
+                "title": "QR Code Generator",
+                "trd_chi": "QR Code Generator",
+                "sim_chi": "QR Code Generator",
+                "eng": "QR Code Generator",
+                "jap": "QR Code Generator",
+                "kor": "QR Code Generator",
+                "icon": "👾",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "no login"],
+                "anchor": "QR_Code_Generator_Tool",
+                "url": "https://www.the-qrcode-generator.com/",
+                "thumbnail": "https://img.youtube.com/vi/DTtqMhbilqQ/0.jpg",
+                "dateAdded": "2025-04-21T00:00:00.000Z"
+            },
+			{
+                "title": "Bar Code Generator",
+                "trd_chi": "Bar Code Generator",
+                "sim_chi": "Bar Code Generator",
+                "eng": "Bar Code Generator",
+                "jap": "Bar Code Generator",
+                "kor": "Bar Code Generator",
+                "icon": "👾",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "no login"],
+                "anchor": "Bar_Code_Generator_Tool",
+                "url": "https://barcode.tec-it.com/zh",
+                "thumbnail": "https://img.youtube.com/vi/BmiPA54gHB0/0.jpg",
+                "dateAdded": "2025-04-20T00:00:00.000Z"
+            },
+			{
+                "title": "Youtube Thumbnail Grabber",
+                "trd_chi": "Youtube Thumbnail Grabber",
+                "sim_chi": "Youtube Thumbnail Grabber",
+                "eng": "Youtube Thumbnail Grabber",
+                "jap": "Youtube Thumbnail Grabber",
+                "kor": "Youtube Thumbnail Grabber",
+                "icon": "⚙️",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "no login"],
+                "anchor": "Youtube_Thumbnail_Grabber_Tool",
+                "url": "https://youtube-thumbnail-grabber.com/",
+                "thumbnail": "https://img.youtube.com/vi/mL-ZUGedMdM/hqdefault.jpg",
+                "dateAdded": "2025-10-20T00:00:00.000Z"
+            },
+			{
+                "title": "HTML Color Picker",
+                "trd_chi": "HTML Color Picker",
+                "sim_chi": "HTML Color Picker",
+                "eng": "HTML Color Picker",
+                "jap": "HTML Color Picker",
+                "kor": "HTML Color Picker",
+                "icon": "⚙️",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "w3schools", "no login"],
+                "anchor": "HTML_Color_Picker_Tool",
+                "url": "https://www.w3schools.com/colors/colors_picker.asp",
+                "thumbnail": "https://img.youtube.com/vi/agXlAhmcEVY/hqdefault.jpg",
+                "dateAdded": "2025-04-15T00:00:00.000Z"
+            },
+			{
+                "title": "EmojiCopy",
+                "trd_chi": "EmojiCopy",
+                "sim_chi": "EmojiCopy",
+                "eng": "EmojiCopy",
+                "jap": "EmojiCopy",
+                "kor": "EmojiCopy",
+                "icon": "🥴",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "no login"],
+                "anchor": "EmojiCopy_Tool",
+                "url": "https://emojicopy.com/",
+                "thumbnail": "https://img.youtube.com/vi/Cqgi-bvqhDM/hqdefault.jpg",
+                "dateAdded": "2025-04-15T00:00:00.000Z"
+            },
+			{
+                "title": "Keyboard.io",
+                "trd_chi": "Keyboard.io",
+                "sim_chi": "Keyboard.io",
+                "eng": "Keyboard.io",
+                "jap": "Keyboard.io",
+                "kor": "Keyboard.io",
+                "icon": "😎",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "emoji", "no login"],
+                "anchor": "Keyboard_io_Tool",
+                "url": "https://emojikeyboard.io/",
+                "thumbnail": "https://img.youtube.com/vi/vUlkpwecL1Y/hqdefault.jpg",
+                "dateAdded": "2025-04-20T00:00:00.000Z"
+            },
+			{
+                "title": "CoolSymbol",
+                "trd_chi": "CoolSymbol",
+                "sim_chi": "CoolSymbol",
+                "eng": "CoolSymbol",
+                "jap": "CoolSymbol",
+                "kor": "CoolSymbol",
+                "icon": "😍",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "emoji", "no login"],
+                "anchor": "CoolSymbol_Tool",
+                "url": "https://coolsymbol.com/",
+                "thumbnail": "https://img.youtube.com/vi/sUfMfpKmTRk/hqdefault.jpg",
+                "dateAdded": "2025-04-20T00:00:00.000Z"
+            },
+			{
+                "title": "Unicode Org",
+                "trd_chi": "Unicode Org",
+                "sim_chi": "Unicode Org",
+                "eng": "Unicode Org",
+                "jap": "Unicode Org",
+                "kor": "Unicode Org",
+                "icon": "🤪",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "emoji", "no login"],
+                "anchor": "Unicode_Org_Tool",
+                "url": "https://unicode.org/emoji/charts/full-emoji-list.html",
+                "thumbnail": "https://img.youtube.com/vi/Q4m6bQ95KNk/hqdefault.jpg",
+                "dateAdded": "2025-04-20T00:00:00.000Z"
+            },
+			{
+                "title": "Emojipedia",
+                "trd_chi": "Emojipedia",
+                "sim_chi": "Emojipedia",
+                "eng": "Emojipedia",
+                "jap": "Emojipedia",
+                "kor": "Emojipedia",
+                "icon": "😵",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "no login"],
+                "anchor": "Emojipedia_Tool",
+                "url": "https://emojipedia.org/",
+                "thumbnail": "https://img.youtube.com/vi/cxRDjci6POs/hqdefault.jpg",
+                "dateAdded": "2025-04-20T00:00:00.000Z"
+            },
+			{
+                "title": "Getemoji",
+                "trd_chi": "Getemoji",
+                "sim_chi": "Getemoji",
+                "eng": "Getemoji",
+                "jap": "Getemoji",
+                "kor": "Getemoji",
+                "icon": "😏",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "no login"],
+                "anchor": "Getemoji_Tool",
+                "url": "https://getemoji.com/",
+                "thumbnail": "https://img.youtube.com/vi/EoTVz8TAI6Q/hqdefault.jpg",
+                "dateAdded": "2025-04-20T00:00:00.000Z"
+            },
+			{
+                "title": "TinyURL",
+                "trd_chi": "TinyURL",
+                "sim_chi": "TinyURL",
+                "eng": "TinyURL",
+                "jap": "TinyURL",
+                "kor": "TinyURL",
+                "icon": "⚙️",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "url shortener", "no login"],
+                "anchor": "TinyURL_Tool",
+                "url": "https://tinyurl.com/",
+                "thumbnail": "https://img.youtube.com/vi/6PUZcR-8vaI/hqdefault.jpg",
+                "dateAdded": "2025-04-15T00:00:00.000Z"
+            },
+			{
+                "title": "Microbit",
+                "trd_chi": "Microbit",
+                "sim_chi": "Microbit",
+                "eng": "Microbit",
+                "jap": "Microbit",
+                "kor": "Microbit",
+                "icon": "⚙️",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "url shortener", "no login"],
+                "anchor": "Microbit_Tool",
+                "url": "https://python.microbit.org/v/3",
+                "thumbnail": "https://img.youtube.com/vi/KRhH654F8zM/hqdefault.jpg",
+                "dateAdded": "2025-04-20T00:00:00.000Z"
+            },
+			{
+                "title": "YouTube 音效庫",
+                "trd_chi": "YouTube 音效庫",
+                "sim_chi": "YouTube 音效库",
+                "eng": "YouTube Sound Library",
+                "jap": "YouTube 効果音ライブラリ",
+                "kor": "YouTube 사운드 효과 라이브러리",
+                "icon": "🎵",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "login"],
+                "anchor": "YouTube_Sound_Library_Tool",
+                "url": "https://tinyurl.com/jumnbjea",
+                "thumbnail": "https://img.youtube.com/vi/JsHqEpWQl-8/hqdefault.jpg",
+                "dateAdded": "2025-04-21T00:00:00.000Z"
+            },
+			{
+                "title": "AudioMass",
+                "trd_chi": "AudioMass",
+                "sim_chi": "AudioMass",
+                "eng": "AudioMass",
+                "jap": "AudioMass",
+                "kor": "AudioMass",
+                "icon": "🎙️",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "no login"],
+                "anchor": "AudioMass_Tool",
+                "url": "https://audiomass.co/",
+                "thumbnail": "https://img.youtube.com/vi/S-fuHNU7Coc/hqdefault.jpg",
+                "dateAdded": "2025-04-21T00:00:00.000Z"
+            },
+			{
+                "title": "YouTube",
+                "trd_chi": "YouTube",
+                "sim_chi": "YouTube",
+                "eng": "YouTube",
+                "jap": "YouTube",
+                "kor": "YouTube",
+                "icon": "▶️",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "no login"],
+                "anchor": "YouTube_Tool",
+                "url": "https://tinyurl.com/6j8bp6r6",
+                "thumbnail": "https://img.youtube.com/vi/UFnXm6cjGwU/0.jpg",
+                "dateAdded": "2025-04-21T00:00:00.000Z"
+            },
+			{
+                "title": "Method (SVG Editor)",
+                "trd_chi": "Method (SVG Editor)",
+                "sim_chi": "Method (SVG Editor)",
+                "eng": "Method (SVG Editor)",
+                "jap": "Method (SVG Editor)",
+                "kor": "Method (SVG Editor)",
+                "icon": "📐",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "no login"],
+                "anchor": "Method_SVG_Editor_Tool",
+                "url": "https://editor.method.ac/",
+                "thumbnail": "https://img.youtube.com/vi/loj4gca1v70/hqdefault.jpg",
+                "dateAdded": "2025-04-21T00:00:00.000Z"
+            },
+			{
+                "title": "GeogeBra",
+                "trd_chi": "GeogeBra",
+                "sim_chi": "GeogeBra",
+                "eng": "GeogeBra",
+                "jap": "GeogeBra",
+                "kor": "GeogeBra",
+                "icon": "📈",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "no login"],
+                "anchor": "GeogeBra_Tool",
+                "url": "https://www.geogebra.org/calculator",
+                "thumbnail": "https://img.youtube.com/vi/M3ocgUejxhE/hqdefault.jpg",
+                "dateAdded": "2025-04-21T00:00:00.000Z"
+            },
+			{
+                "title": "Chartle",
+                "trd_chi": "Chartle",
+                "sim_chi": "Chartle",
+                "eng": "Chartle",
+                "jap": "Chartle",
+                "kor": "Chartle",
+                "icon": "📉",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "no login"],
+                "anchor": "Chartle_Tool",
+                "url": "https://www.chartle.com/",
+                "thumbnail": "https://img.youtube.com/vi/Xu12ohPIS3o/hqdefault.jpg",
+                "dateAdded": "2025-04-21T00:00:00.000Z"
+            },
+			{
+                "title": "Convertio",
+                "trd_chi": "Convertio",
+                "sim_chi": "Convertio",
+                "eng": "Convertio",
+                "jap": "Convertio",
+                "kor": "Convertio",
+                "icon": "📃",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "ocr converter", "no login"],
+                "anchor": "Convertio_Tool",
+                "url": "https://convertio.co/zh/",
+                "thumbnail": "https://img.youtube.com/vi/lX8KqmGy_og/hqdefault.jpg",
+                "dateAdded": "2025-04-21T00:00:00.000Z"
+            },
+			{
+                "title": "香港可視化三維地圖",
+                "trd_chi": "香港可視化三維地圖",
+                "sim_chi": "香港可视化三维地图",
+                "eng": "The 3D Visualisation Map",
+                "jap": "香港3Dビジュアルマップ",
+                "kor": "홍콩 3D 시각 지도",
+                "icon": "🗺️",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "open3dhk", "no login"],
+                "anchor": "The_3D_Visualisation_Map_Tool",
+                "url": "https://3d.map.gov.hk/",
+                "thumbnail": "https://img.youtube.com/vi/615cNQxdqQ8/hqdefault.jpg",
+                "dateAdded": "2025-04-16T00:00:00.000Z"
+            },
+			{
+                "title": "Stopwatch",
+                "trd_chi": "Stopwatch",
+                "sim_chi": "Stopwatch",
+                "eng": "Stopwatch",
+                "jap": "Stopwatch",
+                "kor": "Stopwatch",
+                "icon": "⏱️",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "no login"],
+                "anchor": "Stopwatch_Tool",
+                "url": "https://www.online-stopwatch.com/full-screen-stopwatch/",
+                "thumbnail": "https://img.youtube.com/vi/-eg5s_CUxkI/hqdefault.jpg",
+                "dateAdded": "2025-04-21T00:00:00.000Z"
+            },
+			{
+                "title": "Countdown",
+                "trd_chi": "Countdown",
+                "sim_chi": "Countdown",
+                "eng": "Countdown",
+                "jap": "Countdown",
+                "kor": "Countdown",
+                "icon": "⏲️",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "no login"],
+                "anchor": "Countdown_Tool",
+                "url": "https://www.online-stopwatch.com/countdown/",
+                "thumbnail": "https://img.youtube.com/vi/lQ7SZ_MOV8Y/hqdefault.jpg",
+                "dateAdded": "2025-04-21T00:00:00.000Z"
+            },
+			{
+                "title": "Presentation Timers",
+                "trd_chi": "Presentation Timers",
+                "sim_chi": "Presentation Timers",
+                "eng": "Presentation Timers",
+                "jap": "Presentation Timers",
+                "kor": "Presentation Timers",
+                "icon": "🎛️",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "no login"],
+                "anchor": "Presentation_Timers_Tool",
+                "url": "https://www.online-stopwatch.com/presentation-timers/light-bulb-timer/full-screen/",
+                "thumbnail": "https://img.youtube.com/vi/oXiLCUNx74E/hqdefault.jpg",
+                "dateAdded": "2025-04-21T00:00:00.000Z"
+            },
+			{
+                "title": "Roll Dice",
+                "trd_chi": "Roll Dice",
+                "sim_chi": "Roll Dice",
+                "eng": "Roll Dice",
+                "jap": "Roll Dice",
+                "kor": "Roll Dice",
+                "icon": "🎲",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "no login"],
+                "anchor": "Roll_Dice_Tool",
+                "url": "https://www.online-stopwatch.com/chance-games/roll-dice-online/full-screen/",
+                "thumbnail": "https://img.youtube.com/vi/9L-VhUmir-A/hqdefault.jpg",
+                "dateAdded": "2025-04-21T00:00:00.000Z"
+            },
+			{
+                "title": "Random Name Pickers",
+                "trd_chi": "Random Name Pickers",
+                "sim_chi": "Random Name Pickers",
+                "eng": "Random Name Pickers",
+                "jap": "Random Name Pickers",
+                "kor": "Random Name Pickers",
+                "icon": "🎲",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "no login"],
+                "anchor": "Random_Name_Pickers_Tool",
+                "url": "https://www.online-stopwatch.com/random-name-pickers/name-picker-wheel/full-screen/",
+                "thumbnail": "https://img.youtube.com/vi/UzcIn8IuEVo/hqdefault.jpg",
+                "dateAdded": "2025-04-21T00:00:00.000Z"
+            },
+			{
+                "title": "Random Group Generators",
+                "trd_chi": "Random Group Generators",
+                "sim_chi": "Random Group Generators",
+                "eng": "Random Group Generators",
+                "jap": "Random Group Generators",
+                "kor": "Random Group Generators",
+                "icon": "👨‍👩‍👧‍👦",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "no login"],
+                "anchor": "Random_Group_Generators_Tool",
+                "url": "https://www.online-stopwatch.com/random-group-generators/random-curtain-call-group-generator/full-screen/",
+                "thumbnail": "https://img.youtube.com/vi/dYtgDJ4cbmE/hqdefault.jpg",
+                "dateAdded": "2025-04-21T00:00:00.000Z"
+            },
+			{
+                "title": "迪遜咖啡廳",
+                "trd_chi": "迪遜咖啡廳",
+                "sim_chi": "迪逊咖啡厅",
+                "eng": "Diczon's Café",
+                "jap": "ディソンカフェ",
+                "kor": "디슨 카페",
+                "icon": "☕",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "cafe", "coffee", "no login"],
+                "anchor": "Diczon_s_Cafe_Tool",
+                "url": "index.html",
+                "thumbnail": "pics/diczon_cafe.jpg",
+                "dateAdded": "2025-04-21T00:00:00.000Z"
+            },
+			{
+                "title": "迪遜咖啡廳(舊)",
+                "trd_chi": "迪遜咖啡廳(舊)",
+                "sim_chi": "迪逊咖啡厅(旧)",
+                "eng": "Diczon's Café (Old)",
+                "jap": "ディソンカフェ（古い）",
+                "kor": "디슨 카페(오래된)",
+                "icon": "☕",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "cafe", "coffee", "no login"],
+                "anchor": "Diczon_s_Cafe_Old_Tool",
+                "url": "index3.html",
+                "thumbnail": "https://img.youtube.com/vi/0wS16YBiSis/hqdefault.jpg",
+                "dateAdded": "2025-08-04T00:00:00.000Z"
+            },
+			{
+                "title": "網頁書籤管理工具",
+                "trd_chi": "網頁書籤管理工具",
+                "sim_chi": "网页书签管理工具",
+                "eng": "Website Bookmarks Manager",
+                "jap": "Webブックマーク管理ツール",
+                "kor": "웹 북마크 관리 도구",
+                "icon": "🔰",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "收藏", "no login"],
+                "anchor": "Website_Bookmarks_Manager_Tool",
+                "url": "bookmarks_manager.html",
+                "thumbnail": "https://img.youtube.com/vi/d3GxwksLd0w/hqdefault.jpg",
+                "dateAdded": "2025-03-29T00:00:00.000Z"
+            },
+			{
+                "title": "Facebook 遊戲工具 Beta",
+                "trd_chi": "Facebook 遊戲工具 Beta",
+                "sim_chi": "Facebook 游戏工具 Beta",
+                "eng": "Facebook Gaming Tools Beta",
+                "jap": "Facebook ゲームツール ベータ版",
+                "kor": "Facebook 게임 도구 베타",
+                "icon": "🔰",
+                "category": "tool",
+                "tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "no login"],
+                "anchor": "Facebook_Gaming_Tools_Beta_Tool",
+                "url": "games/facebook_tool_0.html",
+                "thumbnail": "https://img.youtube.com/vi/M1WbPkVJveQ/hqdefault.jpg",
+                "dateAdded": "2025-04-21T00:00:00.000Z"
+            }
+        ];
+		
+		// Pagination variables
+		const cardsPerPage = 60;
+		let currentPage = 1;
+		let filteredCards = [];
+		let lazyLoadObserver = null;
+		
+		let draggedIndex = null;
+		let currentLanguage = 'trd_chi';
+		const twoWeekAgo = new Date();
+		twoWeekAgo.setDate(twoWeekAgo.getDate() - 14);
+		let clockInterval;
+		
+		// Touch drag variables
+		let isDragging = false;
+		let isLongPress = false;
+		let longPressTimer = null;
+		let draggedElement = null;
+		let currentCardIndex = null;
+		let startY = 0;
+		let scrollStartY = 0;
+
+		// Timer variables
+		let timerInterval;
+		let timerSeconds = 0;
+		let timerMinutes = 0;
+		let timerHours = 0;
+		let isTimerRunning = false;
+
+		// Stopper variables
+		let stopperInterval;
+		let stopperMilliseconds = 0;
+		let stopperSeconds = 0;
+		let stopperMinutes = 0;
+		let stopperHours = 0;
+		let isStopperRunning = false;
+		let lapTimes = [];
+		let lastStopperTime = 0;
+		
+		// YouTube Thumbnail Downloader Functions
+		function showYoutubeThumbnailsModal() {
+			document.getElementById('youtubeThumbnailsModal').style.display = 'block';
+			document.getElementById('youtubeThumbnailsModalOverlay').style.display = 'block';
+			// Add example URL for convenience
+			document.getElementById('youtube-url').value = 'https://www.youtube.com/watch?v=d3GxwksLd0w';
+		}
+
+		function closeYoutubeThumbnailsModal() {
+			document.getElementById('youtubeThumbnailsModal').style.display = 'none';
+			document.getElementById('youtubeThumbnailsModalOverlay').style.display = 'none';
+			// Clear thumbnails when closing
+			document.getElementById('thumbnails-grid').innerHTML = '';
+			document.getElementById('thumbnails-section').style.display = 'none';
+			document.getElementById('error-message').style.display = 'none';
+		}
+
+		// Initialize YouTube Thumbnail Downloader when modal opens
+		document.addEventListener('DOMContentLoaded', function() {
+			const youtubeUrlInput = document.getElementById('youtube-url');
+			const fetchBtn = document.getElementById('fetch-btn');
+			const thumbnailsSection = document.getElementById('thumbnails-section');
+			const thumbnailsGrid = document.getElementById('thumbnails-grid');
+			const errorMessage = document.getElementById('error-message');
+			
+			fetchBtn.addEventListener('click', function() {
+				const youtubeUrl = youtubeUrlInput.value.trim();
+				const videoId = extractVideoId(youtubeUrl);
+				
+				if (videoId) {
+					errorMessage.style.display = 'none';
+					displayThumbnails(videoId);
+				} else {
+					errorMessage.style.display = 'block';
+					thumbnailsSection.style.display = 'none';
+				}
+			});
+			
+			function extractVideoId(url) {
+				// Regular expressions to match different YouTube URL formats
+				const regExp1 = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+				const regExp2 = /^.*(youtube.com\/shorts\/)([^#\&\?]*).*/;
+				
+				let match = url.match(regExp1);
+				if (match && match[2].length === 11) {
+					return match[2];
+				}
+				
+				match = url.match(regExp2);
+				if (match && match[2].length === 11) {
+					return match[2];
+				}
+				
+				return null;
+			}
+			
+			function displayThumbnails(videoId) {
+			// Clear previous thumbnails
+			thumbnailsGrid.innerHTML = '';
+			
+			// YouTube thumbnail qualities and their dimensions
+			const thumbnailQualities = [
+				{ quality: 'Max Resolution', suffix: 'maxresdefault', width: 1280, height: 720 },
+				{ quality: 'High Quality', suffix: 'hqdefault', width: 480, height: 360 },
+				{ quality: 'Medium Quality', suffix: 'mqdefault', width: 320, height: 180 },
+				{ quality: 'Standard Definition', suffix: 'sddefault', width: 640, height: 480 },
+				{ quality: 'Default', suffix: 'default', width: 120, height: 90 }
+			];
+			
+			// Create thumbnail cards for each quality
+			thumbnailQualities.forEach(quality => {
+				const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/${quality.suffix}.jpg`;
+				
+				const thumbnailCard = document.createElement('div');
+				thumbnailCard.className = 'thumbnail-card';
+				
+				thumbnailCard.innerHTML = `
+					<img src="${thumbnailUrl}" alt="${quality.quality} thumbnail" class="thumbnail-img" onerror="this.style.display='none'">
+					<div class="thumbnail-info">
+						<div class="thumbnail-quality">${quality.quality}</div>
+						<div class="thumbnail-dimensions">${quality.width} × ${quality.height} pixels</div>
+						<a href="${thumbnailUrl}" target="_blank" class="download-btn">下載</a>
+					</div>
+				`;
+				
+				thumbnailsGrid.appendChild(thumbnailCard);
+			});
+			
+			// Show the thumbnails section
+			thumbnailsSection.style.display = 'block';
+		}
+		});
+		
+		// Update header image based on tag filter selection
+		document.getElementById('tagFilter').addEventListener('change', function(e) {
+			const selectedFilter = e.target.value;
+			const headerImage = document.getElementById('headerImage');
+			
+			// Define image mappings for each filter
+			const imageMap = {
+				'All': 'pics/diczon_cafe.png',
+				'bookmark': 'pics/bookmark.png',
+				'music': 'pics/diczon_cafe.png',
+				'music_rip': 'pics/diczon_cafe.png',
+				'song': 'pics/diczon_song.png',
+				'song_male': 'pics/diczon_song.png',
+				'song_female': 'pics/diczon_song.png',
+				'song_group': 'pics/diczon_song.png',
+				'song_hk': 'pics/diczon_song.png',
+				'song_pth': 'pics/diczon_song.png',
+				'song_jap': 'pics/diczon_song.png',
+				'song_kor': 'pics/diczon_song.png',
+				'song_eng': 'pics/diczon_song.png',
+				'song_es': 'pics/diczon_song.png',
+				'song_ro': 'pics/diczon_song.png',
+				'song_ti': 'pics/diczon_song.png',
+				'animation': 'pics/diczon_animation.png',
+				'animation_hk': 'pics/diczon_animation.png',
+				'animation_pth': 'pics/diczon_animation.png',
+				'animation_jap': 'pics/diczon_animation.png',
+				'animation_kor': 'pics/diczon_animation.png',
+				'animation_eng': 'pics/diczon_animation.png',
+				'drama': 'pics/diczon_drama.png',
+				'drama_hk': 'pics/diczon_drama.png',
+				'drama_pth': 'pics/diczon_drama.png',
+				'drama_jap': 'pics/diczon_drama.png',
+				'drama_kor': 'pics/diczon_drama.png',
+				'drama_eng': 'pics/diczon_drama.png',
+				'movie': 'pics/diczon_movie.png',
+				'movie_hk': 'pics/diczon_movie.png',
+				'movie_pth': 'pics/diczon_movie.png',
+				'movie_jap': 'pics/diczon_movie.png',
+				'movie_kor': 'pics/diczon_movie.png',
+				'movie_ta': 'pics/diczon_movie.png',
+				'movie_eng': 'pics/diczon_movie.png',
+				'trailer': 'pics/diczon_trailer.png',
+				'trailer_movie': 'pics/diczon_trailer.png',
+				'trailer_game': 'pics/diczon_trailer.png',
+				'trailer_rip': 'pics/diczon_trailer.png',
+				'comic': 'pics/diczon_comic.png',
+				'comic_hk': 'pics/diczon_comic.png',
+				'comic_pth': 'pics/diczon_comic.png',
+				'comic_eng': 'pics/diczon_comic.png',
+				'novel': 'pics/diczon_novel.png',
+				'novel_hk': 'pics/diczon_novel.png',
+				'novel_pth': 'pics/diczon_novel.png',
+				'novel_eng': 'pics/diczon_novel.png',
+				'ai': 'pics/diczon_ai.png',
+				'ai_no login': 'pics/diczon_ai.png',
+				'ai_login': 'pics/diczon_ai.png',
+				'tool': 'pics/diczon_tool.png',
+				'tool_no login': 'pics/diczon_tool.png',
+				'tool_login': 'pics/diczon_tool.png',
+				'education': 'pics/diczon_education.png',
+				'education_no login': 'pics/diczon_education.png',
+				'education_login': 'pics/diczon_education.png',
+				'education_hk': 'pics/diczon_education.png',
+				'education_pth': 'pics/diczon_education.png',
+				'education_jap': 'pics/diczon_education.png',
+				'education_eng': 'pics/diczon_education.png',
+				'game': 'pics/diczon_game.png',
+				'game_login': 'pics/diczon_game.png',
+				'game_no login': 'pics/diczon_game.png',
+				'game_portal': 'pics/diczon_game.png',
+				'game_dual platform': 'pics/diczon_game.png',
+				'game_mobile': 'pics/diczon_game.png',
+				'game_computer': 'pics/diczon_game.png',
+				'game_multiplayer': 'pics/diczon_game.png',
+				'game_single player': 'pics/diczon_game.png',
+				'game_gb': 'pics/diczon_game.png',
+				'game_gbc': 'pics/diczon_game.png',
+				'game_gba': 'pics/diczon_game.png',
+				'game_ngp': 'pics/diczon_game.png',
+				'game_ngpc': 'pics/diczon_game.png',
+				'game_NDS': 'pics/diczon_game.png',
+				'game_ws': 'pics/diczon_game.png',
+				'game_wsc': 'pics/diczon_game.png',
+				'game_j2me': 'pics/diczon_game.png',
+				'game_nes': 'pics/diczon_game.png',
+				'game_snes': 'pics/diczon_game.png',
+				'game_n64': 'pics/diczon_game.png',
+				'game_arcade': 'pics/diczon_game.png',
+				'game_playstation': 'pics/diczon_game.png',
+				'game_flash player': 'pics/diczon_game.png',
+				'game_action': 'pics/diczon_game.png',
+				'game_horizontally scrolling': 'pics/diczon_game.png',
+				'game_vertically scrolling': 'pics/diczon_game.png',
+				'game_shooting': 'pics/diczon_game.png',
+				'game_racing': 'pics/diczon_game.png',
+				'game_turn': 'pics/diczon_game.png',
+				'game_rts': 'pics/diczon_game.png',
+				'game_match': 'pics/diczon_game.png',
+				'game_tycoon': 'pics/diczon_game.png',
+				'game_sport': 'pics/diczon_game.png',
+				'game_gamble': 'pics/diczon_game.png',
+				'game_horror': 'pics/diczon_game.png',
+				'walkthrough': 'pics/diczon_walkthrough.png',
+				'gameplay': 'pics/diczon_gameplay.png',
+				'gameplay_diczon': 'pics/gameplay_diczon.png',
+				'gameplay_tony gaming hk': 'pics/gameplay_tony_gaming_hk.png',
+				'gameplay_jc gameplay': 'pics/gameplay_jc_gameplay.png',
+				'gameplay_bht x wmb': 'pics/gameplay_bht_x_wmb.png',
+				'vlog': 'pics/diczon_vlog.png',
+				'vlog_male': 'pics/diczon_vlog.png',
+				'vlog_female': 'pics/diczon_vlog.png',
+				'vlog_hk': 'pics/diczon_vlog.png',
+				'vlog_pth': 'pics/diczon_vlog.png',
+				'vlog_eng': 'pics/diczon_vlog.png',
+				'info': 'pics/diczon_info.png',
+				'info_article': 'pics/diczon_info.png',
+				'info_video': 'pics/diczon_info.png',
+				'info_hk': 'pics/diczon_info.png',
+				'info_pth': 'pics/diczon_info.png',
+				'info_jap': 'pics/diczon_info.png',
+				'info_eng': 'pics/diczon_info.png',
+				'news': 'pics/diczon_news.png',
+				'news_hk': 'pics/diczon_news.png',
+				'news_pth': 'pics/diczon_news.png',
+				'news_eng': 'pics/diczon_news.png',
+				'18+': 'pics/diczon_18+.png',
+				'lgbtq': 'pics/diczon_lgbtq.png'
+			};
+			
+			// Set the image based on the selected filter
+			headerImage.src = imageMap[selectedFilter] || 'pics/diczon_cafe.png';
+			headerImage.alt = selectedFilter || 'header_image';
+		});
+
+		// Initialize lazy loading
+		function initLazyLoading() {
+			if (lazyLoadObserver) {
+				lazyLoadObserver.disconnect();
+			}
+			
+			lazyLoadObserver = new IntersectionObserver((entries) => {
+				entries.forEach(entry => {
+					if (entry.isIntersecting) {
+						const img = entry.target;
+						const src = img.dataset.src;
+						if (src) {
+							img.style.backgroundImage = `url('${src}')`;
+							img.removeAttribute('data-src');
+							lazyLoadObserver.unobserve(img);
+						}
+					}
+				});
+			}, {
+				rootMargin: '100px 0px',
+				threshold: 0.01
+			});
+		}
+
+		function renderCards() {
+			const container = document.getElementById('cardContainer');
+			const searchTerm = document.getElementById('search').value.toLowerCase();
+			const selectedFilter = document.getElementById('tagFilter').value;
+			const today = new Date();
+			today.setHours(0, 0, 0, 0);
+			const hash = window.location.hash.substring(1);
+
+			// Filter cards
+			filteredCards = cards.filter(card => {
+				// Check if card date is in the future
+				const cardDate = new Date(card.dateAdded);
+				cardDate.setHours(0, 0, 0, 0);
+				if (cardDate > today) return false;
+
+				// Search across all language fields and tags
+				const matchesSearch = Object.entries(card)
+					.filter(([key]) => ['trd_chi', 'sim_chi', 'eng', 'jap', 'kor', 'tags'].includes(key))
+					.some(([key, value]) => {
+						if(key === 'tags') {
+							return value.some(tag => tag.toLowerCase().includes(searchTerm));
+						}
+						return String(value).toLowerCase().includes(searchTerm);
+					});
+
+				// Filter by category and tags
+				let matchesFilter;
+				if (selectedFilter === 'All') {
+					matchesFilter = true;
+				} else if (selectedFilter === 'bookmark') {
+					matchesFilter = card.tags.includes('bookmark');
+				} else if (selectedFilter === 'news') {
+					matchesFilter = card.category.includes('news');
+				} else if (selectedFilter === 'news_hk') {
+					matchesFilter = card.category === 'news' && card.tags.includes('hk');
+				} else if (selectedFilter === 'news_pth') {
+					matchesFilter = card.category === 'news' && card.tags.includes('pth');
+				} else if (selectedFilter === 'news_eng') {
+					matchesFilter = card.category === 'news' && card.tags.includes('eng');
+				} else if (selectedFilter === 'lgbtq') {
+					matchesFilter = card.tags.includes('lgbtq');
+				} else if (selectedFilter === '18+') {
+					matchesFilter = card.tags.includes('18+');
+				} else if (selectedFilter.includes('_')) {
+					const [category, tag] = selectedFilter.split('_');
+					matchesFilter = card.category === category && card.tags.includes(tag);
+				} else {
+					matchesFilter = card.category === selectedFilter;
+				}
+
+				// Hide news cards unless explicitly filtered
+				if (card.category.includes('news') && !['news', 'news_hk', 'news_pth', 'news_eng'].includes(selectedFilter)) {
+					matchesFilter = false;
+				}
+
+				// Hide lgbtq cards unless explicitly filtered
+				if (card.tags.includes('lgbtq') && selectedFilter !== 'lgbtq') {
+					matchesFilter = false;
+				}
+
+				// Hide 18+ cards unless explicitly filtered
+				if (card.tags.includes('18+') && selectedFilter !== '18+') {
+					matchesFilter = false;
+				}
+
+				return matchesSearch && matchesFilter;
+			});
+
+			// Check if we need to load all cards for anchor navigation
+			const requiresAllCards = hash && !filteredCards.some(card => card.anchor === hash && 
+				filteredCards.indexOf(card) < currentPage * cardsPerPage);
+
+			if (requiresAllCards) {
+				currentPage = Math.ceil(filteredCards.length / cardsPerPage);
+			}
+
+			// Calculate cards to show
+			const startIndex = 0;
+			const endIndex = currentPage * cardsPerPage;
+			const cardsToRender = filteredCards.slice(startIndex, endIndex);
+
+			// Clear container and render cards
+			container.innerHTML = '';
+
+			cardsToRender.forEach((card, index) => {
+				const displayTitle = card[currentLanguage] || card.trd_chi;
+				const originalIndex = cards.findIndex(c => c.anchor === card.anchor);
+
+				const cardElement = document.createElement('div');
+				cardElement.className = 'card';
+				cardElement.id = card.anchor;
+				cardElement.dataset.index = originalIndex;
+				cardElement.draggable = true;
+				cardElement.innerHTML = `
+					<button class="close-btn" onclick="deleteCard(event)">×</button>
+					<div class="thumbnail-container">
+						<div class="thumbnail lazy" data-src="${card.thumbnail}" 
+							 onclick="handleThumbnailClick('${card.url}')"></div>
+					</div>
+					<div class="slide-info">
+						<div class="slide-date-anchor">
+							<a href="#${card.anchor}" onclick="event.stopPropagation(); scrollToCard('${card.anchor}')">
+								${card.icon} ${displayTitle}
+							</a>
+						</div>
+					</div>
+				`;
+
+				// Mouse drag events
+				cardElement.addEventListener('dragstart', () => dragStart(originalIndex));
+				cardElement.addEventListener('dragover', dragOver);
+				cardElement.addEventListener('drop', () => dragDrop(originalIndex));
+
+				// Touch events for mobile
+				cardElement.addEventListener('touchstart', (e) => handleTouchStart(e, originalIndex, cardElement), { passive: false });
+				cardElement.addEventListener('touchmove', (e) => handleTouchMove(e, originalIndex, cardElement), { passive: false });
+				cardElement.addEventListener('touchend', () => handleTouchEnd(cardElement));
+
+				// Add to container
+				container.appendChild(cardElement);
+
+				// Observe for lazy loading
+				const thumbnail = cardElement.querySelector('.thumbnail.lazy');
+				if (thumbnail) {
+					lazyLoadObserver.observe(thumbnail);
+				}
+			});
+
+			// Update load more button
+			const loadMoreBtn = document.getElementById('loadMoreBtn');
+			if (endIndex < filteredCards.length) {
+				loadMoreBtn.style.display = 'block';
+				loadMoreBtn.disabled = false;
+				loadMoreBtn.innerHTML = '🔰顯示所有';
+			} else {
+				loadMoreBtn.style.display = 'none';
+			}
+
+			// Scroll to anchor after cards are rendered
+			setTimeout(() => {
+				if (hash) {
+					const anchor = hash;
+					scrollToCard(anchor);
+				}
+			}, 100);
+		}
+
+		function scrollToCard(anchor) {
+			const card = document.getElementById(anchor);
+			if (card) {
+				card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+				history.replaceState(null, null, `#${anchor}`);
+				updateSocialMeta();
+				
+				// Add highlight animation
+				card.style.animation = 'none';
+				void card.offsetWidth; // Trigger reflow
+				card.style.animation = 'highlight 1.5s ease-out';
+			} else if (anchor) {
+				// Anchor not found in current view - load all cards and try again
+				const loadMoreBtn = document.getElementById('loadMoreBtn');
+				if (loadMoreBtn.style.display !== 'none') {
+					loadMoreBtn.click();
+				}
+			}
+		}
+
+		function loadMoreCards() {
+			const loadMoreBtn = document.getElementById('loadMoreBtn');
+			loadMoreBtn.disabled = true;
+			loadMoreBtn.innerHTML = '<span class="spinner"></span> 載入中...';
+			
+			setTimeout(() => {
+				const totalPages = Math.ceil(filteredCards.length / cardsPerPage);
+				currentPage = totalPages;
+				renderCards();
+				
+				// After loading all cards, scroll to anchor if needed
+				setTimeout(() => {
+					const hash = window.location.hash.substring(1);
+					if (hash) {
+						scrollToCard(hash);
+					}
+				}, 300);
+			}, 500);
+		}
+
+		function deleteCard(event) {
+			const cardElement = event.target.closest('.card');
+			const index = parseInt(cardElement.dataset.index);
+			cards.splice(index, 1);
+			renderCards();
+			renderSlideshow();
+			renderRecommended();
+		}
+
+		// Theme management
+		function toggleTheme() {
+			const body = document.body;
+			const isDark = body.getAttribute('data-theme') === 'dark';
+			body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+			localStorage.setItem('theme', isDark ? 'light' : 'dark');
+			updateThemeButton();
+		}
+
+		function updateThemeButton() {
+			const isDark = document.body.getAttribute('data-theme') === 'dark';
+			document.getElementById('themeToggle').textContent = isDark ? '🌞' : '🌙';
+		}
+
+		// Initialize theme
+		const savedTheme = localStorage.getItem('theme') || 'light';
+		document.body.setAttribute('data-theme', savedTheme);
+		updateThemeButton();
+
+		// Add event listener
+		document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+		// Language selection
+		document.getElementById('languageSelect').addEventListener('change', function(e) {
+			currentLanguage = e.target.value;
+			renderCards();
+			renderSlideshow();
+			renderRecommended();
+		});
+
+		// Utility selection
+		document.getElementById('utilitySelect').addEventListener('change', function(e) {
+			const utility = e.target.value;
+			if(utility) {
+				if (utility === 'calculator') {
+					showCalculatorModal();
+				} else if (utility === 'weather') {
+					showWeatherModal();
+				} else if (utility === 'qr') {
+					showQRModal();
+				} else if (utility === 'timer') {
+					showTimerModal();
+				} else if (utility === 'stopper') {
+					showStopperModal();
+				} else if (utility === 'youtube_thumbnails') {
+					showYoutubeThumbnailsModal();
+				}
+				e.target.value = '';
+			}
+		});
+
+		function handleThumbnailClick(url) {
+			if (url.includes('youtube.com') || url.includes('youtu.be')) {
+				// For mobile devices, always open YouTube videos in new tab
+				if (isMobileDevice()) {
+					window.open(url, '_blank');
+				} else {
+					// For desktop, use the modal as before
+					showVideo(url);
+				}
+			} else {
+				// Non-YouTube URLs always open in new tab
+				window.open(url, '_blank');
+			}
+		}
+
+		// Mobile detection function
+		function isMobileDevice() {
+			return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+				   (window.innerWidth <= 768);
+		}
+
+		function showVideo(url) {
+			const modal = document.getElementById('videoModal');
+			const overlay = document.getElementById('videoModalOverlay');
+			const iframe = modal.querySelector('iframe');
+			const urlParams = new URL(url).searchParams;
+			const videoId = urlParams.get('v');
+			const listId = urlParams.get('list');
+			
+			// Add memory-efficient parameters
+			const params = new URLSearchParams({
+				'autoplay': '1',
+				'rel': '0',
+				'modestbranding': '1',
+				'playsinline': '1' // Important for mobile
+			});
+			
+			if (listId) {
+				iframe.src = `https://www.youtube.com/embed/videoseries?list=${listId}&${params}`;
+			} else if (videoId) {
+				iframe.src = `https://www.youtube.com/embed/${videoId}?${params}`;
+			}
+			
+			modal.style.display = 'block';
+			overlay.style.display = 'block';
+		}
+
+		function closeVideo() {
+			const modal = document.getElementById('videoModal');
+			const overlay = document.getElementById('videoModalOverlay');
+			const iframe = modal.querySelector('iframe');
+			iframe.src = '';
+			modal.style.display = 'none';
+			overlay.style.display = 'none';
+		}
+
+		function renderSlideshow() {
+			const container = document.getElementById('slideshowContainer');
+				container.innerHTML = '';
+
+				const today = new Date();
+				today.setHours(0, 0, 0, 0);
+
+				// Use filteredCards instead of cards
+				filteredCards
+					.filter(card => {
+						const cardDate = new Date(card.dateAdded);
+						cardDate.setHours(0, 0, 0, 0);
+						return cardDate <= today && new Date(card.dateAdded) > twoWeekAgo;
+					})
+					.sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded))
+					.forEach((card, index) => {
+					const displayTitle = card[currentLanguage] || card.trd_chi;
+					const originalIndex = cards.findIndex(c => c.anchor === card.anchor);
+
+					const slide = document.createElement('div');
+					slide.className = 'slide-item card';
+					slide.id = `slide-${card.anchor}`;
+					slide.dataset.index = originalIndex;
+					slide.draggable = true;
+					slide.innerHTML = `
+						<button class="close-btn" onclick="deleteCard(event)">×</button>
+						<div class="thumbnail-container">
+							<div class="thumbnail lazy" data-src="${card.thumbnail}" 
+								 onclick="handleThumbnailClick('${card.url}')"></div>
+						</div>
+						<div class="slide-info">
+							<div class="slide-date-anchor">
+								<span class="slide-date">${formatDate(card.dateAdded)}</span>
+								<a href="#${card.anchor}" onclick="event.stopPropagation(); scrollToCard('${card.anchor}')">
+									${card.icon} ${displayTitle}
+								</a>
+							</div>
+						</div>
+					`;
+
+					// Mouse drag events
+					slide.addEventListener('dragstart', () => dragStart(originalIndex));
+					slide.addEventListener('dragover', dragOver);
+					slide.addEventListener('drop', () => dragDrop(originalIndex));
+
+					// Touch events for mobile
+					slide.addEventListener('touchstart', (e) => handleTouchStart(e, originalIndex, slide), { passive: false });
+					slide.addEventListener('touchmove', (e) => handleTouchMove(e, originalIndex, slide), { passive: false });
+					slide.addEventListener('touchend', () => handleTouchEnd(slide));
+
+					container.appendChild(slide);
+
+					// Observe for lazy loading
+					const thumbnail = slide.querySelector('.thumbnail.lazy');
+					if (thumbnail) {
+						lazyLoadObserver.observe(thumbnail);
+					}
+				});
+		}
+		
+		function renderRecommended() {
+			const container = document.getElementById('recommendedContainer');
+			container.innerHTML = '';
+
+			// Use filteredCards instead of cards
+			const today = new Date();
+			today.setHours(0, 0, 0, 0);
+			const validCards = filteredCards.filter(card => {
+				const cardDate = new Date(card.dateAdded);
+				cardDate.setHours(0, 0, 0, 0);
+				return cardDate <= today;
+			});
+
+			// Shuffle array and pick first 14
+			const shuffled = validCards.sort(() => 0.5 - Math.random());
+			const selected = shuffled.slice(0, 14);
+
+			selected.forEach((card, index) => {
+				const displayTitle = card[currentLanguage] || card.trd_chi;
+				const originalIndex = cards.findIndex(c => c.anchor === card.anchor);
+
+				const slide = document.createElement('div');
+				slide.className = 'slide-item card';
+				slide.id = `rec-${card.anchor}`;
+				slide.dataset.index = originalIndex;
+				slide.draggable = true;
+				slide.innerHTML = `
+					<button class="close-btn" onclick="deleteCard(event)">×</button>
+					<div class="thumbnail-container">
+						<div class="thumbnail lazy" data-src="${card.thumbnail}" 
+							 onclick="handleThumbnailClick('${card.url}')"></div>
+					</div>
+					<div class="slide-info">
+						<div class="slide-date-anchor">
+							<a href="#${card.anchor}" onclick="event.stopPropagation(); scrollToCard('${card.anchor}')">
+								${card.icon} ${displayTitle}
+							</a>
+						</div>
+					</div>
+				`;
+
+				// Mouse drag events
+				slide.addEventListener('dragstart', () => dragStart(originalIndex));
+				slide.addEventListener('dragover', dragOver);
+				slide.addEventListener('drop', () => dragDrop(originalIndex));
+
+				// Touch events for mobile
+				slide.addEventListener('touchstart', (e) => handleTouchStart(e, originalIndex, slide), { passive: false });
+				slide.addEventListener('touchmove', (e) => handleTouchMove(e, originalIndex, slide), { passive: false });
+				slide.addEventListener('touchend', () => handleTouchEnd(slide));
+
+				container.appendChild(slide);
+
+				// Observe for lazy loading
+				const thumbnail = slide.querySelector('.thumbnail.lazy');
+				if (thumbnail) {
+					lazyLoadObserver.observe(thumbnail);
+				}
+			});
+		}
+
+		function closeSlideshow(slideshowId) {
+			document.getElementById(slideshowId).style.display = 'none';
+		}
+
+		function formatDate(isoString) {
+			const date = new Date(isoString);
+			return `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} 新增︰`;
+		}
+
+		function updateSocialMeta() {
+			const anchor = window.location.hash.substring(1);
+			const card = cards.find(c => c.anchor === anchor);
+			
+			if(card) {
+				document.querySelector('meta[property="og:title"]').content = card.title;
+				document.querySelector('meta[property="og:image"]').content = card.thumbnail;
+				document.querySelector('meta[property="og:url"]').content = window.location.href;
+				
+				document.querySelector('meta[name="twitter:title"]').content = card.title;
+				document.querySelector('meta[name="twitter:image"]').content = card.thumbnail;
+			} else {
+				// Default values
+				const defaultThumb = "https://img.youtube.com/vi/MZaXalOWs54/hqdefault.jpg";
+				document.querySelector('meta[property="og:title"]').content = "☕迪遜咖啡廳";
+				document.querySelector('meta[property="og:image"]').content = defaultThumb;
+				document.querySelector('meta[property="og:url"]').content = window.location.href;
+				
+				document.querySelector('meta[name="twitter:title"]').content = "☕迪遜咖啡廳";
+				document.querySelector('meta[name="twitter:image"]').content = defaultThumb;
+			}
+		}
+
+		function dragStart(index) {
+			draggedIndex = index;
+		}
+
+		function dragOver(e) {
+			e.preventDefault();
+		}
+
+		function dragDrop(droppedIndex) {
+			[cards[draggedIndex], cards[droppedIndex]] = [cards[droppedIndex], cards[draggedIndex]];
+			renderCards();
+			renderSlideshow();
+			renderRecommended();
+		}
+
+		function handleTouchStart(e, index, element) {
+			// Start long press timer
+			isLongPress = false;
+			longPressTimer = setTimeout(() => {
+				isLongPress = true;
+				startDrag(index, element);
+			}, 500); // 500ms for long press
+			
+			const touch = e.touches[0];
+			startY = touch.clientY;
+			scrollStartY = window.scrollY;
+		}
+
+		function handleTouchMove(e, index, element) {
+			if (!isLongPress) {
+				// Cancel long press if user moves finger too much
+				const touch = e.touches[0];
+				if (Math.abs(touch.clientY - startY) > 10) {
+					clearTimeout(longPressTimer);
+				}
+				return;
+			}
+			
+			if (!isDragging) return;
+			e.preventDefault();
+			
+			const touch = e.touches[0];
+			const y = touch.clientY;
+			
+			// Move the dragged element
+			draggedElement.style.top = `${y - draggedElement.offsetHeight / 2 + window.scrollY}px`;
+			
+			// Find the card we're hovering over
+			const elements = document.elementsFromPoint(touch.clientX, touch.clientY);
+			for (const el of elements) {
+				if (el.classList.contains('card') && !el.classList.contains('dragging')) {
+					const containers = ['cardContainer', 'slideshowContainer', 'recommendedContainer'];
+					for (const containerId of containers) {
+						const container = document.getElementById(containerId);
+						if (container.contains(el)) {
+							const targetIndex = Array.from(container.children).indexOf(el);
+							if (targetIndex !== -1 && currentCardIndex !== null && targetIndex !== currentCardIndex) {
+								// Swap the cards in the array
+								[cards[currentCardIndex], cards[targetIndex]] = [cards[targetIndex], cards[currentCardIndex]];
+								currentCardIndex = targetIndex;
+								renderCards();
+								renderSlideshow();
+								renderRecommended();
+								break;
+							}
+						}
+					}
+					break;
+				}
+			}
+		}
+
+		function handleTouchEnd(element) {
+			clearTimeout(longPressTimer);
+			
+			if (isDragging) {
+				endDrag();
+			}
+		}
+
+		function startDrag(index, element) {
+			isDragging = true;
+			draggedElement = element;
+			currentCardIndex = index;
+			
+			// Style the dragged element
+			element.classList.add('dragging');
+			element.style.position = 'absolute';
+			element.style.zIndex = '1000';
+			element.style.width = `${element.offsetWidth}px`;
+			element.style.top = `${element.getBoundingClientRect().top + window.scrollY}px`;
+			element.style.left = `${element.getBoundingClientRect().left}px`;
+		}
+
+		function endDrag() {
+			if (!isDragging) return;
+			
+			isDragging = false;
+			isLongPress = false;
+			
+			// Reset the dragged element's style
+			if (draggedElement) {
+				draggedElement.classList.remove('dragging');
+				draggedElement.style.position = '';
+				draggedElement.style.top = '';
+				draggedElement.style.left = '';
+				draggedElement.style.zIndex = '';
+				draggedElement.style.width = '';
+			}
+			
+			draggedElement = null;
+			currentCardIndex = null;
+		}
+
+		function addCard() {
+			const category = document.getElementById('category').value;
+			const title = document.getElementById('title').value;
+			const url = document.getElementById('url').value;
+			const thumbnail = document.getElementById('thumbnail').value;
+			const tags = document.getElementById('tags').value.split(',').map(tag => tag.trim());
+
+			if (category && title && url && thumbnail) {
+				const anchor = title.replace(/\s+/g, '_');
+				const newCard = { 
+					title: title,
+					trd_chi: title,
+					sim_chi: title,
+					eng: title,
+					jap: title,
+					kor: title,
+					icon: "⭐",
+					category: category,
+					tags: tags,
+					anchor: anchor,
+					url: url,
+					thumbnail: thumbnail,
+					dateAdded: new Date().toISOString()
+				};
+				cards.unshift(newCard); // Add to beginning of array
+				renderCards();
+				renderSlideshow();
+				clearInputs();
+				scrollToCard(anchor);
+			}
+		}
+
+		function clearInputs() {
+			document.getElementById('category').value = '';
+			document.getElementById('title').value = '';
+			document.getElementById('url').value = '';
+			document.getElementById('thumbnail').value = '';
+			document.getElementById('tags').value = '';
+		}
+
+		function saveCards() {
+			const data = JSON.stringify(cards, null, 2);
+			const blob = new Blob([data], { type: 'text/plain' });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = 'Bookmarks.txt';
+			a.click();
+		}
+
+		function loadCards() {
+			const input = document.createElement('input');
+			input.type = 'file';
+			input.accept = '.txt';
+			input.onchange = e => {
+				const file = e.target.files[0];
+				const reader = new FileReader();
+				reader.onload = event => {
+					cards = JSON.parse(event.target.result);
+					currentPage = 1; // Reset to first page
+					renderCards();
+					renderSlideshow();
+				};
+				reader.readAsText(file);
+			};
+			input.click();
+		}
+
+		// Modal Functions
+		function showClockModal() {
+			document.getElementById('clockModal').style.display = 'block';
+			document.getElementById('clockModalOverlay').style.display = 'block';
+			updateClock();
+			clockInterval = setInterval(updateClock, 1000);
+		}
+
+		function closeClockModal() {
+			document.getElementById('clockModal').style.display = 'none';
+			document.getElementById('clockModalOverlay').style.display = 'none';
+			clearInterval(clockInterval);
+		}
+
+		function showCalculatorModal() {
+			document.getElementById('calculatorModal').style.display = 'block';
+			document.getElementById('calculatorModalOverlay').style.display = 'block';
+		}
+
+		function closeCalculatorModal() {
+			document.getElementById('calculatorModal').style.display = 'none';
+			document.getElementById('calculatorModalOverlay').style.display = 'none';
+		}
+
+		function showWeatherModal() {
+			document.getElementById('weatherModal').style.display = 'block';
+			document.getElementById('weatherModalOverlay').style.display = 'block';
+		}
+
+		function closeWeatherModal() {
+			document.getElementById('weatherModal').style.display = 'none';
+			document.getElementById('weatherModalOverlay').style.display = 'none';
+		}
+
+		function showQRModal() {
+			document.getElementById('qrModal').style.display = 'block';
+			document.getElementById('qrModalOverlay').style.display = 'block';
+		}
+
+		function closeQRModal() {
+			document.getElementById('qrModal').style.display = 'none';
+			document.getElementById('qrModalOverlay').style.display = 'none';
+		}
+
+		function showVersionModal() {
+			document.getElementById('versionModal').style.display = 'block';
+			document.getElementById('versionModalOverlay').style.display = 'block';
+		}
+
+		function closeVersionModal() {
+			document.getElementById('versionModal').style.display = 'none';
+			document.getElementById('versionModalOverlay').style.display = 'none';
+		}
+		
+		function showHelpModal() {
+			document.getElementById('helpModal').style.display = 'block';
+			document.getElementById('helpModalOverlay').style.display = 'block';
+		}
+
+		function closeHelpModal() {
+			document.getElementById('helpModal').style.display = 'none';
+			document.getElementById('helpModalOverlay').style.display = 'none';
+		}
+
+		// Timer Functions
+		function showTimerModal() {
+			document.getElementById('timerModal').style.display = 'block';
+			document.getElementById('timerModalOverlay').style.display = 'block';
+			resetTimer();
+		}
+
+		function closeTimerModal() {
+			document.getElementById('timerModal').style.display = 'none';
+			document.getElementById('timerModalOverlay').style.display = 'none';
+			resetTimer();
+		}
+
+		function startTimer() {
+			if (!isTimerRunning) {
+				const hours = parseInt(document.getElementById('timerHours').value) || 0;
+				const minutes = parseInt(document.getElementById('timerMinutes').value) || 0;
+				const seconds = parseInt(document.getElementById('timerSeconds').value) || 0;
+				
+				timerHours = hours;
+				timerMinutes = minutes;
+				timerSeconds = seconds;
+				
+				isTimerRunning = true;
+				timerInterval = setInterval(updateTimer, 1000);
+			}
+		}
+
+		function pauseTimer() {
+			isTimerRunning = false;
+			clearInterval(timerInterval);
+		}
+
+		function resetTimer() {
+			isTimerRunning = false;
+			clearInterval(timerInterval);
+			timerHours = 0;
+			timerMinutes = 0;
+			timerSeconds = 0;
+			document.getElementById('timerHours').value = '0';
+			document.getElementById('timerMinutes').value = '0';
+			document.getElementById('timerSeconds').value = '0';
+			document.getElementById('timerDisplay').textContent = '00:00:00';
+		}
+
+		function updateTimer() {
+			if (timerSeconds > 0) {
+				timerSeconds--;
+			} else {
+				if (timerMinutes > 0) {
+					timerMinutes--;
+					timerSeconds = 59;
+				} else {
+					if (timerHours > 0) {
+						timerHours--;
+						timerMinutes = 59;
+						timerSeconds = 59;
+					} else {
+						// Timer finished
+						clearInterval(timerInterval);
+						isTimerRunning = false;
+						document.getElementById('timerDisplay').textContent = '00:00:00';
+						alert('計時器結束！');
+						return;
+					}
+				}
+			}
+			
+			const displayHours = timerHours.toString().padStart(2, '0');
+			const displayMinutes = timerMinutes.toString().padStart(2, '0');
+			const displaySeconds = timerSeconds.toString().padStart(2, '0');
+			document.getElementById('timerDisplay').textContent = `${displayHours}:${displayMinutes}:${displaySeconds}`;
+		}
+
+		// Stopper Functions
+		function showStopperModal() {
+			document.getElementById('stopperModal').style.display = 'block';
+			document.getElementById('stopperModalOverlay').style.display = 'block';
+			resetStopper();
+		}
+
+		function closeStopperModal() {
+			document.getElementById('stopperModal').style.display = 'none';
+			document.getElementById('stopperModalOverlay').style.display = 'none';
+			resetStopper();
+		}
+
+		function startStopper() {
+			if (!isStopperRunning) {
+				isStopperRunning = true;
+				lastStopperTime = performance.now();
+				stopperInterval = requestAnimationFrame(updateStopper);
+			}
+		}
+
+		function pauseStopper() {
+			isStopperRunning = false;
+			cancelAnimationFrame(stopperInterval);
+		}
+
+		function resetStopper() {
+			isStopperRunning = false;
+			cancelAnimationFrame(stopperInterval);
+			stopperHours = 0;
+			stopperMinutes = 0;
+			stopperSeconds = 0;
+			stopperMilliseconds = 0;
+			lapTimes = [];
+			document.getElementById('stopperDisplay').textContent = '00:00:00.000';
+			document.getElementById('lapTimes').innerHTML = '';
+		}
+
+		function updateStopper(timestamp) {
+			if (!isStopperRunning) return;
+			
+			const elapsed = timestamp - lastStopperTime;
+			lastStopperTime = timestamp;
+			
+			stopperMilliseconds += elapsed;
+			
+			if (stopperMilliseconds >= 1000) {
+				stopperSeconds += Math.floor(stopperMilliseconds / 1000);
+				stopperMilliseconds = stopperMilliseconds % 1000;
+				
+				if (stopperSeconds >= 60) {
+					stopperMinutes += Math.floor(stopperSeconds / 60);
+					stopperSeconds = stopperSeconds % 60;
+					
+					if (stopperMinutes >= 60) {
+						stopperHours += Math.floor(stopperMinutes / 60);
+						stopperMinutes = stopperMinutes % 60;
+					}
+				}
+			}
+			
+			const displayHours = stopperHours.toString().padStart(2, '0');
+			const displayMinutes = stopperMinutes.toString().padStart(2, '0');
+			const displaySeconds = stopperSeconds.toString().padStart(2, '0');
+			const displayMilliseconds = Math.floor(stopperMilliseconds).toString().padStart(3, '0');
+			
+			document.getElementById('stopperDisplay').textContent = 
+				`${displayHours}:${displayMinutes}:${displaySeconds}.${displayMilliseconds}`;
+			
+			stopperInterval = requestAnimationFrame(updateStopper);
+		}
+
+		function recordLap() {
+			if (isStopperRunning) {
+				const lapTime = document.getElementById('stopperDisplay').textContent;
+				lapTimes.push(lapTime);
+				
+				const lapTimesContainer = document.getElementById('lapTimes');
+				const lapElement = document.createElement('div');
+				lapElement.className = 'lap-time';
+				lapElement.textContent = `圈 ${lapTimes.length}: ${lapTime}`;
+				lapTimesContainer.prepend(lapElement);
+			}
+		}
+
+		// Clock Functions
+		function updateClock() {
+			const now = new Date();
+			const timeString = now.toLocaleTimeString();
+			const dateString = now.toLocaleDateString(undefined, { 
+				weekday: 'long', 
+				year: 'numeric', 
+				month: 'long', 
+				day: 'numeric' 
+			});
+			
+			document.getElementById('clockDisplay').textContent = timeString;
+			document.getElementById('dateDisplay').textContent = dateString;
+			
+			// Update analog clock
+			const hours = now.getHours() % 12;
+			const minutes = now.getMinutes();
+			const seconds = now.getSeconds();
+			
+			const hourDegrees = (hours * 30) + (minutes * 0.5);
+			const minuteDegrees = minutes * 6;
+			const secondDegrees = seconds * 6;
+			
+			document.getElementById('hourHand').style.transform = `rotate(${hourDegrees}deg)`;
+			document.getElementById('minuteHand').style.transform = `rotate(${minuteDegrees}deg)`;
+			document.getElementById('secondHand').style.transform = `rotate(${secondDegrees}deg)`;
+		}
+
+		// Enhanced Calculator Functions
+		let calcValue = '';
+		let lastCalculation = '';
+
+		function calcInput(val) {
+			if (calcValue === '0' && val !== '.') {
+				calcValue = '';
+			}
+			calcValue += val;
+			document.getElementById('calcDisplay').textContent = calcValue;
+		}
+
+		function clearDisplay() {
+			calcValue = '0';
+			document.getElementById('calcDisplay').textContent = calcValue;
+		}
+		
+		function deleteLastCharacter() {
+			calcValue = calcValue.slice(0, -1);
+			if (calcValue === '') {
+				calcValue = '0';
+			}
+			document.getElementById('calcDisplay').textContent = calcValue;
+		}
+
+		function calculate() {
+			try {
+				// Replace × and ÷ with * and / for evaluation
+				const expression = calcValue.replace(/×/g, '*').replace(/÷/g, '/');
+				lastCalculation = `${calcValue} = ${eval(expression)}`;
+				
+				// Play a subtle click sound
+				const audio = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...');
+				audio.volume = 0.2;
+				audio.play().catch(e => {});
+				
+				calcValue = eval(expression).toString();
+				document.getElementById('calcDisplay').textContent = calcValue;
+				
+				// Add coffee animation
+				const display = document.getElementById('calcDisplay');
+				display.style.color = '#4CAF50';
+				setTimeout(() => {
+					display.style.color = 'var(--text-color)';
+				}, 500);
+			} catch {
+				// Show error animation
+				const display = document.getElementById('calcDisplay');
+				display.textContent = 'Error';
+				display.style.color = '#f44336';
+				setTimeout(() => {
+					display.textContent = calcValue || '0';
+					display.style.color = 'var(--text-color)';
+				}, 1000);
+			}
+		}
+
+		// QR Generator
+		function generateQR() {
+			const text = document.getElementById('qrInput').value;
+			if(text) {
+				document.getElementById('qrCode').innerHTML = `
+					<div style="padding:10px;background:#fff;">
+						<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(text)}" 
+							 alt="QR Code" style="max-width:100%;">
+					</div>
+				`;
+			}
+		}
+
+		// Initialize when page loads
+		window.addEventListener('load', () => {
+			initLazyLoading();
+			renderCards();
+			renderSlideshow();
+			renderRecommended();
+			updateSocialMeta();
+			
+			// Add event listener to Load More button
+			document.getElementById('loadMoreBtn').addEventListener('click', loadMoreCards);
+			
+			// Reset page when search or filter changes
+			document.getElementById('search').addEventListener('input', () => {
+				currentPage = 1;
+				renderCards();
+				renderSlideshow();
+			});
+			
+			document.getElementById('tagFilter').addEventListener('change', () => {
+				currentPage = 1;
+				renderCards();
+				renderSlideshow();
+				renderRecommended();
+			});
+			
+			// Update social meta when hash changes
+			window.addEventListener('hashchange', updateSocialMeta);
+		});
+	</script>
+</body>
+</html>

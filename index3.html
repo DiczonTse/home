@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<!--Redirect-->
+		<!--<meta http-equiv="Refresh" content="0; url=https://diczon.infinityfreeapp.com/" />-->
+		<!--/Redirect-->
+		<!--Bootstrap-->
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="css/bootstrap.min.css">
+		<link rel="stylesheet" href="css/w3pro.css">
+		<link rel="stylesheet" href="css/w3-theme-teal.css">
+		<link rel="stylesheet" href="css/font-awesome.min.css">
+		<!--/Bootstrap-->
+		<!--Filter-->
+		<link rel="stylesheet" type="text/css" href="css/filter.css">
+		<!--/Filter-->
+		<!--Favicon-->
+		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+		<link rel="manifest" href="/site.webmanifest">
+		<!--/Favicon-->
+		<!--Whatsapp Preview Image for 迪遜咖啡廳-->
+		<meta property="og:title" content="迪遜咖啡廳">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://diczon.infinityfreeapp.com/">
+		<meta property="og:image:type" content="image/jpeg">
+		<meta property="og:image:width" content="300">
+		<meta property="og:image:height" content="300">
+		<meta property="og:image" content="https://diczon.infinityfreeapp.com/pics/diczon.jpg">
+		<style>
+			body {
+			  height: 100%;
+			  background: linear-gradient(141deg, #ccffff 0%, #ffccff 26%, #ccffcc 51%, #ccccff 76%, #ffffcc 90%);
+			  font-family: "Lato", "sans-serif", "Segoe UI Emoji";
+			}
+			
+			.overlay {
+				height: 100%;
+				width: 0;
+				position: fixed;
+				z-index: 1;
+				top: 0;
+				left: 0;
+				background-color: rgb(0,0,0);
+				background-color: rgba(0,0,0, 0.9);
+				overflow-x: hidden;
+				transition: 0.5s;
+			}
+			.overlay-content {
+				position: relative;
+				top: 0%;
+				width: 100%;
+				text-align: center;
+				margin-top: 30px;
+			}
+			.overlay a {
+				padding: 8px;
+				text-decoration: none;
+				font-size: 24px;
+				color: #818181;
+				display: inline;
+				transition: 0.3s;
+			}
+			.overlay a:hover, .overlay a:focus {
+				color: #f1f1f1;
+			}
+			.overlay .closebtn2 {
+				position: relative;
+				top: 0%;
+				right: 45px;
+				font-size: 60px;
+			}
+			@media screen and (max-height: 450px) {
+				.overlay a {font-size: 20px}
+				.overlay .closebtn2 {
+				font-size: 40px;
+				top: 0%;
+				right: 35px;}
+			}
+			
+			.dropbtn {
+			  background-color: transparent;
+			  color: #ffd103;
+			  padding: 12px;
+			  font-size: 16px;
+			  border-radius: 8px;
+			  border: none;
+			}
+
+			.dropdown {
+			  position: relative;
+			  border-radius: 8px;
+			  display: inline-block;
+			}
+
+			.dropdown-content {
+			  display: none;
+			  position: absolute;
+			  background-color: #081587;
+			  min-width: 150px;
+			  border-radius: 8px;
+			  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+			  z-index: 1;
+			}
+
+			.dropdown-content a {
+			  color: black;
+			  padding: 12px 16px;
+			  text-decoration: none;
+			  display: block;
+			}
+			
+			.dropdown-menu-center {
+				left: 50% !important;
+				right: auto !important;
+				text-align: center !important;
+				transform: translate(-50%, 0) !important;
+			}
+
+			.dropdown-content a:hover {background-color: #ddd;}
+
+			.dropdown:hover .dropdown-content {display: block;}
+
+			.dropdown:hover .dropbtn {background-color: #081587;}
+
+			.openbtn {
+			  font-size: 20px;
+			  cursor: pointer;
+			  background-color: #111;
+			  color: white;
+			  position: fixed;
+			  top: 0px;
+			  left: 0px;
+			  z-index: 99;
+			  padding: 10px 15px;
+			  border: none;
+			  border-radius: 4px;
+			}
+
+			.openbtn:hover {
+			  background-color: #444;
+			}
+
+			#main {
+			  transition: margin-left .5s;
+			  padding: 16px;
+			}
+
+			/* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
+			@media screen and (max-height: 450px) {
+			  .sidebar {padding-top: 15px;}
+			  .sidebar a {font-size: 18px;}
+			}
+
+			.alert {
+			  padding: 20px;
+			  background-color: #f44336;
+			  color: white;
+			  opacity: 1;
+			  transition: opacity 0.6s;
+			  margin-bottom: 15px;
+			}
+
+			.alert.success {background-color: #4CAF50;}
+			.alert.info {background-color: #2196F3;}
+			.alert.warning {background-color: #ff9800;}
+
+			.closebtn {
+			  margin-left: 15px;
+			  color: white;
+			  font-weight: bold;
+			  float: right;
+			  font-size: 22px;
+			  line-height: 20px;
+			  cursor: pointer;
+			  transition: 0.3s;
+			}
+
+			.closebtn:hover {
+			  color: black;
+			}
+			
+			#topBtn {
+			  display: none;
+			  position: fixed;
+			  bottom: 40px;
+			  right: 25px;
+			  z-index: 99;
+			  font-size: 20px;
+			  border: none;
+			  outline: none;
+			  background-color: gray;
+			  color: white;
+			  cursor: pointer;
+			  padding: 10px 15px;
+			  border-radius: 4px;
+			}
+
+			#topBtn:hover {
+			  background-color: #555;
+			}
+
+			hr {
+				margin: 10px;
+				border: 1px dashed lightblue;
+			}
+			
+			.notification {
+			  text-decoration: none;
+			  padding: 15px 26px;
+			  position: relative;
+			  display: inline-block;
+			  border-radius: 2px;
+			}
+
+			.notification:hover {
+			  background: grey;
+			}
+
+			.notification .badge {
+			  position: absolute;
+			  top: 0px;
+			  right: 0px;
+			  padding: 5px 10px;
+			  border-radius: 50%;
+			  background-color: red;
+			  color: white;
+			}
+			
+			/* The Modal (background) */
+			.modal, .modal2, .modal3 {
+			  display: none; /* Hidden by default */
+			  position: fixed; /* Stay in place */
+			  z-index: 1; /* Sit on top */
+			  padding-top: 0px; /* Location of the box */
+			  left: 0;
+			  top: 0;
+			  width: 100%; /* Full width */
+			  height: 100%; /* Full height */
+			  overflow: auto; /* Enable scroll if needed */
+			  background-color: rgb(0,0,0); /* Fallback color */
+			  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+			}
+
+			/* Modal Content */
+			.modal-content, .modal-content2, .modal-content3 {
+			  position: relative;
+			  background-color: #fefefe;
+			  margin: auto;
+			  padding: 0;
+			  border: 1px solid #888;
+			  width: 80%;
+			  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+			  -webkit-animation-name: animatetop;
+			  -webkit-animation-duration: 0.4s;
+			  animation-name: animatetop;
+			  animation-duration: 0.4s
+			}
+			
+			/* Calculator */
+			.calculator {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+			}
+			.display {
+				width: 100%;
+				max-width: 400px;
+				height: 100px;
+				background-color: #dddddd;
+				display: flex;
+				justify-content: flex-end;
+				align-items: center;
+				padding: 20px;
+				font-size: 36px;
+			}
+			.buttons {
+				display: flex;
+				flex-wrap: wrap;
+				width: 100%;
+				max-width: 400px;
+			}
+			.buttons button {
+				width: calc(100% / 4);
+				height: 100px;
+				font-size: 36px;
+			}
+			
+			/* Center the loader */
+			/*#loader {
+			  position: absolute;
+			  left: 50%;
+			  top: 50%;
+			  z-index: 1;
+			  width: 150px;
+			  height: 150px;
+			  margin: -75px 0 0 -75px;
+			  border: 16px solid #f3f3f3;
+			  border-radius: 50%;
+			  border-top: 16px solid #3498db;
+			  width: 120px;
+			  height: 120px;
+			  -webkit-animation: spin 2s linear infinite;
+			  animation: spin 2s linear infinite;
+			}
+
+			@-webkit-keyframes spin {
+			  0% { -webkit-transform: rotate(0deg); }
+			  100% { -webkit-transform: rotate(360deg); }
+			}
+
+			@keyframes spin {
+			  0% { transform: rotate(0deg); }
+			  100% { transform: rotate(360deg); }
+			}
+			
+			#notShowDiv {
+			  display: none;
+			  text-align: center;
+			}*/
+			
+			/* Add Animation */
+			@-webkit-keyframes animatetop {
+			  from {top:-300px; opacity:0} 
+			  to {top:0; opacity:1}
+			  to {top:0; opacity:1}
+			}
+
+			@keyframes animatetop {
+			  from {top:-300px; opacity:0}
+			  to {top:0; opacity:1}
+			}
+
+			/* The Close Button */
+			.close, .close2, .close3 {
+			  color: white;
+			  float: right;
+			  font-size: 28px;
+			  font-size: 28px;
+			  font-weight: bold;
+			}
+
+			.close:hover, .close2:hover, .close3:hover,
+			.close:focus, .close2:focus, .close3:focus {
+			  color: #000;
+			  text-decoration: none;
+			  cursor: pointer;
+			}
+			
+			.modal-header {
+			  padding: 2px 16px;
+			  background-color: #5cb85c;
+			  color: white;
+			}
+
+			.modal-body {padding: 2px 16px;}
+
+			.modal-footer {
+			  padding: 2px 16px;
+			  background-color: #5cb85c;
+			  color: white;
+			}
+		</style>
+		<title>迪遜咖啡廳</title>
+	</head>
+	<body style="margin:0;">
+	<!--<body onload="loaderFunction()" style="margin:0;">-->
+	<!--<body onload="checkCookie()" style="margin:0;">-->
+		<!--<div id="loader"></div>-->
+		<footer class="w3-container w3-bottom w3-theme w3-margin-top">
+			<font align="left">Copyright © 2025 Diczon Tse. All rights reserved</font>
+		</footer>
+			<!--The Modal Constuct Update-->
+			<div id="myModal" class="modal">
+				<!--Modal content-->
+				<div class="modal-content">
+					<div class="modal-header">
+						<h3>☕️迪遜咖啡廳-結構更新</h3>
+						<span class="close">&times;</span>
+					</div>
+					<div w3-include-html="structure_update.html"></div>
+				</div>
+				<!--/Modal content-->
+			</div>
+			<!--/The Modal Constuct Update-->
+			<!--The Modal Content Update-->
+			<div id="myModal2" class="modal2">
+				<!--Modal content-->
+				<div class="modal-content2">
+					<div class="modal-header">
+						<h3>☕️迪遜咖啡廳-內容更新</h3>
+						<span class="close2">&times;</span>
+					</div>
+					<div w3-include-html="content_update.html"></div>
+				</div>
+				<!--/Modal content-->
+			</div>
+			<!--/The Modal Content Update-->
+			<!--The Modal Calculator-->
+			<div id="myModal3" class="modal3">
+				<!--Modal content-->
+				<div class="modal-content3">
+					<div class="modal-header">
+						<h2>🧮迪遜計算機</h2>
+						<span class="close3">&times;</span>
+					</div>
+					<div class="modal-body">
+						<div class="calculator">
+							<div class="display" id="display"></div>
+							<div class="buttons">
+								<button onclick="updateDisplay('(')">(</button>
+								<button onclick="updateDisplay(')')">)</button>
+								<button onclick="clearDisplay()">AC</button>
+								<button onclick="backspace()">◀</button>
+								<button onclick="updateDisplay('7')">7</button>
+								<button onclick="updateDisplay('8')">8</button>
+								<button onclick="updateDisplay('9')">9</button>
+								<button onclick="updateDisplay('/')">÷</button>
+								<button onclick="updateDisplay('4')">4</button>
+								<button onclick="updateDisplay('5')">5</button>
+								<button onclick="updateDisplay('6')">6</button>
+								<button onclick="updateDisplay('*')">x</button>
+								<button onclick="updateDisplay('1')">1</button>
+								<button onclick="updateDisplay('2')">2</button>
+								<button onclick="updateDisplay('3')">3</button>
+								<button onclick="updateDisplay('-')">-</button>
+								<button onclick="updateDisplay('0')">0</button>
+								<button onclick="updateDisplay('.')">.</button>
+								<button onclick="calculate()">=</button>
+								<button onclick="updateDisplay('+')">+</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!--/Modal content-->
+			</div>
+			<!--/The Modal Calculator-->
+			<!--Sidebar-->
+			<!--Fullscreen Overlay Nav Function-->
+			<div id="myNav" class="overlay">
+				<div class="overlay-content">
+					<div style="text-align: right;"><a href="javascript:void(0)" class="closebtn2" onclick="closeNav()">&times;</a><br></div>
+					<div class="dropdown">
+						<button class="dropbtn">🔧工具</button>
+						<div class="dropdown-content dropdown-menu-center">
+							<button class="btn" onclick="javascript:window.open('https://www.google.com/', '_blank');">🔍Google</button>
+							<button class="btn" onclick="javascript:window.open('https://baike.baidu.com/', '_blank');">🔍百度百科</button>
+							<button class="btn" onclick="javascript:window.open('https://www.bing.com/', '_blank');">🔍Bing</button>
+							<button class="btn" onclick="javascript:window.open('https://www.baidu.com/', '_blank');">🔍百度</button>
+							<button class="btn" onclick="javascript:window.open('https://yandex.com/', '_blank');">🔍Yandex</button>
+							<button class="btn" onclick="javascript:window.open('https://yahoo.com/', '_blank');">🔍Yahoo!</button>
+							<button class="btn" onclick="javascript:window.open('https://duckduckgo.com/', '_blank');">🔍DuckDuckGo</button>
+							<button class="btn" onclick="javascript:window.open('https://brave.com/', '_blank');">🔍brave</button>
+							<button class="btn" onclick="javascript:window.open('https://zh.wikipedia.org/', '_blank');">🔍維基百科</button>
+							<button class="btn" onclick="javascript:window.open('https://archive.org/', '_blank');">🔍Internet Archive</button>
+							<button class="btn" onclick="javascript:window.open('https://www.kuaikanmanhua.com/', '_blank');">📖漫畫</button>
+							<button class="btn" onclick="javascript:window.open('https://openverse.org/', '_blank');">🔍Openverse</button>
+							<button class="btn" onclick="javascript:window.open('https://www.consumer.org.hk/tc/rapid_antigen_test_search', '_blank');">🔍檢測包搜尋</button>
+							<button class="btn" onclick="javascript:window.open('https://www.consumer.org.hk/tc/paracetamol_search', '_blank');">🔍撲熱息痛搜尋</button>
+							<button class="btn" onclick="javascript:window.open('https://config.office.com/deploymentsettings', '_blank');">📤Office Deploy</button>
+							<button class="btn" onclick="javascript:window.open('https://animedb.jp/', '_blank');">📖日本動漫大全</button>
+						</div>
+					</div>
+					<div class="dropdown">
+						<button class="dropbtn">🔧工具(需登入)</button>
+						<div class="dropdown-content dropdown-menu-center">
+							<button class="btn" onclick="javascript:window.open('https://www.bing.com/', '_blank');">🤖Bing</button>
+							<button class="btn" onclick="javascript:window.open('https://huggingface.co/Qwen/QwQ-32B-Preview', '_blank');">🤖Hugging Face</button>
+							<button class="btn" onclick="javascript:window.open('https://www.office.com/apps', '_blank');">🧰Office</button>
+							<button class="btn" onclick="javascript:window.open('https://about.google/intl/zhhk/products/?tab=kh#all-products', '_blank');">🧰Google</button>
+							<button class="btn" onclick="javascript:window.open('https://mail.google.com/', '_blank');">📧Gmail</button>
+							<button class="btn" onclick="javascript:window.open('https://outlook.live.com/', '_blank');">📧Outlook</button>
+							<button class="btn" onclick="javascript:window.open('https://hk.mail.yahoo.com/', '_blank');">📧yahoo!mail</button>
+							<button class="btn" onclick="javascript:window.open('https://creator.nightcafe.studio/', '_blank');">🖼️AI Art</button>
+							<button class="btn" onclick="javascript:window.open('http://studio.youtube.com/', '_blank');">📤YT 工作室</button>
+							<button class="btn" onclick="javascript:window.open('https://member.bilibili.com/platform/upload/video/frame', '_blank');">📤Bilibili 投稿</button>
+							<button class="btn" onclick="javascript:window.open('https://www.youtube.com/@Diczon/community', '_blank');">📅Youtube 社群</button>
+							<button class="btn" onclick="javascript:window.open('https://business.facebook.com/latest/content_calendar', '_blank');">📅Meta 規劃</button>
+							<button class="btn" onclick="javascript:window.open('https://www.blogger.com/', '_blank');">📓部落格管理</button>
+							<button class="btn" onclick="javascript:window.open('https://www.infinityfree.com/', '_blank');">🏗️Infinity Free</button>
+							<button class="btn" onclick="javascript:window.open('https://search.google.com/search-console', '_blank');">📊SearchConsole</button>
+							<button class="btn" onclick="javascript:window.open('https://gptzero.me/', '_blank');">🤖GPTZero</button>
+							<button class="btn" onclick="javascript:window.open('https://excelformulabot.com/', '_blank');">🤖Excelformula</button>
+						</div>
+					</div>
+					<div class="dropdown">
+						<button class="dropbtn">🔊通訊工具(需登入)</button>
+						<div class="dropdown-content dropdown-menu-center">
+							<button class="btn" onclick="javascript:window.open('https://web.whatsapp.com/', '_blank');">🔊WhatsApp</button>
+							<button class="btn" onclick="javascript:window.open('https://web.telegram.org/k/', '_blank');">🔊Telegram</button>
+							<button class="btn" onclick="javascript:window.open('https://discord.com/channels/@me', '_blank');">🔊Discord</button>
+							<button class="btn" onclick="javascript:window.open('https://mail.google.com/mail/u/0/#chat/welcome', '_blank');">🔊Google Chat</button>
+							<button class="btn" onclick="javascript:window.open('https://www.facebook.com/', '_blank');">🔊Facebook</button>
+							<button class="btn" onclick="javascript:window.open('https://www.instagram.com/', '_blank');">🔊Instagram</button>
+							<button class="btn" onclick="javascript:window.open('https://twitter.com/', '_blank');">🔊X</button>
+							<button class="btn" onclick="javascript:window.open('https://mewe.com/', '_blank');">🔊MeWe</button>
+							<button class="btn" onclick="javascript:window.open('https://www.xiaohongshu.com/', '_blank');">🔊小红书</button>
+						</div>
+					</div>
+					<div class="dropdown">
+						<button class="dropbtn">📺視頻平台</button>
+						<div class="dropdown-content dropdown-menu-center">
+							<button class="btn" onclick="javascript:window.open('https://www.bilibili.com/', '_blank');">📺bilibili</button>
+							<button class="btn" onclick="javascript:window.open('https://www.facebook.com/', '_blank');">📺Facebook</button>
+							<button class="btn" onclick="javascript:window.open('https://www.instagram.com/', '_blank');">📺Instagram</button>
+							<button class="btn" onclick="javascript:window.open('https://www.douyin.com/', '_blank');">📺抖音</button>
+							<button class="btn" onclick="javascript:window.open('https://odysee.com/', '_blank');">📺Odysee</button>
+						</div>
+					</div>
+					<div class="dropdown">
+						<button class="dropbtn">🥽元宇宙</button>
+						<div class="dropdown-content dropdown-menu-center">
+							<button class="btn" onclick="javascript:window.open('https://www.minecraft.net/en-us', '_blank');">🌎Minecraft</button>
+							<button class="btn" onclick="javascript:window.open('https://www.sandbox.game/', '_blank');">📦The Sandbox</button>
+							<button class="btn" onclick="javascript:window.open('https://www.fortnite.com/', '_blank');">🔨Fortnite</button>
+							<button class="btn" onclick="javascript:window.open('https://www.roblox.com/', '_blank');">🧍‍Roblox</button>
+							<button class="btn" onclick="javascript:window.open('https://staratlas.com/', '_blank');">🚀Star Atlas</button>
+							<button class="btn" onclick="javascript:window.open('https://sidequestvr.com/app/4936/revomon-beta', '_blank');">👹Revomon</button>
+							<button class="btn" onclick="javascript:window.open('https://www.oculus.com/horizon-worlds/', '_blank');">♾️Horizon Worlds</button>
+							<button class="btn" onclick="javascript:window.open('https://hello.vrchat.com/', '_blank');">💬VR Chat</button>
+							<button class="btn" onclick="javascript:window.open('https://recroom.com/', '_blank');">⏺️Rec Room</button>
+							<button class="btn" onclick="javascript:window.open('https://secondlife.com/', '_blank');">✌️Second Life</button>
+							<button class="btn" onclick="javascript:window.open('https://www.upland.me/', '_blank');">🦙Upland</button>
+							<button class="btn" onclick="javascript:window.open('https://www.myneighboralice.com/', '_blank');">👩‍🌾My Neighbor Alice</button>
+							<button class="btn" onclick="javascript:window.open('https://pokemongolive.com/', '_blank');">🐛Pokemon Go</button>
+							<button class="btn" onclick="javascript:window.open('https://www.youtube.com/watch?v=AQEizp-VrVU', '_blank');">🌎Minecraft 地球</button>
+						</div>
+					</div>
+					<div class="dropdown">
+						<button class="dropbtn">📰新聞</button>
+						<div class="dropdown-content dropdown-menu-center">
+							<button class="btn" onclick="javascript:window.open('https://www.coronavirus.gov.hk/chi/index.html', '_blank');">📰香港疫情</button>
+							<button class="btn" onclick="javascript:window.open('https://www.healthbureau.gov.hk/cn/news/index.html', '_blank');">📰最新防疫動態</button>
+							<button class="btn" onclick="javascript:window.open('https://www.wenweipo.com/', '_blank');">📰文匯網</button>
+							<button class="btn" onclick="javascript:window.open('https://www.bastillepost.com/hongkong/', '_blank');">📰巴士的報</button>
+							<button class="btn" onclick="javascript:window.open('https://www.news.gov.hk/chi/index.html', '_blank');">📰政府新聞網</button>
+							<button class="btn" onclick="javascript:window.open('https://news.tvb.com/tc', '_blank');">📰無線新聞</button>
+							<button class="btn" onclick="javascript:window.open('https://hd.stheadline.com/news/realtime/%E5%8D%B3%E6%99%82/', '_blank');">📰頭條日報</button>
+							<button class="btn" onclick="javascript:window.open('https://www.hk01.com/', '_blank');">📰香港01</button>
+							<button class="btn" onclick="javascript:window.open('https://hk.on.cc/hk/news/index.html', '_blank');">📰東網</button>
+						</div>
+					</div>
+					<div class="dropdown">
+						<button class="dropbtn">👨‍💻科技新聞</button>
+						<div class="dropdown-content dropdown-menu-center">
+							<button class="btn" onclick="javascript:window.open('https://unwire.pro/', '_blank');">👨‍💻unwire.pro</button>
+						</div>
+					</div>
+					<div class="dropdown">
+						<button class="dropbtn">📔字典</button>
+						<div class="dropdown-content dropdown-menu-center">
+							<button class="btn" onclick="javascript:window.open('https://dictionary.cambridge.org/dictionary/english-chinese-traditional/', '_blank');">📔Cambridge(C)</button>
+							<button class="btn" onclick="javascript:window.open('https://dictionary.cambridge.org/dictionary/english/', '_blank');">📔Cambridge(E)</button>
+							<button class="btn" onclick="javascript:window.open('https://www.oxfordlearnersdictionaries.com/', '_blank');">📓Oxford</button>
+							<button class="btn" onclick="javascript:window.open('https://humanum.arts.cuhk.edu.hk/Lexis/lexi-can/', '_blank');">📘粵音韻彙</button>
+							<button class="btn" onclick="javascript:window.open('http://humanum.arts.cuhk.edu.hk/Lexis/lexi-mf/', '_blank');">📕中文字典</button>
+							<button class="btn" onclick="javascript:window.open('https://translate.google.com.hk/?hl=en&tab=cT', '_blank');">📑谷歌翻譯</button>
+						</div>
+					</div>
+					<div class="dropdown">
+						<button class="dropbtn">🚪即時遊戲傳送門</button>
+						<div class="dropdown-content dropdown-menu-center">
+							<button class="btn" onclick="javascript:window.open('https://www.google.com/doodles', '_blank');">🚪Doodles</button>
+							<button class="btn" onclick="javascript:window.open('https://www.nitrome.com/html5-games/', '_blank');">🚪nitrome</button>
+							<button class="btn" onclick="javascript:window.open('https://www.shockwave.com/', '_blank');">🚪Shockwave</button>
+							<button class="btn" onclick="javascript:window.open('https://www.newgrounds.com/games', '_blank');">🚪Newgrounds</button>
+							<button class="btn" onclick="javascript:window.open('https://www.crazymonkeygames.com/', '_blank');">🚪CrazyMonkey</button>
+							<button class="btn" onclick="javascript:window.open('https://www.cartoonnetworkasia.com/games', '_blank');">🚪CartoonNet</button>
+							<button class="btn" onclick="javascript:window.open('https://www.quizzesme.com/', '_blank');">🚪Quizzesme</button>
+							<button class="btn" onclick="javascript:window.open('https://www.zazgames.com/', '_blank');">🚪Zaz Games</button>
+							<button class="btn" onclick="javascript:window.open('https://6games.eu/', '_blank');">🚪6games</button>
+							<button class="btn" onclick="javascript:window.open('https://subwaysurf.io/new-games', '_blank');">🚪Subwaysurf.io</button>
+							<button class="btn" onclick="javascript:window.open('https://kevin.games/', '_blank');">🚪Kevin Games</button>
+							<button class="btn" onclick="javascript:window.open('https://igroutka.ru/', '_blank');">🚪ИгроУтка</button>
+							<button class="btn" onclick="javascript:window.open('https://www.retrogames.cc/', '_blank');">🚪Retro Games</button>
+							<button class="btn" onclick="javascript:window.open('https://www.playretrogames.com/', '_blank');">🚪Play Retro</button>
+							<button class="btn" onclick="javascript:window.open('https://playclassic.games/', '_blank');">🚪Classic Games</button>
+							<button class="btn" onclick="javascript:window.open('https://www.letsplaygba.com/', '_blank');">🚪LP GBA</button>
+							<button class="btn" onclick="javascript:window.open('https://myemulator.online/', '_blank');">🚪GBA Emu</button>
+							<button class="btn" onclick="javascript:window.open('https://www.retrogames.cz/', '_blank');">🚪Retro Emu</button>
+							<button class="btn" onclick="javascript:window.open('https://archive.org/details/softwarelibrary_palm', '_blank');">🚪Palm Emu</button>
+							<button class="btn" onclick="javascript:window.open('https://archive.org/details/calculatordrawer', '_blank');">🚪各種計算機</button>
+						</div>
+					</div>
+					<button class="btn" style="width:100%; background-color: blue; color: #ffd103;">💠Windows</button>
+					<div class="dropdown">
+						<button class="dropbtn">💠Windows 工具下載</button>
+						<div class="dropdown-content dropdown-menu-center">
+							<button class="btn" onclick="javascript:window.open('https://chromeenterprise.google/browser/download/#windows-tab', '_blank');">🌐Chrome</button>
+							<button class="btn" onclick="javascript:window.open('https://chrome.google.com/webstore/category/extensions', '_blank');">📎Extensions</button>
+							<button class="btn" onclick="javascript:window.open('https://www.av-test.org/en/', '_blank');">🔰防毒排名</button>
+							<button class="btn" onclick="javascript:window.open('https://www.bitdefender.com/solutions/free.html', '_blank');">🛡Bitdefender</button>
+							<button class="btn" onclick="javascript:window.open('https://www.microsoft.com/zh-hk/store/', '_blank');">🛒Microsoft</button>
+							<button class="btn" onclick="javascript:window.open('https://www.ccleaner.com/zh-cn/ccleaner/download', '_blank');">🧹CCleaner</button>
+							<button class="btn" onclick="javascript:window.open('https://www.ccleaner.com/defraggler/download', '_blank');">🗜️Defraggler</button>
+							<button class="btn" onclick="javascript:window.open('https://www.ccleaner.com/zh-cn/recuva/download', '_blank');">⛑️Recuva</button>
+							<button class="btn" onclick="javascript:window.open('https://www.cpuid.com/softwares/cpu-z.html', '_blank');">ℹ️CPU-Z</button>
+							<button class="btn" onclick="javascript:window.open('https://www.ccleaner.com/zh-cn/speccy/download', '_blank');">ℹ️Speccy</button>
+							<button class="btn" onclick="javascript:window.open('https://www.ubackup.com/download.html', '_blank');">🎒AOMEI BU</button>
+							<button class="btn" onclick="javascript:window.open('https://www.diskpart.com/tw/download-home.html', '_blank');">🗂️AOMEI PA</button>
+							<button class="btn" onclick="javascript:window.open('https://www.7-zip.org/', '_blank');">🔒7-Zip</button>
+							<button class="btn" onclick="javascript:window.open('https://codecguide.com/download_kl.htm', '_blank');">📺K-Lite</button>
+							<button class="btn" onclick="javascript:window.open('https://www.videolan.org/vlc/', '_blank');">📺VLC</button>
+							<button class="btn" onclick="javascript:window.open('https://obsproject.com/', '_blank');">⏺️OBS</button>
+							<button class="btn" onclick="javascript:window.open('https://shotcut.org/download/', '_blank');">🎞️Shotcut</button>
+							<button class="btn" onclick="javascript:window.open('https://www.gimp.org/downloads/', '_blank');">✍️GIMP</button>
+							<button class="btn" onclick="javascript:window.open('https://www.irfanview.com/', '_blank');">🖼️IrfanView</button>
+							<button class="btn" onclick="javascript:window.open('https://www.audacityteam.org/', '_blank');">🎼Audacity</button>
+							<button class="btn" onclick="javascript:window.open('https://notepad-plus-plus.org/downloads/', '_blank');">🧬Notepad++</button>
+							<button class="btn" onclick="javascript:window.open('http://infrarecorder.org/?page_id=5', '_blank');">💽InfraRecorder</button>
+							<button class="btn" onclick="javascript:window.open('https://rufus.ie/zh_TW/', '_blank');">🔨Rufus</button>
+							<button class="btn" onclick="javascript:window.open('https://www.4kdownload.com/zh-tw/downloads/7', '_blank');">📲4K Download</button>
+							<button class="btn" onclick="javascript:window.open('https://www.pdfill.com/', '_blank');">📔PDFill</button>
+							<button class="btn" onclick="javascript:window.open('https://www.bulkrenameutility.co.uk/Download.php', '_blank');">🔠Bulk Rename</button>
+							<button class="btn" onclick="javascript:window.open('https://www.autohotkey.com/', '_blank');">⌨️AutoHotKey</button>
+							<button class="btn" onclick="javascript:window.open('https://www.mozilla.org/zh-TW/firefox/new/', '_blank');">🌐Firefox</button>
+							<button class="btn" onclick="javascript:window.open('https://www.opera.com/zh-cn', '_blank');">🌐Opera</button>
+							<button class="btn" onclick="javascript:window.open('https://www.microsoft.com/zh-tw/edge/download', '_blank');">🌐Edge</button>
+							<button class="btn" onclick="javascript:window.open('https://www.avast.com/index#pc', '_blank');">🛡Avast</button>
+							<button class="btn" onclick="javascript:window.open('https://www.avg.com/en-ww/homepage#pc', '_blank');">🛡AVG</button>
+							<button class="btn" onclick="javascript:window.open('https://www.avira.com/zh-tw', '_blank');">🛡Avira</button>
+							<button class="btn" onclick="javascript:window.open('https://www.microsoft.com/zh-tw/download/details.aspx?id=5201', '_blank');">🛡MSE</button>
+							<button class="btn" onclick="javascript:window.open('https://www.malwarebytes.com/', '_blank');">🛡Malwarebytes</button>
+							<button class="btn" onclick="javascript:window.open('https://www.malwarebytes.com/adwcleaner', '_blank');">🛡AdwCleaner</button>
+							<button class="btn" onclick="javascript:window.open('https://support.kaspersky.com/common/disinfection/5350', '_blank');">🛡TDSSKiller</button>
+							<button class="btn" onclick="javascript:window.open('https://www.bleepingcomputer.com/download/junkware-removal-tool/', '_blank');">🛡JRT</button>
+							<button class="btn" onclick="javascript:window.open('https://www.bleepingcomputer.com/download/rkill/', '_blank');">🛡RKill</button>
+							<button class="btn" onclick="javascript:window.open('https://www.fortinet.com/products/endpoint-security/forticlient', '_blank');">🔰FortiClient</button>
+							<button class="btn" onclick="javascript:window.open('https://clamwin.com/', '_blank');">🔰ClamWin</button>
+							<button class="btn" onclick="javascript:window.open('https://wincdemu.sysprogs.org/download/', '_blank');">💿WinCDEmu</button>
+							<button class="btn" onclick="javascript:window.open('https://www.gadwin.com/download/index.htm#PrintScreen', '_blank');">📸Print Screen</button>
+						</div>
+					</div>
+					<div class="dropdown">
+						<button class="dropbtn">💠Windows 遊戲下載</button>
+						<div class="dropdown-content dropdown-menu-center">
+							<button class="btn" onclick="javascript:window.open('https://www.microsoft.com/zh-hk/store/most-popular/games/pc', '_blank');">🛒Microsoft</button>
+							<button class="btn" onclick="javascript:window.open('https://sites.google.com/site/taiwanrpgplayer/home', '_blank');">🍻製作者酒館</button>
+							<button class="btn" onclick="javascript:window.open('https://www.re4hd.com/', '_blank');">🧟‍♂️生化危機4 HD</button>
+							<button class="btn" onclick="javascript:window.open('https://www.mediafire.com/download/39j2kzpgl578yrw/2000_%E7%B9%BD%E7%B4%9B%E5%B7%A5%E6%88%BF_%E4%B9%9D%E9%BE%8D%E9%AD%94%E6%B3%95%E9%99%A3.zip', '_blank');">🕯️九龍魔法陣</button>
+							<button class="btn" onclick="javascript:window.open('https://bunfungame.at-ninja.jp/', '_blank');">⭐繽紛貨倉</button>
+							<button class="btn" onclick="javascript:window.open('http://bunfun.at-ninja.jp/', '_blank');">⭐繽紛工房</button>
+						</div>
+					</div>
+					<div class="dropdown">
+						<button class="dropbtn">💠Windows 線上遊戲下載</button>
+						<div class="dropdown-content dropdown-menu-center">
+							<button class="btn" onclick="javascript:window.open('https://www.microsoft.com/zh-hk/store/most-popular/games/pc', '_blank');">🛒Microsoft</button>
+							<button class="btn" onclick="javascript:window.open('https://albiononline.com/download', '_blank');">⚔Albion Online</button>
+							<button class="btn" onclick="javascript:window.open('https://web3.mtr.com.hk/intro', '_blank');">🔷港鐵元宇宙</button>
+							<button class="btn" onclick="javascript:window.open('https://yahoo.digitalmktg.com.hk/metaverse/', '_blank');">🔷雅虎元宇宙</button>
+							<button class="btn" onclick="javascript:window.open('https://www.sandbox.game/en/experiences/pccw-hkt-futurera/384ce905-712e-4666-82e7-405483754ace/', '_blank');">🤡膠戰</button>
+						</div>
+					</div>
+					<div class="dropdown">
+						<button class="dropbtn">💠Windows 模擬器下載</button>
+						<div class="dropdown-content dropdown-menu-center">
+							<button class="btn" onclick="javascript:window.open('https://www.bluestacks.com/tw/index.html', '_blank');">🎮BlueStacks</button>
+							<button class="btn" onclick="javascript:window.open('https://tw.bignox.com/', '_blank');">🎮Nox</button>
+							<button class="btn" onclick="javascript:window.open('https://play.google.com/googleplaygames#section-overview', '_blank');">🎮Google Play</button>
+						</div>
+					</div>
+					<button class="btn" style="width:100%; background-color: #ff9933; color: white;">🛍️Android</button>
+					<div class="dropdown">
+						<button class="dropbtn">👾Android 工具下載</button>
+						<div class="dropdown-content dropdown-menu-center">
+							<button class="btn" onclick="javascript:window.open('https://play.google.com/store/apps/details?id=com.rsupport.mvagent', '_blank');">🛍️Mobizen</button>
+							<button class="btn" onclick="javascript:window.open('https://play.google.com/store/apps/details?id=com.rsupport.mobizen.sec', '_blank');">🛍️Mobizen(三星)</button>
+							<button class="btn" onclick="javascript:window.open('https://play.google.com/store/apps/details?id=com.rsupport.mobizen.lg', '_blank');">🛍️Mobizen(LG)</button>
+						</div>
+					</div>
+					<div class="dropdown">
+						<button class="dropbtn">👾Android 遊戲下載</button>
+						<div class="dropdown-content dropdown-menu-center">
+							<button class="btn" onclick="javascript:window.open('https://play.google.com/store/games', '_blank');">🛍️Google Play</button>
+							<button class="btn" onclick="javascript:window.open('https://game.xiaomi.com/', '_blank');">🛍️小米遊戲中心</button>
+							<button class="btn" onclick="javascript:window.open('https://appgallery.huawei.com/Featured', '_blank');">🛍️華為應用市場</button>
+							<button class="btn" onclick="javascript:window.open('https://game.xiaomi.com/game/62232113', '_blank');">🌍Minecraft</button>
+						</div>
+					</div>
+					<div class="dropdown">
+						<button class="dropbtn">👾Android 線上遊戲下載</button>
+						<div class="dropdown-content dropdown-menu-center">
+							<button class="btn" onclick="javascript:window.open('https://play.google.com/store/apps/details?id=com.albiononline', '_blank');">⚔Albion Online</button>
+						</div>
+					</div>
+					<div class="dropdown">
+						<button class="dropbtn">👾Android 模擬器下載</button>
+						<div class="dropdown-content dropdown-menu-center">
+							<button class="btn" onclick="javascript:window.open('https://play.google.com/store/apps/details?id=org.easyrpg.player', '_blank');">🎮EasyRPG</button>
+							<button class="btn" onclick="javascript:window.open('https://play.google.com/store/apps/details?id=com.fastemulator.gbafree', '_blank');">🎮MyBoy!Lite</button>
+							<button class="btn" onclick="javascript:window.open('https://play.google.com/store/apps/details?id=com.fastemulator.gbcfree', '_blank');">🎮MyOldBoy!Lite</button>
+							<button class="btn" onclick="javascript:window.open('https://play.google.com/store/apps/details?id=com.fastemulator.shaderpack', '_blank');">🎮Shaders</button>
+							<button class="btn" onclick="javascript:window.open('https://play.google.com/store/apps/details?id=org.citra.citra_emu', '_blank');">🎮Citra Emulator</button>
+							<button class="btn" onclick="javascript:window.open('https://play.google.com/store/apps/details?id=org.ppsspp.ppsspp', '_blank');">🎮PPSSPP</button>
+							<button class="btn" onclick="javascript:window.open('https://play.google.com/store/apps/details?id=com.swordfish.lemuroid', '_blank');">🎮Lemuroid</button>
+						</div>
+					</div>
+					<button class="btn" style="width:100%; background-color: white; color: black;">🍎Mac</button>
+					<div class="dropdown">
+						<button class="dropbtn">🍎Mac 工具下載</button>
+						<div class="dropdown-content dropdown-menu-center">
+							<button class="btn" onclick="javascript:window.open('https://support.apple.com/downloads/safari', '_blank');">🌐Safari</button>
+							<button class="btn" onclick="javascript:window.open('https://chromeenterprise.google/browser/download/#mac-tab', '_blank');">🌐Chrome</button>
+							<button class="btn" onclick="javascript:window.open('https://www.mozilla.org/en-US/firefox/mac/', '_blank');">🌐Firefox</button>
+							<button class="btn" onclick="javascript:window.open('https://www.opera.com/zh-cn', '_blank');">🌐Opera</button>
+							<button class="btn" onclick="javascript:window.open('https://www.microsoft.com/zh-tw/edge/download', '_blank');">🌐Edge</button>
+						</div>
+					</div>
+					<div class="dropdown">
+						<button class="dropbtn">🍎Mac 遊戲下載</button>
+						<div class="dropdown-content dropdown-menu-center">
+							<button class="btn" onclick="javascript:window.open('https://www.apple.com/app-store/', '_blank');">🍎App Store</button>
+						</div>
+					</div>
+					<div class="dropdown">
+						<button class="dropbtn">🍎Mac 線上遊戲下載</button>
+						<div class="dropdown-content dropdown-menu-center">
+							<button class="btn" onclick="javascript:window.open('https://www.apple.com/app-store/', '_blank');">🍎App Store</button>
+							<button class="btn" onclick="javascript:window.open('https://albiononline.com/download', '_blank');">⚔Albion Online</button>
+						</div>
+					</div>
+					<button class="btn" style="width:100%; background-color: #660066; color: white;">🐧Linux</button>
+					<div class="dropdown">
+						<button class="dropbtn">🐧Linux 工具下載</button>
+						<div class="dropdown-content dropdown-menu-center">
+							<button class="btn" onclick="javascript:window.open('https://www.google.com/intl/en_us/chrome/', '_blank');">🌐Chrome</button>
+							<button class="btn" onclick="javascript:window.open('https://www.mozilla.org/en-US/firefox/linux/', '_blank');">🌐Firefox</button>
+							<button class="btn" onclick="javascript:window.open('https://www.opera.com/zh-cn', '_blank');">🌐Opera</button>
+							<button class="btn" onclick="javascript:window.open('https://www.microsoft.com/zh-tw/edge/download', '_blank');">🌐Edge</button>
+							<button class="btn" onclick="javascript:window.open('https://www.winehq.org/', '_blank');">🍷Wine</button>
+							<button class="btn" onclick="javascript:window.open('https://www.linuxfordevices.com/tutorials/ubuntu/reinstall-software-center', '_blank');">🛒Ubuntu Store</button>
+						</div>
+					</div>
+					<div class="dropdown">
+						<button class="dropbtn">🐧Linux 線上遊戲下載</button>
+						<div class="dropdown-content dropdown-menu-center">
+							<button class="btn" onclick="javascript:window.open('https://www.linuxfordevices.com/tutorials/ubuntu/reinstall-software-center', '_blank');">🛒Ubuntu Store</button>
+							<button class="btn" onclick="javascript:window.open('https://albiononline.com/download', '_blank');">⚔Albion Online</button>
+						</div>
+					</div>
+					<button class="dropbtn" style="width:100%; background-color: red; color: #ffd103;">🗃篩選器</button>
+					<button class="btn active" onclick="filterSelection('all')">💯全部</button>
+					<div class="dropdown">
+						<button class="btn dropbtn" onmouseover="this.style.color='orange';" onmouseout="this.style.color='#ffd103';" onclick="filterSelection('music')">🎵音樂</button>
+						<div class="dropdown-content dropdown-menu-center">
+							<button class="btn" onclick="filterSelection('music')">🎧純音樂</button>
+						</div>
+					</div>
+					<div class="dropdown">
+						<button class="btn dropbtn" onmouseover="this.style.color='orange';" onmouseout="this.style.color='#ffd103';" onclick="filterSelection('game ')">🎮即時遊戲</button>
+						<div class="dropdown-content dropdown-menu-center">
+							<button class="btn" onclick="filterSelection('game ')">🎮遊戲角落</button>
+							<button class="btn" onclick="filterSelection('mobile computer')">📱💻雙平台</button>
+							<button class="btn" onclick="filterSelection('mobile')">📱手機遊戲</button>
+							<button class="btn" onclick="filterSelection('computer')">💻電腦遊戲</button>
+							<button class="btn" onclick="filterSelection('multiplayer')">👥多人遊戲</button>
+							<button class="btn" onclick="filterSelection('single player')">👤單機遊戲</button>
+						</div>
+					</div>
+					<div class="dropdown">
+						<button class="btn dropbtn" onmouseover="this.style.color='orange';" onmouseout="this.style.color='#ffd103';" onclick="filterSelection('rip')">🗃遊戲分類</button>
+						<div class="dropdown-content dropdown-menu-center">
+							<button class="btn" onclick="filterSelection('turn ')">♻️回合制</button>
+							<button class="btn" onclick="filterSelection('rts')">⌛即時策略</button>
+							<button class="btn" onclick="filterSelection('action')">🏃‍動作類</button>
+							<button class="btn" onclick="filterSelection('shooting')">🔫射擊類</button>
+							<button class="btn" onclick="filterSelection('racing')">🚗競速類</button>
+							<button class="btn" onclick="filterSelection('match')">💥消除類</button>
+							<button class="btn" onclick="filterSelection('tycoon')">💵經營類</button>
+							<button class="btn" onclick="filterSelection('sport')">🏊運動類</button>
+							<button class="btn" onclick="filterSelection('gamble')">💸賭博類</button>
+							<button class="btn" onclick="filterSelection('horror')">👻恐怖類</button>
+							<button class="btn" onclick="filterSelection('gb ')">📱Game Boy</button>
+							<button class="btn" onclick="filterSelection('gbc ')">　📱GBC　</button>
+							<button class="btn" onclick="filterSelection('gba ')">　📱GBA　</button>
+							<button class="btn" onclick="filterSelection('ngp ')">　📱NGP　</button>
+							<button class="btn" onclick="filterSelection('ngpc ')">　📱NGPC　</button>
+							<button class="btn" onclick="filterSelection('nds ')">📱Nintendo DS</button>
+							<button class="btn" onclick="filterSelection('ws ')">📱WonderSwan</button>
+							<button class="btn" onclick="filterSelection('wsc ')">📱WSC</button>
+							<button class="btn" onclick="filterSelection(' nes ')">📱紅白機</button>
+							<button class="btn" onclick="filterSelection('snes ')">📱超級任天堂</button>
+							<button class="btn" onclick="filterSelection('n64 ')">📱任天堂64</button>
+							<button class="btn" onclick="filterSelection('arcade ')">📱街機</button>
+							<button class="btn" onclick="filterSelection('playstation')">📱Playstation</button>
+							<button class="btn" onclick="filterSelection('rip')">☠️R.I.P.</button>
+						</div>
+					</div>
+					<div class="dropdown">
+						<button class="btn dropbtn" onmouseover="this.style.color='orange';" onmouseout="this.style.color='#ffd103';" onclick="filterSelection('hk')">💬語言</button>
+						<div class="dropdown-content dropdown-menu-center">
+							<button class="btn" onclick="filterSelection('hk')">💬粵語</button>
+							<button class="btn" onclick="filterSelection('pth')">💬國語</button>
+							<button class="btn" onclick="filterSelection('eng')">💬英文</button>
+							<button class="btn" onclick="filterSelection('jp')">💬日語</button>
+						</div>
+					</div>
+					<a class="weatherwidget-io" href="https://forecast7.com/zh-tw/22d40114d11/hong-kong/" data-label_1="香港" data-label_2="天氣" data-font="微軟正黑體 (Microsoft JhengHei)" data-theme="original" >香港 天氣</a>
+					<canvas id="canvas" width="400" height="400"></canvas>
+				</div>
+			</div>
+			<div id="main">
+			  <button class="openbtn" onclick="openNav()">☰</button>
+			</div>
+			<div class="w3-container" style="margin-top:10px">
+				<div align='middle'>
+					<a href="index.html" target="_parent"><img src="pics/diczon_cafe.png" alt="diczon_cafe" width="80%" style="max-width:800px;"></a>
+					<input type="text" id="myInput" onkeyup="searchBar()" placeholder="🔍音樂/即時遊戲/番劇" style="width:100%">
+				</div>
+				<div class="row" align='middle'>
+					<div class="col-4 col-sm-3 col-md-3 col-lg-2 col-xl-2" style="text-align: center;">
+						<button class="btn dropbtn" style="background-color: green; width: 100%;" onmouseover="this.style.color='#cc9900';" onmouseout="this.style.color='#ffd103';" onclick="filterSelection('all')">💯全部</button>
+					</div>
+					<div class="col-4 col-sm-3 col-md-3 col-lg-2 col-xl-2" style="text-align: center;">
+						<button class="btn dropbtn" style="background-color: #ffd103; color: black; width: 100%;" onclick="filterSelection('music')" onmouseover="this.style.color='grey';" onmouseout="this.style.color='black';">🎧音樂</button>
+					</div>
+					<div class="dropdown col-4 col-sm-3 col-md-3 col-lg-2 col-xl-2">
+						<button class="btn dropbtn" style="text-align: center; background-color: red; width: 100%;" onmouseover="this.style.color='#ff9900';" onmouseout="this.style.color='#ffd103';" onclick="filterSelection('game ')">🎮遊戲</button>
+						<div class="dropdown-content dropdown-menu-center">
+							<button class="btn" onclick="filterSelection('game ')">🎮遊戲角落</button>
+							<button class="btn" onclick="filterSelection('mobile computer')">📱💻雙平台</button>
+							<button class="btn" onclick="filterSelection('mobile')">📱手機遊戲</button>
+							<button class="btn" onclick="filterSelection('computer')">💻電腦遊戲</button>
+							<button class="btn" onclick="filterSelection('multiplayer')">👥多人遊戲</button>
+							<button class="btn" onclick="filterSelection('single player')">👤單機遊戲</button>
+							<button class="btn" onclick="filterSelection('turn ')">♻️回合制</button>
+							<button class="btn" onclick="filterSelection('rts')">⌛即時策略</button>
+							<button class="btn" onclick="filterSelection('action')">🏃‍動作類</button>
+							<button class="btn" onclick="filterSelection('shooting')">🔫射擊類</button>
+							<button class="btn" onclick="filterSelection('racing')">🚗競速類</button>
+							<button class="btn" onclick="filterSelection('match')">💥消除類</button>
+							<button class="btn" onclick="filterSelection('tycoon')">💵經營類</button>
+							<button class="btn" onclick="filterSelection('sport')">🏊運動類</button>
+							<button class="btn" onclick="filterSelection('gamble')">💸賭博類</button>
+							<button class="btn" onclick="filterSelection('horror')">👻恐怖類</button>
+							<button class="btn" onclick="filterSelection('gb ')">📱Game Boy</button>
+							<button class="btn" onclick="filterSelection('gbc ')">　📱GBC　</button>
+							<button class="btn" onclick="filterSelection('gba ')">　📱GBA　</button>
+							<button class="btn" onclick="filterSelection('ngp ')">　📱NGP　</button>
+							<button class="btn" onclick="filterSelection('ngpc ')">　📱NGPC　</button>
+							<button class="btn" onclick="filterSelection('nds ')">📱Nintendo DS</button>
+							<button class="btn" onclick="filterSelection('ws ')">📱WonderSwan</button>
+							<button class="btn" onclick="filterSelection('wsc ')">📱WSC</button>
+							<button class="btn" onclick="filterSelection(' nes ')">📱紅白機</button>
+							<button class="btn" onclick="filterSelection('snes ')">📱超級任天堂</button>
+							<button class="btn" onclick="filterSelection('n64 ')">📱任天堂64</button>
+							<button class="btn" onclick="filterSelection('arcade ')">📱街機</button>
+							<button class="btn" onclick="filterSelection('playstation')">📱Playstation</button>
+							<button class="btn" onclick="filterSelection('rip')">☠️R.I.P.</button>
+						</div>
+					</div>
+				</div>
+				<!--
+				<div class="alert success" style="margin-top:5px">
+					<span class="closebtn">&times;</span>
+					<strong>
+						2023-05-05 更新︰<br>
+						<a href="#_Animation" style="text-decoration:none;" target="_parent">《🎨 》</a><br>
+						更新︰<br>
+						<a href="#" style="text-decoration:none;" target="_parent">《🎧 》</a><br>
+						官方收起︰<br>
+						<a href="#" style="text-decoration:none;" target="_parent">《🎨 》</a><br>
+					</strong>
+				</div>-->
+				<!--info warning success danger 新增 更新 🎧🎤🔨🎮🕹️🎁🎨🎬🎥🧠📰🧢👒<img class="w3-circle" src="pics/diczon.jpg" style="width:25px">-->
+				<hr>
+				<!--<div style="display:none;" id="notShowDiv" class="animate-bottom">-->
+				<div id="ost_tb">
+					<div class="row" id="mySearch" align='middle'>
+						<div w3-repeat="ost" class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 filterDiv {{filterDiv}}" align="left">
+							<a href="#{{Anchor}}" style="text-decoration:none;" target="_parent"><font class="anchor" id="{{Anchor}}">{{Icon}} {{Trd_Name}}</font></a><br>
+								<div style="position: relative; padding-bottom: 56.25%; height: 0;">
+									<div style="display: none;"><p hidden>{{Trd_Name}} {{Chi_Name}} {{Eng_Name}} {{Jap_Name}} {{Kor_Name}} {{filterDiv}}</p></div>
+									<iframe
+										style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
+										srcdoc="<style>*{padding:0;margin:0;overflow:hidden}html,body{height:100%}img,span{position:absolute;width:100%;top:0;bottom:0;margin:auto}span{height:1.5em;text-align:center;font:48px/1.5 sans-serif;color:white;text-shadow:0 0 0.5em black}</style>
+										<a href={{Link}}>
+										<img src={{Image}} loading='lazy' /><span>{{Icon2}}</span></a>"
+										frameborder="0" allow="accelerometer; autoplay=1; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+									</iframe>
+								</div>
+							<hr>
+						</div>
+					</div>
+				</div>
+				<!--</div>-->
+				<br><br>
+				<!--Play List-->
+				<script src="w3.js"></script>
+				<script>
+				const playList= {"ost":[
+				{"Trd_Name":"寶可夢 GO/寵物小精靈","Chi_Name":"宝可梦 GO/口袋妖怪","Eng_Name":"Pokemon GO/Pokémon/Pocket Monsters","Jap_Name":"ポケモンGO","Kor_Name":"포켓몬 고","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Pokemon_Go_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssh6IMpjlRcV-Y3P0wRRkTeC","Image":"https://img.youtube.com/vi/tIDuMsqZnUE/hqdefault.jpg"},
+				{"Trd_Name":"寶可夢 紅/綠/藍/黃/比卡超/寵物小精靈","Chi_Name":"宝可梦 红/绿/蓝/黄/皮卡丘/口袋妖怪","Eng_Name":"Pokemon Red/Green/Blue/Yellow/Pokémon/Pocket Monsters","Jap_Name":"ポケットモンスター 赤/緑/青/ピカチュウ","Kor_Name":"포켓몬스터 레드·그린·피카추","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Pokemon_Red_Green_Blue_Yellow_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssjbNVPIeSFKLiIyftotxMJZ","Image":"https://img.youtube.com/vi/YyDzZAy3ZSA/hqdefault.jpg"},
+				{"Trd_Name":"數碼寶貝 Linkz/數碼暴龍","Chi_Name":"数码宝贝 Linkz","Eng_Name":"Digimon Linkz","Jap_Name":"デジモンリンクス","Kor_Name":"디지몬 링크즈","filterDiv":"music 音樂 音乐 音楽 음악 rip","Icon":"🎧 ","Icon2":"▶","Anchor":"Digimon_Linkz_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exsshk1b8XACRBTmEHRygFESbG","Image":"https://img.youtube.com/vi/liB3X2F6VsY/hqdefault.jpg"},
+				{"Trd_Name":"數碼寶貝ReArise/數碼暴龍","Chi_Name":"数码宝贝ReArise","Eng_Name":"Digimon ReArise","Jap_Name":"デジモンリアライズ","Kor_Name":"디지몬 리얼라이즈","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Digimon_ReArise_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssgoMiroCCCZEFbIa7XFQCE6","Image":"https://img.youtube.com/vi/4nJv4EFJGts/hqdefault.jpg"},
+				{"Trd_Name":"魔物獵人物語","Chi_Name":"魔物猎人物语","Eng_Name":"Monster Hunter Stories/MHST","Jap_Name":"モンスターハンター ストーリーズ","Kor_Name":"몬스터 헌터 스토리즈","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Monster_Hunter_Stories_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssj4ITJjpIjjuGmbJYrRN9xK","Image":"https://img.youtube.com/vi/lfFA2o0LmCY/hqdefault.jpg"},
+				{"Trd_Name":"Miscrits: World Of Creatures","Chi_Name":"Miscrits：动物世界","Eng_Name":"Miscrits: World Of Creatures/Sunfall Kingdom/Volcano Island","Jap_Name":"Miscrits: World of Creatures","Kor_Name":"Miscrits: World of Creatures","filterDiv":"music 音樂 音乐 音楽 음악 rip","Icon":"🎧 ","Icon2":"▶","Anchor":"Miscrits_World_Of_Creatures_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssg0JOt_2Iv4A1ZahXqOpUvt","Image":"https://img.youtube.com/vi/p6VCAjlNKDs/hqdefault.jpg"},
+				{"Trd_Name":"Monster Galaxy: The Zodiac Islands/Exile","Chi_Name":"Monster Galaxy: The Zodiac Islands/Exile","Eng_Name":"Monster Galaxy: The Zodiac Islands/Exile","Jap_Name":"Monster Galaxy: The Zodiac Islands/Exile","Kor_Name":"Monster Galaxy: The Zodiac Islands/Exile","filterDiv":"music 音樂 音乐 音楽 음악 rip","Icon":"🎧 ","Icon2":"▶","Anchor":"Monster_Galaxy_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssg-_dqIn7WK-mFRx53D2K3J","Image":"https://img.youtube.com/vi/Y8KeqkMrztc/hqdefault.jpg"},
+				{"Trd_Name":"夢幻怪獸","Chi_Name":"梦幻怪兽","Eng_Name":"Neo Monsters","Jap_Name":"ネオモンスターズ","Kor_Name":"네오 몬스터","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Neo_Monsters_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exsshM7WUyj6t93PMgRLLtzfJB","Image":"https://img.youtube.com/vi/E5T9X9TCOxk/hqdefault.jpg"},
+				{"Trd_Name":"Cybermon","Chi_Name":"Cybermon","Eng_Name":"Cybermon","Jap_Name":"Cybermon","Kor_Name":"Cybermon","filterDiv":"music 音樂 音乐 音楽 음악 rip","Icon":"🎧 ","Icon2":"▶","Anchor":"Cybermon_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssh1yNR6CK-nNqMTkT6D7lPB","Image":"https://img.youtube.com/vi/TsJTYotOvCY/hqdefault.jpg"},
+				{"Trd_Name":"Bulu Monster","Chi_Name":"Bulu Monster","Eng_Name":"Bulu Monster","Jap_Name":"Bulu Monster","Kor_Name":"Bulu Monster","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Bulu_Monster_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssjyymzIuWjzqs6-GzB-HsBU","Image":"https://img.youtube.com/vi/BeoQJ4Wlk_o/hqdefault.jpg"},
+				{"Trd_Name":"魔靈召喚: 天空之役","Chi_Name":"魔灵召唤: 天空之役","Eng_Name":"Summoners War","Jap_Name":"サマナーズウォー: Sky Arena","Kor_Name":"서머너즈 워: 천공의 아레나","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Summoners_War_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssjGGXC-gmbCa6RTLPpkthXw","Image":"https://img.youtube.com/vi/D2sstaeFKlg/hqdefault.jpg"},
+				{"Trd_Name":"怪物傳說","Chi_Name":"怪物传说","Eng_Name":"Monster Legends","Jap_Name":"モンスターの伝説","Kor_Name":"몬스터 레전드","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Monster_Legends_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssjIU2PusC64kREXHvF69f5E","Image":"https://img.youtube.com/vi/hLA-mQXD0qo/hqdefault.jpg"},
+				{"Trd_Name":"一拳超人：最強之男","Chi_Name":"一拳超人：最强之男","Eng_Name":"One Punch Man: The Strongest Man","Jap_Name":"ワンパンマン 最強の男","Kor_Name":"원펀맨: 최강의 남자","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"One_Punch_Man_Strongest_Man_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssgxDUmFEGQCPH2pZroMuFlZ","Image":"https://img.youtube.com/vi/UpvcZ-JuDoE/hqdefault.jpg"},
+				{"Trd_Name":"一拳超人 無名英雄","Chi_Name":"一拳超人 无名英雄","Eng_Name":"One-Punch Man: A Hero Nobody Knows","Jap_Name":"ワンパンマン：誰も知らないヒーロー-レビュー","Kor_Name":"원펀맨 어 히어로 노바디 노우즈","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"One_Punch_Man_A_Hero_Nobody_Knows_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exsshCB2eshLU6M_Sd1it7-iAb","Image":"https://img.youtube.com/vi/0Wku8TFv5Z8/hqdefault.jpg"},
+				{"Trd_Name":"死亡愛麗絲","Chi_Name":"死亡爱丽丝","Eng_Name":"SINoALICE","Jap_Name":"-シノアリス-","Kor_Name":"시노앨리스","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"SINoALICE_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssh8n3I9H3Gjraw7DufIAX-A","Image":"https://img.youtube.com/vi/DjFxNqP4fe0/hqdefault.jpg"},
+				{"Trd_Name":"怪物彈珠","Chi_Name":"怪物弹珠","Eng_Name":"Monster Strike","Jap_Name":"モンスターストライク","Kor_Name":"몬스터 스트라이크","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Monster_Strike_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssjoqMTPTuf5gLmTRIphnVz6","Image":"https://img.youtube.com/vi/rgcyMfqiCC4/hqdefault.jpg"},
+				{"Trd_Name":"古墓奇兵Go/蘿拉Go","Chi_Name":"劳拉Go/劳拉快跑","Eng_Name":"Lara Croft GO","Jap_Name":"ララ・クロフトゴー","Kor_Name":"라라 크로프트 GO","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Lara_Croft_GO_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssg9OxwzdQJWtu5s4JKsFlVB","Image":"https://img.youtube.com/vi/LE3JqrNP2bg/hqdefault.jpg"},
+				{"Trd_Name":"駭客入侵Go","Chi_Name":"杀出重围Go","Eng_Name":"Deus Ex GO","Jap_Name":"デウスエクスゴー","Kor_Name":"데이어스 엑스 GO","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Deus_Ex_GO_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exsshCnsDxRLthKeqJ4UefWDB0","Image":"https://img.youtube.com/vi/sdkaUqbJwOA/hqdefault.jpg"},
+				{"Trd_Name":"刺客任務Go","Chi_Name":"杀手Go","Eng_Name":"Hitman GO","Jap_Name":"ヒットマンゴー","Kor_Name":"히트맨 GO","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Hitman_GO_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssg8Xss5CBnMB6uxPxASY6BD","Image":"https://img.youtube.com/vi/LYD3ocMlRKA/hqdefault.jpg"},
+				{"Trd_Name":"火焰之紋章 英雄/聖火降魔錄 英雄雲集","Chi_Name":"火焰之纹章 英雄","Eng_Name":"Fire Emblem Heroes","Jap_Name":"ファイアーエムブレム ヒーローズ","Kor_Name":"파이어 엠블렘 히어로즈","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Fire_Emblem_Heroes_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssiyfixAKVZTT6H2kA4r0nbA","Image":"https://img.youtube.com/vi/ORHmnlvY0dc/hqdefault.jpg"},
+				{"Trd_Name":"聖火降魔錄 烈火之劍/火焰之紋章 烈火之劍","Chi_Name":"火焰之纹章 烈火之剑","Eng_Name":"Fire Emblem 7","Jap_Name":"ファイアーエムブレム 烈火の剣","Kor_Name":"파이어 엠블렘 열화의 검","filterDiv":"music 音樂 音乐 音楽 음악 rip","Icon":"🎧 ","Icon2":"▶","Anchor":"Fire_Emblem_7_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssj92VjPyahUlOxwfCe9ZD8n","Image":"https://img.youtube.com/vi/DWh4GbMddNE/hqdefault.jpg"},
+				{"Trd_Name":"夢幻模擬戰/蘭古利薩","Chi_Name":"梦幻模拟战/兰古利萨","Eng_Name":"Langrisser","Jap_Name":"ラングリッサー","Kor_Name":"랑그릿사","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Langrisser_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssgzsG8ECXE28U-5kZY4DbUu","Image":"https://img.youtube.com/vi/fRrR8uk6Akk/hqdefault.jpg"},
+				{"Trd_Name":"夢幻模擬戰/蘭古利薩 - Part 2","Chi_Name":"梦幻模拟战/兰古利萨 - Part 2","Eng_Name":"Langrisser - Part 2","Jap_Name":"ラングリッサー - Part 2","Kor_Name":"랑그릿사 - Part 2","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Langrisser_Part2_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssgY8nAWyXf6THgLFs9faYz6","Image":"https://img.youtube.com/vi/6_muu7hPBZU/hqdefault.jpg"},
+				{"Trd_Name":"夢幻模擬戰 Mobile/蘭古利薩","Chi_Name":"梦幻模拟战/兰古利萨","Eng_Name":"Langrisser Mobile","Jap_Name":"ラングリッサー モバイル","Kor_Name":"랑그릿사","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Langrisser_Mobile_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssilWFkdOZ2Tye9DOFe0FI0X","Image":"https://img.youtube.com/vi/E1TUR8m5vac/hqdefault.jpg"},
+				{"Trd_Name":"夢幻模擬戰 II 重製版/蘭古利薩","Chi_Name":"梦幻模拟战 II 重制版/兰古利萨","Eng_Name":"Langrisser II Remake","Jap_Name":"ラングリッサーⅠⅠリメイク","Kor_Name":"랑그릿사 II","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Langrisser_II_Remake_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssiLsJe5N7oEtYjQWM8Ci-pJ","Image":"https://img.youtube.com/vi/PzNkmOV-wQQ/hqdefault.jpg"},
+				{"Trd_Name":"夢幻模擬戰 II 重製版/蘭古利薩 - Ver.2","Chi_Name":"梦幻模拟战 II 重制版/兰古利萨 - Ver.2","Eng_Name":"Langrisser II Remake - Ver.2","Jap_Name":"ラングリッサーⅠⅠリメイク - Ver.2","Kor_Name":"랑그릿사 II - Ver.2","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Langrisser_II_Remake_Ver_2_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exsshf8mSoQpJvEkW8N__bgsod","Image":"https://img.youtube.com/vi/rjtpgOMDHyE/hqdefault.jpg"},
+				{"Trd_Name":"夢幻模擬戰 I 重製版/蘭古利薩","Chi_Name":"梦幻模拟战 I 重制版/兰古利萨","Eng_Name":"Langrisser I Remake","Jap_Name":"ラングリッサーⅠリメイク","Kor_Name":"랑그릿사 I","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Langrisser_I_Remake_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssgFwL3iJQoQ0u6lAR-tHZge","Image":"https://img.youtube.com/vi/TcIqH8MQ-vQ/hqdefault.jpg"},
+				{"Trd_Name":"夢幻模擬戰 III/蘭古利薩","Chi_Name":"梦幻模拟战 III/兰古利萨","Eng_Name":"Langrisser III","Jap_Name":"ラングリッサーIII","Kor_Name":"랑그릿사 III","filterDiv":"music 音樂 音乐 音楽 음악 rip","Icon":"🎧 ","Icon2":"▶","Anchor":"Langrisser_III_OST","Link":"https://www.youtube.com/embed/videoseries?list=PL_BhbJAAueZSAPHRjp4ljvEsJ1SSwDEll","Image":"https://img.youtube.com/vi/iTGUTMnDx40/hqdefault.jpg"},
+				{"Trd_Name":"夢幻模擬戰II/蘭古利薩 (Mega Drive/Sega Genesis)","Chi_Name":"梦幻模拟战 II/兰古利萨 (Mega Drive/Sega Genesis)","Eng_Name":"Langrisser II (Mega Drive/Sega Genesis)","Jap_Name":"ラングリッサーII (Mega Drive/Sega Genesis)","Kor_Name":"랑그릿사 II (Mega Drive/Sega Genesis)","filterDiv":"music 音樂 音乐 音楽 음악 rip","Icon":"🎧 ","Icon2":"▶","Anchor":"Langrisser_II_Mega_Drive_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssjxOTHwgR8eJOU-HNB3siSF","Image":"https://img.youtube.com/vi/Xn4Qx4k4d6o/hqdefault.jpg"},
+				{"Trd_Name":"夢幻模擬戰/蘭古利薩 (Mega Drive/Sega Genesis)","Chi_Name":"梦幻模拟战/兰古利萨 (Mega Drive/Sega Genesis)","Eng_Name":"Langrisser/Warsong (Mega Drive/Sega Genesis)","Jap_Name":"ラングリッサー (Mega Drive/Sega Genesis)","Kor_Name":"랑그릿사 (Mega Drive/Sega Genesis)","filterDiv":"music 音樂 音乐 音楽 음악 rip","Icon":"🎧 ","Icon2":"▶","Anchor":"Langrisser_Warsong_Mega_Drive_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssih9g6FDKB6r_Bd1P-5pQEV","Image":"https://img.youtube.com/vi/eiOknks1scs/hqdefault.jpg"},
+				{"Trd_Name":"夢幻模擬戰/蘭古利薩 (Sega Saturn)","Chi_Name":"梦幻模拟战/兰古利萨 (Sega Saturn)","Eng_Name":"Langrisser/Warsong (Sega Saturn)","Jap_Name":"ラングリッサー (Sega Saturn)","Kor_Name":"랑그릿사 (Sega Saturn)","filterDiv":"music 音樂 音乐 音楽 음악 rip","Icon":"🎧 ","Icon2":"▶","Anchor":"Langrisser_Warsong_Sega_Saturn_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssiv-ae9Myq3e0Fmeh_WUUlg","Image":"https://img.youtube.com/vi/eCKgn-a4Htk/hqdefault.jpg"},
+				{"Trd_Name":"夢幻模擬戰/蘭古利薩 (SNES/SFC)","Chi_Name":"梦幻模拟战/兰古利萨 (SNES/SFC)","Eng_Name":"Der Langrisser (SNES/SFC)","Jap_Name":"デア ラングリッサー (SNES/SFC)","Kor_Name":"랑그릿사 (SNES/SFC)","filterDiv":"music 音樂 音乐 音楽 음악 rip","Icon":"🎧 ","Icon2":"▶","Anchor":"Der_Langrisser_SFC_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssiX_VrP7mZsDzS1n1XhZdSp","Image":"https://img.youtube.com/vi/JNj8_iaY-Xo/hqdefault.jpg"},
+				{"Trd_Name":"超級機器人大戰/機戰","Chi_Name":"超级机器人大战/机战","Eng_Name":"Super Robot Wars/Taisen/SRW","Jap_Name":"スーパーロボット大戦","Kor_Name":"슈퍼로봇대전","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Super_Robot_Wars_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssgiVX3m6aM_lHy6tDGtyMnv","Image":"https://img.youtube.com/vi/G9xzhyp431c/hqdefault.jpg"},
+				{"Trd_Name":"超級機器人大戰30/機戰30","Chi_Name":"超级机器人大战30/机战30","Eng_Name":"Super Robot Wars 30/Taisen/SRW30","Jap_Name":"スーパーロボット大戦30","Kor_Name":"슈퍼로봇대전 30","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Super_Robot_Wars_30_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssg6D35oE4qpqO7R8SpYvBbG","Image":"https://img.youtube.com/vi/lKXOK1Di0lM/hqdefault.jpg"},
+				{"Trd_Name":"超級機械人大戰V/機戰V","Chi_Name":"超级机器人大战V/机战V","Eng_Name":"Super Robot Wars V/Taisen/SRWV","Jap_Name":"スーパーロボット大戦V","Kor_Name":"슈퍼로봇대전 V","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Super_Robot_Wars_V_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssjV9FbX15ZiLph0Lrgpnu_h","Image":"https://img.youtube.com/vi/tNEa3C-SkqM/hqdefault.jpg"},
+				{"Trd_Name":"超級機器人大戰T/機戰T","Chi_Name":"超级机器人大战T/机战T","Eng_Name":"Super Robot Wars T/Taisen/SRWT","Jap_Name":"スーパーロボット大戦T","Kor_Name":"슈퍼로봇대전 T","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Super_Robot_Wars_T_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssgdflRzNAGD3iP11vbNZSIQ","Image":"https://img.youtube.com/vi/tXSH26lYcN4/hqdefault.jpg"},
+				{"Trd_Name":"超級機器人大戰X/機戰X","Chi_Name":"超级机器人大战X/机战X","Eng_Name":"Super Robot Wars X/Taisen/SRWX","Jap_Name":"スーパーロボット大戦X","Kor_Name":"슈퍼로봇대전 X","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Super_Robot_Wars_X_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssjS41f6nIAKLPOfSm9UalMm","Image":"https://img.youtube.com/vi/ryhYZO7DYmo/hqdefault.jpg"},
+				{"Trd_Name":"超級機器人大戰ORIGINAL GENERATION/機戰OG","Chi_Name":"超级机器人大战ORIGINAL GENERATION/机战OG","Eng_Name":"Super Robot Wars Original Generation/Taisen/SRWOG","Jap_Name":"スーパーロボット大戦ORIGINAL GENERATION","Kor_Name":"슈퍼로봇대전 OG","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Super_Robot_Wars_OG_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exsshJWpnDF2PtR4OnA9IaoZ13","Image":"https://img.youtube.com/vi/RU7tgpfFPQk/hqdefault.jpg"},
+				{"Trd_Name":"超級機械人大戰OG THE MOON DWELLERS/機戰OG","Chi_Name":"超级机械人大战OG THE MOON DWELLERS/机战OG","Eng_Name":"Super Robot Wars OG The Moon Dwellers/Taisen/SRWOG","Jap_Name":"スーパーロボット大戦OG ムーン・デュエラーズ","Kor_Name":"슈퍼로봇대전 OG THE MOON DWELLERS","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Super_Robot_Wars_OG_The_Moon_Dwellers_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exsshd8FZZODZtNo0lNHpmEIFR","Image":"https://img.youtube.com/vi/nFvaUVUd2cA/hqdefault.jpg"},
+				{"Trd_Name":"超級機械人大戰Z/機戰Z","Chi_Name":"超级机器人大战Z/机战Z","Eng_Name":"Super Robot Wars Z/Taisen/SRWZ","Jap_Name":"スーパーロボット大戦Z","Kor_Name":"슈퍼로봇대전 Z","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Super_Robot_Wars_Z_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exsshPrXeCz8Y2lg1xwbEhofaX","Image":"https://img.youtube.com/vi/-m9pOeq_is4/hqdefault.jpg"},
+				{"Trd_Name":"超級機器人大戰F/機戰F","Chi_Name":"超级机器人大战F/机战F","Eng_Name":"Super Robot Wars F/Taisen/SRWF","Jap_Name":"スーパーロボット大戦F","Kor_Name":"슈퍼로봇대전 F","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Super_Robot_Wars_F_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exsshgJY-k56Y6q9K1xLdVm-s9","Image":"https://img.youtube.com/vi/fyC7OWlyCZ4/hqdefault.jpg"},
+				{"Trd_Name":"超級機器人大戰Operation Extend/機戰OE","Chi_Name":"超级机器人大战Operation Extend/机战OE","Eng_Name":"Super Robot Wars Operation Extend/Taisen/SRWOE","Jap_Name":"スーパーロボット大戦Operation Extend","Kor_Name":"슈퍼로봇대전 Operation Extend","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Super_Robot_Wars_Operation_Extend_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssj9hLCX6rbvYBaeV-Xuf6V0","Image":"https://img.youtube.com/vi/kvH6UIbhNVU/hqdefault.jpg"},
+				{"Trd_Name":"超級機器人大戰DD/機戰DD","Chi_Name":"超级机器人大战DD/机战DD","Eng_Name":"Super Robot Wars DD/Taisen/SRWDD","Jap_Name":"スーパーロボット大戦DD","Kor_Name":"슈퍼로봇대전 DD","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Super_Robot_Wars_DD_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssgPlB5ymREhXuF8yIfU-L8V","Image":"https://img.youtube.com/vi/Tg06Ag4vuTc/hqdefault.jpg"},
+				{"Trd_Name":"超級機器人大戰X-Ω/機戰X-Ω","Chi_Name":"超级机器人大战X-Ω/机战X-Ω","Eng_Name":"Super Robot Wars X-Ω/Taisen/SRWX-Ω/Cross Omega","Jap_Name":"スーパーロボット大戦X-Ω","Kor_Name":"슈퍼로봇대전 X-Ω","filterDiv":"music 音樂 音乐 音楽 음악 rip","Icon":"🎧 ","Icon2":"▶","Anchor":"Super_Robot_Wars_Cross_Omega_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssjhLtpoRKEOP3shzEBd7s7x","Image":"https://img.youtube.com/vi/hJw7BGOR7ZE/hqdefault.jpg"},
+				{"Trd_Name":"超級機械人大戰BX/機戰BX","Chi_Name":"超级机械人大战BX/机战BX","Eng_Name":"Super Robot Wars BX/Taisen/SRWBX","Jap_Name":"スーパーロボット大戦BX","Kor_Name":"슈퍼로봇대전 BX","filterDiv":"music 音樂 音乐 音楽 음악 rip","Icon":"🎧 ","Icon2":"▶","Anchor":"Super_Robot_Wars_BX_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssgwDpA-FRvzCKIKCVLPcI8e","Image":"https://img.youtube.com/vi/UhLRcdAGOJc/hqdefault.jpg"},
+				{"Trd_Name":"超級機械人大戰UX/機戰UX","Chi_Name":"超级机械人大战UX/机战UX","Eng_Name":"Super Robot Wars UX/Taisen/SRWUX","Jap_Name":"スーパーロボット大戦UX","Kor_Name":"슈퍼로봇대전 UX","filterDiv":"music 音樂 音乐 音楽 음악 rip","Icon":"🎧 ","Icon2":"▶","Anchor":"Super_Robot_Wars_UX_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssijXtGn_audsT-_EF8xHNNc","Image":"https://img.youtube.com/vi/uNnTtXnUEDc/hqdefault.jpg"},
+				{"Trd_Name":"超級機械人大戰W/機戰W","Chi_Name":"超级机械人大战W/机战W","Eng_Name":"Super Robot Wars W/Taisen/SRWW","Jap_Name":"スーパーロボット大戦W","Kor_Name":"슈퍼로봇대전 W","filterDiv":"music 音樂 音乐 音楽 음악 rip","Icon":"🎧 ","Icon2":"▶","Anchor":"Super_Robot_Wars_W_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssgOtC0pfW0zw7E3MsqvQ9OO","Image":"https://img.youtube.com/vi/m2hMgBu7UVE/hqdefault.jpg"},
+				{"Trd_Name":"超級機器人大戰J/機戰J","Chi_Name":"超级机械人大战J/机战J","Eng_Name":"Super Robot Wars J/Taisen/SRWJ","Jap_Name":"スーパーロボット大戦J","Kor_Name":"슈퍼로봇대전 J","filterDiv":"music 音樂 音乐 音楽 음악 rip","Icon":"🎧 ","Icon2":"▶","Anchor":"Super_Robot_Wars_J_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssgcEhUPZPW91MaJ-zPtVRJ7","Image":"https://img.youtube.com/vi/-M2npyitr-Q/hqdefault.jpg"},
+				{"Trd_Name":"超級機器人大戰D/機戰D","Chi_Name":"超级机械人大战D/机战D","Eng_Name":"Super Robot Wars D/Taisen/SRWD","Jap_Name":"スーパーロボット大戦D","Kor_Name":"슈퍼로봇대전 D","filterDiv":"music 音樂 音乐 音楽 음악 rip","Icon":"🎧 ","Icon2":"▶","Anchor":"Super_Robot_Wars_D_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssjJpSuug4e45eQ714rVSjzX","Image":"https://img.youtube.com/vi/7zDU1FPI7Cw/hqdefault.jpg"},
+				{"Trd_Name":"超級機器人大戰R/機戰R","Chi_Name":"超级机械人大战R/机战R","Eng_Name":"Super Robot Wars R/Taisen/SRWR","Jap_Name":"スーパーロボット大戦R","Kor_Name":"슈퍼로봇대전 R","filterDiv":"music 音樂 音乐 音楽 음악 rip","Icon":"🎧 ","Icon2":"▶","Anchor":"Super_Robot_Wars_R_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exsshLnuhobtnAKgQnWxUIaCos","Image":"https://img.youtube.com/vi/eOspEGt-MHc/hqdefault.jpg"},
+				{"Trd_Name":"超級機器人大戰A/機戰A","Chi_Name":"超级机械人大战A/机战A","Eng_Name":"Super Robot Wars A/Taisen/SRWA","Jap_Name":"スーパーロボット大戦A","Kor_Name":"슈퍼로봇대전 A","filterDiv":"music 音樂 音乐 音楽 음악 rip","Icon":"🎧 ","Icon2":"▶","Anchor":"Super_Robot_Wars_A_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssi-qy-yaLyvaJZtDOlqnfF6","Image":"https://img.youtube.com/vi/HsgVoUlN_M4/hqdefault.jpg"},
+				{"Trd_Name":"超級機器人大戰HD/機戰HD","Chi_Name":"超级机械人大战HD/机战HD","Eng_Name":"Super Robot Wars HD/Taisen/SRWHD","Jap_Name":"スーパーロボット大戦HD","Kor_Name":"슈퍼로봇대전 HD","filterDiv":"music 音樂 音乐 音楽 음악 rip","Icon":"🎧 ","Icon2":"▶","Anchor":"Super_Robot_Wars_HD_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssj_P9Ulzay-0tY_4whPdwDn","Image":"https://img.youtube.com/vi/3jNE8S8EEz0/hqdefault.jpg"},
+				{"Trd_Name":"超級機械人大戰OG SAGA 魔裝機神III PRIDE OF JUSTICE","Chi_Name":"超级机械人大战OG SAGA 魔装机神III PRIDE OF JUSTICE","Eng_Name":"Super Robot Wars OG Saga: Masō Kishin III - Pride of Justice/Masou","Jap_Name":"スーパーロボット大戦OGサーガ 魔装機神III PRIDE OF JUSTICE","Kor_Name":"슈퍼로봇대전OG사가 마장기신3","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Masou_Kishin_III_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssjzVtfeUU1B_WJUF0FUhLPo","Image":"https://img.youtube.com/vi/YY75oR77pf0/hqdefault.jpg"},
+				{"Trd_Name":"超級機械人大戰OG SAGA 魔裝機神F COFFIN OF THE END","Chi_Name":"超级机械人大战OG SAGA 魔装机神F COFFIN OF THE END","Eng_Name":"Super Robot Wars OG Saga: Masō Kishin F - Coffin of the End/Masou","Jap_Name":"スーパーロボット大戦OGサーガ 魔装機神F COFFIN OF THE END","Kor_Name":"슈퍼로봇대전OG사가 마장기신 F 중고 일본판","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Masou_Kishin_F_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssjNJMIwyAebb0VL1dsB0QZV","Image":"https://img.youtube.com/vi/wC7nsL9LjLk/hqdefault.jpg"},
+				{"Trd_Name":"瘋狂水族箱","Chi_Name":"疯狂水族箱","Eng_Name":"Insaniquarium! Deluxe","Jap_Name":"クレイジーアクアリウム","Kor_Name":"인사니쿠아리움","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Insaniquarium_Deluxe_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exsshnMWaZujwuHMEnLzQUrNad","Image":"https://img.youtube.com/vi/dd7m2KYXJ-Y/hqdefault.jpg"},
+				{"Trd_Name":"點擊泰坦","Chi_Name":"点杀泰坦","Eng_Name":"Tap Titans","Jap_Name":"タップタイタン","Kor_Name":"탭타이탄","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Tap_Titans_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssig7FFp5AEgU0PKuT-Tt7Og","Image":"https://img.youtube.com/vi/qMoO9b1pI7E/hqdefault.jpg"},
+				{"Trd_Name":"街頭霸王 X 全CAPCOM","Chi_Name":"街头霸王 X 全CAPCOM","Eng_Name":"Street Fighter X All Capcom","Jap_Name":"ストリートファイター×オールカプコン","Kor_Name":"'스트리트파이터x올캡콤","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Street_Fighter_X_All_Capcom_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssjSH6qTRgRoDCBZUkWx0ZnM","Image":"https://img.youtube.com/vi/OgJ5ByItDoI/hqdefault.jpg"},
+				{"Trd_Name":"哥斯拉保衛戰","Chi_Name":"哥吉拉保卫战","Eng_Name":"Godzilla Defense Force","Jap_Name":"ゴジラディフェンスフォース","Kor_Name":"고질라 디펜스 포스","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Godzilla_Defense_Force_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exsshi_kq3vYbTQWlYJRP8cEgx","Image":"https://img.youtube.com/vi/xd8AYC0QOto/hqdefault.jpg"},
+				{"Trd_Name":"過山車大亨/模擬樂園","Chi_Name":"过山车大亨","Eng_Name":"RollerCoaster Tycoon/Roller Coaster","Jap_Name":"ローラーコースタータイクーン","Kor_Name":"롤러코스터 타이쿤","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"RollerCoaster_Tycoon_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssi_O0435vgAw7Wb9aXMsW6I","Image":"https://img.youtube.com/vi/-1gS8GS9hPE/hqdefault.jpg"},
+				{"Trd_Name":"Farm Frenzy","Chi_Name":"Farm Frenzy","Eng_Name":"Farm Frenzy","Jap_Name":"Farm Frenzy","Kor_Name":"Farm Frenzy","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Farm_Frenzy_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssj1vDFN9HkSEEseTM3wvdIQ","Image":"https://img.youtube.com/vi/WhEdgB3SYyk/hqdefault.jpg"},
+				{"Trd_Name":"龍城","Chi_Name":"龙城","Eng_Name":"Dragon City","Jap_Name":"ドラゴンシティ","Kor_Name":"드래곤 시티","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Dragon_City_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssjx_6e2-cQjWV1cDY80dkut","Image":"https://img.youtube.com/vi/C3hsVXDi21I/hqdefault.jpg"},
+				{"Trd_Name":"Crazy Planets","Chi_Name":"Crazy Planets","Eng_Name":"Crazy Planets","Jap_Name":"Crazy Planets","Kor_Name":"Crazy Planets","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Crazy_Planets_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssiN7V8P7rq6kgNG_Qbz2s7s","Image":"https://img.youtube.com/vi/V-qa7oI3KPA/hqdefault.jpg"},
+				{"Trd_Name":"My Empire","Chi_Name":"My Empire","Eng_Name":"My Empire","Jap_Name":"My Empire","Kor_Name":"My Empire","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"My_Empire_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssjbaKZml6b8e-ogfBxbNy5Y","Image":"https://img.youtube.com/vi/UovQSQlJyUg/hqdefault.jpg"},
+				{"Trd_Name":"EA Sports FIFA Superstars","Chi_Name":"EA Sports FIFA Superstars","Eng_Name":"EA Sports FIFA Superstars","Jap_Name":"EA Sports FIFA Superstars","Kor_Name":"EA Sports FIFA Superstars","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"EA_Sports_FIFA_Superstars_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssiQng97DsKAVpjxAT0SC7xH","Image":"https://img.youtube.com/vi/nUI-0G_3vUY/hqdefault.jpg"},
+				{"Trd_Name":"硬幣公主!","Chi_Name":"硬币公主!","Eng_Name":"Coin Princess!","Jap_Name":"コインプリンセス!","Kor_Name":"코인공주!","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Coin_Princess_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssh1C1srkQ87FWwaHfsdpnGq","Image":"https://img.youtube.com/vi/_hHjqVdQWF0/hqdefault.jpg"},
+				{"Trd_Name":"Restaurant City","Chi_Name":"Restaurant City","Eng_Name":"Restaurant City","Jap_Name":"Restaurant City","Kor_Name":"Restaurant City","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Restaurant_City_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssjDsWicxO5Wc9aXyJKd79wa","Image":"https://img.youtube.com/vi/zSq1rdrIXs4/hqdefault.jpg"},
+				{"Trd_Name":"Pet Society","Chi_Name":"Pet Society","Eng_Name":"Pet Society","Jap_Name":"Pet Society","Kor_Name":"Pet Society","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Pet_Society_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssj-Nynr2XA5Dxuoepva4Us3","Image":"https://img.youtube.com/vi/SQ0lyUPBi_Q/hqdefault.jpg"},
+				{"Trd_Name":"Country Story","Chi_Name":"Country Story","Eng_Name":"Country Story","Jap_Name":"Country Story","Kor_Name":"Country Story","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Country_Story_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssiqjjCUrMNYpFQTsMlzJZHv","Image":"https://img.youtube.com/vi/UF9RfmlMH_k/hqdefault.jpg"},
+				{"Trd_Name":"RuneScape","Chi_Name":"RuneScape","Eng_Name":"RuneScape","Jap_Name":"RuneScape","Kor_Name":"RuneScape","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"RuneScape_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssgUaQp3pyYrRUvOdz79cfl6","Image":"https://img.youtube.com/vi/DjHZWmqDECA/hqdefault.jpg"},
+				{"Trd_Name":"隨機骰子：大戰","Chi_Name":"随机骰子：大战","Eng_Name":"Random Dice: Wars","Jap_Name":"ランダムダイス: ウォーズ","Kor_Name":"랜덤 다이스: 워즈","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Random_Dice_wars_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssjnFa9SbWygqKjtWSxjubg7","Image":"https://img.youtube.com/vi/uYTHsjkMKpk/hqdefault.jpg"},
+				{"Trd_Name":"我，騎著茄子飛行。/貓咪","Chi_Name":"我，骑着茄子飞行。/猫咪","Eng_Name":"Spirit Saga: Eggplant Escapade/Catastrophe","Jap_Name":"我，騎著茄子飛行。/貓咪","Kor_Name":"我，騎著茄子飛行。/貓咪","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Spirit_Saga_Eggplant_Escapade_Catastrophe_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssgyImA7TsgUUVStIhhqFMlL","Image":"https://img.youtube.com/vi/b-tevivxMkM/hqdefault.jpg"},
+				{"Trd_Name":"冥想音樂","Chi_Name":"冥想音乐","Eng_Name":"Meditation Music","Jap_Name":"瞑想音楽","Kor_Name":"명상 음악","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Meditation_Music_OST","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssi-LHhitZNgdkzhhtxb3Ifd","Image":"https://img.youtube.com/vi/rXyAGNluWms/hqdefault.jpg"},
+				{"Trd_Name":"純音樂","Chi_Name":"纯音乐","Eng_Name":"Music","Jap_Name":"純粋な音楽","Kor_Name":"순수한 음악","filterDiv":"music 音樂 音乐 音楽 음악","Icon":"🎧 ","Icon2":"▶","Anchor":"Music","Link":"https://www.youtube.com/embed/videoseries?list=PLrLxjs6exssj6KbwwOkPVpkp8OsF5WNWp","Image":"https://img.youtube.com/vi/IvUU8joBb1Q/hqdefault.jpg"},
+				{"Trd_Name":"Omicronian","Chi_Name":"Omicronian","Eng_Name":"Omicronian","Jap_Name":"Omicronian","Kor_Name":"Omicronian","filterDiv":"game mobile computer pc single player third person shooting vertically scrolling shooter scroller 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 縱向捲軸 射擊 動作","Icon":"🎮 ","Icon2":"🎮","Anchor":"Omicronian_Game","Link":"https://yaksgames.com/games/omicronian/G010FX98VK target=_blank","Image":"https://img.youtube.com/vi/5zxtKVYN2VQ/hqdefault.jpg"},
+				{"Trd_Name":"Endless Toy Flight","Chi_Name":"Endless Toy Flight","Eng_Name":"Endless Toy Flight","Jap_Name":"Endless Toy Flight","Kor_Name":"Endless Toy Flight","filterDiv":"game mobile computer pc single player third person shooting vertically scrolling shooter scroller 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 縱向捲軸 射擊 動作","Icon":"🎮 ","Icon2":"🎮","Anchor":"Endless_Toy_Flight_Game","Link":"https://www.crazygames.com/game/endless-toy-flight target=_blank","Image":"https://img.youtube.com/vi/NP_el0k-O9A/hqdefault.jpg"},
+				{"Trd_Name":"Elite Sniper","Chi_Name":"Elite Sniper","Eng_Name":"Elite Sniper","Jap_Name":"Elite Sniper","Kor_Name":"Elite Sniper","filterDiv":"game mobile computer pc single player first person shooting shooter 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 射擊","Icon":"🎮 ","Icon2":"🎮","Anchor":"Elite_Sniper_Game","Link":"https://www.crazygames.com/game/elite-sniper target=_blank","Image":"https://img.youtube.com/vi/i-AYChXexe0/hqdefault.jpg"},
+				{"Trd_Name":"10 Bullets","Chi_Name":"10 Bullets","Eng_Name":"10 Bullets","Jap_Name":"10 Bullets","Kor_Name":"10 Bullets","filterDiv":"game mobile computer pc single player third person shooting shooter 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 射擊","Icon":"🎮 ","Icon2":"🎮","Anchor":"10_Bullets_Game","Link":"https://www.crazygames.com/game/10-bullets-html-5 target=_blank","Image":"https://img.youtube.com/vi/JOdwrayzt1g/hqdefault.jpg"},
+				{"Trd_Name":"Battle Arena: RPG online","Chi_Name":"Battle Arena: RPG online","Eng_Name":"Battle Arena: RPG online","Jap_Name":"Battle Arena: RPG online","Kor_Name":"Battle Arena: RPG online","filterDiv":"game mobile computer pc signle player third person real time strategy rts 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 塔防 守城 即時戰略 即時策略 即時战略","Icon":"🎮 ","Icon2":"🎮","Anchor":"Battle_Arena_RPG_online_Game","Link":"https://yandex.com/games/app/184531 target=_blank","Image":"https://img.youtube.com/vi/G44luGNe7fM/hqdefault.jpg"},
+				{"Trd_Name":"Mafia Wars","Chi_Name":"Mafia Wars","Eng_Name":"Mafia Wars","Jap_Name":"Mafia Wars","Kor_Name":"Mafia Wars","filterDiv":"game mobile computer pc single player third person shooting tower defence td real time strategy rts 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 射擊 塔防 守城 即時戰略 即時策略 即時战略","Icon":"🎮 ","Icon2":"🎮","Anchor":"Mafia_Wars_Game","Link":"https://poki.jp/g/mafia-wars target=_blank","Image":"https://img.youtube.com/vi/K9cdJ072qjY/hqdefault.jpg"},
+				{"Trd_Name":"Live or Die Survival","Chi_Name":"Live or Die Survival","Eng_Name":"Live or Die Survival","Jap_Name":"Live or Die Survival","Kor_Name":"Live or Die Survival","filterDiv":"game mobile computer pc single player third person real time strategy rts 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 即時戰略 即時策略 即時战略","Icon":"🎮 ","Icon2":"🎮","Anchor":"Live_or_Die_Survival_Game","Link":"https://yandex.com/games/app/257333 target=_blank","Image":"https://img.youtube.com/vi/1QrFTQNS8M0/hqdefault.jpg"},
+				{"Trd_Name":"Survival Island","Chi_Name":"Survival Island","Eng_Name":"Survival Island","Jap_Name":"Survival Island","Kor_Name":"Survival Island","filterDiv":"game mobile computer pc single player third person real time strategy rts 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 即時戰略 即時策略 即時战略 當個創世神 麥塊 我的世界 マインクラフト 마인크래프트 minecraft mc","Icon":"🎮 ","Icon2":"🎮","Anchor":"Survival_Island_Game","Link":"https://poki.com/jp/g/survival-island target=_blank","Image":"https://img.youtube.com/vi/UXyx4UCJT5U/hqdefault.jpg"},
+				{"Trd_Name":"War of Sticks","Chi_Name":"War of Sticks","Eng_Name":"War of Sticks","Jap_Name":"War of Sticks","Kor_Name":"War of Sticks","filterDiv":"game mobile computer pc single player third person tower defence td real time strategy rts 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 塔防 守城 即時戰略 即時策略 即時战略","Icon":"🎮 ","Icon2":"🎮","Anchor":"War_of_Sticks_Game","Link":"https://poki.jp/g/war-of-sticks target=_blank","Image":"https://img.youtube.com/vi/Fngg5OB_4Ok/hqdefault.jpg"},
+				{"Trd_Name":"El Dorado Lite","Chi_Name":"El Dorado Lite","Eng_Name":"El Dorado Lite","Jap_Name":"El Dorado Lite","Kor_Name":"El Dorado Lite","filterDiv":"game mobile computer pc single player third person tower defence td real time strategy rts 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 塔防 守城 即時戰略 即時策略 即時战略","Icon":"🎮 ","Icon2":"🎮","Anchor":"El_Dorado_Lite_Game","Link":"https://www.crazygames.com/game/el-dorado-lite target=_blank","Image":"https://img.youtube.com/vi/NCfqeFiEcJs/hqdefault.jpg"},
+				{"Trd_Name":"Age of War","Chi_Name":"Age of War","Eng_Name":"Age of War","Jap_Name":"Age of War","Kor_Name":"Age of War","filterDiv":"game mobile computer pc single player third person tower defence td real time strategy rts 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 塔防 守城 即時戰略 即時策略 即時战略","Icon":"🎮 ","Icon2":"🎮","Anchor":"Age_of_War_Game","Link":"https://www.crazygames.com/game/age-of-war target=_blank","Image":"https://img.youtube.com/vi/folefTdbaOQ/hqdefault.jpg"},
+				{"Trd_Name":"Age of War 2","Chi_Name":"Age of War 2","Eng_Name":"Age of War 2","Jap_Name":"Age of War 2","Kor_Name":"Age of War 2","filterDiv":"game mobile computer pc single player third person tower defence td real time strategy rts 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 塔防 守城 即時戰略 即時策略 即時战略","Icon":"🎮 ","Icon2":"🎮","Anchor":"Age_of_War_2_Game","Link":"https://www.gameflare.com/online-game/age-of-war-2/ target=_blank","Image":"https://img.youtube.com/vi/fVgJBKhW-cE/hqdefault.jpg"},
+				{"Trd_Name":"Angry Plants","Chi_Name":"Angry Plants","Eng_Name":"Angry Plants","Jap_Name":"Angry Plants","Kor_Name":"Angry Plants","filterDiv":"game mobile computer pc single player third person tower defence td real time strategy rts 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 塔防 守城 即時戰略 即時策略 即時战略","Icon":"🎮 ","Icon2":"🎮","Anchor":"Angry_Plants_Game","Link":"https://yandex.com/games/app/269940 target=_blank","Image":"https://img.youtube.com/vi/L8OhDIPLd1c/hqdefault.jpg"},
+				{"Trd_Name":"Stick Defenders","Chi_Name":"Stick Defenders","Eng_Name":"Stick Defenders","Jap_Name":"Stick Defenders","Kor_Name":"Stick Defenders","filterDiv":"game mobile computer pc single player third person tower defence td real time strategy rts 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 塔防 守城 即時戰略 即時策略 即時战略","Icon":"🎮 ","Icon2":"🎮","Anchor":"Stick_Defenders_Game","Link":"https://poki.jp/g/stick-defenders target=_blank","Image":"https://img.youtube.com/vi/f14LKcKgOk0/hqdefault.jpg"},
+				{"Trd_Name":"Monsters TD","Chi_Name":"Monsters TD","Eng_Name":"Monsters TD","Jap_Name":"Monsters TD","Kor_Name":"Monsters TD","filterDiv":"game mobile computer pc single player third person tower defence td real time strategy rts 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 塔防 守城 即時戰略 即時策略 即時战略","Icon":"🎮 ","Icon2":"🎮","Anchor":"Monsters_TD_Game","Link":"https://www.gameflare.com/online-game/monsters-td/ target=_blank","Image":"https://img.youtube.com/vi/17AZcSD5LW8/hqdefault.jpg"},
+				{"Trd_Name":"Base Defense","Chi_Name":"Base Defense","Eng_Name":"Base Defense","Jap_Name":"Base Defense","Kor_Name":"Base Defense","filterDiv":"game mobile computer pc single player third person tower defence td real time strategy rts 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 塔防 守城 即時戰略 即時策略 即時战略","Icon":"🎮 ","Icon2":"🎮","Anchor":"Base_Defense_Game","Link":"https://poki.jp/g/base-defense target=_blank","Image":"https://img.youtube.com/vi/pBEeMv17ios/hqdefault.jpg"},
+				{"Trd_Name":"Mini Guardians Castle Defense","Chi_Name":"Mini Guardians Castle Defense","Eng_Name":"Mini Guardians Castle Defense","Jap_Name":"Mini Guardians Castle Defense","Kor_Name":"Mini Guardians Castle Defense","filterDiv":"game mobile computer pc single player third person tower defence td real time strategy rts 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 塔防 守城 即時戰略 即時策略 即時战略","Icon":"🎮 ","Icon2":"🎮","Anchor":"Mini_Guardians_Castle_Defense_Game","Link":"https://poki.jp/g/mini-guardians-castle-defense target=_blank","Image":"https://img.youtube.com/vi/rcEC7VwRDeE/hqdefault.jpg"},
+				{"Trd_Name":"Zombies Can't Jump","Chi_Name":"Zombies Can't Jump","Eng_Name":"Zombies Can't Jump","Jap_Name":"Zombies Can't Jump","Kor_Name":"Zombies Can't Jump","filterDiv":"game mobile computer pc single player third person tower defence td real time strategy rts 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 塔防 守城 即時戰略 即時策略 即時战略","Icon":"🎮 ","Icon2":"🎮","Anchor":"Zombies_Cant_Jump_Game","Link":"https://www.crazygames.com/game/zombies-cant-jump target=_blank","Image":"https://img.youtube.com/vi/USj3cPMf4rI/hqdefault.jpg"},
+				{"Trd_Name":"Clash of Vikings","Chi_Name":"Clash of Vikings","Eng_Name":"Clash of Vikings","Jap_Name":"Clash of Vikings","Kor_Name":"Clash of Vikings","filterDiv":"game mobile computer pc multiplayer first person tower defence td real time strategy rts 遊戲 手機 手遊 電腦 電子 單人 第三人稱 塔防 守城 即時戰略 即時策略 即時战略","Icon":"🎮 ","Icon2":"🎮","Anchor":"Clash_of_Vikings_Game","Link":"https://www.crazygames.com/game/clash-of-vikings target=_blank","Image":"https://img.youtube.com/vi/srwP_CWyAPY/hqdefault.jpg"},
+				{"Trd_Name":"Day of Meat","Chi_Name":"Day of Meat","Eng_Name":"Day of Meat","Jap_Name":"Day of Meat","Kor_Name":"Day of Meat","filterDiv":"game mobile computer pc single player third person tower defence td real time strategy rts 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 塔防 守城 即時戰略 即時策略 即時战略","Icon":"🎮 ","Icon2":"🎮","Anchor":"Day_of_Meat_Game","Link":"https://poki.cn/g/day-of-meat target=_blank","Image":"https://img.youtube.com/vi/eiueW-bsJP0/hqdefault.jpg"},
+				{"Trd_Name":"Day of Meat: Radiation","Chi_Name":"Day of Meat: Radiation","Eng_Name":"Day of Meat: Radiation","Jap_Name":"Day of Meat: Radiation","Kor_Name":"Day of Meat: Radiation","filterDiv":"game mobile computer pc single player third person tower defence td real time strategy rts 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 塔防 守城 即時戰略 即時策略 即時战略","Icon":"🎮 ","Icon2":"🎮","Anchor":"Day_of_Meat_Radiation_Game","Link":"https://poki.cn/g/day-of-meat-radiation target=_blank","Image":"https://img.youtube.com/vi/BFg7PsZYxVI/hqdefault.jpg"},
+				{"Trd_Name":"Palworld: Evolution of Heroes","Chi_Name":"Palworld: Evolution of Heroes","Eng_Name":"Palworld: Evolution of Heroes","Jap_Name":"Palworld: Evolution of Heroes","Kor_Name":"Palworld: Evolution of Heroes","filterDiv":"game mobile computer pc single player third person tower defence td real time strategy rts 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 塔防 守城 即時戰略 即時策略 即時战略","Icon":"🎮 ","Icon2":"🎮","Anchor":"Palworld_Evolution_of_Heroes_Game","Link":"https://yandex.com/games/app/292957 target=_blank","Image":"https://img.youtube.com/vi/Okg_V1Kjf4Y/hqdefault.jpg"},
+				{"Trd_Name":"Maid Heroes","Chi_Name":"Maid Heroes","Eng_Name":"Maid Heroes","Jap_Name":"Maid Heroes","Kor_Name":"Maid Heroes","filterDiv":"game mobile computer pc single player third person tower defence td real time strategy rts 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 塔防 守城 即時戰略 即時策略 即時战略","Icon":"🎮 ","Icon2":"🎮","Anchor":"Maid_Heroes_Game","Link":"https://www.crazygames.com/game/maid-heroes-idle-rpg target=_blank","Image":"https://img.youtube.com/vi/nnaqVASHGn8/hqdefault.jpg"},
+				{"Trd_Name":"Monster Box","Chi_Name":"Monster Box","Eng_Name":"Monster Box","Jap_Name":"Monster Box","Kor_Name":"Monster Box","filterDiv":"game mobile computer pc single player third person role play rpg real time strategy rts 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 角色扮演 即時戰略 即時策略 即時战略","Icon":"🎮 ","Icon2":"🎮","Anchor":"Monster_Box_Game","Link":"https://www.crazygames.com/game/monster-box-bae target=_blank","Image":"https://img.youtube.com/vi/0NEMWI6h5sM/hqdefault.jpg"},
+				{"Trd_Name":"Monster Guardians","Chi_Name":"Monster Guardians","Eng_Name":"Monster Guardians","Jap_Name":"モンスターガーヂィアンズ","Kor_Name":"몬스터가 지앙스","filterDiv":"game mobile computer pc single player third person role play rpg real time strategy rts 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 角色扮演 即時戰略 即時策略 即時战略 gba game boy advance ゲームボーイアドバンス 게임보이 어드밴스","Icon":"🎮 ","Icon2":"🎮","Anchor":"Monster_Guardians_Game","Link":"https://www.retrogames.cc/gameboyadvance-games/monster-guardians-j-rapid-fire.html target=_blank","Image":"https://img.youtube.com/vi/lb7JZFWUyqo/hqdefault.jpg"},
+				{"Trd_Name":"地鐵跑酷/衝浪者︰世界巡遊","Chi_Name":"地铁跑酷/冲浪者︰世界巡游","Eng_Name":"Subway Surfers World Tour","Jap_Name":"サブウェイサーファーズ ワールドツアー","Kor_Name":"지하철 서퍼스 월드 투어","filterDiv":"game mobile computer pc single player third person action endless runner infinite 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 動作 跑酷","Icon":"🎮 ","Icon2":"🎮","Anchor":"Subway_Surfers_World_Tour_Game","Link":"https://poki.jp/g/subway-surfers target=_blank","Image":"https://img.youtube.com/vi/G6Sje1H7eRY/hqdefault.jpg"},
+				{"Trd_Name":"地鐵跑酷/衝浪者︰柏林/首爾","Chi_Name":"地铁跑酷/冲浪者︰柏林/首尔","Eng_Name":"Subway Surfers: Berlin/Seoul","Jap_Name":"サブウェイサーファーズ: ベルリン/ソウル","Kor_Name":"지하철 서퍼스: 베를린/서울","filterDiv":"game mobile computer pc single player third person action endless runner infinite 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 動作 跑酷","Icon":"🎮 ","Icon2":"🎮","Anchor":"Subway_Surfers_Berlin_Game","Link":"https://www.quizzesme.com/play/subway-surfers target=_blank","Image":"https://img.youtube.com/vi/tkRVrTUgcf8/hqdefault.jpg"},
+				{"Trd_Name":"地鐵跑酷/衝浪者︰香港(試玩)","Chi_Name":"地铁跑酷/冲浪者︰香港(试玩)","Eng_Name":"Subway Surfers: Hong Kong","Jap_Name":"サブウェイサーファーズ: 香港(デモ)","Kor_Name":"지하철 서퍼스: 홍콩(데모)","filterDiv":"game mobile computer pc single player third person action endless runner infinite 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 動作 跑酷","Icon":"🎮 ","Icon2":"🎮","Anchor":"Subway_Surfers_Hong_Kong_Game","Link":"https://www.zazgames.com/game/game-subway-surf-hong-kong target=_blank","Image":"https://img.youtube.com/vi/gD436oAa8-U/hqdefault.jpg"},
+				{"Trd_Name":"地鐵跑酷/衝浪者︰峇里(試玩)","Chi_Name":"地铁跑酷/冲浪者︰峇里(试玩)","Eng_Name":"Subway Surfers: Bali","Jap_Name":"サブウェイサーファーズ: バリ(デモ)","Kor_Name":"지하철 서퍼스: 발리(데모)","filterDiv":"game mobile computer pc single player third person action endless runner infinite 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 動作 跑酷","Icon":"🎮 ","Icon2":"🎮","Anchor":"Subway_Surfers_Hong_Kong_Game","Link":"https://www.zazgames.com/game/subway-surfer-bali-2022 target=_blank","Image":"https://img.youtube.com/vi/cAB-p0RrgeQ/hqdefault.jpg"},
+				{"Trd_Name":"Skate Hooligans","Chi_Name":"Skate Hooligans","Eng_Name":"Skate Hooligans","Jap_Name":"Skate Hooligans","Kor_Name":"Skate Hooligans","filterDiv":"game mobile computer pc single player third person action endless runner infinite 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 動作 跑酷","Icon":"🎮 ","Icon2":"🎮","Anchor":"Skate_Hooligans_Game","Link":"https://subwaysurf.io/skate-holigans target=_blank","Image":"https://img.youtube.com/vi/xt1CWSyIeEg/hqdefault.jpg"},
+				{"Trd_Name":"Tomb Runner","Chi_Name":"Tomb Runner","Eng_Name":"Tomb Runner","Jap_Name":"Tomb Runner","Kor_Name":"Tomb Runner","filterDiv":"game mobile computer pc single player third person action endless runner infinite 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 動作 跑酷","Icon":"🎮 ","Icon2":"🎮","Anchor":"Tomb_Runner_Game","Link":"https://subwaysurf.io/temple-run target=_blank","Image":"https://assets.funnygames.org/7/25577/80446/320x180/tomb-runner.webp"},
+				{"Trd_Name":"Temple Raider","Chi_Name":"Temple Raider","Eng_Name":"Temple Raider","Jap_Name":"Temple Raider","Kor_Name":"Temple Raider","filterDiv":"game mobile computer pc single player third person action endless runner infinite 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 動作 跑酷","Icon":"🎮 ","Icon2":"🎮","Anchor":"Temple_Raider_Game","Link":"https://www.zazgames.com/game/temple-raider target=_blank","Image":"https://img.youtube.com/vi/1hMVmRtg1MY/hqdefault.jpg"},
+				{"Trd_Name":"神廟逃亡2","Chi_Name":"神庙逃亡2","Eng_Name":"Temple Run 2","Jap_Name":"テンプルラン2","Kor_Name":"탬플 런 2","filterDiv":"game mobile computer pc single player third person action endless runner infinite 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 動作 跑酷","Icon":"🎮 ","Icon2":"🎮","Anchor":"Temple_Run_2_Game","Link":"https://poki.com/jp/g/temple-run-2 target=_blank","Image":"https://img.youtube.com/vi/S6JNQbJ36wk/hqdefault.jpg"},
+				{"Trd_Name":"神廟逃亡2酷凜之冬","Chi_Name":"神庙逃亡2酷凛之冬","Eng_Name":"Temple Run 2: Frozen Shadows","Jap_Name":"テンプルラン2 厳しい冬","Kor_Name":"템플런 2 암울한 겨울","filterDiv":"game mobile computer pc single player third person action endless runner infinite 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 動作 跑酷","Icon":"🎮 ","Icon2":"🎮","Anchor":"Temple_Run_2_Frozen_Shadows_Game","Link":"https://poki.jp/g/temple-run-2-frozen-shadows target=_blank","Image":"https://img.youtube.com/vi/iJPoHKcbTuc/hqdefault.jpg"},
+				{"Trd_Name":"神廟逃亡2侯麗節","Chi_Name":"神庙逃亡2侯丽节","Eng_Name":"Temple Run 2: Holi Festival","Jap_Name":"テンプルラン2 ホーリー祭","Kor_Name":"템플런 2 홀리 페스티벌","filterDiv":"game mobile computer pc single player third person action endless runner infinite 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 動作 跑酷","Icon":"🎮 ","Icon2":"🎮","Anchor":"Temple_Run_2_Holi_Festival_Game","Link":"https://poki.jp/g/temple-run-2-holi-festival target=_blank","Image":"https://img.youtube.com/vi/Xn2mRrAuJcQ/hqdefault.jpg"},
+				{"Trd_Name":"神廟逃亡2叢林之秋","Chi_Name":"神庙逃亡2丛林之秋","Eng_Name":"Temple Run 2: Jungle Fall","Jap_Name":"テンプルラン2 ジャングルの秋","Kor_Name":"템플런 2 정글 가을","filterDiv":"game mobile computer pc single player third person action endless runner infinite 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 動作 跑酷","Icon":"🎮 ","Icon2":"🎮","Anchor":"Temple_Run_2_Jungle_Fall_Game","Link":"https://poki.jp/g/temple-run-2-jungle-fall target=_blank","Image":"https://img.youtube.com/vi/RSJ3xhRitv4/hqdefault.jpg"},
+				{"Trd_Name":"神廟逃亡2幽靈峰會","Chi_Name":"神庙逃亡2幽灵峰会","Eng_Name":"Temple Run 2: Spooky Summit","Jap_Name":"テンプルラン2 スプーキー・サミット","Kor_Name":"템플런 2 무시무시한 서밋","filterDiv":"game mobile computer pc single player third person action endless runner infinite 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 動作 跑酷","Icon":"🎮 ","Icon2":"🎮","Anchor":"Temple_Run_2_Spooky_Summit_Game","Link":"https://poki.jp/g/temple-run-2-spooky-summit target=_blank","Image":"https://img.youtube.com/vi/A9BdwQ28EJo/hqdefault.jpg"},
+				{"Trd_Name":"Runer","Chi_Name":"Runer","Eng_Name":"Runer","Jap_Name":"Runer","Kor_Name":"Runer","filterDiv":"game mobile computer pc single player third person action endless runner infinite 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 動作 跑酷","Icon":"🎮 ","Icon2":"🎮","Anchor":"Runer_Game","Link":"https://subwaysurf.io/run-3 target=_blank","Image":"https://img.youtube.com/vi/T4c4ezrINDs/hqdefault.jpg"},
+				{"Trd_Name":"Sonic Superstars","Chi_Name":"Sonic Superstars","Eng_Name":"Sonic Superstars","Jap_Name":"Sonic Superstars","Kor_Name":"Sonic Superstars","filterDiv":"game mobile computer pc single player third person action side horizontally scrolling scroller christmas 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 橫向捲軸 動作 跑酷 超音鼠 刺猬索尼克 Sonic the Hedgehog ソニック・ザ・ヘッジホッグ 소닉 더 헤지혹","Icon":"🎮 ","Icon2":"🎮","Anchor":"Sonic_Superstars_Game","Link":"https://kukogames.com/games/sonic-superstars/ target=_blank","Image":"https://img.youtube.com/vi/GkTxWC9ZbUY/hqdefault.jpg"},
+				{"Trd_Name":"Santa Parkour","Chi_Name":"Santa Parkour","Eng_Name":"Santa Parkour","Jap_Name":"Santa Parkour","Kor_Name":"Santa Parkour","filterDiv":"game mobile computer pc single player third person action side horizontally scrolling scroller christmas 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 橫向捲軸 動作 跑酷 聖誕老人","Icon":"🎮 ","Icon2":"🎮","Anchor":"Santa_Parkour_Game","Link":"https://kbhgames.com/game/santa-parkour target=_blank","Image":"https://img.youtube.com/vi/bxS4yU5vCn4/hqdefault.jpg"},
+				{"Trd_Name":"鐵拳 Advance","Chi_Name":"铁拳 Advance","Eng_Name":"Tekken Advance","Jap_Name":"鉄拳 Advance","Kor_Name":"철권 Advance","filterDiv":"game computer pc single player third person action side horizontally scrolling scroller vs versus pvp pk fight 遊戲 電腦 電子 單人 單打 單機 第三人稱 橫向捲軸 動作 對戰 gba game boy advance ゲームボーイアドバンス 게임보이 어드밴스","Icon":"🎮 ","Icon2":"🎮","Anchor":"Tekken_Advance_Game","Link":"https://www.retrogames.cc/gameboyadvance-games/tekken-advance-u-venom.html target=_blank","Image":"https://img.youtube.com/vi/Nu--RxA2qH8/hqdefault.jpg"},
+				{"Trd_Name":"寵物小精靈 比卡超","Chi_Name":"宝可梦 皮卡丘","Eng_Name":"Pokémon Yellow","Jap_Name":"ポケットモンスター ピカチュウ","Kor_Name":"포켓몬스터 피카츄","filterDiv":"game mobile computer pc single player third person turn-based turn based role play rpg pokemon yellow 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 回合制 角色扮演 寵物小精靈 皮卡丘 寵物小精靈 黃 寶可夢 黃 寶可夢 皮卡丘 宠物小精灵 比卡超 宠物小精灵 皮卡丘 宠物小精灵 黄 宝可梦 黄 宝可梦 皮卡丘 gbc game boy color ゲームボーイカラー 게임보이 컬러","Icon":"🎮 ","Icon2":"🎮","Anchor":"Pokemon_Yellow_Game","Link":"https://www.classicgames.me/pokemon-yellow.html target=_blank","Image":"https://img.youtube.com/vi/aqr_YgqF2vM/hqdefault.jpg"},
+				{"Trd_Name":"Dynamons World","Chi_Name":"Dynamons World","Eng_Name":"Dynamons World","Jap_Name":"Dynamons World","Kor_Name":"Dynamons World","filterDiv":"game mobile computer pc single player third person turn-based turn based role play rpg 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 回合制 角色扮演","Icon":"🎮 ","Icon2":"🎮","Anchor":"Dynamons_World_Game","Link":"https://www.crazygames.com/game/dynamons-world target=_blank","Image":"https://img.youtube.com/vi/jdtWe6MUgC0/hqdefault.jpg"},
+				{"Trd_Name":"Magikmon","Chi_Name":"Magikmon","Eng_Name":"Magikmon","Jap_Name":"Magikmon","Kor_Name":"Magikmon","filterDiv":"game mobile computer pc single player third person turn-based turn based role play rpg 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 回合制 角色扮演","Icon":"🎮 ","Icon2":"🎮","Anchor":"Magikmon_Game","Link":"https://poki.jp/g/magikmon target=_blank","Image":"https://img.youtube.com/vi/aijI8JfTJco/hqdefault.jpg"},
+				{"Trd_Name":"應許之地","Chi_Name":"应许之地","Eng_Name":"Riviera: The Promised Land","Jap_Name":"Riviera 〜約束の地リヴィエラ〜","Kor_Name":"약속의 땅 리비에라","filterDiv":"game mobile computer pc single player third person turn-based turn based role play rpg 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 回合制 角色扮演 約束之地 约束之地 承諾之地 承诺之地 gba game boy advance ゲームボーイアドバンス 게임보이 어드밴스","Icon":"🎮 ","Icon2":"🎮","Anchor":"Riviera_The_Promised_Land_GBA_Game","Link":"https://www.retrogames.cc/gameboyadvance-games/yakusoku-no-chi-riviera-j-caravan.html target=_blank","Image":"https://img.youtube.com/vi/Pvoe_JUX11k/hqdefault.jpg"},
+				{"Trd_Name":"應許之地(Eng)","Chi_Name":"应许之地(Eng)","Eng_Name":"Riviera: The Promised Land(Eng)","Jap_Name":"Riviera 〜約束の地リヴィエラ〜(Eng)","Kor_Name":"약속의 땅 리비에라(Eng)","filterDiv":"game mobile computer pc single player third person turn-based turn based role play rpg 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 回合制 角色扮演 約束之地 约束之地 承諾之地 承诺之地 gba game boy advance ゲームボーイアドバンス 게임보이 어드밴스","Icon":"🎮 ","Icon2":"🎮","Anchor":"Riviera_The_Promised_Land_GBA_Eng_Game","Link":"https://www.retrogames.cc/gameboyadvance-games/riviera-the-promised-land-u-trashman.html target=_blank","Image":"https://img.youtube.com/vi/Pvoe_JUX11k/hqdefault.jpg"},
+				{"Trd_Name":"吞食天地(NES)","Chi_Name":"吞食天地(NES)","Eng_Name":"Destiny of an Emperor (NES)","Jap_Name":"天地を喰らう (NES)","Kor_Name":"吞食天地(NES)","filterDiv":"game mobile computer pc single player third person turn-based turn based role play rpg tenchi wo kurau the devouring of heaven and earth three kingdoms 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 回合制 角色扮演 三國 nes nintendo entertainment system family computer famicom fc遊戲機 紅白機 灰機 家庭電腦 fc游戏机 红白机 灰机 家庭电脑 ファミリーコンピュータ 패밀리 컴퓨터","Icon":"🎮 ","Icon2":"🎮","Anchor":"Tenchi_o_Kurau_NES_Game","Link":"https://www.retrogames.cc/nes-games/destiny-of-an-emperor-usa.html target=_blank","Image":"https://img.youtube.com/vi/dDOg6yaFeHg/hqdefault.jpg"},
+				{"Trd_Name":"吞食天地II 諸葛孔明傳(NES)","Chi_Name":"吞食天地II 诸葛孔明传(NES)","Eng_Name":"The Devouring of Heaven and Earth II: The Story of Kong Ming (NES)","Jap_Name":"天地を喰らうII 諸葛孔明伝(NES)","Kor_Name":"天地を喰らうII 諸葛孔明伝(NES)","filterDiv":"game mobile computer pc single player third person turn-based turn based role play rpg tenchi wo kurau destiny of an emperor tenchi wo kurau ii: shokatsu komei den three kingdoms 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 回合制 角色扮演 三國 nes nintendo entertainment system family computer famicom fc遊戲機 紅白機 灰機 家庭電腦 fc游戏机 红白机 灰机 家庭电脑 ファミリーコンピュータ 패밀리 컴퓨터","Icon":"🎮 ","Icon2":"🎮","Anchor":"Tenchi_wo_Kurau_II_Shokatsu_Komei_Den_NES_Game","Link":"https://www.retrogames.cc/nes-games/tenchi-wo-kurau-ii-shokatsu-koumei-den-japan-en-by-magic-destiny-v1-12-destiny-of-an-emperor-ii-the-story-of-zhuge-liang.html target=_blank","Image":"https://img.youtube.com/vi/7Vbo7Un39yE/hqdefault.jpg"},
+				{"Trd_Name":"吞食天地(GB)","Chi_Name":"吞食天地(GB)","Eng_Name":"Destiny of an Emperor (GB)","Jap_Name":"天地を喰らう(GB)","Kor_Name":"天地を喰らう(GB)","filterDiv":"game mobile computer pc single player third person turn-based turn based role play rpg tenchi o kurau the devouring of heaven and earth three kingdoms 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 回合制 角色扮演 三國 gb game boy ゲームボーイ 게임보이","Icon":"🎮 ","Icon2":"🎮","Anchor":"Tenchi_o_Kurau_GB_Game","Link":"https://www.retrogames.cc/gameboy-games/tenchi-o-kurau-japan.html target=_blank","Image":"https://img.youtube.com/vi/1mzfnuyhTXY/hqdefault.jpg"},
+				{"Trd_Name":"SD高達G世代 ADVANCE","Chi_Name":"SD高达G世代 ADVANCE","Eng_Name":"SD Gundam G Generation Advance","Jap_Name":"SDガンダム GGENERATION ADVANCE","Kor_Name":"SD건담 G제네레이션 ADVANCE","filterDiv":"game mobile computer pc single player third person turn-based turn based role play rpg 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 回合制 角色扮演 sd鋼彈G世代 advance sd钢弹G世代 advance gba game boy advance ゲームボーイアドバンス 게임보이 어드밴스","Icon":"🎮 ","Icon2":"🎮","Anchor":"SD_Gundam_G_Generation_Advance_Game","Link":"https://www.retrogames.cc/gameboyadvance-games/sd-gundam-g-generation-advance-j-independent.html target=_blank","Image":"https://img.youtube.com/vi/wSEDhQEVVq0/hqdefault.jpg"},
+				{"Trd_Name":"超級警備隊-怪獸襲擊","Chi_Name":"超级警备队-怪兽袭击","Eng_Name":"Ultra Keibitai – Monster Attack","Jap_Name":"ウルトラ警備隊 モンスターアタック","Kor_Name":"ウルトラ警備隊 モンスターアタック","filterDiv":"game mobile computer pc single player third person turn-based turn based role play rpg 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 回合制 角色扮演 奧特曼警備隊 奥特曼警备队 gba game boy advance ゲームボーイアドバンス 게임보이 어드밴스","Icon":"🎮 ","Icon2":"🎮","Anchor":"Ultra_Keibitai_Monster_Attack_Game","Link":"https://www.retrogames.cc/gameboyadvance-games/ultra-keibitai-monster-attack-j-caravan.html target=_blank","Image":"https://img.youtube.com/vi/SQgrB5ti9e4/hqdefault.jpg"},
+				{"Trd_Name":"How to Loot - Pin Pull","Chi_Name":"How to Loot - Pin Pull","Eng_Name":"How to Loot - Pin Pull","Jap_Name":"How to Loot - Pin Pull","Kor_Name":"How to Loot - Pin Pull","filterDiv":"game mobile computer pc single player third person turn-based turn based role play rpg 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 回合制 角色扮演","Icon":"🎮 ","Icon2":"🎮","Anchor":"How_to_Loot_Pin_Pull_Game","Link":"https://poki.com/zh/g/how-to-loot-pin-pull target=_blank","Image":"https://img.youtube.com/vi/iiW3GFrC0xg/hqdefault.jpg"},
+				{"Trd_Name":"Hero Pin","Chi_Name":"Hero Pin","Eng_Name":"Hero Pin","Jap_Name":"Hero Pin","Kor_Name":"Hero Pin","filterDiv":"game mobile computer pc single player third person turn-based turn based role play rpg 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 回合制 角色扮演","Icon":"🎮 ","Icon2":"🎮","Anchor":"Hero_Pin_Game","Link":"https://yandex.com/games/app/282152 target=_blank","Image":"https://img.youtube.com/vi/2TE9zyo14zk/hqdefault.jpg"},
+				{"Trd_Name":"Space Adventure Pinball","Chi_Name":"Space Adventure Pinball","Eng_Name":"Space Adventure Pinball","Jap_Name":"Space Adventure Pinball","Kor_Name":"Space Adventure Pinball","filterDiv":"game mobile computer pc single player first person 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 街機 彈珠台 街机 弹珠台 arcade cabinet arcade machine 街機 機臺 街邊遊戲機 步行街遊戲機 大型電玩 街机 机台 街边游戏机 步行街游戏机 大型电玩 アーケードゲーム 아케이드 게임","Icon":"🎮 ","Icon2":"🎮","Anchor":"Space_Adventure_Pinball_Game","Link":"https://www.classicgame.com/game/Pinball+Space+Adventure target=_blank","Image":"https://img.youtube.com/vi/05ucSewthAE/hqdefault.jpg"},
+				{"Trd_Name":"Tom & Jerry Mousetrap Pinball","Chi_Name":"Tom & Jerry Mousetrap Pinball","Eng_Name":"Tom & Jerry Mousetrap Pinball","Jap_Name":"Tom & Jerry Mousetrap Pinball","Kor_Name":"Tom & Jerry Mousetrap Pinball","filterDiv":"game mobile computer pc single player first person 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 街機 彈珠台 街机 弹珠台 arcade cabinet arcade machine 街機 機臺 街邊遊戲機 步行街遊戲機 大型電玩 街机 机台 街边游戏机 步行街游戏机 大型电玩 アーケードゲーム 아케이드 게임","Icon":"🎮 ","Icon2":"🎮","Anchor":"Tom_And_Jerry_Mousetrap_Pinball_Game","Link":"https://www.classicgame.com/game/Tom+%26+Jerry+Mousetrap+Pinball target=_blank","Image":"https://img.youtube.com/vi/XzliKm0SLsQ/hqdefault.jpg"},
+				{"Trd_Name":"Firefighter Pinball","Chi_Name":"Firefighter Pinball","Eng_Name":"Firefighter Pinball","Jap_Name":"Firefighter Pinball","Kor_Name":"Firefighter Pinball","filterDiv":"game mobile computer pc single player first person 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 街機 彈珠台 街机 弹珠台 arcade cabinet arcade machine 街機 機臺 街邊遊戲機 步行街遊戲機 大型電玩 街机 机台 街边游戏机 步行街游戏机 大型电玩 アーケードゲーム 아케이드 게임","Icon":"🎮 ","Icon2":"🎮","Anchor":"Firefighter_Pinball_Game","Link":"https://www.classicgame.com/game/Firefighter+Pinball target=_blank","Image":"https://img.youtube.com/vi/lX94pUghyxo/hqdefault.jpg"},
+				{"Trd_Name":"Zoo Pinball","Chi_Name":"Zoo Pinball","Eng_Name":"Zoo Pinball","Jap_Name":"Zoo Pinball","Kor_Name":"Zoo Pinball","filterDiv":"game mobile computer pc single player first person 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 街機 彈珠台 街机 弹珠台 arcade cabinet arcade machine 街機 機臺 街邊遊戲機 步行街遊戲機 大型電玩 街机 机台 街边游戏机 步行街游戏机 大型电玩 アーケードゲーム 아케이드 게임","Icon":"🎮 ","Icon2":"🎮","Anchor":"Zoo_Pinball_Game","Link":"https://www.classicgame.com/game/Zoo+Pinball target=_blank","Image":"https://img.youtube.com/vi/Tn0-8MJkOLg/hqdefault.jpg"},
+				{"Trd_Name":"Rainbow Pinball","Chi_Name":"Rainbow Pinball","Eng_Name":"Rainbow Pinball","Jap_Name":"Rainbow Pinball","Kor_Name":"Rainbow Pinball","filterDiv":"game mobile computer pc single player first person 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 街機 彈珠台 街机 弹珠台 arcade cabinet arcade machine 街機 機臺 街邊遊戲機 步行街遊戲機 大型電玩 街机 机台 街边游戏机 步行街游戏机 大型电玩 アーケードゲーム 아케이드 게임","Icon":"🎮 ","Icon2":"🎮","Anchor":"Rainbow_Pinball_Game","Link":"https://www.classicgame.com/game/Rainbow+Pinball target=_blank","Image":"https://img.youtube.com/vi/CLsxMgh2grg/hqdefault.jpg"},
+				{"Trd_Name":"寵物小精靈彈珠(GBC)","Chi_Name":"宝可梦弹珠(GBC)","Eng_Name":"Pokémon Pinball (GBC)","Jap_Name":"ポケモンピンボール(GBC)","Kor_Name":"포켓몬 핀볼(GBC)","filterDiv":"game mobile computer pc single player first person pokemon 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 街機 彈珠台 寶可夢 街机 弹珠台 宠物小精灵弹珠 arcade cabinet arcade machine 街機 機臺 街邊遊戲機 步行街遊戲機 大型電玩 街机 机台 街边游戏机 步行街游戏机 大型电玩 アーケードゲーム 아케이드 게임 gbc game boy color ゲームボーイカラー 게임보이 컬러","Icon":"🎮 ","Icon2":"🎮","Anchor":"Pokemon_Pinball_GBC_Game","Link":"https://emulatorgames.online/games/gbc/pokemon-pinball target=_blank","Image":"https://img.youtube.com/vi/UJbWjcXjO54/hqdefault.jpg"},
+				{"Trd_Name":"Classic Pinball","Chi_Name":"Classic Pinball","Eng_Name":"Classic Pinball","Jap_Name":"Classic Pinball","Kor_Name":"Classic Pinball","filterDiv":"game mobile computer pc single player first person 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 街機 彈珠台 街机 弹珠台 arcade cabinet arcade machine 街機 機臺 街邊遊戲機 步行街遊戲機 大型電玩 街机 机台 街边游戏机 步行街游戏机 大型电玩 アーケードゲーム 아케이드 게임","Icon":"🎮 ","Icon2":"🎮","Anchor":"Classic_Pinball_Game","Link":"https://www.funnygames.org/game/classic_pinball.html target=_blank","Image":"https://img.youtube.com/vi/zf9Q_zp0XJg/hqdefault.jpg"},
+				{"Trd_Name":"NeonGames Pinball","Chi_Name":"NeonGames Pinball","Eng_Name":"NeonGames Pinball","Jap_Name":"NeonGames Pinball","Kor_Name":"NeonGames Pinball","filterDiv":"game mobile computer pc single player first person 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 街機 彈珠台 街机 弹珠台 arcade cabinet arcade machine 街機 機臺 街邊遊戲機 步行街遊戲機 大型電玩 街机 机台 街边游戏机 步行街游戏机 大型电玩 アーケードゲーム 아케이드 게임","Icon":"🎮 ","Icon2":"🎮","Anchor":"NeonGames_Pinball_Game","Link":"https://www.classicgame.com/game/Pinball target=_blank","Image":"https://img.youtube.com/vi/KbWYojzWlQc/hqdefault.jpg"},
+				{"Trd_Name":"Neon Pinball","Chi_Name":"Neon Pinball","Eng_Name":"Neon Pinball","Jap_Name":"Neon Pinball","Kor_Name":"Neon Pinball","filterDiv":"game mobile computer pc single player first person 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 街機 彈珠台 街机 弹珠台 arcade cabinet arcade machine 街機 機臺 街邊遊戲機 步行街遊戲機 大型電玩 街机 机台 街边游戏机 步行街游戏机 大型电玩 アーケードゲーム 아케이드 게임","Icon":"🎮 ","Icon2":"🎮","Anchor":"Neon_Pinball_Game","Link":"https://www.classicgame.com/game/Neon+Pinball target=_blank","Image":"https://img.youtube.com/vi/8qomQpH8yrE/hqdefault.jpg"},
+				{"Trd_Name":"Pinball Galaxy","Chi_Name":"Pinball Galaxy","Eng_Name":"Pinball Galaxy","Jap_Name":"Pinball Galaxy","Kor_Name":"Pinball Galaxy","filterDiv":"game mobile computer pc single player first person 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 街機 彈珠台 街机 弹珠台 arcade cabinet arcade machine 街機 機臺 街邊遊戲機 步行街遊戲機 大型電玩 街机 机台 街边游戏机 步行街游戏机 大型电玩 アーケードゲーム 아케이드 게임","Icon":"🎮 ","Icon2":"🎮","Anchor":"Pinball_Galaxy_Game","Link":"https://www.y8.com/games/pinball_galaxy target=_blank","Image":"https://img.youtube.com/vi/oNk5T9cmYy0/hqdefault.jpg"},
+				{"Trd_Name":"Metal Pinball","Chi_Name":"Metal Pinball","Eng_Name":"Metal Pinball","Jap_Name":"Metal Pinball","Kor_Name":"Metal Pinball","filterDiv":"game mobile computer pc single player first person 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 街機 彈珠台 街机 弹珠台 arcade cabinet arcade machine 街機 機臺 街邊遊戲機 步行街遊戲機 大型電玩 街机 机台 街边游戏机 步行街游戏机 大型电玩 アーケードゲーム 아케이드 게임","Icon":"🎮 ","Icon2":"🎮","Anchor":"Metal_Pinball_Game","Link":"https://www.classicgame.com/game/Metal+Pinball target=_blank","Image":"https://img.youtube.com/vi/8XJ0NjeBw2s/hqdefault.jpg"},
+				{"Trd_Name":"01mobile Pinball","Chi_Name":"01mobile Pinball","Eng_Name":"01mobile Pinball","Jap_Name":"01mobile Pinball","Kor_Name":"01mobile Pinball","filterDiv":"game mobile computer pc single player first person 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 街機 彈珠台 街机 弹珠台 arcade cabinet arcade machine 街機 機臺 街邊遊戲機 步行街遊戲機 大型電玩 街机 机台 街边游戏机 步行街游戏机 大型电玩 アーケードゲーム 아케이드 게임","Icon":"🎮 ","Icon2":"🎮","Anchor":"01mobile_Pinball_Game","Link":"https://www.classicgame.com/game/Pinball+2 target=_blank","Image":"https://img.youtube.com/vi/C1FF4uKkcec/hqdefault.jpg"},
+				{"Trd_Name":"Black Star Pinball","Chi_Name":"Black Star Pinball","Eng_Name":"Black Star Pinball","Jap_Name":"Black Star Pinball","Kor_Name":"Black Star Pinball","filterDiv":"game mobile computer pc single player first person 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 街機 彈珠台 街机 弹珠台 arcade cabinet arcade machine 街機 機臺 街邊遊戲機 步行街遊戲機 大型電玩 街机 机台 街边游戏机 步行街游戏机 大型电玩 アーケードゲーム 아케이드 게임","Icon":"🎮 ","Icon2":"🎮","Anchor":"Black_Star_Pinball_Game","Link":"https://plays.org/game/black-star-pinball/ target=_blank","Image":"https://img.youtube.com/vi/QEy7NiXJNoA/hqdefault.jpg"},
+				{"Trd_Name":"Pinball Rush","Chi_Name":"Pinball Rush","Eng_Name":"Pinball Rush","Jap_Name":"Pinball Rush","Kor_Name":"Pinball Rush","filterDiv":"game mobile computer pc single player first person 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 街機 彈珠台 街机 弹珠台 arcade cabinet arcade machine 街機 機臺 街邊遊戲機 步行街遊戲機 大型電玩 街机 机台 街边游戏机 步行街游戏机 大型电玩 アーケードゲーム 아케이드 게임","Icon":"🎮 ","Icon2":"🎮","Anchor":"Pinball_Rush_Game","Link":"https://www.friv.com/z/games/pinballrush/game.html target=_blank","Image":"https://img.youtube.com/vi/DTXGXOy5hs0/hqdefault.jpg"},
+				{"Trd_Name":"Flipper Basketball","Chi_Name":"Flipper Basketball","Eng_Name":"Flipper Basketball","Jap_Name":"Flipper Basketball","Kor_Name":"Flipper Basketball","filterDiv":"game mobile computer pc single player first person pinball 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 街機 彈珠台 籃球 街机 弹珠台 篮球 arcade cabinet arcade machine 街機 機臺 街邊遊戲機 步行街遊戲機 大型電玩 街机 机台 街边游戏机 步行街游戏机 大型电玩 アーケードゲーム 아케이드 게임","Icon":"🎮 ","Icon2":"🎮","Anchor":"Flipper_Basketball_Game","Link":"https://www.gamepix.com/play/flipper-basketball target=_blank","Image":"https://img.youtube.com/vi/dCD5OVBtm58/hqdefault.jpg"},
+				{"Trd_Name":"Flipper Dunk 3D","Chi_Name":"Flipper Dunk 3D","Eng_Name":"Flipper Dunk 3D","Jap_Name":"Flipper Dunk 3D","Kor_Name":"Flipper Dunk 3D","filterDiv":"game mobile computer pc single player first person pinball basketball 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 街機 彈珠台 籃球 街机 弹珠台 篮球 arcade cabinet arcade machine 街機 機臺 街邊遊戲機 步行街遊戲機 大型電玩 街机 机台 街边游戏机 步行街游戏机 大型电玩 アーケードゲーム 아케이드 게임","Icon":"🎮 ","Icon2":"🎮","Anchor":"Flipper_Dunk_3D_Game","Link":"https://www.crazygames.com/game/flipper-dunk-3d target=_blank","Image":"https://img.youtube.com/vi/Gd22ZqJUbq0/hqdefault.jpg"},
+				{"Trd_Name":"Flipper Pinball","Chi_Name":"Flipper Pinball","Eng_Name":"Flipper Pinball","Jap_Name":"Flipper Pinball","Kor_Name":"Flipper Pinball","filterDiv":"game mobile computer pc single player first person pinball 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 街機 彈珠台 街机 弹珠台 arcade cabinet arcade machine 街機 機臺 街邊遊戲機 步行街遊戲機 大型電玩 街机 机台 街边游戏机 步行街游戏机 大型电玩 アーケードゲーム 아케이드 게임","Icon":"🎮 ","Icon2":"🎮","Anchor":"Flipper_Pinball_Game","Link":"https://www.classicgame.com/game/Flipper+Pinball target=_blank","Image":"https://img.youtube.com/vi/tLUkRq9mmkI/hqdefault.jpg"},
+				{"Trd_Name":"Drop Dunks","Chi_Name":"Drop Dunks","Eng_Name":"Drop Dunks","Jap_Name":"Drop Dunks","Kor_Name":"Drop Dunks","filterDiv":"game mobile computer pc single player first person pinball basketball 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 街機 彈珠台 籃球 街机 弹珠台 篮球 arcade cabinet arcade machine 街機 機臺 街邊遊戲機 步行街遊戲機 大型電玩 街机 机台 街边游戏机 步行街游戏机 大型电玩 アーケードゲーム 아케이드 게임","Icon":"🎮 ","Icon2":"🎮","Anchor":"Drop_Dunks_Game","Link":"https://www.gamepix.com/play/drop-dunks target=_blank","Image":"https://img.youtube.com/vi/Yyo04jc0Gxo/hqdefault.jpg"},
+				{"Trd_Name":"葬送的芙莉蓮","Chi_Name":"葬送的芙莉莲","Eng_Name":"Frieren: Beyond Journey's End","Jap_Name":"葬送のフリーレン","Kor_Name":"장송의 프리렌","filterDiv":"game mobile computer pc single player first person pinball 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 街機 街机 arcade cabinet arcade machine 街機 機臺 街邊遊戲機 步行街遊戲機 大型電玩 街机 机台 街边游戏机 步行街游戏机 大型电玩 アーケードゲーム 아케이드 게임","Icon":"🎮 ","Icon2":"🎮","Anchor":"Frieren_Game","Link":"https://frieren.s-pace.land/ target=_blank","Image":"https://img.youtube.com/vi/jxQbUsgi4Gw/hqdefault.jpg"},
+				{"Trd_Name":"Monkey Mart","Chi_Name":"Monkey Mart","Eng_Name":"Monkey Mart","Jap_Name":"Monkey Mart","Kor_Name":"Monkey Mart","filterDiv":"game mobile computer pc single player third person business simulation economic tycoon incremental idle 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 模擬經營 增量 放置 閒置 模拟经营 闲置","Icon":"🎮 ","Icon2":"🎮","Anchor":"Monkey_Mart_Game","Link":"https://poki.jp/g/monkey-mart target=_blank","Image":"https://img.youtube.com/vi/0b44s-d2lo0/hqdefault.jpg"},
+				{"Trd_Name":"Cow Bay","Chi_Name":"Cow Bay","Eng_Name":"Cow Bay","Jap_Name":"Cow Bay","Kor_Name":"Cow Bay","filterDiv":"game mobile computer pc single player third person business simulation agriculture-simulation farming plowing planting growing harvesting economic tycoon incremental idle 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 農場模擬經營 增量 放置 閒置 模拟经营 闲置","Icon":"🎮 ","Icon2":"🎮","Anchor":"Cow_Bay_Game","Link":"https://poki.com/en/g/cow-bay target=_blank","Image":"https://img.youtube.com/vi/FeUA4q9Q8PY/hqdefault.jpg"},
+				{"Trd_Name":"瘋狂水族箱","Chi_Name":"疯狂水族箱","Eng_Name":"Insaniquarium! Deluxe","Jap_Name":"クレイジーアクアリウム","Kor_Name":"인사니쿠아리움","filterDiv":"game mobile computer pc single player third person business simulation agriculture-simulation farming plowing planting growing harvesting economic tycoon incremental idle arcade 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 農場模擬經營 增量 放置 閒置 街機 模拟经营 闲置 街机","Icon":"🎮 ","Icon2":"🎮","Anchor":"Insaniquarium_Game","Link":"https://scratch.mit.edu/projects/156552692/fullscreen/ target=_blank","Image":"https://img.youtube.com/vi/S7i82axE-F0/hqdefault.jpg"},
+				{"Trd_Name":"Idle Gun","Chi_Name":"Idle Gun","Eng_Name":"Idle Gun","Jap_Name":"Idle Gun","Kor_Name":"Idle Gun","filterDiv":"game mobile computer pc single player third person business simulation economic tycoon incremental idle 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 模擬經營 增量 放置 閒置 模拟经营 闲置","Icon":"🎮 ","Icon2":"🎮","Anchor":"Idle_Gun_Game","Link":"https://www.crazygames.com/game/idlegun target=_blank","Image":"https://img.youtube.com/vi/XEvEg9o0Clg/hqdefault.jpg"},
+				{"Trd_Name":"Idle Gun 2","Chi_Name":"Idle Gun 2","Eng_Name":"Idle Gun 2","Jap_Name":"Idle Gun 2","Kor_Name":"Idle Gun 2","filterDiv":"game mobile computer pc single player third person business simulation economic tycoon incremental idle 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 模擬經營 增量 放置 閒置 模拟经营 闲置","Icon":"🎮 ","Icon2":"🎮","Anchor":"Idle_Gun_2_Game","Link":"https://www.crazygames.com/game/idle-gun-2 target=_blank","Image":"https://img.youtube.com/vi/XEvEg9o0Clg/hqdefault.jpg"},
+				{"Trd_Name":"Merge Tycoon","Chi_Name":"Merge Tycoon","Eng_Name":"Merge Tycoon","Jap_Name":"Merge Tycoon","Kor_Name":"Merge Tycoon","filterDiv":"game mobile computer pc single player first person business simulation economic tycoon incremental idle 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 模擬經營 增量 放置 閒置 合併 模拟经营 闲置 合并","Icon":"🎮 ","Icon2":"🎮","Anchor":"Merge_Tycoon_Game","Link":"https://poki.com/en/g/merge-tycoon target=_blank","Image":"https://img.youtube.com/vi/2by2RWGiW8c/hqdefault.jpg"},
+				{"Trd_Name":"Look, Your Loot!","Chi_Name":"Look, Your Loot!","Eng_Name":"Look, Your Loot!","Jap_Name":"Look, Your Loot!","Kor_Name":"Look, Your Loot!","filterDiv":"game mobile computer pc single player third person puzzle board strategy 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 益智 解密 解謎 智力 棋盤 圖版 桌上 桌面 卡片 卡牌 紙牌 戰略 策略","Icon":"🎮 ","Icon2":"🎮","Anchor":"Look_Your_Loot_Game","Link":"https://poki.jp/g/look-your-loot target=_blank","Image":"https://img.youtube.com/vi/WNqHb16jtiY/hqdefault.jpg"},
+				{"Trd_Name":"鐵拳卡片挑戰賽","Chi_Name":"铁拳卡片挑战赛","Eng_Name":"Tekken Card Challenge","Jap_Name":"鉄拳カードチャレンジ","Kor_Name":"철권 카드 챌린지","filterDiv":"game mobile computer pc single player third person puzzle board strategy 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 益智 解密 解謎 智力 棋盤 圖版 桌上 桌面 卡片 卡牌 紙牌 戰略 策略 gb game boy ゲームボーイ 게임보이","Icon":"🎮 ","Icon2":"🎮","Anchor":"Tekken_Card_Challenge_Game","Link":"https://www.retrogames.cc/wonderswan-games/tekken-card-challenge-j-m.html target=_blank","Image":"https://img.youtube.com/vi/y8kgTMlqTBc/hqdefault.jpg"},
+				{"Trd_Name":"Maya","Chi_Name":"Maya","Eng_Name":"Maya","Jap_Name":"Maya","Kor_Name":"Maya","filterDiv":"game mobile computer pc single player first person puzzle tile-matching tile matching match-three match-3 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 益智 消除 三消 3消","Icon":"🎮 ","Icon2":"🎮","Anchor":"Maya_Game","Link":"https://en.gameslol.net/maya-zuma-1458.html target=_blank","Image":"https://img.youtube.com/vi/FgDpnkUfCdA/hqdefault.jpg"},
+				{"Trd_Name":"糖果傳奇","Chi_Name":"糖果传奇","Eng_Name":"Candy Crush Saga","Jap_Name":"キャンディークラッシュ","Kor_Name":"Candy Crush Saga","filterDiv":"game mobile computer pc single player first person puzzle tile-matching tile matching match-three match-3 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 益智 消除 三消 3消","Icon":"🎮 ","Icon2":"🎮","Anchor":"Candy_Crush_Saga_Game","Link":"https://candy-crush-online.github.io/ target=_blank","Image":"https://img.youtube.com/vi/W8hGMI_q1Xo/hqdefault.jpg"},
+				{"Trd_Name":"Tetra Blocks","Chi_Name":"Tetra Blocks","Eng_Name":"Tetra Blocks","Jap_Name":"Tetra Blocks","Kor_Name":"Tetra Blocks","filterDiv":"game mobile computer pc single player first person puzzle tile-matching tile matching match-three match-3 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 益智 消除 三消 3消","Icon":"🎮 ","Icon2":"🎮","Anchor":"Tetra_Blocks_Game","Link":"https://poki.jp/g/tetra-blocks target=_blank","Image":"https://img.youtube.com/vi/N1PAxrVzLDo/hqdefault.jpg"},
+				{"Trd_Name":"Five Nights at Freddy's","Chi_Name":"Five Nights at Freddy's","Eng_Name":"Five Nights at Freddy's","Jap_Name":"Five Nights at Freddy's","Kor_Name":"Five Nights at Freddy's","filterDiv":"game mobile computer pc single player first person puzzle room escape horror 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 益智 密室逃脫 密室逃脱 恐怖","Icon":"🎮 ","Icon2":"🎮","Anchor":"Five_Nights_at_Freddys_Game","Link":"https://www.gameflare.com/online-game/five-nights-at-freddys/ target=_blank","Image":"https://img.youtube.com/vi/M7WgoBhF7gc/hqdefault.jpg"},
+				{"Trd_Name":"Five Nights at Freddy's 2","Chi_Name":"Five Nights at Freddy's 2","Eng_Name":"Five Nights at Freddy's 2","Jap_Name":"Five Nights at Freddy's 2","Kor_Name":"Five Nights at Freddy's 2","filterDiv":"game mobile computer pc single player first person puzzle room escape horror 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 益智 密室逃脫 密室逃脱 恐怖","Icon":"🎮 ","Icon2":"🎮","Anchor":"Five_Nights_at_Freddys_2_Game","Link":"https://www.gameflare.com/online-game/five-nights-at-freddys-2/ target=_blank","Image":"https://img.youtube.com/vi/60wLvPWXCCc/hqdefault.jpg"},
+				{"Trd_Name":"Five Nights at Freddy's 3","Chi_Name":"Five Nights at Freddy's 3","Eng_Name":"Five Nights at Freddy's 3","Jap_Name":"Five Nights at Freddy's 3","Kor_Name":"Five Nights at Freddy's 3","filterDiv":"game mobile computer pc single player first person puzzle room escape horror 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 益智 密室逃脫 密室逃脱 恐怖","Icon":"🎮 ","Icon2":"🎮","Anchor":"Five_Nights_at_Freddys_3_Game","Link":"https://www.gameflare.com/online-game/five-nights-at-freddys-3/ target=_blank","Image":"https://img.youtube.com/vi/a6zmIvT7WZw/hqdefault.jpg"},
+				{"Trd_Name":"Five Nights at Freddy's 4","Chi_Name":"Five Nights at Freddy's 4","Eng_Name":"Five Nights at Freddy's 4","Jap_Name":"Five Nights at Freddy's 4","Kor_Name":"Five Nights at Freddy's 4","filterDiv":"game mobile computer pc single player first person puzzle room escape horror 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 益智 密室逃脫 密室逃脱 恐怖","Icon":"🎮 ","Icon2":"🎮","Anchor":"Five_Nights_at_Freddys_4_Game","Link":"https://www.gameflare.com/online-game/five-nights-at-freddys-4/ target=_blank","Image":"https://img.youtube.com/vi/ibCoLMjwJ1g/hqdefault.jpg"},
+				{"Trd_Name":"Clown Nights","Chi_Name":"Clown Nights","Eng_Name":"Clown Nights","Jap_Name":"Clown Nights","Kor_Name":"Clown Nights","filterDiv":"game mobile computer pc single player first person puzzle room escape horror 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 益智 密室逃脫 密室逃脱 恐怖","Icon":"🎮 ","Icon2":"🎮","Anchor":"Clown_Nights_Game","Link":"https://www.gameflare.com/online-game/clown-nights/ target=_blank","Image":"https://img.youtube.com/vi/qgs5tSfnh8Y/hqdefault.jpg"},
+				{"Trd_Name":"Exhibit of Sorrows","Chi_Name":"Exhibit of Sorrows","Eng_Name":"Exhibit of Sorrows","Jap_Name":"Exhibit of Sorrows","Kor_Name":"Exhibit of Sorrows","filterDiv":"game mobile computer pc single player first person puzzle room escape horror 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 益智 密室逃脫 密室逃脱 恐怖","Icon":"🎮 ","Icon2":"🎮","Anchor":"Exhibit_of_Sorrows_Game","Link":"https://www.crazygames.com/game/exhibit-of-sorrows target=_blank","Image":"https://img.youtube.com/vi/q9KZDwkM7mw/hqdefault.jpg"},
+				{"Trd_Name":"There Is No Game","Chi_Name":"There Is No Game","Eng_Name":"There Is No Game","Jap_Name":"There Is No Game","Kor_Name":"There Is No Game","filterDiv":"game mobile computer pc single player first person puzzle room escape 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第一人稱 益智 密室逃脫 密室逃脱","Icon":"🎮 ","Icon2":"🎮","Anchor":"There_Is_No_Game_Game","Link":"https://poki.com/en/g/there-is-no-game target=_blank","Image":"https://img.youtube.com/vi/scqyfnrGJv8/hqdefault.jpg"},
+				{"Trd_Name":"Blob Opera","Chi_Name":"Blob Opera","Eng_Name":"Blob Opera","Jap_Name":"Blob Opera","Kor_Name":"Blob Opera","filterDiv":"game mobile computer pc single player third person beat 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 節拍","Icon":"🎮 ","Icon2":"🎮","Anchor":"Blob_Opera_Game","Link":"https://artsandculture.google.com/experiment/blob-opera/AAHWrq360NcGbw?cp=e30. target=_blank","Image":"https://img.youtube.com/vi/_c0LVeAnLRY/hqdefault.jpg"},
+				{"Trd_Name":"鐵拳","Chi_Name":"铁拳","Eng_Name":"Tekken","Jap_Name":"鉄拳","Kor_Name":"철권","filterDiv":"game computer pc multiplayer third person action side horizontally scrolling scroller vs versus pvp pk fight 遊戲 電腦 電子 多人 第三人稱 橫向捲軸 動作 對戰 playstation","Icon":"🎮 ","Icon2":"🎮","Anchor":"Tekken_Game","Link":"https://www.retrogames.cc/arcade-games/tekken-world-te2-ver-c.html target=_blank","Image":"https://img.youtube.com/vi/4KXqQT4JLIQ/hqdefault.jpg"},
+				{"Trd_Name":"鐵拳2","Chi_Name":"铁拳2","Eng_Name":"Tekken 2","Jap_Name":"鉄拳2","Kor_Name":"철권 2","filterDiv":"game computer pc multiplayer third person action side horizontally scrolling scroller vs versus pvp pk fight 遊戲 電腦 電子 多人 第三人稱 橫向捲軸 動作 對戰 playstation","Icon":"🎮 ","Icon2":"🎮","Anchor":"Tekken_2_Game","Link":"https://www.retrogames.cc/arcade-games/tekken-2-ver-b-us-tes3-ver-d.html target=_blank","Image":"https://img.youtube.com/vi/OcJB9GWRq9Q/hqdefault.jpg"},
+				{"Trd_Name":"鐵拳3","Chi_Name":"铁拳3","Eng_Name":"Tekken 3","Jap_Name":"鉄拳3","Kor_Name":"철권 3","filterDiv":"game computer pc multiplayer third person action side horizontally scrolling scroller vs versus pvp pk fight 遊戲 電腦 電子 多人 第三人稱 橫向捲軸 動作 對戰 playstation","Icon":"🎮 ","Icon2":"🎮","Anchor":"Tekken_3_Game","Link":"https://www.retrogames.cc/arcade-games/tekken-3-world-tet2-ver-e1.html target=_blank","Image":"https://img.youtube.com/vi/N3YAwyC5Wc0/hqdefault.jpg"},
+				{"Trd_Name":"三國無雙","Chi_Name":"三国无双","Eng_Name":"Dynasty Warriors","Jap_Name":"三國無双","Kor_Name":"三國無双","filterDiv":"game computer pc multiplayer third person action side horizontally scrolling scroller vs versus pvp pk fight 遊戲 電腦 電子 多人 第三人稱 橫向捲軸 動作 對戰 playstation","Icon":"🎮 ","Icon2":"🎮","Anchor":"Dynasty_Warriors_Game","Link":"https://www.retrogames.cc/psx-games/dynasty-warriors.html target=_blank","Image":"https://img.youtube.com/vi/_NX1sfKqzf8/hqdefault.jpg"},
+				{"Trd_Name":"鐵拳2(NES)","Chi_Name":"铁拳2(NES)","Eng_Name":"Tekken 2 (NES)","Jap_Name":"鉄拳2(NES)","Kor_Name":"철권 2 (NES)","filterDiv":"game computer pc multiplayer third person action side horizontally scrolling scroller vs versus pvp pk fight 遊戲 電腦 電子 多人 第三人稱 橫向捲軸 動作 對戰 nes nintendo entertainment system family computer famicom fc遊戲機 紅白機 灰機 家庭電腦 fc游戏机 红白机 灰机 家庭电脑 ファミリーコンピュータ 패밀리 컴퓨터","Icon":"🎮 ","Icon2":"🎮","Anchor":"Tekken_2_NES_Game","Link":"https://www.retrogames.cc/nes-games/tekken-2.html target=_blank","Image":"https://img.youtube.com/vi/5wLZD6DSAHo/hqdefault.jpg"},
+				{"Trd_Name":"鐵拳2(SNES)","Chi_Name":"铁拳2(SNES)","Eng_Name":"Tekken 2 (SNES)","Jap_Name":"鉄拳2(SNES)","Kor_Name":"철권 2 (SNES)","filterDiv":"game computer pc multiplayer third person action side horizontally scrolling scroller vs versus pvp pk fight 遊戲 電腦 電子 多人 第三人稱 橫向捲軸 動作 對戰 snes super nintendo entertainment system super famicom sfc 超級任天堂 超级任天堂 スーパーファミコン 슈퍼 패미컴","Icon":"🎮 ","Icon2":"🎮","Anchor":"Tekken_2_SNES_Game","Link":"https://www.playsnesonline.com/play-tekken-2-online/?play=true&emulator=java#content target=_blank","Image":"https://img.youtube.com/vi/DXCAZw3FRfM/hqdefault.jpg"},
+				{"Trd_Name":"古惑狼賽車","Chi_Name":"袋狼大进击赛车","Eng_Name":"Crash Team Racing","Jap_Name":"クラッシュ・バンディクー レーシング","Kor_Name":"크래쉬 팀 레이싱","filterDiv":"game computer pc multiplayer third person racing ctr 遊戲 電腦 電子 多人 第三人稱 袋狼大進擊賽車 古惑狼赛车 playstation","Icon":"🎮 ","Icon2":"🎮","Anchor":"Crash_Team_Racing_Game","Link":"https://www.retrogames.cc/psx-games/crash-team-racing.html target=_blank","Image":"https://img.youtube.com/vi/6bWNrO4fI0o/hqdefault.jpg"},
+				{"Trd_Name":"Crash Bash","Chi_Name":"Crash Bash","Eng_Name":"Crash Bash","Jap_Name":"クラッシュ・バンディクー カーニバル","Kor_Name":"Crash Bash","filterDiv":"game computer pc multiplayer third person crash bandicoot carnival 遊戲 電腦 電子 多人 第三人稱 街機 街机 playstation","Icon":"🎮 ","Icon2":"🎮","Anchor":"Crash_Bash_Game","Link":"https://www.retrogames.cc/psx-games/crash-bash.html target=_blank","Image":"https://img.youtube.com/vi/y9YxrOGyydU/hqdefault.jpg"},
+				{"Trd_Name":"捉猴啦","Chi_Name":"捉猴啦","Eng_Name":"Ape Escape","Jap_Name":"サルゲッチュ","Kor_Name":"Ape Escape","filterDiv":"game computer pc single player third person action 遊戲 電腦 電子 單人 單打 單機 第三人稱 動作 playstation","Icon":"🎮 ","Icon2":"🎮","Anchor":"Ape_Escape_Game","Link":"https://www.retrogames.cc/psx-games/ape-escape.html target=_blank","Image":"https://img.youtube.com/vi/6PWL2T1Qu88/hqdefault.jpg"},
+				{"Trd_Name":"薩爾達傳說 時之笛 (N64)","Chi_Name":"萨尔达传说 时之笛 (N64)","Eng_Name":"The Legend of Zelda: Ocarina of Time (N64)","Jap_Name":"ゼルダの伝説 時のオカリナ (N64)","Kor_Name":"젤다의 전설 시간의 오카리나 (N64)","filterDiv":"game computer pc single player third person action 遊戲 電腦 電子 單人 單打 單機 第三人稱 動作 n64 nintendo 64 任天堂64 ニンテンドウ64","Icon":"🎮 ","Icon2":"🎮","Anchor":"The_Legend_of_Zelda_Ocarina_of_Time_N64_Game","Link":"https://arcadespot.com/game/the-legend-of-zelda-ocarina-of-time target=_blank","Image":"https://img.youtube.com/vi/0aJIVLN8E68/hqdefault.jpg"},
+				{"Trd_Name":"古惑狼","Chi_Name":"袋狼大进击","Eng_Name":"Crash Bandicoot","Jap_Name":"クラッシュ・バンディクー","Kor_Name":"크래쉬 밴디쿳","filterDiv":"game computer pc single player third person action role play rpg 遊戲 電腦 電子 單人 單打 單機 第三人稱 動作 角色扮演 袋狼大進擊 playstation","Icon":"🎮 ","Icon2":"🎮","Anchor":"Crash_Bandicoot_Game","Link":"https://www.retrogames.cc/psx-games/crash-bandicoot.html target=_blank","Image":"https://img.youtube.com/vi/Xn7y7gvjSxM/hqdefault.jpg"},
+				{"Trd_Name":"古惑狼2：皮質反擊","Chi_Name":"袋狼大进击2","Eng_Name":"Crash Bandicoot 2: Cortex Strikes Back","Jap_Name":"クラッシュ・バンディクー2 コルテックスの逆襲!","Kor_Name":"크래쉬 밴디쿳 2: 코텍스의 역습","filterDiv":"game computer pc single player third person action role play rpg 遊戲 電腦 電子 單人 單打 單機 第三人稱 動作 角色扮演 袋狼大進擊 皮质反击 playstation","Icon":"🎮 ","Icon2":"🎮","Anchor":"Crash_Bandicoot_2_Cortex_Strikes_Back_Game","Link":"https://www.retrogames.cc/psx-games/crash-bandicoot-2-cortex-strikes-back.html target=_blank","Image":"https://img.youtube.com/vi/bmnq7yedAzI/hqdefault.jpg"},
+				{"Trd_Name":"古惑狼3：Warped","Chi_Name":"袋狼大进击3：Warped","Eng_Name":"Crash Bandicoot: Warped","Jap_Name":"クラッシュ・バンディクー3 ブッとび!世界一周","Kor_Name":"크래쉬 밴디쿳: 워프드","filterDiv":"game computer pc single player third person action role play rpg 遊戲 電腦 電子 單人 單打 單機 第三人稱 動作 角色扮演 袋狼大進擊 扭曲 playstation","Icon":"🎮 ","Icon2":"🎮","Anchor":"Crash_Bandicoot_3_Warped_Game","Link":"https://www.retrogames.cc/psx-games/crash-bandicoot-warped.html target=_blank","Image":"https://img.youtube.com/vi/HG-NRnGp3RA/hqdefault.jpg"},
+				{"Trd_Name":"古惑狼 泰坦 (NDS)","Chi_Name":"古惑狼 泰坦 (NDS)","Eng_Name":"Crash of the Titans (NDS)","Jap_Name":"Crash of the Titans (NDS)","Kor_Name":"Crash of the Titans (NDS)","filterDiv":"game computer pc single player third person action role play rpg fusion 遊戲 電腦 電子 單人 單打 單機 第三人稱 動作 角色扮演 袋狼大進擊 nds nintendo ds 任天堂ds ニンテンドーds 닌텐도 ds","Icon":"🎮 ","Icon2":"🎮","Anchor":"Crash_of_the_Titans_NDS_Game","Link":"https://www.retrogames.cc/nds-games/crash-of-the-titans-usa.html target=_blank","Image":"https://img.youtube.com/vi/cQPAWihTKPY/hqdefault.jpg"},
+				{"Trd_Name":"Deer Simulator Christmas","Chi_Name":"Deer Simulator Christmas","Eng_Name":"Deer Simulator Christmas","Jap_Name":"Deer Simulator Christmas","Kor_Name":"Deer Simulator Christmas","filterDiv":"game computer pc single player third person action role play rpg santa 遊戲 電腦 電子 單人 單打 單機 第三人稱 動作 角色扮演 聖誕老人","Icon":"🎮 ","Icon2":"🎮","Anchor":"Deer_Simulator_Christmas_Game","Link":"https://www.crazygames.com/game/deer-simulator-christmas target=_blank","Image":"https://img.youtube.com/vi/vSXPL3MtadQ/hqdefault.jpg"},
+				{"Trd_Name":"Gladihoppers","Chi_Name":"Gladihoppers","Eng_Name":"Gladihoppers","Jap_Name":"Gladihoppers","Kor_Name":"Gladihoppers","filterDiv":"game computer pc multiplayer third person action side horizontally scrolling scroller vs versus pvp pk fight 遊戲 電腦 電子 單人 單打 單機 第三人稱 橫向捲軸 動作 對戰","Icon":"🎮 ","Icon2":"🎮","Anchor":"Gladihoppers_Game","Link":"https://poki.jp/g/gladihoppers target=_blank","Image":"https://img.youtube.com/vi/_kuLMGMoGAY/hqdefault.jpg"},
+				{"Trd_Name":"Egg Fighters","Chi_Name":"Egg Fighters","Eng_Name":"Egg Fighters","Jap_Name":"Egg Fighters","Kor_Name":"Egg Fighters","filterDiv":"game computer pc multiplayer third person action side horizontally scrolling scroller vs versus pvp pk fight 遊戲 電腦 電子 單人 單打 單機 第三人稱 橫向捲軸 動作 對戰","Icon":"🎮 ","Icon2":"🎮","Anchor":"Egg_Fighters_Game","Link":"https://www.twoplayergames.org/game/egg-fighters target=_blank","Image":"https://img.youtube.com/vi/F_NK2YfKzwk/hqdefault.jpg"},
+				{"Trd_Name":"Gunny Bunny","Chi_Name":"Gunny Bunny","Eng_Name":"Gunny Bunny","Jap_Name":"Gunny Bunny","Kor_Name":"Gunny Bunny","filterDiv":"game computer pc single player action shooting first person shooter first person shooter 遊戲 電腦 電子 單人 單打 單機 第一人稱 射擊 動作","Icon":"🎮 ","Icon2":"🎮","Anchor":"Gunny_Bunny_Game","Link":"https://archive.org/details/1100_gunny_bunny target=_blank","Image":"https://img.youtube.com/vi/GMF5bq9ukUg/hqdefault.jpg"},
+				{"Trd_Name":"Gunny Bunny 2","Chi_Name":"Gunny Bunny 2","Eng_Name":"Gunny Bunny 2","Jap_Name":"Gunny Bunny 2","Kor_Name":"Gunny Bunny 2","filterDiv":"game computer pc single player action shooting first person shooter first person shooter 遊戲 電腦 電子 單人 單打 單機 第一人稱 射擊 動作","Icon":"🎮 ","Icon2":"🎮","Anchor":"Gunny_Bunny_2_Game","Link":"https://www.newgrounds.com/portal/view/216187 target=_blank","Image":"https://img.youtube.com/vi/PMAhfrAuj-E/hqdefault.jpg"},
+				{"Trd_Name":"Hammer 2: Reloaded","Chi_Name":"Hammer 2: Reloaded","Eng_Name":"Hammer 2: Reloaded","Jap_Name":"Hammer 2: Reloaded","Kor_Name":"Hammer 2: Reloaded","filterDiv":"game computer pc single player action shooting third person shooter third person shooter 遊戲 電腦 電子 單人 單打 單機 第三人稱 射擊 動作","Icon":"🎮 ","Icon2":"🎮","Anchor":"Hammer_2_Reloaded_Game","Link":"https://www.crazygames.com/game/hammer-2 target=_blank","Image":"https://img.youtube.com/vi/fQn8LiQW1jY/hqdefault.jpg"},
+				{"Trd_Name":"恐龍危機","Chi_Name":"恐龙危机","Eng_Name":"Dino Crisis","Jap_Name":"ディノクライシス","Kor_Name":"디노 크라이시스","filterDiv":"game computer pc single player action shooting third person shooter real time strategy rts puzzle room escape horror 遊戲 電腦 電子 單人 單打 單機 第三人稱 射擊 動作 即時戰略 即時策略 即時战略 益智 密室逃脫 密室逃脱 恐怖 playstation","Icon":"🎮 ","Icon2":"🎮","Anchor":"Dino_Crisis_Game","Link":"https://www.retrogames.cc/psx-games/dino-crisis.html target=_blank","Image":"https://img.youtube.com/vi/LanZ-rRgw8s/hqdefault.jpg"},
+				{"Trd_Name":"SuperHot","Chi_Name":"SuperHot","Eng_Name":"SuperHot","Jap_Name":"SuperHot","Kor_Name":"SuperHot","filterDiv":"game computer pc single player action shooting first person shooter real time strategy rts 遊戲 電腦 電子 單人 單打 單機 第一人稱 射擊 動作 即時戰略 即時策略 即時战略","Icon":"🎮 ","Icon2":"🎮","Anchor":"SuperHot_Game","Link":"https://www.crazygames.com/game/super-hot target=_blank","Image":"https://img.youtube.com/vi/O9kNn05oaLo/hqdefault.jpg"},
+				{"Trd_Name":"Lunar Knight","Chi_Name":"Lunar Knight","Eng_Name":"Lunar Knight","Jap_Name":"Lunar Knight","Kor_Name":"Lunar Knight","filterDiv":"game computer pc single player action shooting third person shooter real time strategy rts 遊戲 電腦 電子 單人 單打 單機 第三人稱 射擊 動作 即時戰略 即時策略 即時战略","Icon":"🎮 ","Icon2":"🎮","Anchor":"Lunar_Knight_Game","Link":"https://www.crazygames.com/game/lunar-knight target=_blank","Image":"https://img.youtube.com/vi/5d6QZrA_0sY/hqdefault.jpg"},
+				{"Trd_Name":"10 Minutes Till Dawn","Chi_Name":"10 Minutes Till Dawn","Eng_Name":"10 Minutes Till Dawn","Jap_Name":"10 Minutes Till Dawn","Kor_Name":"10 Minutes Till Dawn","filterDiv":"game computer pc single player action shooting third person shooter real time strategy rts 遊戲 電腦 電子 單人 單打 單機 第三人稱 射擊 動作 即時戰略 即時策略 即時战略","Icon":"🎮 ","Icon2":"🎮","Anchor":"10_Minutes_Till_Dawn_Game","Link":"https://www.crazygames.com/game/10-minutes-till-dawn target=_blank","Image":"https://img.youtube.com/vi/ELrk3tp_6Dg/hqdefault.jpg"},
+				{"Trd_Name":"越南大戰7","Chi_Name":"合金弹头7","Eng_Name":"Metal Slug 7","Jap_Name":"メタルスラッグ7","Kor_Name":"메탈슬러그 7","filterDiv":"game computer pc single player third person action shooting side horizontally scrolling shooter scroller snk 遊戲 電腦 電子 單人 單打 單機 第三人稱 橫向捲軸 射擊 動作 合金彈頭7 鋼鐵蟲師7 钢铁虫师7 越南大战7 任天堂DS nds nintendo ds 任天堂ds ニンテンドーds 닌텐도 ds","Icon":"🎮 ","Icon2":"🎮","Anchor":"Metal_Slug_7_Game","Link":"https://www.retrogames.cc/nds-games/metal-slug-7-usa.html target=_blank","Image":"https://img.youtube.com/vi/4nYWZJ3kerU/hqdefault.jpg"},
+				{"Trd_Name":"特種任務","Chi_Name":"特种任务","Eng_Name":"Special Mission","Jap_Name":"特种任务","Kor_Name":"特种任务","filterDiv":"game computer pc single player third person action shooting side horizontally scrolling shooter scroller metal slug reloaded 遊戲 電腦 電子 單人 單打 單機 第三人稱 橫向捲軸 射擊 動作","Icon":"🎮 ","Icon2":"🎮","Anchor":"Special_Mission_Game","Link":"https://www.addictinggames.com/shooting/special-mission target=_blank","Image":"https://img.youtube.com/vi/jK9VmkO8YZs/hqdefault.jpg"},
+				{"Trd_Name":"Commando 2","Chi_Name":"Commando 2","Eng_Name":"Commando 2","Jap_Name":"Commando 2","Kor_Name":"Commando 2","filterDiv":"game computer pc single player third person action shooting side horizontally scrolling shooter scroller 遊戲 電腦 電子 單人 單打 單機 第三人稱 橫向捲軸 射擊 動作","Icon":"🎮 ","Icon2":"🎮","Anchor":"Commando_2_Game","Link":"https://evilgames.eu/flashgames/commando-2.htm target=_blank","Image":"https://img.youtube.com/vi/3_kQgFJdOr4/hqdefault.jpg"},
+				{"Trd_Name":"Commando","Chi_Name":"Commando","Eng_Name":"Commando","Jap_Name":"Commando","Kor_Name":"Commando","filterDiv":"game computer pc single player third person action shooting side horizontally scrolling shooter scroller 遊戲 電腦 電子 單人 單打 單機 第三人稱 橫向捲軸 射擊 動作","Icon":"🎮 ","Icon2":"🎮","Anchor":"Commando_Game","Link":"https://evilgames.eu/flashgames/commando.htm target=_blank","Image":"https://img.youtube.com/vi/nE_Sm3LKWPY/hqdefault.jpg"},
+				{"Trd_Name":"Commando Rush","Chi_Name":"Commando Rush","Eng_Name":"Commando Rush","Jap_Name":"Commando Rush","Kor_Name":"Commando Rush","filterDiv":"game computer pc single player third person action shooting side horizontally scrolling shooter scroller tower defence td real time strategy rts 遊戲 電腦 電子 單人 單打 單機 第三人稱 橫向捲軸 射擊 動作 塔防 守城 即時戰略 即時策略 即時战略","Icon":"🎮 ","Icon2":"🎮","Anchor":"Commando_Rush_Game","Link":"https://www.play-games.com/game/32493/commando-rush.html target=_blank","Image":"https://img.youtube.com/vi/hO9rI11Mtf8/hqdefault.jpg"},
+				{"Trd_Name":"The Last Stand 2","Chi_Name":"The Last Stand 2","Eng_Name":"The Last Stand 2","Jap_Name":"The Last Stand 2","Kor_Name":"The Last Stand 2","filterDiv":"game computer pc single player third person action shooting side horizontally scrolling shooter scroller tower defence td real time strategy rts 遊戲 電腦 電子 單人 單打 單機 第三人稱 橫向捲軸 射擊 動作 塔防 守城 即時戰略 即時策略 即時战略","Icon":"🎮 ","Icon2":"🎮","Anchor":"The_Last_Stand_2_Game","Link":"https://www.crazygames.com/game/the-last-stand-2 target=_blank","Image":"https://img.youtube.com/vi/AoDebG26RNE/hqdefault.jpg"},
+				{"Trd_Name":"光速兔崽子","Chi_Name":"光速兔崽子","Eng_Name":"Jazz Jackrabbit","Jap_Name":"Jazz Jackrabbit","Kor_Name":"재즈 잭래빗","filterDiv":"game computer pc single player third person action shooting side horizontally scrolling shooter scroller 遊戲 電腦 電子 單人 單打 單機 第三人稱 橫向捲軸 射擊 動作 dos disk operating system 磁碟作業系統 磁碟作业系统 ディスクオペレーティングシステム ディーオーエス ドス 도스 디스크 오퍼레이팅 시스템","Icon":"🎮 ","Icon2":"🎮","Anchor":"Jazz_Jackrabbit_Game","Link":"https://playclassic.games/games/run-and-gun-dos-games-online/play-jazz-jackrabbit-cd-rom-online/ target=_blank","Image":"https://img.youtube.com/vi/PCr4Uz_DWyM/hqdefault.jpg"},
+				{"Trd_Name":"Jazz Jackrabbit: Holiday Hare 1995","Chi_Name":"Jazz Jackrabbit: Holiday Hare 1995","Eng_Name":"Jazz Jackrabbit: Holiday Hare 1995","Jap_Name":"Jazz Jackrabbit: Holiday Hare 1995","Kor_Name":"Jazz Jackrabbit: Holiday Hare 1995","filterDiv":"game computer pc single player third person action shooting side horizontally scrolling shooter scroller 遊戲 電腦 電子 單人 單打 單機 第三人稱 橫向捲軸 射擊 動作 dos disk operating system 磁碟作業系統 磁碟作业系统 ディスクオペレーティングシステム ディーオーエス ドス 도스 디스크 오퍼레이팅 시스템","Icon":"🎮 ","Icon2":"🎮","Anchor":"Jazz_Jackrabbit_Holiday_Hare_1995_Game","Link":"https://playclassic.games/games/run-and-gun-dos-games-online/play-jazz-jackrabbit-holiday-hare-1995-online/ target=_blank","Image":"https://img.youtube.com/vi/cSgFNzuDRVs/hqdefault.jpg"},
+				{"Trd_Name":"RaidenX","Chi_Name":"RaidenX","Eng_Name":"RaidenX","Jap_Name":"RaidenX","Kor_Name":"RaidenX","filterDiv":"game computer pc single player third person shooting vertically scrolling shooter scroller 遊戲 電腦 電子 單人 單打 單機 第三人稱 縱向捲軸 射擊 動作","Icon":"🎮 ","Icon2":"🎮","Anchor":"RaidenX_Game","Link":"https://www.crazymonkeygames.com/RaidenX.html target=_blank","Image":"https://img.youtube.com/vi/hp7mxK8Jn10/hqdefault.jpg"},
+				{"Trd_Name":"War Lands","Chi_Name":"War Lands","Eng_Name":"War Lands","Jap_Name":"War Lands","Kor_Name":"War Lands","filterDiv":"game computer pc single player third person action 遊戲 電腦 電子 單人 單打 單機 第三人稱 動作","Icon":"🎮 ","Icon2":"🎮","Anchor":"War_Lands_Game","Link":"https://www.crazygames.com/game/war-lands target=_blank","Image":"https://img.youtube.com/vi/rlBdiIRRurA/hqdefault.jpg"},
+				{"Trd_Name":"Apple Knight","Chi_Name":"Apple Knight","Eng_Name":"Apple Knight","Jap_Name":"Apple Knight","Kor_Name":"Apple Knight","filterDiv":"game computer pc single player third person action side horizontally scrolling scroller 遊戲 電腦 電子 單人 單打 單機 第三人稱 橫向捲軸 動作","Icon":"🎮 ","Icon2":"🎮","Anchor":"Apple_Knight_Game","Link":"https://titotu.io/apple-knight-online target=_blank","Image":"https://img.youtube.com/vi/In-so1x9xro/hqdefault.jpg"},
+				{"Trd_Name":"惡魔城 蒼月十字架","Chi_Name":"恶魔城 苍月十字架","Eng_Name":"Castlevania: Dawn Of Sorrow","Jap_Name":"悪魔城ドラキュラ 蒼月の十字架","Kor_Name":"악마성 드라큘라 창월의 십자가","filterDiv":"game computer pc single player third person action side horizontally scrolling scroller 遊戲 電腦 電子 單人 單打 單機 第三人稱 橫向捲軸 動作 nds nintendo ds 任天堂ds ニンテンドーds 닌텐도 ds","Icon":"🎮 ","Icon2":"🎮","Anchor":"Castlevania_Dawn_of_Sorrow_Game","Link":"https://www.retrogames.cc/nds-games/castlevania-dawn-of-sorrow-usa.html target=_blank","Image":"https://img.youtube.com/vi/XP9HKdTY8JU/hqdefault.jpg"},
+				{"Trd_Name":"惡魔城X 月下夜想曲","Chi_Name":"恶魔城X 月下夜想曲","Eng_Name":"Castlevania: Symphony of the Night","Jap_Name":"悪魔城ドラキュラX 月下の夜想曲","Kor_Name":"악마성 드라큘라 X 월하의 야상곡","filterDiv":"game computer pc single player third person action side horizontally scrolling scroller gekka no nocturne 遊戲 電腦 電子 單人 單打 單機 第三人稱 橫向捲軸 動作 playstation","Icon":"🎮 ","Icon2":"🎮","Anchor":"Castlevania_Symphony_of_the_Night_Game","Link":"https://www.retrogames.cc/psx-games/castlevania-symphony-of-the-night-quality-hack.html target=_blank","Image":"https://img.youtube.com/vi/Fixj9ZgkJSA/hqdefault.jpg"},
+				{"Trd_Name":"惡魔城 迷宮迴廊","Chi_Name":"恶魔城 迷宫回廊","Eng_Name":"Castlevania: Portrait of Ruin","Jap_Name":"悪魔城ドラキュラ ギャラリー オブ ラビリンス","Kor_Name":"악마성 드라큘라 갤러리 오브 라비린스","filterDiv":"game computer pc single player third person action side horizontally scrolling scroller 遊戲 電腦 電子 單人 單打 單機 第三人稱 橫向捲軸 動作 nds nintendo ds 任天堂ds ニンテンドーds 닌텐도 ds","Icon":"🎮 ","Icon2":"🎮","Anchor":"Castlevania_Portrait_of_Ruin_Game","Link":"https://www.retrogames.cc/nds-games/castlevania-portrait-of-ruin-usa.html target=_blank","Image":"https://img.youtube.com/vi/M3KtcwsqhA4/hqdefault.jpg"},
+				{"Trd_Name":"惡魔城 被奪走的刻印","Chi_Name":"恶魔城 被夺走的刻印","Eng_Name":"Castlevania: Order of Ecclesia","Jap_Name":"悪魔城ドラキュラ 奪われた刻印","Kor_Name":"캐슬바니아 오더 오브 에클레시아","filterDiv":"game computer pc single player third person action side horizontally scrolling scroller 遊戲 電腦 電子 單人 單打 單機 第三人稱 橫向捲軸 動作 nds nintendo ds 任天堂ds ニンテンドーds 닌텐도 ds","Icon":"🎮 ","Icon2":"🎮","Anchor":"Castlevania_Order_of_Ecclesia_Game","Link":"https://www.retrogames.cc/nds-games/castlevania-order-of-ecclesia-usa-en-fr.html target=_blank","Image":"https://img.youtube.com/vi/F09pMBvHIBg/hqdefault.jpg"},
+				{"Trd_Name":"惡魔城年代記","Chi_Name":"恶魔城年代记","Eng_Name":"Castlevania Chronicles","Jap_Name":"悪魔城ドラキュラ","Kor_Name":"캐슬바니아 연대기","filterDiv":"game computer pc single player third person action side horizontally scrolling scroller 遊戲 電腦 電子 單人 單打 單機 第三人稱 橫向捲軸 動作 playstation","Icon":"🎮 ","Icon2":"🎮","Anchor":"Castlevania_Chronicles_Game","Link":"https://www.retrogames.cc/psx-games/castlevania-chronicles.html target=_blank","Image":"https://img.youtube.com/vi/8lxIHuvGOBw/hqdefault.jpg"},
+				{"Trd_Name":"Crash: Mind over Mutant","Chi_Name":"Crash: Mind over Mutant","Eng_Name":"Crash: Mind over Mutant","Jap_Name":"Crash: Mind over Mutant","Kor_Name":"Crash: Mind over Mutant","filterDiv":"game computer pc single player third person action side horizontally scrolling scroller role play rpg fusion 遊戲 電腦 電子 單人 單打 單機 第三人稱 橫向捲軸 動作 角色扮演 袋狼大進擊 nds nintendo ds 任天堂ds ニンテンドーds 닌텐도 ds","Icon":"🎮 ","Icon2":"🎮","Anchor":"Crash_Mind_over_Mutant_Game","Link":"https://www.retrogames.cc/nds-games/crash-mind-over-mutant-usa-en-fr-de-es-it-nl.html target=_blank","Image":"https://img.youtube.com/vi/pnTeV2eKQvg/hqdefault.jpg"},
+				{"Trd_Name":"Demons of Asteborg DX","Chi_Name":"Demons of Asteborg DX","Eng_Name":"Demons of Asteborg DX","Jap_Name":"Demons of Asteborg DX","Kor_Name":"Demons of Asteborg DX","filterDiv":"game computer pc single player third person action side horizontally scrolling scroller 遊戲 手機 手遊 電腦 電子 單人 單打 單機 第三人稱 橫向捲軸 動作","Icon":"🎮 ","Icon2":"🎮","Anchor":"Demons_of_Asteborg_DX_Game","Link":"https://neofidstudios.itch.io/demons-of-asteborg-dx target=_blank","Image":"https://img.youtube.com/vi/1E6xfuDPVBU/hqdefault.jpg"},
+				{"Trd_Name":"Paper Minecraft","Chi_Name":"Paper Minecraft","Eng_Name":"Paper Minecraft","Jap_Name":"Paper Minecraft","Kor_Name":"Paper Minecraft","filterDiv":"game computer pc single player third person side horizontally scrolling scroller action role play rpg 遊戲 電腦 電子 單人 單打 單機 第三人稱 橫向捲軸 動作 角色扮演 當個創世神 麥塊 我的世界 マインクラフト 마인크래프트 minecraft mc","Icon":"🎮 ","Icon2":"🎮","Anchor":"Paper_Minecraft_Game","Link":"https://www.crazygames.com/game/paper-minecraft target=_blank","Image":"https://img.youtube.com/vi/zOLtTVGqCoM/hqdefault.jpg"},
+				{"Trd_Name":"Yeah Bunny","Chi_Name":"Yeah Bunny","Eng_Name":"Yeah Bunny","Jap_Name":"Yeah Bunny","Kor_Name":"Yeah Bunny","filterDiv":"game computer pc single player third person action side horizontally scrolling scroller role play rpg 遊戲 電腦 電子 單人 單打 單機 第三人稱 橫向捲軸 動作 角色扮演","Icon":"🎮 ","Icon2":"🎮","Anchor":"Yeah_Bunny_Game","Link":"https://poki.jp/g/yeah-bunny target=_blank","Image":"https://img.youtube.com/vi/dkyT10CAg24/hqdefault.jpg"},
+				{"Trd_Name":"Yeah Bunny 2","Chi_Name":"Yeah Bunny 2","Eng_Name":"Yeah Bunny 2","Jap_Name":"Yeah Bunny 2","Kor_Name":"Yeah Bunny 2","filterDiv":"game computer pc single player third person action side horizontally scrolling scroller role play rpg 遊戲 電腦 電子 單人 單打 單機 第三人稱 橫向捲軸 動作 角色扮演","Icon":"🎮 ","Icon2":"🎮","Anchor":"Yeah_Bunny_2_Game","Link":"https://poki.jp/g/yeah-bunny-2 target=_blank","Image":"https://img.youtube.com/vi/ag5BVRxyYrY/hqdefault.jpg"},
+				{"Trd_Name":"Gelda","Chi_Name":"Gelda","Eng_Name":"Gelda","Jap_Name":"Gelda","Kor_Name":"Gelda","filterDiv":"game computer pc single player third person action side horizontally scrolling scroller role play rpg 遊戲 電腦 電子 單人 單打 單機 第三人稱 橫向捲軸 動作 角色扮演","Icon":"🎮 ","Icon2":"🎮","Anchor":"Gelda_Game","Link":"https://kbhgames.com/game/gelda#google_vignette target=_blank","Image":"https://img.youtube.com/vi/TEPoc1YU4uM/hqdefault.jpg"},
+				{"Trd_Name":"Mad Panic Coaster","Chi_Name":"Mad Panic Coaster","Eng_Name":"Mad Panic Coaster","Jap_Name":"Mad Panic Coaster","Kor_Name":"Mad Panic Coaster","filterDiv":"game computer pc single player third person action side horizontally scrolling scroller role play rpg 遊戲 電腦 電子 單人 單打 單機 第三人稱 橫向捲軸 動作 角色扮演","Icon":"🎮 ","Icon2":"🎮","Anchor":"Mad_Panic_Coaster_Game","Link":"https://archive.org/details/psx_madpanic target=_blank","Image":"https://img.youtube.com/vi/Lop2bkYjLj0/hqdefault.jpg"},
+				{"Trd_Name":"Undead Assault","Chi_Name":"Undead Assault","Eng_Name":"Undead Assault","Jap_Name":"Undead Assault","Kor_Name":"Undead Assault","filterDiv":"game computer pc single player third person action side horizontally scrolling scroller role play rpg 遊戲 電腦 電子 單人 單打 單機 第三人稱 橫向捲軸 動作 角色扮演","Icon":"🎮 ","Icon2":"🎮","Anchor":"Undead_Assault_Game","Link":"https://www.miniplay.com/game/undead-assault target=_blank","Image":"https://img.youtube.com/vi/mPhBtaCSGJs/hqdefault.jpg"},
+				{"Trd_Name":"Rally Point 3","Chi_Name":"Rally Point 3","Eng_Name":"Rally Point 3","Jap_Name":"Rally Point 3","Kor_Name":"Rally Point 3","filterDiv":"game computer pc single player third person racing 遊戲 電腦 電子 單人 單打 單機 第三人稱 賽車","Icon":"🎮 ","Icon2":"🎮","Anchor":"Rally_Point_3_Game","Link":"https://www.crazygames.com/game/rally-point-3 target=_blank","Image":"https://img.youtube.com/vi/ZELt40ynwyc/hqdefault.jpg"},
+				{"Trd_Name":"Rally Point 4","Chi_Name":"Rally Point 4","Eng_Name":"Rally Point 4","Jap_Name":"Rally Point 4","Kor_Name":"Rally Point 4","filterDiv":"game computer pc single player third person racing 遊戲 電腦 電子 單人 單打 單機 第三人稱 賽車","Icon":"🎮 ","Icon2":"🎮","Anchor":"Rally_Point_4_Game","Link":"https://www.crazygames.com/game/rally-point-4 target=_blank","Image":"https://img.youtube.com/vi/ihLszMRz5lI/hqdefault.jpg"},
+				{"Trd_Name":"Rally Point 5","Chi_Name":"Rally Point 5","Eng_Name":"Rally Point 5","Jap_Name":"Rally Point 5","Kor_Name":"Rally Point 5","filterDiv":"game computer pc single player third person racing 遊戲 電腦 電子 單人 單打 單機 第三人稱 賽車","Icon":"🎮 ","Icon2":"🎮","Anchor":"Rally_Point_5_Game","Link":"https://gamaverse.com/rally-point-5-game/ target=_blank","Image":"https://img.youtube.com/vi/5TyYuVhq-L4/hqdefault.jpg"},
+				{"Trd_Name":"Rally Point 6","Chi_Name":"Rally Point 6","Eng_Name":"Rally Point 6","Jap_Name":"Rally Point 6","Kor_Name":"Rally Point 6","filterDiv":"game computer pc single player third person racing 遊戲 電腦 電子 單人 單打 單機 第三人稱 賽車","Icon":"🎮 ","Icon2":"🎮","Anchor":"Rally_Point_6_Game","Link":"https://gamaverse.com/rally-point-6-game/ target=_blank","Image":"https://img.youtube.com/vi/LVq7D_LEf18/hqdefault.jpg"},
+				{"Trd_Name":"超級機械人大戰F","Chi_Name":"超级机械人大战F","Eng_Name":"Super Robot Taisen F","Jap_Name":"スーパーロボット大戦F","Kor_Name":"슈퍼로봇대전 F","filterDiv":"game computer pc single player third person turn-based turn based role play rpg 遊戲 電腦 電子 單人 單打 單機 第三人稱 回合制 角色扮演 playstation","Icon":"🎮 ","Icon2":"🎮","Anchor":"Super_Robot_Taisen_F_Game","Link":"https://archive.org/details/psx_srobotf target=_blank","Image":"https://img.youtube.com/vi/QX4JmmzJfpI/hqdefault.jpg"},
+				{"Trd_Name":"超級機械人大戰F完結篇","Chi_Name":"超级机械人大战F完结篇","Eng_Name":"Super Robot Taisen F Kanketsuhen","Jap_Name":"スーパーロボット大戦F完結編","Kor_Name":"슈퍼로봇대전 F 완결편","filterDiv":"game computer pc single player third person turn-based turn based role play rpg 遊戲 電腦 電子 單人 單打 單機 第三人稱 回合制 角色扮演 playstation","Icon":"🎮 ","Icon2":"🎮","Anchor":"Super_Robot_Taisen_F_Kanketsuhen_Game","Link":"https://archive.org/details/psx_srobotfk target=_blank","Image":"https://img.youtube.com/vi/5sIrysFinEY/hqdefault.jpg"},
+				{"Trd_Name":"Crash Boom Bang!","Chi_Name":"Crash Boom Bang!","Eng_Name":"Crash Boom Bang!","Jap_Name":"クラッシュ・バンディクー フェスティバル","Kor_Name":"Crash Boom Bang!","filterDiv":"game computer pc single player third person crash bandicoot festival 遊戲 電腦 電子 單人 單打 單機 第三人稱 街機 街机 nds nintendo ds 任天堂ds ニンテンドーds 닌텐도 ds","Icon":"🎮 ","Icon2":"🎮","Anchor":"Crash_Boom_Bang_Game","Link":"https://www.retrogames.cc/nds-games/crash-boom-bang-usa.html target=_blank","Image":"https://img.youtube.com/vi/8GS9tYjpxec/hqdefault.jpg"},
+				{"Trd_Name":"Survival Builder","Chi_Name":"Survival Builder","Eng_Name":"Survival Builder","Jap_Name":"Survival Builder","Kor_Name":"Survival Builder","filterDiv":"game computer pc single player third person business simulation agriculture-simulation farming plowing planting growing harvesting economic tycoon incremental idle 遊戲 電腦 電子 單人 單打 單機 第三人稱 農場模擬經營 增量 放置 閒置","Icon":"🎮 ","Icon2":"🎮","Anchor":"Survival_Builder_Game","Link":"https://poki.com/en/g/survival-builder target=_blank","Image":"https://img.youtube.com/vi/dXdJs4IlYPA/hqdefault.jpg"},
+				{"Trd_Name":"Idle Digging Tycoon","Chi_Name":"Idle Digging Tycoon","Eng_Name":"Idle Digging Tycoon","Jap_Name":"Idle Digging Tycoon","Kor_Name":"Idle Digging Tycoon","filterDiv":"game computer pc single player third person business simulation agriculture-simulation farming plowing planting growing harvesting economic tycoon incremental idle 遊戲 電腦 電子 單人 單打 單機 第三人稱 農場模擬經營 增量 放置 閒置","Icon":"🎮 ","Icon2":"🎮","Anchor":"Idle_Digging_Tycoon_Game","Link":"https://poki.com/en/g/idle-digging-tycoon target=_blank","Image":"https://img.youtube.com/vi/sofD6oZjc30/hqdefault.jpg"}
+				]};
+				w3.displayObject("ost_tb", playList);
+				</script>
+			</div>
+			<button onclick="topFunction()" id="topBtn" title="Go to top">▲</button>
+		<!--Loader-->
+		<!--<script>
+		var myVar;
+
+		function loaderFunction() {
+		  myVar = setTimeout(showPage, 0);
+		}
+
+		function showPage() {
+		  document.getElementById("loader").style.display = "none";
+		  document.getElementById("notShowDiv").style.display = "block";
+		}
+		</script>-->
+		<!--Smooth Scrolling-->
+		<script src="jquery.min.js"></script>
+		<script>
+			$(document).ready(function(){
+			  // Add smooth scrolling to all links
+			  $("a").on('click', function(event) {
+
+				// Make sure this.hash has a value before overriding default behavior
+				if (this.hash !== "") {
+				  // Prevent default anchor click behavior
+				  event.preventDefault();
+
+				  // Store hash
+				  var hash = this.hash;
+
+				  // Using jQuery's animate() method to add smooth page scroll
+				  // The optional number (800) specifies the number of milliseconds it takes to scroll to the specified area
+				  $('html, body').animate({
+					scrollTop: $(hash).offset().top
+				  }, 800, function(){
+			   
+					// Add hash (#) to URL when done scrolling (default click behavior)
+					window.location.hash = hash;
+				  });
+				} // End if
+			  });
+			});
+		</script>
+		<!--filter-->
+		<script>
+			filterSelection("all")
+			function filterSelection(c) {
+			  var x, i;
+			  x = document.getElementsByClassName("filterDiv");
+			  if (c == "all") c = "";
+			  for (i = 0; i < x.length; i++) {
+				w3RemoveClass(x[i], "show");
+				if (x[i].className.indexOf(c) > -1) w3AddClass(x[i], "show");
+			  }
+			}
+
+			function w3AddClass(element, name) {
+			  var i, arr1, arr2;
+			  arr1 = element.className.split(" ");
+			  arr2 = name.split(" ");
+			  for (i = 0; i < arr2.length; i++) {
+				if (arr1.indexOf(arr2[i]) == -1) {element.className += " " + arr2[i];}
+			  }
+			}
+
+			function w3RemoveClass(element, name) {
+			  var i, arr1, arr2;
+			  arr1 = element.className.split(" ");
+			  arr2 = name.split(" ");
+			  for (i = 0; i < arr2.length; i++) {
+				while (arr1.indexOf(arr2[i]) > -1) {
+				  arr1.splice(arr1.indexOf(arr2[i]), 1);     
+				}
+			  }
+			  element.className = arr1.join(" ");
+			}
+
+			// Add active class to the current button (highlight it)
+			var btnContainer = document.getElementById("myNav");
+			var btns = btnContainer.getElementsByClassName("btn");
+			for (var i = 0; i < btns.length; i++) {
+			  btns[i].addEventListener("click", function(){
+				var current = document.getElementsByClassName("active");
+				current[0].className = current[0].className.replace(" active", "");
+				this.className += " active";
+			  });
+			}
+		</script>
+		<!--Constuct Update-->
+		<script>
+			// Get the modal
+			var modal = document.getElementById("myModal");
+			// Get the button that opens the modal
+			var btn = document.getElementById("updateBtn");
+			// Get the <span> element that closes the modal
+			var span = document.getElementsByClassName("close")[0];
+			// When the user clicks the button, open the modal 
+			btn.onclick = function() {
+			  modal.style.display = "block";
+			}
+			// When the user clicks on <span> (x), close the modal
+			span.onclick = function() {
+			  modal.style.display = "none";
+			}
+			// When the user clicks anywhere outside of the modal, close it
+			window.addEventListener("click", function(){
+				if (event.target == modal) {
+					modal.style.display = "none";
+				}
+			});
+		</script>
+		<!--/Constuct Update-->
+		<!--Content Update-->
+		<script>
+			// Get the modal
+			var modal2 = document.getElementById("myModal2");
+			// Get the button that opens the modal
+			var btn2 = document.getElementById("updateBtn2");
+			// Get the <span> element that closes the modal
+			var span2 = document.getElementsByClassName("close2")[0];
+			// When the user clicks the button, open the modal 
+			btn2.onclick = function() {
+			  modal2.style.display = "block";
+			}
+			// When the user clicks on <span> (x), close the modal
+			span2.onclick = function() {
+			  modal2.style.display = "none";
+			}
+			// When the user clicks anywhere outside of the modal, close it
+			window.addEventListener("click", function(){
+				if (event.target == modal2) {
+					modal2.style.display = "none";
+				}
+			});
+		</script>
+		<!--/Content Update-->
+		<!--Fullscreen Overlay Nav Function-->
+		<script>
+			function openNav() {
+			if (document.getElementById("myNav").style.width != "100%"){
+				document.getElementById("myNav").style.width = "100%";
+				}
+			else{
+				document.getElementById("myNav").style.width = "0%";
+				}
+			}
+			function closeNav() {
+				document.getElementById("myNav").style.width = "0%";
+			}
+		</script>
+		<!--Calculator-->
+		<script>
+			// Get the modal
+			var modal3 = document.getElementById("myModal3");
+			// Get the button that opens the modal
+			var btn3 = document.getElementById("updateBtn3");
+			// Get the <span> element that closes the modal
+			var span3 = document.getElementsByClassName("close3")[0];
+			// When the user clicks the button, open the modal 
+			btn3.onclick = function() {
+			  modal3.style.display = "block";
+			}
+			// When the user clicks on <span> (x), close the modal
+			span3.onclick = function() {
+			  modal3.style.display = "none";
+			}
+			// When the user clicks anywhere outside of the modal, close it
+			window.addEventListener("click", function(){
+				if (event.target == modal3) {
+					modal3.style.display = "none";
+				}
+			});
+		</script>
+		<script>
+			var display = document.getElementById("display");
+			var expression = "";
+			var value = "0";
+			function updateDisplay(value) {
+				expression += value;
+				display.innerText = expression;
+			}
+			function backspace() {
+				expression = expression.slice(0, -1);
+				display.innerText = expression;
+			}
+			function clearDisplay() {
+				expression = "";
+				display.innerText = expression;
+			}
+			function calculate() {
+				try {
+				  var result = eval(expression);
+				  result = result.toFixed(2);
+				  expression = "" + result;
+				  display.innerText = result;
+				} catch (error) {
+				  display.innerText = "Error";
+				}
+			}
+		</script>
+		<!--/Calculator-->
+		<!--Alert-->
+		<script>
+			var close = document.getElementsByClassName("closebtn");
+			var i;
+
+			for (i = 0; i < close.length; i++) {
+			  close[i].onclick = function(){
+				var div = this.parentElement;
+				div.style.opacity = "0";
+				setTimeout(function(){ div.style.display = "none"; }, 600);
+			  }
+			}
+		</script>
+		<!--/Alert-->
+		<!--Top Button-->
+		<script>
+		//Get the button
+		var topbutton = document.getElementById("topBtn");
+
+		// When the user scrolls down 20px from the top of the document, show the button
+		window.onscroll = function() {scrollFunction()};
+
+		function scrollFunction() {
+		  if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+			topbutton.style.display = "block";
+		  } else {
+			topbutton.style.display = "none";
+		  }
+		}
+
+		// When the user clicks on the button, scroll to the top of the document
+		function topFunction() {
+			document.body.scrollTop = 0;
+			document.documentElement.scrollTop = 0;
+		}
+		</script>
+		<!--Login-->
+		<script>
+			function setCookie(cname,cvalue,exdays) {
+			  const d = new Date();
+			  d.setTime(d.getTime() + (exdays*24*60*60*1000));
+			  let expires = "expires=" + d.toUTCString();
+			  document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+			}
+
+			function getCookie(cname) {
+			  let name = cname + "=";
+			  let decodedCookie = decodeURIComponent(document.cookie);
+			  let ca = decodedCookie.split(';');
+			  for(let i = 0; i < ca.length; i++) {
+				let c = ca[i];
+				while (c.charAt(0) == ' ') {
+				  c = c.substring(1);
+				}
+				if (c.indexOf(name) == 0) {
+				  return c.substring(name.length, c.length);
+				}
+			  }
+			  return "";
+			}
+
+			function checkCookie() {
+			  let user = getCookie("username");
+			  if (user != "") {
+				alert("歡迎回來，" + user + "！");
+			  } else {
+				 user = prompt("請問你叫什麼名字？","");
+				 if (user != "" && user != null) {
+				   setCookie("username", user, 30);
+				 }
+			  }
+			}
+		</script>
+		<!--End of Login-->
+		<!--searchBar-->
+		<script>
+			function searchBar() {
+				var input, filter, bigDiv, div, p, i, txtValue;
+				input = document.getElementById("myInput");
+				filter = input.value.toUpperCase();
+				bigDiv = document.getElementById("mySearch");
+				div = bigDiv.getElementsByTagName("div");
+				for (i = 0; i < div.length; i++) {
+					p = div[i].getElementsByTagName("p")[0];
+					txtValue = p.textContent || p.innerText;
+					if (txtValue.toUpperCase().indexOf(filter) > -1) {
+						div[i].style.display = "";
+					} else {
+						div[i].style.display = "none";
+					}
+				}
+			}
+		</script>
+		<!--/searchBar-->
+		<!--Weather Forecast Function-->
+		<script>
+			!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
+		</script>
+		<!--Canvas Clock Function-->
+		<script>
+			var canvas = document.getElementById("canvas");
+			var ctx = canvas.getContext("2d");
+			var radius = canvas.height / 2;
+			ctx.translate(radius, radius);
+			radius = radius * 0.90
+			setInterval(drawClock, 1000);
+			function drawClock() {
+				drawFace(ctx, radius);
+				drawNumbers(ctx, radius);
+				drawTime(ctx, radius);
+			}
+			function drawFace(ctx, radius) {
+				var grad;
+				ctx.beginPath();
+				ctx.arc(0, 0, radius, 0, 2*Math.PI);
+				ctx.fillStyle = 'white';
+				ctx.fill();
+				grad = ctx.createRadialGradient(0,0,radius*0.95, 0,0,radius*1.05);
+				grad.addColorStop(0, '#333');
+				grad.addColorStop(0.5, 'white');
+				grad.addColorStop(1, '#333');
+				ctx.strokeStyle = grad;
+				ctx.lineWidth = radius*0.1;
+				ctx.stroke();
+				ctx.beginPath();
+				ctx.arc(0, 0, radius*0.1, 0, 2*Math.PI);
+				ctx.fillStyle = '#333';
+				ctx.fill();
+			}
+			function drawNumbers(ctx, radius) {
+				var ang;
+				var num;
+				ctx.font = radius*0.15 + "px arial";
+				ctx.textBaseline="middle";
+				ctx.textAlign="center";
+				for(num = 1; num < 13; num++){
+					ang = num * Math.PI / 6;
+					ctx.rotate(ang);
+					ctx.translate(0, -radius*0.85);
+					ctx.rotate(-ang);
+					ctx.fillText(num.toString(), 0, 0);
+					ctx.rotate(ang);
+					ctx.translate(0, radius*0.85);
+					ctx.rotate(-ang);
+				}
+			}
+			function drawTime(ctx, radius){
+				var now = new Date();
+				var hour = now.getHours();
+				var minute = now.getMinutes();
+				var second = now.getSeconds();
+				//hour
+				hour=hour%12;
+				hour=(hour*Math.PI/6)+
+				(minute*Math.PI/(6*60))+
+				(second*Math.PI/(360*60));
+				drawHand(ctx, hour, radius*0.5, radius*0.07);
+				//minute
+				minute=(minute*Math.PI/30)+(second*Math.PI/(30*60));
+				drawHand(ctx, minute, radius*0.8, radius*0.07);
+				// second
+				second=(second*Math.PI/30);
+				drawHand(ctx, second, radius*0.9, radius*0.02);
+			}
+
+			function drawHand(ctx, pos, length, width) {
+				ctx.beginPath();
+				ctx.lineWidth = width;
+				ctx.lineCap = "round";
+				ctx.moveTo(0,0);
+				ctx.rotate(pos);
+				ctx.lineTo(0, -length);
+				ctx.stroke();
+				ctx.rotate(-pos);
+			}
+		</script>
+		<!--Import other html-->
+		<script>
+			function includeHTML() {
+			  var z, i, elmnt, file, xhttp;
+			  /*loop through a collection of all HTML elements:*/
+			  z = document.getElementsByTagName("*");
+			  for (i = 0; i < z.length; i++) {
+				elmnt = z[i];
+				/*search for elements with a certain attribute:*/
+				file = elmnt.getAttribute("w3-include-html");
+				if (file) {
+				  /*make an HTTP request using the attribute value as the file name:*/
+				  xhttp = new XMLHttpRequest();
+				  xhttp.onreadystatechange = function() {
+					if (this.readyState == 4) {
+					  if (this.status == 200) {elmnt.innerHTML = this.responseText;}
+					  if (this.status == 404) {elmnt.innerHTML = "Page not found.";}
+					  /*remove the attribute, and call this function once more:*/
+					  elmnt.removeAttribute("w3-include-html");
+					  includeHTML();
+					}
+				  }      
+				  xhttp.open("GET", file, true);
+				  xhttp.send();
+				  /*exit the function:*/
+				  return;
+				}
+			  }
+			};
+		</script>
+		<script>
+			includeHTML();
+		</script>
+	</body>
+</html>
