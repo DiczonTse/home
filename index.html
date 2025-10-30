@@ -22519,10 +22519,11 @@
 			});
 			
 			if (listId) {
-				// Playlist URL - use videoseries embed
+				// This is a playlist - use playlist embed mode
+				// If there's also a videoId, it will be the first video in the playlist
 				iframe.src = `https://www.youtube.com/embed/videoseries?list=${listId}&${params}`;
 			} else if (videoId) {
-				// Single video URL
+				// Single video only
 				iframe.src = `https://www.youtube.com/embed/${videoId}?${params}`;
 			} else {
 				// Fallback for other YouTube URLs
