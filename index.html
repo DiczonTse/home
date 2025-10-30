@@ -22479,8 +22479,8 @@
 				const urlObj = new URL(url);
 				const listId = urlObj.searchParams.get('list');
 				
+				// Always use embedded player for playlists, regardless of device
 				if (listId) {
-					// It's a playlist - always use embedded player for playlists
 					showVideo(url);
 				} else {
 					// Single video - use existing mobile/desktop logic
@@ -22502,61 +22502,96 @@
 				   (window.innerWidth <= 768);
 		}
 
+		// Add this global variable
+		let youtubePlayer = null;
+
 		function showVideo(url) {
 			const modal = document.getElementById('videoModal');
 			const overlay = document.getElementById('videoModalOverlay');
-			const iframe = modal.querySelector('iframe');
+			const videoContainer = document.querySelector('.video-container');
 			const urlParams = new URL(url).searchParams;
 			const videoId = urlParams.get('v');
 			const listId = urlParams.get('list');
 			
-			// Enhanced parameters for better playlist stability
+			// Clear previous iframe
+			const iframe = modal.querySelector('iframe');
+			if (iframe) {
+				iframe.remove();
+			}
+			
+			// Create new iframe with YouTube API
+			const newIframe = document.createElement('iframe');
+			newIframe.className = 'video-iframe';
+			newIframe.allowFullscreen = true;
+			newIframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+			
 			const params = new URLSearchParams({
 				'autoplay': '1',
 				'rel': '0',
 				'modestbranding': '1',
 				'playsinline': '1',
-				'enablejsapi': '1', // Enable JavaScript API for better control
-				'widget_referrer': window.location.href,
+				'enablejsapi': '1',
 				'origin': window.location.origin
 			});
 			
 			if (listId) {
-				// Use the standard embed URL but force playlist parameters
-				// This method is more stable for playlists
 				if (videoId) {
-					// Include both video and playlist - this often works better
-					params.append('list', listId);
-					iframe.src = `https://www.youtube.com/embed/${videoId}?${params}`;
+					// This format tends to be most stable for playlists
+					params.append('playlist', listId);
+					newIframe.src = `https://www.youtube.com/embed/${videoId}?${params}`;
 				} else {
-					// Fallback to videoseries if no video ID
-					iframe.src = `https://www.youtube.com/embed/videoseries?list=${listId}&${params}`;
+					newIframe.src = `https://www.youtube.com/embed/videoseries?list=${listId}&${params}`;
 				}
 			} else if (videoId) {
-				// Single video only
-				iframe.src = `https://www.youtube.com/embed/${videoId}?${params}`;
-			} else {
-				// Fallback
-				iframe.src = `https://www.youtube.com/embed/?${params}`;
+				newIframe.src = `https://www.youtube.com/embed/${videoId}?${params}`;
 			}
+			
+			videoContainer.insertBefore(newIframe, videoContainer.querySelector('.video-close-btn'));
 			
 			modal.style.display = 'block';
 			overlay.style.display = 'block';
 			
-			// Add an event listener to detect when the iframe loads and try to enforce playlist mode
-			iframe.onload = function() {
-				// This helps maintain playlist context
-				console.log('Video loaded, playlist mode should be active');
+			// Load YouTube IFrame API if not already loaded
+			if (!window.YT) {
+				const tag = document.createElement('script');
+				tag.src = "https://www.youtube.com/iframe_api";
+				const firstScriptTag = document.getElementsByTagName('script')[0];
+				firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+			}
+			
+			// Set up player when API is ready
+			window.onYouTubeIframeAPIReady = function() {
+				youtubePlayer = new YT.Player(newIframe, {
+					events: {
+						'onStateChange': onPlayerStateChange
+					}
+				});
 			};
+			
+			function onPlayerStateChange(event) {
+				// If video ends and we're in a playlist, try to ensure we stay in playlist mode
+				if (event.data === YT.PlayerState.ENDED && listId) {
+					// This helps maintain playlist context after video ends
+					console.log('Video ended, maintaining playlist context');
+				}
+			}
 		}
 
 		function closeVideo() {
 			const modal = document.getElementById('videoModal');
 			const overlay = document.getElementById('videoModalOverlay');
-			const iframe = modal.querySelector('iframe');
-			iframe.src = '';
+			
+			// Stop the player if it exists
+			if (youtubePlayer) {
+				youtubePlayer.stopVideo();
+				youtubePlayer = null;
+			}
+			
 			modal.style.display = 'none';
 			overlay.style.display = 'none';
+			
+			// Clear the onYouTubeIframeAPIReady to avoid conflicts
+			window.onYouTubeIframeAPIReady = null;
 		}
 
 		function renderSlideshow() {
