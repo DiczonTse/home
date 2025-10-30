@@ -22509,72 +22509,62 @@
 			const modal = document.getElementById('videoModal');
 			const overlay = document.getElementById('videoModalOverlay');
 			const videoContainer = document.querySelector('.video-container');
-			const urlParams = new URL(url).searchParams;
-			const videoId = urlParams.get('v');
-			const listId = urlParams.get('list');
-			
-			// Clear previous iframe
 			const iframe = modal.querySelector('iframe');
-			if (iframe) {
-				iframe.remove();
-			}
 			
-			// Create new iframe with YouTube API
-			const newIframe = document.createElement('iframe');
-			newIframe.className = 'video-iframe';
-			newIframe.allowFullscreen = true;
-			newIframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+			// Clear previous iframe source
+			iframe.src = '';
 			
+			const urlParams = new URL(url);
+			const videoId = urlParams.searchParams.get('v');
+			const listId = urlParams.searchParams.get('list');
+			
+			// Build proper embed URL with all necessary parameters
 			const params = new URLSearchParams({
 				'autoplay': '1',
 				'rel': '0',
 				'modestbranding': '1',
 				'playsinline': '1',
 				'enablejsapi': '1',
-				'origin': window.location.origin
+				'widget_referrer': window.location.href,
+				'origin': window.location.origin,
+				'hl': 'en', // Language parameter
+				'cc_load_policy': '0'
 			});
 			
+			let embedUrl;
+			
 			if (listId) {
+				// For playlists, use the videoseries endpoint
+				embedUrl = `https://www.youtube.com/embed/videoseries?list=${listId}`;
+				
+				// If there's a specific video in the playlist, add it as the first video
 				if (videoId) {
-					// This format tends to be most stable for playlists
-					params.append('playlist', listId);
-					newIframe.src = `https://www.youtube.com/embed/${videoId}?${params}`;
-				} else {
-					newIframe.src = `https://www.youtube.com/embed/videoseries?list=${listId}&${params}`;
+					params.append('v', videoId);
 				}
 			} else if (videoId) {
-				newIframe.src = `https://www.youtube.com/embed/${videoId}?${params}`;
+				// Single video
+				embedUrl = `https://www.youtube.com/embed/${videoId}`;
+			} else {
+				// Fallback - try to extract video ID from youtu.be URLs
+				if (url.includes('youtu.be/')) {
+					const shortId = url.split('youtu.be/')[1]?.split('?')[0]?.split('&')[0];
+					if (shortId) {
+						embedUrl = `https://www.youtube.com/embed/${shortId}`;
+					}
+				}
+				
+				if (!embedUrl) {
+					// Last resort - open in new tab
+					window.open(url, '_blank');
+					return;
+				}
 			}
 			
-			videoContainer.insertBefore(newIframe, videoContainer.querySelector('.video-close-btn'));
+			// Add all parameters to the URL
+			iframe.src = `${embedUrl}?${params}`;
 			
 			modal.style.display = 'block';
 			overlay.style.display = 'block';
-			
-			// Load YouTube IFrame API if not already loaded
-			if (!window.YT) {
-				const tag = document.createElement('script');
-				tag.src = "https://www.youtube.com/iframe_api";
-				const firstScriptTag = document.getElementsByTagName('script')[0];
-				firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-			}
-			
-			// Set up player when API is ready
-			window.onYouTubeIframeAPIReady = function() {
-				youtubePlayer = new YT.Player(newIframe, {
-					events: {
-						'onStateChange': onPlayerStateChange
-					}
-				});
-			};
-			
-			function onPlayerStateChange(event) {
-				// If video ends and we're in a playlist, try to ensure we stay in playlist mode
-				if (event.data === YT.PlayerState.ENDED && listId) {
-					// This helps maintain playlist context after video ends
-					console.log('Video ended, maintaining playlist context');
-				}
-			}
 		}
 
 		function closeVideo() {
