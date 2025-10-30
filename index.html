@@ -2807,9 +2807,11 @@
     <div class="video-modal" id="videoModal">
         <div class="video-container">
             <button class="video-close-btn" onclick="closeVideo()">×</button>
-            <iframe class="video-iframe" allowfullscreen 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
-            </iframe>
+            <iframe class="video-iframe" 
+					allowfullscreen 
+					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+					referrerpolicy="strict-origin-when-cross-origin">
+			</iframe>
         </div>
     </div>
     
@@ -22475,23 +22477,10 @@
 
 		function handleThumbnailClick(url) {
 			if (url.includes('youtube.com') || url.includes('youtu.be')) {
-				// Check if it's a playlist URL (contains 'list=' parameter)
-				const urlObj = new URL(url);
-				const listId = urlObj.searchParams.get('list');
-				
-				// Always use embedded player for playlists, regardless of device
-				if (listId) {
-					showVideo(url);
-				} else {
-					// Single video - use existing mobile/desktop logic
-					if (isMobileDevice()) {
-						window.open(url, '_blank');
-					} else {
-						showVideo(url);
-					}
-				}
+				// Always use embedded player for YouTube videos
+				showVideo(url);
 			} else {
-				// Non-YouTube URLs always open in new tab
+				// Non-YouTube URLs open in new tab
 				window.open(url, '_blank');
 			}
 		}
@@ -22508,63 +22497,58 @@
 		function showVideo(url) {
 			const modal = document.getElementById('videoModal');
 			const overlay = document.getElementById('videoModalOverlay');
-			const videoContainer = document.querySelector('.video-container');
 			const iframe = modal.querySelector('iframe');
 			
-			// Clear previous iframe source
+			// Reset iframe
 			iframe.src = '';
 			
-			const urlParams = new URL(url);
-			const videoId = urlParams.searchParams.get('v');
-			const listId = urlParams.searchParams.get('list');
-			
-			// Build proper embed URL with all necessary parameters
-			const params = new URLSearchParams({
-				'autoplay': '1',
-				'rel': '0',
-				'modestbranding': '1',
-				'playsinline': '1',
-				'enablejsapi': '1',
-				'widget_referrer': window.location.href,
-				'origin': window.location.origin,
-				'hl': 'en', // Language parameter
-				'cc_load_policy': '0'
-			});
-			
-			let embedUrl;
-			
-			if (listId) {
-				// For playlists, use the videoseries endpoint
-				embedUrl = `https://www.youtube.com/embed/videoseries?list=${listId}`;
+			try {
+				let embedUrl;
 				
-				// If there's a specific video in the playlist, add it as the first video
-				if (videoId) {
-					params.append('v', videoId);
-				}
-			} else if (videoId) {
-				// Single video
-				embedUrl = `https://www.youtube.com/embed/${videoId}`;
-			} else {
-				// Fallback - try to extract video ID from youtu.be URLs
-				if (url.includes('youtu.be/')) {
-					const shortId = url.split('youtu.be/')[1]?.split('?')[0]?.split('&')[0];
-					if (shortId) {
-						embedUrl = `https://www.youtube.com/embed/${shortId}`;
+				// Convert YouTube URL to embed URL
+				if (url.includes('youtube.com/watch')) {
+					const urlObj = new URL(url);
+					const videoId = urlObj.searchParams.get('v');
+					const listId = urlObj.searchParams.get('list');
+					
+					if (listId) {
+						// Playlist - use this format which is most reliable
+						embedUrl = `https://www.youtube.com/embed?list=${listId}`;
+						if (videoId) {
+							embedUrl += `&v=${videoId}`;
+						}
+					} else if (videoId) {
+						// Single video
+						embedUrl = `https://www.youtube.com/embed/${videoId}`;
+					}
+				} else if (url.includes('youtu.be/')) {
+					// Short URL
+					const videoId = url.split('youtu.be/')[1]?.split('?')[0];
+					if (videoId) {
+						embedUrl = `https://www.youtube.com/embed/${videoId}`;
 					}
 				}
 				
 				if (!embedUrl) {
-					// Last resort - open in new tab
-					window.open(url, '_blank');
-					return;
+					throw new Error('Could not parse YouTube URL');
 				}
+				
+				// Add basic parameters (keep it simple)
+				const params = new URLSearchParams({
+					'autoplay': '1',
+					'rel': '0',
+					'modestbranding': '1'
+				});
+				
+				iframe.src = `${embedUrl}?${params}`;
+				modal.style.display = 'block';
+				overlay.style.display = 'block';
+				
+			} catch (error) {
+				console.error('Error loading YouTube video:', error);
+				// Fallback - open in new tab
+				window.open(url, '_blank');
 			}
-			
-			// Add all parameters to the URL
-			iframe.src = `${embedUrl}?${params}`;
-			
-			modal.style.display = 'block';
-			overlay.style.display = 'block';
 		}
 
 		function closeVideo() {
