@@ -22477,7 +22477,7 @@
 
 		function handleThumbnailClick(url) {
 			if (url.includes('youtube.com') || url.includes('youtu.be')) {
-				// Always use embedded player for YouTube videos
+				// Always use embedded player
 				showVideo(url);
 			} else {
 				// Non-YouTube URLs open in new tab
@@ -22491,81 +22491,111 @@
 				   (window.innerWidth <= 768);
 		}
 
-		// Add this global variable
 		let youtubePlayer = null;
 
 		function showVideo(url) {
 			const modal = document.getElementById('videoModal');
 			const overlay = document.getElementById('videoModalOverlay');
-			const iframe = modal.querySelector('iframe');
+			const videoContainer = document.querySelector('.video-container');
 			
-			// Reset iframe
-			iframe.src = '';
+			// Clear any existing iframe
+			const existingIframe = modal.querySelector('iframe');
+			if (existingIframe) {
+				existingIframe.remove();
+			}
 			
-			try {
-				let embedUrl;
-				
-				// Convert YouTube URL to embed URL
-				if (url.includes('youtube.com/watch')) {
-					const urlObj = new URL(url);
-					const videoId = urlObj.searchParams.get('v');
-					const listId = urlObj.searchParams.get('list');
-					
-					if (listId) {
-						// Playlist - use this format which is most reliable
-						embedUrl = `https://www.youtube.com/embed?list=${listId}`;
-						if (videoId) {
-							embedUrl += `&v=${videoId}`;
-						}
-					} else if (videoId) {
-						// Single video
-						embedUrl = `https://www.youtube.com/embed/${videoId}`;
-					}
-				} else if (url.includes('youtu.be/')) {
-					// Short URL
-					const videoId = url.split('youtu.be/')[1]?.split('?')[0];
-					if (videoId) {
-						embedUrl = `https://www.youtube.com/embed/${videoId}`;
-					}
+			// Create new iframe
+			const iframe = document.createElement('iframe');
+			iframe.className = 'video-iframe';
+			iframe.allowFullscreen = true;
+			iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+			
+			const urlParams = new URL(url);
+			const videoId = urlParams.searchParams.get('v');
+			const listId = urlParams.searchParams.get('list');
+			
+			let embedUrl;
+			
+			if (listId) {
+				// For playlists
+				embedUrl = `https://www.youtube.com/embed/videoseries?list=${listId}`;
+				if (videoId) {
+					// Include the specific video as starting point
+					embedUrl += `&v=${videoId}`;
 				}
-				
-				if (!embedUrl) {
-					throw new Error('Could not parse YouTube URL');
+			} else if (videoId) {
+				// Single video
+				embedUrl = `https://www.youtube.com/embed/${videoId}`;
+			} else if (url.includes('youtu.be/')) {
+				// Short URL
+				const shortId = url.split('youtu.be/')[1]?.split('?')[0];
+				if (shortId) {
+					embedUrl = `https://www.youtube.com/embed/${shortId}`;
 				}
-				
-				// Add basic parameters (keep it simple)
-				const params = new URLSearchParams({
-					'autoplay': '1',
-					'rel': '0',
-					'modestbranding': '1'
-				});
-				
-				iframe.src = `${embedUrl}?${params}`;
-				modal.style.display = 'block';
-				overlay.style.display = 'block';
-				
-			} catch (error) {
-				console.error('Error loading YouTube video:', error);
+			}
+			
+			if (!embedUrl) {
 				// Fallback - open in new tab
 				window.open(url, '_blank');
+				return;
 			}
+			
+			// Add autoplay and other parameters
+			const params = new URLSearchParams({
+				'autoplay': '1',
+				'mute': '0', // Try with sound enabled first
+				'rel': '0',
+				'modestbranding': '1',
+				'playsinline': '1'
+			});
+			
+			iframe.src = `${embedUrl}?${params}`;
+			
+			// Add iframe to modal
+			videoContainer.appendChild(iframe);
+			
+			modal.style.display = 'block';
+			overlay.style.display = 'block';
+			
+			// Try to force autoplay with a small delay
+			setTimeout(() => {
+				// If autoplay didn't work, try with muted audio (more likely to work)
+				const currentSrc = iframe.src;
+				if (!currentSrc.includes('mute=1')) {
+					iframe.src = currentSrc.replace('mute=0', 'mute=1');
+				}
+			}, 1000);
 		}
 
 		function closeVideo() {
 			const modal = document.getElementById('videoModal');
 			const overlay = document.getElementById('videoModalOverlay');
+			const iframe = modal.querySelector('iframe');
 			
-			// Stop the player if it exists
+			// Stop the video by removing the iframe completely
+			if (iframe) {
+				// First, try to stop by setting src to empty
+				iframe.src = '';
+				
+				// Then remove the iframe after a short delay
+				setTimeout(() => {
+					iframe.remove();
+				}, 100);
+			}
+			
+			// Also stop any YouTube API player
 			if (youtubePlayer) {
-				youtubePlayer.stopVideo();
+				try {
+					youtubePlayer.stopVideo();
+					youtubePlayer.destroy();
+				} catch (e) {
+					console.log('Error stopping YouTube player:', e);
+				}
 				youtubePlayer = null;
 			}
 			
 			modal.style.display = 'none';
 			overlay.style.display = 'none';
-			
-			// Clear the onYouTubeIframeAPIReady to avoid conflicts
-			window.onYouTubeIframeAPIReady = null;
 		}
 
 		function renderSlideshow() {
