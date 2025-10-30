@@ -22556,15 +22556,6 @@
 			
 			modal.style.display = 'block';
 			overlay.style.display = 'block';
-			
-			// Try to force autoplay with a small delay
-			setTimeout(() => {
-				// If autoplay didn't work, try with muted audio (more likely to work)
-				const currentSrc = iframe.src;
-				if (!currentSrc.includes('mute=1')) {
-					iframe.src = currentSrc.replace('mute=0', 'mute=1');
-				}
-			}, 1000);
 		}
 
 		function closeVideo() {
