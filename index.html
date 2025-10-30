@@ -2808,7 +2808,7 @@
         <div class="video-container">
             <button class="video-close-btn" onclick="closeVideo()">×</button>
             <iframe class="video-iframe" allowfullscreen 
-                allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
             </iframe>
         </div>
     </div>
@@ -22475,12 +22475,20 @@
 
 		function handleThumbnailClick(url) {
 			if (url.includes('youtube.com') || url.includes('youtu.be')) {
-				// For mobile devices, always open YouTube videos in new tab
-				if (isMobileDevice()) {
-					window.open(url, '_blank');
-				} else {
-					// For desktop, use the modal as before
+				// Check if it's a playlist URL (contains 'list=' parameter)
+				const urlObj = new URL(url);
+				const listId = urlObj.searchParams.get('list');
+				
+				if (listId) {
+					// It's a playlist - always use embedded player for playlists
 					showVideo(url);
+				} else {
+					// Single video - use existing mobile/desktop logic
+					if (isMobileDevice()) {
+						window.open(url, '_blank');
+					} else {
+						showVideo(url);
+					}
 				}
 			} else {
 				// Non-YouTube URLs always open in new tab
@@ -22511,9 +22519,14 @@
 			});
 			
 			if (listId) {
+				// Playlist URL - use videoseries embed
 				iframe.src = `https://www.youtube.com/embed/videoseries?list=${listId}&${params}`;
 			} else if (videoId) {
+				// Single video URL
 				iframe.src = `https://www.youtube.com/embed/${videoId}?${params}`;
+			} else {
+				// Fallback for other YouTube URLs
+				iframe.src = `https://www.youtube.com/embed/?${params}`;
 			}
 			
 			modal.style.display = 'block';
