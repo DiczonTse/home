@@ -157,7 +157,7 @@
 				transition: all 0.3s ease;
 			}
 
-			/* Updated responsive filter container */
+			/* Responsive filter container */
 			.filter-container {
 				display: grid;
 				grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -167,7 +167,7 @@
 				margin: 20px auto;
 			}
 
-			/* Updated dropdown styling */
+			/* Dropdown styling */
 			#languageSelect, #tagFilter, #utilitySelect, #channelSelect {
 				width: 100%;
 				max-width: 100%;
@@ -2815,7 +2815,7 @@
 			<div class="video-container">
 				<button class="video-close-btn" onclick="closeVideo()">×</button>
 				<iframe class="video-iframe" allowfullscreen 
-					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
 				</iframe>
 			</div>
 		</div>
@@ -22452,7 +22452,14 @@
 
 			// MODIFIED: Always open URLs in new tabs
 			function handleThumbnailClick(url) {
-				window.open(url, '_blank');
+				const isMobile = window.innerWidth <= 768;
+				const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
+				
+				if (isYouTube && !isMobile) {
+					showVideo(url);
+				} else {
+					window.open(url, '_blank');
+				}
 			}
 
 			function showVideo(url) {
