@@ -22452,10 +22452,9 @@
 
 			// MODIFIED: Always open URLs in new tabs
 			function handleThumbnailClick(url) {
-				const isMobile = window.innerWidth <= 768;
-				const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
+				const isYouTube = url.includes('https://www.youtube.com/watch?v=');
 				
-				if (isYouTube && !isMobile) {
+				if (isYouTube) {
 					showVideo(url);
 				} else {
 					window.open(url, '_blank');
