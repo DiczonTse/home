@@ -22487,16 +22487,16 @@
 				const videoId = urlParams.get('v');
 				const listId = urlParams.get('list');
 				
-				// Enhanced parameters to reduce ads and improve experience
+				// Enhanced parameters for mobile playlist display
 				const params = new URLSearchParams({
 					'autoplay': '1',
-					'rel': '0', // Show related videos from same channel only
+					'rel': '0',
 					'modestbranding': '1',
-					'playsinline': '1',
-					'iv_load_policy': '3', // Hide video annotations
-					'disablekb': '1', // Disable keyboard controls to prevent accidental closes
+					'playsinline': '1', // Important for iOS
+					'iv_load_policy': '3',
+					'disablekb': '1',
 					'controls': '1',
-					'enablejsapi': '1' // Enable JS API for better control
+					'enablejsapi': '1',
 					'showinfo': '0',
 					'fs': '1', // Allow fullscreen
 					'hl': 'zh-TW' // Set language to help with display
@@ -22516,6 +22516,8 @@
 				
 				modal.style.display = 'block';
 				overlay.style.display = 'block';
+				
+				// Add mobile-specific adjustments
 				adjustVideoModalForMobile();
 				
 				// Add a small delay to ensure iframe is loaded, then try to skip ads programmatically
