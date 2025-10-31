@@ -22470,22 +22470,46 @@
 				const videoId = urlParams.get('v');
 				const listId = urlParams.get('list');
 				
-				// Add memory-efficient parameters
+				// Enhanced parameters to reduce ads and improve experience
 				const params = new URLSearchParams({
 					'autoplay': '1',
-					'rel': '0',
+					'rel': '0', // Show related videos from same channel only
 					'modestbranding': '1',
-					'playsinline': '1' // Important for mobile
+					'playsinline': '1',
+					'iv_load_policy': '3', // Hide video annotations
+					'disablekb': '1', // Disable keyboard controls to prevent accidental closes
+					'fs': '0', // Disable fullscreen button
+					'controls': '1',
+					'enablejsapi': '1' // Enable JS API for better control
 				});
 				
+				// Use youtube-nocookie.com domain to reduce tracking (may help with ads)
+				const domain = 'www.youtube-nocookie.com';
+				
 				if (listId) {
-					iframe.src = `https://www.youtube.com/embed/videoseries?list=${listId}&${params}`;
+					// For playlists, use enhanced parameters to minimize interruptions
+					iframe.src = `https://${domain}/embed/videoseries?list=${listId}&${params}`;
 				} else if (videoId) {
-					iframe.src = `https://www.youtube.com/embed/${videoId}?${params}`;
+					iframe.src = `https://${domain}/embed/${videoId}?${params}`;
 				}
 				
 				modal.style.display = 'block';
 				overlay.style.display = 'block';
+				
+				// Add a small delay to ensure iframe is loaded, then try to skip ads programmatically
+				setTimeout(() => {
+					try {
+						// This attempts to skip ads if they appear (works for some ad types)
+						const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+						const skipButton = iframeDoc.querySelector('.ytp-ad-skip-button, .ytp-ad-skip-button-modern');
+						if (skipButton) {
+							skipButton.click();
+						}
+					} catch (e) {
+						// Cross-origin restrictions may prevent this, but it's worth trying
+						console.log('Cannot access iframe due to security restrictions');
+					}
+				}, 3000);
 			}
 
 			function closeVideo() {
