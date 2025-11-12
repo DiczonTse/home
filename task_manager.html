@@ -720,6 +720,8 @@
         const taskList = document.getElementById('taskList');
         const taskCount = document.getElementById('taskCount');
         const currentDate = document.getElementById('currentDate');
+		const today = new Date().toDateString();
+		const lastVisit = localStorage.getItem('lastVisitDate');
         const filterButtons = document.querySelectorAll('.filter-btn');
         const fabButton = document.getElementById('fabButton');
         const taskFormSection = document.getElementById('taskFormSection');
@@ -914,6 +916,16 @@
             }
         }
         
+		// Reset tasks completion daily
+		if (lastVisit !== today) {
+			tasks = tasks.map(task => ({
+				...task,
+				completed: false
+			}));
+			localStorage.setItem('dailyTasks', JSON.stringify(tasks));
+			localStorage.setItem('lastVisitDate', today);
+		}
+		
         // Event listener for form submission
         taskForm.addEventListener('submit', function(e) {
             e.preventDefault();
