@@ -6,7 +6,7 @@
     <title>每日任務</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* CSS Reset & Base Styles */
+        /* 原有的CSS保持不变 */
         * {
             margin: 0;
             padding: 0;
@@ -78,6 +78,7 @@
             padding: 1rem;
             flex: 1;
             width: 100%;
+            transition: var(--transition);
         }
         
         /* Task Form */
@@ -88,6 +89,9 @@
             margin-bottom: 1.5rem;
             box-shadow: var(--shadow);
             transition: var(--transition);
+            transform-origin: top;
+            max-height: 1000px;
+            overflow: hidden;
         }
         
         .task-form.collapsed {
@@ -480,6 +484,11 @@
             .task-actions {
                 flex-direction: column;
             }
+            
+            /* 移动端优化：表单展开时调整容器 */
+            .container.form-expanded {
+                padding-bottom: 6rem;
+            }
         }
         
         /* Animation for new tasks */
@@ -519,6 +528,72 @@
             transform: translateX(-50%) translateY(0);
             opacity: 1;
         }
+        
+        /* 新增：移动端表单优化 */
+        .mobile-form-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 200;
+        }
+        
+        .mobile-form-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            padding: 1.5rem;
+            max-height: 85vh;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: 201;
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .mobile-form-container.open {
+            transform: translateY(0);
+        }
+        
+        .mobile-form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .mobile-form-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .close-mobile-form {
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--gray);
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+        
+        .close-mobile-form:hover {
+            background-color: #f0f0f0;
+        }
     </style>
 </head>
 <body>
@@ -531,7 +606,7 @@
         </div>
     </header>
     
-    <main class="container">
+    <main class="container" id="mainContainer">
         <section class="task-form collapsed" id="taskFormSection">
             <h2 class="form-title"><i class="fas fa-plus-circle"></i> 增加任務</h2>
             <form id="taskForm">
@@ -579,6 +654,41 @@
         </section>
     </main>
     
+    <!-- 移动端表单覆盖层 -->
+    <div class="mobile-form-overlay" id="mobileFormOverlay"></div>
+    <div class="mobile-form-container" id="mobileFormContainer">
+        <div class="mobile-form-header">
+            <h2 class="mobile-form-title">增加任務</h2>
+            <button class="close-mobile-form" id="closeMobileForm">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="mobileTaskForm">
+            <div class="form-group">
+                <label for="mobileTaskTitle">任務名稱</label>
+                <input type="text" id="mobileTaskTitle" placeholder="要完成的任務" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="mobileTaskDescription">任務內容</label>
+                <textarea id="mobileTaskDescription" placeholder="詳細內容"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="mobileTaskPriority">次序</label>
+                <select id="mobileTaskPriority">
+                    <option value="low">瑣事</option>
+                    <option value="medium">次要</option>
+                    <option value="high" selected>優先</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-plus"></i> 增加任務
+            </button>
+        </form>
+    </div>
+    
     <!-- Toast Notification -->
     <div class="toast" id="toast"></div>
     
@@ -606,16 +716,21 @@
     <script>
         // DOM Elements
         const taskForm = document.getElementById('taskForm');
+        const mobileTaskForm = document.getElementById('mobileTaskForm');
         const taskList = document.getElementById('taskList');
         const taskCount = document.getElementById('taskCount');
         const currentDate = document.getElementById('currentDate');
         const filterButtons = document.querySelectorAll('.filter-btn');
         const fabButton = document.getElementById('fabButton');
         const taskFormSection = document.getElementById('taskFormSection');
+        const mainContainer = document.getElementById('mainContainer');
         const toast = document.getElementById('toast');
         const navHome = document.getElementById('navHome');
         const navCompleted = document.getElementById('navCompleted');
         const navAdd = document.getElementById('navAdd');
+        const mobileFormOverlay = document.getElementById('mobileFormOverlay');
+        const mobileFormContainer = document.getElementById('mobileFormContainer');
+        const closeMobileForm = document.getElementById('closeMobileForm');
         
         // Initialize tasks array
         let tasks = JSON.parse(localStorage.getItem('dailyTasks')) || [];
@@ -648,10 +763,30 @@
             }, 3000);
         }
         
-        // Toggle task form visibility
+        // 移动端表单控制
+        function openMobileForm() {
+            mobileFormOverlay.style.display = 'block';
+            mobileFormContainer.classList.add('open');
+            document.body.style.overflow = 'hidden'; // 防止背景滚动
+            
+            // 短暂延迟后聚焦到输入框
+            setTimeout(() => {
+                document.getElementById('mobileTaskTitle').focus();
+            }, 300);
+        }
+        
+        function closeMobileFormHandler() {
+            mobileFormContainer.classList.remove('open');
+            setTimeout(() => {
+                mobileFormOverlay.style.display = 'none';
+                document.body.style.overflow = ''; // 恢复背景滚动
+            }, 300);
+        }
+        
+        // Toggle task form visibility (桌面端使用)
         function toggleTaskForm() {
             const isMobile = window.innerWidth < 768;
-            if (isMobile) {
+            if (!isMobile) {
                 taskFormSection.classList.toggle('collapsed');
                 // Update FAB icon based on form state
                 const fabIcon = fabButton.querySelector('i');
@@ -742,9 +877,9 @@
             // Show success message
             showToast('成功接受任務！');
             
-            // Close form on mobile after adding task
+            // Close mobile form if open
             if (window.innerWidth < 768) {
-                toggleTaskForm();
+                closeMobileFormHandler();
             }
             
             // Scroll to the new task
@@ -794,6 +929,21 @@
             }
         });
         
+        // Event listener for mobile form submission
+        mobileTaskForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('mobileTaskTitle').value.trim();
+            const description = document.getElementById('mobileTaskDescription').value.trim();
+            const priority = document.getElementById('mobileTaskPriority').value;
+            
+            if (title) {
+                addTask(title, description, priority);
+                mobileTaskForm.reset();
+                document.getElementById('mobileTaskPriority').value = 'medium';
+            }
+        });
+        
         // Event listeners for filter buttons
         filterButtons.forEach(button => {
             button.addEventListener('click', function() {
@@ -805,7 +955,13 @@
         });
         
         // FAB button to show form on mobile
-        fabButton.addEventListener('click', toggleTaskForm);
+        fabButton.addEventListener('click', function() {
+            if (window.innerWidth < 768) {
+                openMobileForm();
+            } else {
+                toggleTaskForm();
+            }
+        });
         
         // Bottom navigation event listeners
         navHome.addEventListener('click', function() {
@@ -817,8 +973,8 @@
             updateTaskList();
             
             // Close form if open on mobile
-            if (window.innerWidth < 768 && !taskFormSection.classList.contains('collapsed')) {
-                toggleTaskForm();
+            if (window.innerWidth < 768 && mobileFormContainer.classList.contains('open')) {
+                closeMobileFormHandler();
             }
         });
         
@@ -831,8 +987,8 @@
             updateTaskList();
             
             // Close form if open on mobile
-            if (window.innerWidth < 768 && !taskFormSection.classList.contains('collapsed')) {
-                toggleTaskForm();
+            if (window.innerWidth < 768 && mobileFormContainer.classList.contains('open')) {
+                closeMobileFormHandler();
             }
         });
         
@@ -842,14 +998,19 @@
             
             // Show the task form
             if (window.innerWidth < 768) {
-                if (taskFormSection.classList.contains('collapsed')) {
-                    toggleTaskForm();
-                }
+                openMobileForm();
             } else {
                 // On desktop, just scroll to the form
+                if (taskFormSection.classList.contains('collapsed')) {
+                    taskFormSection.classList.remove('collapsed');
+                }
                 taskFormSection.scrollIntoView({ behavior: 'smooth' });
             }
         });
+        
+        // Close mobile form events
+        closeMobileForm.addEventListener('click', closeMobileFormHandler);
+        mobileFormOverlay.addEventListener('click', closeMobileFormHandler);
         
         // Initialize the app
         updateTaskList();
@@ -859,6 +1020,10 @@
             if (window.innerWidth >= 768) {
                 taskFormSection.classList.remove('collapsed');
                 fabButton.style.display = 'none';
+                // Close mobile form if open
+                if (mobileFormContainer.classList.contains('open')) {
+                    closeMobileFormHandler();
+                }
             } else {
                 fabButton.style.display = 'flex';
                 // Only collapse the form if we're switching from desktop to mobile
