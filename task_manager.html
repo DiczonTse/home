@@ -87,6 +87,11 @@
             padding: 1.5rem;
             margin-bottom: 1.5rem;
             box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        
+        .task-form.collapsed {
+            display: none;
         }
         
         .form-title {
@@ -451,6 +456,10 @@
             .fab {
                 display: none;
             }
+            
+            .task-form.collapsed {
+                display: block;
+            }
         }
         
         @media (max-width: 480px) {
@@ -488,6 +497,28 @@
             outline: 2px solid var(--primary);
             outline-offset: 2px;
         }
+        
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 5rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--dark);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -501,7 +532,7 @@
     </header>
     
     <main class="container">
-        <section class="task-form" id="taskFormSection">
+        <section class="task-form collapsed" id="taskFormSection">
             <h2 class="form-title"><i class="fas fa-plus-circle"></i> 增加任務</h2>
             <form id="taskForm">
                 <div class="form-group">
@@ -515,7 +546,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="taskPriority">優先次序</label>
+                    <label for="taskPriority">次序</label>
                     <select id="taskPriority">
                         <option value="low">瑣事</option>
                         <option value="medium">次要</option>
@@ -548,19 +579,22 @@
         </section>
     </main>
     
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+    
     <!-- Mobile Bottom Navigation -->
     <nav class="bottom-nav">
-        <button class="nav-btn active">
+        <button class="nav-btn active" id="navHome">
             <i class="fas fa-home nav-icon"></i>
             <span class="nav-text">首頁</span>
         </button>
-        <button class="nav-btn">
+        <button class="nav-btn" id="navCompleted">
             <i class="fas fa-check-circle nav-icon"></i>
             <span class="nav-text">已完成</span>
         </button>
-        <button class="nav-btn">
-            <i class="fas fa-cog nav-icon"></i>
-            <span class="nav-text">設定</span>
+        <button class="nav-btn" id="navAdd">
+            <i class="fas fa-plus nav-icon"></i>
+            <span class="nav-text">增加任務</span>
         </button>
     </nav>
     
@@ -578,6 +612,10 @@
         const filterButtons = document.querySelectorAll('.filter-btn');
         const fabButton = document.getElementById('fabButton');
         const taskFormSection = document.getElementById('taskFormSection');
+        const toast = document.getElementById('toast');
+        const navHome = document.getElementById('navHome');
+        const navCompleted = document.getElementById('navCompleted');
+        const navAdd = document.getElementById('navAdd');
         
         // Initialize tasks array
         let tasks = JSON.parse(localStorage.getItem('dailyTasks')) || [];
@@ -599,6 +637,32 @@
             const totalTasks = tasks.length;
             const completedTasks = tasks.filter(task => task.completed).length;
             taskCount.textContent = `${completedTasks}/${totalTasks} 個任務`;
+        }
+        
+        // Show toast notification
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Toggle task form visibility
+        function toggleTaskForm() {
+            const isMobile = window.innerWidth < 768;
+            if (isMobile) {
+                taskFormSection.classList.toggle('collapsed');
+                // Update FAB icon based on form state
+                const fabIcon = fabButton.querySelector('i');
+                if (taskFormSection.classList.contains('collapsed')) {
+                    fabIcon.className = 'fas fa-plus';
+                } else {
+                    fabIcon.className = 'fas fa-times';
+                    // Focus on the first input when form opens
+                    document.getElementById('taskTitle').focus();
+                }
+            }
         }
         
         // Render tasks based on current filter
@@ -675,6 +739,14 @@
             tasks.push(newTask);
             saveTasks();
             
+            // Show success message
+            showToast('成功接受任務！');
+            
+            // Close form on mobile after adding task
+            if (window.innerWidth < 768) {
+                toggleTaskForm();
+            }
+            
             // Scroll to the new task
             setTimeout(() => {
                 const newTaskElement = document.querySelector('.task-item.new');
@@ -689,7 +761,9 @@
         function toggleTaskCompletion(taskId) {
             tasks = tasks.map(task => {
                 if (task.id === taskId) {
-                    return { ...task, completed: !task.completed };
+                    const updatedTask = { ...task, completed: !task.completed };
+                    showToast(updatedTask.completed ? '任務完成！' : '任務列為處理中');
+                    return updatedTask;
                 }
                 return task;
             });
@@ -698,9 +772,10 @@
         
         // Delete a task
         function deleteTask(taskId) {
-            if (confirm('確定要刪除任務？')) {
+            if (confirm('確認要刪除任務？')) {
                 tasks = tasks.filter(task => task.id !== taskId);
                 saveTasks();
+                showToast('已刪除任務');
             }
         }
         
@@ -716,11 +791,6 @@
                 addTask(title, description, priority);
                 taskForm.reset();
                 document.getElementById('taskPriority').value = 'medium';
-                
-                // On mobile, collapse the form after adding a task
-                if (window.innerWidth < 768) {
-                    taskFormSection.style.display = 'none';
-                }
             }
         });
         
@@ -735,27 +805,76 @@
         });
         
         // FAB button to show form on mobile
-        fabButton.addEventListener('click', function() {
-            taskFormSection.style.display = taskFormSection.style.display === 'none' ? 'block' : 'block';
-            document.getElementById('taskTitle').focus();
+        fabButton.addEventListener('click', toggleTaskForm);
+        
+        // Bottom navigation event listeners
+        navHome.addEventListener('click', function() {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            document.querySelector('[data-filter="all"]').classList.add('active');
+            currentFilter = 'all';
+            updateTaskList();
+            
+            // Close form if open on mobile
+            if (window.innerWidth < 768 && !taskFormSection.classList.contains('collapsed')) {
+                toggleTaskForm();
+            }
+        });
+        
+        navCompleted.addEventListener('click', function() {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            document.querySelector('[data-filter="completed"]').classList.add('active');
+            currentFilter = 'completed';
+            updateTaskList();
+            
+            // Close form if open on mobile
+            if (window.innerWidth < 768 && !taskFormSection.classList.contains('collapsed')) {
+                toggleTaskForm();
+            }
+        });
+        
+        navAdd.addEventListener('click', function() {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Show the task form
+            if (window.innerWidth < 768) {
+                if (taskFormSection.classList.contains('collapsed')) {
+                    toggleTaskForm();
+                }
+            } else {
+                // On desktop, just scroll to the form
+                taskFormSection.scrollIntoView({ behavior: 'smooth' });
+            }
         });
         
         // Initialize the app
         updateTaskList();
         
-        // Hide form by default on mobile
-        if (window.innerWidth < 768) {
-            taskFormSection.style.display = 'none';
-        }
-        
         // Adjust layout on window resize
         window.addEventListener('resize', function() {
             if (window.innerWidth >= 768) {
-                taskFormSection.style.display = 'block';
+                taskFormSection.classList.remove('collapsed');
+                fabButton.style.display = 'none';
             } else {
-                taskFormSection.style.display = 'none';
+                fabButton.style.display = 'flex';
+                // Only collapse the form if we're switching from desktop to mobile
+                if (!taskFormSection.classList.contains('collapsed')) {
+                    taskFormSection.classList.add('collapsed');
+                }
             }
         });
+        
+        // Initialize based on current screen size
+        if (window.innerWidth >= 768) {
+            taskFormSection.classList.remove('collapsed');
+            fabButton.style.display = 'none';
+        } else {
+            fabButton.style.display = 'flex';
+        }
     </script>
 </body>
 </html>
