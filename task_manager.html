@@ -80,6 +80,85 @@
             width: 100%;
             transition: var(--transition);
         }
+		
+		/* Footer Styles */
+		footer {
+			background: linear-gradient(135deg, var(--primary), var(--secondary));
+			color: white;
+			padding: 2rem 1rem;
+			margin-top: auto;
+		}
+
+		.footer-content {
+			max-width: 800px;
+			margin: 0 auto;
+			text-align: center;
+		}
+
+		.footer-title {
+			font-size: 1.5rem;
+			font-weight: 700;
+			margin-bottom: 0.5rem;
+		}
+
+		.footer-subtitle {
+			font-size: 0.9rem;
+			opacity: 0.9;
+			margin-bottom: 1.5rem;
+		}
+
+		.footer-links {
+			display: flex;
+			justify-content: center;
+			gap: 1.5rem;
+			margin-bottom: 1.5rem;
+			flex-wrap: wrap;
+		}
+
+		.footer-link {
+			color: white;
+			text-decoration: none;
+			font-size: 0.9rem;
+			opacity: 0.9;
+			transition: var(--transition);
+		}
+
+		.footer-link:hover {
+			opacity: 1;
+			text-decoration: underline;
+		}
+
+		.footer-info {
+			font-size: 0.8rem;
+			opacity: 0.7;
+			border-top: 1px solid rgba(255, 255, 255, 0.1);
+			padding-top: 1rem;
+			margin-top: 1rem;
+		}
+
+		.footer-info a {
+			color: var(--success);
+			text-decoration: none;
+		}
+
+		.footer-info a:hover {
+			text-decoration: underline;
+		}
+
+		/* Responsive Footer */
+		@media (max-width: 768px) {
+			footer {
+				padding: 1.5rem 1rem;
+			}
+			
+			.footer-links {
+				gap: 1rem;
+			}
+			
+			.footer-link {
+				font-size: 0.85rem;
+			}
+		}
         
         /* Task Form */
         .task-form {
@@ -163,6 +242,32 @@
         
         .btn-primary:hover, .btn-primary:active {
             background-color: var(--primary-dark);
+        }
+        
+        .btn-secondary {
+            background-color: var(--gray);
+            color: white;
+            width: 48%;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+            width: 48%;
+        }
+        
+        .btn-success:hover {
+            background-color: #3ab8e0;
+        }
+        
+        .form-buttons {
+            display: flex;
+            gap: 4%;
+            justify-content: space-between;
         }
         
         /* Task Filters */
@@ -329,6 +434,11 @@
         
         .action-btn:hover {
             background-color: #f0f0f0;
+        }
+        
+        .edit-btn:hover {
+            color: var(--primary);
+            background-color: #e6f0ff;
         }
         
         .delete-btn:hover {
@@ -594,6 +704,29 @@
         .close-mobile-form:hover {
             background-color: #f0f0f0;
         }
+        
+        /* Edit form specific styles */
+        .form-subtitle {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-top: -0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .cancel-edit-btn {
+            background-color: transparent;
+            color: var(--gray);
+            border: 1px solid #ddd;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-left: 1rem;
+        }
+        
+        .cancel-edit-btn:hover {
+            background-color: #f8f9fa;
+        }
     </style>
 </head>
 <body>
@@ -608,8 +741,10 @@
     
     <main class="container" id="mainContainer">
         <section class="task-form collapsed" id="taskFormSection">
-            <h2 class="form-title"><i class="fas fa-plus-circle"></i> 增加任務</h2>
+            <h2 class="form-title"><i class="fas fa-plus-circle"></i> <span id="formTitle">增加任務</span></h2>
+            <p class="form-subtitle" id="formSubtitle">請輸入新任務的詳細資料</p>
             <form id="taskForm">
+                <input type="hidden" id="taskId" value="">
                 <div class="form-group">
                     <label for="taskTitle">任務名稱</label>
                     <input type="text" id="taskTitle" placeholder="要完成的任務" required>
@@ -629,9 +764,14 @@
                     </select>
                 </div>
                 
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> 增加任務
-                </button>
+                <div class="form-buttons">
+                    <button type="button" class="btn btn-secondary" id="cancelEditBtn" style="display:none;">
+                        <i class="fas fa-times"></i> 取消
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="fas fa-plus"></i> 增加任務
+                    </button>
+                </div>
             </form>
         </section>
         
@@ -653,17 +793,42 @@
             </ul>
         </section>
     </main>
+	
+	<footer>
+        <div class="footer-content">
+            <h2 class="footer-title">📝每日任務</h2>
+            <p class="footer-subtitle">您的個人任務管理助手</p>
+            
+            <div class="footer-links">
+                <a href="index.html" class="footer-link">首頁</a>
+                <a href="index.html" class="footer-link">關於我們</a>
+                <a href="index.html" class="footer-link">隱私政策</a>
+                <a href="index.html" class="footer-link">使用條款</a>
+                <a href="mailto:tsedkn@gmail.com" class="footer-link">聯繫我們</a>
+            </div>
+            
+            <div class="footer-info">
+                <p>© <span id="currentYear"></span> 每日任務管理工具 - 保持專注，完成每日任務！</p>
+                <p>任務每日重置功能已啟用，幫助您專注於當日目標。</p>
+                <p>如有任何問題，<a href="mailto:tsedkn@gmail.com">請聯繫支援團隊。</a></p>
+            </div>
+        </div>
+    </footer>
     
     <!-- 移动端表单覆盖层 -->
     <div class="mobile-form-overlay" id="mobileFormOverlay"></div>
     <div class="mobile-form-container" id="mobileFormContainer">
         <div class="mobile-form-header">
-            <h2 class="mobile-form-title">增加任務</h2>
+            <div>
+                <h2 class="mobile-form-title" id="mobileFormTitle">增加任務</h2>
+                <p class="form-subtitle" id="mobileFormSubtitle">請輸入新任務的詳細資料</p>
+            </div>
             <button class="close-mobile-form" id="closeMobileForm">
                 <i class="fas fa-times"></i>
             </button>
         </div>
         <form id="mobileTaskForm">
+            <input type="hidden" id="mobileTaskId" value="">
             <div class="form-group">
                 <label for="mobileTaskTitle">任務名稱</label>
                 <input type="text" id="mobileTaskTitle" placeholder="要完成的任務" required>
@@ -683,9 +848,14 @@
                 </select>
             </div>
             
-            <button type="submit" class="btn btn-primary">
-                <i class="fas fa-plus"></i> 增加任務
-            </button>
+            <div class="form-buttons">
+                <button type="button" class="btn btn-secondary" id="mobileCancelEditBtn" style="display:none;">
+                    <i class="fas fa-times"></i> 取消
+                </button>
+                <button type="submit" class="btn btn-primary" id="mobileSubmitBtn">
+                    <i class="fas fa-plus"></i> 增加任務
+                </button>
+            </div>
         </form>
     </div>
     
@@ -720,8 +890,6 @@
         const taskList = document.getElementById('taskList');
         const taskCount = document.getElementById('taskCount');
         const currentDate = document.getElementById('currentDate');
-		const today = new Date().toDateString();
-		const lastVisit = localStorage.getItem('lastVisitDate');
         const filterButtons = document.querySelectorAll('.filter-btn');
         const fabButton = document.getElementById('fabButton');
         const taskFormSection = document.getElementById('taskFormSection');
@@ -734,14 +902,38 @@
         const mobileFormContainer = document.getElementById('mobileFormContainer');
         const closeMobileForm = document.getElementById('closeMobileForm');
         
+        // 表单元素
+        const taskIdInput = document.getElementById('taskId');
+        const taskTitleInput = document.getElementById('taskTitle');
+        const taskDescriptionInput = document.getElementById('taskDescription');
+        const taskPrioritySelect = document.getElementById('taskPriority');
+        const submitBtn = document.getElementById('submitBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const formTitle = document.getElementById('formTitle');
+        const formSubtitle = document.getElementById('formSubtitle');
+        
+        const mobileTaskIdInput = document.getElementById('mobileTaskId');
+        const mobileTaskTitleInput = document.getElementById('mobileTaskTitle');
+        const mobileTaskDescriptionInput = document.getElementById('mobileTaskDescription');
+        const mobileTaskPrioritySelect = document.getElementById('mobileTaskPriority');
+        const mobileSubmitBtn = document.getElementById('mobileSubmitBtn');
+        const mobileCancelEditBtn = document.getElementById('mobileCancelEditBtn');
+        const mobileFormTitle = document.getElementById('mobileFormTitle');
+        const mobileFormSubtitle = document.getElementById('mobileFormSubtitle');
+        
         // Initialize tasks array
         let tasks = JSON.parse(localStorage.getItem('dailyTasks')) || [];
         let currentFilter = 'all';
+        let editingTaskId = null;
         
         // Set current date
         const now = new Date();
         const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         currentDate.textContent = now.toLocaleDateString('en-US', options);
+		
+		// Set current year in footer
+		const currentYear = new Date().getFullYear();
+		document.getElementById('currentYear').textContent = currentYear;
         
         // Save tasks to localStorage
         function saveTasks() {
@@ -773,7 +965,7 @@
             
             // 短暂延迟后聚焦到输入框
             setTimeout(() => {
-                document.getElementById('mobileTaskTitle').focus();
+                mobileTaskTitleInput.focus();
             }, 300);
         }
         
@@ -782,7 +974,62 @@
             setTimeout(() => {
                 mobileFormOverlay.style.display = 'none';
                 document.body.style.overflow = ''; // 恢复背景滚动
+                resetForm('mobile');
             }, 300);
+        }
+        
+        // 重置表单（新建任务模式）
+        function resetForm(formType = 'desktop') {
+            editingTaskId = null;
+            
+            if (formType === 'desktop') {
+                taskIdInput.value = '';
+                taskTitleInput.value = '';
+                taskDescriptionInput.value = '';
+                taskPrioritySelect.value = 'high';
+                
+                formTitle.textContent = '增加任務';
+                formSubtitle.textContent = '請輸入新任務的詳細資料';
+                submitBtn.innerHTML = '<i class="fas fa-plus"></i> 增加任務';
+                cancelEditBtn.style.display = 'none';
+            } else {
+                mobileTaskIdInput.value = '';
+                mobileTaskTitleInput.value = '';
+                mobileTaskDescriptionInput.value = '';
+                mobileTaskPrioritySelect.value = 'high';
+                
+                mobileFormTitle.textContent = '增加任務';
+                mobileFormSubtitle.textContent = '請輸入新任務的詳細資料';
+                mobileSubmitBtn.innerHTML = '<i class="fas fa-plus"></i> 增加任務';
+                mobileCancelEditBtn.style.display = 'none';
+            }
+        }
+        
+        // 设置表单为编辑模式
+        function setFormToEditMode(task, formType = 'desktop') {
+            editingTaskId = task.id;
+            
+            if (formType === 'desktop') {
+                taskIdInput.value = task.id;
+                taskTitleInput.value = task.title;
+                taskDescriptionInput.value = task.description || '';
+                taskPrioritySelect.value = task.priority;
+                
+                formTitle.textContent = '編輯任務';
+                formSubtitle.textContent = '修改任務資料';
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> 更新任務';
+                cancelEditBtn.style.display = 'flex';
+            } else {
+                mobileTaskIdInput.value = task.id;
+                mobileTaskTitleInput.value = task.title;
+                mobileTaskDescriptionInput.value = task.description || '';
+                mobileTaskPrioritySelect.value = task.priority;
+                
+                mobileFormTitle.textContent = '編輯任務';
+                mobileFormSubtitle.textContent = '修改任務資料';
+                mobileSubmitBtn.innerHTML = '<i class="fas fa-save"></i> 更新任務';
+                mobileCancelEditBtn.style.display = 'flex';
+            }
         }
         
         // Toggle task form visibility (桌面端使用)
@@ -797,7 +1044,7 @@
                 } else {
                     fabIcon.className = 'fas fa-times';
                     // Focus on the first input when form opens
-                    document.getElementById('taskTitle').focus();
+                    taskTitleInput.focus();
                 }
             }
         }
@@ -821,7 +1068,7 @@
                 `;
             } else {
                 taskList.innerHTML = filteredTasks.map((task, index) => `
-                    <li class="task-item ${task.completed ? 'completed' : ''} ${index === filteredTasks.length - 1 ? 'new' : ''}" data-id="${task.id}">
+                    <li class="task-item ${task.completed ? 'completed' : ''} ${index === filteredTasks.length - 1 && !editingTaskId ? 'new' : ''}" data-id="${task.id}">
                         <div class="task-checkbox ${task.completed ? 'checked' : ''}">
                             ${task.completed ? '<i class="fas fa-check" style="font-size: 12px;"></i>' : ''}
                         </div>
@@ -830,24 +1077,34 @@
                                 ${task.title}
                                 <span class="task-priority priority-${task.priority}">
                                     <i class="fas fa-${task.priority === 'high' ? 'exclamation-circle' : task.priority === 'medium' ? 'minus-circle' : 'info-circle'}"></i>
-                                    ${task.priority}
+                                    ${task.priority === 'high' ? '優先' : task.priority === 'medium' ? '次要' : '瑣事'}
                                 </span>
                             </div>
                             ${task.description ? `<div class="task-description">${task.description}</div>` : ''}
                         </div>
                         <div class="task-actions">
-                            <button class="action-btn delete-btn">
+                            <button class="action-btn edit-btn" title="編輯任務">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete-btn" title="刪除任務">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     </li>
                 `).join('');
                 
-                // Add event listeners to checkboxes and delete buttons
+                // Add event listeners to checkboxes and buttons
                 document.querySelectorAll('.task-checkbox').forEach((checkbox) => {
                     checkbox.addEventListener('click', function() {
                         const taskId = this.closest('.task-item').dataset.id;
                         toggleTaskCompletion(taskId);
+                    });
+                });
+                
+                document.querySelectorAll('.edit-btn').forEach((button) => {
+                    button.addEventListener('click', function() {
+                        const taskId = this.closest('.task-item').dataset.id;
+                        editTask(taskId);
                     });
                 });
                 
@@ -870,7 +1127,8 @@
                 description,
                 priority,
                 completed: false,
-                createdAt: new Date().toISOString()
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
             };
             
             tasks.push(newTask);
@@ -882,6 +1140,9 @@
             // Close mobile form if open
             if (window.innerWidth < 768) {
                 closeMobileFormHandler();
+            } else {
+                // Reset form
+                resetForm('desktop');
             }
             
             // Scroll to the new task
@@ -894,11 +1155,62 @@
             }, 300);
         }
         
+        // Edit a task
+        function editTask(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            // 根据设备类型打开相应的表单
+            if (window.innerWidth < 768) {
+                // 移动端：打开移动表单
+                setFormToEditMode(task, 'mobile');
+                openMobileForm();
+            } else {
+                // 桌面端：显示表单并设置为编辑模式
+                if (taskFormSection.classList.contains('collapsed')) {
+                    taskFormSection.classList.remove('collapsed');
+                    const fabIcon = fabButton.querySelector('i');
+                    fabIcon.className = 'fas fa-times';
+                }
+                setFormToEditMode(task, 'desktop');
+                taskFormSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+        
+        // Update an existing task
+        function updateTask(taskId, title, description, priority) {
+            tasks = tasks.map(task => {
+                if (task.id === taskId) {
+                    return {
+                        ...task,
+                        title,
+                        description,
+                        priority,
+                        updatedAt: new Date().toISOString()
+                    };
+                }
+                return task;
+            });
+            
+            saveTasks();
+            showToast('任務已更新！');
+            resetForm(window.innerWidth < 768 ? 'mobile' : 'desktop');
+            
+            // Close mobile form if open
+            if (window.innerWidth < 768) {
+                closeMobileFormHandler();
+            }
+        }
+        
         // Toggle task completion
         function toggleTaskCompletion(taskId) {
             tasks = tasks.map(task => {
                 if (task.id === taskId) {
-                    const updatedTask = { ...task, completed: !task.completed };
+                    const updatedTask = { 
+                        ...task, 
+                        completed: !task.completed,
+                        updatedAt: new Date().toISOString()
+                    };
                     showToast(updatedTask.completed ? '任務完成！' : '任務列為處理中');
                     return updatedTask;
                 }
@@ -913,31 +1225,34 @@
                 tasks = tasks.filter(task => task.id !== taskId);
                 saveTasks();
                 showToast('已刪除任務');
+                
+                // 如果正在编辑被删除的任务，重置表单
+                if (editingTaskId === taskId) {
+                    resetForm(window.innerWidth < 768 ? 'mobile' : 'desktop');
+                }
             }
         }
         
-		// Reset tasks completion daily
-		if (lastVisit !== today) {
-			tasks = tasks.map(task => ({
-				...task,
-				completed: false
-			}));
-			localStorage.setItem('dailyTasks', JSON.stringify(tasks));
-			localStorage.setItem('lastVisitDate', today);
-		}
-		
-        // Event listener for form submission
+        // Event listener for form submission (桌面端)
         taskForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const title = document.getElementById('taskTitle').value.trim();
-            const description = document.getElementById('taskDescription').value.trim();
-            const priority = document.getElementById('taskPriority').value;
+            const title = taskTitleInput.value.trim();
+            const description = taskDescriptionInput.value.trim();
+            const priority = taskPrioritySelect.value;
+            const taskId = taskIdInput.value;
             
-            if (title) {
+            if (!title) {
+                showToast('請輸入任務名稱！');
+                return;
+            }
+            
+            if (taskId) {
+                // 更新现有任务
+                updateTask(taskId, title, description, priority);
+            } else {
+                // 添加新任务
                 addTask(title, description, priority);
-                taskForm.reset();
-                document.getElementById('taskPriority').value = 'high';
             }
         });
         
@@ -945,15 +1260,36 @@
         mobileTaskForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const title = document.getElementById('mobileTaskTitle').value.trim();
-            const description = document.getElementById('mobileTaskDescription').value.trim();
-            const priority = document.getElementById('mobileTaskPriority').value;
+            const title = mobileTaskTitleInput.value.trim();
+            const description = mobileTaskDescriptionInput.value.trim();
+            const priority = mobileTaskPrioritySelect.value;
+            const taskId = mobileTaskIdInput.value;
             
-            if (title) {
-                addTask(title, description, priority);
-                mobileTaskForm.reset();
-                document.getElementById('mobileTaskPriority').value = 'high';
+            if (!title) {
+                showToast('請輸入任務名稱！');
+                return;
             }
+            
+            if (taskId) {
+                // 更新现有任务
+                updateTask(taskId, title, description, priority);
+            } else {
+                // 添加新任务
+                addTask(title, description, priority);
+            }
+        });
+        
+        // Cancel edit button event (桌面端)
+        cancelEditBtn.addEventListener('click', function() {
+            resetForm('desktop');
+            showToast('已取消編輯');
+        });
+        
+        // Cancel edit button event (移动端)
+        mobileCancelEditBtn.addEventListener('click', function() {
+            resetForm('mobile');
+            closeMobileFormHandler();
+            showToast('已取消編輯');
         });
         
         // Event listeners for filter buttons
@@ -969,8 +1305,12 @@
         // FAB button to show form on mobile
         fabButton.addEventListener('click', function() {
             if (window.innerWidth < 768) {
+                resetForm('mobile');
                 openMobileForm();
             } else {
+                if (editingTaskId) {
+                    resetForm('desktop');
+                }
                 toggleTaskForm();
             }
         });
@@ -1010,13 +1350,17 @@
             
             // Show the task form
             if (window.innerWidth < 768) {
+                resetForm('mobile');
                 openMobileForm();
             } else {
                 // On desktop, just scroll to the form
                 if (taskFormSection.classList.contains('collapsed')) {
                     taskFormSection.classList.remove('collapsed');
+                    const fabIcon = fabButton.querySelector('i');
+                    fabIcon.className = 'fas fa-times';
                 }
                 taskFormSection.scrollIntoView({ behavior: 'smooth' });
+                resetForm('desktop');
             }
         });
         
@@ -1052,6 +1396,10 @@
         } else {
             fabButton.style.display = 'flex';
         }
+        
+        // 初始化表单状态
+        resetForm('desktop');
+        resetForm('mobile');
     </script>
 </body>
 </html>
