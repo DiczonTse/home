@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📝每日任務</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* 原有的CSS保持不变 */
+        /* 原有的CSS保持不變 */
         * {
             margin: 0;
             padding: 0;
@@ -30,7 +30,7 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft JhengHei', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background-color: #f0f2f5;
             color: var(--dark);
             line-height: 1.6;
@@ -595,7 +595,7 @@
                 flex-direction: column;
             }
             
-            /* 移动端优化：表单展开时调整容器 */
+            /* 移動端優化：表單展開時調整容器 */
             .container.form-expanded {
                 padding-bottom: 6rem;
             }
@@ -639,7 +639,7 @@
             opacity: 1;
         }
         
-        /* 新增：移动端表单优化 */
+        /* 新增：移動端表單優化 */
         .mobile-form-overlay {
             display: none;
             position: fixed;
@@ -815,7 +815,7 @@
         </div>
     </footer>
     
-    <!-- 移动端表单覆盖层 -->
+    <!-- 移動端表單覆蓋層 -->
     <div class="mobile-form-overlay" id="mobileFormOverlay"></div>
     <div class="mobile-form-container" id="mobileFormContainer">
         <div class="mobile-form-header">
@@ -902,7 +902,7 @@
         const mobileFormContainer = document.getElementById('mobileFormContainer');
         const closeMobileForm = document.getElementById('closeMobileForm');
         
-        // 表单元素
+        // 表單元素
         const taskIdInput = document.getElementById('taskId');
         const taskTitleInput = document.getElementById('taskTitle');
         const taskDescriptionInput = document.getElementById('taskDescription');
@@ -926,10 +926,24 @@
         let currentFilter = 'all';
         let editingTaskId = null;
         
-        // Set current date
-        const now = new Date();
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        currentDate.textContent = now.toLocaleDateString('en-US', options);
+        // 中文日期顯示
+        function updateChineseDate() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth() + 1;
+            const date = now.getDate();
+            const day = now.getDay();
+            
+            // 中文星期幾
+            const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            const weekday = weekdays[day];
+            
+            // 格式: 2025年1月1日 星期三
+            currentDate.textContent = `${year}年${month}月${date}日 ${weekday}`;
+        }
+        
+        // Set current date in Chinese
+        updateChineseDate();
 		
 		// Set current year in footer
 		const currentYear = new Date().getFullYear();
@@ -957,13 +971,13 @@
             }, 3000);
         }
         
-        // 移动端表单控制
+        // 移動端表單控制
         function openMobileForm() {
             mobileFormOverlay.style.display = 'block';
             mobileFormContainer.classList.add('open');
-            document.body.style.overflow = 'hidden'; // 防止背景滚动
+            document.body.style.overflow = 'hidden'; // 防止背景滾動
             
-            // 短暂延迟后聚焦到输入框
+            // 短暫延遲後聚焦到輸入框
             setTimeout(() => {
                 mobileTaskTitleInput.focus();
             }, 300);
@@ -973,12 +987,12 @@
             mobileFormContainer.classList.remove('open');
             setTimeout(() => {
                 mobileFormOverlay.style.display = 'none';
-                document.body.style.overflow = ''; // 恢复背景滚动
+                document.body.style.overflow = ''; // 恢復背景滾動
                 resetForm('mobile');
             }, 300);
         }
         
-        // 重置表单（新建任务模式）
+        // 重置表單（新建任務模式）
         function resetForm(formType = 'desktop') {
             editingTaskId = null;
             
@@ -1005,7 +1019,7 @@
             }
         }
         
-        // 设置表单为编辑模式
+        // 設置表單為編輯模式
         function setFormToEditMode(task, formType = 'desktop') {
             editingTaskId = task.id;
             
@@ -1160,13 +1174,13 @@
             const task = tasks.find(t => t.id === taskId);
             if (!task) return;
             
-            // 根据设备类型打开相应的表单
+            // 根據設備類型打開相應的表單
             if (window.innerWidth < 768) {
-                // 移动端：打开移动表单
+                // 移動端：打開移動表單
                 setFormToEditMode(task, 'mobile');
                 openMobileForm();
             } else {
-                // 桌面端：显示表单并设置为编辑模式
+                // 桌面端：顯示表單並設置為編輯模式
                 if (taskFormSection.classList.contains('collapsed')) {
                     taskFormSection.classList.remove('collapsed');
                     const fabIcon = fabButton.querySelector('i');
@@ -1226,7 +1240,7 @@
                 saveTasks();
                 showToast('已刪除任務');
                 
-                // 如果正在编辑被删除的任务，重置表单
+                // 如果正在編輯被刪除的任務，重置表單
                 if (editingTaskId === taskId) {
                     resetForm(window.innerWidth < 768 ? 'mobile' : 'desktop');
                 }
@@ -1248,10 +1262,10 @@
             }
             
             if (taskId) {
-                // 更新现有任务
+                // 更新現有任務
                 updateTask(taskId, title, description, priority);
             } else {
-                // 添加新任务
+                // 添加新任務
                 addTask(title, description, priority);
             }
         });
@@ -1271,10 +1285,10 @@
             }
             
             if (taskId) {
-                // 更新现有任务
+                // 更新現有任務
                 updateTask(taskId, title, description, priority);
             } else {
-                // 添加新任务
+                // 添加新任務
                 addTask(title, description, priority);
             }
         });
@@ -1285,7 +1299,7 @@
             showToast('已取消編輯');
         });
         
-        // Cancel edit button event (移动端)
+        // Cancel edit button event (移動端)
         mobileCancelEditBtn.addEventListener('click', function() {
             resetForm('mobile');
             closeMobileFormHandler();
@@ -1397,7 +1411,7 @@
             fabButton.style.display = 'flex';
         }
         
-        // 初始化表单状态
+        // 初始化表單狀態
         resetForm('desktop');
         resetForm('mobile');
     </script>
