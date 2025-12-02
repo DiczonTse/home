@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中文親戚稱呼計算機/三姑六婆網頁版</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .calculator-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .calculator-box {
+            flex: 1;
+            min-width: 300px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            transition: transform 0.3s ease;
+        }
+        
+        .calculator-box:hover {
+            transform: translateY(-5px);
+        }
+        
+        h2 {
+            color: #3498db;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        h2 i {
+            color: #e74c3c;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        select:focus, input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        
+        button {
+            background: linear-gradient(to right, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        button:hover {
+            background: linear-gradient(to right, #2980b9, #1c5a7d);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        .result {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 25px;
+            border-left: 5px solid #3498db;
+            display: none;
+        }
+        
+        .result.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .result h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .result p {
+            font-size: 1.4rem;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .examples {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-top: 20px;
+        }
+        
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .example-card {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-top: 4px solid #3498db;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .example-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .example-card h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .note {
+            background-color: #fffde7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #8a6d3b;
+            border-left: 4px solid #ffeb3b;
+        }
+        
+        @media (max-width: 768px) {
+            .calculator-container {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+        }
+        
+        .relationship-path {
+            background-color: #f0f7ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 0.95rem;
+            color: #555;
+        }
+        
+        .relationship-path span {
+            color: #3498db;
+            font-weight: bold;
+        }
+        
+        .quick-examples {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .quick-example {
+            background-color: #eaf4ff;
+            border: 1px solid #b8d4ff;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .quick-example:hover {
+            background-color: #d4e7ff;
+        }
+        
+        .additional-relation {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px dashed #ddd;
+        }
+        
+        .complex-example {
+            background-color: #f0f7ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .complex-example h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><a href="index.html" target="_parent" style="text-decoration:none; color:#2c3e50;"><i class="fas fa-users"></i> 中文親戚稱呼計算機/三姑六婆網頁版</a></h1>
+            <p class="subtitle">輕鬆計算親戚間的正確稱呼，支援雙向查詢。支援複雜關係查詢，如「父親的母親的妹妹的兒子」等。</p>
+        </header>
+        
+        <div class="calculator-container">
+            <div class="calculator-box">
+                <h2><i class="fas fa-calculator"></i> 查詢親戚稱呼</h2>
+                <p>請選擇您與目標親戚的關係路徑：</p>
+                
+                <div class="input-group">
+                    <label for="relation1">與我的關係：</label>
+                    <select id="relation1">
+                        <option value="">請選擇關係</option>
+                        <option value="father">父親</option>
+                        <option value="mother">母親</option>
+                        <option value="olderBrother">哥哥</option>
+                        <option value="youngerBrother">弟弟</option>
+                        <option value="olderSister">姐姐</option>
+                        <option value="youngerSister">妹妹</option>
+                        <option value="son">兒子</option>
+                        <option value="daughter">女兒</option>
+                        <option value="husband">丈夫</option>
+                        <option value="wife">妻子</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label for="relation2">與其關係：</label>
+                    <select id="relation2">
+                        <option value="">請選擇關係（可選）</option>
+                        <option value="father">父親</option>
+                        <option value="mother">母親</option>
+                        <option value="olderBrother">哥哥</option>
+                        <option value="youngerBrother">弟弟</option>
+                        <option value="olderSister">姐姐</option>
+                        <option value="youngerSister">妹妹</option>
+                        <option value="son">兒子</option>
+                        <option value="daughter">女兒</option>
+                        <option value="husband">丈夫</option>
+                        <option value="wife">妻子</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label for="relation3">再與其關係：</label>
+                    <select id="relation3">
+                        <option value="">請選擇關係（可選）</option>
+                        <option value="father">父親</option>
+                        <option value="mother">母親</option>
+                        <option value="olderBrother">哥哥</option>
+                        <option value="youngerBrother">弟弟</option>
+                        <option value="olderSister">姐姐</option>
+                        <option value="youngerSister">妹妹</option>
+                        <option value="son">兒子</option>
+                        <option value="daughter">女兒</option>
+                        <option value="husband">丈夫</option>
+                        <option value="wife">妻子</option>
+                    </select>
+                </div>
+                
+                <div class="additional-relation">
+                    <label for="relation4">再與其關係（可選）：</label>
+                    <select id="relation4">
+                        <option value="">請選擇關係（可選，最多四層）</option>
+                        <option value="father">父親</option>
+                        <option value="mother">母親</option>
+                        <option value="olderBrother">哥哥</option>
+                        <option value="youngerBrother">弟弟</option>
+                        <option value="olderSister">姐姐</option>
+                        <option value="youngerSister">妹妹</option>
+                        <option value="son">兒子</option>
+                        <option value="daughter">女兒</option>
+                        <option value="husband">丈夫</option>
+                        <option value="wife">妻子</option>
+                    </select>
+                </div>
+                
+                <div class="quick-examples">
+                    <div class="quick-example" data-example="表哥的兒子">表哥的兒子</div>
+                    <div class="quick-example" data-example="父親的母親的妹妹的兒子">父親的母親的妹妹的兒子</div>
+                    <div class="quick-example" data-example="舅舅的孫子">舅舅的孫子</div>
+                    <div class="quick-example" data-example="堂哥的女兒">堂哥的女兒</div>
+                </div>
+                
+                <button id="calculateBtn">
+                    <i class="fas fa-search"></i> 計算稱呼
+                </button>
+                
+                <div id="result1" class="result">
+                    <h3>查詢結果：</h3>
+                    <p id="resultText1"></p>
+                    <div id="relationshipPath1" class="relationship-path"></div>
+                    <div class="note">
+                        <i class="fas fa-lightbulb"></i> 提示：稱呼可能因地區習俗略有差異，此結果為通用稱呼。
+                    </div>
+                </div>
+                
+                <div class="complex-example">
+                    <h4><i class="fas fa-lightbulb"></i> 複雜關係說明</h4>
+                    <p><strong>父親的母親的妹妹的兒子</strong> = 祖母的妹妹的兒子 = 姨婆的兒子 = 表舅（父親的表兄弟）</p>
+                    <p>要查詢此關係，請選擇：父親 → 母親 → 妹妹 → 兒子</p>
+                </div>
+            </div>
+            
+            <div class="calculator-box">
+                <h2><i class="fas fa-exchange-alt"></i> 反向查詢（由稱呼查關係）</h2>
+                <p>輸入您聽到的親戚稱呼，查詢可能的親戚關係：</p>
+                
+                <div class="input-group">
+                    <label for="titleInput">親戚稱呼：</label>
+                    <input type="text" id="titleInput" placeholder="例如：表舅、表姑、表叔">
+                </div>
+                
+                <div class="quick-examples">
+                    <div class="quick-example" data-example="表舅">表舅</div>
+                    <div class="quick-example" data-example="表姑">表姑</div>
+                    <div class="quick-example" data-example="表叔">表叔</div>
+                    <div class="quick-example" data-example="表姨">表姨</div>
+                </div>
+                
+                <button id="reverseBtn">
+                    <i class="fas fa-redo"></i> 查詢關係
+                </button>
+                
+                <div id="result2" class="result">
+                    <h3>查詢結果：</h3>
+                    <p id="resultText2"></p>
+                    <div id="relationshipPath2" class="relationship-path"></div>
+                    <div class="note">
+                        <i class="fas fa-lightbulb"></i> 提示：同一稱呼可能對應多種親戚關係，此處顯示最常見的一種。
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="examples">
+            <h2><i class="fas fa-list-alt"></i> 常見親戚稱呼示例</h2>
+            <div class="examples-grid">
+                <div class="example-card">
+                    <h4>直系親屬</h4>
+                    <p>父親、母親、兒子、女兒</p>
+                    <p>祖父、祖母、孫子、孫女</p>
+                </div>
+                <div class="example-card">
+                    <h4>兄弟姐妹</h4>
+                    <p>哥哥、弟弟、姐姐、妹妹</p>
+                    <p>堂哥、堂弟、表哥、表弟</p>
+                </div>
+                <div class="example-card">
+                    <h4>叔叔阿姨輩</h4>
+                    <p>伯父、叔父、姑母、姨母</p>
+                    <p>舅舅、舅媽、姑父、姨父</p>
+                </div>
+                <div class="example-card">
+                    <h4>晚輩親屬</h4>
+                    <p>侄子、侄女、外甥、外甥女</p>
+                    <p>堂侄、表侄、堂外甥、表外甥</p>
+                </div>
+                <div class="example-card">
+                    <h4>複雜關係（新增）</h4>
+                    <p>父親的母親的妹妹的兒子：表舅</p>
+                    <p>父親的母親的妹妹的女兒：表姑</p>
+                    <p>母親的母親的弟弟的兒子：表舅</p>
+                    <p>父親的父親的哥哥的孫子：堂兄/堂弟</p>
+                </div>
+                <div class="example-card">
+                    <h4>其他遠親</h4>
+                    <p>表舅、表姨、表叔、表姑</p>
+                    <p>表姑父、表姨父、表伯母</p>
+                </div>
+            </div>
+            
+            <div class="note">
+                <h4><i class="fas fa-info-circle"></i> 使用說明：</h4>
+                <p>1. 在左側查詢器中，通過選擇關係路徑來計算稱呼。例如：選擇"父親"→"母親"→"妹妹"→"兒子"，可查詢"父親的母親的妹妹的兒子（表舅）"的稱呼。</p>
+                <p>2. 在右側查詢器中，直接輸入稱呼來查找對應的親戚關係。例如：輸入"表舅"，可查詢到"父親的母親的妹妹的兒子"這一關係。</p>
+                <p>3. 點擊快速示例按鈕可快速填充查詢條件。</p>
+                <p>4. 稱呼計算基於標準中文親屬關係，實際使用中可能因地區、習俗有所不同。</p>
+            </div>
+        </div>
+        
+        <footer>
+            <p>中文親戚稱呼計算機/三姑六婆網頁版 &copy; 2025 | 使用HTML、CSS和JavaScript開發</p>
+            <p>本工具僅供參考，實際稱呼請結合家庭習慣和當地習俗</p>
+        </footer>
+    </div>
+    
+    <script>
+        // 親戚關係映射數據（擴展版，支援更複雜的關係）
+        const relations = {
+            // 直接關係
+            "father": { title: "父親", reverse: "子女", gender: "male" },
+            "mother": { title: "母親", reverse: "子女", gender: "female" },
+            "olderBrother": { title: "哥哥", reverse: "弟弟/妹妹", gender: "male" },
+            "youngerBrother": { title: "弟弟", reverse: "哥哥/姐姐", gender: "male" },
+            "olderSister": { title: "姐姐", reverse: "弟弟/妹妹", gender: "female" },
+            "youngerSister": { title: "妹妹", reverse: "哥哥/姐姐", gender: "female" },
+            "son": { title: "兒子", reverse: "父親/母親", gender: "male" },
+            "daughter": { title: "女兒", reverse: "父親/母親", gender: "female" },
+            "husband": { title: "丈夫", reverse: "妻子", gender: "male" },
+            "wife": { title: "妻子", reverse: "丈夫", gender: "female" },
+            
+            // 雙重關係
+            "father_father": { title: "祖父", reverse: "孫子/孫女", gender: "male" },
+            "father_mother": { title: "祖母", reverse: "孫子/孫女", gender: "female" },
+            "mother_father": { title: "外祖父", reverse: "外孫/外孫女", gender: "male" },
+            "mother_mother": { title: "外祖母", reverse: "外孫/外孫女", gender: "female" },
+            
+            "father_olderBrother": { title: "伯父", reverse: "侄子/侄女", gender: "male" },
+            "father_youngerBrother": { title: "叔父", reverse: "侄子/侄女", gender: "male" },
+            "father_olderSister": { title: "姑母", reverse: "侄子/侄女", gender: "female" },
+            "father_youngerSister": { title: "姑母", reverse: "侄子/侄女", gender: "female" },
+            
+            "mother_olderBrother": { title: "舅父", reverse: "外甥/外甥女", gender: "male" },
+            "mother_youngerBrother": { title: "舅父", reverse: "外甥/外甥女", gender: "male" },
+            "mother_olderSister": { title: "姨母", reverse: "外甥/外甥女", gender: "female" },
+            "mother_youngerSister": { title: "姨母", reverse: "外甥/外甥女", gender: "female" },
+            
+            "olderBrother_son": { title: "侄子", reverse: "伯父/叔父/姑母", gender: "male" },
+            "olderBrother_daughter": { title: "侄女", reverse: "伯父/叔父/姑母", gender: "female" },
+            "youngerBrother_son": { title: "侄子", reverse: "伯父/叔父/姑母", gender: "male" },
+            "youngerBrother_daughter": { title: "侄女", reverse: "伯父/叔父/姑母", gender: "female" },
+            
+            "olderSister_son": { title: "外甥", reverse: "舅父/姨母", gender: "male" },
+            "olderSister_daughter": { title: "外甥女", reverse: "舅父/姨母", gender: "female" },
+            "youngerSister_son": { title: "外甥", reverse: "舅父/姨母", gender: "male" },
+            "youngerSister_daughter": { title: "外甥女", reverse: "舅父/姨母", gender: "female" },
+            
+            // 三重關係（堂表兄弟姐妹）
+            "father_father_father": { title: "曾祖父", reverse: "曾孫/曾孫女", gender: "male" },
+            "father_father_mother": { title: "曾祖母", reverse: "曾孫/曾孫女", gender: "female" },
+            
+            "father_olderBrother_son": { title: "堂哥", reverse: "堂弟/堂妹", gender: "male" },
+            "father_olderBrother_daughter": { title: "堂姐", reverse: "堂弟/堂妹", gender: "female" },
+            "father_youngerBrother_son": { title: "堂弟", reverse: "堂哥/堂姐", gender: "male" },
+            "father_youngerBrother_daughter": { title: "堂妹", reverse: "堂哥/堂姐", gender: "female" },
+            
+            "mother_olderBrother_son": { title: "表哥", reverse: "表弟/表妹", gender: "male" },
+            "mother_olderBrother_daughter": { title: "表姐", reverse: "表弟/表妹", gender: "female" },
+            "mother_youngerBrother_son": { title: "表弟", reverse: "表哥/表姐", gender: "male" },
+            "mother_youngerBrother_daughter": { title: "表妹", reverse: "表哥/表姐", gender: "female" },
+            "mother_olderSister_son": { title: "表哥", reverse: "表弟/表妹", gender: "male" },
+            "mother_olderSister_daughter": { title: "表姐", reverse: "表弟/表妹", gender: "female" },
+            "mother_youngerSister_son": { title: "表弟", reverse: "表哥/表姐", gender: "male" },
+            "mother_youngerSister_daughter": { title: "表妹", reverse: "表哥/表姐", gender: "female" },
+            
+            // 四重關係（新增：支援父親的母親的妹妹的兒子等複雜關係）
+            "mother_olderBrother_son_son": { title: "表侄", reverse: "表叔/表伯", gender: "male" },
+            "mother_olderBrother_son_daughter": { title: "表侄女", reverse: "表姑", gender: "female" },
+            "mother_youngerBrother_son_son": { title: "表侄", reverse: "表叔", gender: "male" },
+            "mother_youngerBrother_son_daughter": { title: "表侄女", reverse: "表姑", gender: "female" },
+            "mother_olderSister_son_son": { title: "表外甥", reverse: "表舅", gender: "male" },
+            "mother_olderSister_son_daughter": { title: "表外甥女", reverse: "表姨", gender: "female" },
+            "mother_youngerSister_son_son": { title: "表外甥", reverse: "表舅", gender: "male" },
+            "mother_youngerSister_son_daughter": { title: "表外甥女", reverse: "表姨", gender: "female" },
+            
+            "mother_olderBrother_daughter_son": { title: "表外甥", reverse: "表舅", gender: "male" },
+            "mother_olderBrother_daughter_daughter": { title: "表外甥女", reverse: "表姨", gender: "female" },
+            
+            "father_olderBrother_son_son": { title: "堂侄", reverse: "堂叔/堂伯", gender: "male" },
+            "father_olderBrother_son_daughter": { title: "堂侄女", reverse: "堂姑", gender: "female" },
+            "father_youngerBrother_son_son": { title: "堂侄", reverse: "堂叔", gender: "male" },
+            "father_youngerBrother_son_daughter": { title: "堂侄女", reverse: "堂姑", gender: "female" },
+            
+            // 父親的母親的妹妹的兒子（表舅）
+            "father_mother_youngerSister_son": { title: "表舅", reverse: "表外甥", gender: "male" },
+            "father_mother_olderSister_son": { title: "表舅", reverse: "表外甥", gender: "male" },
+            "father_mother_youngerSister_daughter": { title: "表姑", reverse: "表侄/表侄女", gender: "female" },
+            "father_mother_olderSister_daughter": { title: "表姑", reverse: "表侄/表侄女", gender: "female" },
+            
+            // 母親的母親的妹妹的兒子（表舅）
+            "mother_mother_youngerSister_son": { title: "表舅", reverse: "表外甥", gender: "male" },
+            "mother_mother_olderSister_son": { title: "表舅", reverse: "表外甥", gender: "male" },
+            "mother_mother_youngerSister_daughter": { title: "表姨", reverse: "表外甥/表外甥女", gender: "female" },
+            "mother_mother_olderSister_daughter": { title: "表姨", reverse: "表外甥/表外甥女", gender: "female" },
+            
+            // 其他常見複雜關係
+            "mother_olderBrother_son_wife": { title: "表嫂", reverse: "表弟妹/表兄嫂", gender: "female" },
+            "mother_youngerBrother_son_wife": { title: "表弟媳", reverse: "表哥/表嫂", gender: "female" },
+        };
+
+        // 稱呼到關係的反向映射
+        const titleToRelation = {
+            "祖父": "父親的父親",
+            "祖母": "父親的母親",
+            "外祖父": "母親的父親",
+            "外祖母": "母親的母親",
+            "伯父": "父親的哥哥",
+            "叔父": "父親的弟弟",
+            "姑母": "父親的姐妹",
+            "舅父": "母親的兄弟",
+            "姨母": "母親的姐妹",
+            "堂哥": "父親的兄弟的兒子（年齡比自己大）",
+            "堂弟": "父親的兄弟的兒子（年齡比自己小）",
+            "堂姐": "父親的兄弟的女兒（年齡比自己大）",
+            "堂妹": "父親的兄弟的女兒（年齡比自己小）",
+            "表哥": "母親的兄弟或姐妹的兒子（年齡比自己大）",
+            "表弟": "母親的兄弟或姐妹的兒子（年齡比自己小）",
+            "表姐": "母親的兄弟或姐妹的女兒（年齡比自己大）",
+            "表妹": "母親的兄弟或姐妹的女兒（年齡比自己小）",
+            "侄子": "兄弟的兒子",
+            "侄女": "兄弟的女兒",
+            "外甥": "姐妹的兒子",
+            "外甥女": "姐妹的女兒",
+            "表侄": "表哥的兒子",
+            "表侄女": "表哥的女兒",
+            "表外甥": "表姐的兒子",
+            "表外甥女": "表姐的女兒",
+            "堂侄": "堂哥的兒子",
+            "堂侄女": "堂哥的女兒",
+            "表舅": "父親的母親的妹妹的兒子 或 母親的母親的兄弟的兒子",
+            "表姑": "父親的母親的妹妹的女兒",
+            "表叔": "父親的父親的兄弟的兒子",
+            "表姨": "母親的母親的姐妹的女兒"
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const calculateBtn = document.getElementById('calculateBtn');
+            const reverseBtn = document.getElementById('reverseBtn');
+            const result1 = document.getElementById('result1');
+            const result2 = document.getElementById('result2');
+            const resultText1 = document.getElementById('resultText1');
+            const resultText2 = document.getElementById('resultText2');
+            const relationshipPath1 = document.getElementById('relationshipPath1');
+            const relationshipPath2 = document.getElementById('relationshipPath2');
+            const quickExamples = document.querySelectorAll('.quick-example');
+            
+            // 快速示例按鈕點擊事件
+            quickExamples.forEach(example => {
+                example.addEventListener('click', function() {
+                    const exampleText = this.getAttribute('data-example');
+                    
+                    // 判斷是哪個區域的示例
+                    const isLeftPanel = this.closest('.calculator-box').querySelector('#relation1');
+                    
+                    if (isLeftPanel) {
+                        // 左側查詢區域：填充關係選擇
+                        fillRelationFromExample(exampleText);
+                    } else {
+                        // 右側查詢區域：填充稱呼輸入
+                        document.getElementById('titleInput').value = exampleText;
+                    }
+                });
+            });
+            
+            // 根據示例填充關係選擇
+            function fillRelationFromExample(exampleText) {
+                // 清空選擇
+                document.getElementById('relation1').value = '';
+                document.getElementById('relation2').value = '';
+                document.getElementById('relation3').value = '';
+                document.getElementById('relation4').value = '';
+                
+                // 根據不同示例設置關係
+                if (exampleText === "表哥的兒子") {
+                    document.getElementById('relation1').value = 'mother';
+                    document.getElementById('relation2').value = 'olderBrother';
+                    document.getElementById('relation3').value = 'son';
+                    document.getElementById('relation4').value = 'son';
+                } else if (exampleText === "父親的母親的妹妹的兒子") {
+                    document.getElementById('relation1').value = 'father';
+                    document.getElementById('relation2').value = 'mother';
+                    document.getElementById('relation3').value = 'youngerSister';
+                    document.getElementById('relation4').value = 'son';
+                } else if (exampleText === "舅舅的孫子") {
+                    document.getElementById('relation1').value = 'mother';
+                    document.getElementById('relation2').value = 'olderBrother';
+                    document.getElementById('relation3').value = 'son';
+                    document.getElementById('relation4').value = 'son';
+                } else if (exampleText === "堂哥的女兒") {
+                    document.getElementById('relation1').value = 'father';
+                    document.getElementById('relation2').value = 'olderBrother';
+                    document.getElementById('relation3').value = 'son';
+                    document.getElementById('relation4').value = 'daughter';
+                }
+            }
+            
+            // 計算稱呼
+            calculateBtn.addEventListener('click', function() {
+                const relation1 = document.getElementById('relation1').value;
+                const relation2 = document.getElementById('relation2').value;
+                const relation3 = document.getElementById('relation3').value;
+                const relation4 = document.getElementById('relation4').value;
+                
+                if (!relation1) {
+                    alert("請至少選擇第一個關係");
+                    return;
+                }
+                
+                let path = relation1;
+                let relationshipDesc = `我的${relations[relation1].title}`;
+                
+                if (relation2) {
+                    path += "_" + relation2;
+                    relationshipDesc += `的${relations[relation2].title}`;
+                }
+                
+                if (relation3) {
+                    path += "_" + relation3;
+                    relationshipDesc += `的${relations[relation3].title}`;
+                }
+                
+                if (relation4) {
+                    path += "_" + relation4;
+                    relationshipDesc += `的${relations[relation4].title}`;
+                }
+                
+                // 查找對應的稱呼
+                let title = "";
+                if (relations[path]) {
+                    title = relations[path].title;
+                } else {
+                    // 如果沒有直接匹配，嘗試生成
+                    title = generateTitle(relation1, relation2, relation3, relation4);
+                }
+                
+                // 顯示結果
+                resultText1.textContent = `我應稱呼其為：${title}`;
+                relationshipPath1.innerHTML = `<strong>關係路徑：</strong><span>${relationshipDesc}</span>`;
+                result1.classList.add('show');
+            });
+            
+            // 反向查詢（由稱呼查關係）
+            reverseBtn.addEventListener('click', function() {
+                const titleInput = document.getElementById('titleInput').value.trim();
+                
+                if (!titleInput) {
+                    alert("請輸入親戚稱呼");
+                    return;
+                }
+                
+                // 查找對應的關係
+                let relationDesc = titleToRelation[titleInput];
+                
+                if (relationDesc) {
+                    resultText2.textContent = `"${titleInput}"對應的親戚關係是：${relationDesc}`;
+                    relationshipPath2.innerHTML = `<strong>解析：</strong><span>${relationDesc}</span>`;
+                } else {
+                    // 嘗試模糊匹配
+                    let matched = false;
+                    for (const [title, desc] of Object.entries(titleToRelation)) {
+                        if (title.includes(titleInput) || titleInput.includes(title)) {
+                            resultText2.textContent = `"${titleInput}"可能對應的親戚關係是：${title} (${desc})`;
+                            relationshipPath2.innerHTML = `<strong>解析：</strong><span>${desc}</span>`;
+                            matched = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!matched) {
+                        // 嘗試處理"父親的母親的妹妹的兒子"這種描述性輸入
+                        if (titleInput.includes("的")) {
+                            const parts = titleInput.split("的");
+                            if (parts.length >= 2) {
+                                // 嘗試解析多層關係
+                                const parsedRelation = parseComplexRelation(titleInput);
+                                if (parsedRelation) {
+                                    resultText2.textContent = `"${titleInput}"對應的親戚關係是：${parsedRelation}`;
+                                    relationshipPath2.innerHTML = `<strong>解析：</strong><span>${parsedRelation}</span>`;
+                                    matched = true;
+                                }
+                            }
+                        }
+                        
+                        if (!matched) {
+                            resultText2.textContent = `未找到與"${titleInput}"完全匹配的親戚關係`;
+                            relationshipPath2.innerHTML = `<strong>提示：</strong><span>請嘗試輸入更常見的稱呼，如"表哥"、"表舅"等</span>`;
+                        }
+                    }
+                }
+                
+                result2.classList.add('show');
+            });
+            
+            // 解析複雜關係描述的輔助函數
+            function parseComplexRelation(relationStr) {
+                // 簡單的關鍵詞映射
+                const keywordMap = {
+                    "父親": "father",
+                    "母親": "mother", 
+                    "哥哥": "olderBrother",
+                    "弟弟": "youngerBrother",
+                    "姐姐": "olderSister",
+                    "妹妹": "youngerSister",
+                    "兒子": "son",
+                    "女兒": "daughter"
+                };
+                
+                const parts = relationStr.split("的");
+                let path = "";
+                let desc = "";
+                
+                for (let i = 0; i < parts.length; i++) {
+                    const keyword = parts[i];
+                    if (keywordMap[keyword]) {
+                        path += (i > 0 ? "_" : "") + keywordMap[keyword];
+                        desc += (i > 0 ? "的" : "") + keyword;
+                    } else {
+                        // 如果遇到不認識的關鍵詞，返回null
+                        return null;
+                    }
+                }
+                
+                // 查找對應的稱呼
+                if (relations[path]) {
+                    return relations[path].title;
+                }
+                
+                return null;
+            }
+            
+            // 生成稱呼的輔助函數
+            function generateTitle(rel1, rel2, rel3, rel4) {
+                if (!rel2 && !rel3 && !rel4) {
+                    return relations[rel1].title;
+                }
+                
+                if (rel2 && !rel3 && !rel4) {
+                    // 雙重關係
+                    const rel1Info = relations[rel1];
+                    const rel2Info = relations[rel2];
+                    
+                    // 父母組合
+                    if (rel1 === "father" && rel2 === "father") return "祖父";
+                    if (rel1 === "father" && rel2 === "mother") return "祖母";
+                    if (rel1 === "mother" && rel2 === "father") return "外祖父";
+                    if (rel1 === "mother" && rel2 === "mother") return "外祖母";
+                    
+                    // 兄弟姐妹的孩子
+                    if (rel1Info.gender === "male" && (rel2 === "son" || rel2 === "daughter")) {
+                        return rel2 === "son" ? "侄子" : "侄女";
+                    }
+                    
+                    if (rel1Info.gender === "female" && (rel2 === "son" || rel2 === "daughter")) {
+                        return rel2 === "son" ? "外甥" : "外甥女";
+                    }
+                    
+                    return `${rel1Info.title}的${rel2Info.title}`;
+                }
+                
+                if (rel2 && rel3 && !rel4) {
+                    // 三重關係
+                    const rel1Info = relations[rel1];
+                    const rel2Info = relations[rel2];
+                    const rel3Info = relations[rel3];
+                    
+                    // 常見堂表關係
+                    if (rel1 === "father" && (rel2 === "olderBrother" || rel2 === "youngerBrother")) {
+                        if (rel3 === "son") return rel2 === "olderBrother" ? "堂哥" : "堂弟";
+                        if (rel3 === "daughter") return rel2 === "olderBrother" ? "堂姐" : "堂妹";
+                    }
+                    
+                    if (rel1 === "mother" && (rel2 === "olderBrother" || rel2 === "youngerBrother" || 
+                                               rel2 === "olderSister" || rel2 === "youngerSister")) {
+                        if (rel3 === "son") return rel2 === "olderBrother" || rel2 === "olderSister" ? "表哥" : "表弟";
+                        if (rel3 === "daughter") return rel2 === "olderBrother" || rel2 === "olderSister" ? "表姐" : "表妹";
+                    }
+                    
+                    // 父親的母親的妹妹（姨婆）
+                    if (rel1 === "father" && rel2 === "mother" && (rel3 === "olderSister" || rel3 === "youngerSister")) {
+                        return rel3 === "olderSister" ? "姨婆" : "姨婆";
+                    }
+                    
+                    // 母親的母親的妹妹（姨婆）
+                    if (rel1 === "mother" && rel2 === "mother" && (rel3 === "olderSister" || rel3 === "youngerSister")) {
+                        return rel3 === "olderSister" ? "姨婆" : "姨婆";
+                    }
+                    
+                    return `${rel1Info.title}的${rel2Info.title}的${rel3Info.title}`;
+                }
+                
+                if (rel2 && rel3 && rel4) {
+                    // 四重關係
+                    const rel1Info = relations[rel1];
+                    const rel2Info = relations[rel2];
+                    const rel3Info = relations[rel3];
+                    const rel4Info = relations[rel4];
+                    
+                    // 父親的母親的妹妹的兒子（表舅）
+                    if (rel1 === "father" && rel2 === "mother" && 
+                        (rel3 === "olderSister" || rel3 === "youngerSister") && rel4 === "son") {
+                        return "表舅";
+                    }
+                    
+                    // 父親的母親的妹妹的女兒（表姑）
+                    if (rel1 === "father" && rel2 === "mother" && 
+                        (rel3 === "olderSister" || rel3 === "youngerSister") && rel4 === "daughter") {
+                        return "表姑";
+                    }
+                    
+                    // 母親的母親的妹妹的兒子（表舅）
+                    if (rel1 === "mother" && rel2 === "mother" && 
+                        (rel3 === "olderSister" || rel3 === "youngerSister") && rel4 === "son") {
+                        return "表舅";
+                    }
+                    
+                    // 母親的母親的妹妹的女兒（表姨）
+                    if (rel1 === "mother" && rel2 === "mother" && 
+                        (rel3 === "olderSister" || rel3 === "youngerSister") && rel4 === "daughter") {
+                        return "表姨";
+                    }
+                    
+                    // 表哥的兒子
+                    if (rel1 === "mother" && (rel2 === "olderBrother" || rel2 === "youngerBrother") && 
+                        rel3 === "son" && rel4 === "son") {
+                        return "表侄";
+                    }
+                    
+                    // 表哥的女兒
+                    if (rel1 === "mother" && (rel2 === "olderBrother" || rel2 === "youngerBrother") && 
+                        rel3 === "son" && rel4 === "daughter") {
+                        return "表侄女";
+                    }
+                    
+                    // 表姐的兒子
+                    if (rel1 === "mother" && (rel2 === "olderSister" || rel2 === "youngerSister") && 
+                        rel3 === "daughter" && rel4 === "son") {
+                        return "表外甥";
+                    }
+                    
+                    // 表姐的女兒
+                    if (rel1 === "mother" && (rel2 === "olderSister" || rel2 === "youngerSister") && 
+                        rel3 === "daughter" && rel4 === "daughter") {
+                        return "表外甥女";
+                    }
+                    
+                    // 堂哥的兒子
+                    if (rel1 === "father" && (rel2 === "olderBrother" || rel2 === "youngerBrother") && 
+                        rel3 === "son" && rel4 === "son") {
+                        return "堂侄";
+                    }
+                    
+                    // 堂哥的女兒
+                    if (rel1 === "father" && (rel2 === "olderBrother" || rel2 === "youngerBrother") && 
+                        rel3 === "son" && rel4 === "daughter") {
+                        return "堂侄女";
+                    }
+                    
+                    return `${rel1Info.title}的${rel2Info.title}的${rel3Info.title}的${rel4Info.title}`;
+                }
+                
+                return "未知稱呼";
+            }
+            
+            // 添加示例快速填充功能
+            const examples = document.querySelectorAll('.example-card');
+            examples.forEach(example => {
+                example.addEventListener('click', function() {
+                    const text = this.textContent || this.innerText;
+                    // 提取可能的关键词
+                    const match = text.match(/[表堂舅叔伯姑姨哥弟姐妹子侄甥父母]{2,}的[子孫兒女父母姐妹兄弟]{1,}/);
+                    if (match) {
+                        document.getElementById('titleInput').value = match[0];
+                    } else {
+                        const keywords = text.match(/[表堂舅叔伯姑姨哥弟姐妹子侄甥父母]{2,}/g);
+                        if (keywords && keywords.length > 0) {
+                            document.getElementById('titleInput').value = keywords[0];
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
