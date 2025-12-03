@@ -2641,7 +2641,7 @@
 		</div>
 		
 		<footer>
-			<p>© 2025 ☕迪遜咖啡廳，版權所有。 <span id="hitCounter" class="hit-counter"></span></p>
+			<p><span id="hitCounter" class="hit-counter"></span> © 2025 ☕迪遜咖啡廳，版權所有。</p>
 			<!--🔰網頁書籤管理工具<p>© 2025 🔰網頁書籤管理工具，版權所有。</p>-->
 		</footer>
 
@@ -24268,15 +24268,19 @@
 			
 			// Hit Counter Functions
 			function initializeHitCounter() {
-				// Get existing hit count from localStorage or initialize to 0
+				// Get existing hit count from localStorage or initialize to 17000
 				const savedCount = localStorage.getItem('diczonCafeHitCount');
-				hitCount = savedCount ? parseInt(savedCount) : 17000;
 				
-				// Increment the count
-				hitCount++;
-				
-				// Save back to localStorage
-				localStorage.setItem('diczonCafeHitCount', hitCount.toString());
+				if (!savedCount) {
+					// First time: set initial count to 17000
+					hitCount = 17000;
+					localStorage.setItem('diczonCafeHitCount', hitCount.toString());
+				} else {
+					// Existing count: increment it
+					hitCount = parseInt(savedCount);
+					hitCount++;
+					localStorage.setItem('diczonCafeHitCount', hitCount.toString());
+				}
 				
 				// Update display
 				updateHitCounterDisplay();
@@ -24308,10 +24312,11 @@
 			// Admin function to reset hit count (run in browser console)
 			function resetHitCount() {
 				if (confirm('確定要重置訪問計數器嗎？')) {
-					hitCount = 0;
-					localStorage.setItem('diczonCafeHitCount', '0');
+					// Reset to initial value 17000
+					hitCount = 17000;
+					localStorage.setItem('diczonCafeHitCount', '17000');
 					updateHitCounterDisplay();
-					console.log('Hit counter reset to 0');
+					console.log('Hit counter reset to 17000');
 				}
 			}
 
