@@ -3,6 +3,7 @@
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<link rel="icon" href="favicon.ico" type="image/x-icon">
 		<title>🔰網頁書籤管理工具</title>
 		
 		<meta name="description" content="🔰網頁書籤管理工具 (Bookmarks Manager) - 提供書籤管理及篩選功能。迪遜的免費工具平台。">
@@ -1559,7 +1560,7 @@
 			<button class="clock-btn" id="clockBtn" onclick="showClockModal()">🕒</button>
 			<h1><a href="index.html" target="_parent" style="text-decoration:none; color:green;">🔰網頁書籤管理工具</a></h1>
 			<button class="help-btn" onclick="showHelpModal()">❓</button>
-			<button class="version-btn" onclick="showVersionModal()">💡</button>
+			<a class="version-btn" href="history.html" target="_blank" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">💡</a>
 		</header>
 
 		<div class="search-container">
@@ -1628,6 +1629,7 @@
 					</optgroup>
 					<optgroup label="📖漫畫">
 						<option value="comic">所有漫畫</option>
+						<option value="comic_motion comic">↳ 動態漫畫</option>
 						<option value="comic_hk">↳ 粵語漫畫</option>
 						<option value="comic_pth">↳ 國語漫畫</option>
 						<option value="comic_eng">↳ 英語漫畫</option>
@@ -1934,8 +1936,20 @@
 		<!-- Version History Modal -->
 		<div class="modal-overlay" id="versionModalOverlay" onclick="closeVersionModal()"></div>
 		<div class="modal" id="versionModal">
-			<h2>💡版本更新 (v2.1.8)</h2>
+			<h2>💡版本更新 (v2.2.0)</h2>
 			<ul class="version-history">
+				<li class="version-item">
+					<strong>2025-12-02 v2.2.0</strong>
+					<ul>
+						<li>《☕迪遜咖啡廳》的《📡頻道》下拉選單增加《⚙️工具》↳《👪中文親戚稱呼計算機》。</li>
+					</ul>
+				</li>
+				<li class="version-item">
+					<strong>2025-11-19 v2.1.9</strong>
+					<ul>
+						<li>《🗃️篩選》的《📖漫畫》選項增加《↳ 動態漫畫》分類。</li>
+					</ul>
+				</li>
 				<li class="version-item">
 					<strong>2025-11-15 v2.1.8</strong>
 					<ul>
@@ -2728,6 +2742,7 @@
 				<p>3. <strong>📡頻道</strong>: 使用下拉選單按📡頻道以選擇其他📡頻道</p>
 				<p>4. <strong>🗃️篩選</strong>: 使用下拉選單按🗃️篩選以篩選書籤</p>
 				<p>5. <strong>🔰顯示所有</strong>: 按下🔰顯示所有按鈕以顯示所有書籤</p>
+				<p>6. <strong>🔺回到頂部/🔻底部</strong>: 按下🔺回到頂部/🔻底部按鈕以快速到達指定位置</p>
 				
 				<h3>書籤管理</h3>
 				<p>1. <strong>➕新增書籤</strong>: 展開"🔰新增/儲存/載入書籤"面板填寫資訊</p>
@@ -4010,6 +4025,7 @@
 					'trailer_game': 'pics/diczon_trailer.png',
 					'trailer_rip': 'pics/diczon_trailer.png',
 					'comic': 'pics/diczon_comic.png',
+					'comic_motion comic': 'pics/diczon_comic.png',
 					'comic_hk': 'pics/diczon_comic.png',
 					'comic_pth': 'pics/diczon_comic.png',
 					'comic_eng': 'pics/diczon_comic.png',
@@ -4848,16 +4864,6 @@
 				document.getElementById('qrModalOverlay').style.display = 'none';
 			}
 
-			function showVersionModal() {
-				document.getElementById('versionModal').style.display = 'block';
-				document.getElementById('versionModalOverlay').style.display = 'block';
-			}
-
-			function closeVersionModal() {
-				document.getElementById('versionModal').style.display = 'none';
-				document.getElementById('versionModalOverlay').style.display = 'none';
-			}
-			
 			function showHelpModal() {
 				document.getElementById('helpModal').style.display = 'block';
 				document.getElementById('helpModalOverlay').style.display = 'block';
