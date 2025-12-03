@@ -1666,6 +1666,30 @@
 			.stealth-btn:hover {
 				background: #1565C0;
 			}
+			
+			/* Hit Counter Styles */
+				.hit-counter {
+					display: inline-flex;
+					align-items: center;
+					justify-content: center;
+					background: var(--button-bg);
+					color: white;
+					padding: 4px 10px;
+					border-radius: 20px;
+					font-size: 0.85em;
+					margin-left: 15px;
+					box-shadow: 0 2px 4px var(--shadow-color);
+					transition: all 0.3s ease;
+				}
+
+				.hit-counter:hover {
+					transform: scale(1.05);
+					box-shadow: 0 4px 8px var(--shadow-color);
+				}
+
+				.hit-counter-icon {
+					margin-right: 5px;
+				}
 
 			/* Mobile responsive adjustments */
 			@media (max-width: 768px) {
@@ -1771,6 +1795,12 @@
 					width: 30px;
 					height: 30px;
 					font-size: 16px;
+				}
+				
+				.hit-counter {
+					padding: 3px 8px;
+					font-size: 0.75em;
+					margin-left: 10px;
 				}
 
 				@media (max-width: 480px) {
@@ -1890,6 +1920,11 @@
 						height: 35px;
 						font-size: 20px;
 					}
+					.hit-counter {
+						padding: 2px 6px;
+						font-size: 0.7em;
+						margin-left: 8px;
+					}
 				}
 			}
 		</style>
@@ -1906,7 +1941,7 @@
 			</a>
 			<!--<h1><a href="index.html" target="_parent" style="text-decoration:none; color:green;">🔰網頁書籤管理工具</a></h1>-->
 			<button class="help-btn" onclick="showHelpModal()">❓</button>
-			<a class="version-btn" href="history.html" target="_blank" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">💡</a>
+			<a class="version-btn" href="history.html" target="_self" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">💡</a>
 		</header>
 		
 		<!-- 摸魚模式模態框 -->
@@ -2113,7 +2148,7 @@
 				</div>
 			</div>
 		</div>
-
+		
 		<div class="search-container">
 			<input type="text" id="search" placeholder="🔍音樂/歌曲/動畫/戲劇/電影/預告/漫畫/小說/人工智能/工具/教學/即時遊戲/遊戲攻略/遊戲紀錄/影片網誌/資訊/新聞……">
 			<div class="filter-container">
@@ -2521,6 +2556,7 @@
 				<p>10. <strong>▶️影片</strong>: 🎨🎥🎬📽🕹️🤳🧠📰以上所有影片書籤亦可打開網站連結欣賞</p>
 				<p>11. <strong>📎其他</strong>: 📖漫畫、📗小說、🤖AI、🔨工具、📚教學及🎯攻略全部可打開直接使用</p>
 				<p>12. <strong>🎮即時遊戲</strong>: 所有🎮即時遊戲免費打開即玩</p>
+				<p>13. <strong>📊訪問計數器</strong>: 頁面底部顯示總訪問次數，每次刷新頁面時增加</p>
 				<!--🔰網頁書籤管理工具-->
 				<!--<p>1. <strong>🔍搜尋</strong>: 在頂部🔍搜尋欄輸入關鍵字可篩選書籤</p>
 				<p>2. <strong>🌐語言</strong>: 使用下拉選單按🌐語言設換書籤名字語言</p>
@@ -2605,7 +2641,7 @@
 		</div>
 		
 		<footer>
-			<p>© 2025 ☕迪遜咖啡廳，版權所有。</p>
+			<p>© 2025 ☕迪遜咖啡廳，版權所有。 <span id="hitCounter" class="hit-counter"></span></p>
 			<!--🔰網頁書籤管理工具<p>© 2025 🔰網頁書籤管理工具，版權所有。</p>-->
 		</footer>
 
@@ -2955,6 +2991,21 @@
 					"url": "https://www.youtube.com/watch?v=KOIEo_74L-Q&list=PLrLxjs6exsshvxzi-3xq2zrPVVxjHd1Yt",
 					"thumbnail": "https://img.youtube.com/vi/JBoUwElRFVM/hqdefault.jpg",
 					"dateAdded": "2025-03-29T00:00:00.000Z"
+				},
+				{
+					"title": "Bloxd.io",
+					"trd_chi": "Bloxd.io",
+					"sim_chi": "Bloxd.io",
+					"eng": "Bloxd.io",
+					"jap": "Bloxd.io",
+					"kor": "Bloxd.io",
+					"icon": "🎧",
+					"category": "music",
+					"tags": ["music", "ost", "音樂", "音乐", "音楽", "음악", "我的世界", "麥塊", "當個創世神", "マインクラフト", "마인크래프트", "mc"],
+					"anchor": "Bloxd_io_OST",
+					"url": "https://www.youtube.com/watch?v=FLFRaJF_N2A&list=PLrLxjs6exssiRBECF8DRB8FRewtYXxH6f",
+					"thumbnail": "https://img.youtube.com/vi/FLFRaJF_N2A/hqdefault.jpg",
+					"dateAdded": "2025-12-07T00:00:00.000Z"
 				},
 				{
 					"title": "Miniblox",
@@ -4815,6 +4866,51 @@
 					"url": "https://www.youtube.com/watch?v=p6VCAjlNKDs&list=PLrLxjs6exssg0JOt_2Iv4A1ZahXqOpUvt",
 					"thumbnail": "https://img.youtube.com/vi/mdDJEsaqHj4/hqdefault.jpg",
 					"dateAdded": "2025-11-22T00:00:00.000Z"
+				},
+				{
+					"title": "Monster Galaxy: The Zodiac Islands",
+					"trd_chi": "Monster Galaxy: The Zodiac Islands",
+					"sim_chi": "Monster Galaxy: The Zodiac Islands",
+					"eng": "Monster Galaxy: The Zodiac Islands",
+					"jap": "Monster Galaxy: The Zodiac Islands",
+					"kor": "Monster Galaxy: The Zodiac Islands",
+					"icon": "🎧",
+					"category": "music",
+					"tags": ["music", "ost", "音樂", "音乐", "音楽", "음악", "monster galaxy: exile", "rip"],
+					"anchor": "Monster_Galaxy_The_Zodiac_Islands_OST",
+					"url": "https://www.youtube.com/watch?v=Y8KeqkMrztc&list=PLrLxjs6exssg-_dqIn7WK-mFRx53D2K3J",
+					"thumbnail": "https://img.youtube.com/vi/R6WF_Gu81vA/hqdefault.jpg",
+					"dateAdded": "2025-12-04T00:00:00.000Z"
+				},
+				{
+					"title": "Cybermon",
+					"trd_chi": "Cybermon",
+					"sim_chi": "Cybermon",
+					"eng": "Cybermon",
+					"jap": "Cybermon",
+					"kor": "Cybermon",
+					"icon": "🎧",
+					"category": "music",
+					"tags": ["music", "ost", "音樂", "音乐", "音楽", "음악", "rip"],
+					"anchor": "Cybermon_OST",
+					"url": "https://www.youtube.com/watch?v=TsJTYotOvCY&list=PLrLxjs6exssh1yNR6CK-nNqMTkT6D7lPB",
+					"thumbnail": "https://img.youtube.com/vi/zpb-cuBn50g/hqdefault.jpg",
+					"dateAdded": "2025-12-06T00:00:00.000Z"
+				},
+				{
+					"title": "夢幻怪獸",
+					"trd_chi": "夢幻怪獸",
+					"sim_chi": "梦幻怪兽",
+					"eng": "Neo Monsters",
+					"jap": "ネオモンスターズ",
+					"kor": "네오 몬스터",
+					"icon": "🎧",
+					"category": "music",
+					"tags": ["music", "ost", "音樂", "音乐", "音楽", "음악"],
+					"anchor": "Neo_Monsters_OST",
+					"url": "https://www.youtube.com/watch?v=cils8-KsYI0&list=PLrLxjs6exsshM7WUyj6t93PMgRLLtzfJB",
+					"thumbnail": "https://img.youtube.com/vi/cils8-KsYI0/hqdefault.jpg",
+					"dateAdded": "2025-12-05T00:00:00.000Z"
 				},
 				{
 					"title": "惡魔城 審判",
@@ -7712,21 +7808,6 @@
 					"dateAdded": "2025-09-26T00:00:00.000Z"
 				},
 				{
-					"title": "大貴族",
-					"trd_chi": "大貴族",
-					"sim_chi": "大贵族",
-					"eng": "Noblesse",
-					"jap": "ノブレス",
-					"kor": "노블레스",
-					"icon": "🎨",
-					"category": "animation",
-					"tags": ["animation", "anime", "動畫", "卡通", "动画", "番劇", "動画", "番剧", "アニメーション", "アニメ", "생기", "jap", "japanese", "nihongo", "日語", "日文", "日语", "日本語", "にほんご", "にっぽんご", "일본어", "bookmark"],
-					"anchor": "Noblesse_Animation",
-					"url": "https://www.youtube.com/watch?v=7njkTAOQ-LA&list=PLuxqoToY7UcgWx9u1Ym-ShapzUrH-PlIm",
-					"thumbnail": "https://img.youtube.com/vi/7njkTAOQ-LA/hqdefault.jpg",
-					"dateAdded": "2025-11-08T00:00:00.000Z"
-				},
-				{
 					"title": "惡食千金與狂血公爵～那個魔物我就美美地享用了！～",
 					"trd_chi": "惡食千金與狂血公爵～那個魔物我就美美地享用了！～",
 					"sim_chi": "恶食千金与狂血公爵～那个魔物我就美美地享用了！ ～",
@@ -8807,21 +8888,6 @@
 					"dateAdded": "2025-08-30T00:00:00.000Z"
 				},
 				{
-					"title": "MOMENTARY LILY 剎那之花",
-					"trd_chi": "MOMENTARY LILY 剎那之花",
-					"sim_chi": "MOMENTARY LILY 刹那之花",
-					"eng": "Momentary Lily",
-					"jap": "もめんたりー・リリィ",
-					"kor": "모멘타리 릴리",
-					"icon": "🎨",
-					"category": "animation",
-					"tags": ["animation", "anime", "動畫", "卡通", "动画", "番劇", "動画", "番剧", "アニメーション", "アニメ", "생기", "jap", "japanese", "nihongo", "日語", "日文", "日语", "日本語", "にほんご", "にっぽんご", "일본어", "bookmark"],
-					"anchor": "Momentary_Lily_Animation",
-					"url": "https://www.youtube.com/watch?v=9p6CGOsm6m4&list=PLuxqoToY7UchHa6OiIGv4k20nmziDRrRD",
-					"thumbnail": "https://img.youtube.com/vi/9p6CGOsm6m4/hqdefault.jpg",
-					"dateAdded": "2025-01-02T00:00:00.000Z"
-				},
-				{
 					"title": "轉生公主與天才千金的魔法革命",
 					"trd_chi": "轉生公主與天才千金的魔法革命",
 					"sim_chi": "转生公主与天才千金的魔法革命",
@@ -9360,6 +9426,21 @@
 					"url": "https://www.youtube.com/watch?v=Gixfwo3cP8I&list=PLuxqoToY7UcjXN8OhmbLJ7EA01LHGi1fA",
 					"thumbnail": "https://img.youtube.com/vi/Gixfwo3cP8I/hqdefault.jpg",
 					"dateAdded": "2025-04-23T00:00:00.000Z"
+				},
+				{
+					"title": "大貴族",
+					"trd_chi": "大貴族",
+					"sim_chi": "大贵族",
+					"eng": "Noblesse",
+					"jap": "ノブレス",
+					"kor": "노블레스",
+					"icon": "🎨",
+					"category": "animation",
+					"tags": ["animation", "anime", "動畫", "卡通", "动画", "番劇", "動画", "番剧", "アニメーション", "アニメ", "생기", "jap", "japanese", "nihongo", "日語", "日文", "日语", "日本語", "にほんご", "にっぽんご", "일본어", "bookmark"],
+					"anchor": "Noblesse_Animation",
+					"url": "https://www.youtube.com/watch?v=7njkTAOQ-LA&list=PLuxqoToY7UcgWx9u1Ym-ShapzUrH-PlIm",
+					"thumbnail": "https://img.youtube.com/vi/7njkTAOQ-LA/hqdefault.jpg",
+					"dateAdded": "2025-11-08T00:00:00.000Z"
 				},
 				{
 					"title": "科學超電磁砲",
@@ -10485,6 +10566,21 @@
 					"url": "https://www.youtube.com/watch?v=qTO79PYZG2k&list=PLC18xlbCdwtTPX2g-0I9TNvLz--lYSDlT",
 					"thumbnail": "https://img.youtube.com/vi/qTO79PYZG2k/hqdefault.jpg",
 					"dateAdded": "2025-10-30T00:00:00.000Z"
+				},
+				{
+					"title": "MOMENTARY LILY 剎那之花",
+					"trd_chi": "MOMENTARY LILY 剎那之花",
+					"sim_chi": "MOMENTARY LILY 刹那之花",
+					"eng": "Momentary Lily",
+					"jap": "もめんたりー・リリィ",
+					"kor": "모멘타리 릴리",
+					"icon": "🎨",
+					"category": "animation",
+					"tags": ["animation", "anime", "動畫", "卡通", "动画", "番劇", "動画", "番剧", "アニメーション", "アニメ", "생기", "jap", "japanese", "nihongo", "日語", "日文", "日语", "日本語", "にほんご", "にっぽんご", "일본어", "bookmark"],
+					"anchor": "Momentary_Lily_Animation",
+					"url": "https://www.youtube.com/watch?v=VvHUDPQ1rpo&list=PLuxqoToY7UchHa6OiIGv4k20nmziDRrRD",
+					"thumbnail": "https://img.youtube.com/vi/9p6CGOsm6m4/hqdefault.jpg",
+					"dateAdded": "2025-01-02T00:00:00.000Z"
 				},
 				{
 					"title": "魔都精兵的奴隸",
@@ -14712,7 +14808,7 @@
 					"category": "tool",
 					"tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "login"],
 					"anchor": "YouTube_Sound_Library_Tool",
-					"url": "https://tinyurl.com/jumnbjea",
+					"url": "https://www.youtube.com/audiolibrary",
 					"thumbnail": "https://img.youtube.com/vi/JsHqEpWQl-8/hqdefault.jpg",
 					"dateAdded": "2025-04-21T00:00:00.000Z"
 				},
@@ -14742,7 +14838,7 @@
 					"category": "tool",
 					"tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "no login"],
 					"anchor": "YouTube_Tool",
-					"url": "https://tinyurl.com/6j8bp6r6",
+					"url": "https://www.youtube.com/",
 					"thumbnail": "https://img.youtube.com/vi/UFnXm6cjGwU/0.jpg",
 					"dateAdded": "2025-04-21T00:00:00.000Z"
 				},
@@ -15422,12 +15518,12 @@
 					"dateAdded": "2025-04-19T00:00:00.000Z"
 				},
 				{
-					"title": "Bloxd",
-					"trd_chi": "Bloxd",
-					"sim_chi": "Bloxd",
-					"eng": "Bloxd",
-					"jap": "Bloxd",
-					"kor": "Bloxd",
+					"title": "Bloxd.io",
+					"trd_chi": "Bloxd.io",
+					"sim_chi": "Bloxd.io",
+					"eng": "Bloxd.io",
+					"jap": "Bloxd.io",
+					"kor": "Bloxd.io",
 					"icon": "🎮",
 					"category": "game",
 					"tags": ["game", "dual platform", "mobile", "pc", "multiplayer", "first person", "role play", "rpg", "action", ".io", "遊戲", "雙平台", "手機", "手遊", "電腦", "電子", "多人", "第一人稱", "角色扮演", "動作", "游戏", "双平台", "手机", "手游", "电脑", "电子", "第一人称", "动作", "ゲーム", "デュアルプラットフォーム", "モバイル", "コンピューター", "マルチプレイヤー", "一人称", "ロールプレイ", "アクション", "게임", "듀얼 플랫폼", "모바일", "컴퓨터", "멀티플레이어", "1인칭", "롤 플레이", "액션", "我的世界", "麥塊", "當個創世神", "マインクラフト", "마인크래프트", "mc", "no login", "bookmark"],
@@ -22672,6 +22768,9 @@
 			let stealthModeEnabled = false;
 			let currentStealthType = 'vscode';
 			
+			// Hit counter variables
+			let hitCount = 0;
+			
 			// YouTube Thumbnail Downloader Functions
 			function showYoutubeThumbnailsModal() {
 				document.getElementById('youtubeThumbnailsModal').style.display = 'block';
@@ -24129,6 +24228,9 @@
 				}
 			});
 
+			// Initialize hit counter immediately
+			initializeHitCounter();
+
 			// Initialize when page loads
 			window.addEventListener('load', function() {
 				loadStealthSettings();
@@ -24163,6 +24265,61 @@
 				// Update social meta when hash changes
 				window.addEventListener('hashchange', updateSocialMeta);
 			});
+			
+			// Hit Counter Functions
+			function initializeHitCounter() {
+				// Get existing hit count from localStorage or initialize to 0
+				const savedCount = localStorage.getItem('diczonCafeHitCount');
+				hitCount = savedCount ? parseInt(savedCount) : 0;
+				
+				// Increment the count
+				hitCount++;
+				
+				// Save back to localStorage
+				localStorage.setItem('diczonCafeHitCount', hitCount.toString());
+				
+				// Update display
+				updateHitCounterDisplay();
+			}
+
+			function updateHitCounterDisplay() {
+				const hitCounterElement = document.getElementById('hitCounter');
+				if (hitCounterElement) {
+					const formattedCount = hitCount.toLocaleString();
+					hitCounterElement.innerHTML = `
+						<span class="hit-counter-icon">👁️</span>
+						<span class="hit-counter-text">訪問次數: ${formattedCount}</span>
+					`;
+				}
+			}
+
+			// Admin function to manually set hit count (run in browser console)
+			function setHitCount(count) {
+				if (typeof count === 'number' && count >= 0) {
+					hitCount = count;
+					localStorage.setItem('diczonCafeHitCount', hitCount.toString());
+					updateHitCounterDisplay();
+					console.log(`Hit count set to: ${hitCount}`);
+				} else {
+					console.error('Invalid hit count value');
+				}
+			}
+
+			// Admin function to reset hit count (run in browser console)
+			function resetHitCount() {
+				if (confirm('確定要重置訪問計數器嗎？')) {
+					hitCount = 0;
+					localStorage.setItem('diczonCafeHitCount', '0');
+					updateHitCounterDisplay();
+					console.log('Hit counter reset to 0');
+				}
+			}
+
+			// Admin function to get current hit count (run in browser console)
+			function getHitCount() {
+				console.log(`Current hit count: ${hitCount}`);
+				return hitCount;
+			}
 		</script>
 	</body>
 </html>
