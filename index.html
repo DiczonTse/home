@@ -24268,19 +24268,27 @@
 			
 			// Hit Counter Functions
 			function initializeHitCounter() {
-				// Get existing hit count from localStorage or initialize to 17000
+				const BASE_HIT_COUNT = 17102;
 				const savedCount = localStorage.getItem('diczonCafeHitCount');
 				
-				if (!savedCount) {
-					// First time: set initial count to 17000
-					hitCount = 17000;
-					localStorage.setItem('diczonCafeHitCount', hitCount.toString());
+				// Parse and validate saved count
+				let parsedCount = 0;
+				if (savedCount) {
+					parsedCount = parseInt(savedCount, 10);
+					if (isNaN(parsedCount) || parsedCount < BASE_HIT_COUNT) {
+						// Invalid or lower than base count, use base count
+						parsedCount = BASE_HIT_COUNT;
+					}
 				} else {
-					// Existing count: increment it
-					hitCount = parseInt(savedCount);
-					hitCount++;
-					localStorage.setItem('diczonCafeHitCount', hitCount.toString());
+					// No saved count, use base count
+					parsedCount = BASE_HIT_COUNT;
 				}
+				
+				// Set current count and increment for this visit
+				hitCount = parsedCount + 1;
+				
+				// Save back to localStorage
+				localStorage.setItem('diczonCafeHitCount', hitCount.toString());
 				
 				// Update display
 				updateHitCounterDisplay();
@@ -24299,11 +24307,13 @@
 
 			// Admin function to manually set hit count (run in browser console)
 			function setHitCount(count) {
+				const baseHitCount = 17102;
 				if (typeof count === 'number' && count >= 0) {
-					hitCount = count;
+					// Ensure count is not lower than base count
+					hitCount = Math.max(count, baseHitCount);
 					localStorage.setItem('diczonCafeHitCount', hitCount.toString());
 					updateHitCounterDisplay();
-					console.log(`Hit count set to: ${hitCount}`);
+					console.log(`Hit count set to: ${hitCount} (minimum: ${baseHitCount})`);
 				} else {
 					console.error('Invalid hit count value');
 				}
@@ -24312,18 +24322,42 @@
 			// Admin function to reset hit count (run in browser console)
 			function resetHitCount() {
 				if (confirm('確定要重置訪問計數器嗎？')) {
-					// Reset to initial value 17000
-					hitCount = 17000;
-					localStorage.setItem('diczonCafeHitCount', '17000');
+					// Reset to base value 17102
+					hitCount = 17102;
+					localStorage.setItem('diczonCafeHitCount', '17102');
 					updateHitCounterDisplay();
-					console.log('Hit counter reset to 17000');
+					console.log('Hit counter reset to base count: 17102');
 				}
 			}
 
 			// Admin function to get current hit count (run in browser console)
 			function getHitCount() {
-				console.log(`Current hit count: ${hitCount}`);
-				return hitCount;
+				const baseHitCount = 17102;
+				const currentCount = Math.max(hitCount, baseHitCount);
+				console.log(`Current hit count: ${currentCount} (base: ${baseHitCount})`);
+				return currentCount;
+			}
+
+			// Admin function to get or set base hit count (run in browser console)
+			function manageBaseHitCount(newBase) {
+				const currentBase = 17102; // You can make this configurable if needed
+				const savedCount = localStorage.getItem('diczonCafeHitCount');
+				const currentCount = savedCount ? parseInt(savedCount) : currentBase;
+				
+				if (newBase === undefined) {
+					// Just return current base
+					console.log(`Current base hit count: ${currentBase}`);
+					console.log(`Current saved count: ${currentCount}`);
+					return currentBase;
+				} else if (typeof newBase === 'number' && newBase >= 0) {
+					// Update base logic and adjust current count if needed
+					const adjustedCount = Math.max(currentCount, newBase);
+					localStorage.setItem('diczonCafeHitCount', adjustedCount.toString());
+					console.log(`Base hit count updated. Current count adjusted to: ${adjustedCount}`);
+					location.reload(); // Reload to apply changes
+				} else {
+					console.error('Invalid base hit count value');
+				}
 			}
 		</script>
 	</body>
