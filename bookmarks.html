@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="favicon.ico" type="image/x-icon">
+    <title>🔗書籤 | 書籤</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .collapsible-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .category {
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .category:last-child {
+            border-bottom: none;
+        }
+        
+        .category-header {
+            padding: 20px;
+            background: #f8f9fa;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .category-header:hover {
+            background: #f1f2f6;
+        }
+        
+        .category-header h2 {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .category-header i {
+            color: #3498db;
+            font-size: 1.2rem;
+        }
+        
+        .toggle-icon {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .category-content {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease, padding 0.3s ease;
+        }
+        
+        .category-content.expanded {
+            padding: 20px;
+            max-height: 2000px;
+        }
+        
+        /* 子分類樣式 */
+        .subcategory-container {
+            margin-bottom: 20px;
+        }
+        
+        .subcategory-header {
+            padding: 15px;
+            background: #f1f8ff;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .subcategory-header:hover {
+            background: #e3f2fd;
+        }
+        
+        .subcategory-header h3 {
+            color: #2c3e50;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .subcategory-header i {
+            color: #2ecc71;
+            font-size: 1rem;
+        }
+        
+        .subcategory-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+        
+        .subcategory-content.expanded {
+            max-height: 2000px;
+        }
+        
+        .links-list {
+            list-style-type: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+            padding: 10px 5px;
+        }
+		
+		/* 捲軸樣式 */
+		.links-list::-webkit-scrollbar {
+			width: 8px;
+		}
+
+		.links-list::-webkit-scrollbar-track {
+			background: #f1f1f1;
+			border-radius: 4px;
+		}
+
+		.links-list::-webkit-scrollbar-thumb {
+			background: #3498db;
+			border-radius: 4px;
+		}
+
+		.links-list::-webkit-scrollbar-thumb:hover {
+			background: #2980b9;
+		}
+        
+        .link-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            transition: all 0.3s ease;
+            border-left: 4px solid #2ecc71;
+        }
+        
+        .link-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            background: #fff;
+        }
+        
+        .link-item a {
+            text-decoration: none;
+            color: #2c3e50;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+        
+        .link-item a:hover {
+            color: #3498db;
+        }
+        
+        .link-item i {
+            color: #3498db;
+            font-size: 1rem;
+        }
+        
+        .link-description {
+            color: #7f8c8d;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+        
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-expand {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-collapse {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-expand:hover {
+            background: #2980b9;
+        }
+        
+        .btn-collapse:hover {
+            background: #c0392b;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            padding: 20px;
+            width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .links-list {
+				grid-template-columns: 1fr;
+			}
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .category-header h2 {
+                font-size: 1.5rem;
+            }
+            
+            .subcategory-header h3 {
+                font-size: 1.1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            header {
+                padding: 15px;
+            }
+            
+            .category-header {
+                padding: 15px;
+            }
+            
+            .subcategory-header {
+                padding: 12px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><a href="index.html" target="_parent" style="text-decoration:none; color:#2c3e50;"><i class="fas fa-link"></i> 書籤</a></h1>
+            <p class="subtitle">點選類別標題展開或折疊連結清單。您也可以使用最下面的按鈕一次展開或折疊所有類別。</p>
+        </header>
+        
+        <main class="collapsible-container">
+            <div class="category">
+                <div class="category-header" onclick="toggleCategory(1)">
+                    <h2><i class="fas fa-shield-alt"></i> 防毒軟體 (21個)</h2>
+                    <span class="toggle-icon">▶</span>
+                </div>
+                <div class="category-content" id="category-1">
+                    <div class="subcategory-container">
+                        <div class="subcategory-header" onclick="toggleSubCategory(1, 1)">
+                            <h3><i class="fas fa-shield-virus"></i> 免費防毒軟體 (7個)</h3>
+                            <span class="toggle-icon">▶</span>
+                        </div>
+                        <div class="subcategory-content" id="subcategory-1-1">
+                            <ul class="links-list">
+                                <li class="link-item">
+                                    <a href="https://www.av-test.org/en" target="_blank"><i class="fas fa-a"></i> AV-Test</a>
+                                    <p class="link-description">評估並認證適用於 Windows、macOS 和 Android 等作業系統的防毒及安全軟體產品。</p>
+                                </li>
+								<li class="link-item">
+                                    <a href="https://www.bitdefender.com/solutions/free.html" target="_blank"><i class="fas fa-shield-virus"></i> Bitdefender Antivirus Free</a>
+                                    <p class="link-description">輕量級免費防毒軟體，提供強大的惡意軟體防護和雲端掃描。</p>
+                                </li>
+								<li class="link-item">
+                                    <a href="https://www.avast.com/zh-tw/index" target="_blank"><i class="fas fa-shield-alt"></i> Avast Free Antivirus</a>
+                                    <p class="link-description">全球最受歡迎的免費防毒軟體之一，提供基本防護和掃描功能。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.avg.com/zh-tw/homepage" target="_blank"><i class="fas fa-virus"></i> AVG AntiVirus Free</a>
+                                    <p class="link-description">可靠的免費防毒軟體，提供惡意軟體防護和基本安全功能。</p>
+                                </li>
+								<li class="link-item">
+                                    <a href="https://www.avira.com/zh-tw" target="_blank"><i class="fas fa-umbrella"></i> Avira Free Security</a>
+                                    <p class="link-description">保護裝置免受病毒和線上威脅等的侵害。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.malwarebytes.com/free" target="_blank"><i class="fas fa-bug"></i> Malwarebytes Free</a>
+                                    <p class="link-description">專門清除惡意軟體的工具，可與傳統防毒軟體同時使用。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.microsoft.com/zh-tw/windows/comprehensive-security" target="_blank"><i class="fab fa-microsoft"></i> Microsoft Defender Antivirus</a>
+                                    <p class="link-description">Windows內建的免費防毒軟體，提供基本安全防護。</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+					
+					<div class="subcategory-container">
+                        <div class="subcategory-header" onclick="toggleSubCategory(1, 2)">
+                            <h3><i class="fas fa-server"></i> 免費伺服器防毒軟體 (2個)</h3>
+                            <span class="toggle-icon">▶</span>
+                        </div>
+                        <div class="subcategory-content" id="subcategory-1-2">
+                            <ul class="links-list">
+								<li class="link-item">
+                                    <a href="https://clamwin.com" target="_blank"><i class="fas fa-bullseye"></i> ClamWin</a>
+                                    <p class="link-description">免費、開源的防毒軟體，專為 Microsoft Windows 作業系統設計。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://forticlient.com" target="_blank"><i class="fas fa-o"></i> fortiClient ZTNA</a>
+                                    <p class="link-description">支持基於零信任原則 (ZTNA) 的應用程式存取控制。</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="subcategory-container">
+                        <div class="subcategory-header" onclick="toggleSubCategory(1, 3)">
+                            <h3><i class="fas fa-crown"></i> 商業防毒軟體 (6個)</h3>
+                            <span class="toggle-icon">▶</span>
+                        </div>
+                        <div class="subcategory-content" id="subcategory-1-3">
+                            <ul class="links-list">
+                                <li class="link-item">
+                                    <a href="https://www.norton.com" target="_blank"><i class="fas fa-shield-alt"></i> Norton 360</a>
+                                    <p class="link-description">全面的安全套裝，包含防毒、防火牆、VPN和身份盜竊保護。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.kaspersky.com" target="_blank"><i class="fas fa-lock"></i> Kaspersky Internet Security</a>
+                                    <p class="link-description">卡巴斯基網路安全套裝，提供全方位保護和家長控制。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.mcafee.com" target="_blank"><i class="fas fa-shield-virus"></i> McAfee Total Protection</a>
+                                    <p class="link-description">McAfee全面保護套裝，涵蓋多設備保護和隱私工具。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.bitdefender.com" target="_blank"><i class="fas fa-shield-virus"></i> Bitdefender Total Security</a>
+                                    <p class="link-description">Bitdefender全方位安全解決方案，提供多層次防護。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.eset.com" target="_blank"><i class="fas fa-virus-slash"></i> ESET Smart Security</a>
+                                    <p class="link-description">ESET智能安全套裝，以輕量高效和低系統影響著稱。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.trendmicro.com" target="_blank"><i class="fas fa-globe"></i> Trend Micro Maximum Security</a>
+                                    <p class="link-description">趨勢科技最高安全防護，專注於網路威脅和詐騙防護。</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="subcategory-container">
+                        <div class="subcategory-header" onclick="toggleSubCategory(1, 4)">
+                            <h3><i class="fas fa-cloud-upload-alt"></i> 線上病毒掃描 (5個)</h3>
+                            <span class="toggle-icon">▶</span>
+                        </div>
+                        <div class="subcategory-content" id="subcategory-1-4">
+                            <ul class="links-list">
+                                <li class="link-item">
+                                    <a href="https://www.virustotal.com" target="_blank"><i class="fas fa-search"></i> VirusTotal</a>
+                                    <p class="link-description">免費線上病毒掃描服務，使用多種防毒引擎分析檔案和URL。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.metadefender.com" target="_blank"><i class="fas fa-shield-alt"></i> MetaDefender Cloud</a>
+                                    <p class="link-description">線上多引擎惡意軟體掃描和檔案分析服務。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.hybrid-analysis.com" target="_blank"><i class="fas fa-chart-bar"></i> Hybrid Analysis</a>
+                                    <p class="link-description">免費惡意軟體分析服務，提供深入的行為分析和報告。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://virusscan.jotti.org" target="_blank"><i class="fas fa-vial"></i> Jotti's Malware Scan</a>
+                                    <p class="link-description">免費線上惡意軟體掃描服務，使用多種防毒引擎。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.joesandbox.com" target="_blank"><i class="fas fa-box"></i> Joe Sandbox</a>
+                                    <p class="link-description">先進的惡意軟體分析平台，提供免費和付費分析服務。</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="subcategory-container">
+                        <div class="subcategory-header" onclick="toggleSubCategory(1, 5)">
+                            <h3><i class="fas fa-search"></i> 惡意軟體分析工具 (4個)</h3>
+                            <span class="toggle-icon">▶</span>
+                        </div>
+                        <div class="subcategory-content" id="subcategory-1-5">
+                            <ul class="links-list">
+                                <li class="link-item">
+                                    <a href="https://www.capesandbox.com" target="_blank"><i class="fas fa-flask"></i> CAPE Sandbox</a>
+                                    <p class="link-description">開源惡意軟體分析平台，專注於高級惡意軟體分析。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.malware-traffic-analysis.net" target="_blank"><i class="fas fa-network-wired"></i> Malware Traffic Analysis</a>
+                                    <p class="link-description">惡意軟體流量分析資源和練習，用於學習網路安全分析。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://github.com/NationalSecurityAgency/ghidra" target="_blank"><i class="fab fa-github"></i> Ghidra (GitHub)</a>
+                                    <p class="link-description">NSA開發的開源軟體逆向工程工具，用於分析惡意軟體。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://cuckoosandbox.org" target="_blank"><i class="fas fa-bug"></i> Cuckoo Sandbox</a>
+                                    <p class="link-description">開源自動化惡意軟體分析系統，可生成詳細分析報告。</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+			
+			<div class="category">
+				<div class="category-header" onclick="toggleCategory(2)">
+					<h2><i class="fas fa-globe"></i> 瀏覽器 (17個)</h2>
+					<span class="toggle-icon">▶</span>
+				</div>
+				<div class="category-content" id="category-2">
+					<div class="subcategory-container">
+						<div class="subcategory-header" onclick="toggleSubCategory(2, 1)">
+							<h3><i class="fab fa-chrome"></i> 主流瀏覽器 (6個)</h3>
+							<span class="toggle-icon">▶</span>
+						</div>
+						<div class="subcategory-content" id="subcategory-2-1">
+							<ul class="links-list">
+								<li class="link-item">
+									<a href="https://www.google.com/chrome/" target="_blank"><i class="fab fa-chrome"></i> Google Chrome</a>
+									<p class="link-description">Google開發的瀏覽器，市場佔有率最高，擴充功能豐富。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.mozilla.org/firefox/" target="_blank"><i class="fab fa-firefox-browser"></i> Mozilla Firefox</a>
+									<p class="link-description">開源瀏覽器，注重隱私保護和網頁標準兼容性。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.microsoft.com/edge" target="_blank"><i class="fab fa-edge"></i> Microsoft Edge</a>
+									<p class="link-description">微軟基於Chromium開發的瀏覽器，與Windows系統深度整合。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.apple.com/safari/" target="_blank"><i class="fab fa-safari"></i> Apple Safari</a>
+									<p class="link-description">蘋果公司開發的瀏覽器，專為macOS和iOS設備優化。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.opera.com" target="_blank"><i class="fab fa-opera"></i> Opera</a>
+									<p class="link-description">挪威開發的瀏覽器，內建VPN和廣告攔截功能。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.brave.com" target="_blank"><i class="fas fa-shield-alt"></i> Brave Browser</a>
+									<p class="link-description">注重隱私的瀏覽器，內建廣告攔截和追蹤保護功能。</p>
+								</li>
+							</ul>
+						</div>
+					</div>
+					
+					<div class="subcategory-container">
+						<div class="subcategory-header" onclick="toggleSubCategory(2, 2)">
+							<h3><i class="fas fa-user-secret"></i> 隱私保護瀏覽器 (4個)</h3>
+							<span class="toggle-icon">▶</span>
+						</div>
+						<div class="subcategory-content" id="subcategory-2-2">
+							<ul class="links-list">
+								<li class="link-item">
+									<a href="https://www.torproject.org" target="_blank"><i class="fas fa-user-secret"></i> Tor Browser</a>
+									<p class="link-description">基於Firefox的瀏覽器，通過Tor網路提供匿名瀏覽功能。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.waterfox.net" target="_blank"><i class="fab fa-firefox"></i> Waterfox</a>
+									<p class="link-description">基於Firefox的開源瀏覽器，專注於隱私和用戶自主權。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://librewolf.net" target="_blank"><i class="fab fa-wolf-pack-battalion"></i> LibreWolf</a>
+									<p class="link-description">注重隱私和安全的Firefox分支，預設禁用追蹤功能。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.palemoon.org" target="_blank"><i class="fas fa-moon"></i> Pale Moon</a>
+									<p class="link-description">基於Firefox舊版代碼的瀏覽器，注重傳統功能和隱私。</p>
+								</li>
+							</ul>
+						</div>
+					</div>
+					
+					<div class="subcategory-container">
+						<div class="subcategory-header" onclick="toggleSubCategory(2, 3)">
+							<h3><i class="fas fa-code"></i> 輕量級瀏覽器 (3個)</h3>
+							<span class="toggle-icon">▶</span>
+						</div>
+						<div class="subcategory-content" id="subcategory-2-3">
+							<ul class="links-list">
+								<li class="link-item">
+									<a href="https://astian.org/midori-browser" target="_blank"><i class="fas fa-leaf"></i> Midori</a>
+									<p class="link-description">輕量級開源瀏覽器，基於WebKit引擎，適合低資源設備。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.falkon.org" target="_blank"><i class="fas fa-bolt"></i> Falkon</a>
+									<p class="link-description">基於QtWebEngine的輕量級瀏覽器，KDE桌面環境的一部分。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.qutebrowser.org" target="_blank"><i class="fas fa-keyboard"></i> qutebrowser</a>
+									<p class="link-description">鍵盤驅動的瀏覽器，Vim風格操作，注重效率和隱私。</p>
+								</li>
+							</ul>
+						</div>
+					</div>
+					
+					<div class="subcategory-container">
+						<div class="subcategory-header" onclick="toggleSubCategory(2, 4)">
+							<h3><i class="fas fa-desktop"></i> 特殊用途瀏覽器 (4個)</h3>
+							<span class="toggle-icon">▶</span>
+						</div>
+						<div class="subcategory-content" id="subcategory-2-4">
+							<ul class="links-list">
+								<li class="link-item">
+									<a href="https://www.vivaldi.com" target="_blank"><i class="fas fa-compass"></i> Vivaldi</a>
+									<p class="link-description">高度可自定義的瀏覽器，由前Opera團隊開發，功能豐富。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.srware.net/en/software_srware_iron.php" target="_blank"><i class="fas fa-shield-alt"></i> Iron Browser</a>
+									<p class="link-description">基於Chromium的瀏覽器，移除隱私相關功能以保護用戶。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.maxthon.com" target="_blank"><i class="fas fa-cloud"></i> Maxthon</a>
+									<p class="link-description">中國開發的瀏覽器，提供雲端同步和獨特的功能。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.centbrowser.com" target="_blank"><i class="fas fa-bolt"></i> Cent Browser</a>
+									<p class="link-description">基於Chromium的瀏覽器，提供許多額外功能和自定義選項。</p>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="category">
+                <div class="category-header" onclick="toggleCategory(3)">
+                    <h2><i class="fas fa-search"></i> 搜索引擎 (33個)</h2>
+                    <span class="toggle-icon">▶</span>
+                </div>
+                <div class="category-content" id="category-3">
+                    <div class="subcategory-container">
+                        <div class="subcategory-header" onclick="toggleSubCategory(3, 1)">
+                            <h3><i class="fas fa-globe"></i> 常用搜索引擎 (6個)</h3>
+                            <span class="toggle-icon">▶</span>
+                        </div>
+                        <div class="subcategory-content" id="subcategory-3-1">
+                            <ul class="links-list">
+                                <li class="link-item">
+									<a href="https://www.google.com" target="_blank"><i class="fab fa-google"></i> Google</a>
+									<p class="link-description">全球最流行的搜索引擎，提供網頁、圖片、視頻等多種搜索服務。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.bing.com" target="_blank"><i class="fab fa-microsoft"></i> Bing</a>
+									<p class="link-description">微軟推出的搜索引擎，提供網頁、圖片、視頻搜索和每日壁紙。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.baidu.com" target="_blank"><i class="fas fa-search"></i> 百度</a>
+									<p class="link-description">中國最大的搜索引擎，提供中文網頁、圖片、新聞等搜索服務。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.yahoo.com" target="_blank"><i class="fab fa-yahoo"></i> Yahoo!</a>
+									<p class="link-description">老牌入口網站和搜索引擎，提供新聞、郵箱、財經和搜索服務。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://yandex.com" target="_blank"><i class="fas fa-search"></i> Yandex</a>
+									<p class="link-description">俄羅斯最大的搜索引擎，在東歐和中亞地區非常流行。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.naver.com" target="_blank"><i class="fas fa-search"></i> Naver</a>
+									<p class="link-description">韓國最大的搜索引擎和入口網站，提供多種本地化服務。</p>
+								</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="subcategory-container">
+                        <div class="subcategory-header" onclick="toggleSubCategory(3, 2)">
+                            <h3><i class="fas fa-search-plus"></i> 元搜索引擎 (5個)</h3>
+                            <span class="toggle-icon">▶</span>
+                        </div>
+                        <div class="subcategory-content" id="subcategory-3-2">
+                            <ul class="links-list">
+                                <li class="link-item">
+                                    <a href="https://www.dogpile.com" target="_blank"><i class="fas fa-search-plus"></i> Dogpile</a>
+                                    <p class="link-description">元搜索引擎，同時搜索Google、Yahoo!、Bing等多個搜索引擎結果。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.webcrawler.com" target="_blank"><i class="fas fa-spider"></i> WebCrawler</a>
+                                    <p class="link-description">最早的網路搜索引擎之一，現在作為元搜索引擎運作。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.infospace.com" target="_blank"><i class="fas fa-cubes"></i> InfoSpace</a>
+                                    <p class="link-description">元搜索引擎和網路目錄，聚合多個來源的搜索結果。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.etools.ch" target="_blank"><i class="fas fa-tools"></i> eTools</a>
+                                    <p class="link-description">瑞士元搜索引擎，同時搜索多個來源並提供結果比較。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.findx.com" target="_blank"><i class="fas fa-search"></i> Findx</a>
+                                    <p class="link-description">注重隱私的搜索引擎，不追蹤用戶搜索或點擊行為。</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="subcategory-container">
+                        <div class="subcategory-header" onclick="toggleSubCategory(3, 3)">
+                            <h3><i class="fas fa-lock"></i> 隱私保護搜索引擎 (7個)</h3>
+                            <span class="toggle-icon">▶</span>
+                        </div>
+                        <div class="subcategory-content" id="subcategory-3-3">
+                            <ul class="links-list">
+                                <li class="link-item">
+                                    <a href="https://duckduckgo.com" target="_blank"><i class="fas fa-search"></i> DuckDuckGo</a>
+                                    <p class="link-description">注重隱私保護的搜索引擎，不跟蹤用戶搜索行為。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.brave.com/search" target="_blank"><i class="fas fa-shield-alt"></i> Brave Search</a>
+                                    <p class="link-description">注重隱私的獨立搜索引擎，不跟蹤用戶並提供無廣告的搜索選項。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.swisscows.com" target="_blank"><i class="fas fa-cow"></i> Swisscows</a>
+                                    <p class="link-description">注重隱私和家庭的搜索引擎，不儲存個人資料並提供安全的搜索環境。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.startpage.com" target="_blank"><i class="fas fa-user-secret"></i> Startpage</a>
+                                    <p class="link-description">隱私保護搜索引擎，提供Google搜索結果但不會跟蹤用戶。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.qwant.com" target="_blank"><i class="fas fa-globe-europe"></i> Qwant</a>
+                                    <p class="link-description">歐洲的隱私保護搜索引擎，尊重用戶隱私並提供無偏見的搜索結果。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.lukol.com" target="_blank"><i class="fas fa-shield-alt"></i> Lukol</a>
+                                    <p class="link-description">隱私保護搜索引擎，代理Google搜索結果以保護用戶隱私。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.oscobo.com" target="_blank"><i class="fas fa-search"></i> Oscobo</a>
+                                    <p class="link-description">英國隱私保護搜索引擎，不追蹤用戶搜索歷史。</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+					<div class="subcategory-container">
+                        <div class="subcategory-header" onclick="toggleSubCategory(3, 4)">
+                            <h3><i class="fas fa-graduation-cap"></i> 專業搜索引擎 (7個)</h3>
+                            <span class="toggle-icon">▶</span>
+                        </div>
+                        <div class="subcategory-content" id="subcategory-3-4">
+                            <ul class="links-list">
+                                <li class="link-item">
+                                    <a href="https://www.semanticscholar.org" target="_blank"><i class="fas fa-graduation-cap"></i> Semantic Scholar</a>
+                                    <p class="link-description">學術搜索引擎，專注於科學研究論文和學術文獻。</p>
+                                </li>
+								<li class="link-item">
+                                    <a href="https://scholar.google.com" target="_blank"><i class="fas fa-graduation-cap"></i> Google 學術搜尋</a>
+                                    <p class="link-description">免費學術文章搜尋引擎，用於尋找論文、書籍、預印本和技術報告等學術文獻。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.wolframalpha.com" target="_blank"><i class="fas fa-calculator"></i> WolframAlpha</a>
+                                    <p class="link-description">計算知識引擎，回答事實性查詢並執行複雜計算。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.boardreader.com" target="_blank"><i class="fas fa-comments"></i> BoardReader</a>
+                                    <p class="link-description">專門搜索論壇和留言板的搜索引擎。</p>
+                                </li>
+								<li class="link-item">
+                                    <a href="https://baike.baidu.com" target="_blank"><i class="fas fa-book"></i> 百度百科</a>
+                                    <p class="link-description">百度旗下的中文百科全書，提供知識性內容搜索。</p>
+                                </li>
+								<li class="link-item">
+                                    <a href="https://zh.wikipedia.org" target="_blank"><i class="fas fa-book"></i> 維基百科</a>
+                                    <p class="link-description">由全球網友協作編輯的免費多語言線上百科全書計畫。</p>
+                                </li>
+								<li class="link-item">
+                                    <a href="https://www.baike.com" target="_blank"><i class="fas fa-book"></i> 快懂百科</a>
+                                    <p class="link-description">抖音旗下的中文百科全書，提供知識性內容搜索。</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+					
+                    <div class="subcategory-container">
+                        <div class="subcategory-header" onclick="toggleSubCategory(3, 5)">
+                            <h3><i class="fas fa-language"></i> 其他搜索引擎 (8個)</h3>
+                            <span class="toggle-icon">▶</span>
+                        </div>
+                        <div class="subcategory-content" id="subcategory-3-5">
+                            <ul class="links-list">
+                                <li class="link-item">
+                                    <a href="https://www.sogou.com" target="_blank"><i class="fas fa-search"></i> 搜狗搜索</a>
+                                    <p class="link-description">中國主要搜索引擎之一，提供網頁、圖片、新聞等多種搜索服務。</p>
+                                </li>
+								<li class="link-item">
+									<a href="https://gigablast.org/" target="_blank"><i class="fas fa-bolt"></i> Gigablast</a>
+									<p class="link-description">開源搜索引擎，提供快速搜索和注重隱私的搜索體驗。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.mojeek.com" target="_blank"><i class="fas fa-search"></i> Mojeek</a>
+									<p class="link-description">獨立搜索引擎，擁有自己的爬蟲和索引，不追蹤用戶資料。</p>
+								</li>
+								<li class="link-item">
+                                    <a href="https://www.so.com" target="_blank"><i class="fas fa-search"></i> 360搜索</a>
+                                    <p class="link-description">中國的搜索引擎，由奇虎360公司開發。</p>
+                                </li>
+								<li class="link-item">
+									<a href="https://www.ask.com" target="_blank"><i class="fas fa-question-circle"></i> Ask.com</a>
+									<p class="link-description">問答式搜索引擎，允許用戶以自然語言提問並獲取答案。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.lycos.com" target="_blank"><i class="fas fa-dog"></i> Lycos</a>
+									<p class="link-description">早期網際網路搜索引擎之一，現在轉型為多媒體內容入口網站。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.aol.com" target="_blank"><i class="fas fa-compass"></i> AOL</a>
+									<p class="link-description">美國線上提供的搜索服務，整合新聞、郵件和各種網際網路服務。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.search.ch" target="_blank"><i class="fas fa-cheese"></i> search.ch</a>
+									<p class="link-description">瑞士本地搜索引擎，專注於瑞士境內的網站和服務搜索。</p>
+								</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="category">
+                <div class="category-header" onclick="toggleCategory(4)">
+                    <h2><i class="fas fa-newspaper"></i> 新聞媒體 (60個)</h2>
+                    <span class="toggle-icon">▶</span>
+                </div>
+				<div class="category-content" id="category-4">
+                    <div class="subcategory-container">
+                        <div class="subcategory-header" onclick="toggleSubCategory(4, 1)">
+                            <h3><i class="fas fa-city"></i> 香港媒體 (9個)</h3>
+                            <span class="toggle-icon">▶</span>
+                        </div>
+                        <div class="subcategory-content" id="subcategory-4-1">
+                            <ul class="links-list">
+                                <li class="link-item">
+									<a href="https://www.dotdotnews.com" target="_blank"><i class="fas fa-circle"></i> 點新聞</a>
+									<p class="link-description">香港新聞媒體，以視頻新聞和專題報導為主。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.wenweipo.com" target="_blank"><i class="fas fa-scale-balanced"></i> 大公文匯網</a>
+									<p class="link-description">香港綜合性新聞媒體，提供香港、內地、國際、財經、生活等多個領域的最新資訊和評論。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.bastillepost.com" target="_blank"><i class="fas fa-monument"></i> 巴士的報</a>
+									<p class="link-description">香港網上新聞媒體，內容涵蓋時事、娛樂和生活資訊。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://news.tvb.com" target="_blank"><i class="fas fa-tv"></i> 無綫新聞</a>
+									<p class="link-description">電視廣播有限公司新聞部，香港主要電視新聞頻道。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://news.now.com" target="_blank"><i class="fas fa-satellite"></i> Now新聞</a>
+									<p class="link-description">Now TV新聞頻道，提供24小時新聞報導和財經資訊。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://news.rthk.hk" target="_blank"><i class="fas fa-broadcast-tower"></i> 香港電台</a>
+									<p class="link-description">香港公共廣播機構，提供電視、電台及網上新聞服務。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.stheadline.com" target="_blank"><i class="fas fa-star"></i> 星島頭條</a>
+									<p class="link-description">星島日報新聞網站，提供香港及國際新聞報導。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.hk01.com" target="_blank"><i class="fas fa-city"></i> 香港01</a>
+									<p class="link-description">香港綜合新聞媒體，提供深度報道、時事評論和生活資訊。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.scmp.com" target="_blank"><i class="fas fa-dragon"></i> 南華早報</a>
+									<p class="link-description">香港英文報紙，專注於中國及亞洲地區新聞報導。</p>
+								</li>
+                            </ul>
+                        </div>
+                    </div>
+					
+					<div class="subcategory-container">
+                        <div class="subcategory-header" onclick="toggleSubCategory(4, 2)">
+                            <h3><i class="fas fa-flag"></i> 中國媒體 (5個)</h3>
+                            <span class="toggle-icon">▶</span>
+                        </div>
+                        <div class="subcategory-content" id="subcategory-4-2">
+                            <ul class="links-list">
+                                <li class="link-item">
+                                    <a href="https://www.xinhuanet.com" target="_blank"><i class="fas fa-landmark"></i> 新華網</a>
+                                    <p class="link-description">中國官方通訊社網站，提供國內外新聞報導。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.people.com.cn" target="_blank"><i class="fas fa-flag"></i> 人民網</a>
+                                    <p class="link-description">中國主要新聞網站，人民日報的線上平台。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.cctv.com" target="_blank"><i class="fas fa-tv"></i> 央視網</a>
+                                    <p class="link-description">中國中央電視台官方網站，提供新聞和視頻內容。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.chinanews.com" target="_blank"><i class="fas fa-newspaper"></i> 中國新聞網</a>
+                                    <p class="link-description">中國新聞社主辦的新聞網站，提供國內外新聞報導。</p>
+                                </li>
+								<li class="link-item">
+                                    <a href="https://phtv.ifeng.com" target="_blank"><i class="fab fa-phoenix-framework"></i> 鳳凰衛視</a>
+                                    <p class="link-description">總部位於香港的跨國華語媒體集團，以「拉近全球華人距離」為宗旨。</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+					
+					<div class="subcategory-container">
+                        <div class="subcategory-header" onclick="toggleSubCategory(4, 3)">
+                            <h3><i class="fas fa-mountain-city"></i> 台灣媒體 (3個)</h3>
+                            <span class="toggle-icon">▶</span>
+                        </div>
+                        <div class="subcategory-content" id="subcategory-4-3">
+                            <ul class="links-list">
+                                <li class="link-item">
+                                    <a href="https://ctinews.com/" target="_blank"><i class="fas fa-leaf"></i> 中天新聞</a>
+                                    <p class="link-description">台灣的一家主要新聞媒體，後期轉型為以網路平台為主的運營模式。</p>
+                                </li>
+								<li class="link-item">
+                                    <a href="https://www.cna.com.tw" target="_blank"><i class="fas fa-mountain-city"></i> 中央社</a>
+                                    <p class="link-description">台灣主要通訊社，提供台灣及國際新聞報導。</p>
+                                </li>
+								<li class="link-item">
+                                    <a href="https://news.cts.com.tw" target="_blank"><i class="fas fa-tv"></i> 華視新聞</a>
+                                    <p class="link-description">中華電視公司新聞網站，提供電視新聞和線上內容。</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+					
+					<div class="subcategory-container">
+                        <div class="subcategory-header" onclick="toggleSubCategory(4, 4)">
+                            <h3><i class="fas fa-globe-americas"></i> 國際媒體 (2個)</h3>
+                            <span class="toggle-icon">▶</span>
+                        </div>
+                        <div class="subcategory-content" id="subcategory-4-4">
+                            <ul class="links-list">
+                                <li class="link-item">
+                                    <a href="https://www.foxnews.com" target="_blank"><i class="fa-brands fa-firefox-browser"></i> 霍士新聞</a>
+                                    <p class="link-description">美國一家著名的保守派新聞和政治評論頻道。</p>
+                                </li>
+								<li class="link-item">
+                                    <a href="https://www.bbc.com" target="_blank"><i class="fas fa-globe-europe"></i> BBC News</a>
+                                    <p class="link-description">英國廣播公司，提供全球新聞、體育、商業、科技等報道。</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+					
+					<div class="subcategory-container">
+                        <div class="subcategory-header" onclick="toggleSubCategory(4, 5)">
+                            <h3><i class="fas fa-satellite-dish"></i> 直播新聞 (5個)</h3>
+                            <span class="toggle-icon">▶</span>
+                        </div>
+                        <div class="subcategory-content" id="subcategory-4-5">
+                            <ul class="links-list">
+								<li class="link-item">
+                                    <a href="https://news.tvb.com/tc/live/83" target="_blank"><i class="fas fa-tv"></i> 無綫新聞</a>
+                                    <p class="link-description">提供即時新聞、24小時直播、財經、天氣和體育資訊。</p>
+                                </li>
+								<li class="link-item">
+                                    <a href="https://news.now.com/home/live" target="_blank"><i class="fas fa-satellite"></i> Now新聞</a>
+                                    <p class="link-description">提供全天候本地、兩岸國際、財經、體育即時新聞和新聞直播。</p>
+                                </li>
+								<li class="link-item">
+                                    <a href="https://www.youtube.com/watch?v=fN9uYWCjQaw" target="_blank"><i class="fab fa-phoenix-framework"></i> 鳳凰衛視</a>
+                                    <p class="link-description">提供24小時新聞直播。</p>
+                                </li>
+								<li class="link-item">
+                                    <a href="https://tv.cctv.com/live/cctv13" target="_blank"><i class="fas fa-tv"></i> CCTV-13 新聞</a>
+                                    <p class="link-description">提供面向全球，多語種，多終端的立體化新聞。</p>
+                                </li>
+								<li class="link-item">
+                                    <a href="https://www.rthk.hk" target="_blank"><i class="fas fa-tv"></i> 香港電台</a>
+                                    <p class="link-description">提供電台、電視及網上多媒體服務。</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+					
+					<div class="subcategory-container">
+                        <div class="subcategory-header" onclick="toggleSubCategory(4, 6)">
+                            <h3><i class="fas fa-video"></i> 影片新聞 (8個)</h3>
+                            <span class="toggle-icon">▶</span>
+                        </div>
+                        <div class="subcategory-content" id="subcategory-4-6">
+                            <ul class="links-list">
+                                <li class="link-item">
+									<a href="https://www.youtube.com/playlist?list=PLKoXXVQa3yxCbgfZiuq61w9UhEI085PHu" target="_blank"><i class="fas fa-tv"></i> 無綫新聞</a>
+									<p class="link-description">電視廣播有限公司新聞部，香港主要電視新聞頻道。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.youtube.com/playlist?list=PLKoXXVQa3yxDKvC1X_lbpeRlqReYSGjbj" target="_blank"><i class="fas fa-tv"></i> 無綫新聞(普通話)</a>
+									<p class="link-description">電視廣播有限公司新聞部，香港主要電視新聞頻道。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.youtube.com/playlist?list=PLKoXXVQa3yxBlMRa-1lq0gDur_RstqgLr" target="_blank"><i class="fas fa-tv"></i> 無綫新聞(英文)</a>
+									<p class="link-description">電視廣播有限公司新聞部，香港主要電視新聞頻道。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.youtube.com/playlist?list=PLIpRvnEkgEeU15yy2o_5gKQjr79KP8O2O" target="_blank"><i class="fas fa-info"></i> 有線新聞</a>
+									<p class="link-description">香港新聞機構，可在其官方網站獲取最新的新聞報道。</p>
+								</li>
+								<li class="link-item">
+                                    <a href="https://tv.on.cc" target="_blank"><i class="fa-brands fa-firefox-browser"></i> 東網電視</a>
+                                    <p class="link-description">提供24小時免費新聞、財經、娛樂、體育、生活和評論等多媒體內容。</p>
+                                </li>
+								<li class="link-item">
+                                    <a href="https://www.youtube.com/playlist?list=PL0eGJygpmOH5xQuy8fpaOvKrenoCsWrKh" target="_blank"><i class="fas fa-tv"></i> CCTV 新聞</a>
+                                    <p class="link-description">提供面向全球，多語種，多終端的立體化新聞。</p>
+                                </li>
+								<li class="link-item">
+                                    <a href="https://www.youtube.com/playlist?list=PLvrTMNP6Iw6p3TKWP_DycGBw-y4Uu8CFx" target="_blank"><i class="fas fa-leaf"></i> 中天新聞</a>
+                                    <p class="link-description">台灣的一家主要新聞媒體，後期轉型為以網路平台為主的運營模式。</p>
+                                </li>
+								<li class="link-item">
+                                    <a href="https://www.youtube.com/playlist?list=PLIkUX6UwgUwh_qR5RnmgTfndUggUjsxHC" target="_blank"><i class="fas fa-leaf"></i> BNE TV</a>
+                                    <p class="link-description">為紐西蘭的亞洲移民和華語社區提供新聞、時事評論和娛樂節目。</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+					
+					<div class="subcategory-container">
+                        <div class="subcategory-header" onclick="toggleSubCategory(4, 7)">
+                            <h3><i class="fa-solid fa-triangle-exclamation"></i> 可疑媒體 (28個)</h3>
+                            <span class="toggle-icon">▶</span>
+                        </div>
+                        <div class="subcategory-content" id="subcategory-4-7">
+                            <ul class="links-list">
+                                <li class="link-item">
+									<a href="https://www.i-cable.com" target="_blank"><i class="fas fa-info"></i> 有線新聞</a>
+									<p class="link-description">香港新聞機構，可在其官方網站獲取最新的新聞報道。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://hk.on.cc" target="_blank"><i class="fas fa-sun"></i> 東網</a>
+									<p class="link-description">東方報業集團新聞網站，提供即時新聞和視頻內容。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://news.mingpao.com" target="_blank"><i class="fas fa-newspaper"></i> 明報</a>
+									<p class="link-description">香港中文報紙，以嚴肅新聞報道和評論著稱。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.hket.com" target="_blank"><i class="fas fa-chart-line"></i> 香港經濟日報</a>
+									<p class="link-description">香港主要財經報紙，專注於經濟和商業新聞。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.hkej.com" target="_blank"><i class="fas fa-coins"></i> 信報</a>
+									<p class="link-description">香港知名財經報紙，提供深度財經分析和評論。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.am730.com.hk" target="_blank"><i class="fab fa-amilia"></i> am730</a>
+									<p class="link-description">多元化的新聞資訊平台。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://skypost.hk" target="_blank"><i class="far fa-sun"></i> 晴報</a>
+									<p class="link-description">內容主要涵蓋健康、娛樂、家庭生活資訊及時事新聞。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://theinitium.com" target="_blank"><i class="fas fa-feather-alt"></i> 端傳媒</a>
+									<p class="link-description">香港深度新聞媒體，專注於大中華地區的調查報導。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.inmediahk.net" target="_blank"><i class="fas fa-users"></i> 獨立媒體</a>
+									<p class="link-description">香港獨立網上新聞媒體，關注社會議題和公民社會。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.dimsumdaily.hk" target="_blank"><i class="fas fa-utensils"></i> Dimsum Daily</a>
+									<p class="link-description">香港英文在線新聞和媒體平台，使用人工智能生成內容輔助製作。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://hongkongfp.com" target="_blank"><i class="fas fa-feather"></i> 香港自由新聞</a>
+									<p class="link-description">香港獨立英文新聞網站，專注於人權和公民社會議題。</p>
+								</li>
+								<li class="link-item">
+                                    <a href="https://udn.com" target="_blank"><i class="fas fa-newspaper"></i> 聯合新聞網</a>
+                                    <p class="link-description">台灣聯合報系新聞網站，提供全方位新聞報導。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.ettoday.net" target="_blank"><i class="fas fa-cloud-sun"></i> ETtoday新聞雲</a>
+                                    <p class="link-description">台灣網路媒體，提供即時新聞和深度報導。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.setn.com" target="_blank"><i class="fas fa-satellite"></i> 三立新聞網</a>
+                                    <p class="link-description">三立電視台新聞網站，提供新聞報導和視頻內容。</p>
+                                </li>
+								<li class="link-item">
+									<a href="https://news.nextapple.com" target="_blank"><i class="fab fa-apple"></i> 壹蘋新聞網</a>
+									<p class="link-description">台灣一家由前《蘋果新聞網》團隊成員組成的新聞網站。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://www.epochtimes.com" target="_blank"><i class="fa-solid fa-person-walking-arrow-loop-left"></i> 大紀元</a>
+									<p class="link-description">該媒體被描述為與陰謀論和政治錯誤信息傳播有關。</p>
+								</li>
+								<li class="link-item">
+                                    <a href="https://www.nytimes.com" target="_blank"><i class="fas fa-newspaper"></i> 紐約時報</a>
+                                    <p class="link-description">美國最具影響力的報紙之一，提供深度新聞報導和分析。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.reuters.com" target="_blank"><i class="fas fa-bullhorn"></i> 路透社</a>
+                                    <p class="link-description">國際新聞通訊社，以快速、準確的新聞報道聞名。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.cnn.com" target="_blank"><i class="fas fa-tv"></i> CNN</a>
+                                    <p class="link-description">美國有線電視新聞網，24小時新聞報導和突發新聞。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.theguardian.com" target="_blank"><i class="fas fa-shield-alt"></i> 衛報</a>
+                                    <p class="link-description">英國著名報紙，以深度調查報導和國際新聞聞名。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.washingtonpost.com" target="_blank"><i class="fas fa-monument"></i> 華盛頓郵報</a>
+                                    <p class="link-description">美國主要報紙，以政治報導和調查新聞著稱。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://apnews.com" target="_blank"><i class="fas fa-satellite-dish"></i> 美聯社</a>
+                                    <p class="link-description">全球最大通訊社之一，為全球媒體提供新聞報導。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.aljazeera.com" target="_blank"><i class="fas fa-globe-asia"></i> 半島電視台</a>
+                                    <p class="link-description">卡達國際新聞頻道，以中東視角報導全球新聞。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.bloomberg.com" target="_blank"><i class="fas fa-chart-line"></i> 彭博社</a>
+                                    <p class="link-description">全球商業和金融新聞、數據和分析的主要來源。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.ft.com" target="_blank"><i class="fas fa-pound-sign"></i> 金融時報</a>
+                                    <p class="link-description">英國國際性報紙，專注於商業和經濟新聞。</p>
+                                </li>
+								<li class="link-item">
+									<a href="https://zh.wikipedia.org/wiki/%E9%83%BD%E5%B8%82%E6%97%A5%E5%A0%B1" target="_blank"><i class="fas fa-globe"></i> 都市日報</a>
+									<p class="link-description">跨國性的免費新聞。</p>
+								</li>
+								<li class="link-item">
+									<a href="https://zh.wikipedia.org/wiki/%E8%8C%B6%E6%9D%AF%E9%9B%9C%E8%AA%8C" target="_blank"><i class="fas fa-mug-hot"></i> 茶杯媒體</a>
+									<p class="link-description">以香港深度文化媒體，探討國際關係、文化和社會議題自居。</p>
+								</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="category">
+                <div class="category-header" onclick="toggleCategory(5)">
+                    <h2><i class="fas fa-code"></i> 開發資源 (12個)</h2>
+                    <span class="toggle-icon">▶</span>
+                </div>
+                <div class="category-content" id="category-5">
+                    <div class="subcategory-container">
+                        <div class="subcategory-header" onclick="toggleSubCategory(5, 1)">
+                            <h3><i class="fab fa-github"></i> 程式碼託管 (3個)</h3>
+                            <span class="toggle-icon">▶</span>
+                        </div>
+                        <div class="subcategory-content" id="subcategory-5-1">
+                            <ul class="links-list">
+                                <li class="link-item">
+                                    <a href="https://github.com" target="_blank"><i class="fab fa-github"></i> GitHub</a>
+                                    <p class="link-description">全球最大的程式碼託管平台，用於版本控制和協作開發。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://gitlab.com" target="_blank"><i class="fab fa-gitlab"></i> GitLab</a>
+                                    <p class="link-description">開源程式碼託管平台，提供完整的DevOps生命週期工具。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://bitbucket.org" target="_blank"><i class="fab fa-bitbucket"></i> Bitbucket</a>
+                                    <p class="link-description">Atlassian的程式碼託管平台，與Jira和Trello深度整合。</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="subcategory-container">
+                        <div class="subcategory-header" onclick="toggleSubCategory(5, 2)">
+                            <h3><i class="fas fa-question-circle"></i> 開發者社區 (4個)</h3>
+                            <span class="toggle-icon">▶</span>
+                        </div>
+                        <div class="subcategory-content" id="subcategory-5-2">
+                            <ul class="links-list">
+                                <li class="link-item">
+                                    <a href="https://stackoverflow.com" target="_blank"><i class="fab fa-stack-overflow"></i> Stack Overflow</a>
+                                    <p class="link-description">程式設計師問答社區，解決程式設計中遇到的各種問題。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://stackexchange.com" target="_blank"><i class="fas fa-exchange-alt"></i> Stack Exchange</a>
+                                    <p class="link-description">Stack Overflow的姊妹網站，涵蓋各種專業領域的問答。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://dev.to" target="_blank"><i class="fas fa-laptop-code"></i> DEV Community</a>
+                                    <p class="link-description">開發者社區，分享技術文章、教程和討論。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.reddit.com/r/programming" target="_blank"><i class="fab fa-reddit"></i> r/programming</a>
+                                    <p class="link-description">Reddit上的程式設計討論區，分享技術新聞和資源。</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="subcategory-container">
+                        <div class="subcategory-header" onclick="toggleSubCategory(5, 3)">
+                            <h3><i class="fas fa-book"></i> 技術文檔與學習 (5個)</h3>
+                            <span class="toggle-icon">▶</span>
+                        </div>
+                        <div class="subcategory-content" id="subcategory-5-3">
+                            <ul class="links-list">
+                                <li class="link-item">
+                                    <a href="https://developer.mozilla.org" target="_blank"><i class="fas fa-code"></i> MDN Web Docs</a>
+                                    <p class="link-description">Mozilla開發者網絡，提供全面的Web開發文件和教學課程。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://css-tricks.com" target="_blank"><i class="fab fa-css3-alt"></i> CSS-Tricks</a>
+                                    <p class="link-description">專注於CSS技巧、教學課程和最佳實務的網站。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.w3schools.com" target="_blank"><i class="fas fa-school"></i> W3Schools</a>
+                                    <p class="link-description">Web開發學習網站，提供HTML、CSS、JavaScript等教程。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.freecodecamp.org" target="_blank"><i class="fas fa-campground"></i> freeCodeCamp</a>
+                                    <p class="link-description">免費學習編程的網站，提供互動式課程和項目實踐。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.codecademy.com" target="_blank"><i class="fas fa-graduation-cap"></i> Codecademy</a>
+                                    <p class="link-description">互動式編程學習平台，提供多種編程語言課程。</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="category">
+                <div class="category-header" onclick="toggleCategory(6)">
+                    <h2><i class="fas fa-palette"></i> 設計與創意 (15個)</h2>
+                    <span class="toggle-icon">▶</span>
+                </div>
+                <div class="category-content" id="category-6">
+                    <div class="subcategory-container">
+                        <div class="subcategory-header" onclick="toggleSubCategory(6, 1)">
+                            <h3><i class="fas fa-paint-brush"></i> 設計靈感 (5個)</h3>
+                            <span class="toggle-icon">▶</span>
+                        </div>
+                        <div class="subcategory-content" id="subcategory-6-1">
+                            <ul class="links-list">
+                                <li class="link-item">
+                                    <a href="https://dribbble.com" target="_blank"><i class="fab fa-dribbble"></i> Dribbble</a>
+                                    <p class="link-description">設計師社區，展示設計作品、尋找靈感和招募設計師。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.behance.net" target="_blank"><i class="fab fa-behance"></i> Behance</a>
+                                    <p class="link-description">Adobe旗下的創意作品展示平台，涵蓋多個設計領域。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.pinterest.com" target="_blank"><i class="fab fa-pinterest"></i> Pinterest</a>
+                                    <p class="link-description">視覺發現引擎，收集和分享創意想法和靈感。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.awwwards.com" target="_blank"><i class="fas fa-award"></i> Awwwards</a>
+                                    <p class="link-description">網頁設計獎項網站，展示優秀的網頁設計作品。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.siteinspire.com" target="_blank"><i class="fas fa-lightbulb"></i> siteInspire</a>
+                                    <p class="link-description">網頁設計靈感畫廊，展示優秀的網站設計作品。</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="subcategory-container">
+                        <div class="subcategory-header" onclick="toggleSubCategory(6, 2)">
+                            <h3><i class="fas fa-images"></i> 圖像資源 (6個)</h3>
+                            <span class="toggle-icon">▶</span>
+                        </div>
+                        <div class="subcategory-content" id="subcategory-6-2">
+                            <ul class="links-list">
+                                <li class="link-item">
+                                    <a href="https://unsplash.com" target="_blank"><i class="fas fa-camera"></i> Unsplash</a>
+                                    <p class="link-description">高品質免費圖片庫，提供可自由使用的攝影作品。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.pexels.com" target="_blank"><i class="fas fa-image"></i> Pexels</a>
+                                    <p class="link-description">免費圖庫網站，提供高品質照片和視頻素材。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://pixabay.com" target="_blank"><i class="fas fa-images"></i> Pixabay</a>
+                                    <p class="link-description">免費圖庫，提供照片、插圖、向量圖和視頻素材。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.freepik.com" target="_blank"><i class="fas fa-paint-brush"></i> Freepik</a>
+                                    <p class="link-description">免費向量圖、照片和PSD素材資源網站。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.flaticon.com" target="_blank"><i class="fas fa-icons"></i> Flaticon</a>
+                                    <p class="link-description">免費圖標庫，提供各種風格的圖標資源。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.fontawesome.com" target="_blank"><i class="fab fa-font-awesome"></i> Font Awesome</a>
+                                    <p class="link-description">流行的圖標字體和CSS工具包，提供可縮放向量圖標。</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="subcategory-container">
+                        <div class="subcategory-header" onclick="toggleSubCategory(6, 3)">
+                            <h3><i class="fas fa-palette"></i> 配色與字體 (4個)</h3>
+                            <span class="toggle-icon">▶</span>
+                        </div>
+                        <div class="subcategory-content" id="subcategory-6-3">
+                            <ul class="links-list">
+                                <li class="link-item">
+                                    <a href="https://coolors.co" target="_blank"><i class="fas fa-palette"></i> Coolors</a>
+                                    <p class="link-description">配色方案生成器，快速創建和分享配色方案。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://fonts.google.com" target="_blank"><i class="fab fa-google"></i> Google Fonts</a>
+                                    <p class="link-description">Google提供的免費開源字體庫，可嵌入網站使用。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://www.fontsquirrel.com" target="_blank"><i class="fa-solid fa-s"></i> Font Squirrel</a>
+                                    <p class="link-description">商業用途免費字體網站，提供高品質字體下載。</p>
+                                </li>
+                                <li class="link-item">
+                                    <a href="https://colorhunt.co" target="_blank"><i class="fas fa-eye-dropper"></i> Color Hunt</a>
+                                    <p class="link-description">配色靈感平台，提供精心挑選的配色方案。</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <div class="actions">
+            <button class="btn btn-expand" onclick="expandAll()">
+                <i class="fas fa-expand"></i> 展開所有
+            </button>
+            <button class="btn btn-collapse" onclick="collapseAll()">
+                <i class="fas fa-compress"></i> 折疊所有
+            </button>
+        </div>
+        
+        <footer>
+            <p>© 2025 🔗書籤 | 使用HTML、CSS與JavaScript建立</p>
+            <p>點擊類別標題切換折疊/展開狀態</p>
+        </footer>
+    </div>
+
+    <script>
+        // 初始狀態：第一個類別和其第一個子類別展開
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleCategory(1); // 展開第一個類別
+            toggleSubCategory(1, 1); // 展開第一個類別的第一個子類別
+        });
+        
+        // 切換主類別展開/折疊狀態
+        function toggleCategory(categoryId) {
+            const categoryContent = document.getElementById(`category-${categoryId}`);
+            const toggleIcon = categoryContent.previousElementSibling.querySelector('.toggle-icon');
+            
+            // 切換展開/折疊狀態
+            categoryContent.classList.toggle('expanded');
+            
+            // 更新箭頭圖標
+            if (categoryContent.classList.contains('expanded')) {
+                toggleIcon.textContent = '▼';
+            } else {
+                toggleIcon.textContent = '▶';
+            }
+        }
+        
+        // 切換子類別展開/折疊狀態
+        function toggleSubCategory(categoryId, subcategoryId) {
+            const subcategoryContent = document.getElementById(`subcategory-${categoryId}-${subcategoryId}`);
+            const toggleIcon = subcategoryContent.previousElementSibling.querySelector('.toggle-icon');
+            
+            // 切換展開/折疊狀態
+            subcategoryContent.classList.toggle('expanded');
+            
+            // 更新箭頭圖標
+            if (subcategoryContent.classList.contains('expanded')) {
+                toggleIcon.textContent = '▼';
+            } else {
+                toggleIcon.textContent = '▶';
+            }
+        }
+        
+        // 展開所有類別和子類別
+        function expandAll() {
+            // 展開所有主類別
+            const allCategories = document.querySelectorAll('.category-content');
+            const allToggleIcons = document.querySelectorAll('.category-header .toggle-icon');
+            
+            allCategories.forEach(category => {
+                category.classList.add('expanded');
+            });
+            
+            allToggleIcons.forEach(icon => {
+                icon.textContent = '▼';
+            });
+            
+            // 展開所有子類別
+            const allSubCategories = document.querySelectorAll('.subcategory-content');
+            const allSubToggleIcons = document.querySelectorAll('.subcategory-header .toggle-icon');
+            
+            allSubCategories.forEach(subcategory => {
+                subcategory.classList.add('expanded');
+            });
+            
+            allSubToggleIcons.forEach(icon => {
+                icon.textContent = '▼';
+            });
+        }
+        
+        // 折疊所有類別和子類別
+        function collapseAll() {
+            // 折疊所有主類別
+            const allCategories = document.querySelectorAll('.category-content');
+            const allToggleIcons = document.querySelectorAll('.category-header .toggle-icon');
+            
+            allCategories.forEach(category => {
+                category.classList.remove('expanded');
+            });
+            
+            allToggleIcons.forEach(icon => {
+                icon.textContent = '▶';
+            });
+            
+            // 折疊所有子類別
+            const allSubCategories = document.querySelectorAll('.subcategory-content');
+            const allSubToggleIcons = document.querySelectorAll('.subcategory-header .toggle-icon');
+            
+            allSubCategories.forEach(subcategory => {
+                subcategory.classList.remove('expanded');
+            });
+            
+            allSubToggleIcons.forEach(icon => {
+                icon.textContent = '▶';
+            });
+        }
+    </script>
+</body>
+</html>
