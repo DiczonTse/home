@@ -614,7 +614,9 @@
                 <div class="example-card">
                     <h4>曾孫/玄孫輩</h4>
                     <p>曾孫（孫子的兒子）</p>
+					<p>外曾孫（女兒的孫子）</p>
                     <p>曾孫女（孫子的女兒）</p>
+					<p>外曾孫女（女兒的孫女）</p>
                     <p>玄孫（曾孫的兒子）</p>
                     <p>玄孫女（曾孫的女兒）</p>
                 </div>
@@ -632,6 +634,13 @@
                     <p>外祖父：外公、阿公</p>
                     <p>外祖母：外婆、阿嬤</p>
                 </div>
+				<div class="example-card">
+					<h4>繼子繼女關係</h4>
+					<p>丈夫的兒子：繼子</p>
+					<p>丈夫的女兒：繼女</p>
+					<p>妻子的兒子：繼子</p>
+					<p>妻子的女兒：繼女</p>
+				</div>
                 
                 <!-- 新增：祖宗18代稱呼卡片 -->
                 <div class="example-card ancestor-card">
@@ -824,12 +833,16 @@
             // 曾孫輩
             "son_son_son": { title: "曾孫", reverse: "曾祖父/曾祖母", gender: "male" },
             "son_son_daughter": { title: "曾孫女", reverse: "曾祖父/曾祖母", gender: "female" },
+			"son_daughter_daughter": { title: "曾孫女", reverse: "曾祖父/曾祖母", gender: "female" },
             "daughter_son_son": { title: "外曾孫", reverse: "外曾祖父/外曾祖母", gender: "male" },
             "daughter_son_daughter": { title: "外曾孫女", reverse: "外曾祖父/外曾祖母", gender: "female" },
+			"daughter_daughter_daughter": { title: "外曾孫女", reverse: "外曾祖父/外曾祖母", gender: "female" },
             
             // 玄孫輩（需要更多層關係，這裡先定義但不一定能通過UI選擇）
             "son_son_son_son": { title: "玄孫", reverse: "高祖父/高祖母", gender: "male" },
             "son_son_son_daughter": { title: "玄孫女", reverse: "高祖父/高祖母", gender: "female" },
+			"son_son_daughter_daughter": { title: "玄孫女", reverse: "高祖父/高祖母", gender: "female" },
+			"daughter_son_daughter_daughter": { title: "外玄孫女", reverse: "外高祖父/外高祖母", gender: "female" },
             
             "mother_olderBrother_son_son": { title: "表侄", reverse: "表叔/表伯", gender: "male" },
             "mother_olderBrother_son_daughter": { title: "表侄女", reverse: "表姑", gender: "female" },
@@ -863,6 +876,12 @@
             // 其他常見複雜關係
             "mother_olderBrother_son_wife": { title: "表嫂", reverse: "表弟妹/表兄嫂", gender: "female" },
             "mother_youngerBrother_son_wife": { title: "表弟媳", reverse: "表哥/表嫂", gender: "female" },
+			
+			// 繼子繼女關係
+			"husband_son": { title: "兒子（繼子）", reverse: "繼母", gender: "male" },
+			"husband_daughter": { title: "女兒（繼女）", reverse: "繼母", gender: "female" },
+			"wife_son": { title: "兒子（繼子）", reverse: "繼父", gender: "male" },
+			"wife_daughter": { title: "女兒（繼女）", reverse: "繼父", gender: "female" },
         };
 
         // 稱呼到關係的反向映射（包含各地叫法）
@@ -964,9 +983,9 @@
             
             // 曾孫輩
             "曾孫": "兒子的兒子的兒子",
-            "曾孫女": "兒子的兒子的女兒",
+            "曾孫女": "兒子的兒子的女兒 或 兒子的女兒的女兒",
             "外曾孫": "女兒的兒子的兒子",
-            "外曾孫女": "女兒的兒子的女兒",
+            "外曾孫女": "女兒的兒子的女兒 或 女兒的女兒的女兒",
             
             // 玄孫輩
             "玄孫": "兒子的兒子的兒子的兒子",
@@ -998,7 +1017,13 @@
             "晜孫": "來孫的兒子",
             "仍孫": "晜孫的兒子",
             "雲孫": "仍孫的兒子",
-            "耳孫": "雲孫的兒子"
+            "耳孫": "雲孫的兒子",
+			
+			// 繼子繼女稱呼映射
+			"繼子": "丈夫的兒子 或 妻子的兒子",
+			"繼女": "丈夫的女兒 或 妻子的女兒",
+			"兒子（繼子）": "丈夫的兒子 或 妻子的兒子",
+			"女兒（繼女）": "丈夫的女兒 或 妻子的女兒"
         };
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -1229,6 +1254,10 @@
                     if (rel1 === "father" && rel2 === "mother") return "祖母（又稱：奶奶、阿嬤）";
                     if (rel1 === "mother" && rel2 === "father") return "外祖父（又稱：外公、阿公）";
                     if (rel1 === "mother" && rel2 === "mother") return "外祖母（又稱：外婆、阿嬤）";
+					if (rel1 === "husband" && rel2 === "son") return "兒子（繼子）";
+					if (rel1 === "husband" && rel2 === "daughter") return "女兒（繼女）";
+					if (rel1 === "wife" && rel2 === "son") return "兒子（繼子）";
+					if (rel1 === "wife" && rel2 === "daughter") return "女兒（繼女）";
                     
                     // 兄弟姐妹的孩子
                     if (rel1Info.gender === "male" && (rel2 === "son" || rel2 === "daughter")) {
@@ -1285,8 +1314,10 @@
                     // 曾孫/曾孫女
                     if (rel1 === "son" && rel2 === "son" && rel3 === "son") return "曾孫";
                     if (rel1 === "son" && rel2 === "son" && rel3 === "daughter") return "曾孫女";
+					if (rel1 === "son" && rel2 === "daughter" && rel3 === "daughter") return "曾孫女";
                     if (rel1 === "daughter" && rel2 === "son" && rel3 === "son") return "外曾孫";
                     if (rel1 === "daughter" && rel2 === "son" && rel3 === "daughter") return "外曾孫女";
+					if (rel1 === "daughter" && rel2 === "daughter" && rel3 === "daughter") return "外曾孫女";
                     
                     return `${rel1Info.title}的${rel2Info.title}的${rel3Info.title}`;
                 }
@@ -1367,6 +1398,9 @@
                     // 玄孫/玄孫女
                     if (rel1 === "son" && rel2 === "son" && rel3 === "son" && rel4 === "son") return "玄孫";
                     if (rel1 === "son" && rel2 === "son" && rel3 === "son" && rel4 === "daughter") return "玄孫女";
+					if (rel1 === "son" && rel2 === "son" && rel3 === "daughter" && rel4 === "daughter") return "玄孫女";
+					if (rel1 === "daughter" && rel2 === "son" && rel3 === "son" && rel4 === "daughter") return "外玄孫女";
+					if (rel1 === "daughter" && rel2 === "son" && rel3 === "daughter" && rel4 === "daughter") return "外玄孫女";
                     
                     return `${rel1Info.title}的${rel2Info.title}的${rel3Info.title}的${rel4Info.title}`;
                 }
