@@ -885,7 +885,48 @@
     </button>
 
     <script>
-        // DOM Elements
+        // ==================== 每日重置功能 ====================
+		(function() {
+			const RESET_KEY = 'dailyTasks_lastReset';
+			const TASKS_KEY = 'dailyTasks';
+			
+			// 獲取今天的日期字符串（YYYY-MM-DD格式）
+			function getTodayString() {
+				const now = new Date();
+				return `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+			}
+			
+			// 檢查並執行每日重置
+			function performDailyReset() {
+				const today = getTodayString();
+				const lastReset = localStorage.getItem(RESET_KEY);
+				
+				// 如果是新的一天，重置任務
+				if (lastReset !== today) {
+					console.log(`重置任務：上次重置 ${lastReset}，今天 ${today}`);
+					
+					// 清除所有任務
+					localStorage.removeItem(TASKS_KEY);
+					
+					// 更新重置日期
+					localStorage.setItem(RESET_KEY, today);
+					
+					return true;
+				}
+				return false;
+			}
+			
+			// 初始化時執行重置檢查
+			const didReset = performDailyReset();
+			
+			// 如果重置了，可以顯示通知（可選）
+			if (didReset && window.location.href.indexOf('reset-notification') === -1) {
+				// 可以在這裡添加重置通知
+				console.log('每日任務已重置完成');
+			}
+		})();
+		
+		// DOM Elements
         const taskForm = document.getElementById('taskForm');
         const mobileTaskForm = document.getElementById('mobileTaskForm');
         const taskList = document.getElementById('taskList');

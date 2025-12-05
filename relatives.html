@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
-	<title>👪中文親戚稱呼計算機 | 三姑六婆 | 姨媽姑姐 | 中文親戚稱呼計算機</title>
+    <title>👪中文親戚稱呼計算機 | 三姑六婆 | 姨媽姑姐 | 中文親戚稱呼計算機</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -279,6 +279,142 @@
             align-items: center;
             gap: 8px;
         }
+        
+        .generation-examples {
+            background-color: #f9f0ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            border-left: 4px solid #9b59b6;
+        }
+        
+        .generation-examples h4 {
+            color: #8e44ad;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .dialect-names {
+            background-color: #f0fff4;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            border-left: 4px solid #27ae60;
+        }
+        
+        .dialect-names h4 {
+            color: #2ecc71;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .dialect-names ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .dialect-names li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .dialect-names li:before {
+            content: "•";
+            color: #27ae60;
+            font-size: 1.5rem;
+            position: absolute;
+            left: 0;
+            top: -5px;
+        }
+        
+        .variation-badge {
+            display: inline-block;
+            background-color: #e8f4fc;
+            color: #3498db;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            margin-left: 5px;
+        }
+        
+        .ancestor-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-top: 4px solid #9b59b6;
+            grid-column: span 2;
+        }
+        
+        .ancestor-card h4 {
+            color: white;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .ancestor-card h4 i {
+            font-size: 1.5rem;
+        }
+        
+        .ancestor-generations {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .generation-column {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .generation-column h5 {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            padding-bottom: 5px;
+        }
+        
+        .generation-item {
+            margin-bottom: 8px;
+            padding: 5px 0;
+            border-bottom: 1px dashed rgba(255,255,255,0.2);
+        }
+        
+        .generation-name {
+            font-weight: bold;
+            display: block;
+        }
+        
+        .generation-desc {
+            font-size: 0.8rem;
+            opacity: 0.9;
+            display: block;
+        }
+        
+        .ancestor-note {
+            margin-top: 15px;
+            font-size: 0.85rem;
+            background-color: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .ancestor-card {
+                grid-column: span 1;
+            }
+            
+            .ancestor-generations {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
@@ -297,16 +433,16 @@
                     <label for="relation1">與我的關係：</label>
                     <select id="relation1">
                         <option value="">請選擇關係</option>
-                        <option value="father">父親</option>
-                        <option value="mother">母親</option>
+                        <option value="father">父親/爸爸</option>
+                        <option value="mother">母親/媽媽</option>
                         <option value="olderBrother">哥哥</option>
                         <option value="youngerBrother">弟弟</option>
                         <option value="olderSister">姐姐</option>
                         <option value="youngerSister">妹妹</option>
                         <option value="son">兒子</option>
                         <option value="daughter">女兒</option>
-                        <option value="husband">丈夫</option>
-                        <option value="wife">妻子</option>
+                        <option value="husband">丈夫/老公</option>
+                        <option value="wife">妻子/老婆</option>
                     </select>
                 </div>
                 
@@ -314,16 +450,16 @@
                     <label for="relation2">與其關係：</label>
                     <select id="relation2">
                         <option value="">請選擇關係（可選）</option>
-                        <option value="father">父親</option>
-                        <option value="mother">母親</option>
+                        <option value="father">父親/爸爸</option>
+                        <option value="mother">母親/媽媽</option>
                         <option value="olderBrother">哥哥</option>
                         <option value="youngerBrother">弟弟</option>
                         <option value="olderSister">姐姐</option>
                         <option value="youngerSister">妹妹</option>
                         <option value="son">兒子</option>
                         <option value="daughter">女兒</option>
-                        <option value="husband">丈夫</option>
-                        <option value="wife">妻子</option>
+                        <option value="husband">丈夫/老公</option>
+                        <option value="wife">妻子/老婆</option>
                     </select>
                 </div>
                 
@@ -331,16 +467,16 @@
                     <label for="relation3">再與其關係：</label>
                     <select id="relation3">
                         <option value="">請選擇關係（可選）</option>
-                        <option value="father">父親</option>
-                        <option value="mother">母親</option>
+                        <option value="father">父親/爸爸</option>
+                        <option value="mother">母親/媽媽</option>
                         <option value="olderBrother">哥哥</option>
                         <option value="youngerBrother">弟弟</option>
                         <option value="olderSister">姐姐</option>
                         <option value="youngerSister">妹妹</option>
                         <option value="son">兒子</option>
                         <option value="daughter">女兒</option>
-                        <option value="husband">丈夫</option>
-                        <option value="wife">妻子</option>
+                        <option value="husband">丈夫/老公</option>
+                        <option value="wife">妻子/老婆</option>
                     </select>
                 </div>
                 
@@ -348,16 +484,16 @@
                     <label for="relation4">再與其關係（可選）：</label>
                     <select id="relation4">
                         <option value="">請選擇關係（可選，最多四層）</option>
-                        <option value="father">父親</option>
-                        <option value="mother">母親</option>
+                        <option value="father">父親/爸爸</option>
+                        <option value="mother">母親/媽媽</option>
                         <option value="olderBrother">哥哥</option>
                         <option value="youngerBrother">弟弟</option>
                         <option value="olderSister">姐姐</option>
                         <option value="youngerSister">妹妹</option>
                         <option value="son">兒子</option>
                         <option value="daughter">女兒</option>
-                        <option value="husband">丈夫</option>
-                        <option value="wife">妻子</option>
+                        <option value="husband">丈夫/老公</option>
+                        <option value="wife">妻子/老婆</option>
                     </select>
                 </div>
                 
@@ -366,6 +502,8 @@
                     <div class="quick-example" data-example="父親的母親的妹妹的兒子">父親的母親的妹妹的兒子</div>
                     <div class="quick-example" data-example="舅舅的孫子">舅舅的孫子</div>
                     <div class="quick-example" data-example="堂哥的女兒">堂哥的女兒</div>
+                    <div class="quick-example" data-example="曾孫">曾孫</div>
+                    <div class="quick-example" data-example="玄孫">玄孫</div>
                 </div>
                 
                 <button id="calculateBtn">
@@ -386,6 +524,27 @@
                     <p><strong>父親的母親的妹妹的兒子</strong> = 祖母的妹妹的兒子 = 姨婆的兒子 = 表舅（父親的表兄弟）</p>
                     <p>要查詢此關係，請選擇：父親 → 母親 → 妹妹 → 兒子</p>
                 </div>
+                
+                <div class="generation-examples">
+                    <h4><i class="fas fa-sitemap"></i> 新增：曾祖/高祖關係示例</h4>
+                    <p><strong>曾祖輩</strong>：父親的父親的父親 = 曾祖父（又稱：太公、太爺）</p>
+                    <p><strong>高祖輩</strong>：父親的父親的父親的父親 = 高祖父（又稱：太祖、天祖）</p>
+                    <p><strong>曾孫輩</strong>：兒子的兒子的兒子 = 曾孫</p>
+                    <p><strong>玄孫輩</strong>：兒子的兒子的兒子的兒子 = 玄孫</p>
+                    <p>要查詢這些關係，請使用四層關係選擇器</p>
+                </div>
+                
+                <div class="dialect-names">
+                    <h4><i class="fas fa-language"></i> 各地叫法差異</h4>
+                    <ul>
+                        <li><strong>曾祖父</strong>：太公、太爺、祖公、太公</li>
+                        <li><strong>曾祖母</strong>：太婆、太奶、祖婆、太婆</li>
+                        <li><strong>丈夫</strong>：老公、先生、夫君、當家的</li>
+                        <li><strong>妻子</strong>：老婆、太太、夫人、內人</li>
+                        <li><strong>外曾祖父</strong>：外太公、外太爺、外祖公</li>
+                        <li><strong>外曾祖母</strong>：外太婆、外太奶、外祖婆</li>
+                    </ul>
+                </div>
             </div>
             
             <div class="calculator-box">
@@ -402,6 +561,8 @@
                     <div class="quick-example" data-example="表姑">表姑</div>
                     <div class="quick-example" data-example="表叔">表叔</div>
                     <div class="quick-example" data-example="表姨">表姨</div>
+                    <div class="quick-example" data-example="曾孫">曾孫</div>
+                    <div class="quick-example" data-example="玄孫">玄孫</div>
                 </div>
                 
                 <button id="reverseBtn">
@@ -424,8 +585,9 @@
             <div class="examples-grid">
                 <div class="example-card">
                     <h4>直系親屬</h4>
-                    <p>父親、母親、兒子、女兒</p>
-                    <p>祖父、祖母、孫子、孫女</p>
+                    <p>父親/爸爸、母親/媽媽、兒子、女兒</p>
+                    <p>丈夫/老公<span class="variation-badge">各地叫法</span></p>
+                    <p>妻子/老婆<span class="variation-badge">各地叫法</span></p>
                 </div>
                 <div class="example-card">
                     <h4>兄弟姐妹</h4>
@@ -443,22 +605,135 @@
                     <p>堂侄、表侄、堂外甥、表外甥</p>
                 </div>
                 <div class="example-card">
-                    <h4>複雜關係（新增）</h4>
+                    <h4>曾祖/高祖輩<span class="variation-badge">各地叫法</span></h4>
+                    <p>曾祖父（太公、太爺）</p>
+                    <p>曾祖母（太婆、太奶）</p>
+                    <p>高祖父（太祖、天祖）</p>
+                    <p>高祖母（太婆、天祖婆）</p>
+                </div>
+                <div class="example-card">
+                    <h4>曾孫/玄孫輩</h4>
+                    <p>曾孫（孫子的兒子）</p>
+                    <p>曾孫女（孫子的女兒）</p>
+                    <p>玄孫（曾孫的兒子）</p>
+                    <p>玄孫女（曾孫的女兒）</p>
+                </div>
+                <div class="example-card">
+                    <h4>複雜關係</h4>
                     <p>父親的母親的妹妹的兒子：表舅</p>
                     <p>父親的母親的妹妹的女兒：表姑</p>
                     <p>母親的母親的弟弟的兒子：表舅</p>
                     <p>父親的父親的哥哥的孫子：堂兄/堂弟</p>
                 </div>
                 <div class="example-card">
-                    <h4>其他遠親</h4>
-                    <p>表舅、表姨、表叔、表姑</p>
-                    <p>表姑父、表姨父、表伯母</p>
+                    <h4>各地特別叫法</h4>
+                    <p>祖父：爺爺、阿公</p>
+                    <p>祖母：奶奶、阿嬤</p>
+                    <p>外祖父：外公、阿公</p>
+                    <p>外祖母：外婆、阿嬤</p>
+                </div>
+                
+                <!-- 新增：祖宗18代稱呼卡片 -->
+                <div class="example-card ancestor-card">
+                    <h4><i class="fas fa-family-tree"></i> 祖宗18代稱呼（完整世代）</h4>
+                    <div class="ancestor-generations">
+                        <div class="generation-column">
+                            <h5>上九代（祖先）</h5>
+                            <div class="generation-item">
+                                <span class="generation-name">鼻祖 (9世祖)</span>
+                                <span class="generation-desc">始祖，最早的祖先</span>
+                            </div>
+                            <div class="generation-item">
+                                <span class="generation-name">遠祖 (8世祖)</span>
+                                <span class="generation-desc">遠代祖先</span>
+                            </div>
+                            <div class="generation-item">
+                                <span class="generation-name">太祖 (7世祖)</span>
+                                <span class="generation-desc">世系較遠的祖先</span>
+                            </div>
+                            <div class="generation-item">
+                                <span class="generation-name">烈祖 (6世祖)</span>
+                                <span class="generation-desc">有功業的祖先</span>
+                            </div>
+                            <div class="generation-item">
+                                <span class="generation-name">天祖 (5世祖)</span>
+                                <span class="generation-desc">高祖的父親</span>
+                            </div>
+                            <div class="generation-item">
+                                <span class="generation-name">高祖 (4世祖)</span>
+                                <span class="generation-desc">曾祖的祖父</span>
+                            </div>
+                            <div class="generation-item">
+                                <span class="generation-name">曾祖 (3世祖)</span>
+                                <span class="generation-desc">祖父的父親</span>
+                            </div>
+                            <div class="generation-item">
+                                <span class="generation-name">祖父 (2世祖)</span>
+                                <span class="generation-desc">父親的父親</span>
+                            </div>
+                            <div class="generation-item">
+                                <span class="generation-name">父親 (1世祖)</span>
+                                <span class="generation-desc">生身之父</span>
+                            </div>
+                        </div>
+                        
+                        <div class="generation-column">
+                            <h5>自己</h5>
+                            <div class="generation-item">
+                                <span class="generation-name">自己</span>
+                                <span class="generation-desc">當事人本身</span>
+                            </div>
+                        </div>
+                        
+                        <div class="generation-column">
+                            <h5>下九代（後代）</h5>
+                            <div class="generation-item">
+                                <span class="generation-name">兒子 (1世孫)</span>
+                                <span class="generation-desc">親生兒子</span>
+                            </div>
+                            <div class="generation-item">
+                                <span class="generation-name">孫子 (2世孫)</span>
+                                <span class="generation-desc">兒子的兒子</span>
+                            </div>
+                            <div class="generation-item">
+                                <span class="generation-name">曾孫 (3世孫)</span>
+                                <span class="generation-desc">孫子的兒子</span>
+                            </div>
+                            <div class="generation-item">
+                                <span class="generation-name">玄孫 (4世孫)</span>
+                                <span class="generation-desc">曾孫的兒子</span>
+                            </div>
+                            <div class="generation-item">
+                                <span class="generation-name">來孫 (5世孫)</span>
+                                <span class="generation-desc">玄孫的兒子</span>
+                            </div>
+                            <div class="generation-item">
+                                <span class="generation-name">晜孫 (6世孫)</span>
+                                <span class="generation-desc">來孫的兒子</span>
+                            </div>
+                            <div class="generation-item">
+                                <span class="generation-name">仍孫 (7世孫)</span>
+                                <span class="generation-desc">晜孫的兒子</span>
+                            </div>
+                            <div class="generation-item">
+                                <span class="generation-name">雲孫 (8世孫)</span>
+                                <span class="generation-desc">仍孫的兒子</span>
+                            </div>
+                            <div class="generation-item">
+                                <span class="generation-name">耳孫 (9世孫)</span>
+                                <span class="generation-desc">雲孫的兒子</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ancestor-note">
+                        <strong>說明：</strong> 祖宗18代是指從自己往上數9代祖先，往下數9代後代，共18代。這是中國傳統家族觀念中對親屬關係最完整的稱謂體系。
+                    </div>
                 </div>
             </div>
             
             <div class="note">
                 <h4><i class="fas fa-info-circle"></i> 使用說明：</h4>
-                <p>1. 在左側查詢器中，通過選擇關係路徑來計算稱呼。例如：選擇"父親"→"母親"→"妹妹"→"兒子"，可查詢"父親的母親的妹妹的兒子（表舅）"的稱呼。</p>
+                <p>1. 在左側查詢器中，通過選擇關係路徑來計算稱呼。例如：選擇"父親/爸爸"→"母親/媽媽"→"妹妹"→"兒子"，可查詢"父親的母親的妹妹的兒子（表舅）"的稱呼。</p>
                 <p>2. 在右側查詢器中，直接輸入稱呼來查找對應的親戚關係。例如：輸入"表舅"，可查詢到"父親的母親的妹妹的兒子"這一關係。</p>
                 <p>3. 點擊快速示例按鈕可快速填充查詢條件。</p>
                 <p>4. 稱呼計算基於標準中文親屬關係，實際使用中可能因地區、習俗有所不同。</p>
@@ -475,22 +750,22 @@
         // 親戚關係映射數據（擴展版，支援更複雜的關係）
         const relations = {
             // 直接關係
-            "father": { title: "父親", reverse: "子女", gender: "male" },
-            "mother": { title: "母親", reverse: "子女", gender: "female" },
+            "father": { title: "父親/爸爸", reverse: "子女", gender: "male" },
+            "mother": { title: "母親/媽媽", reverse: "子女", gender: "female" },
             "olderBrother": { title: "哥哥", reverse: "弟弟/妹妹", gender: "male" },
             "youngerBrother": { title: "弟弟", reverse: "哥哥/姐姐", gender: "male" },
             "olderSister": { title: "姐姐", reverse: "弟弟/妹妹", gender: "female" },
             "youngerSister": { title: "妹妹", reverse: "哥哥/姐姐", gender: "female" },
             "son": { title: "兒子", reverse: "父親/母親", gender: "male" },
             "daughter": { title: "女兒", reverse: "父親/母親", gender: "female" },
-            "husband": { title: "丈夫", reverse: "妻子", gender: "male" },
-            "wife": { title: "妻子", reverse: "丈夫", gender: "female" },
+            "husband": { title: "丈夫/老公", reverse: "妻子", gender: "male" },
+            "wife": { title: "妻子/老婆", reverse: "丈夫", gender: "female" },
             
             // 雙重關係
-            "father_father": { title: "祖父", reverse: "孫子/孫女", gender: "male" },
-            "father_mother": { title: "祖母", reverse: "孫子/孫女", gender: "female" },
-            "mother_father": { title: "外祖父", reverse: "外孫/外孫女", gender: "male" },
-            "mother_mother": { title: "外祖母", reverse: "外孫/外孫女", gender: "female" },
+            "father_father": { title: "祖父（又稱：爺爺、阿公）", reverse: "孫子/孫女", gender: "male" },
+            "father_mother": { title: "祖母（又稱：奶奶、阿嬤）", reverse: "孫子/孫女", gender: "female" },
+            "mother_father": { title: "外祖父（又稱：外公、阿公）", reverse: "外孫/外孫女", gender: "male" },
+            "mother_mother": { title: "外祖母（又稱：外婆、阿嬤）", reverse: "外孫/外孫女", gender: "female" },
             
             "father_olderBrother": { title: "伯父", reverse: "侄子/侄女", gender: "male" },
             "father_youngerBrother": { title: "叔父", reverse: "侄子/侄女", gender: "male" },
@@ -512,9 +787,17 @@
             "youngerSister_son": { title: "外甥", reverse: "舅父/姨母", gender: "male" },
             "youngerSister_daughter": { title: "外甥女", reverse: "舅父/姨母", gender: "female" },
             
-            // 三重關係（堂表兄弟姐妹）
-            "father_father_father": { title: "曾祖父", reverse: "曾孫/曾孫女", gender: "male" },
-            "father_father_mother": { title: "曾祖母", reverse: "曾孫/曾孫女", gender: "female" },
+            // 三重關係（堂表兄弟姐妹及曾祖輩）
+            "father_father_father": { title: "曾祖父（又稱：太公、太爺）", reverse: "曾孫/曾孫女", gender: "male" },
+            "father_father_mother": { title: "曾祖母（又稱：太婆、太奶）", reverse: "曾孫/曾孫女", gender: "female" },
+            "mother_father_father": { title: "外曾祖父（又稱：外太公、外太爺）", reverse: "外曾孫/外曾孫女", gender: "male" },
+            "mother_father_mother": { title: "外曾祖母（又稱：外太婆、外太奶）", reverse: "外曾孫/外曾孫女", gender: "female" },
+            
+            // 孫輩
+            "son_son": { title: "孫子", reverse: "祖父/祖母", gender: "male" },
+            "son_daughter": { title: "孫女", reverse: "祖父/祖母", gender: "female" },
+            "daughter_son": { title: "外孫", reverse: "外祖父/外祖母", gender: "male" },
+            "daughter_daughter": { title: "外孫女", reverse: "外祖父/外祖母", gender: "female" },
             
             "father_olderBrother_son": { title: "堂哥", reverse: "堂弟/堂妹", gender: "male" },
             "father_olderBrother_daughter": { title: "堂姐", reverse: "堂弟/堂妹", gender: "female" },
@@ -530,7 +813,24 @@
             "mother_youngerSister_son": { title: "表弟", reverse: "表哥/表姐", gender: "male" },
             "mother_youngerSister_daughter": { title: "表妹", reverse: "表哥/表姐", gender: "female" },
             
-            // 四重關係（新增：支援父親的母親的妹妹的兒子等複雜關係）
+            // 四重關係（新增：支援曾祖/高祖輩、曾孫輩及複雜關係）
+            "father_father_father_father": { title: "高祖父（又稱：太祖、天祖）", reverse: "玄孫/玄孫女", gender: "male" },
+            "father_father_father_mother": { title: "高祖母（又稱：太婆、天祖婆）", reverse: "玄孫/玄孫女", gender: "female" },
+            "father_father_mother_father": { title: "高外祖父", reverse: "玄孫/玄孫女", gender: "male" },
+            "father_father_mother_mother": { title: "高外祖母", reverse: "玄孫/玄孫女", gender: "female" },
+            "mother_father_father_father": { title: "外高祖父（又稱：外太祖）", reverse: "外玄孫/外玄孫女", gender: "male" },
+            "mother_father_father_mother": { title: "外高祖母（又稱：外太婆）", reverse: "外玄孫/外玄孫女", gender: "female" },
+            
+            // 曾孫輩
+            "son_son_son": { title: "曾孫", reverse: "曾祖父/曾祖母", gender: "male" },
+            "son_son_daughter": { title: "曾孫女", reverse: "曾祖父/曾祖母", gender: "female" },
+            "daughter_son_son": { title: "外曾孫", reverse: "外曾祖父/外曾祖母", gender: "male" },
+            "daughter_son_daughter": { title: "外曾孫女", reverse: "外曾祖父/外曾祖母", gender: "female" },
+            
+            // 玄孫輩（需要更多層關係，這裡先定義但不一定能通過UI選擇）
+            "son_son_son_son": { title: "玄孫", reverse: "高祖父/高祖母", gender: "male" },
+            "son_son_son_daughter": { title: "玄孫女", reverse: "高祖父/高祖母", gender: "female" },
+            
             "mother_olderBrother_son_son": { title: "表侄", reverse: "表叔/表伯", gender: "male" },
             "mother_olderBrother_son_daughter": { title: "表侄女", reverse: "表姑", gender: "female" },
             "mother_youngerBrother_son_son": { title: "表侄", reverse: "表叔", gender: "male" },
@@ -565,17 +865,82 @@
             "mother_youngerBrother_son_wife": { title: "表弟媳", reverse: "表哥/表嫂", gender: "female" },
         };
 
-        // 稱呼到關係的反向映射
+        // 稱呼到關係的反向映射（包含各地叫法）
         const titleToRelation = {
+            // 父母輩
+            "父親": "父親/爸爸",
+            "爸爸": "父親/爸爸",
+            "老爸": "父親/爸爸",
+            "爹": "父親/爸爸",
+            "母親": "母親/媽媽",
+            "媽媽": "母親/媽媽",
+            "老媽": "母親/媽媽",
+            "娘": "母親/媽媽",
+            
+            // 祖父母輩
             "祖父": "父親的父親",
+            "爺爺": "父親的父親",
+            "阿公": "父親的父親",
             "祖母": "父親的母親",
+            "奶奶": "父親的母親",
+            "阿嬤": "父親的母親",
             "外祖父": "母親的父親",
+            "外公": "母親的父親",
             "外祖母": "母親的母親",
+            "外婆": "母親的母親",
+            
+            // 曾祖父母輩（含各地叫法）
+            "曾祖父": "父親的父親的父親",
+            "太公": "父親的父親的父親",
+            "太爺": "父親的父親的父親",
+            "祖公": "父親的父親的父親",
+            "曾祖母": "父親的父親的母親",
+            "太婆": "父親的父親的母親",
+            "太奶": "父親的父親的母親",
+            "祖婆": "父親的父親的母親",
+            "外曾祖父": "母親的父親的父親",
+            "外太公": "母親的父親的父親",
+            "外太爺": "母親的父親的父親",
+            "外曾祖母": "母親的父親的母親",
+            "外太婆": "母親的父親的母親",
+            "外太奶": "母親的父親的母親",
+            
+            // 高祖父母輩（含各地叫法）
+            "高祖父": "父親的父親的父親的父親",
+            "太祖": "父親的父親的父親的父親",
+            "天祖": "父親的父親的父親的父親",
+            "老太爺": "父親的父親的父親的父親",
+            "高祖母": "父親的父親的父親的母親",
+            "太婆": "父親的父親的父親的母親",
+            "天祖婆": "父親的父親的父親的母親",
+            "老太太": "父親的父親的父親的母親",
+            "外高祖父": "母親的父親的父親的父親",
+            "外太祖": "母親的父親的父親的父親",
+            "外天祖": "母親的父親的父親的父親",
+            "外高祖母": "母親的父親的父親的母親",
+            "外太婆": "母親的父親的父親的母親",
+            "外天祖婆": "母親的父親的父親的母親",
+            
+            // 夫妻關係（含各地叫法）
+            "丈夫": "丈夫/老公",
+            "老公": "丈夫/老公",
+            "先生": "丈夫/老公",
+            "夫君": "丈夫/老公",
+            "當家的": "丈夫/老公",
+            "妻子": "妻子/老婆",
+            "老婆": "妻子/老婆",
+            "太太": "妻子/老婆",
+            "夫人": "妻子/老婆",
+            "內人": "妻子/老婆",
+            
+            // 叔伯姑姨輩
             "伯父": "父親的哥哥",
             "叔父": "父親的弟弟",
             "姑母": "父親的姐妹",
             "舅父": "母親的兄弟",
             "姨母": "母親的姐妹",
+            
+            // 堂表兄弟姐妹
             "堂哥": "父親的兄弟的兒子（年齡比自己大）",
             "堂弟": "父親的兄弟的兒子（年齡比自己小）",
             "堂姐": "父親的兄弟的女兒（年齡比自己大）",
@@ -584,20 +949,56 @@
             "表弟": "母親的兄弟或姐妹的兒子（年齡比自己小）",
             "表姐": "母親的兄弟或姐妹的女兒（年齡比自己大）",
             "表妹": "母親的兄弟或姐妹的女兒（年齡比自己小）",
+            
+            // 晚輩
             "侄子": "兄弟的兒子",
             "侄女": "兄弟的女兒",
             "外甥": "姐妹的兒子",
             "外甥女": "姐妹的女兒",
+            
+            // 孫輩
+            "孫子": "兒子的兒子",
+            "孫女": "兒子的女兒",
+            "外孫": "女兒的兒子",
+            "外孫女": "女兒的女兒",
+            
+            // 曾孫輩
+            "曾孫": "兒子的兒子的兒子",
+            "曾孫女": "兒子的兒子的女兒",
+            "外曾孫": "女兒的兒子的兒子",
+            "外曾孫女": "女兒的兒子的女兒",
+            
+            // 玄孫輩
+            "玄孫": "兒子的兒子的兒子的兒子",
+            "玄孫女": "兒子的兒子的兒子的女兒",
+            "外玄孫": "女兒的兒子的兒子的兒子",
+            "外玄孫女": "女兒的兒子的兒子的女兒",
+            
+            // 其他晚輩
             "表侄": "表哥的兒子",
             "表侄女": "表哥的女兒",
             "表外甥": "表姐的兒子",
             "表外甥女": "表姐的女兒",
             "堂侄": "堂哥的兒子",
             "堂侄女": "堂哥的女兒",
+            
+            // 複雜關係
             "表舅": "父親的母親的妹妹的兒子 或 母親的母親的兄弟的兒子",
             "表姑": "父親的母親的妹妹的女兒",
             "表叔": "父親的父親的兄弟的兒子",
-            "表姨": "母親的母親的姐妹的女兒"
+            "表姨": "母親的母親的姐妹的女兒",
+            
+            // 祖宗18代特殊稱呼
+            "鼻祖": "最早的祖先，始祖",
+            "遠祖": "遠代祖先",
+            "太祖": "世系較遠的祖先",
+            "烈祖": "有功業的祖先",
+            "天祖": "高祖的父親",
+            "來孫": "玄孫的兒子",
+            "晜孫": "來孫的兒子",
+            "仍孫": "晜孫的兒子",
+            "雲孫": "仍孫的兒子",
+            "耳孫": "雲孫的兒子"
         };
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -658,6 +1059,15 @@
                     document.getElementById('relation2').value = 'olderBrother';
                     document.getElementById('relation3').value = 'son';
                     document.getElementById('relation4').value = 'daughter';
+                } else if (exampleText === "曾孫") {
+                    document.getElementById('relation1').value = 'son';
+                    document.getElementById('relation2').value = 'son';
+                    document.getElementById('relation3').value = 'son';
+                } else if (exampleText === "玄孫") {
+                    document.getElementById('relation1').value = 'son';
+                    document.getElementById('relation2').value = 'son';
+                    document.getElementById('relation3').value = 'son';
+                    document.getElementById('relation4').value = 'son';
                 }
             }
             
@@ -763,13 +1173,21 @@
                 // 簡單的關鍵詞映射
                 const keywordMap = {
                     "父親": "father",
-                    "母親": "mother", 
+                    "爸爸": "father",
+                    "老爸": "father",
+                    "母親": "mother",
+                    "媽媽": "mother",
+                    "老媽": "mother", 
                     "哥哥": "olderBrother",
                     "弟弟": "youngerBrother",
                     "姐姐": "olderSister",
                     "妹妹": "youngerSister",
                     "兒子": "son",
-                    "女兒": "daughter"
+                    "女兒": "daughter",
+                    "丈夫": "husband",
+                    "老公": "husband",
+                    "妻子": "wife",
+                    "老婆": "wife"
                 };
                 
                 const parts = relationStr.split("的");
@@ -807,10 +1225,10 @@
                     const rel2Info = relations[rel2];
                     
                     // 父母組合
-                    if (rel1 === "father" && rel2 === "father") return "祖父";
-                    if (rel1 === "father" && rel2 === "mother") return "祖母";
-                    if (rel1 === "mother" && rel2 === "father") return "外祖父";
-                    if (rel1 === "mother" && rel2 === "mother") return "外祖母";
+                    if (rel1 === "father" && rel2 === "father") return "祖父（又稱：爺爺、阿公）";
+                    if (rel1 === "father" && rel2 === "mother") return "祖母（又稱：奶奶、阿嬤）";
+                    if (rel1 === "mother" && rel2 === "father") return "外祖父（又稱：外公、阿公）";
+                    if (rel1 === "mother" && rel2 === "mother") return "外祖母（又稱：外婆、阿嬤）";
                     
                     // 兄弟姐妹的孩子
                     if (rel1Info.gender === "male" && (rel2 === "son" || rel2 === "daughter")) {
@@ -820,6 +1238,12 @@
                     if (rel1Info.gender === "female" && (rel2 === "son" || rel2 === "daughter")) {
                         return rel2 === "son" ? "外甥" : "外甥女";
                     }
+                    
+                    // 孫輩
+                    if (rel1 === "son" && rel2 === "son") return "孫子";
+                    if (rel1 === "son" && rel2 === "daughter") return "孫女";
+                    if (rel1 === "daughter" && rel2 === "son") return "外孫";
+                    if (rel1 === "daughter" && rel2 === "daughter") return "外孫女";
                     
                     return `${rel1Info.title}的${rel2Info.title}`;
                 }
@@ -851,6 +1275,18 @@
                     if (rel1 === "mother" && rel2 === "mother" && (rel3 === "olderSister" || rel3 === "youngerSister")) {
                         return rel3 === "olderSister" ? "姨婆" : "姨婆";
                     }
+                    
+                    // 曾祖父/曾祖母
+                    if (rel1 === "father" && rel2 === "father" && rel3 === "father") return "曾祖父（又稱：太公、太爺）";
+                    if (rel1 === "father" && rel2 === "father" && rel3 === "mother") return "曾祖母（又稱：太婆、太奶）";
+                    if (rel1 === "mother" && rel2 === "father" && rel3 === "father") return "外曾祖父（又稱：外太公、外太爺）";
+                    if (rel1 === "mother" && rel2 === "father" && rel3 === "mother") return "外曾祖母（又稱：外太婆、外太奶）";
+                    
+                    // 曾孫/曾孫女
+                    if (rel1 === "son" && rel2 === "son" && rel3 === "son") return "曾孫";
+                    if (rel1 === "son" && rel2 === "son" && rel3 === "daughter") return "曾孫女";
+                    if (rel1 === "daughter" && rel2 === "son" && rel3 === "son") return "外曾孫";
+                    if (rel1 === "daughter" && rel2 === "son" && rel3 === "daughter") return "外曾孫女";
                     
                     return `${rel1Info.title}的${rel2Info.title}的${rel3Info.title}`;
                 }
@@ -921,6 +1357,16 @@
                         rel3 === "son" && rel4 === "daughter") {
                         return "堂侄女";
                     }
+                    
+                    // 高祖父/高祖母
+                    if (rel1 === "father" && rel2 === "father" && rel3 === "father" && rel4 === "father") return "高祖父（又稱：太祖、天祖）";
+                    if (rel1 === "father" && rel2 === "father" && rel3 === "father" && rel4 === "mother") return "高祖母（又稱：太婆、天祖婆）";
+                    if (rel1 === "mother" && rel2 === "father" && rel3 === "father" && rel4 === "father") return "外高祖父（又稱：外太祖）";
+                    if (rel1 === "mother" && rel2 === "father" && rel3 === "father" && rel4 === "mother") return "外高祖母（又稱：外太婆）";
+                    
+                    // 玄孫/玄孫女
+                    if (rel1 === "son" && rel2 === "son" && rel3 === "son" && rel4 === "son") return "玄孫";
+                    if (rel1 === "son" && rel2 === "son" && rel3 === "son" && rel4 === "daughter") return "玄孫女";
                     
                     return `${rel1Info.title}的${rel2Info.title}的${rel3Info.title}的${rel4Info.title}`;
                 }
