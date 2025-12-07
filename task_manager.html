@@ -890,7 +890,7 @@
 			const RESET_KEY = 'dailyTasks_lastReset';
 			const TASKS_KEY = 'dailyTasks';
 			
-			// 獲取今天的日期字符串（YYYY-MM-DD格式）
+			// 取得今天的日期字串（YYYY-MM-DD格式）
 			function getTodayString() {
 				const now = new Date();
 				return `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
@@ -901,12 +901,35 @@
 				const today = getTodayString();
 				const lastReset = localStorage.getItem(RESET_KEY);
 				
-				// 如果是新的一天，重置任務
+				// 如果是新的一天，重置任務狀態
 				if (lastReset !== today) {
-					console.log(`重置任務：上次重置 ${lastReset}，今天 ${today}`);
+					console.log(`重置任務狀態：上次重置 ${lastReset}，今天 ${today}`);
 					
-					// 清除所有任務
-					localStorage.removeItem(TASKS_KEY);
+					// 取得現有任務
+					const savedTasks = localStorage.getItem(TASKS_KEY);
+					if (savedTasks) {
+						try {
+							let tasks = JSON.parse(savedTasks);
+							
+							// 重置所有任務的完成狀態
+							tasks = tasks.map(task => ({
+								...task,
+								completed: false,
+								updatedAt: new Date().toISOString()
+							}));
+							
+							// 儲存重置後的任務
+							localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+							console.log(`已重置 ${tasks.length} 個任務的狀態為未完成`);
+							
+							// 顯示重置通知（可選）
+							if (window.location.href.indexOf('reset-notification') === -1) {
+								console.log('每日任務狀態已重置完成');
+							}
+						} catch (error) {
+							console.error('重置任務狀態時出錯:', error);
+						}
+					}
 					
 					// 更新重置日期
 					localStorage.setItem(RESET_KEY, today);
@@ -917,13 +940,7 @@
 			}
 			
 			// 初始化時執行重置檢查
-			const didReset = performDailyReset();
-			
-			// 如果重置了，可以顯示通知（可選）
-			if (didReset && window.location.href.indexOf('reset-notification') === -1) {
-				// 可以在這裡添加重置通知
-				console.log('每日任務已重置完成');
-			}
+			performDailyReset();
 		})();
 		
 		// DOM Elements
