@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <title>👪中文親戚稱呼計算機 | 三姑六婆 | 姨媽姑姐 | 中文親戚稱呼計算機</title>
+    <title>👪中文親戚稱呼計算機 | 三姑六婆 | 姨媽姑姐 | 姨媽姑爹 | 中文親戚稱呼計算機</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -1394,6 +1394,7 @@
                     if (rel1 === "father" && rel2 === "father" && rel3 === "father" && rel4 === "mother") return "高祖母（又稱：太婆、天祖婆）";
                     if (rel1 === "mother" && rel2 === "father" && rel3 === "father" && rel4 === "father") return "外高祖父（又稱：外太祖）";
                     if (rel1 === "mother" && rel2 === "father" && rel3 === "father" && rel4 === "mother") return "外高祖母（又稱：外太婆）";
+					if (rel1 === "mother" && rel2 === "mother" && rel3 === "mother" && rel4 === "mother") return "外高祖母（又稱：外太婆）";
                     
                     // 玄孫/玄孫女
                     if (rel1 === "son" && rel2 === "son" && rel3 === "son" && rel4 === "son") return "玄孫";
@@ -1401,6 +1402,7 @@
 					if (rel1 === "son" && rel2 === "son" && rel3 === "daughter" && rel4 === "daughter") return "玄孫女";
 					if (rel1 === "daughter" && rel2 === "son" && rel3 === "son" && rel4 === "daughter") return "外玄孫女";
 					if (rel1 === "daughter" && rel2 === "son" && rel3 === "daughter" && rel4 === "daughter") return "外玄孫女";
+					if (rel1 === "daughter" && rel2 === "daughter" && rel3 === "daughter" && rel4 === "daughter") return "外玄孫女";
                     
                     return `${rel1Info.title}的${rel2Info.title}的${rel3Info.title}的${rel4Info.title}`;
                 }
