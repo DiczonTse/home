@@ -1721,8 +1721,9 @@
 					</optgroup>
 					<optgroup label="🧠資訊">
 						<option value="info">所有資訊</option>
-						<option value="info_article">📰文章資訊</option>
+						<option value="info_live">🎙️直播資訊</option>
 						<option value="info_video">📺影片資訊</option>
+						<option value="info_article">📰文章資訊</option>
 						<option value="info_hk">↳ 粵語資訊</option>
 						<option value="info_pth">↳ 國語資訊</option>
 						<option value="info_jap">↳ 日語資訊</option>
@@ -1730,6 +1731,9 @@
 					</optgroup>
 					<optgroup label="📰新聞">
 						<option value="news">所有新聞</option>
+						<option value="news_live">🎙️直播新聞</option>
+						<option value="news_video">📺影片新聞</option>
+						<option value="news_article">📰文章新聞</option>
 						<option value="news_hk">↳ 粵語新聞</option>
 						<option value="news_pth">↳ 國語新聞</option>
 						<option value="news_eng">↳ 英語新聞</option>
@@ -3046,7 +3050,7 @@
 					"tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "gov", "政府", "정부", "sb", "no login"],
 					"anchor": "Security_Bureau_Tool",
 					"url": "https://www.sb.gov.hk/chi/about/welcome.html",
-					"thumbnail": "https://img.youtube.com/vi/2KSEvo6EbWY/hqdefault.jpg",
+					"thumbnail": "https://img.youtube.com/vi/BgA-j58V4FU/hqdefault.jpg",
 					"dateAdded": "2026-02-22T00:00:00.000Z"
 				},
 				{
@@ -4392,13 +4396,17 @@
 					'vlog_pth': 'pics/diczon_vlog.png',
 					'vlog_eng': 'pics/diczon_vlog.png',
 					'info': 'pics/diczon_info.png',
-					'info_article': 'pics/diczon_info.png',
+					'info_live': 'pics/diczon_info.png',
 					'info_video': 'pics/diczon_info.png',
+					'info_article': 'pics/diczon_info.png',
 					'info_hk': 'pics/diczon_info.png',
 					'info_pth': 'pics/diczon_info.png',
 					'info_jap': 'pics/diczon_info.png',
 					'info_eng': 'pics/diczon_info.png',
 					'news': 'pics/diczon_news.png',
+					'news_live': 'pics/diczon_news.png',
+					'news_video': 'pics/diczon_news.png',
+					'news_article': 'pics/diczon_news.png',
 					'news_hk': 'pics/diczon_news.png',
 					'news_pth': 'pics/diczon_news.png',
 					'news_eng': 'pics/diczon_news.png',
@@ -4468,6 +4476,12 @@
 						matchesFilter = card.tags.includes('bookmark');
 					} else if (selectedFilter === 'news') {
 						matchesFilter = card.category.includes('news');
+					} else if (selectedFilter === 'news_live') {
+						matchesFilter = card.category === 'news' && card.tags.includes('live');
+					} else if (selectedFilter === 'news_video') {
+						matchesFilter = card.category === 'news' && card.tags.includes('video');
+					} else if (selectedFilter === 'news_article') {
+						matchesFilter = card.category === 'news' && card.tags.includes('article');
 					} else if (selectedFilter === 'news_hk') {
 						matchesFilter = card.category === 'news' && card.tags.includes('hk');
 					} else if (selectedFilter === 'news_pth') {
@@ -4485,7 +4499,7 @@
 						matchesFilter = card.category === selectedFilter;
 					}
 
-					if (card.category.includes('news') && !['news', 'news_hk', 'news_pth', 'news_eng'].includes(selectedFilter)) {
+					if (card.category.includes('news') && !['news', 'news_live', 'news_video', 'news_article', 'news_hk', 'news_pth', 'news_eng'].includes(selectedFilter)) {
 						matchesFilter = contentSettings.showNews;
 					}
 
