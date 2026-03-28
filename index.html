@@ -31654,20 +31654,13 @@
 				const domain = 'www.youtube-nocookie.com';
 				
 				if (listId) {
-					// 如果有播放列表
-					if (videoId) {
-						// 有特定影片 ID → 嵌入影片並附帶播放列表
-						iframe.src = `https://${domain}/embed/${videoId}?list=${listId}&${params}`;
-					} else {
-						// 僅播放列表 → 使用 videoseries 路徑
-						iframe.src = `https://${domain}/embed/videoseries?list=${listId}&${params}`;
-					}
+					// For playlists on mobile, force playlist display
+					iframe.src = `https://${domain}/embed/?listType=playlist&list=${listId}&${params}`;
+					
+					// Alternative approach that often works better on mobile
+					// iframe.src = `https://${domain}/embed/videoseries?list=${listId}&${params}&playlist=${listId}`;
 				} else if (videoId) {
-					// 只有單一影片
 					iframe.src = `https://${domain}/embed/${videoId}?${params}`;
-				} else {
-					// 無效 URL
-					return;
 				}
 				
 				modal.style.display = 'block';
