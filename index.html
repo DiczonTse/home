@@ -840,6 +840,51 @@
 				background: rgba(0,0,0,0.5);
 				z-index: 1000;
 			}
+				
+			.youtube-link-container {
+				position: absolute;
+				bottom: 15px;
+				left: 0;
+				right: 0;
+				text-align: center;
+				z-index: 1110;
+				pointer-events: none;
+			}
+			
+			.youtube-direct-link {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+				background: rgba(0,0,0,0.75);
+				backdrop-filter: blur(8px);
+				color: #fff;
+				padding: 8px 18px;
+				border-radius: 40px;
+				font-size: 14px;
+				font-weight: 500;
+				text-decoration: none;
+				border: 1px solid rgba(255,255,255,0.3);
+				transition: all 0.2s ease;
+				pointer-events: auto;
+				box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+			}
+			
+			.youtube-direct-link:hover {
+				background: #ff0000;
+				border-color: #ff0000;
+				transform: scale(1.02);
+			}
+			
+			.youtube-direct-link:active {
+				transform: scale(0.98);
+			}
+			
+			.video-iframe {
+				width: 100%;
+				height: 100%;
+				border: none;
+				border-radius: 12px;
+			}
 
 			.video-modal {
 				display: none;
@@ -1780,6 +1825,11 @@
 					margin: 15% auto;
 				}
 				
+				.youtube-direct-link {
+					padding: 6px 14px;
+					font-size: 12px;
+				}
+				
 				.video-iframe {
 					width: 100%;
 					height: 100%;
@@ -1911,6 +1961,11 @@
 						width: 98%;
 						height: 45%;
 						margin: 20% auto;
+					}
+					
+					.youtube-direct-link {
+						padding: 5px 12px;
+						font-size: 11px;
 					}
 					
 					.video-close-btn {
@@ -2654,6 +2709,11 @@
 				<iframe class="video-iframe" allowfullscreen 
 						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
 				</iframe>
+				<div class="youtube-link-container">
+					<a id="youtubeDirectLink" class="youtube-direct-link" href="#" target="_blank" rel="noopener noreferrer">
+						▶️ 在 YouTube 中打開
+					</a>
+				</div>
 			</div>
 		</div>
 		
@@ -31565,6 +31625,8 @@
 				renderSlideshow();
 				renderRecommended();
 			}
+			
+			
 
 			// Theme management
 			function toggleTheme() {
@@ -31710,6 +31772,48 @@
 					closeBtn.style.right = '-20px';
 				}
 			}
+			
+			function showVideo(url) {
+            const modal = document.getElementById('videoModal');
+            const overlay = document.getElementById('videoModalOverlay');
+            const iframe = modal.querySelector('iframe');
+            const directLink = document.getElementById('youtubeDirectLink');
+            
+            // 解析 URL，保留原始鏈接（包含 playlist 參數）
+            let finalEmbedUrl = '';
+            let originalUrl = url;
+            try {
+                const urlObj = new URL(url);
+                const videoId = urlObj.searchParams.get('v');
+                const listId = urlObj.searchParams.get('list');
+                const params = new URLSearchParams({ autoplay: '1', rel: '0', modestbranding: '1', playsinline: '1', controls: '1', enablejsapi: '1' });
+                if (listId) {
+                    // 播放列表模式：使用播放列表嵌入方式
+                    finalEmbedUrl = `https://www.youtube-nocookie.com/embed/videoseries?list=${listId}&${params.toString()}`;
+                } else if (videoId) {
+                    finalEmbedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?${params.toString()}`;
+                } else {
+                    finalEmbedUrl = `https://www.youtube-nocookie.com/embed/?${params.toString()}`;
+                }
+                // 設定直連連結為原始 YouTube 網址，使用者點擊可到 YouTube 網站完整播放列表
+                directLink.href = originalUrl;
+            } catch(e) {
+                finalEmbedUrl = `https://www.youtube-nocookie.com/embed/?autoplay=1`;
+                directLink.href = url;
+            }
+            
+            iframe.src = finalEmbedUrl;
+            modal.style.display = 'block';
+            overlay.style.display = 'block';
+            
+            // 移動端適配
+            if(/Android|webOS|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                const vc = document.querySelector('.video-container');
+                if(vc) { vc.style.width = '95%'; vc.style.height = '50%'; vc.style.margin = '20% auto'; }
+                const linkBtn = document.querySelector('.youtube-direct-link');
+                if(linkBtn) linkBtn.style.fontSize = '12px';
+            }
+        }
 
 			function closeVideo() {
 				const modal = document.getElementById('videoModal');
