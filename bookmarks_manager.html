@@ -5,6 +5,10 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 		<link rel="icon" href="favicon.ico" type="image/x-icon">
 		<title>🔰網頁書籤管理工具</title>
+		<!--摸魚模式時的標題-->
+		<!--<title>Visual Studio Code</title>-->
+		<!--<title>Microsoft Excel</title>-->
+		<!--<title>Microsoft PowerPoint</title>-->
 		
 		<meta name="description" content="🔰網頁書籤管理工具 (Bookmarks Manager) - 提供書籤管理及篩選功能。迪遜的免費工具平台。">
 		<meta name="keywords" content="☕迪遜咖啡廳, ☕迪逊咖啡厅, ☕ Diczon's Cafe, ☕Diczon's Cafe, 迪遜咖啡廳, 迪逊咖啡厅, Diczon's Cafe, 迪遜, 迪逊, Diczon, 音樂分享, 遊戲預告, 動畫戲劇, 🔰網頁書籤管理工具, 網頁書籤管理工具, 🔰网页书签管理工具, 网页书签管理工具, 網頁書籤, 書籤管理", "bookmark", "bookmarks", "bookmarks manager">
@@ -675,10 +679,10 @@
 			/* Settings button */
 			.settings-btn {
 				position: absolute;
-				left: 120px; /* Positioned left of help button */
+				right: 120px;
 				top: 50%;
 				transform: translateY(-50%);
-				background: var(--utility-bg);
+				background: var(--version-btn-bg);
 				color: white;
 				border: none;
 				border-radius: 20px;
@@ -693,7 +697,7 @@
 			}
 
 			.settings-btn:hover {
-				background: #1565C0;
+				background: var(--button-hover);
 			}
 
 			/* Settings content */
@@ -814,6 +818,51 @@
 				background: rgba(0,0,0,0.5);
 				z-index: 1000;
 			}
+				
+			.youtube-link-container {
+				position: absolute;
+				bottom: 15px;
+				left: 0;
+				right: 0;
+				text-align: center;
+				z-index: 1110;
+				pointer-events: none;
+			}
+			
+			.youtube-direct-link {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+				background: rgba(0,0,0,0.75);
+				backdrop-filter: blur(8px);
+				color: #fff;
+				padding: 8px 18px;
+				border-radius: 40px;
+				font-size: 14px;
+				font-weight: 500;
+				text-decoration: none;
+				border: 1px solid rgba(255,255,255,0.3);
+				transition: all 0.2s ease;
+				pointer-events: auto;
+				box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+			}
+			
+			.youtube-direct-link:hover {
+				background: #ff0000;
+				border-color: #ff0000;
+				transform: scale(1.02);
+			}
+			
+			.youtube-direct-link:active {
+				transform: scale(0.98);
+			}
+			
+			.video-iframe {
+				width: 100%;
+				height: 100%;
+				border: none;
+				border-radius: 12px;
+			}
 
 			.video-modal {
 				display: none;
@@ -823,16 +872,21 @@
 				width: 100%;
 				height: 100%;
 				background: rgba(0,0,0,0.9);
-				z-index: 1000;
+				z-index: 1100;
+				align-items: center;
+				justify-content: center;
+			}
+			
+			.video-modal[style*="display: block"] {
+				display: flex !important;
 			}
 
 			.video-container {
 				position: relative;
 				width: 80%;
 				height: 80%;
-				margin: 5% auto;
 				background: var(--modal-bg);
-				border-radius: 8px;
+				border-radius: 12px;
 				transition: background-color 0.3s ease;
 			}
 
@@ -840,7 +894,7 @@
 				width: 100%;
 				height: 100%;
 				border: none;
-				border-radius: 8px;
+				border-radius: 12px;
 			}
 
 			.video-close-btn {
@@ -854,7 +908,7 @@
 				border-radius: 50%;
 				color: white;
 				cursor: pointer;
-				z-index: 1002;
+				z-index: 1101;
 				display: flex;
 				align-items: center;
 				justify-content: center;
@@ -1357,6 +1411,313 @@
 			.download-btn:hover {
 				background: #1565C0;
 			}
+			
+			/* 摸魚模式樣式 */
+			.stealth-mode-overlay {
+				display: none;
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: #1e1e1e;
+				z-index: 9999;
+				font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+				color: #cccccc;
+				overflow: hidden;
+			}
+
+			.stealth-mode-header {
+				background: #2d2d30;
+				padding: 8px 15px;
+				display: flex;
+				align-items: center;
+				border-bottom: 1px solid #3e3e42;
+			}
+
+			.stealth-mode-menu {
+				display: flex;
+				gap: 15px;
+				margin-left: 20px;
+			}
+
+			.stealth-mode-menu-item {
+				padding: 5px 10px;
+				cursor: pointer;
+				border-radius: 3px;
+				transition: background 0.2s;
+			}
+
+			.stealth-mode-menu-item:hover {
+				background: #3e3e42;
+			}
+
+			.stealth-mode-content {
+				display: flex;
+				height: calc(100vh - 40px);
+			}
+
+			.stealth-mode-sidebar {
+				width: 250px;
+				background: #333337;
+				border-right: 1px solid #3e3e42;
+				padding: 10px;
+			}
+
+			.stealth-mode-explorer {
+				font-size: 12px;
+			}
+
+			.stealth-mode-explorer-title {
+				font-weight: bold;
+				margin-bottom: 10px;
+				text-transform: uppercase;
+				font-size: 11px;
+				color: #888;
+			}
+
+			.stealth-mode-folder {
+				margin: 5px 0;
+				cursor: pointer;
+			}
+
+			.stealth-mode-folder-name {
+				padding: 3px 5px;
+				border-radius: 3px;
+				transition: background 0.2s;
+			}
+
+			.stealth-mode-folder-name:hover {
+				background: #2a2d2e;
+			}
+
+			.stealth-mode-files {
+				margin-left: 15px;
+			}
+
+			.stealth-mode-file {
+				padding: 3px 5px;
+				border-radius: 3px;
+				cursor: pointer;
+				transition: background 0.2s;
+			}
+
+			.stealth-mode-file:hover {
+				background: #2a2d2e;
+			}
+
+			.stealth-mode-file.active {
+				background: #094771;
+			}
+
+			.stealth-mode-editor {
+				flex: 1;
+				padding: 20px;
+				background: #1e1e1e;
+				overflow: auto;
+			}
+
+			.stealth-mode-code {
+				font-family: 'Courier New', monospace;
+				font-size: 14px;
+				line-height: 1.5;
+				color: #d4d4d4;
+			}
+
+			.stealth-mode-line-number {
+				color: #6e7681;
+				display: inline-block;
+				width: 40px;
+				text-align: right;
+				margin-right: 15px;
+				user-select: none;
+			}
+
+			.stealth-mode-keyword {
+				color: #569cd6;
+			}
+
+			.stealth-mode-function {
+				color: #dcdcaa;
+			}
+
+			.stealth-mode-string {
+				color: #ce9178;
+			}
+
+			.stealth-mode-comment {
+				color: #6a9955;
+			}
+
+			.stealth-mode-var {
+				color: #9cdcfe;
+			}
+
+			.stealth-mode-close-btn {
+				position: absolute;
+				top: 10px;
+				right: 10px;
+				background: #da3636;
+				color: white;
+				border: none;
+				border-radius: 3px;
+				padding: 5px 10px;
+				cursor: pointer;
+				z-index: 10000;
+			}
+
+			.stealth-mode-close-btn:hover {
+				background: #f14c4c;
+			}
+
+			/* Excel 樣式 */
+			.excel-mode {
+				background: white;
+				color: black;
+			}
+
+			.excel-mode .stealth-mode-header {
+				background: #f3f3f3;
+				color: black;
+				border-bottom: 1px solid #d0d0d0;
+			}
+
+			.excel-mode .stealth-mode-content {
+				background: white;
+			}
+
+			.excel-mode .stealth-mode-sidebar {
+				background: #f8f8f8;
+				color: black;
+				border-right: 1px solid #d0d0d0;
+			}
+
+			.excel-grid {
+				width: 100%;
+				border-collapse: collapse;
+			}
+
+			.excel-grid th, .excel-grid td {
+				border: 1px solid #d0d0d0;
+				padding: 5px 10px;
+				min-width: 80px;
+				height: 25px;
+				font-size: 12px;
+			}
+
+			.excel-grid th {
+				background: #f0f0f0;
+				font-weight: bold;
+			}
+
+			.excel-grid .selected {
+				background: #d0e8ff;
+			}
+
+			/* PowerPoint 樣式 */
+			.powerpoint-mode {
+				background: #f6f6f6;
+				color: black;
+			}
+
+			.powerpoint-mode .stealth-mode-header {
+				background: #e6e6e6;
+				color: black;
+				border-bottom: 1px solid #d0d0d0;
+			}
+
+			.powerpoint-slide {
+				width: 80%;
+				height: 70%;
+				background: white;
+				margin: 50px auto;
+				border-radius: 5px;
+				box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+				display: flex;
+				flex-direction: column;
+				overflow: hidden;
+			}
+
+			.powerpoint-title {
+				background: #2e75b6;
+				color: white;
+				padding: 30px;
+				font-size: 32px;
+				font-weight: bold;
+			}
+
+			.powerpoint-content {
+				padding: 40px;
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+			}
+
+			.powerpoint-subtitle {
+				font-size: 24px;
+				color: #2e75b6;
+				margin-bottom: 20px;
+			}
+
+			.powerpoint-bullets {
+				font-size: 18px;
+				line-height: 1.6;
+			}
+
+			.powerpoint-bullets li {
+				margin-bottom: 10px;
+			}
+
+			/* 摸魚模式按鈕 */
+			.stealth-btn {
+				position: absolute;
+				left: 120px;
+				top: 50%;
+				transform: translateY(-50%);
+				background: var(--utility-bg);
+				color: white;
+				border: none;
+				border-radius: 50%;
+				width: 40px;
+				height: 40px;
+				font-size: 18px;
+				cursor: pointer;
+				z-index: 1001;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				box-shadow: 0 2px 4px var(--shadow-color);
+				transition: background-color 0.3s ease;
+			}
+
+			.stealth-btn:hover {
+				background: #1565C0;
+			}
+			
+			/* Hit Counter Styles */
+				.hit-counter {
+					display: inline-flex;
+					align-items: center;
+					justify-content: center;
+					background: var(--button-bg);
+					color: white;
+					padding: 4px 10px;
+					border-radius: 20px;
+					font-size: 0.85em;
+					margin-left: 15px;
+					box-shadow: 0 2px 4px var(--shadow-color);
+					transition: all 0.3s ease;
+				}
+
+				.hit-counter:hover {
+					transform: scale(1.05);
+					box-shadow: 0 4px 8px var(--shadow-color);
+				}
+
+				.hit-counter-icon {
+					margin-right: 5px;
+				}
 
 			/* Mobile responsive adjustments */
 			@media (max-width: 768px) {
@@ -1399,8 +1760,18 @@
 					height: 36px;
 				}
 				
-				.settings-btn {
+				.stealth-btn {
 					left: 102px;
+					width: 36px;
+					height: 36px;
+				}
+
+				.stealth-mode-sidebar {
+					width: 200px;
+				}
+				
+				.settings-btn {
+					right: 102px;
 					width: 36px;
 					height: 36px;
 					font-size: 18px;
@@ -1433,8 +1804,13 @@
 
 				.video-container {
 					width: 95%;
-					height: 60%;
-					margin: 15% auto;
+					height: 55%;
+					margin: 20% auto;
+				}
+				
+				.youtube-direct-link {
+					padding: 6px 14px;
+					font-size: 12px;
 				}
 				
 				.video-iframe {
@@ -1452,6 +1828,12 @@
 					width: 30px;
 					height: 30px;
 					font-size: 16px;
+				}
+				
+				.hit-counter {
+					padding: 3px 8px;
+					font-size: 0.75em;
+					margin-left: 10px;
 				}
 
 				@media (max-width: 480px) {
@@ -1498,8 +1880,29 @@
 						font-size: 18px;
 					}
 					
-					.settings-btn {
+					.stealth-btn {
 						left: 94px;
+						width: 32px;
+						height: 32px;
+						font-size: 16px;
+					}
+
+					.stealth-mode-sidebar {
+						width: 150px;
+					}
+
+					.stealth-mode-menu {
+						gap: 10px;
+						margin-left: 10px;
+					}
+
+					.stealth-mode-menu-item {
+						padding: 3px 6px;
+						font-size: 12px;
+					}
+					
+					.settings-btn {
+						right: 94px;
 						width: 32px;
 						height: 32px;
 						font-size: 18px;
@@ -1538,9 +1941,13 @@
 					}
 
 					.video-container {
-						width: 98%;
 						height: 45%;
-						margin: 20% auto;
+						margin: 25% auto;
+					}
+					
+					.youtube-direct-link {
+						padding: 5px 12px;
+						font-size: 11px;
 					}
 					
 					.video-close-btn {
@@ -1549,6 +1956,11 @@
 						width: 35px;
 						height: 35px;
 						font-size: 20px;
+					}
+					.hit-counter {
+						padding: 2px 6px;
+						font-size: 0.7em;
+						margin-left: 8px;
 					}
 				}
 			}
@@ -1562,7 +1974,212 @@
 			<button class="help-btn" onclick="showHelpModal()">❓</button>
 			<a class="version-btn" href="history.html" target="_self" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">💡</a>
 		</header>
+		
+		<!-- 摸魚模式模態框 -->
+		<div class="modal-overlay" id="stealthModeModalOverlay" onclick="closeStealthModeModal()"></div>
+		<div class="modal" id="stealthModeModal" style="max-width: 600px;">
+			<h2>🐟摸魚模式設置</h2>
+			<div class="settings-content">
+				<div class="setting-item">
+					<label class="switch">
+						<input type="checkbox" id="enableStealthMode" onchange="toggleStealthMode()">
+						<span class="slider"></span>
+					</label>
+					<span class="setting-label">啟用摸魚模式</span>
+				</div>
+				<div class="setting-item">
+					<label class="setting-label">偽裝類型:</label>
+					<select id="stealthType" onchange="updateStealthMode()" style="margin-left: 15px; padding: 5px; background: var(--card-bg); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 4px;">
+						<option value="vscode">Visual Studio Code</option>
+						<option value="excel">Microsoft Excel</option>
+						<option value="powerpoint">Microsoft PowerPoint</option>
+					</select>
+				</div>
+				<div class="setting-item">
+					<label class="setting-label">快捷鍵:</label>
+					<span class="setting-label" style="margin-left: 15px; color: var(--text-color); opacity: 0.8;">Ctrl+Shift+S (開啟/關閉)</span>
+				</div>
+				<div class="help-content">
+					<p><strong>使用說明:</strong></p>
+					<p>• 啟用後網頁會偽裝成工作軟體界面</p>
+					<p>• 點擊右上角 ❌ 按鈕或按 ESC 鍵可退出</p>
+					<p>• 實際功能仍然可用，只是界面偽裝</p>
+				</div>
+			</div>
+		</div>
 
+		<!-- 摸魚模式覆蓋層 -->
+		<div class="stealth-mode-overlay" id="stealthModeOverlay">
+			<button class="stealth-mode-close-btn" onclick="disableStealthMode()">❌</button>
+			
+			<!-- VS Code 界面 -->
+			<div id="vscodeInterface" class="stealth-mode-interface">
+				<div class="stealth-mode-header">
+					<div>File</div>
+					<div class="stealth-mode-menu">
+						<div class="stealth-mode-menu-item">Edit</div>
+						<div class="stealth-mode-menu-item">Selection</div>
+						<div class="stealth-mode-menu-item">View</div>
+						<div class="stealth-mode-menu-item">Go</div>
+						<div class="stealth-mode-menu-item">Run</div>
+						<div class="stealth-mode-menu-item">Terminal</div>
+						<div class="stealth-mode-menu-item">Help</div>
+					</div>
+				</div>
+				<div class="stealth-mode-content">
+					<div class="stealth-mode-sidebar">
+						<div class="stealth-mode-explorer">
+							<div class="stealth-mode-explorer-title">Explorer</div>
+							<div class="stealth-mode-folder">
+								<div class="stealth-mode-folder-name">project-name</div>
+								<div class="stealth-mode-files">
+									<div class="stealth-mode-file active">index.js</div>
+									<div class="stealth-mode-file">styles.css</div>
+									<div class="stealth-mode-file">utils.js</div>
+									<div class="stealth-mode-file">package.json</div>
+								</div>
+							</div>
+							<div class="stealth-mode-folder">
+								<div class="stealth-mode-folder-name">src</div>
+								<div class="stealth-mode-files">
+									<div class="stealth-mode-file">components</div>
+									<div class="stealth-mode-file">services</div>
+									<div class="stealth-mode-file">constants.js</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="stealth-mode-editor">
+						<div class="stealth-mode-code">
+							<div><span class="stealth-mode-line-number">1</span> <span class="stealth-mode-keyword">const</span> <span class="stealth-mode-var">express</span> = <span class="stealth-mode-function">require</span>(<span class="stealth-mode-string">'express'</span>);</div>
+							<div><span class="stealth-mode-line-number">2</span> <span class="stealth-mode-keyword">const</span> <span class="stealth-mode-var">app</span> = <span class="stealth-mode-function">express</span>();</div>
+							<div><span class="stealth-mode-line-number">3</span> </div>
+							<div><span class="stealth-mode-line-number">4</span> <span class="stealth-mode-comment">// Server configuration</span></div>
+							<div><span class="stealth-mode-line-number">5</span> <span class="stealth-mode-var">app</span>.<span class="stealth-mode-function">use</span>(<span class="stealth-mode-function">express</span>.<span class="stealth-mode-function">json</span>());</div>
+							<div><span class="stealth-mode-line-number">6</span> </div>
+							<div><span class="stealth-mode-line-number">7</span> <span class="stealth-mode-keyword">const</span> <span class="stealth-mode-var">PORT</span> = <span class="stealth-mode-function">process</span>.<span class="stealth-mode-var">env</span>.<span class="stealth-mode-var">PORT</span> || <span class="stealth-mode-string">3000</span>;</div>
+							<div><span class="stealth-mode-line-number">8</span> </div>
+							<div><span class="stealth-mode-line-number">9</span> <span class="stealth-mode-var">app</span>.<span class="stealth-mode-function">get</span>(<span class="stealth-mode-string">'/'</span>, (<span class="stealth-mode-var">req</span>, <span class="stealth-mode-var">res</span>) => {</div>
+							<div><span class="stealth-mode-line-number">10</span> &nbsp;&nbsp;&nbsp;&nbsp;<span class="stealth-mode-var">res</span>.<span class="stealth-mode-function">send</span>(<span class="stealth-mode-string">'Hello World!'</span>);</div>
+							<div><span class="stealth-mode-line-number">11</span> });</div>
+							<div><span class="stealth-mode-line-number">12</span> </div>
+							<div><span class="stealth-mode-line-number">13</span> <span class="stealth-mode-var">app</span>.<span class="stealth-mode-function">listen</span>(<span class="stealth-mode-var">PORT</span>, () => {</div>
+							<div><span class="stealth-mode-line-number">14</span> &nbsp;&nbsp;&nbsp;&nbsp;<span class="stealth-mode-function">console</span>.<span class="stealth-mode-function">log</span>(<span class="stealth-mode-string">`Server running on port <span class="stealth-mode-string">${</span><span class="stealth-mode-var">PORT</span><span class="stealth-mode-string">}</span>`</span>);</div>
+							<div><span class="stealth-mode-line-number">15</span> });</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Excel 界面 -->
+			<div id="excelInterface" class="stealth-mode-interface excel-mode" style="display: none;">
+				<div class="stealth-mode-header">
+					<div>File</div>
+					<div class="stealth-mode-menu">
+						<div class="stealth-mode-menu-item">Home</div>
+						<div class="stealth-mode-menu-item">Insert</div>
+						<div class="stealth-mode-menu-item">Page Layout</div>
+						<div class="stealth-mode-menu-item">Formulas</div>
+						<div class="stealth-mode-menu-item">Data</div>
+						<div class="stealth-mode-menu-item">Review</div>
+						<div class="stealth-mode-menu-item">View</div>
+					</div>
+				</div>
+				<div class="stealth-mode-content">
+					<table class="excel-grid">
+						<tr>
+							<th></th>
+							<th>A</th>
+							<th>B</th>
+							<th>C</th>
+							<th>D</th>
+							<th>E</th>
+						</tr>
+						<tr>
+							<th>1</th>
+							<td class="selected">Project Budget</td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+						<tr>
+							<th>2</th>
+							<td></td>
+							<td>Q1</td>
+							<td>Q2</td>
+							<td>Q3</td>
+							<td>Q4</td>
+						</tr>
+						<tr>
+							<th>3</th>
+							<td>Development</td>
+							<td>$15,000</td>
+							<td>$12,000</td>
+							<td>$10,000</td>
+							<td>$8,000</td>
+						</tr>
+						<tr>
+							<th>4</th>
+							<td>Marketing</td>
+							<td>$5,000</td>
+							<td>$7,000</td>
+							<td>$6,000</td>
+							<td>$4,000</td>
+						</tr>
+						<tr>
+							<th>5</th>
+							<td>Operations</td>
+							<td>$3,000</td>
+							<td>$3,500</td>
+							<td>$3,200</td>
+							<td>$3,000</td>
+						</tr>
+						<tr>
+							<th>6</th>
+							<td><strong>Total</strong></td>
+							<td><strong>$23,000</strong></td>
+							<td><strong>$22,500</strong></td>
+							<td><strong>$19,200</strong></td>
+							<td><strong>$15,000</strong></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+
+			<!-- PowerPoint 界面 -->
+			<div id="powerpointInterface" class="stealth-mode-interface powerpoint-mode" style="display: none;">
+				<div class="stealth-mode-header">
+					<div>File</div>
+					<div class="stealth-mode-menu">
+						<div class="stealth-mode-menu-item">Home</div>
+						<div class="stealth-mode-menu-item">Insert</div>
+						<div class="stealth-mode-menu-item">Design</div>
+						<div class="stealth-mode-menu-item">Transitions</div>
+						<div class="stealth-mode-menu-item">Animations</div>
+						<div class="stealth-mode-menu-item">Slide Show</div>
+						<div class="stealth-mode-menu-item">Review</div>
+						<div class="stealth-mode-menu-item">View</div>
+					</div>
+				</div>
+				<div class="stealth-mode-content">
+					<div class="powerpoint-slide">
+						<div class="powerpoint-title">Quarterly Business Review</div>
+						<div class="powerpoint-content">
+							<div class="powerpoint-subtitle">Q4 Performance Highlights</div>
+							<ul class="powerpoint-bullets">
+								<li>Revenue growth: 15% increase YoY</li>
+								<li>Customer acquisition: 2,500 new clients</li>
+								<li>Product launches: 3 new features deployed</li>
+								<li>Team expansion: 12 new hires</li>
+								<li>Market share: 5% growth in target segments</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
 		<div class="search-container">
 			<input type="text" id="search" placeholder="🔍音樂/歌曲/動畫/戲劇/電影/預告/漫畫/小說/人工智能/工具/教學/即時遊戲/遊戲攻略/遊戲紀錄/影片網誌/資訊/新聞……">
 			<div class="filter-container">
@@ -1692,22 +2309,28 @@
 						<option value="game_dos">💻DOS</option>
 						<option value="game_nes">🎮紅白機</option>
 						<option value="game_rpg">🧜角色扮演</option>
-						<option value="game_action">🏃動作</option>
+						<option value="game_action">👊動作</option>
 						<option value="game_shooting">🔫射擊</option>
 						<option value="game_horizontally scrolling">👉橫向捲軸</option>
 						<option value="game_vertically scrolling">👆縱向捲軸</option>
 						<option value="game_survival">🍞生存</option>
 						<option value="game_racing">🚗競速</option>
+						<option value="game_endless runner">🏃無盡跑酷</option>
 						<option value="game_turn">♻️回合制</option>
 						<option value="game_rts">⌛即時策略</option>
+						<option value="game_board">♟️戰棋</option>
+						<option value="game_card">🃏卡牌</option>
 						<option value="game_puzzle">🧩益智</option>
 						<option value="game_match">💥消除</option>
-						<option value="game_casual">🏕️休閒</option>
 						<option value="game_tycoon">💵經營</option>
+						<option value="game_pinball machine">🔮彈珠台</option>
 						<option value="game_sport">🏊運動</option>
 						<option value="game_nurture">🐶育成</option>
+						<option value="game_idle">😴放置</option>
+						<option value="game_casual">🏕️休閒</option>
 						<option value="game_gamble">🎰賭博</option>
 						<option value="game_horror">👻恐怖</option>
+						<option value="game_escape room">🔐密室逃脫</option>
 					</optgroup>
 					<option value="walkthrough">🎯遊戲攻略</option>
 					<optgroup label="🕹️遊戲紀錄">
@@ -1759,9 +2382,6 @@
 					<option value="youtube_thumbnails">📥YouTube 預覽圖下載</option>
 					<option value="timer">⏲️計時器</option>
 					<option value="stopper">⏱️秒錶</option>
-					<optgroup label="🎮小遊戲">
-						<option value="">↳ 敬請期待</option>
-					</optgroup>
 				</select>
 			</div>
 		</div>
@@ -1948,9 +2568,6 @@
 				</div>
 			</div>
 		</div>
-
-		<!-- Version History Modal -->
-		<div class="modal-overlay" id="versionModalOverlay" onclick="closeVersionModal()"></div>
 		
 		<!-- Help Modal -->
 		<div class="modal-overlay" id="helpModalOverlay" onclick="closeHelpModal()"></div>
@@ -2030,6 +2647,11 @@
 				<iframe class="video-iframe" allowfullscreen 
 						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
 				</iframe>
+				<div class="youtube-link-container">
+					<a id="youtubeDirectLink" class="youtube-direct-link" href="#" target="_blank" rel="noopener noreferrer">
+						▶️ 在 YouTube 中打開
+					</a>
+				</div>
 			</div>
 		</div>
 		
@@ -2550,6 +3172,21 @@
 					"dateAdded": "2025-04-20T00:00:00.000Z"
 				},
 				{
+					"title": "網絡安全資訊站",
+					"trd_chi": "網絡安全資訊站",
+					"sim_chi": "网络安全资讯站",
+					"eng": "Cybersecurity Information Portal",
+					"jap": "サイバーセキュリティ情報サイト",
+					"kor": "사이버보안 정보 사이트",
+					"icon": "🛡️",
+					"category": "tool",
+					"tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "gov", "政府", "정부", "dpo", "digital policy office", "數字政策辦公室", "數字辦", "数字政策办公室", "数字办", "no login"],
+					"anchor": "Cybersecurity_Information_Portal_Tool",
+					"url": "https://www.cybersecurity.hk/tc/index.php",
+					"thumbnail": "https://img.youtube.com/vi/aSBGsOQGqNk/0.jpg",
+					"dateAdded": "2026-03-25T00:00:00.000Z"
+				},
+				{
 					"title": "香港政府一站通",
 					"trd_chi": "香港政府一站通",
 					"sim_chi": "香港政府一站通",
@@ -2595,19 +3232,64 @@
 					"dateAdded": "2026-03-05T00:00:00.000Z"
 				},
 				{
+					"title": "中電集團",
+					"trd_chi": "中電集團",
+					"sim_chi": "中电集团",
+					"eng": "CLP Group",
+					"jap": "CLPホールディングス",
+					"kor": "CLP 파워",
+					"icon": "⚡️",
+					"category": "tool",
+					"tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "china light & power company syndicate", "中華電力有限公司", "中電", "中华电力有限公司", "中电", "シーエルピーホールディングス", "login"],
+					"anchor": "CLP_Group_Tool",
+					"url": "https://www.clp.com.hk/zh/index",
+					"thumbnail": "https://img.youtube.com/vi/Yud0VP16u8o/0.jpg",
+					"dateAdded": "2026-03-24T00:00:00.000Z"
+				},
+				{
+					"title": "香港電燈有限公司",
+					"trd_chi": "香港電燈有限公司",
+					"sim_chi": "香港电灯有限公司",
+					"eng": "The Hongkong Electric Company, Limited",
+					"jap": "香港電気有限公司",
+					"kor": "홍콩 전기 유한회사",
+					"icon": "⚡️",
+					"category": "tool",
+					"tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "hec", "港燈", "港灯", "login"],
+					"anchor": "The_Hongkong_Electric_Company_Limited_Tool",
+					"url": "https://www.hkelectric.com/zh/",
+					"thumbnail": "https://img.youtube.com/vi/zGecz20Ozd4/0.jpg",
+					"dateAdded": "2026-03-25T00:00:00.000Z"
+				},
+				{
 					"title": "報讀煤氣錶度數",
 					"trd_chi": "報讀煤氣錶度數",
 					"sim_chi": "报读煤气表度数",
 					"eng": "Report Meter Readings",
-					"jap": "ガスメーターの目盛りを読み取ってください。",
-					"kor": "가스 계량기를읽으세요.",
+					"jap": "ガスメーターの目盛りを読み取ってください",
+					"kor": "가스 계량기를읽으세요",
 					"icon": "🔥",
 					"category": "tool",
-					"tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "gov", "政府", "정부", "報錶", "报表", "login"],
+					"tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "the hong kong and china gas company limited", "香港中華煤氣有限公司", "煤氣公司", "香港中华煤气有限公司", "煤气公司", "報錶", "报表", "login"],
 					"anchor": "Report_Meter_Readings_Tool",
 					"url": "https://eservice.towngas.com/zh-hk/SelfService/ReportMeterReading",
 					"thumbnail": "https://img.youtube.com/vi/KtK0dEfIuM4/0.jpg",
 					"dateAdded": "2026-03-18T00:00:00.000Z"
+				},
+				{
+					"title": "香港中華煤氣有限公司",
+					"trd_chi": "香港中華煤氣有限公司",
+					"sim_chi": "香港中华煤气有限公司",
+					"eng": "The Hong Kong and China Gas Company Limited",
+					"jap": "香港中華ガス",
+					"kor": "홍콩 및 중국 가스 유한회사",
+					"icon": "🔥",
+					"category": "tool",
+					"tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "煤氣公司", "煤气公司", "ホンコンちゅうかガス", "login"],
+					"anchor": "The_Hong_Kong_and_China_Gas_Company_Limited_Tool",
+					"url": "https://www.towngas.com/tc",
+					"thumbnail": "https://img.youtube.com/vi/gP2aJ8fVvCE/0.jpg",
+					"dateAdded": "2026-03-24T00:00:00.000Z"
 				},
 				{
 					"title": "勞工處互動就業服務",
@@ -2775,21 +3457,6 @@
 					"dateAdded": "2026-02-23T00:00:00.000Z"
 				},
 				{
-					"title": "香港特別行政區政府檔案管理的行政指引",
-					"trd_chi": "香港特別行政區政府檔案管理的行政指引",
-					"sim_chi": "香港特别行政区政府档案管理的行政指引",
-					"eng": "Guidelines on records management in the Government",
-					"jap": "香港特別行政区政府による記録管理に関する行政ガイドライン",
-					"kor": "홍콩 특별행정구 정부의 기록 관리 행정 지침",
-					"icon": "🗂️",
-					"category": "tool",
-					"tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "gov", "政府", "정부", "aw", "grs", "login"],
-					"anchor": "Guidelines_on_records_management_in_the_Government_Tool",
-					"url": "https://www.grs.gov.hk/tc/hksar_government_administrative_guidelines_on_record_management.html",
-					"thumbnail": "https://img.youtube.com/vi/Y360stcBmNQ/0.jpg",
-					"dateAdded": "2026-02-26T00:00:00.000Z"
-				},
-				{
 					"title": "電子辭彙",
 					"trd_chi": "電子辭彙",
 					"sim_chi": "电子辞汇",
@@ -2848,6 +3515,21 @@
 					"url": "https://www.taipofire.gov.hk/chi/press.html",
 					"thumbnail": "https://img.youtube.com/vi/TQAEBU5QGjo/hqdefault.jpg",
 					"dateAdded": "2026-02-23T00:00:00.000Z"
+				},
+				{
+					"title": "BMI 計算機",
+					"trd_chi": "BMI 計算機",
+					"sim_chi": "BMI 计算机",
+					"eng": "BMI Calculator",
+					"jap": "BMI計算機",
+					"kor": "BMI 계산기",
+					"icon": "🧮",
+					"category": "tool",
+					"tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "gov", "政府", "정부", "dh", "body mass index", "no login"],
+					"anchor": "BMI_Calculator_Tool",
+					"url": "https://www.change4health.gov.hk/tc/weight_management/index.html",
+					"thumbnail": "https://img.youtube.com/vi/NJiw11hIKKM/0.jpg",
+					"dateAdded": "2026-03-24T00:00:00.000Z"
 				},
 				{
 					"title": "衞生防護中心",
@@ -2910,6 +3592,21 @@
 					"dateAdded": "2026-02-19T00:00:00.000Z"
 				},
 				{
+					"title": "健康飲食在校園",
+					"trd_chi": "健康飲食在校園",
+					"sim_chi": "健康饮食在校园",
+					"eng": "EatSmart@School.hk",
+					"jap": "キャンパス内での健康的な食事",
+					"kor": "캠퍼스 내 건강한 식생활",
+					"icon": "🍲",
+					"category": "tool",
+					"tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "gov", "政府", "정부", "dh", "essas", "eatsmart school accreditation scheme", "至營學校認證計劃", "至营学校认证计划", "no login"],
+					"anchor": "EatSmart_At_School_hk_Tool",
+					"url": "https://school.eatsmart.gov.hk/b5/index.aspx",
+					"thumbnail": "https://img.youtube.com/vi/a8EiX05HREk/0.jpg",
+					"dateAdded": "2026-03-26T00:00:00.000Z"
+				},
+				{
 					"title": "長者健康服務",
 					"trd_chi": "長者健康服務",
 					"sim_chi": "长者健康服务",
@@ -2923,6 +3620,21 @@
 					"url": "https://www.elderly.gov.hk/cindex.html",
 					"thumbnail": "https://img.youtube.com/vi/VJirnH6dqxk/0.jpg",
 					"dateAdded": "2026-03-16T00:00:00.000Z"
+				},
+				{
+					"title": "家庭健康服務",
+					"trd_chi": "家庭健康服務",
+					"sim_chi": "家庭健康服务",
+					"eng": "Family Health Service",
+					"jap": "家族向け医療サービス",
+					"kor": "가족 건강 서비스",
+					"icon": "🤱",
+					"category": "tool",
+					"tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "gov", "政府", "정부", "dh", "fhs", "no login"],
+					"anchor": "Family_Health_Service_Tool",
+					"url": "https://www.fhs.gov.hk/tc_chi/",
+					"thumbnail": "https://img.youtube.com/vi/Nj2YIIgFxOw/0.jpg",
+					"dateAdded": "2026-03-23T00:00:00.000Z"
 				},
 				{
 					"title": "公司註冊處電子服務(香港)",
@@ -3163,6 +3875,21 @@
 					"url": "https://www.hkfsd.gov.hk/chi/index.html",
 					"thumbnail": "https://img.youtube.com/vi/7M6kdisODGM/hqdefault.jpg",
 					"dateAdded": "2026-03-06T00:00:00.000Z"
+				},
+				{
+					"title": "民眾安全服務隊",
+					"trd_chi": "民眾安全服務隊",
+					"sim_chi": "民众安全服务队",
+					"eng": "Civil Aid Service",
+					"jap": "民衆安全服務隊",
+					"kor": "홍콩 민간방위대",
+					"icon": "👨‍✈️",
+					"category": "tool",
+					"tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "gov", "政府", "정부", "sb", "security bureau", "保安局", "cas", "民安隊", "民安队", "みんしゅうあんぜんふくむたい", "no login"],
+					"anchor": "Civil_Aid_Service_Tool",
+					"url": "https://www.cas.gov.hk/chi/home/home.html",
+					"thumbnail": "https://img.youtube.com/vi/vSL77zXcVv0/hqdefault.jpg",
+					"dateAdded": "2026-03-23T00:00:00.000Z"
 				},
 				{
 					"title": "香港海關",
@@ -3540,6 +4267,21 @@
 					"dateAdded": "2026-03-01T00:00:00.000Z"
 				},
 				{
+					"title": "機電工程署",
+					"trd_chi": "機電工程署",
+					"sim_chi": "机电工程署",
+					"eng": "Electrical and Mechanical Services Department",
+					"jap": "電気・機械設備部門",
+					"kor": "전기 및 기계 설비 부서",
+					"icon": "👨‍🔧",
+					"category": "tool",
+					"tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "gov", "政府", "정부", "devb", "development bureau", "發展局", "发展局", "emsd", "機電署", "机电署", "no login"],
+					"anchor": "Electrical_and_Mechanical_Services_Department_Tool",
+					"url": "https://www.emsd.gov.hk/tc/home/index.html",
+					"thumbnail": "https://img.youtube.com/vi/0Xy6L47HqXQ/0.jpg",
+					"dateAdded": "2026-03-23T00:00:00.000Z"
+				},
+				{
 					"title": "渠務署",
 					"trd_chi": "渠務署",
 					"sim_chi": "渠务署",
@@ -3613,6 +4355,36 @@
 					"url": "https://www.csb.gov.hk/tc_chi/otherinfo/links/565.html",
 					"thumbnail": "https://img.youtube.com/vi/Z0mfxBUyWgg/0.jpg",
 					"dateAdded": "2026-02-27T00:00:00.000Z"
+				},
+				{
+					"title": "香港特別行政區政府檔案管理的行政指引",
+					"trd_chi": "香港特別行政區政府檔案管理的行政指引",
+					"sim_chi": "香港特别行政区政府档案管理的行政指引",
+					"eng": "Guidelines on records management in the Government",
+					"jap": "香港特別行政区政府による記録管理に関する行政ガイドライン",
+					"kor": "홍콩 특별행정구 정부의 기록 관리 행정 지침",
+					"icon": "🗂️",
+					"category": "tool",
+					"tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "gov", "政府", "정부", "aw", "grs", "login"],
+					"anchor": "Guidelines_on_records_management_in_the_Government_Tool",
+					"url": "https://www.grs.gov.hk/tc/hksar_government_administrative_guidelines_on_record_management.html",
+					"thumbnail": "https://img.youtube.com/vi/Y360stcBmNQ/0.jpg",
+					"dateAdded": "2026-02-26T00:00:00.000Z"
+				},
+				{
+					"title": "香港家庭計劃指導會",
+					"trd_chi": "香港家庭計劃指導會",
+					"sim_chi": "香港家庭计划指导会",
+					"eng": "The Family Planning Association of Hong Kong",
+					"jap": "香港家族計画協会",
+					"kor": "홍콩 가족계획협회",
+					"icon": "👨‍👨‍👦‍👦",
+					"category": "tool",
+					"tags": ["tool", "工具", "道具", "ツール", "도구", "용구", "fpahk", "家計會", "家计会", "no login"],
+					"anchor": "The_Family_Planning_Association_of_Hong_Kong_Tool",
+					"url": "https://www.famplan.org.hk/",
+					"thumbnail": "https://img.youtube.com/vi/hzYA_YDfhLA/0.jpg",
+					"dateAdded": "2026-03-24T00:00:00.000Z"
 				},
 				{
 					"title": "iplocation",
@@ -4291,6 +5063,13 @@
 			let lapTimes = [];
 			let lastStopperTime = 0;
 			
+			// 摸魚模式相關變量
+			let stealthModeEnabled = false;
+			let currentStealthType = 'vscode';
+			
+			// Hit counter variables
+			let hitCount = 0;
+			
 			// YouTube Thumbnail Downloader Functions
 			function showYoutubeThumbnailsModal() {
 				document.getElementById('youtubeThumbnailsModal').style.display = 'block';
@@ -4758,6 +5537,8 @@
 				renderSlideshow();
 				renderRecommended();
 			}
+			
+			
 
 			// Theme management
 			function toggleTheme() {
@@ -4903,6 +5684,48 @@
 					closeBtn.style.right = '-20px';
 				}
 			}
+			
+			function showVideo(url) {
+            const modal = document.getElementById('videoModal');
+            const overlay = document.getElementById('videoModalOverlay');
+            const iframe = modal.querySelector('iframe');
+            const directLink = document.getElementById('youtubeDirectLink');
+            
+            // 解析 URL，保留原始鏈接（包含 playlist 參數）
+            let finalEmbedUrl = '';
+            let originalUrl = url;
+            try {
+                const urlObj = new URL(url);
+                const videoId = urlObj.searchParams.get('v');
+                const listId = urlObj.searchParams.get('list');
+                const params = new URLSearchParams({ autoplay: '1', rel: '0', modestbranding: '1', playsinline: '1', controls: '1', enablejsapi: '1' });
+                if (listId) {
+                    // 播放列表模式：使用播放列表嵌入方式
+                    finalEmbedUrl = `https://www.youtube-nocookie.com/embed/videoseries?list=${listId}&${params.toString()}`;
+                } else if (videoId) {
+                    finalEmbedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?${params.toString()}`;
+                } else {
+                    finalEmbedUrl = `https://www.youtube-nocookie.com/embed/?${params.toString()}`;
+                }
+                // 設定直連連結為原始 YouTube 網址，使用者點擊可到 YouTube 網站完整播放列表
+                directLink.href = originalUrl;
+            } catch(e) {
+                finalEmbedUrl = `https://www.youtube-nocookie.com/embed/?autoplay=1`;
+                directLink.href = url;
+            }
+            
+            iframe.src = finalEmbedUrl;
+            modal.style.display = 'block';
+            overlay.style.display = 'block';
+            
+            // 移動端適配
+            if(/Android|webOS|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                const vc = document.querySelector('.video-container');
+                if(vc) { vc.style.width = '95%'; vc.style.height = '50%'; vc.style.margin = '20% auto'; }
+                const linkBtn = document.querySelector('.youtube-direct-link');
+                if(linkBtn) linkBtn.style.fontSize = '12px';
+            }
+        }
 
 			function closeVideo() {
 				const modal = document.getElementById('videoModal');
@@ -5291,7 +6114,7 @@
 				document.getElementById('qrModal').style.display = 'none';
 				document.getElementById('qrModalOverlay').style.display = 'none';
 			}
-
+			
 			function showHelpModal() {
 				document.getElementById('helpModal').style.display = 'block';
 				document.getElementById('helpModalOverlay').style.display = 'block';
@@ -5621,9 +6444,167 @@
 					`;
 				}
 			}
+			
+			// 顯示摸魚模式設置模態框
+			function showStealthModeModal() {
+				document.getElementById('stealthModeModal').style.display = 'block';
+				document.getElementById('stealthModeModalOverlay').style.display = 'block';
+				
+				// 載入保存的設置
+				loadStealthSettings();
+			}
+
+			// 關閉摸魚模式設置模態框
+			function closeStealthModeModal() {
+				document.getElementById('stealthModeModal').style.display = 'none';
+				document.getElementById('stealthModeModalOverlay').style.display = 'none';
+			}
+
+			// 載入摸魚模式設置
+			function loadStealthSettings() {
+				const savedStealthMode = localStorage.getItem('stealthModeEnabled');
+				const savedStealthType = localStorage.getItem('stealthModeType');
+				
+				if (savedStealthMode) {
+					stealthModeEnabled = savedStealthMode === 'true';
+					document.getElementById('enableStealthMode').checked = stealthModeEnabled;
+				}
+				
+				if (savedStealthType) {
+					currentStealthType = savedStealthType;
+					document.getElementById('stealthType').value = currentStealthType;
+				}
+			}
+
+			// 切換摸魚模式
+			function toggleStealthMode() {
+				stealthModeEnabled = document.getElementById('enableStealthMode').checked;
+				localStorage.setItem('stealthModeEnabled', stealthModeEnabled);
+				
+				if (stealthModeEnabled) {
+					enableStealthMode();
+				} else {
+					disableStealthMode();
+				}
+			}
+
+			// 啟用摸魚模式
+			function enableStealthMode() {
+				const overlay = document.getElementById('stealthModeOverlay');
+				overlay.style.display = 'block';
+				
+				// 更改網頁標題
+				switch(currentStealthType) {
+					case 'vscode':
+						document.title = 'Visual Studio Code';
+						break;
+					case 'excel':
+						document.title = 'Microsoft Excel';
+						break;
+					case 'powerpoint':
+						document.title = 'Microsoft PowerPoint';
+						break;
+				}
+				
+				// 隱藏原始內容
+				document.querySelector('header').style.display = 'none';
+				document.querySelector('.search-container').style.display = 'none';
+				document.querySelector('.new-cards-slideshow').style.display = 'none';
+				document.querySelector('.card-container').style.display = 'none';
+				document.querySelector('.load-more-container').style.display = 'none';
+				document.querySelector('.controls-section').style.display = 'none';
+				document.querySelector('footer').style.display = 'none';
+				
+				// 顯示對應的偽裝界面
+				updateStealthInterface();
+			}
+
+			// 禁用摸魚模式
+			function disableStealthMode() {
+				const overlay = document.getElementById('stealthModeOverlay');
+				overlay.style.display = 'none';
+				
+				// 恢復原始標題
+				document.title = '☕迪遜咖啡廳 | Diczon\'s Cafe';
+				
+				// 顯示原始內容
+				document.querySelector('header').style.display = 'flex';
+				document.querySelector('.search-container').style.display = 'block';
+				document.querySelector('.new-cards-slideshow').style.display = 'block';
+				document.querySelector('.card-container').style.display = 'grid';
+				document.querySelector('.load-more-container').style.display = 'flex';
+				document.querySelector('.controls-section').style.display = 'block';
+				document.querySelector('footer').style.display = 'flex';
+				
+				stealthModeEnabled = false;
+				document.getElementById('enableStealthMode').checked = false;
+				localStorage.setItem('stealthModeEnabled', 'false');
+			}
+
+			// 更新摸魚模式界面
+			function updateStealthMode() {
+				currentStealthType = document.getElementById('stealthType').value;
+				localStorage.setItem('stealthModeType', currentStealthType);
+				
+				if (stealthModeEnabled) {
+					enableStealthMode();
+				}
+			}
+
+			// 更新偽裝界面顯示
+			function updateStealthInterface() {
+				// 隱藏所有界面
+				document.querySelectorAll('.stealth-mode-interface').forEach(interface => {
+					interface.style.display = 'none';
+				});
+				
+				// 顯示當前選擇的界面
+				document.getElementById(currentStealthType + 'Interface').style.display = 'block';
+				
+				// 更新覆蓋層的類名
+				const overlay = document.getElementById('stealthModeOverlay');
+				overlay.className = 'stealth-mode-overlay';
+				if (currentStealthType === 'excel') {
+					overlay.classList.add('excel-mode');
+				} else if (currentStealthType === 'powerpoint') {
+					overlay.classList.add('powerpoint-mode');
+				}
+			}
+
+			// 添加快捷鍵支持
+			document.addEventListener('keydown', function(e) {
+				// Ctrl+Shift+S 切換摸魚模式
+				if (e.ctrlKey && e.shiftKey && e.key === 'S') {
+					e.preventDefault();
+					stealthModeEnabled = !stealthModeEnabled;
+					document.getElementById('enableStealthMode').checked = stealthModeEnabled;
+					localStorage.setItem('stealthModeEnabled', stealthModeEnabled);
+					
+					if (stealthModeEnabled) {
+						enableStealthMode();
+					} else {
+						disableStealthMode();
+					}
+				}
+				
+				// ESC 鍵退出摸魚模式
+				if (e.key === 'Escape' && stealthModeEnabled) {
+					disableStealthMode();
+				}
+			});
+
+			// Initialize hit counter immediately
+			initializeHitCounter();
 
 			// Initialize when page loads
-			window.addEventListener('load', () => {
+			window.addEventListener('load', function() {
+				loadStealthSettings();
+				loadSettings();
+				
+				// 如果摸魚模式已啟用，則應用設置
+				if (stealthModeEnabled) {
+					enableStealthMode();
+				}
 				initLazyLoading();
 				renderCards();
 				renderSlideshow();
@@ -5650,6 +6631,100 @@
 				// Update social meta when hash changes
 				window.addEventListener('hashchange', updateSocialMeta);
 			});
+			
+			// Hit Counter Functions
+			function initializeHitCounter() {
+				const BASE_HIT_COUNT = 20642;
+				const savedCount = localStorage.getItem('diczonCafeHitCount');
+				
+				// Parse and validate saved count
+				let parsedCount = 0;
+				if (savedCount) {
+					parsedCount = parseInt(savedCount, 10);
+					if (isNaN(parsedCount) || parsedCount < BASE_HIT_COUNT) {
+						// Invalid or lower than base count, use base count
+						parsedCount = BASE_HIT_COUNT;
+					}
+				} else {
+					// No saved count, use base count
+					parsedCount = BASE_HIT_COUNT;
+				}
+				
+				// Set current count and increment for this visit
+				hitCount = parsedCount + 1;
+				
+				// Save back to localStorage
+				localStorage.setItem('diczonCafeHitCount', hitCount.toString());
+				
+				// Update display
+				updateHitCounterDisplay();
+			}
+
+			function updateHitCounterDisplay() {
+				const hitCounterElement = document.getElementById('hitCounter');
+				if (hitCounterElement) {
+					const formattedCount = hitCount.toLocaleString();
+					hitCounterElement.innerHTML = `
+						<span class="hit-counter-icon">👁️</span>
+						<span class="hit-counter-text">訪問次數: ${formattedCount}</span>
+					`;
+				}
+			}
+
+			// Admin function to manually set hit count (run in browser console)
+			function setHitCount(count) {
+				const baseHitCount = 20642;
+				if (typeof count === 'number' && count >= 0) {
+					// Ensure count is not lower than base count
+					hitCount = Math.max(count, baseHitCount);
+					localStorage.setItem('diczonCafeHitCount', hitCount.toString());
+					updateHitCounterDisplay();
+					console.log(`Hit count set to: ${hitCount} (minimum: ${baseHitCount})`);
+				} else {
+					console.error('Invalid hit count value');
+				}
+			}
+
+			// Admin function to reset hit count (run in browser console)
+			function resetHitCount() {
+				if (confirm('確定要重置訪問計數器嗎？')) {
+					// Reset to base value
+					hitCount = 20642;
+					localStorage.setItem('diczonCafeHitCount', '20642');
+					updateHitCounterDisplay();
+					console.log('Hit counter reset to base count: 20642');
+				}
+			}
+
+			// Admin function to get current hit count (run in browser console)
+			function getHitCount() {
+				const baseHitCount = 20642;
+				const currentCount = Math.max(hitCount, baseHitCount);
+				console.log(`Current hit count: ${currentCount} (base: ${baseHitCount})`);
+				return currentCount;
+			}
+
+			// Admin function to get or set base hit count (run in browser console)
+			function manageBaseHitCount(newBase) {
+				const currentBase = 20642; // You can make this configurable if needed
+				const savedCount = localStorage.getItem('diczonCafeHitCount');
+				const currentCount = savedCount ? parseInt(savedCount) : currentBase;
+				
+				if (newBase === undefined) {
+					// Just return current base
+					console.log(`Current base hit count: ${currentBase}`);
+					console.log(`Current saved count: ${currentCount}`);
+					return currentBase;
+				} else if (typeof newBase === 'number' && newBase >= 0) {
+					// Update base logic and adjust current count if needed
+					const adjustedCount = Math.max(currentCount, newBase);
+					localStorage.setItem('diczonCafeHitCount', adjustedCount.toString());
+					console.log(`Base hit count updated. Current count adjusted to: ${adjustedCount}`);
+					location.reload(); // Reload to apply changes
+				} else {
+					console.error('Invalid base hit count value');
+				}
+			}
 		</script>
 	</body>
 </html>
