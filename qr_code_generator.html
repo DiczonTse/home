@@ -500,9 +500,9 @@
             </div>
         </div>
 
-        <!-- 版權資訊（動態） -->
-        <div class="copyright" id="copyrightNotice">
-            <span class="version">v1.0</span> &nbsp;<span id="copyrightText">© 2026 ☕迪遜咖啡廳，版權所有。</span>
+        <!-- 版權資訊（動態年份 + 多語言） -->
+        <div class="copyright">
+            <span class="version">v1.0</span> &nbsp;<span id="copyrightText"></span>
         </div>
     </div>
 
@@ -511,8 +511,9 @@
             // ---- 設定 ----
             const BYTE_LIMIT = 250;
             const QR_SIZE = 300;
+            const CURRENT_YEAR = new Date().getFullYear(); // 自動取得當前年份
 
-            // ---- 多語言（含版權） ----
+            // ---- 多語言（含版權，使用 {year} 佔位符） ----
             const LANG = {
                 'zh-Hant': {
                     title: '📎 二維碼生成器',
@@ -529,7 +530,7 @@
                     partLabel: (index, preview) => `第 ${index} 部分  ·  ${preview}`,
                     qrError: '⚠️ 無法生成',
                     qrSuccess: '✓ 可掃描',
-                    copyright: '© 2026 ☕迪遜咖啡廳，版權所有。'
+                    copyright: `© {year} ☕迪遜咖啡廳，版權所有。`
                 },
                 'zh-Hans': {
                     title: '📎 二维码生成器',
@@ -546,7 +547,7 @@
                     partLabel: (index, preview) => `第 ${index} 部分  ·  ${preview}`,
                     qrError: '⚠️ 无法生成',
                     qrSuccess: '✓ 可扫描',
-                    copyright: '© 2026 ☕迪逊咖啡厅，版权所有。'
+                    copyright: `© {year} ☕迪逊咖啡厅，版权所有。`
                 },
                 'en': {
                     title: '📎 QR Code Generator',
@@ -563,7 +564,7 @@
                     partLabel: (index, preview) => `part ${index}  ·  ${preview}`,
                     qrError: '⚠️ failed',
                     qrSuccess: '✓ scannable',
-                    copyright: '© 2026 ☕Dickson Café, All Rights Reserved.'
+                    copyright: `© {year} ☕Diczon's Cafe, All Rights Reserved.`
                 },
                 'ja': {
                     title: '📎 QRコードジェネレーター',
@@ -580,7 +581,7 @@
                     partLabel: (index, preview) => `パート ${index}  ·  ${preview}`,
                     qrError: '⚠️ 生成失敗',
                     qrSuccess: '✓ スキャン可能',
-                    copyright: '© 2026 ☕ディクソンカフェ，無断転載を禁じます。'
+                    copyright: `© {year} ☕ディクソンカフェ，無断転載を禁じます。`
                 },
                 'ko': {
                     title: '📎 QR 코드 생성기',
@@ -597,7 +598,7 @@
                     partLabel: (index, preview) => `파트 ${index}  ·  ${preview}`,
                     qrError: '⚠️ 생성 실패',
                     qrSuccess: '✓ 스캔 가능',
-                    copyright: '© 2026 ☕딕슨 카페，판권 소유.'
+                    copyright: `© {year} ☕딕슨 카페，판권 소유.`
                 }
             };
 
@@ -623,7 +624,7 @@
                 document.documentElement.setAttribute('data-theme', theme);
                 localStorage.setItem('theme', theme);
                 themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
-                // 強制重新繪製
+                // 強制重繪
                 document.body.style.display = 'none';
                 requestAnimationFrame(() => {
                     document.body.style.display = '';
@@ -632,11 +633,9 @@
 
             function toggleTheme() {
                 const current = document.documentElement.getAttribute('data-theme') || 'light';
-                const newTheme = current === 'light' ? 'dark' : 'light';
-                setTheme(newTheme);
+                setTheme(current === 'light' ? 'dark' : 'light');
             }
 
-            // 讀取儲存的主題偏好
             const savedTheme = localStorage.getItem('theme') || 'light';
             setTheme(savedTheme);
             themeToggle.addEventListener('click', toggleTheme);
@@ -654,6 +653,15 @@
                 return LANG[currentLang] || LANG['zh-Hant'];
             }
 
+            // ---- 更新版權（動態年份 + 多語言） ----
+            function updateCopyright() {
+                const dict = getDict();
+                // 用當前年份替換 {year}
+                const copyrightWithYear = dict.copyright.replace(/\{year\}/g, CURRENT_YEAR);
+                copyrightText.textContent = copyrightWithYear;
+            }
+
+            // ---- 更新所有 UI 文字 ----
             function updateUIText() {
                 const dict = getDict();
                 mainTitle.textContent = dict.title;
@@ -664,7 +672,7 @@
                 placeholderSub.textContent = dict.placeholderSub;
                 clearBtn.textContent = dict.clearBtn;
                 limitNumberSpan.textContent = BYTE_LIMIT;
-                copyrightText.textContent = dict.copyright;
+                updateCopyright(); // 更新版權（含動態年份）
                 updateQRCodes();
             }
 
@@ -895,6 +903,7 @@
             qrCounterSpan.textContent = '0';
             setLanguage('zh-Hant');
 
+            // 確保初始化後版權正確顯示
             setTimeout(() => {
                 if (textInput.value.trim() === '') {
                     renderQRCodes([]);
@@ -903,6 +912,8 @@
                     byteCountDisplay.textContent = '0';
                     qrCounterSpan.textContent = '0';
                 }
+                // 再次確保版權已更新（防止 race condition）
+                updateCopyright();
             }, 10);
 
             window.__qrDebug = { updateQRCodes, splitTextIntoChunks, countBytes, BYTE_LIMIT, setLanguage };
