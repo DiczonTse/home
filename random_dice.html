@@ -7,72 +7,117 @@
     <style>
         * { margin:0; padding:0; box-sizing:border-box; user-select:none; }
         body { background:#0b0e1a; display:flex; justify-content:center; align-items:center; min-height:100vh; font-family:'Segoe UI',Arial,sans-serif; color:#fff; touch-action:none; }
-        .game-wrapper { background:linear-gradient(145deg,#141a2b,#1a2236); border-radius:28px; padding:16px 16px 20px; box-shadow:0 20px 60px rgba(0,0,0,0.8),inset 0 1px 2px rgba(255,255,255,0.06); max-width:520px; width:100%; margin:10px; border:1px solid #2d3a5a; position:relative; }
-        .header { display:flex; justify-content:space-between; align-items:center; padding:0 4px 12px 4px; border-bottom:1px solid #27324b; }
-        .title { font-size:20px; font-weight:800; background:linear-gradient(135deg,#f7d875,#f5a623); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-shadow:0 0 30px rgba(245,166,35,0.2); letter-spacing:0.5px; }
-        .stats { display:flex; gap:14px; font-size:14px; font-weight:600; }
-        .stats span { display:flex; align-items:center; gap:5px; background:#0f1424; padding:4px 12px; border-radius:20px; border:1px solid #29344f; }
-        .stats .icon { font-size:16px; }
-        /* 固定數字寬度，防止抖動 */
-        .stats .gold, .stats .life, .stats .wave {
-            display:inline-block;
-            min-width:28px;
-            text-align:center;
-            font-family:'Courier New',monospace;
-            font-weight:700;
-        }
-        .board-container { position:relative; margin:14px auto; padding:6px; background:#0d1222; border-radius:18px; box-shadow:inset 0 0 30px rgba(0,0,0,0.6); border:1px solid #27324b; aspect-ratio:1/1; width:100%; max-width:480px; }
+        .game-wrapper { background:linear-gradient(145deg,#141a2b,#1a2236); border-radius:28px; padding:16px 16px 20px; box-shadow:0 20px 60px rgba(0,0,0,0.8),inset 0 1px 2px rgba(255,255,255,0.06); max-width:550px; width:100%; margin:10px; border:1px solid #2d3a5a; position:relative; }
+        .board-container { position:relative; margin:0 auto; padding:0; background:#0d1222; border-radius:18px; box-shadow:inset 0 0 30px rgba(0,0,0,0.6); border:1px solid #27324b; width:100%; max-width:480px; aspect-ratio:1/1; }
         #gameCanvas { display:block; width:100% !important; height:100% !important; border-radius:14px; background:#111827; touch-action:none; cursor:pointer; }
-        .controls { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:10px; padding:14px 4px 0; }
+
+        .controls { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:10px; padding:10px 4px 0; }
         .btn { background:linear-gradient(145deg,#1f2a44,#15203a); border:1px solid #33415e; color:#e8edf5; padding:10px 18px; border-radius:30px; font-size:15px; font-weight:700; display:flex; align-items:center; gap:6px; transition:all 0.15s; box-shadow:0 4px 12px rgba(0,0,0,0.3); cursor:pointer; touch-action:manipulation; flex:1 1 auto; justify-content:center; min-width:70px; }
         .btn:active { transform:scale(0.94); background:linear-gradient(145deg,#15203a,#0f172e); }
         .btn.gold { background:linear-gradient(145deg,#b8860b,#8b6900); border-color:#daa520; color:#fff; }
         .btn.gold:active { background:linear-gradient(145deg,#8b6900,#6b5100); }
         .btn:disabled { opacity:0.4; transform:none !important; pointer-events:none; }
+        #rollBtn { min-width:130px; justify-content:center; }
         .dice-preview { display:flex; gap:6px; align-items:center; background:#0d1222; border-radius:30px; padding:4px 12px 4px 8px; border:1px solid #27324b; flex:1 1 auto; min-width:100px; justify-content:center; }
         .dice-preview .dice-icon { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; color:#fff; border:2px solid rgba(255,255,255,0.2); box-shadow:0 2px 8px rgba(0,0,0,0.4); }
         .dice-preview .empty { color:#4a5a7a; font-size:13px; font-weight:500; }
-        .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); padding:10px 24px; border-radius:40px; font-size:15px; font-weight:600; color:#fff; border:1px solid #3d4d6e; box-shadow:0 10px 40px rgba(0,0,0,0.6); z-index:999; pointer-events:none; opacity:0; transition:opacity 0.3s ease; text-align:center; max-width:90%; }
-        .toast.show { opacity:1; }
-        .merge-hint { font-size:12px; color:#8a9fc0; text-align:center; padding-top:6px; opacity:0.7; }
-        .start-overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:radial-gradient(ellipse at center, #1a2645 0%, #0b0e1a 100%); backdrop-filter:blur(8px); border-radius:28px; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:100; padding:30px 20px; text-align:center; transition:opacity 0.5s ease; overflow-y:auto; }
-        .start-overlay.hidden { opacity:0; pointer-events:none; }
+
         .deco-dice { position:absolute; font-size:60px; opacity:0.08; transform:rotate(15deg); pointer-events:none; }
         .deco-dice:nth-child(1) { top:5%; left:5%; transform:rotate(-20deg); font-size:80px; }
         .deco-dice:nth-child(2) { bottom:8%; right:6%; transform:rotate(30deg); font-size:90px; }
         .deco-dice:nth-child(3) { top:20%; right:10%; transform:rotate(45deg); font-size:50px; }
         .deco-dice:nth-child(4) { bottom:25%; left:8%; transform:rotate(-10deg); font-size:70px; }
-        .start-overlay h1 { font-size:44px; font-weight:900; background:linear-gradient(135deg,#f7d875,#f5a623,#e67e22); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-shadow:0 0 30px rgba(245,166,35,0.3); margin-bottom:6px; animation:glow 2.5s ease-in-out infinite alternate; letter-spacing:2px; position:relative; z-index:2; }
+
+        .start-overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:radial-gradient(ellipse at center, #1a2645 0%, #0b0e1a 100%); backdrop-filter:blur(8px); border-radius:28px; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:100; padding:20px 16px; text-align:center; transition:opacity 0.5s ease; overflow-y:auto; }
+        .start-overlay.hidden { opacity:0; pointer-events:none; }
+        .start-overlay h1 { font-size:38px; font-weight:900; background:linear-gradient(135deg,#f7d875,#f5a623,#e67e22); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-shadow:0 0 30px rgba(245,166,35,0.3); margin-bottom:4px; animation:glow 2.5s ease-in-out infinite alternate; letter-spacing:2px; position:relative; z-index:2; }
         @keyframes glow { 0% { filter:drop-shadow(0 0 8px rgba(245,166,35,0.2)); } 100% { filter:drop-shadow(0 0 25px rgba(245,166,35,0.6)); } }
-        .start-overlay .sub-desc { font-size:15px; color:#aab8d0; margin:6px 0 12px 0; line-height:1.7; position:relative; z-index:2; max-width:380px; }
-        .lang-group { display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin:8px 0 14px 0; position:relative; z-index:2; }
-        .lang-btn { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#c8d0e0; padding:4px 12px; border-radius:20px; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s; backdrop-filter:blur(4px); display:flex; align-items:center; gap:4px; }
+        .start-overlay .sub-desc { font-size:13px; color:#aab8d0; margin:4px 0 10px 0; line-height:1.6; position:relative; z-index:2; max-width:380px; }
+        .lang-group { display:flex; flex-wrap:wrap; justify-content:center; gap:4px; margin:6px 0 10px 0; position:relative; z-index:2; }
+        .lang-btn { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#c8d0e0; padding:3px 10px; border-radius:18px; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; backdrop-filter:blur(4px); display:flex; align-items:center; gap:3px; }
         .lang-btn:hover { background:rgba(245,166,35,0.15); border-color:#f5a623; color:#f7d875; }
         .lang-btn.active { background:rgba(245,166,35,0.25); border-color:#f5a623; color:#f7d875; box-shadow:0 0 15px rgba(245,166,35,0.15); }
-        .start-overlay .btn-start { background:linear-gradient(145deg,#f5a623,#d4891b); border:none; color:#0b0e1a; font-size:22px; font-weight:800; padding:14px 44px; border-radius:60px; box-shadow:0 8px 30px rgba(245,166,35,0.3); cursor:pointer; transition:transform 0.15s,box-shadow 0.15s; position:relative; z-index:2; margin:6px 0 10px 0; }
+
+        .cover-buttons { display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin:4px 0 8px 0; position:relative; z-index:2; }
+        .cover-buttons .btn-cover { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#c8d0e0; padding:6px 16px; border-radius:24px; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s; backdrop-filter:blur(4px); }
+        .cover-buttons .btn-cover:hover { background:rgba(245,166,35,0.15); border-color:#f5a623; color:#f7d875; }
+        .cover-buttons .btn-cover.primary { background:rgba(245,166,35,0.2); border-color:#f5a623; color:#f7d875; }
+        .cover-buttons .btn-cover.primary:hover { background:rgba(245,166,35,0.35); }
+        .cover-buttons .btn-cover.danger { border-color:#ff6b6b; color:#ff6b6b; }
+        .cover-buttons .btn-cover.danger:hover { background:rgba(255,107,107,0.2); }
+        .cover-buttons .btn-cover.save { border-color:#74b9ff; color:#74b9ff; }
+        .cover-buttons .btn-cover.save:hover { background:rgba(116,185,255,0.2); }
+
+        .start-overlay .btn-start { background:linear-gradient(145deg,#f5a623,#d4891b); border:none; color:#0b0e1a; font-size:20px; font-weight:800; padding:12px 36px; border-radius:60px; box-shadow:0 8px 30px rgba(245,166,35,0.3); cursor:pointer; transition:transform 0.15s,box-shadow 0.15s; position:relative; z-index:2; margin:4px 0 6px 0; }
         .start-overlay .btn-start:active { transform:scale(0.94); box-shadow:0 4px 15px rgba(245,166,35,0.2); }
-        .start-overlay .footer { position:relative; z-index:2; margin-top:6px; font-size:11px; color:#5a6a8a; display:flex; flex-direction:column; gap:2px; }
+        .start-overlay .footer { position:relative; z-index:2; margin-top:4px; font-size:10px; color:#5a6a8a; display:flex; flex-direction:column; gap:1px; }
         .start-overlay .footer .version { font-weight:600; color:#7a8aaa; }
         .start-overlay .footer .copyright { opacity:0.6; }
+        .start-overlay .footer .score-display { color:#f7d875; font-weight:700; font-size:12px; }
+
+        .shop-overlay { position:absolute; top:0; left:0; width:100%; height:100%; border-radius:28px; background:rgba(11,14,26,0.96); backdrop-filter:blur(10px); display:none; flex-direction:column; align-items:center; justify-content:flex-start; z-index:110; padding:20px 16px; overflow-y:auto; }
+        .shop-overlay.visible { display:flex; }
+        .shop-overlay h2 { font-size:28px; font-weight:800; background:linear-gradient(135deg,#f7d875,#f5a623); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:4px; }
+        .shop-overlay .shop-points { font-size:16px; color:#f7d875; margin-bottom:8px; }
+        .shop-overlay .shop-close { position:absolute; top:12px; right:16px; font-size:28px; color:#8a9fc0; cursor:pointer; transition:color 0.2s; background:none; border:none; }
+        .shop-overlay .shop-close:hover { color:#fff; }
+        .shop-dice-grid { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; width:100%; max-width:440px; margin:4px 0 8px 0; }
+        .shop-dice-item { background:rgba(20,30,50,0.6); border:1px solid #3d4d6e; border-radius:12px; padding:10px 12px; width:100px; text-align:center; transition:border-color 0.2s; }
+        .shop-dice-item.owned { border-color:#f7d875; background:rgba(245,166,35,0.08); }
+        .shop-dice-item .icon { font-size:32px; display:block; }
+        .shop-dice-item .dname { font-size:13px; font-weight:600; color:#e8edf5; margin:2px 0; }
+        .shop-dice-item .desc { font-size:10px; color:#8a9fc0; line-height:1.3; }
+        .shop-dice-item .price { font-size:12px; color:#f7d875; margin:4px 0; }
+        .shop-dice-item .btn-buy { background:linear-gradient(145deg,#f5a623,#d4891b); border:none; color:#0b0e1a; font-size:12px; font-weight:700; padding:4px 14px; border-radius:20px; cursor:pointer; transition:transform 0.15s; }
+        .shop-dice-item .btn-buy:active { transform:scale(0.94); }
+        .shop-dice-item .btn-buy:disabled { opacity:0.4; transform:none !important; pointer-events:none; }
+        .shop-dice-item .owned-badge { color:#2ecc71; font-size:13px; font-weight:700; }
+
+        .shop-select-section { width:100%; max-width:440px; margin:4px 0; }
+        .shop-select-section .label { font-size:14px; font-weight:600; color:#aab8d0; margin-bottom:4px; }
+        .shop-select-grid { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; }
+        .shop-select-slot { width:52px; height:52px; border-radius:10px; border:2px solid #3d4d6e; background:rgba(13,18,34,0.5); display:flex; align-items:center; justify-content:center; font-size:28px; cursor:pointer; transition:border-color 0.2s; position:relative; }
+        .shop-select-slot.filled { border-color:#f7d875; background:rgba(245,166,35,0.08); }
+        .shop-select-slot:hover { border-color:#f5a623; }
+        .shop-select-slot .slot-label { position:absolute; bottom:2px; font-size:8px; color:#8a9fc0; }
+
+        .shop-dice-picker { display:none; flex-wrap:wrap; gap:4px; justify-content:center; padding:6px; background:rgba(13,18,34,0.6); border-radius:10px; margin-top:4px; }
+        .shop-dice-picker.visible { display:flex; }
+        .shop-dice-picker .pick-item { width:44px; height:44px; border-radius:8px; border:1px solid #3d4d6e; background:rgba(20,30,50,0.4); display:flex; align-items:center; justify-content:center; font-size:22px; cursor:pointer; transition:border-color 0.2s; }
+        .shop-dice-picker .pick-item:hover { border-color:#f5a623; }
+        .shop-dice-picker .pick-item.selected { border-color:#f7d875; background:rgba(245,166,35,0.12); }
+
+        .shop-confirm-btn { background:linear-gradient(145deg,#f5a623,#d4891b); border:none; color:#0b0e1a; font-size:18px; font-weight:800; padding:10px 36px; border-radius:40px; box-shadow:0 8px 30px rgba(245,166,35,0.3); cursor:pointer; transition:transform 0.15s; margin:6px 0; }
+        .shop-confirm-btn:active { transform:scale(0.94); }
+
         .gameover-overlay { position:absolute; top:0; left:0; width:100%; height:100%; border-radius:28px; background:rgba(0,0,0,0.75); backdrop-filter:blur(6px); display:none; flex-direction:column; align-items:center; justify-content:center; z-index:50; padding:30px; text-align:center; }
         .gameover-overlay.visible { display:flex; }
         .gameover-overlay h2 { font-size:38px; font-weight:800; color:#ff6b6b; margin-bottom:8px; }
-        .gameover-overlay p { font-size:22px; color:#ddd; margin-bottom:20px; }
+        .gameover-overlay p { font-size:22px; color:#ddd; margin-bottom:6px; }
+        .gameover-overlay .score-earned { font-size:20px; color:#f7d875; margin-bottom:12px; }
         .gameover-overlay .btn-restart { background:linear-gradient(145deg,#f5a623,#d4891b); border:none; color:#0b0e1a; font-size:24px; font-weight:800; padding:16px 48px; border-radius:60px; box-shadow:0 8px 30px rgba(245,166,35,0.3); cursor:pointer; transition:transform 0.15s,box-shadow 0.15s; }
         .gameover-overlay .btn-restart:active { transform:scale(0.94); box-shadow:0 4px 15px rgba(245,166,35,0.2); }
+
+        #fileInput { display:none; }
+
         @media (max-width:420px) {
             .game-wrapper { padding:10px; }
-            .title { font-size:16px; }
-            .stats { font-size:12px; gap:8px; }
-            .stats span { padding:2px 8px; }
             .btn { font-size:13px; padding:8px 12px; min-width:56px; }
+            #rollBtn { min-width:100px; }
             .dice-preview .dice-icon { width:30px; height:30px; font-size:14px; }
-            .start-overlay h1 { font-size:30px; }
-            .start-overlay .btn-start { font-size:18px; padding:12px 32px; }
-            .deco-dice { display:none; }
+            .start-overlay h1 { font-size:28px; }
+            .start-overlay .btn-start { font-size:16px; padding:10px 28px; }
+            .deco-dice { font-size:40px; }
+            .deco-dice:nth-child(1) { font-size:50px; }
+            .deco-dice:nth-child(2) { font-size:60px; }
+            .deco-dice:nth-child(3) { font-size:35px; }
+            .deco-dice:nth-child(4) { font-size:45px; }
             .gameover-overlay h2 { font-size:28px; }
             .gameover-overlay p { font-size:18px; }
-            .stats .gold, .stats .life, .stats .wave { min-width:22px; }
+            .shop-dice-item { width:80px; padding:6px 8px; }
+            .shop-dice-item .icon { font-size:24px; }
+            .shop-select-slot { width:44px; height:44px; font-size:22px; }
+            .shop-overlay h2 { font-size:22px; }
         }
     </style>
 </head>
@@ -93,6 +138,15 @@
             <button class="lang-btn" data-lang="ja">🌐 日本語</button>
             <button class="lang-btn" data-lang="ko">🌐 한국어</button>
         </div>
+        <div class="footer">
+            <span class="score-display" id="coverScore">🏆 累積分數: 0</span>
+        </div>
+        <div class="cover-buttons">
+            <button class="btn-cover primary" id="shopBtn">🏪 商店</button>
+            <button class="btn-cover save" id="saveBtn">💾 儲存</button>
+            <button class="btn-cover save" id="loadBtn">📂 載入</button>
+            <button class="btn-cover danger" id="resetBtn">🔄 重設</button>
+        </div>
         <button class="btn-start" id="startBtn">開始遊戲</button>
         <div class="footer">
             <span class="version" id="coverVersion">v1.0</span>
@@ -100,21 +154,27 @@
         </div>
     </div>
 
-    <!-- 遊戲主畫面 -->
-    <div class="header">
-        <div class="title" id="gameTitle">🎲 Random Dice</div>
-        <div class="stats">
-            <span><span class="icon">💰</span><span class="gold" id="goldDisplay">0</span></span>
-            <span><span class="icon">❤️</span><span class="life" id="lifeDisplay">3</span></span>
-            <span><span class="icon">🌊</span><span class="wave" id="waveDisplay">0</span></span>
+    <!-- 商店 -->
+    <div class="shop-overlay" id="shopOverlay">
+        <button class="shop-close" id="shopCloseBtn">✕</button>
+        <h2 id="shopTitle">🏪 商店</h2>
+        <div class="shop-points" id="shopPointsDisplay">🏆 累積分數: 0</div>
+        <div class="shop-dice-grid" id="shopDiceGrid"></div>
+        <div class="shop-select-section">
+            <div class="label" id="shopSelectLabel">🎯 選擇攜帶的5顆骰子：</div>
+            <div class="shop-select-grid" id="shopSelectGrid"></div>
+            <div class="shop-dice-picker" id="shopDicePicker"></div>
         </div>
+        <button class="shop-confirm-btn" id="shopConfirmBtn">✅ 確認</button>
     </div>
+
+    <!-- 遊戲主畫面 -->
     <div class="board-container">
         <canvas id="gameCanvas" width="600" height="600"></canvas>
     </div>
     <div class="controls">
         <div class="dice-preview" id="dicePreview"><span class="empty" id="dicePreviewEmpty">🎲 擲骰</span></div>
-        <button class="btn gold" id="rollBtn">🎲 擲骰</button>
+        <button class="btn gold" id="rollBtn">🎲 擲骰 (10)</button>
     </div>
     <div class="merge-hint" id="mergeHint">🔗 拖曳骰子到另一顆同類型同星級骰子上合併</div>
 
@@ -122,42 +182,65 @@
     <div class="gameover-overlay" id="gameoverOverlay">
         <h2 id="gameoverTitle">💀 GAME OVER</h2>
         <p id="finalWaveText">到達第 0 波</p>
+        <div class="score-earned" id="scoreEarned">🏆 獲得 +0 分</div>
         <button class="btn-restart" id="restartBtn">🔄 重新遊戲</button>
     </div>
 </div>
-<div class="toast" id="toast"></div>
+<!-- 隱藏的文件輸入 -->
+<input type="file" id="fileInput" accept=".txt" />
 
 <script>
 // ============================================================
-//  Random Dice v6.5 — 固定數字寬度，防止介面抖動
+//  Random Dice v8.2 — 表情移至底部
 // ============================================================
 
-// ========== 翻譯字典 ==========
+// ========== 翻譯字典 (完整) ==========
 const translations = {
     'zh-TW': {
         coverTitle: '🎲 隨機骰子',
-        coverDesc: '🌪️風・❄️冰・☠️毒・🔥火・⚡雷 五種骰子<br>⭐ 合併最高 7 星 &nbsp;|&nbsp; 💰 費用每次 +1<br>🛡️ 每10關特殊Boss &nbsp;|&nbsp; ❤️ 僅 3 條命<br>🔗 拖曳骰子到同類同星上合併',
+        coverDesc: '🌪️風・❄️冰・☠️毒・🔥火・⚡雷 五種骰子<br>⭐ 合併最高 7 星 &nbsp;|&nbsp; 💰 費用每次 +10<br>🛡️ 每10關特殊Boss &nbsp;|&nbsp; ❤️ 僅 3 條命<br>🔗 拖曳骰子到同類同星上合併',
         startBtn: '開始遊戲',
         version: 'v1.0',
         copyright: '© {year} ☕迪遜咖啡廳，版權所有。',
         gameTitle: '🎲 Random Dice',
-        gold: '金幣',
-        life: '生命',
-        wave: '波次',
         rollBtn: '擲骰',
         mergeHint: '🔗 拖曳骰子到另一顆同類型同星級骰子上合併',
         dicePreviewEmpty: '🎲 擲骰',
         gameoverTitle: '💀 GAME OVER',
         finalWave: '到達第 {wave} 波',
         restartBtn: '🔄 重新遊戲',
-        diceNames: { WIND: '風', ICE: '冰', POISON: '毒', FIRE: '火', THUNDER: '雷' },
+        scoreEarned: '🏆 獲得 +{score} 分',
+        totalScore: '🏆 累積分數: {score}',
+        shopTitle: '🏪 商店',
+        shopSelectLabel: '🎯 選擇攜帶的5顆骰子：',
+        shopConfirm: '✅ 確認',
+        shopClose: '✕',
+        owned: '✓ 已擁有',
+        buy: '購買',
+        ownedBadge: '✅ 已擁有',
+        selectDice: '選擇骰子',
+        shopBtn: '🏪 商店',
+        saveBtn: '💾 儲存',
+        loadBtn: '📂 載入',
+        resetBtn: '🔄 重設',
+        shopSelectHint: '點擊空位選擇骰子，點擊已選骰子可移除',
+        diceNames: {
+            WIND: '風', ICE: '冰', POISON: '毒', FIRE: '火', THUNDER: '雷',
+            RANDOM: '隨機', JOKER: '小丑', SAPLING: '樹苗'
+        },
+        diceDescs: {
+            WIND: '攻速快', ICE: '減速敵人', POISON: '持續傷害',
+            FIRE: '範圍濺射', THUNDER: '連鎖攻擊',
+            RANDOM: '攻擊隨機敵人', JOKER: '弱攻・特殊合併', SAPLING: '極弱・目標合併'
+        },
+        dicePrices: { RANDOM: 30, JOKER: 200, SAPLING: 500 },
         bossNames: {
             mage: '法師', lion: '獅王', snake: '大蛇', lamb: '沉默的羔羊',
             knight: '騎士', hacker: '黑客', slime: '史萊姆', magnet: '磁力王', cloud: '飛雲'
         },
         bossAppear: '👑 {name} 出現！',
         bossWarningMage: '🔥 法師準備隕石！快合併骰子！',
-        bossWarningLion: '🦁 獅王咆哮！上半部骰子降星！',
+        bossWarningLion: '🦁 獅王咆哮！1星骰子將被移除！',
         bossWarningSnake: '🐍 大蛇召喚小怪！',
         bossWarningLamb: '🐑 沉默的羔羊鎖定骰子！',
         bossWarningKnight: '🛡️ 騎士打亂骰子！',
@@ -171,36 +254,70 @@ const translations = {
         toastDiceInfo: '{label} {name} ★{star} 傷害:{damage}',
         toastWaveStart: '🌊 第 {wave} 波 開始！ ({count} 個敵人)',
         toastGameOver: '💀 遊戲結束！到達 {wave} 波',
-        toastRestart: '重新開始！',
+        toastRestart: '回到標題',
         toastGameStart: '🎮 遊戲開始！拖曳骰子合併',
         waveRemain: '🌊 第 {wave} 波  {count} 剩餘',
         costLabel: '擲骰費用: {cost} 💰',
         hackedHeal: '+{dmg}',
+        upgradeSuccess: '⬆ {name} 升級至 Lv{level}！',
+        upgradeFail: '❌ 金幣不足！升級需要 {cost}',
+        upgradeMax: '⭐ 已達最高等級！',
+        lv: 'Lv',
+        max: 'MAX',
+        saveSuccess: '💾 存檔已下載！',
+        loadSuccess: '📂 讀取成功！',
+        loadFail: '❌ 讀取失敗，檔案格式錯誤',
+        resetConfirm: '⚠️ 確定要重設所有資料嗎？此操作無法復原！',
+        resetDone: '🔄 已重設所有資料',
+        shopBuySuccess: '✅ 成功購買 {name}！',
+        shopBuyFail: '❌ 積分不足！需要 {cost} 分',
+        shopAlreadyOwned: '✅ 已擁有此骰子',
     },
     'zh-CN': {
         coverTitle: '🎲 随机骰子',
-        coverDesc: '🌪️风・❄️冰・☠️毒・🔥火・⚡雷 五种骰子<br>⭐ 合并最高 7 星 &nbsp;|&nbsp; 💰 费用每次 +1<br>🛡️ 每10关特殊Boss &nbsp;|&nbsp; ❤️ 仅 3 条命<br>🔗 拖曳骰子到同类同星上合并',
+        coverDesc: '🌪️风・❄️冰・☠️毒・🔥火・⚡雷 五种骰子<br>⭐ 合并最高 7 星 &nbsp;|&nbsp; 💰 费用每次 +10<br>🛡️ 每10关特殊Boss &nbsp;|&nbsp; ❤️ 仅 3 条命<br>🔗 拖曳骰子到同类同星上合并',
         startBtn: '开始游戏',
         version: 'v1.0',
         copyright: '© {year} ☕迪逊咖啡厅，版权所有。',
         gameTitle: '🎲 Random Dice',
-        gold: '金币',
-        life: '生命',
-        wave: '波次',
         rollBtn: '掷骰',
         mergeHint: '🔗 拖曳骰子到另一颗同类同星级骰子上合并',
         dicePreviewEmpty: '🎲 掷骰',
         gameoverTitle: '💀 GAME OVER',
         finalWave: '到达第 {wave} 波',
         restartBtn: '🔄 重新游戏',
-        diceNames: { WIND: '风', ICE: '冰', POISON: '毒', FIRE: '火', THUNDER: '雷' },
+        scoreEarned: '🏆 获得 +{score} 分',
+        totalScore: '🏆 累积分数: {score}',
+        shopTitle: '🏪 商店',
+        shopSelectLabel: '🎯 选择携带的5颗骰子：',
+        shopConfirm: '✅ 确认',
+        shopClose: '✕',
+        owned: '✓ 已拥有',
+        buy: '购买',
+        ownedBadge: '✅ 已拥有',
+        selectDice: '选择骰子',
+        shopBtn: '🏪 商店',
+        saveBtn: '💾 储存',
+        loadBtn: '📂 载入',
+        resetBtn: '🔄 重设',
+        shopSelectHint: '点击空位选择骰子，点击已选骰子可移除',
+        diceNames: {
+            WIND: '风', ICE: '冰', POISON: '毒', FIRE: '火', THUNDER: '雷',
+            RANDOM: '随机', JOKER: '小丑', SAPLING: '树苗'
+        },
+        diceDescs: {
+            WIND: '攻速快', ICE: '减速敌人', POISON: '持续伤害',
+            FIRE: '范围溅射', THUNDER: '连锁攻击',
+            RANDOM: '攻击随机敌人', JOKER: '弱攻・特殊合并', SAPLING: '极弱・目标合并'
+        },
+        dicePrices: { RANDOM: 30, JOKER: 200, SAPLING: 500 },
         bossNames: {
             mage: '法师', lion: '狮王', snake: '大蛇', lamb: '沉默的羔羊',
             knight: '骑士', hacker: '黑客', slime: '史莱姆', magnet: '磁力王', cloud: '飞云'
         },
         bossAppear: '👑 {name} 出现！',
         bossWarningMage: '🔥 法师准备陨石！快合并骰子！',
-        bossWarningLion: '🦁 狮王咆哮！上半部骰子降星！',
+        bossWarningLion: '🦁 狮王咆哮！1星骰子将被移除！',
         bossWarningSnake: '🐍 大蛇召唤小怪！',
         bossWarningLamb: '🐑 沉默的羔羊锁定骰子！',
         bossWarningKnight: '🛡️ 骑士打乱骰子！',
@@ -214,36 +331,70 @@ const translations = {
         toastDiceInfo: '{label} {name} ★{star} 伤害:{damage}',
         toastWaveStart: '🌊 第 {wave} 波 开始！ ({count} 个敌人)',
         toastGameOver: '💀 游戏结束！到达 {wave} 波',
-        toastRestart: '重新开始！',
+        toastRestart: '回到标题',
         toastGameStart: '🎮 游戏开始！拖曳骰子合并',
         waveRemain: '🌊 第 {wave} 波  {count} 剩余',
         costLabel: '掷骰费用: {cost} 💰',
         hackedHeal: '+{dmg}',
+        upgradeSuccess: '⬆ {name} 升级至 Lv{level}！',
+        upgradeFail: '❌ 金币不足！升级需要 {cost}',
+        upgradeMax: '⭐ 已达最高等级！',
+        lv: 'Lv',
+        max: 'MAX',
+        saveSuccess: '💾 存档已下载！',
+        loadSuccess: '📂 读取成功！',
+        loadFail: '❌ 读取失败，档案格式错误',
+        resetConfirm: '⚠️ 确定要重置所有数据吗？此操作无法复原！',
+        resetDone: '🔄 已重置所有数据',
+        shopBuySuccess: '✅ 成功购买 {name}！',
+        shopBuyFail: '❌ 积分不足！需要 {cost} 分',
+        shopAlreadyOwned: '✅ 已拥有此骰子',
     },
     'en': {
         coverTitle: '🎲 Random Dice',
-        coverDesc: '🌪️Wind・❄️Ice・☠️Poison・🔥Fire・⚡Thunder<br>⭐ Merge up to 7 Stars &nbsp;|&nbsp; 💰 Cost +1 each roll<br>🛡️ Special Boss every 10 Waves &nbsp;|&nbsp; ❤️ Only 3 Lives<br>🔗 Drag dice to merge same type & star',
+        coverDesc: '🌪️Wind・❄️Ice・☠️Poison・🔥Fire・⚡Thunder<br>⭐ Merge up to 7 Stars &nbsp;|&nbsp; 💰 Cost +10 each roll<br>🛡️ Special Boss every 10 Waves &nbsp;|&nbsp; ❤️ Only 3 Lives<br>🔗 Drag dice to merge same type & star',
         startBtn: 'Start Game',
         version: 'v1.0',
         copyright: '© {year} ☕Diczon\'s Cafe, All Rights Reserved.',
         gameTitle: '🎲 Random Dice',
-        gold: 'Gold',
-        life: 'Life',
-        wave: 'Wave',
         rollBtn: 'Roll',
         mergeHint: '🔗 Drag a die onto another of same type and star to merge',
         dicePreviewEmpty: '🎲 Roll',
         gameoverTitle: '💀 GAME OVER',
         finalWave: 'Reached Wave {wave}',
         restartBtn: '🔄 Restart',
-        diceNames: { WIND: 'Wind', ICE: 'Ice', POISON: 'Poison', FIRE: 'Fire', THUNDER: 'Thunder' },
+        scoreEarned: '🏆 +{score} points earned!',
+        totalScore: '🏆 Total Score: {score}',
+        shopTitle: '🏪 Shop',
+        shopSelectLabel: '🎯 Select 5 dice to bring:',
+        shopConfirm: '✅ Confirm',
+        shopClose: '✕',
+        owned: '✓ Owned',
+        buy: 'Buy',
+        ownedBadge: '✅ Owned',
+        selectDice: 'Select Dice',
+        shopBtn: '🏪 Shop',
+        saveBtn: '💾 Save',
+        loadBtn: '📂 Load',
+        resetBtn: '🔄 Reset',
+        shopSelectHint: 'Click empty slot to select, click selected to remove',
+        diceNames: {
+            WIND: 'Wind', ICE: 'Ice', POISON: 'Poison', FIRE: 'Fire', THUNDER: 'Thunder',
+            RANDOM: 'Random', JOKER: 'Joker', SAPLING: 'Sapling'
+        },
+        diceDescs: {
+            WIND: 'Fast Attack', ICE: 'Slow Enemies', POISON: 'DoT',
+            FIRE: 'Splash AoE', THUNDER: 'Chain Attack',
+            RANDOM: 'Random Target', JOKER: 'Weak・Special Merge', SAPLING: 'Very Weak・Target Merge'
+        },
+        dicePrices: { RANDOM: 30, JOKER: 200, SAPLING: 500 },
         bossNames: {
             mage: 'Mage', lion: 'Lion King', snake: 'Serpent', lamb: 'Silent Lamb',
             knight: 'Knight', hacker: 'Hacker', slime: 'Slime', magnet: 'Magnet King', cloud: 'Flying Cloud'
         },
         bossAppear: '👑 {name} appears!',
         bossWarningMage: '🔥 Mage casting meteor! Merge the targeted die!',
-        bossWarningLion: '🦁 Lion King roars! Upper dice lose a star!',
+        bossWarningLion: '🦁 Lion King roars! 1-star dice removed!',
         bossWarningSnake: '🐍 Serpent summons minions!',
         bossWarningLamb: '🐑 Silent Lamb locks dice!',
         bossWarningKnight: '🛡️ Knight shuffles dice types!',
@@ -257,36 +408,70 @@ const translations = {
         toastDiceInfo: '{label} {name} ★{star} Damage:{damage}',
         toastWaveStart: '🌊 Wave {wave} starts! ({count} enemies)',
         toastGameOver: '💀 Game Over! Reached Wave {wave}',
-        toastRestart: 'Restarting!',
+        toastRestart: 'Back to Title',
         toastGameStart: '🎮 Game started! Drag dice to merge',
         waveRemain: '🌊 Wave {wave}  {count} remaining',
         costLabel: 'Roll Cost: {cost} 💰',
         hackedHeal: '+{dmg}',
+        upgradeSuccess: '⬆ {name} upgraded to Lv{level}!',
+        upgradeFail: '❌ Not enough gold! Need {cost}',
+        upgradeMax: '⭐ Already max level!',
+        lv: 'Lv',
+        max: 'MAX',
+        saveSuccess: '💾 Save downloaded!',
+        loadSuccess: '📂 Load successful!',
+        loadFail: '❌ Load failed, invalid format',
+        resetConfirm: '⚠️ Reset all data? This cannot be undone!',
+        resetDone: '🔄 All data reset',
+        shopBuySuccess: '✅ Purchased {name}!',
+        shopBuyFail: '❌ Not enough points! Need {cost} points',
+        shopAlreadyOwned: '✅ Already owned',
     },
     'ja': {
         coverTitle: '🎲 ランダムダイス',
-        coverDesc: '🌪️風・❄️氷・☠️毒・🔥火・⚡雷 5種類のダイス<br>⭐ 最大7つ星まで合体 &nbsp;|&nbsp; 💰 コストは毎回+1<br>🛡️ 10ウェーブごとに特殊ボス &nbsp;|&nbsp; ❤️ ライフは3つ<br>🔗 ドラッグして同種・同星のダイスを合体',
+        coverDesc: '🌪️風・❄️氷・☠️毒・🔥火・⚡雷 5種類のダイス<br>⭐ 最大7つ星まで合体 &nbsp;|&nbsp; 💰 コストは毎回+10<br>🛡️ 10ウェーブごとに特殊ボス &nbsp;|&nbsp; ❤️ ライフは3つ<br>🔗 ドラッグして同種・同星のダイスを合体',
         startBtn: 'ゲーム開始',
         version: 'v1.0',
         copyright: '© {year} ☕ディクソンカフェ，無断転載を禁じます。',
         gameTitle: '🎲 Random Dice',
-        gold: 'ゴールド',
-        life: 'ライフ',
-        wave: 'ウェーブ',
         rollBtn: 'ダイス',
         mergeHint: '🔗 同種・同星のダイスにドラッグして合体',
         dicePreviewEmpty: '🎲 ダイス',
         gameoverTitle: '💀 GAME OVER',
         finalWave: '第 {wave} ウェーブ到達',
         restartBtn: '🔄 再起動',
-        diceNames: { WIND: '風', ICE: '氷', POISON: '毒', FIRE: '火', THUNDER: '雷' },
+        scoreEarned: '🏆 +{score} ポイント獲得！',
+        totalScore: '🏆 累計スコア: {score}',
+        shopTitle: '🏪 ショップ',
+        shopSelectLabel: '🎯 持ち込む5個のダイスを選択：',
+        shopConfirm: '✅ 確認',
+        shopClose: '✕',
+        owned: '✓ 所有済み',
+        buy: '購入',
+        ownedBadge: '✅ 所有済み',
+        selectDice: 'ダイス選択',
+        shopBtn: '🏪 ショップ',
+        saveBtn: '💾 保存',
+        loadBtn: '📂 読み込み',
+        resetBtn: '🔄 リセット',
+        shopSelectHint: '空きスロットをクリックして選択、選択済みをクリックで解除',
+        diceNames: {
+            WIND: '風', ICE: '氷', POISON: '毒', FIRE: '火', THUNDER: '雷',
+            RANDOM: 'ランダム', JOKER: 'ジョーカー', SAPLING: '苗木'
+        },
+        diceDescs: {
+            WIND: '高速攻撃', ICE: '敵を減速', POISON: '持続ダメージ',
+            FIRE: '範囲攻撃', THUNDER: '連鎖攻撃',
+            RANDOM: 'ランダムターゲット', JOKER: '弱攻・特殊合体', SAPLING: '極弱・ターゲット合体'
+        },
+        dicePrices: { RANDOM: 30, JOKER: 200, SAPLING: 500 },
         bossNames: {
             mage: '魔法使い', lion: 'ライオンキング', snake: '大蛇', lamb: '沈黙の子羊',
             knight: '騎士', hacker: 'ハッカー', slime: 'スライム', magnet: '磁力王', cloud: '飛雲'
         },
         bossAppear: '👑 {name} が現れた！',
         bossWarningMage: '🔥 魔法使いが隕石を準備！ダイスを合体させろ！',
-        bossWarningLion: '🦁 ライオンキングが咆哮！上半分のダイスが星を失う！',
+        bossWarningLion: '🦁 ライオンキングが咆哮！1つ星ダイスが除去される！',
         bossWarningSnake: '🐍 大蛇が子分を召喚！',
         bossWarningLamb: '🐑 沈黙の子羊がダイスをロック！',
         bossWarningKnight: '🛡️ 騎士がダイスの種類をシャッフル！',
@@ -300,36 +485,70 @@ const translations = {
         toastDiceInfo: '{label} {name} ★{star} ダメージ:{damage}',
         toastWaveStart: '🌊 第 {wave} ウェーブ開始！ ({count} 体の敵)',
         toastGameOver: '💀 ゲームオーバー！第 {wave} ウェーブ到達',
-        toastRestart: '再起動！',
+        toastRestart: 'タイトルに戻る',
         toastGameStart: '🎮 ゲーム開始！ドラッグして合体',
         waveRemain: '🌊 第 {wave} ウェーブ  {count} 残り',
         costLabel: 'ダイスコスト: {cost} 💰',
         hackedHeal: '+{dmg}',
+        upgradeSuccess: '⬆ {name} を Lv{level} にアップグレード！',
+        upgradeFail: '❌ ゴールド不足！ {cost} 必要',
+        upgradeMax: '⭐ すでに最大レベル！',
+        lv: 'Lv',
+        max: 'MAX',
+        saveSuccess: '💾 セーブデータをダウンロードしました！',
+        loadSuccess: '📂 読み込み成功！',
+        loadFail: '❌ 読み込み失敗、ファイル形式が無効です',
+        resetConfirm: '⚠️ 全てのデータをリセットしますか？この操作は取り消せません！',
+        resetDone: '🔄 全てのデータをリセットしました',
+        shopBuySuccess: '✅ {name} を購入しました！',
+        shopBuyFail: '❌ ポイントが不足しています！ {cost} ポイント必要',
+        shopAlreadyOwned: '✅ すでに所有しています',
     },
     'ko': {
         coverTitle: '🎲 랜덤 다이스',
-        coverDesc: '🌪️바람・❄️얼음・☠️독・🔥불・⚡번개 5종 다이스<br>⭐ 최대 7성 합병 &nbsp;|&nbsp; 💰 비용 매회 +1<br>🛡️ 10웨이브마다 특수 보스 &nbsp;|&nbsp; ❤️ 목숨 3개<br>🔗 드래그하여 같은 종류·별 등급 합병',
+        coverDesc: '🌪️바람・❄️얼음・☠️독・🔥불・⚡번개 5종 다이스<br>⭐ 최대 7성 합병 &nbsp;|&nbsp; 💰 비용 매회 +10<br>🛡️ 10웨이브마다 특수 보스 &nbsp;|&nbsp; ❤️ 목숨 3개<br>🔗 드래그하여 같은 종류·별 등급 합병',
         startBtn: '게임 시작',
         version: 'v1.0',
         copyright: '© {year} ☕딕슨 카페，판권 소유.',
         gameTitle: '🎲 Random Dice',
-        gold: '골드',
-        life: '생명',
-        wave: '웨이브',
         rollBtn: '주사위',
         mergeHint: '🔗 같은 종류·별 등급 다이스에 드래그하여 합병',
         dicePreviewEmpty: '🎲 주사위',
         gameoverTitle: '💀 GAME OVER',
         finalWave: '{wave} 웨이브 도달',
         restartBtn: '🔄 재시작',
-        diceNames: { WIND: '바람', ICE: '얼음', POISON: '독', FIRE: '불', THUNDER: '번개' },
+        scoreEarned: '🏆 +{score} 점 획득!',
+        totalScore: '🏆 누적 점수: {score}',
+        shopTitle: '🏪 상점',
+        shopSelectLabel: '🎯 가져갈 5개 주사위 선택:',
+        shopConfirm: '✅ 확인',
+        shopClose: '✕',
+        owned: '✓ 보유',
+        buy: '구매',
+        ownedBadge: '✅ 보유',
+        selectDice: '주사위 선택',
+        shopBtn: '🏪 상점',
+        saveBtn: '💾 저장',
+        loadBtn: '📂 불러오기',
+        resetBtn: '🔄 초기화',
+        shopSelectHint: '빈 슬롯 클릭하여 선택, 선택된 것 클릭하여 제거',
+        diceNames: {
+            WIND: '바람', ICE: '얼음', POISON: '독', FIRE: '불', THUNDER: '번개',
+            RANDOM: '랜덤', JOKER: '조커', SAPLING: '묘목'
+        },
+        diceDescs: {
+            WIND: '빠른 공격', ICE: '적 감속', POISON: '지속 피해',
+            FIRE: '범위 공격', THUNDER: '연쇄 공격',
+            RANDOM: '무작위 대상', JOKER: '약공・특수 합병', SAPLING: '극약・대상 합병'
+        },
+        dicePrices: { RANDOM: 30, JOKER: 200, SAPLING: 500 },
         bossNames: {
             mage: '마법사', lion: '사자왕', snake: '대뱀', lamb: '침묵의 양',
             knight: '기사', hacker: '해커', slime: '슬라임', magnet: '자기왕', cloud: '비운'
         },
         bossAppear: '👑 {name} 등장!',
         bossWarningMage: '🔥 마법사가 운석을 준비! 주사위를 합병하라!',
-        bossWarningLion: '🦁 사자왕이 포효! 상반부 주사위 별 등급 하락!',
+        bossWarningLion: '🦁 사자왕이 포효! 1성 주사위 제거!',
         bossWarningSnake: '🐍 대뱀이 부하를 소환!',
         bossWarningLamb: '🐑 침묵의 양이 주사위를 잠금!',
         bossWarningKnight: '🛡️ 기사가 주사위 종류를 뒤섞음!',
@@ -343,111 +562,209 @@ const translations = {
         toastDiceInfo: '{label} {name} ★{star} 데미지:{damage}',
         toastWaveStart: '🌊 {wave} 웨이브 시작! ({count} 마리 적)',
         toastGameOver: '💀 게임 오버! {wave} 웨이브 도달',
-        toastRestart: '재시작!',
+        toastRestart: '제목으로 돌아가기',
         toastGameStart: '🎮 게임 시작! 드래그하여 합병',
         waveRemain: '🌊 {wave} 웨이브  {count} 남음',
         costLabel: '주사위 비용: {cost} 💰',
         hackedHeal: '+{dmg}',
+        upgradeSuccess: '⬆ {name} Lv{level} 업그레이드!',
+        upgradeFail: '❌ 골드 부족! {cost} 필요',
+        upgradeMax: '⭐ 이미 최대 레벨!',
+        lv: 'Lv',
+        max: 'MAX',
+        saveSuccess: '💾 저장 파일 다운로드!',
+        loadSuccess: '📂 불러오기 성공!',
+        loadFail: '❌ 불러오기 실패, 파일 형식 오류',
+        resetConfirm: '⚠️ 모든 데이터를 초기화하시겠습니까? 되돌릴 수 없습니다!',
+        resetDone: '🔄 모든 데이터 초기화 완료',
+        shopBuySuccess: '✅ {name} 구매 성공!',
+        shopBuyFail: '❌ 포인트 부족! {cost} 포인트 필요',
+        shopAlreadyOwned: '✅ 이미 보유 중',
     }
 };
 
 // ========== 當前語言 ==========
 let currentLang = 'zh-TW';
-function getData() { return translations[currentLang]; }
+function getData() { return translations[currentLang] || translations['zh-TW']; }
+function getDiceName(type) { return getData().diceNames[type] || type; }
+function getDiceDesc(type) { return getData().diceDescs[type] || ''; }
+function getDicePrice(type) { return getData().dicePrices[type] || 0; }
+function getBossName(id) { return getData().bossNames[id] || id; }
 
-// ========== 更新所有UI ==========
-function updateAllUI() {
-    const data = getData();
-    if (!data) return;
-    document.getElementById('coverTitle').textContent = data.coverTitle;
-    document.getElementById('coverDesc').innerHTML = data.coverDesc;
-    document.getElementById('startBtn').textContent = data.startBtn;
-    document.getElementById('coverVersion').textContent = data.version;
-    const year = new Date().getFullYear();
-    document.getElementById('coverCopyright').textContent = data.copyright.replace(/\{year\}/g, year);
-    document.getElementById('gameTitle').textContent = data.gameTitle;
-    document.getElementById('rollBtn').textContent = `🎲 ${data.rollBtn}`;
-    document.getElementById('mergeHint').textContent = data.mergeHint;
-    document.getElementById('dicePreviewEmpty').textContent = data.dicePreviewEmpty;
-    document.getElementById('gameoverTitle').textContent = data.gameoverTitle;
-    document.getElementById('restartBtn').textContent = data.restartBtn;
-    updateDicePreview();
-    updateUI();
+// ========== 保存/載入系統 ==========
+const STORAGE_KEY = 'randomDiceSaveData';
+
+function getDefaultSaveData() {
+    return {
+        totalScore: 0,
+        ownedDice: ['WIND', 'ICE', 'POISON', 'FIRE', 'THUNDER'],
+        selectedDice: ['WIND', 'ICE', 'POISON', 'FIRE', 'THUNDER'],
+        purchased: {
+            RANDOM: false,
+            JOKER: false,
+            SAPLING: false
+        }
+    };
 }
 
-// ========== 輔助函數 ==========
-function getDiceName(type) {
-    const data = getData();
-    return data.diceNames[type] || type;
+let saveData = null;
+
+function loadSaveData() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+            const data = JSON.parse(raw);
+            const def = getDefaultSaveData();
+            for (let key in def) {
+                if (!(key in data)) data[key] = def[key];
+            }
+            for (let key in def.purchased) {
+                if (!(key in data.purchased)) data.purchased[key] = false;
+            }
+            saveData = data;
+        } else {
+            saveData = getDefaultSaveData();
+        }
+    } catch (e) {
+        saveData = getDefaultSaveData();
+    }
+    saveData.selectedDice = saveData.selectedDice.filter(d => saveData.ownedDice.includes(d));
+    while (saveData.selectedDice.length < 5) {
+        const fallback = ['WIND', 'ICE', 'POISON', 'FIRE', 'THUNDER'];
+        for (let d of fallback) {
+            if (saveData.ownedDice.includes(d) && !saveData.selectedDice.includes(d)) {
+                saveData.selectedDice.push(d);
+                break;
+            }
+        }
+        if (saveData.selectedDice.length < 5) {
+            for (let d of ['WIND', 'ICE', 'POISON', 'FIRE', 'THUNDER']) {
+                if (!saveData.selectedDice.includes(d)) {
+                    saveData.selectedDice.push(d);
+                }
+                if (saveData.selectedDice.length >= 5) break;
+            }
+        }
+    }
+    saveSaveData();
 }
-function getBossName(id) {
-    const data = getData();
-    return data.bossNames[id] || id;
+
+function saveSaveData() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
 }
 
-// ========== 語言切換 ==========
-document.querySelectorAll('.lang-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const lang = btn.dataset.lang;
-        if (lang === currentLang) return;
-        currentLang = lang;
-        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        updateAllUI();
-        showToast('🌐 Language changed', 1000);
-    });
-});
+function resetAllData() {
+    const data = getData();
+    if (confirm(data.resetConfirm)) {
+        saveData = getDefaultSaveData();
+        saveSaveData();
+        updateCoverUI();
+        updateShopUI();
+        showToast(data.resetDone);
+    }
+}
 
-// ============================================================
-//  遊戲核心
-// ============================================================
+function exportSave() {
+    const data = getData();
+    const blob = new Blob([JSON.stringify(saveData, null, 2)], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `RandomDice_Save_${new Date().toISOString().slice(0,10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(data.saveSuccess);
+}
 
+function importSave(file) {
+    const data = getData();
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const parsed = JSON.parse(e.target.result);
+            const def = getDefaultSaveData();
+            for (let key in def) {
+                if (!(key in parsed)) { throw new Error('Invalid format'); }
+            }
+            for (let key in def.purchased) {
+                if (!(key in parsed.purchased)) { throw new Error('Invalid format'); }
+            }
+            saveData = parsed;
+            saveData.selectedDice = saveData.selectedDice.filter(d => saveData.ownedDice.includes(d));
+            while (saveData.selectedDice.length < 5) {
+                const fallback = ['WIND', 'ICE', 'POISON', 'FIRE', 'THUNDER'];
+                for (let d of fallback) {
+                    if (saveData.ownedDice.includes(d) && !saveData.selectedDice.includes(d)) {
+                        saveData.selectedDice.push(d);
+                        break;
+                    }
+                }
+                if (saveData.selectedDice.length < 5) {
+                    for (let d of ['WIND', 'ICE', 'POISON', 'FIRE', 'THUNDER']) {
+                        if (!saveData.selectedDice.includes(d)) {
+                            saveData.selectedDice.push(d);
+                        }
+                        if (saveData.selectedDice.length >= 5) break;
+                    }
+                }
+            }
+            saveSaveData();
+            updateCoverUI();
+            updateShopUI();
+            showToast(data.loadSuccess);
+        } catch (err) {
+            showToast(data.loadFail);
+        }
+    };
+    reader.readAsText(file);
+}
+
+// ========== DOM 元素 ==========
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-const COLS = 6, ROWS = 6;
-const CELL_SIZE = 600 / COLS;
+const W = 600, H = 600;
 
-const goldSpan = document.getElementById('goldDisplay');
-const lifeSpan = document.getElementById('lifeDisplay');
-const waveSpan = document.getElementById('waveDisplay');
-const dicePreview = document.getElementById('dicePreview');
-const rollBtn = document.getElementById('rollBtn');
-const mergeHint = document.getElementById('mergeHint');
-const toastEl = document.getElementById('toast');
-const startOverlay = document.getElementById('startOverlay');
-const gameoverOverlay = document.getElementById('gameoverOverlay');
-const restartBtn = document.getElementById('restartBtn');
-const finalWaveText = document.getElementById('finalWaveText');
+// 布局參數 (表情移至底部，增加一行)
+const TOP_BAR_H = 36;
+const PANEL_GAP = 4;
+const BOARD_WIDTH = 600;
+const BOARD_HEIGHT = Math.floor(BOARD_WIDTH * 4 / 7);
+const UPGRADE_WIDTH = 600;
+const UPGRADE_HEIGHT = 100;
+const TOAST_HEIGHT = 40;
+const EMOJI_HEIGHT = 32;   // 新增表情區域高度
 
-// --- 骰子類型 ---
-const DICE_TYPES = {
-    WIND: { label: '🌪️', nameKey: 'WIND', color: '#74b9ff', damage: 8, interval: 0.45, splash: 0, slow: 0, critRate: 0, critMul: 0, poison: 0, chain: 0 },
-    ICE: { label: '❄️', nameKey: 'ICE', color: '#4fc3f7', damage: 5, interval: 1.3, splash: 0, slow: 0.4, critRate: 0, critMul: 0, poison: 0, chain: 0 },
-    POISON: { label: '☠️', nameKey: 'POISON', color: '#6c5ce7', damage: 6, interval: 1.0, splash: 0, slow: 0, critRate: 0, critMul: 0, poison: { damage: 4, duration: 3, tick: 0.5 }, chain: 0 },
-    FIRE: { label: '🔥', nameKey: 'FIRE', color: '#e17055', damage: 6, interval: 1.6, splash: 0.8, slow: 0, critRate: 0, critMul: 0, poison: 0, chain: 0 },
-    THUNDER: { label: '⚡', nameKey: 'THUNDER', color: '#fdcb6e', damage: 7, interval: 1.2, splash: 0, slow: 0, critRate: 0, critMul: 0, poison: 0, chain: { count: 3, range: 2.5, damageFactor: 0.6 } },
-};
-const DICE_KEYS = Object.keys(DICE_TYPES);
+const topBarY = 0;
+const boardY = topBarY + TOP_BAR_H;
+const upgradeY = boardY + BOARD_HEIGHT + PANEL_GAP;
+const toastY = upgradeY + UPGRADE_HEIGHT + 2;
+const emojiY = toastY + TOAST_HEIGHT + 2; // 表情在 Toast 下方
 
-// --- Boss 類型 ---
-const BOSS_TYPES = [
-    { id: 'mage', nameKey: 'mage', emoji: '🧙', color: '#9b59b6' },
-    { id: 'lion', nameKey: 'lion', emoji: '🦁', color: '#e67e22' },
-    { id: 'snake', nameKey: 'snake', emoji: '🐍', color: '#2ecc71' },
-    { id: 'lamb', nameKey: 'lamb', emoji: '🐑', color: '#f1c40f' },
-    { id: 'knight', nameKey: 'knight', emoji: '🛡️', color: '#3498db' },
-    { id: 'hacker', nameKey: 'hacker', emoji: '💻', color: '#2c3e50' },
-    { id: 'slime', nameKey: 'slime', emoji: '🟢', color: '#27ae60' },
-    { id: 'magnet', nameKey: 'magnet', emoji: '🧲', color: '#e74c3c' },
-    { id: 'cloud', nameKey: 'cloud', emoji: '☁️', color: '#ecf0f1' },
+// 注意總高度可能需要調整，但畫布固定600，我們重新計算總高度
+// 但我們保留原布局，只將表情從頂部移除，繪製在底部
+
+const boardX = 0;
+const upgradeX = 0;
+
+const COLS = 7, ROWS = 4;
+const CELL_SIZE = BOARD_WIDTH / COLS;
+
+// 路徑
+const PATH = [
+    { col: 0, row: 3 }, { col: 0, row: 2 }, { col: 0, row: 1 }, { col: 0, row: 0 },
+    { col: 1, row: 0 }, { col: 2, row: 0 }, { col: 3, row: 0 }, { col: 4, row: 0 },
+    { col: 5, row: 0 }, { col: 6, row: 0 }, { col: 6, row: 1 }, { col: 6, row: 2 }, { col: 6, row: 3 }
 ];
-let bossIndex = 0;
+const PATH_PIXELS = PATH.map(p => ({
+    x: boardX + p.col * CELL_SIZE + CELL_SIZE/2,
+    y: boardY + p.row * CELL_SIZE + CELL_SIZE/2
+}));
 
-// --- 遊戲狀態 ---
+// ========== 遊戲狀態 ==========
 let game = {
     board: [],
-    gold: 12,
-    diceCost: 1,
+    gold: 100,
+    diceCost: 10,
     lives: 3,
     wave: 0,
     enemies: [],
@@ -470,32 +787,78 @@ let game = {
     bossLockedDice: [],
     bossHackedDice: [],
     bossCloud: null,
+    _markedDice: [],
+    _lastGold: 100,
+    emoji: '😎',
+    emojiTimer: 0,
+    waveCompleted: false,
+    enemyReachedTwoThirds: false,
+    toastMessage: '',
+    toastTimer: 0,
+    toastDuration: 0,
+    activeDiceTypes: [],
 };
 
-// --- 路徑 ---
-const PATH = [
-    { col: 0, row: 5 }, { col: 0, row: 4 }, { col: 0, row: 3 }, { col: 0, row: 2 },
-    { col: 0, row: 1 }, { col: 0, row: 0 }, { col: 1, row: 0 }, { col: 2, row: 0 },
-    { col: 3, row: 0 }, { col: 4, row: 0 }, { col: 5, row: 0 }, { col: 5, row: 1 },
-    { col: 5, row: 2 }, { col: 5, row: 3 }, { col: 5, row: 4 }, { col: 5, row: 5 },
-];
-const PATH_PIXELS = PATH.map(p => ({ x: p.col * CELL_SIZE + CELL_SIZE/2, y: p.row * CELL_SIZE + CELL_SIZE/2 }));
+// ========== 骰子定義 ==========
+const ALL_DICE_DEFS = {
+    WIND: { label: '🌪️', color: '#74b9ff', damage: 8, interval: 0.45, splash: 0, slow: 0, critRate: 0, critMul: 0, poison: 0, chain: 0, attackType: 'front' },
+    ICE: { label: '❄️', color: '#4fc3f7', damage: 5, interval: 1.3, splash: 0, slow: 0.4, critRate: 0, critMul: 0, poison: 0, chain: 0, attackType: 'front' },
+    POISON: { label: '☠️', color: '#6c5ce7', damage: 6, interval: 1.0, splash: 0, slow: 0, critRate: 0, critMul: 0, poison: { damage: 4, duration: 3, tick: 0.5 }, chain: 0, attackType: 'front' },
+    FIRE: { label: '🔥', color: '#e17055', damage: 6, interval: 1.6, splash: 0.8, slow: 0, critRate: 0, critMul: 0, poison: 0, chain: 0, attackType: 'front' },
+    THUNDER: { label: '⚡', color: '#fdcb6e', damage: 7, interval: 1.2, splash: 0, slow: 0, critRate: 0, critMul: 0, poison: 0, chain: { count: 3, range: 2.5, damageFactor: 0.6 }, attackType: 'front' },
+    RANDOM: { label: '🎲', color: '#a29bfe', damage: 6, interval: 1.1, splash: 0, slow: 0, critRate: 0, critMul: 0, poison: 0, chain: 0, attackType: 'random' },
+    JOKER: { label: '🃏', color: '#fd79a8', damage: 3, interval: 1.0, splash: 0, slow: 0, critRate: 0, critMul: 0, poison: 0, chain: 0, attackType: 'front', isJoker: true },
+    SAPLING: { label: '🌱', color: '#55efc4', damage: 2, interval: 1.4, splash: 0, slow: 0, critRate: 0, critMul: 0, poison: 0, chain: 0, attackType: 'front', isSapling: true },
+};
 
-// --- 工具 ---
+function getActiveDiceKeys() { return game.activeDiceTypes; }
+
+// ========== 升級系統 ==========
+const UPGRADE_MULTIPLIERS = [1.0, 1.2, 1.4, 1.6, 2.0];
+const UPGRADE_COSTS = [0, 100, 200, 400, 700];
+const MAX_LEVEL = 5;
+let upgradeLevels = {};
+
+function initUpgradeLevels() {
+    upgradeLevels = {};
+    for (let key of game.activeDiceTypes) {
+        upgradeLevels[key] = 1;
+    }
+}
+function getUpgradeMultiplier(type) {
+    const lv = upgradeLevels[type] || 1;
+    return UPGRADE_MULTIPLIERS[Math.min(lv-1, UPGRADE_MULTIPLIERS.length-1)];
+}
+function getUpgradeCost(type) {
+    const lv = upgradeLevels[type] || 1;
+    if (lv >= MAX_LEVEL) return null;
+    return UPGRADE_COSTS[lv];
+}
+
+// ========== 工具 ==========
 function rand(min, max) { return Math.random() * (max - min) + min; }
 function randInt(min, max) { return Math.floor(rand(min, max+1)); }
 function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
 
-let toastTimer = null;
 function showToast(msg, duration=1800) {
-    toastEl.textContent = msg;
-    toastEl.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toastEl.classList.remove('show'), duration);
+    game.toastMessage = msg;
+    game.toastTimer = duration / 1000;
+    game.toastDuration = duration / 1000;
+}
+function addFloatingText(x, y, text, color='#ffd93d', size=20) {
+    game.floatingTexts.push({ x, y, text, color, size, life:1.2, maxLife:1.2, vy:-50 });
+}
+function updateFloatingTexts(dt) {
+    for (let i=game.floatingTexts.length-1; i>=0; i--) {
+        const ft = game.floatingTexts[i];
+        ft.life -= dt;
+        ft.y += ft.vy * dt;
+        if (ft.life <= 0) game.floatingTexts.splice(i,1);
+    }
 }
 
-// --- 棋盤 ---
+// ========== 棋盤 ==========
 function initBoard() {
     game.board = [];
     for (let r=0; r<ROWS; r++) {
@@ -511,34 +874,37 @@ function getEmptyCells() {
     return cells;
 }
 
-// --- 骰子 ---
+// ========== 骰子創建 ==========
 function createDice(type, star=1) {
-    const def = DICE_TYPES[type];
+    const def = ALL_DICE_DEFS[type];
+    if (!def) return null;
     const s = clamp(star, 1, game.maxStar);
+    const mult = getUpgradeMultiplier(type);
     return {
         type, star: s, cooldown: 0,
-        get damage() { return def.damage * (1 + (s-1)*0.7); },
-        get interval() { return def.interval * (1 - (s-1)*0.06); },
+        get damage() { return def.damage * (1 + (s-1)*0.7) * mult; },
+        get interval() { return def.interval / mult; },
         get label() { return def.label; },
         get color() { return def.color; },
-        get name() { return getDiceName(def.nameKey); },
+        get name() { return getDiceName(type); },
         get splash() { return def.splash || 0; },
         get slow() { return def.slow || 0; },
         get critRate() { return def.critRate || 0; },
         get critMul() { return def.critMul || 2.0; },
         get poison() { return def.poison || 0; },
         get chain() { return def.chain || 0; },
+        get attackType() { return def.attackType || 'front'; },
+        get isJoker() { return def.isJoker || false; },
+        get isSapling() { return def.isSapling || false; },
     };
 }
 function randomDiceType() {
-    const weights = [20,20,20,20,20];
-    const total = weights.reduce((a,b)=>a+b,0);
-    let r = Math.random() * total;
-    for (let i=0; i<weights.length; i++) { r -= weights[i]; if (r<=0) return DICE_KEYS[i]; }
-    return DICE_KEYS[0];
+    const keys = getActiveDiceKeys();
+    if (keys.length === 0) return 'WIND';
+    return keys[randInt(0, keys.length-1)];
 }
 
-// --- 擲骰 ---
+// ========== 擲骰 ==========
 function rollDice() {
     if (game.gameOver || !game.gameStarted) return;
     const data = getData();
@@ -557,10 +923,8 @@ function rollDice() {
     const dice = createDice(type, 1);
     const pos = empty[randInt(0, empty.length-1)];
     game.board[pos.row][pos.col] = dice;
-    game.diceCost += 1;
+    game.diceCost += 10;
     updateUI();
-    rollBtn.textContent = `🎲 ${data.rollBtn} (-${costPaid})`;
-    setTimeout(() => { if (!game.gameOver) rollBtn.textContent = `🎲 ${data.rollBtn} (${game.diceCost})`; }, 800);
     const msg = data.toastPlace
         .replace(/\{label\}/g, dice.label)
         .replace(/\{name\}/g, dice.name)
@@ -570,15 +934,11 @@ function rollDice() {
     updateDicePreview(dice);
 }
 function updateUI() {
-    goldSpan.textContent = game.gold;
-    lifeSpan.textContent = game.lives;
-    waveSpan.textContent = game.wave;
-    if (game.gameOver) waveSpan.textContent = '💀';
     const data = getData();
     if (!game.gameOver && game.gameStarted) {
-        rollBtn.textContent = `🎲 ${data.rollBtn} (${game.diceCost})`;
+        document.getElementById('rollBtn').textContent = `🎲 ${data.rollBtn} (${game.diceCost})`;
     } else if (game.gameOver) {
-        rollBtn.textContent = `🎲 ${data.rollBtn}`;
+        document.getElementById('rollBtn').textContent = `🎲 ${data.rollBtn}`;
     }
 }
 function updateDicePreview(dice) {
@@ -595,19 +955,34 @@ function updateDicePreview(dice) {
     `;
 }
 
-// --- 拖曳 ---
+// ========== 拖曳合併 ==========
 function getGridPosFromPointer(e) {
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width, scaleY = canvas.height / rect.height;
     const mx = (e.clientX - rect.left)*scaleX, my = (e.clientY - rect.top)*scaleY;
-    if (mx<0 || my<0 || mx>canvas.width || my>canvas.height) return null;
-    const col = Math.floor(mx/CELL_SIZE), row = Math.floor(my/CELL_SIZE);
+    if (mx < boardX || my < boardY || mx > boardX+BOARD_WIDTH || my > boardY+BOARD_HEIGHT) return null;
+    const col = Math.floor((mx - boardX) / CELL_SIZE);
+    const row = Math.floor((my - boardY) / CELL_SIZE);
     if (col<0 || col>=COLS || row<0 || row>=ROWS) return null;
     return { col, row, x:mx, y:my };
 }
 function onPointerDown(e) {
     e.preventDefault();
     if (game.gameOver || !game.gameStarted) return;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width, scaleY = canvas.height / rect.height;
+    const mx = (e.clientX - rect.left)*scaleX, my = (e.clientY - rect.top)*scaleY;
+    if (mx >= upgradeX && mx <= upgradeX+UPGRADE_WIDTH && my >= upgradeY && my <= upgradeY+UPGRADE_HEIGHT) {
+        const itemW = UPGRADE_WIDTH / Math.max(getActiveDiceKeys().length, 5);
+        const idx = Math.floor((mx - upgradeX) / itemW);
+        const keys = getActiveDiceKeys();
+        if (idx < keys.length) {
+            const type = keys[idx];
+            upgradeType(type);
+        }
+        return;
+    }
+
     const pos = getGridPosFromPointer(e);
     if (!pos) return;
     const { col, row } = pos;
@@ -661,22 +1036,61 @@ function onPointerUp(e) {
             const targetDice = game.board[row][col];
             const sourceDice = game.board[src.row][src.col];
             if (sourceDice && targetDice) {
-                if (sourceDice.type === targetDice.type && sourceDice.star === targetDice.star) {
-                    if (sourceDice.star >= game.maxStar) {
-                        showToast(`⭐ 已達最高星級 (${game.maxStar}星)`);
-                    } else {
+                const sameStar = sourceDice.star === targetDice.star;
+                if (!sameStar) {
+                    showToast('❌ 必須同星級');
+                } else if (sourceDice.star >= game.maxStar) {
+                    showToast(`⭐ 已達最高星級 (${game.maxStar}星)`);
+                } else {
+                    let merged = false;
+                    if (sourceDice.isSapling) {
                         const newStar = sourceDice.star + 1;
-                        const newDice = createDice(sourceDice.type, newStar);
-                        newDice.cooldown = 0;
-                        game.board[row][col] = newDice;
-                        game.board[src.row][src.col] = null;
-                        const mergeMsg = data.toastMerge
-                            .replace(/\{star\}/g, newStar)
-                            .replace(/\{name\}/g, newDice.name);
-                        showToast(mergeMsg);
-                        updateDicePreview(newDice);
+                        const newDice = createDice(targetDice.type, newStar);
+                        if (newDice) {
+                            game.board[row][col] = newDice;
+                            game.board[src.row][src.col] = null;
+                            merged = true;
+                            const mergeMsg = data.toastMerge
+                                .replace(/\{star\}/g, newStar)
+                                .replace(/\{name\}/g, newDice.name);
+                            showToast(mergeMsg);
+                            updateDicePreview(newDice);
+                        }
+                    } else if (sourceDice.isJoker) {
+                        const newStar = sourceDice.star + 1;
+                        const newType = randomDiceType();
+                        const newDice = createDice(newType, newStar);
+                        if (newDice) {
+                            game.board[row][col] = newDice;
+                            game.board[src.row][src.col] = null;
+                            merged = true;
+                            const mergeMsg = data.toastMerge
+                                .replace(/\{star\}/g, newStar)
+                                .replace(/\{name\}/g, newDice.name);
+                            showToast(mergeMsg);
+                            updateDicePreview(newDice);
+                        }
+                    } else if (sourceDice.type === targetDice.type) {
+                        const newStar = sourceDice.star + 1;
+                        const newType = randomDiceType();
+                        const newDice = createDice(newType, newStar);
+                        if (newDice) {
+                            game.board[row][col] = newDice;
+                            game.board[src.row][src.col] = null;
+                            merged = true;
+                            const mergeMsg = data.toastMerge
+                                .replace(/\{star\}/g, newStar)
+                                .replace(/\{name\}/g, newDice.name);
+                            showToast(mergeMsg);
+                            updateDicePreview(newDice);
+                        }
+                    } else {
+                        showToast('❌ 普通合併需同類型，或使用小丑/樹苗特殊合併');
                     }
-                } else showToast('❌ 必須同類型且同星級');
+                    if (merged) {
+                        updateUI();
+                    }
+                }
             }
         } else showToast('❌ 無效的合併目標');
     }
@@ -687,18 +1101,62 @@ window.addEventListener('pointermove', onPointerMove);
 window.addEventListener('pointerup', onPointerUp);
 canvas.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
 
-// --- 敵人與波次 ---
+// ========== 升級函數 ==========
+function upgradeType(type) {
+    const data = getData();
+    const lv = upgradeLevels[type] || 1;
+    if (lv >= MAX_LEVEL) { showToast(data.upgradeMax); return false; }
+    const cost = UPGRADE_COSTS[lv];
+    if (game.gold < cost) { showToast(data.upgradeFail.replace(/\{cost\}/g, cost)); return false; }
+    game.gold -= cost;
+    upgradeLevels[type] = lv + 1;
+    for (let r=0; r<ROWS; r++) for (let c=0; c<COLS; c++) {
+        const dice = game.board[r][c];
+        if (dice && dice.type === type) {
+            const newDice = createDice(type, dice.star);
+            newDice.cooldown = dice.cooldown;
+            game.board[r][c] = newDice;
+        }
+    }
+    updateDicePreview();
+    updateUI();
+    const name = getDiceName(type);
+    showToast(data.upgradeSuccess.replace(/\{name\}/g, name).replace(/\{level\}/g, upgradeLevels[type]));
+    addFloatingText(W-80, topBarY+10, `-${cost}`, '#ff6b6b', 18);
+    return true;
+}
+function getTotalStars(type) {
+    let sum = 0;
+    for (let r=0; r<ROWS; r++) for (let c=0; c<COLS; c++) {
+        const dice = game.board[r][c];
+        if (dice && dice.type === type) sum += dice.star;
+    }
+    return sum;
+}
+
+// ========== Boss 系統 ==========
+const BOSS_TYPES = [
+    { id: 'mage', nameKey: 'mage', emoji: '🧙', color: '#9b59b6' },
+    { id: 'lion', nameKey: 'lion', emoji: '🦁', color: '#e67e22' },
+    { id: 'snake', nameKey: 'snake', emoji: '🐍', color: '#2ecc71' },
+    { id: 'lamb', nameKey: 'lamb', emoji: '🐑', color: '#f1c40f' },
+    { id: 'knight', nameKey: 'knight', emoji: '🛡️', color: '#3498db' },
+    { id: 'hacker', nameKey: 'hacker', emoji: '💻', color: '#2c3e50' },
+    { id: 'slime', nameKey: 'slime', emoji: '🟢', color: '#27ae60' },
+    { id: 'magnet', nameKey: 'magnet', emoji: '🧲', color: '#e74c3c' },
+    { id: 'cloud', nameKey: 'cloud', emoji: '☁️', color: '#ecf0f1' },
+];
+
+// ========== 敵人生成 ==========
 function spawnEnemy() {
     if (game.gameOver || !game.isWaveActive) return;
     if (game.enemiesSpawned >= game.enemiesPerWave) return;
 
-    let isBoss = false;
-    let bossType = null;
+    let isBoss = false, bossType = null;
     if (game.wave % 10 === 0 && game.hasBoss) {
-        isBoss = true;
-        game.hasBoss = false;
-        const typeDef = BOSS_TYPES[bossIndex % BOSS_TYPES.length];
-        bossIndex++;
+        isBoss = true; game.hasBoss = false;
+        const randIdx = randInt(0, BOSS_TYPES.length-1);
+        const typeDef = BOSS_TYPES[randIdx];
         bossType = typeDef.id;
         const hpBase = 80 + game.wave * 12;
         const hp = hpBase * 4.5;
@@ -707,26 +1165,11 @@ function spawnEnemy() {
         const bossEntity = {
             pathIndex: 0,
             x: PATH_PIXELS[0].x, y: PATH_PIXELS[0].y,
-            hp, maxHp: hp,
-            speed,
-            reward,
-            type: 'boss',
-            size: 1.8,
-            isBoss: true,
-            alive: true,
-            bossType: bossType,
-            abilityPhase: 0,
-            abilityCooldown: 0,
-            abilityTriggered: false,
-            slimeChildren: [],
-            cloudTimer: 0,
-            warningTimer: 0,
-            warningActive: false,
-            warningText: '',
+            hp, maxHp: hp, speed, reward, type: 'boss', size: 1.8,
+            isBoss: true, alive: true, bossType: bossType, abilityPhase: 0,
         };
         const bossName = getBossName(bossType);
-        const appearMsg = getData().bossAppear.replace(/\{name\}/g, bossName);
-        showToast(appearMsg, 2500);
+        showToast(getData().bossAppear.replace(/\{name\}/g, bossName), 2500);
         game.currentBoss = bossEntity;
         game.enemies.push(bossEntity);
         game.enemiesSpawned++;
@@ -736,26 +1179,128 @@ function spawnEnemy() {
     const hpBase = 20 + game.wave * 6;
     let hp = hpBase * (0.85 + Math.random()*0.3);
     let speed = 1.0 + game.wave * 0.025;
-    let reward = 4 + Math.floor(game.wave/3);
-    let size = 1;
-    let type = 'normal';
+    let reward = 10 + Math.floor(game.wave/2) * 2;
+    let size = 1, type = 'normal';
     const rnd = Math.random();
-    if (rnd < 0.15 && game.wave > 2) { type='tank'; hp*=2.0; reward+=3; size=1.3; }
-    else if (rnd < 0.25 && game.wave > 1) { type='fast'; hp*=0.7; reward+=2; size=0.8; speed*=1.6; }
+    if (rnd < 0.15 && game.wave > 2) { type='tank'; hp*=2.0; reward+=5; size=1.3; }
+    else if (rnd < 0.25 && game.wave > 1) { type='fast'; hp*=0.7; reward+=3; size=0.8; speed*=1.6; }
     const enemy = {
         pathIndex: 0,
         x: PATH_PIXELS[0].x, y: PATH_PIXELS[0].y,
-        hp, maxHp: hp,
-        speed, reward, type, size,
-        slowTimer:0, slowFactor:0,
-        hitFlash:0, alive:true,
-        isBoss: false,
-        poison: null,
+        hp, maxHp: hp, speed, reward, type, size,
+        slowTimer:0, slowFactor:0, hitFlash:0, alive:true,
+        isBoss: false, poison: null,
     };
     game.enemies.push(enemy);
     game.enemiesSpawned++;
 }
 
+function updateEnemies(dt) {
+    if (game.currentBoss && game.currentBoss.alive) {
+        updateBossAbilities(dt);
+    }
+    let anyAtTwoThirds = false;
+    for (const e of game.enemies) {
+        if (!e.alive) continue;
+        const progress = e.pathIndex / (PATH_PIXELS.length - 1);
+        if (progress >= 0.66) { anyAtTwoThirds = true; break; }
+    }
+    game.enemyReachedTwoThirds = anyAtTwoThirds;
+    updateEmoji();
+
+    for (let i = game.enemies.length-1; i>=0; i--) {
+        const e = game.enemies[i];
+        if (!e.alive) continue;
+        let speedMul = 1;
+        if (e.slowTimer > 0) { e.slowTimer -= dt; speedMul = 1 - e.slowFactor*0.5; }
+        const targetIdx = Math.min(e.pathIndex + 1, PATH_PIXELS.length-1);
+        const target = PATH_PIXELS[targetIdx];
+        const dx = target.x - e.x, dy = target.y - e.y;
+        const d = Math.hypot(dx, dy);
+        const step = e.speed * dt * 60 * speedMul;
+        if (d < step) {
+            e.x = target.x; e.y = target.y;
+            e.pathIndex = targetIdx;
+            if (e.pathIndex >= PATH_PIXELS.length - 1) {
+                e.alive = false;
+                game.lives--;
+                game.screenFlash = 0.4;
+                if (game.lives <= 0) {
+                    game.lives = 0; game.gameOver = true;
+                    showToast(getData().toastGameOver.replace(/\{wave\}/g, game.wave), 3000);
+                    showGameOver();
+                }
+                updateUI();
+                continue;
+            }
+        } else {
+            e.x += (dx/d) * step;
+            e.y += (dy/d) * step;
+        }
+        if (e.poison) {
+            e.poison.timer -= dt;
+            if (e.poison.timer <= 0) e.poison = null;
+            else {
+                e.poison.nextTick -= dt;
+                if (e.poison.nextTick <= 0) {
+                    const poisonDmg = e.poison.damagePerTick;
+                    e.hp -= poisonDmg;
+                    e.hitFlash = 0.2;
+                    addFloatingText(e.x, e.y-20, `-${Math.round(poisonDmg)}`, '#a29bfe');
+                    e.poison.nextTick = e.poison.tickInterval;
+                }
+            }
+        }
+        if (e.hitFlash > 0) e.hitFlash -= dt;
+        if (e.hp <= 0) {
+            e.alive = false;
+            game.gold += e.reward;
+            addFloatingText(e.x, e.y-30, `+${e.reward}`, '#2ecc71', 16);
+            if (e.isBoss && e.bossType) handleBossDeath(e);
+            updateUI();
+        }
+    }
+    game.enemies = game.enemies.filter(e => e.alive);
+    if (game.currentBoss && !game.currentBoss.alive) game.currentBoss = null;
+    if (game.isWaveActive && game.enemiesSpawned >= game.enemiesPerWave && game.enemies.length === 0) {
+        game.isWaveActive = false;
+        game.waveCompleted = true;
+        game.emojiTimer = 5.0;
+        if (game.enemyReachedTwoThirds) {
+            game.emoji = '😭';
+        } else {
+            game.emoji = '😍';
+        }
+        game.bossLockedDice = [];
+        game.bossHackedDice = [];
+        game.bossCloud = null;
+        if (!game.gameOver) {
+            startWave();
+        }
+    }
+    if (game.emojiTimer > 0) {
+        game.emojiTimer -= dt;
+        if (game.emojiTimer <= 0) {
+            game.emojiTimer = 0;
+            if (game.waveCompleted) {
+                game.waveCompleted = false;
+                game.emoji = '😎';
+            }
+        }
+    }
+}
+
+function updateEmoji() {
+    if (game.waveCompleted) return;
+    if (game.emojiTimer > 0) return;
+    if (game.enemyReachedTwoThirds) {
+        game.emoji = '😱';
+    } else {
+        game.emoji = '😎';
+    }
+}
+
+// ========== Boss能力 (精簡) ==========
 function updateBossAbilities(dt) {
     if (!game.currentBoss || !game.currentBoss.alive) return;
     const boss = game.currentBoss;
@@ -788,9 +1333,15 @@ function triggerBossAbility(boss, phase) {
                     const pick = diceCells[randInt(0, diceCells.length-1)];
                     const dice = game.board[pick.row][pick.col];
                     if (dice) {
-                        game.board[pick.row][pick.col] = null;
-                        addFloatingText(pick.col*CELL_SIZE+CELL_SIZE/2, pick.row*CELL_SIZE+CELL_SIZE/2, '💥 摧毀', '#ff6b6b', 24);
-                        showToast(`💥 隕石摧毀了 ${dice.label} ${dice.name}!`);
+                        game._markedDice = [{row: pick.row, col: pick.col, timer: 1.0}];
+                        setTimeout(() => {
+                            if (game.board[pick.row] && game.board[pick.row][pick.col] === dice) {
+                                game.board[pick.row][pick.col] = null;
+                                addFloatingText(boardX+pick.col*CELL_SIZE+CELL_SIZE/2, boardY+pick.row*CELL_SIZE+CELL_SIZE/2, '💥 摧毀', '#ff6b6b', 24);
+                                showToast(`💥 隕石摧毀了 ${dice.label} ${dice.name}!`);
+                                game._markedDice = [];
+                            }
+                        }, 1000);
                     }
                 }
                 const heal = boss.maxHp * 0.2;
@@ -803,21 +1354,19 @@ function triggerBossAbility(boss, phase) {
             showBossWarning(data.bossWarningLion, 1.5);
             setTimeout(() => {
                 if (!boss.alive) return;
-                let count = 0;
-                const half = Math.floor(ROWS/2);
-                for (let r=0; r<half; r++) for (let c=0; c<COLS; c++) {
+                let removed = 0;
+                for (let r=0; r<ROWS; r++) for (let c=0; c<COLS; c++) {
                     if (isOccupied(c,r)) {
                         const dice = game.board[r][c];
-                        if (dice && dice.star > 1) {
-                            dice.star--;
-                            const newDice = createDice(dice.type, dice.star);
-                            newDice.cooldown = dice.cooldown;
-                            game.board[r][c] = newDice;
-                            count++;
+                        if (dice && dice.star === 1) {
+                            game.board[r][c] = null;
+                            removed++;
+                            addFloatingText(boardX+c*CELL_SIZE+CELL_SIZE/2, boardY+r*CELL_SIZE+CELL_SIZE/2, '❌ 移除', '#ff6b6b', 18);
                         }
                     }
                 }
-                showToast(`🦁 咆哮降星！影響 ${count} 顆骰子`);
+                showToast(`🦁 咆哮！移除了 ${removed} 顆1星骰子`);
+                game._markedDice = [];
             }, 1500);
             boss.speed *= 1.8;
             setTimeout(() => { if (boss.alive) boss.speed /= 1.8; }, 1000);
@@ -831,18 +1380,12 @@ function triggerBossAbility(boss, phase) {
                     const idx = Math.min(boss.pathIndex + 2 + i, PATH_PIXELS.length-1);
                     const pos = PATH_PIXELS[idx];
                     const enemy = {
-                        pathIndex: idx,
-                        x: pos.x, y: pos.y,
-                        hp: 30 + game.wave*4,
-                        maxHp: 30 + game.wave*4,
-                        speed: 1.2,
-                        reward: 3,
-                        type: 'normal',
-                        size: 0.9,
-                        slowTimer:0, slowFactor:0,
-                        hitFlash:0, alive:true,
-                        isBoss: false,
-                        poison: null,
+                        pathIndex: idx, x: pos.x, y: pos.y,
+                        hp: 30 + game.wave*4, maxHp: 30 + game.wave*4,
+                        speed: 1.2, reward: 10 + Math.floor(game.wave/2)*2,
+                        type: 'normal', size: 0.9,
+                        slowTimer:0, slowFactor:0, hitFlash:0, alive:true,
+                        isBoss: false, poison: null,
                     };
                     game.enemies.push(enemy);
                 }
@@ -903,19 +1446,24 @@ function triggerBossAbility(boss, phase) {
                 for (let r=0; r<ROWS; r++) for (let c=0; c<COLS; c++) {
                     if (isOccupied(c,r) && !isPathCell(c,r)) diceCells.push({row:r, col:c});
                 }
-                let hacked = [];
+                let hacked = [], marked = [];
                 for (let i=0; i<Math.min(2, diceCells.length); i++) {
                     const pick = diceCells.splice(randInt(0, diceCells.length-1), 1)[0];
-                    if (pick) hacked.push(pick);
+                    if (pick) {
+                        hacked.push(pick);
+                        marked.push({row: pick.row, col: pick.col, timer: 1.0});
+                    }
                 }
-                game.bossHackedDice = hacked;
-                showToast(`💻 ${hacked.length} 顆骰子被控制！攻擊會補血！`);
+                game._markedDice = marked;
+                setTimeout(() => {
+                    game.bossHackedDice = hacked;
+                    game._markedDice = [];
+                    showToast(`💻 ${hacked.length} 顆骰子被控制！攻擊會補血！`);
+                }, 1000);
             }, 2000);
             break;
         }
-        case 'slime': {
-            break;
-        }
+        case 'slime': { break; }
         case 'magnet': {
             showBossWarning(data.bossWarningMagnet, 1.5);
             setTimeout(() => {
@@ -965,95 +1513,21 @@ function triggerBossAbility(boss, phase) {
         default: break;
     }
 }
-
 function updateBossContinuousEffects(dt) {
     if (game.bossCloud) {
         game.bossCloud.timer -= dt;
         if (game.bossCloud.timer <= 0) { game.bossCloud = null; showToast('☁️ 迷霧消散'); }
     }
+    if (game._markedDice) {
+        for (let i=game._markedDice.length-1; i>=0; i--) {
+            game._markedDice[i].timer -= dt;
+            if (game._markedDice[i].timer <= 0) game._markedDice.splice(i,1);
+        }
+    }
 }
-
 function showBossWarning(text, duration) {
     game.bossWarning = { text, timer: duration, duration };
 }
-
-function updateEnemies(dt) {
-    if (game.currentBoss && game.currentBoss.alive) {
-        updateBossAbilities(dt);
-    }
-
-    for (let i = game.enemies.length-1; i>=0; i--) {
-        const e = game.enemies[i];
-        if (!e.alive) continue;
-        let speedMul = 1;
-        if (e.slowTimer > 0) { e.slowTimer -= dt; speedMul = 1 - e.slowFactor*0.5; }
-        const targetIdx = Math.min(e.pathIndex + 1, PATH_PIXELS.length-1);
-        const target = PATH_PIXELS[targetIdx];
-        const dx = target.x - e.x, dy = target.y - e.y;
-        const d = Math.hypot(dx, dy);
-        const step = e.speed * dt * 60 * speedMul;
-        if (d < step) {
-            e.x = target.x; e.y = target.y;
-            e.pathIndex = targetIdx;
-            if (e.pathIndex >= PATH_PIXELS.length - 1) {
-                e.alive = false;
-                game.lives--;
-                game.screenFlash = 0.4;
-                if (game.lives <= 0) {
-                    game.lives = 0;
-                    game.gameOver = true;
-                    const data = getData();
-                    showToast(data.toastGameOver.replace(/\{wave\}/g, game.wave), 3000);
-                    showGameOver();
-                }
-                updateUI();
-                continue;
-            }
-        } else {
-            e.x += (dx/d) * step;
-            e.y += (dy/d) * step;
-        }
-
-        if (e.poison) {
-            e.poison.timer -= dt;
-            if (e.poison.timer <= 0) e.poison = null;
-            else {
-                e.poison.nextTick -= dt;
-                if (e.poison.nextTick <= 0) {
-                    const poisonDmg = e.poison.damagePerTick;
-                    e.hp -= poisonDmg;
-                    e.hitFlash = 0.2;
-                    addFloatingText(e.x, e.y-20, `-${Math.round(poisonDmg)}`, '#a29bfe');
-                    e.poison.nextTick = e.poison.tickInterval;
-                }
-            }
-        }
-
-        if (e.hitFlash > 0) e.hitFlash -= dt;
-        if (e.hp <= 0) {
-            e.alive = false;
-            game.gold += e.reward;
-            if (e.isBoss && e.bossType) {
-                handleBossDeath(e);
-            }
-            updateUI();
-        }
-    }
-
-    game.enemies = game.enemies.filter(e => e.alive);
-    if (game.currentBoss && !game.currentBoss.alive) game.currentBoss = null;
-
-    if (game.isWaveActive && game.enemiesSpawned >= game.enemiesPerWave && game.enemies.length === 0) {
-        game.isWaveActive = false;
-        if (!game.gameOver) {
-            game.bossLockedDice = [];
-            game.bossHackedDice = [];
-            game.bossCloud = null;
-            startWave();
-        }
-    }
-}
-
 function handleBossDeath(boss) {
     if (boss.bossType === 'slime') {
         const childHp = boss.maxHp / 3;
@@ -1063,27 +1537,20 @@ function handleBossDeath(boss) {
                 pathIndex: boss.pathIndex,
                 x: boss.x + (i===0 ? -20 : 20),
                 y: boss.y + (i===0 ? -20 : 20),
-                hp: childHp,
-                maxHp: childHp,
-                speed: childSpeed,
+                hp: childHp, maxHp: childHp, speed: childSpeed,
                 reward: Math.floor(boss.reward/2),
-                type: 'normal',
-                size: boss.size * 0.7,
-                isBoss: false,
-                alive: true,
-                slowTimer:0, slowFactor:0,
-                hitFlash:0,
-                poison: null,
-                slimeLevel: (boss.slimeLevel||0) + 1,
+                type: 'normal', size: boss.size * 0.7,
+                isBoss: false, alive: true,
+                slowTimer:0, slowFactor:0, hitFlash:0,
+                poison: null, slimeLevel: (boss.slimeLevel||0) + 1,
             };
-            if (child.slimeLevel <= 2) {
-                game.enemies.push(child);
-            }
+            if (child.slimeLevel <= 2) game.enemies.push(child);
         }
         showToast('🟢 史萊姆分裂！');
     }
 }
 
+// ========== 攻擊 ==========
 function updateAttacks(dt) {
     const board = game.board;
     for (let r=0; r<ROWS; r++) {
@@ -1094,13 +1561,26 @@ function updateAttacks(dt) {
             if (dice.cooldown > 0) continue;
 
             const isHacked = game.bossHackedDice.some(d => d.row===r && d.col===c);
-            const pos = { x: c*CELL_SIZE+CELL_SIZE/2, y: r*CELL_SIZE+CELL_SIZE/2 };
+            const pos = { x: boardX + c*CELL_SIZE+CELL_SIZE/2, y: boardY + r*CELL_SIZE+CELL_SIZE/2 };
+
             let target = null;
-            let minDist = Infinity;
+            let candidates = [];
             for (const e of game.enemies) {
                 if (!e.alive) continue;
-                const d = dist(pos, e);
-                if (d < minDist) { minDist = d; target = e; }
+                candidates.push(e);
+            }
+            if (candidates.length === 0) continue;
+
+            if (dice.attackType === 'random') {
+                target = candidates[randInt(0, candidates.length-1)];
+            } else {
+                let maxIdx = -1;
+                for (const e of candidates) {
+                    if (e.pathIndex > maxIdx) {
+                        maxIdx = e.pathIndex;
+                        target = e;
+                    }
+                }
             }
             if (!target) continue;
 
@@ -1112,8 +1592,7 @@ function updateAttacks(dt) {
             if (isHacked) {
                 target.hp += damage;
                 target.hitFlash = 0.2;
-                const healText = getData().hackedHeal.replace(/\{dmg\}/g, Math.round(damage));
-                addFloatingText(target.x, target.y-20, healText, '#2ecc71', 18);
+                addFloatingText(target.x, target.y-20, `+${Math.round(damage)}`, '#2ecc71', 18);
             } else {
                 let dmgReduction = 1;
                 if (game.bossCloud) {
@@ -1178,7 +1657,6 @@ function updateAttacks(dt) {
         }
     }
 }
-
 function updateProjectiles(dt) {
     for (let i=game.projectiles.length-1; i>=0; i--) {
         const p = game.projectiles[i];
@@ -1191,39 +1669,24 @@ function updateProjectiles(dt) {
     }
 }
 
-function addFloatingText(x, y, text, color='#ffd93d', size=20) {
-    game.floatingTexts.push({ x, y, text, color, size, life:1.2, maxLife:1.2, vy:-60 });
-}
-function updateFloatingTexts(dt) {
-    for (let i=game.floatingTexts.length-1; i>=0; i--) {
-        const ft = game.floatingTexts[i];
-        ft.life -= dt;
-        ft.y += ft.vy * dt;
-        if (ft.life <= 0) game.floatingTexts.splice(i,1);
-    }
-}
-
 function startWave() {
     if (game.gameOver) return;
     if (game.isWaveActive) return;
     game.wave++;
     game.enemiesSpawned = 0;
     game.enemiesPerWave = 4 + game.wave * 2;
-    if (game.wave % 10 === 0) {
-        game.hasBoss = true;
-        game.enemiesPerWave += 1;
-    } else {
-        game.hasBoss = false;
-    }
+    if (game.wave % 10 === 0) { game.hasBoss = true; game.enemiesPerWave += 1; }
+    else game.hasBoss = false;
     game.isWaveActive = true;
     game.spawnTimer = 0;
     game.spawnInterval = Math.max(0.35, 0.9 - game.wave*0.02);
     updateUI();
     const data = getData();
-    const msg = data.toastWaveStart
-        .replace(/\{wave\}/g, game.wave)
-        .replace(/\{count\}/g, game.enemiesPerWave);
-    showToast(msg);
+    showToast(data.toastWaveStart.replace(/\{wave\}/g, game.wave).replace(/\{count\}/g, game.enemiesPerWave));
+    game.enemyReachedTwoThirds = false;
+    if (game.emojiTimer <= 0 && !game.waveCompleted) {
+        game.emoji = '😎';
+    }
 }
 function updateWaveSpawning(dt) {
     if (!game.isWaveActive) return;
@@ -1237,45 +1700,57 @@ function updateWaveSpawning(dt) {
 
 function showGameOver() {
     const data = getData();
-    finalWaveText.textContent = data.finalWave.replace(/\{wave\}/g, game.wave);
-    gameoverOverlay.classList.add('visible');
-    rollBtn.disabled = true;
+    const scoreEarned = game.wave * 5 + Math.floor(game.wave / 10) * 10;
+    saveData.totalScore += scoreEarned;
+    saveSaveData();
+    document.getElementById('finalWaveText').textContent = data.finalWave.replace(/\{wave\}/g, game.wave);
+    document.getElementById('scoreEarned').textContent = data.scoreEarned.replace(/\{score\}/g, scoreEarned);
+    document.getElementById('gameoverOverlay').classList.add('visible');
+    document.getElementById('rollBtn').disabled = true;
+    updateCoverUI();
 }
 
 function restartGame() {
     game.gameOver = false;
-    game.gameStarted = true;
+    game.gameStarted = false;
+    initUpgradeLevels();
+    game.gold = 100;
+    game.diceCost = 10;
+    game.lives = 3;
+    game.wave = 0;
     game.enemies = [];
     game.projectiles = [];
     game.floatingTexts = [];
     game.isWaveActive = false;
-    game.wave = 0;
-    game.lives = 3;
-    game.gold = 12;
-    game.diceCost = 1;
-    game.screenFlash = 0;
-    game.hasBoss = false;
     game.enemiesSpawned = 0;
     game.enemiesPerWave = 0;
     game.spawnTimer = 0;
+    game.screenFlash = 0;
     game.currentBoss = null;
     game.bossWarning = null;
     game.bossLockedDice = [];
     game.bossHackedDice = [];
     game.bossCloud = null;
-    bossIndex = 0;
+    game._markedDice = [];
+    game.emoji = '😎';
+    game.emojiTimer = 0;
+    game.waveCompleted = false;
+    game.enemyReachedTwoThirds = false;
+    game._lastGold = 100;
+    game.toastMessage = '';
+    game.toastTimer = 0;
+    game.activeDiceTypes = [...saveData.selectedDice];
+    initUpgradeLevels();
     initBoard();
-    gameoverOverlay.classList.remove('visible');
-    rollBtn.disabled = false;
+    document.getElementById('gameoverOverlay').classList.remove('visible');
+    document.getElementById('rollBtn').disabled = false;
     updateUI();
     updateDicePreview(null);
-    const data = getData();
-    rollBtn.textContent = `🎲 ${data.rollBtn} (${game.diceCost})`;
-    startWave();
-    showToast(data.toastRestart, 1000);
+    document.getElementById('startOverlay').classList.remove('hidden');
+    showToast(getData().toastRestart, 1500);
 }
 
-// --- 繪製 ---
+// ========== 繪製 ==========
 function drawDicePips(ctx, cx, cy, size, star) {
     const s = Math.min(star, 6);
     const dotRadius = size * 0.09;
@@ -1300,13 +1775,126 @@ function drawDicePips(ctx, cx, cy, size, star) {
     ctx.shadowBlur=0;
 }
 
+function drawDice(ctx, x, y, size, dice) {
+    const def = ALL_DICE_DEFS[dice.type];
+    if (!def) return;
+    const margin=6, radius=10;
+    const cx = x+size/2, cy = y+size/2;
+    const dSize = size - margin*2;
+    ctx.shadowColor='rgba(0,0,0,0.4)'; ctx.shadowBlur=10; ctx.shadowOffsetY=3;
+    const grad = ctx.createLinearGradient(x,y,x+size,y+size);
+    const baseColor = def.color;
+    grad.addColorStop(0, baseColor);
+    grad.addColorStop(0.5, lightenColor(baseColor,20));
+    grad.addColorStop(1, darkenColor(baseColor,20));
+    ctx.fillStyle = grad;
+    const rx=x+margin, ry=y+margin, rw=dSize, rh=dSize;
+    ctx.beginPath();
+    ctx.moveTo(rx+radius, ry);
+    ctx.lineTo(rx+rw-radius, ry);
+    ctx.quadraticCurveTo(rx+rw, ry, rx+rw, ry+radius);
+    ctx.lineTo(rx+rw, ry+rh-radius);
+    ctx.quadraticCurveTo(rx+rw, ry+rh, rx+rw-radius, ry+rh);
+    ctx.lineTo(rx+radius, ry+rh);
+    ctx.quadraticCurveTo(rx, ry+rh, rx, ry+rh-radius);
+    ctx.lineTo(rx, ry+radius);
+    ctx.quadraticCurveTo(rx, ry, rx+radius, ry);
+    ctx.closePath();
+    ctx.fill();
+    ctx.shadowBlur=0; ctx.shadowOffsetY=0;
+    ctx.strokeStyle='rgba(255,255,255,0.2)'; ctx.lineWidth=1.5; ctx.stroke();
+
+    drawDicePips(ctx, cx, cy, dSize, dice.star);
+
+    if (dice.star >= game.maxStar) {
+        ctx.shadowColor=def.color; ctx.shadowBlur=30;
+        ctx.strokeStyle='rgba(255,215,0,0.5)'; ctx.lineWidth=3;
+        ctx.beginPath(); ctx.arc(cx, cy, dSize/2+4, 0, Math.PI*2); ctx.stroke();
+        ctx.shadowBlur=0;
+    }
+
+    ctx.fillStyle='rgba(255,255,255,0.9)';
+    ctx.font = `${Math.floor(size*0.35)}px sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='bottom';
+    ctx.fillText(def.label, cx, y+size-8);
+    ctx.fillStyle='rgba(255,255,255,0.5)';
+    ctx.font = `${Math.floor(size*0.12)}px sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='top';
+    ctx.fillText(dice.name, cx, y+4);
+    if (dice.cooldown > 0) {
+        const ratio = dice.cooldown / dice.interval;
+        ctx.fillStyle='rgba(0,0,0,0.3)';
+        ctx.beginPath();
+        ctx.arc(cx, cy, dSize/2-2, -Math.PI/2, -Math.PI/2 + Math.PI*2*ratio);
+        ctx.fill();
+    }
+}
+
+function lightenColor(hex, amt) {
+    let r = parseInt(hex.slice(1,2),16)*17 || parseInt(hex.slice(1,3),16);
+    let g = parseInt(hex.slice(2,3),16)*17 || parseInt(hex.slice(3,5),16);
+    let b = parseInt(hex.slice(3,4),16)*17 || parseInt(hex.slice(5,7),16);
+    if (hex.length===7) { r=parseInt(hex.slice(1,3),16); g=parseInt(hex.slice(3,5),16); b=parseInt(hex.slice(5,7),16); }
+    r=Math.min(255,r+amt); g=Math.min(255,g+amt); b=Math.min(255,b+amt);
+    return `rgb(${r},${g},${b})`;
+}
+function darkenColor(hex, amt) {
+    let r = parseInt(hex.slice(1,2),16)*17 || parseInt(hex.slice(1,3),16);
+    let g = parseInt(hex.slice(2,3),16)*17 || parseInt(hex.slice(3,5),16);
+    let b = parseInt(hex.slice(3,4),16)*17 || parseInt(hex.slice(5,7),16);
+    if (hex.length===7) { r=parseInt(hex.slice(1,3),16); g=parseInt(hex.slice(3,5),16); b=parseInt(hex.slice(5,7),16); }
+    r=Math.max(0,r-amt); g=Math.max(0,g-amt); b=Math.max(0,b-amt);
+    return `rgb(${r},${g},${b})`;
+}
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+    CanvasRenderingContext2D.prototype.roundRect = function(x,y,w,h,r) {
+        if (r>w/2) r=w/2; if (r>h/2) r=h/2;
+        this.moveTo(x+r,y); this.lineTo(x+w-r,y);
+        this.quadraticCurveTo(x+w,y,x+w,y+r);
+        this.lineTo(x+w,y+h-r);
+        this.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+        this.lineTo(x+r,y+h);
+        this.quadraticCurveTo(x,y+h,x,y+h-r);
+        this.lineTo(x,y+r);
+        this.quadraticCurveTo(x,y,x+r,y);
+        this.closePath(); return this;
+    };
+}
+
 function draw() {
-    const W = canvas.width, H = canvas.height;
+    const data = getData();
     ctx.clearRect(0,0,W,H);
 
+    // ---- 1. 頂部狀態欄 (移除表情) ----
+    ctx.fillStyle = 'rgba(13,18,34,0.6)';
+    ctx.shadowColor = 'rgba(0,0,0,0.3)';
+    ctx.shadowBlur = 10;
+    ctx.beginPath(); ctx.roundRect(0, topBarY, 600, TOP_BAR_H-2, 12); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(39,50,75,0.6)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect(0, topBarY, 600, TOP_BAR_H-2, 12); ctx.stroke();
+
+    ctx.fillStyle = '#f7d875';
+    ctx.font = 'bold 20px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(data.gameTitle, 300, topBarY + (TOP_BAR_H-2)/2);
+
+    // 狀態靠右 (只顯示生命和金錢)
+    let xPos = 590;
+    ctx.textAlign = 'right';
+    ctx.font = 'bold 15px sans-serif';
+    ctx.fillStyle = '#ff6b6b';
+    ctx.fillText(`❤️ ${game.lives}`, xPos, topBarY + (TOP_BAR_H-2)/2);
+    xPos -= ctx.measureText(`❤️ ${game.lives}`).width + 16;
+    ctx.fillStyle = '#f7d875';
+    ctx.fillText(`💰 ${game.gold}`, xPos, topBarY + (TOP_BAR_H-2)/2);
+
+    // ---- 2. 棋盤 ----
     for (let r=0; r<ROWS; r++) {
         for (let c=0; c<COLS; c++) {
-            const x = c*CELL_SIZE, y = r*CELL_SIZE;
+            const x = boardX + c*CELL_SIZE, y = boardY + r*CELL_SIZE;
             const isPath = isPathCell(c,r);
             let color = '#1a2238';
             if ((r+c)%2===0) color = '#1e2742';
@@ -1330,8 +1918,8 @@ function draw() {
                     ctx.restore();
                 }
             }
-            if (c===0 && r===5) { ctx.fillStyle='rgba(46,204,113,0.25)'; ctx.font='18px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('▶', x+CELL_SIZE/2, y+CELL_SIZE/2); }
-            if (c===5 && r===5) { ctx.fillStyle='rgba(231,76,60,0.25)'; ctx.font='18px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('◀', x+CELL_SIZE/2, y+CELL_SIZE/2); }
+            if (c===0 && r===3) { ctx.fillStyle='rgba(46,204,113,0.25)'; ctx.font='18px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('▶', x+CELL_SIZE/2, y+CELL_SIZE/2); }
+            if (c===6 && r===3) { ctx.fillStyle='rgba(231,76,60,0.25)'; ctx.font='18px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('◀', x+CELL_SIZE/2, y+CELL_SIZE/2); }
 
             if (game.dragData && game.dragData.col===c && game.dragData.row===r && game.isDragging) {
                 ctx.strokeStyle='rgba(255,215,0,0.8)'; ctx.lineWidth=4; ctx.shadowColor='rgba(255,215,0,0.5)'; ctx.shadowBlur=16;
@@ -1341,6 +1929,15 @@ function draw() {
             const dice = game.board[r][c];
             if (dice) drawDice(ctx, x, y, CELL_SIZE, dice);
 
+            if (game._markedDice && game._markedDice.some(d => d.row===r && d.col===c)) {
+                ctx.fillStyle = 'rgba(255,0,0,0.4)';
+                ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+                ctx.fillStyle = '#ff0000';
+                ctx.font = '30px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('⚠️', x+CELL_SIZE/2, y+CELL_SIZE/2);
+            }
             if (game.bossLockedDice.some(d => d.row===r && d.col===c)) {
                 ctx.fillStyle='rgba(241,196,15,0.4)'; ctx.fillRect(x,y,CELL_SIZE,CELL_SIZE);
                 ctx.fillStyle='#f1c40f'; ctx.font='24px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
@@ -1471,7 +2068,7 @@ function draw() {
     if (game.bossWarning) {
         const warn = game.bossWarning;
         warn.timer -= 1/60;
-        if (warn.timer <= 0) { game.bossWarning = null; }
+        if (warn.timer <= 0) game.bossWarning = null;
         else {
             const alpha = Math.min(1, warn.timer / 0.5);
             ctx.globalAlpha = alpha;
@@ -1479,7 +2076,7 @@ function draw() {
             ctx.font = 'bold 22px sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'top';
-            ctx.fillText('⚠️ ' + warn.text, W/2, 20);
+            ctx.fillText('⚠️ ' + warn.text, W/2, 6);
             ctx.globalAlpha = 1.0;
         }
     }
@@ -1491,113 +2088,130 @@ function draw() {
     }
 
     if (game.isWaveActive && !game.gameOver) {
-        const data = getData();
         const remainText = data.waveRemain
             .replace(/\{wave\}/g, game.wave)
             .replace(/\{count\}/g, game.enemies.length);
         ctx.fillStyle='rgba(255,255,255,0.08)';
-        ctx.fillRect(10,10,200,30);
+        ctx.fillRect(boardX, boardY-20, 180, 18);
         ctx.fillStyle='rgba(255,255,255,0.7)';
-        ctx.font='14px sans-serif';
+        ctx.font='11px sans-serif';
         ctx.textAlign='left'; ctx.textBaseline='top';
-        ctx.fillText(remainText, 18, 14);
-    }
-    if (!game.gameOver && game.gameStarted) {
-        const data = getData();
-        const costText = data.costLabel.replace(/\{cost\}/g, game.diceCost);
-        ctx.fillStyle='rgba(255,255,255,0.4)';
-        ctx.font='12px sans-serif';
-        ctx.textAlign='right'; ctx.textBaseline='bottom';
-        ctx.fillText(costText, W-10, H-6);
-    }
-}
-
-function drawDice(ctx, x, y, size, dice) {
-    const def = DICE_TYPES[dice.type];
-    const margin=6, radius=10;
-    const cx = x+size/2, cy = y+size/2;
-    const dSize = size - margin*2;
-    ctx.shadowColor='rgba(0,0,0,0.4)'; ctx.shadowBlur=10; ctx.shadowOffsetY=3;
-    const grad = ctx.createLinearGradient(x,y,x+size,y+size);
-    const baseColor = def.color;
-    grad.addColorStop(0, baseColor);
-    grad.addColorStop(0.5, lightenColor(baseColor,20));
-    grad.addColorStop(1, darkenColor(baseColor,20));
-    ctx.fillStyle = grad;
-    const rx=x+margin, ry=y+margin, rw=dSize, rh=dSize;
-    ctx.beginPath();
-    ctx.moveTo(rx+radius, ry);
-    ctx.lineTo(rx+rw-radius, ry);
-    ctx.quadraticCurveTo(rx+rw, ry, rx+rw, ry+radius);
-    ctx.lineTo(rx+rw, ry+rh-radius);
-    ctx.quadraticCurveTo(rx+rw, ry+rh, rx+rw-radius, ry+rh);
-    ctx.lineTo(rx+radius, ry+rh);
-    ctx.quadraticCurveTo(rx, ry+rh, rx, ry+rh-radius);
-    ctx.lineTo(rx, ry+radius);
-    ctx.quadraticCurveTo(rx, ry, rx+radius, ry);
-    ctx.closePath();
-    ctx.fill();
-    ctx.shadowBlur=0; ctx.shadowOffsetY=0;
-    ctx.strokeStyle='rgba(255,255,255,0.2)'; ctx.lineWidth=1.5; ctx.stroke();
-
-    drawDicePips(ctx, cx, cy, dSize, dice.star);
-
-    if (dice.star >= game.maxStar) {
-        ctx.shadowColor=def.color; ctx.shadowBlur=30;
-        ctx.strokeStyle='rgba(255,215,0,0.5)'; ctx.lineWidth=3;
-        ctx.beginPath(); ctx.arc(cx, cy, dSize/2+4, 0, Math.PI*2); ctx.stroke();
-        ctx.shadowBlur=0;
+        ctx.fillText(remainText, boardX+6, boardY-18);
     }
 
-    ctx.fillStyle='rgba(255,255,255,0.9)';
-    ctx.font = `${Math.floor(size*0.35)}px sans-serif`;
-    ctx.textAlign='center'; ctx.textBaseline='bottom';
-    ctx.fillText(def.label, cx, y+size-8);
-    ctx.fillStyle='rgba(255,255,255,0.5)';
-    ctx.font = `${Math.floor(size*0.12)}px sans-serif`;
-    ctx.textAlign='center'; ctx.textBaseline='top';
-    ctx.fillText(dice.name, cx, y+4);
-    if (dice.cooldown > 0) {
-        const ratio = dice.cooldown / dice.interval;
-        ctx.fillStyle='rgba(0,0,0,0.3)';
-        ctx.beginPath();
-        ctx.arc(cx, cy, dSize/2-2, -Math.PI/2, -Math.PI/2 + Math.PI*2*ratio);
-        ctx.fill();
+    // ---- 3. 升級面板 ----
+    const ux = upgradeX, uy = upgradeY, uW = UPGRADE_WIDTH, uH = UPGRADE_HEIGHT;
+    ctx.fillStyle = 'rgba(13,18,34,0.7)';
+    ctx.shadowColor = 'rgba(0,0,0,0.3)';
+    ctx.shadowBlur = 10;
+    ctx.beginPath(); ctx.roundRect(ux, uy, uW, uH, 12); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(39,50,75,0.8)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect(ux, uy, uW, uH, 12); ctx.stroke();
+
+    const activeKeys = getActiveDiceKeys();
+    const itemW = uW / Math.max(activeKeys.length, 5);
+    const pad = 4;
+    for (let i=0; i<activeKeys.length; i++) {
+        const type = activeKeys[i];
+        const def = ALL_DICE_DEFS[type];
+        if (!def) continue;
+        const lv = upgradeLevels[type] || 1;
+        const maxed = lv >= MAX_LEVEL;
+        const cost = maxed ? null : UPGRADE_COSTS[lv];
+        const canAfford = cost !== null && game.gold >= cost;
+        const totalStars = getTotalStars(type);
+
+        const x = ux + i*itemW + pad/2;
+        const y = uy + pad/2;
+        const w = itemW - pad;
+        const h = uH - pad;
+
+        ctx.fillStyle = maxed ? 'rgba(31,42,68,0.8)' : (canAfford ? 'rgba(245,166,35,0.12)' : 'rgba(20,30,50,0.6)');
+        ctx.strokeStyle = maxed ? '#f5a623' : (canAfford ? '#f5a623' : '#3d4d6e');
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.roundRect(x, y, w, h, 6); ctx.fill();
+        ctx.stroke();
+
+        ctx.font = '28px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = '#fff';
+        ctx.fillText(def.label, x + w/2, y + 4);
+
+        ctx.font = '12px monospace';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = '#f7d875';
+        ctx.fillText(totalStars, x + 4, y + 2);
+
+        ctx.font = '13px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillStyle = maxed ? '#f7d875' : '#aab8d0';
+        const lvText = maxed ? data.max : `${data.lv} ${lv}`;
+        ctx.fillText(lvText, x + w/2, y + h - 6);
+
+        ctx.font = '11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        if (maxed) {
+            ctx.fillStyle = '#f7d875';
+            ctx.fillText('⭐', x + w/2, y + 36);
+        } else {
+            ctx.fillStyle = canAfford ? '#f7d875' : '#6a7a8a';
+            ctx.fillText(`💰${cost}`, x + w/2, y + 36);
+        }
+    }
+
+    // ---- 4. Toast 和 表情 (表情在 Toast 下方) ----
+    // Toast 消息
+    if (game.toastTimer > 0) {
+        const alpha = Math.min(1, game.toastTimer / 0.3);
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = 'rgba(0,0,0,0.75)';
+        ctx.shadowColor = 'rgba(0,0,0,0.3)';
+        ctx.shadowBlur = 10;
+        ctx.beginPath(); ctx.roundRect(10, toastY, 580, TOAST_HEIGHT-4, 16); ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.roundRect(10, toastY, 580, TOAST_HEIGHT-4, 16); ctx.stroke();
+
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 15px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(game.toastMessage, 300, toastY + (TOAST_HEIGHT-4)/2);
+        ctx.globalAlpha = 1.0;
+
+        game.toastTimer -= 1/60;
+        if (game.toastTimer < 0) game.toastTimer = 0;
+    }
+
+    // 表情 (底部居中，在 Toast 下方)
+    const emojiX = 300;
+    const emojiYPos = emojiY + 4; // 稍微下移
+    ctx.font = '32px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = '#fff';
+    ctx.shadowColor = 'rgba(255,255,255,0.2)';
+    ctx.shadowBlur = 10;
+    ctx.fillText(game.emoji, emojiX, emojiYPos);
+    ctx.shadowBlur = 0;
+
+    if (!game.gameStarted) {
+        ctx.fillStyle = 'rgba(255,255,255,0.1)';
+        ctx.font = '24px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🎲 點擊「開始遊戲」', W/2, H/2);
     }
 }
 
-function lightenColor(hex, amt) {
-    let r = parseInt(hex.slice(1,2),16)*17 || parseInt(hex.slice(1,3),16);
-    let g = parseInt(hex.slice(2,3),16)*17 || parseInt(hex.slice(3,5),16);
-    let b = parseInt(hex.slice(3,4),16)*17 || parseInt(hex.slice(5,7),16);
-    if (hex.length===7) { r=parseInt(hex.slice(1,3),16); g=parseInt(hex.slice(3,5),16); b=parseInt(hex.slice(5,7),16); }
-    r=Math.min(255,r+amt); g=Math.min(255,g+amt); b=Math.min(255,b+amt);
-    return `rgb(${r},${g},${b})`;
-}
-function darkenColor(hex, amt) {
-    let r = parseInt(hex.slice(1,2),16)*17 || parseInt(hex.slice(1,3),16);
-    let g = parseInt(hex.slice(2,3),16)*17 || parseInt(hex.slice(3,5),16);
-    let b = parseInt(hex.slice(3,4),16)*17 || parseInt(hex.slice(5,7),16);
-    if (hex.length===7) { r=parseInt(hex.slice(1,3),16); g=parseInt(hex.slice(3,5),16); b=parseInt(hex.slice(5,7),16); }
-    r=Math.max(0,r-amt); g=Math.max(0,g-amt); b=Math.max(0,b-amt);
-    return `rgb(${r},${g},${b})`;
-}
-if (!CanvasRenderingContext2D.prototype.roundRect) {
-    CanvasRenderingContext2D.prototype.roundRect = function(x,y,w,h,r) {
-        if (r>w/2) r=w/2; if (r>h/2) r=h/2;
-        this.moveTo(x+r,y); this.lineTo(x+w-r,y);
-        this.quadraticCurveTo(x+w,y,x+w,y+r);
-        this.lineTo(x+w,y+h-r);
-        this.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
-        this.lineTo(x+r,y+h);
-        this.quadraticCurveTo(x,y+h,x,y+h-r);
-        this.lineTo(x,y+r);
-        this.quadraticCurveTo(x,y,x+r,y);
-        this.closePath(); return this;
-    };
-}
-
-// --- 遊戲循環 ---
+// ========== 遊戲循環 ==========
 function gameLoop(time) {
     const dt = Math.min(0.05, (time - game.lastTime)/1000);
     game.lastTime = time;
@@ -1611,8 +2225,7 @@ function gameLoop(time) {
         if (game.lives <= 0) {
             game.lives = 0;
             game.gameOver = true;
-            const data = getData();
-            showToast(data.toastGameOver.replace(/\{wave\}/g, game.wave), 3000);
+            showToast(getData().toastGameOver.replace(/\{wave\}/g, game.wave), 3000);
             showGameOver();
             updateUI();
         }
@@ -1622,38 +2235,297 @@ function gameLoop(time) {
     requestAnimationFrame(gameLoop);
 }
 
-// --- 開始按鈕 (封面) ---
-document.getElementById('startBtn').addEventListener('click', () => {
-    startOverlay.classList.add('hidden');
-    game.gameStarted = true;
-    if (game.board.length === 0) initBoard();
-    game.gold = 12; game.diceCost = 1; game.lives = 3; game.wave = 0;
-    game.enemies = []; game.projectiles = []; game.floatingTexts = [];
-    game.isWaveActive = false; game.gameOver = false; game.screenFlash = 0;
-    game.hasBoss = false; game.enemiesSpawned = 0; game.enemiesPerWave = 0; game.spawnTimer = 0;
-    game.currentBoss = null; game.bossWarning = null;
-    game.bossLockedDice = []; game.bossHackedDice = []; game.bossCloud = null;
-    bossIndex = 0;
-    gameoverOverlay.classList.remove('visible');
-    rollBtn.disabled = false;
-    updateUI();
+// ========== UI 更新 ==========
+function updateCoverUI() {
     const data = getData();
-    rollBtn.textContent = `🎲 ${data.rollBtn} (${game.diceCost})`;
+    document.getElementById('coverScore').textContent = data.totalScore.replace(/\{score\}/g, saveData.totalScore);
+    document.getElementById('shopBtn').innerHTML = data.shopBtn;
+    document.getElementById('saveBtn').innerHTML = data.saveBtn;
+    document.getElementById('loadBtn').innerHTML = data.loadBtn;
+    document.getElementById('resetBtn').innerHTML = data.resetBtn;
+}
+
+function updateShopUI() {
+    const data = getData();
+    document.getElementById('shopPointsDisplay').textContent = data.totalScore.replace(/\{score\}/g, saveData.totalScore);
+    const grid = document.getElementById('shopDiceGrid');
+    grid.innerHTML = '';
+    const allTypes = ['WIND', 'ICE', 'POISON', 'FIRE', 'THUNDER', 'RANDOM', 'JOKER', 'SAPLING'];
+    for (let type of allTypes) {
+        const def = ALL_DICE_DEFS[type];
+        if (!def) continue;
+        const owned = saveData.ownedDice.includes(type);
+        const price = getDicePrice(type);
+        const div = document.createElement('div');
+        div.className = 'shop-dice-item' + (owned ? ' owned' : '');
+        div.innerHTML = `
+            <span class="icon">${def.label}</span>
+            <div class="dname">${getDiceName(type)}</div>
+            <div class="desc">${getDiceDesc(type)}</div>
+            ${owned ? `<div class="owned-badge">${data.ownedBadge}</div>` :
+              `<div class="price">💰 ${price}</div>
+               <button class="btn-buy" data-type="${type}">${data.buy}</button>`}
+        `;
+        grid.appendChild(div);
+        if (!owned) {
+            const btn = div.querySelector('.btn-buy');
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                purchaseDice(type);
+            });
+        }
+    }
+    updateShopSelection();
+}
+
+function purchaseDice(type) {
+    const data = getData();
+    if (saveData.ownedDice.includes(type)) {
+        showToast(data.shopAlreadyOwned);
+        return;
+    }
+    const price = getDicePrice(type);
+    if (saveData.totalScore < price) {
+        showToast(data.shopBuyFail.replace(/\{cost\}/g, price));
+        return;
+    }
+    saveData.totalScore -= price;
+    saveData.ownedDice.push(type);
+    saveData.purchased[type] = true;
+    saveSaveData();
+    const name = getDiceName(type);
+    showToast(data.shopBuySuccess.replace(/\{name\}/g, name));
+    updateCoverUI();
+    updateShopUI();
+}
+
+function updateShopSelection() {
+    const grid = document.getElementById('shopSelectGrid');
+    grid.innerHTML = '';
+    const data = getData();
+    for (let i=0; i<5; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'shop-select-slot' + (i < saveData.selectedDice.length ? ' filled' : '');
+        const type = i < saveData.selectedDice.length ? saveData.selectedDice[i] : null;
+        if (type) {
+            const def = ALL_DICE_DEFS[type];
+            slot.textContent = def ? def.label : '?';
+            slot.dataset.type = type;
+            slot.dataset.index = i;
+            slot.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const idx = parseInt(slot.dataset.index);
+                if (idx >= 0 && idx < saveData.selectedDice.length) {
+                    saveData.selectedDice.splice(idx, 1);
+                    saveSaveData();
+                    updateShopSelection();
+                    updateShopUI();
+                    showToast(data.shopSelectHint);
+                }
+            });
+        } else {
+            slot.textContent = '+';
+            slot.dataset.index = i;
+            slot.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showDicePicker(i);
+            });
+        }
+        grid.appendChild(slot);
+    }
+}
+
+let pickerTargetIndex = -1;
+
+function showDicePicker(index) {
+    pickerTargetIndex = index;
+    const picker = document.getElementById('shopDicePicker');
+    picker.innerHTML = '';
+    picker.className = 'shop-dice-picker visible';
+    for (let type of saveData.ownedDice) {
+        const def = ALL_DICE_DEFS[type];
+        if (!def) continue;
+        const div = document.createElement('div');
+        div.className = 'pick-item';
+        div.textContent = def.label;
+        div.title = getDiceName(type);
+        div.addEventListener('click', () => {
+            if (saveData.selectedDice.includes(type) && saveData.selectedDice[index] !== type) {
+                showToast('❌ 此骰子已在選擇清單中');
+                return;
+            }
+            if (index < saveData.selectedDice.length) {
+                saveData.selectedDice[index] = type;
+            } else {
+                saveData.selectedDice.push(type);
+            }
+            saveSaveData();
+            picker.className = 'shop-dice-picker';
+            updateShopSelection();
+            updateShopUI();
+        });
+        picker.appendChild(div);
+    }
+    const cancel = document.createElement('div');
+    cancel.className = 'pick-item';
+    cancel.textContent = '✕';
+    cancel.style.borderColor = '#ff6b6b';
+    cancel.addEventListener('click', () => {
+        picker.className = 'shop-dice-picker';
+    });
+    picker.appendChild(cancel);
+}
+
+// ========== 初始化 ==========
+function initGameState() {
+    game.activeDiceTypes = [...saveData.selectedDice];
+    initUpgradeLevels();
+    game.gold = 100;
+    game.diceCost = 10;
+    game.lives = 3;
+    game.wave = 0;
+    game.enemies = [];
+    game.projectiles = [];
+    game.floatingTexts = [];
+    game.isWaveActive = false;
+    game.gameOver = false;
+    game.screenFlash = 0;
+    game.hasBoss = false;
+    game.enemiesSpawned = 0;
+    game.enemiesPerWave = 0;
+    game.spawnTimer = 0;
+    game.currentBoss = null;
+    game.bossWarning = null;
+    game.bossLockedDice = [];
+    game.bossHackedDice = [];
+    game.bossCloud = null;
+    game._markedDice = [];
+    game.emoji = '😎';
+    game.emojiTimer = 0;
+    game.waveCompleted = false;
+    game.enemyReachedTwoThirds = false;
+    game._lastGold = 100;
+    game.toastMessage = '';
+    game.toastTimer = 0;
+    initBoard();
+    updateUI();
+    updateDicePreview(null);
+}
+
+// ========== 事件綁定 ==========
+document.getElementById('startBtn').addEventListener('click', () => {
+    document.getElementById('startOverlay').classList.add('hidden');
+    game.gameStarted = true;
+    game.activeDiceTypes = [...saveData.selectedDice];
+    initUpgradeLevels();
+    initGameState();
+    document.getElementById('gameoverOverlay').classList.remove('visible');
+    document.getElementById('rollBtn').disabled = false;
+    const data = getData();
+    document.getElementById('rollBtn').textContent = `🎲 ${data.rollBtn} (${game.diceCost})`;
     showToast(data.toastGameStart, 1500);
     startWave();
 });
 
-// --- 重新遊戲 ---
-restartBtn.addEventListener('click', restartGame);
-
-// --- 擲骰按鈕 ---
-rollBtn.addEventListener('click', rollDice);
+document.getElementById('restartBtn').addEventListener('click', restartGame);
+document.getElementById('rollBtn').addEventListener('click', rollDice);
 document.addEventListener('keydown', (e) => { if (e.key==='r'||e.key==='R') rollDice(); });
 
-// --- 初始化UI ---
-updateAllUI();
-initBoard(); updateUI(); updateDicePreview(null); game.gameStarted = false; requestAnimationFrame(gameLoop);
-console.log('🎲 Random Dice v6.5 — 固定數字寬度，防止介面抖動');
+document.getElementById('shopBtn').addEventListener('click', () => {
+    document.getElementById('shopOverlay').classList.add('visible');
+    updateShopUI();
+});
+document.getElementById('shopCloseBtn').addEventListener('click', () => {
+    document.getElementById('shopOverlay').classList.remove('visible');
+    document.getElementById('shopDicePicker').className = 'shop-dice-picker';
+});
+document.getElementById('shopConfirmBtn').addEventListener('click', () => {
+    document.getElementById('shopOverlay').classList.remove('visible');
+    document.getElementById('shopDicePicker').className = 'shop-dice-picker';
+    game.activeDiceTypes = [...saveData.selectedDice];
+    initUpgradeLevels();
+    if (game.gameStarted && !game.gameOver) {
+        for (let r=0; r<ROWS; r++) for (let c=0; c<COLS; c++) {
+            const dice = game.board[r][c];
+            if (dice) {
+                const newDice = createDice(dice.type, dice.star);
+                newDice.cooldown = dice.cooldown;
+                game.board[r][c] = newDice;
+            }
+        }
+        updateUI();
+        updateDicePreview();
+    }
+    showToast('✅ 已更新骰子配置');
+});
+
+document.getElementById('resetBtn').addEventListener('click', resetAllData);
+document.getElementById('saveBtn').addEventListener('click', exportSave);
+document.getElementById('loadBtn').addEventListener('click', () => {
+    document.getElementById('fileInput').click();
+});
+document.getElementById('fileInput').addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+        importSave(e.target.files[0]);
+        e.target.value = '';
+    }
+});
+
+// 語言切換
+document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const lang = btn.dataset.lang;
+        if (lang === currentLang) return;
+        currentLang = lang;
+        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const data = getData();
+        document.getElementById('coverTitle').textContent = data.coverTitle;
+        document.getElementById('coverDesc').innerHTML = data.coverDesc;
+        document.getElementById('startBtn').textContent = data.startBtn;
+        document.getElementById('coverVersion').textContent = data.version;
+        const year = new Date().getFullYear();
+        document.getElementById('coverCopyright').textContent = data.copyright.replace(/\{year\}/g, year);
+        document.getElementById('dicePreviewEmpty').textContent = data.dicePreviewEmpty;
+        document.getElementById('gameoverTitle').textContent = data.gameoverTitle;
+        document.getElementById('restartBtn').textContent = data.restartBtn;
+        document.getElementById('shopTitle').textContent = data.shopTitle;
+        document.getElementById('shopSelectLabel').textContent = data.shopSelectLabel;
+        document.getElementById('shopConfirmBtn').textContent = data.shopConfirm;
+        document.getElementById('mergeHint').textContent = data.mergeHint;
+        updateCoverUI();
+        updateDicePreview(null);
+        updateUI();
+        showToast('🌐 Language changed', 1000);
+        if (game.gameStarted) draw();
+    });
+});
+
+// ========== 初始化 ==========
+loadSaveData();
+updateCoverUI();
+
+const initData = getData();
+document.getElementById('coverTitle').textContent = initData.coverTitle;
+document.getElementById('coverDesc').innerHTML = initData.coverDesc;
+document.getElementById('startBtn').textContent = initData.startBtn;
+document.getElementById('coverVersion').textContent = initData.version;
+const year = new Date().getFullYear();
+document.getElementById('coverCopyright').textContent = initData.copyright.replace(/\{year\}/g, year);
+document.getElementById('dicePreviewEmpty').textContent = initData.dicePreviewEmpty;
+document.getElementById('gameoverTitle').textContent = initData.gameoverTitle;
+document.getElementById('restartBtn').textContent = initData.restartBtn;
+document.getElementById('shopTitle').textContent = initData.shopTitle;
+document.getElementById('shopSelectLabel').textContent = initData.shopSelectLabel;
+document.getElementById('shopConfirmBtn').textContent = initData.shopConfirm;
+document.getElementById('mergeHint').textContent = initData.mergeHint;
+
+game.activeDiceTypes = [...saveData.selectedDice];
+initUpgradeLevels();
+initGameState();
+game.gameStarted = false;
+requestAnimationFrame(gameLoop);
+console.log('🎲 Random Dice v8.2 — 表情移至底部');
 </script>
 </body>
 </html>
