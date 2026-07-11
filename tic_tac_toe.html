@@ -108,12 +108,17 @@
             letter-spacing: 2px;
         }
 
-        /* 預覽棋盤 */
+        /* 預覽棋盤（可隱藏） */
         .preview-container {
             display: flex;
             justify-content: center;
             margin: 10px auto 25px;
+            transition: all 0.3s ease;
         }
+        .preview-container.hidden {
+            display: none;
+        }
+
         .preview-board {
             display: grid;
             grid-template-columns: repeat(3, 50px);
@@ -448,8 +453,8 @@
         <div class="title-underline"></div>
         <div class="menu-sub" id="menuSub">✦ 選擇語言，然後進入遊戲 ✦</div>
 
-        <!-- 動態預覽棋盤 -->
-        <div class="preview-container">
+        <!-- 動態預覽棋盤（可隱藏） -->
+        <div class="preview-container" id="previewContainer">
             <div class="preview-board" id="previewBoard">
                 <div class="preview-cell empty" data-pindex="0"></div>
                 <div class="preview-cell empty" data-pindex="1"></div>
@@ -511,7 +516,7 @@
             <button class="btn-start-game" id="btnStartGame">⚔️ 開始遊戲</button>
         </div>
 
-        <div class="footer" id="footerCopyright">v1.0 © 2026 ☕迪遜咖啡廳，版權所有。</div>
+        <div class="footer" id="footerCopyright">v1.0 © 2025 ☕迪遜咖啡廳，版權所有。</div>
     </div>
 
     <!-- 遊戲畫面 -->
@@ -552,7 +557,7 @@
 
 <script>
     // ============================================================
-    //  🌍 語言包（加入 back）
+    //  🌍 語言包
     // ============================================================
     const LANG = {
         'zh-TW': {
@@ -795,6 +800,7 @@
     const gameScreen = document.getElementById('gameScreen');
     const menuTitle = document.getElementById('menuTitle');
     const menuSub = document.getElementById('menuSub');
+    const previewContainer = document.getElementById('previewContainer');
     const settingsArea = document.getElementById('settingsArea');
     const btnEnterGame = document.getElementById('btnEnterGame');
     const btnStartGame = document.getElementById('btnStartGame');
@@ -1248,8 +1254,14 @@
         settingsArea.classList.toggle('visible');
         if (settingsArea.classList.contains('visible')) {
             btnEnterGame.textContent = t('back');
+            previewContainer.classList.add('hidden'); // 隱藏預覽棋盤
         } else {
             btnEnterGame.textContent = t('enter');
+            previewContainer.classList.remove('hidden'); // 顯示預覽棋盤
+            // 如果動畫已停止，重新啟動
+            if (!previewInterval) {
+                startPreviewAnimation();
+            }
         }
     });
 
@@ -1268,6 +1280,7 @@
         updateUI();
         settingsArea.classList.remove('visible');
         btnEnterGame.textContent = t('enter');
+        previewContainer.classList.remove('hidden'); // 恢復顯示預覽棋盤
         // 重新啟動預覽
         if (!previewInterval) {
             startPreviewAnimation();
@@ -1279,6 +1292,12 @@
     langSelect.addEventListener('change', function() {
         state.lang = this.value;
         updateLanguage();
+        // 更新按鈕文字（保持狀態一致）
+        if (settingsArea.classList.contains('visible')) {
+            btnEnterGame.textContent = t('back');
+        } else {
+            btnEnterGame.textContent = t('enter');
+        }
     });
 
     gameTypeSelect.addEventListener('change', function() {
@@ -1294,6 +1313,7 @@
     gameScreen.classList.remove('active');
     settingsArea.classList.remove('visible');
     btnEnterGame.textContent = t('enter');
+    previewContainer.classList.remove('hidden');
     updateUI();
     statusMessage.textContent = '▶ 點擊「開始遊戲」';
     turnIndicator.textContent = '▶';

@@ -1,0 +1,2924 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>⛏️ 方塊傳說 · 迷宮冒險</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #0b1a1f;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px;
+        }
+        #coverScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0b1a1f;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.8s ease;
+            padding: 20px;
+        }
+        #coverScreen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .cover-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #f5d742;
+            text-shadow: 0 0 30px rgba(245, 215, 66, 0.3);
+            margin-bottom: 10px;
+            letter-spacing: 4px;
+        }
+        .cover-sub {
+            font-size: 1.2rem;
+            color: #98bcc3;
+            margin-bottom: 30px;
+            letter-spacing: 6px;
+        }
+        .cover-input-group {
+            margin-bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            width: 80%;
+            max-width: 320px;
+        }
+        .cover-input-group label {
+            color: #98bcc3;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+        }
+        .cover-input-group input {
+            background: #0d262b;
+            border: 2px solid #3b6b73;
+            border-radius: 60px;
+            padding: 10px 20px;
+            width: 100%;
+            color: #e2f0f2;
+            font-size: 1rem;
+            text-align: center;
+            outline: none;
+            transition: 0.2s;
+        }
+        .cover-input-group input:focus {
+            border-color: #f5d742;
+            box-shadow: 0 0 20px rgba(245, 215, 66, 0.15);
+        }
+        .cover-input-group input::placeholder {
+            color: #4a6b66;
+        }
+        .cover-btn {
+            background: #2d5f67;
+            border: none;
+            border-radius: 60px;
+            padding: 14px 48px;
+            margin: 10px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border: 2px solid #48919b;
+            transition: 0.2s;
+            min-width: 200px;
+            letter-spacing: 2px;
+        }
+        .cover-btn:hover {
+            background: #3b7983;
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(72, 145, 155, 0.4);
+        }
+        .cover-btn:active {
+            transform: scale(0.95);
+        }
+        .cover-btn.secondary {
+            background: #364f4b;
+            border-color: #60918b;
+        }
+        .cover-btn.secondary:hover {
+            background: #4a6b66;
+        }
+        .cover-version {
+            margin-top: 40px;
+            color: #4a6b66;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+        }
+        .game-wrapper {
+            max-width: 950px;
+            width: 100%;
+            background: #1e3a3f;
+            border-radius: 40px 40px 28px 28px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7), inset 0 0 0 1px #4f7b82;
+            padding: 18px 18px 16px;
+            transition: 0.2s;
+        }
+        .battle-scene-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #0b1e22;
+            border-radius: 20px;
+            padding: 10px 16px;
+            margin-bottom: 10px;
+            border: 1px solid #3b6b73;
+            min-height: 80px;
+        }
+        .battle-side {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            flex: 1;
+        }
+        .battle-side .title {
+            font-size: 0.65rem;
+            color: #98bcc3;
+        }
+        .battle-side .units {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+        }
+        .unit-icon {
+            font-size: 1.4rem;
+            line-height: 1.2;
+            text-align: center;
+            background: #0f2a2f;
+            border-radius: 12px;
+            padding: 2px 8px;
+            border: 1px solid #3b6b73;
+            min-width: 40px;
+            color: #f0f8fa;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+        }
+        .unit-icon .hp-bar {
+            font-size: 0.55rem;
+            color: #7ddfb3;
+            display: block;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+        }
+        .unit-icon .player-name {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: #f5d742;
+            text-shadow: 0 0 10px rgba(245, 215, 66, 0.3);
+            display: block;
+            line-height: 1.1;
+        }
+        .unit-icon .monster-placeholder {
+            font-size: 0.65rem;
+            color: #b3d9e0;
+            opacity: 0.7;
+        }
+        .unit-icon .unit-extra {
+            font-size: 0.55rem;
+            color: #7dc9df;
+            display: block;
+        }
+        .battle-vs {
+            font-size: 1.2rem;
+            color: #f5d742;
+            font-weight: 700;
+            padding: 0 6px;
+        }
+        .status-panel {
+            background: #0d262b;
+            border-radius: 30px;
+            padding: 12px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            color: #d4e9ed;
+            border-bottom: 3px solid #3b6b73;
+            margin-bottom: 10px;
+            box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.5);
+        }
+        .stat-badge {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: #183238;
+            padding: 5px 12px;
+            border-radius: 40px;
+            letter-spacing: 0.2px;
+        }
+        .stat-badge span {
+            color: #b3d9e0;
+            font-weight: 400;
+        }
+        .stat-badge strong {
+            color: #f5d742;
+            font-weight: 700;
+        }
+        .stat-badge .stamina-low {
+            color: #ff6b6b !important;
+        }
+        .stat-badge .stamina-mid {
+            color: #f5d742 !important;
+        }
+        .exp-bar-wrap {
+            width: 100%;
+            margin-top: 6px;
+            background: #0b1e22;
+            border-radius: 20px;
+            height: 14px;
+            overflow: hidden;
+            border: 1px solid #3b6b73;
+        }
+        .exp-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #f5d742, #f7b731);
+            border-radius: 20px;
+            transition: width 0.3s;
+        }
+        .exp-text {
+            font-size: 0.7rem;
+            color: #b3d9e0;
+            text-align: center;
+            margin-top: 2px;
+        }
+        .top-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .region-tabs {
+            display: flex;
+            gap: 5px;
+            background: #0d262b;
+            padding: 4px;
+            border-radius: 60px;
+            border: 1px solid #2b5a62;
+            flex: 2;
+            min-width: 180px;
+            flex-wrap: wrap;
+        }
+        .region-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 7px 5px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: #98bcc3;
+            transition: 0.2s;
+            cursor: pointer;
+            letter-spacing: 0.2px;
+            min-width: 40px;
+        }
+        .region-btn.active {
+            background: #e4b13b;
+            color: #0f282e;
+            box-shadow: 0 3px 0 #8f6d1f;
+            transform: scale(0.97);
+        }
+        .region-btn:active {
+            transform: scale(0.94);
+        }
+        .map-btn {
+            background: #2d5f67;
+            border: none;
+            border-radius: 40px;
+            padding: 7px 18px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1px solid #48919b;
+            transition: 0.15s;
+            font-size: 0.85rem;
+        }
+        .map-btn:active {
+            background: #1f4349;
+        }
+        .main-area {
+            background: #163035;
+            border-radius: 30px;
+            padding: 14px 12px;
+            min-height: 180px;
+            border: 1px solid #3c6a72;
+            box-shadow: inset 0 6px 12px rgba(0, 0, 0, 0.4);
+            color: #e2f0f2;
+            margin-bottom: 10px;
+        }
+        .info-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            gap: 4px 10px;
+            background: #0f282e;
+            border-radius: 16px;
+            padding: 8px 14px;
+            border-left: 4px solid #b68b3b;
+            margin-bottom: 8px;
+        }
+        .info-row .loc {
+            font-weight: 700;
+            color: #f5d742;
+        }
+        .info-row .detail {
+            color: #b3d9e0;
+        }
+        .combined-log {
+            background: #0b1e22;
+            border-radius: 16px;
+            padding: 6px 10px;
+            margin-top: 6px;
+            border: 1px solid #3b6b73;
+            max-height: 120px;
+            overflow-y: auto;
+            font-size: 0.75rem;
+            line-height: 1.5;
+            color: #d4e9ed;
+        }
+        .combined-log .system {
+            color: #b3d9e0;
+        }
+        .combined-log .dmg {
+            color: #ff9a76;
+        }
+        .combined-log .heal {
+            color: #7ddfb3;
+        }
+        .combined-log .boss-speech {
+            color: #f5d742;
+            font-weight: 600;
+        }
+        .combined-log .player-attack {
+            color: #f5d742;
+        }
+        .combined-log .monster-attack {
+            color: #ff6b6b;
+        }
+        .combined-log .welcome {
+            color: #7ddfb3;
+        }
+        .combined-log .stamina-msg {
+            color: #7dc9df;
+        }
+        .combined-log .loot {
+            color: #b3d9e0;
+        }
+        .action-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+            margin: 8px 0 4px;
+        }
+        .action-btn {
+            background: #1f4349;
+            border: none;
+            border-radius: 60px;
+            padding: 6px 14px;
+            font-weight: 600;
+            color: #e7f6f8;
+            box-shadow: 0 4px 0 #0f282e;
+            transition: 0.07s linear;
+            cursor: pointer;
+            font-size: 0.8rem;
+            flex: 1 0 auto;
+            letter-spacing: 0.2px;
+            border: 1px solid #3b7983;
+        }
+        .action-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0px 0 #0f282e;
+        }
+        .action-btn.shop {
+            background: #2a6d5e;
+            border-color: #4ba392;
+        }
+        .action-btn.danger {
+            background: #914141;
+            border-color: #c96a6a;
+        }
+        .action-btn.special {
+            background: #7a5f2e;
+            border-color: #c9a33b;
+        }
+        .action-btn.equip {
+            background: #3d5f7a;
+            border-color: #6a9bc4;
+        }
+        .action-btn:disabled {
+            opacity: 0.5;
+            transform: none;
+            box-shadow: 0 4px 0 #0f282e;
+            pointer-events: none;
+        }
+        .save-load-area {
+            margin-top: 12px;
+            background: #0f262b;
+            border-radius: 60px;
+            padding: 8px 12px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #2d5f67;
+        }
+        .file-label {
+            background: #2d5f67;
+            padding: 4px 12px;
+            border-radius: 40px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s;
+            border: 1px solid #48919b;
+            font-size: 0.8rem;
+        }
+        .file-label:hover {
+            background: #3b7983;
+        }
+        #fileInput {
+            display: none;
+        }
+        .txt-btn {
+            background: #364f4b;
+            border: none;
+            border-radius: 40px;
+            padding: 4px 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid #60918b;
+            font-size: 0.8rem;
+        }
+        .txt-btn:active {
+            background: #1f3d39;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            padding: 16px;
+        }
+        .modal-box {
+            background: #1a3a3f;
+            border-radius: 40px;
+            max-width: 850px;
+            width: 100%;
+            padding: 20px 18px;
+            border: 2px solid #7ab3b0;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+            color: #e2f0f2;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-box h3 {
+            color: #f5d742;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #3b6b73;
+            padding-bottom: 6px;
+        }
+        .modal-box h4 {
+            color: #7dc9df;
+            margin: 12px 0 6px;
+        }
+        .modal-close {
+            background: #5a3e3e;
+            border: none;
+            border-radius: 60px;
+            padding: 8px 20px;
+            color: white;
+            font-weight: 700;
+            margin-top: 12px;
+            cursor: pointer;
+            width: 100%;
+            border: 1px solid #a06b6b;
+        }
+        .modal-close:active {
+            background: #3f2b2b;
+        }
+        .skill-choice-btn {
+            background: #2a5a4a;
+            border: 1px solid #4ba392;
+            border-radius: 30px;
+            padding: 10px 20px;
+            margin: 6px 0;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+            transition: 0.15s;
+        }
+        .skill-choice-btn:hover {
+            background: #3a7a5a;
+        }
+        .skill-choice-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background: #1a3a3a;
+        }
+        .maze-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 0;
+            gap: 4px;
+            width: 100%;
+        }
+        .maze-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin: 2px 0;
+            width: 100%;
+        }
+        .maze-cell {
+            width: 90px;
+            min-height: 50px;
+            padding: 4px 6px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            font-weight: 600;
+            background: #0f2a2f;
+            border: 2px solid #3b6b73;
+            color: #b3d9e0;
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: center;
+            position: relative;
+            line-height: 1.2;
+            flex: 0 1 auto;
+        }
+        .maze-cell .cell-name {
+            font-size: 0.55rem;
+            line-height: 1.2;
+        }
+        .maze-cell .cell-boss {
+            font-size: 0.5rem;
+            color: #f5d742;
+        }
+        .maze-cell.unlocked {
+            border-color: #4ba392;
+            background: #1a3f44;
+        }
+        .maze-cell.unlocked:hover {
+            border-color: #f5d742;
+            transform: scale(1.05);
+        }
+        .maze-cell.current {
+            border-color: #f5d742;
+            box-shadow: 0 0 15px rgba(245, 215, 66, 0.5);
+            background: #2a5a4a;
+        }
+        .maze-cell.locked {
+            background: #0b1e22;
+            border-color: #2a4a4f;
+            opacity: 0.6;
+            cursor: not-allowed;
+            color: #4a6b66;
+        }
+        .maze-cell .lock-icon {
+            font-size: 1.2rem;
+        }
+        .maze-connector {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            color: #3b6b73;
+            font-size: 0.7rem;
+            padding: 0 4px;
+            flex-wrap: wrap;
+            min-width: 20px;
+        }
+        .maze-connector .line {
+            height: 2px;
+            background: #3b6b73;
+            min-width: 20px;
+            flex: 1;
+        }
+        .maze-connector .line.unlocked {
+            background: #4ba392;
+        }
+        .maze-connector .line.boss-path {
+            background: #f5d742;
+            box-shadow: 0 0 6px #f5d742;
+        }
+        @media (max-width: 600px) {
+            .maze-cell {
+                width: 70px;
+                min-height: 40px;
+                font-size: 0.5rem;
+            }
+            .maze-cell .cell-name {
+                font-size: 0.45rem;
+            }
+            .maze-connector .line {
+                min-width: 12px;
+            }
+        }
+        @media (max-width: 480px) {
+            .maze-cell {
+                width: 60px;
+                min-height: 35px;
+                font-size: 0.45rem;
+                padding: 2px 4px;
+            }
+            .maze-cell .cell-name {
+                font-size: 0.4rem;
+            }
+            .maze-connector .line {
+                min-width: 8px;
+            }
+            .battle-scene-top {
+                flex-direction: column;
+                gap: 6px;
+            }
+            .battle-vs {
+                transform: rotate(90deg);
+            }
+        }
+        .equip-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin: 6px 0;
+        }
+        .equip-item {
+            background: #0f2a2f;
+            border-radius: 20px;
+            padding: 8px 12px;
+            border-left: 4px solid #b68b3b;
+        }
+        .modal-item {
+            background: #0f2a2f;
+            border-radius: 30px;
+            padding: 10px 16px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #b68b3b;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .modal-item button {
+            background: #2a6d5e;
+            border: none;
+            border-radius: 40px;
+            padding: 6px 16px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid #4ba392;
+            white-space: nowrap;
+        }
+        .modal-item button:active {
+            background: #1d4f44;
+        }
+        .modal-item .item-info {
+            flex: 1;
+            font-size: 0.85rem;
+        }
+        .stamina-bar-wrap {
+            width: 100%;
+            margin-top: 4px;
+            background: #0b1e22;
+            border-radius: 20px;
+            height: 6px;
+            overflow: hidden;
+            border: 1px solid #2a5a62;
+        }
+        .stamina-bar-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #f5d742, #7ddfb3);
+            border-radius: 20px;
+            transition: width 0.3s;
+        }
+        .stamina-text {
+            font-size: 0.6rem;
+            color: #b3d9e0;
+            text-align: center;
+            margin-top: 1px;
+        }
+        .stamina-info {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .stamina-info .stamina-icon {
+            font-size: 0.9rem;
+        }
+        .copyright {
+            margin-top: 14px;
+            padding: 8px 12px;
+            border-top: 1px solid #2a5a62;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #4a6b66;
+            letter-spacing: 1px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .copyright .version {
+            background: #0f282e;
+            padding: 0 8px;
+            border-radius: 12px;
+            font-weight: 600;
+            color: #7d9ea0;
+        }
+        .copyright #copyrightText {
+            color: #4a7a7a;
+        }
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 6px;
+            margin: 8px 0;
+        }
+        .inv-item {
+            background: #0f2a2f;
+            border-radius: 12px;
+            padding: 4px 8px;
+            text-align: center;
+            border: 1px solid #3b6b73;
+            font-size: 0.7rem;
+        }
+        .inv-item .count {
+            color: #f5d742;
+            font-weight: 700;
+        }
+        .badge {
+            display: inline-block;
+            background: #2a5a62;
+            border-radius: 20px;
+            padding: 0 8px;
+            font-size: 0.65rem;
+            color: #b3d9e0;
+        }
+        .upgrade-path {
+            font-size: 0.7rem;
+            color: #7dc9df;
+            margin: 2px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 封面 -->
+    <div id="coverScreen">
+        <div class="cover-title">⛏️ 方塊傳說</div>
+        <div class="cover-sub">— 迷宮冒險 · 升級樹 —</div>
+        <div class="cover-input-group">
+            <label for="playerNameInput">👤 輸入你的名字</label>
+            <input type="text" id="playerNameInput" placeholder="例如：史蒂夫" value="史蒂夫" maxlength="10">
+        </div>
+        <button class="cover-btn" id="startNewBtn">🌟 開始遊戲</button>
+        <button class="cover-btn secondary" id="continueBtn">📂 繼續遊戲</button>
+        <div class="cover-version">v1.0 · 打造專屬自已的裝備！</div>
+    </div>
+
+    <!-- 主遊戲 -->
+    <div class="game-wrapper" id="gameWrapper" style="display:none;">
+
+        <!-- 戰鬥畫面 (置頂) -->
+        <div class="battle-scene-top" id="battleSceneTop">
+            <div class="battle-side" id="playerSide">
+                <div class="title">🛡️ 我方</div>
+                <div class="units" id="playerUnits">
+                    <div class="unit-icon">🧑 <span class="player-name">史蒂夫</span><br><span class="hp-bar">❤️30</span></div>
+                </div>
+            </div>
+            <div class="battle-vs">⚔️</div>
+            <div class="battle-side" id="enemySide">
+                <div class="title">👹 敵方</div>
+                <div class="units" id="enemyUnits">
+                    <div class="unit-icon">❓ <span class="monster-placeholder">???</span><br><span class="hp-bar">❤️??</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 狀態欄 -->
+        <div class="status-panel">
+            <div class="stat-badge">
+                <span>⚔️ Lv.<strong id="levelDisplay">1</strong></span>
+                <span>❤️ <strong id="hpDisplay">30/30</strong></span>
+                <span class="stamina-info">
+                    <span class="stamina-icon">⚡</span>
+                    <strong id="staminaDisplay">50/50</strong>
+                </span>
+                <span>🗡️ <strong id="atkDisplay">4</strong></span>
+                <span>🛡️ <strong id="defDisplay">1</strong></span>
+            </div>
+            <div class="stat-badge">
+                <span>💰 <strong id="goldDisplay">20</strong></span>
+                <span>🏆 <strong id="achieveCount">0</strong></span>
+            </div>
+            <div style="width:100%;">
+                <div class="exp-bar-wrap">
+                    <div class="exp-bar-fill" id="expBarFill" style="width:0%;"></div>
+                </div>
+                <div class="exp-text" id="expText">經驗 0 / 20</div>
+                <div class="stamina-bar-wrap">
+                    <div class="stamina-bar-fill" id="staminaBarFill" style="width:100%;"></div>
+                </div>
+                <div class="stamina-text" id="staminaText">⚡ 體力 50 / 50 · 每3秒恢復1</div>
+            </div>
+        </div>
+
+        <!-- 區域切換 & 地圖按鈕 -->
+        <div class="top-row">
+            <div class="region-tabs" id="regionTabs">
+                <!-- 由js動態生成 -->
+            </div>
+            <button class="map-btn" id="mapBtn">🗺️ 迷宮地圖</button>
+            <button class="map-btn" id="inventoryBtn">🎒 背包</button>
+            <button class="map-btn" id="gatherBtn">⛏️ 採集</button>
+        </div>
+
+        <!-- 主內容 -->
+        <div class="main-area">
+            <!-- 位置資訊 -->
+            <div class="info-row" id="infoRow">
+                <span class="loc" id="locName">🏚️ 廢棄村莊</span>
+                <span class="detail" id="locDetail">平原入口</span>
+                <span class="detail" id="extraDetail">武器: 空 防具: 空</span>
+            </div>
+
+            <!-- 戰鬥記錄 -->
+            <div class="combined-log" id="combinedLog"></div>
+
+            <!-- 操作按鈕 -->
+            <div class="action-grid">
+                <button class="action-btn" data-action="explore" id="exploreBtn">🔍 探索</button>
+                <button class="action-btn danger" data-action="fight" id="fightBtn">⚔️ 戰鬥</button>
+                <button class="action-btn shop" data-action="shop">🏪 商店</button>
+                <button class="action-btn special" data-action="skill" id="skillBtn">✨ 技能</button>
+                <button class="action-btn" data-action="team">👥 招募</button>
+                <button class="action-btn equip" data-action="equip">📦 裝備</button>
+            </div>
+        </div>
+
+        <div class="save-load-area">
+            <button class="txt-btn" id="saveTxtBtn">💾 手動存檔</button>
+            <label class="file-label" for="fileInput">📂 讀取</label>
+            <input type="file" id="fileInput" accept=".txt">
+            <button class="txt-btn" id="resetGameBtn">🔄 重新開始</button>
+        </div>
+
+        <!-- 版權資訊 -->
+        <div class="copyright" id="copyrightNotice">
+            <span class="version">v1.0</span>
+            <span id="copyrightText">© 2026 ☕迪遜咖啡廳，版權所有。</span>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ============================================================
+            // 0. 全域設定與數據
+            // ============================================================
+            const BIOME_ORDER = ['平原', '山地', '森林', '乾旱', '洞穴', '海洋', '地獄', '終界'];
+
+            const BIOME_NODES = {
+                '平原': {
+                    nodes: [
+                        { id: 'plains_0', name: '廢棄村莊', row: 0, col: 1, isBoss: false },
+                        { id: 'plains_1', name: '農場遺跡', row: 1, col: 0, isBoss: false },
+                        { id: 'plains_2', name: '水井', row: 1, col: 2, isBoss: false },
+                        { id: 'plains_3', name: '教堂廢墟', row: 2, col: 1, isBoss: false },
+                        { id: 'plains_4', name: '地牢入口', row: 3, col: 0, isBoss: false },
+                        { id: 'plains_5', name: '殭屍王巢穴', row: 3, col: 2, isBoss: true },
+                    ],
+                    connections: [
+                        ['plains_0', 'plains_1'],
+                        ['plains_0', 'plains_2'],
+                        ['plains_1', 'plains_3'],
+                        ['plains_2', 'plains_3'],
+                        ['plains_3', 'plains_4'],
+                        ['plains_3', 'plains_5'],
+                        ['plains_4', 'plains_5'],
+                    ],
+                    bossName: '殭屍王',
+                    bossHp: 30,
+                    bossAtk: 8,
+                    bossDef: 2,
+                    bossGold: 30,
+                    bossSpeech: '🧟 你以為平原很安全？',
+                    monsters: [
+                        { name: '殭屍', hp: 10, atk: 4, def: 1, gold: 4, emoji: '🧟', drops: [{ id: '鐵礦', rate: 0.15 }] },
+                        { name: '骷髏', hp: 12, atk: 5, def: 2, gold: 5, emoji: '💀', drops: [{ id: '骨頭', rate: 0.2 }] },
+                        { name: '苦力怕', hp: 15, atk: 7, def: 0, gold: 6, emoji: '💥', drops: [{ id: '火藥', rate: 0.25 }] },
+                        { name: '蜘蛛', hp: 13, atk: 5, def: 1, gold: 5, emoji: '🕷️', drops: [{ id: '線', rate: 0.3 }] },
+                        { name: '羊', hp: 8, atk: 1, def: 0, gold: 2, emoji: '🐑', drops: [{ id: '羊毛', rate: 0.5 }] },
+                    ],
+                    gatherResources: ['木材', '石頭', '小麥', '羊毛'],
+                },
+                '山地': {
+                    nodes: [
+                        { id: 'mountain_0', name: '山腳營地', row: 0, col: 1, isBoss: false },
+                        { id: 'mountain_1', name: '懸崖礦道', row: 1, col: 0, isBoss: false },
+                        { id: 'mountain_2', name: '雪地小屋', row: 1, col: 2, isBoss: false },
+                        { id: 'mountain_3', name: '冰凍湖', row: 2, col: 1, isBoss: false },
+                        { id: 'mountain_4', name: '鐵魔像聖殿', row: 3, col: 1, isBoss: true },
+                    ],
+                    connections: [
+                        ['mountain_0', 'mountain_1'],
+                        ['mountain_0', 'mountain_2'],
+                        ['mountain_1', 'mountain_3'],
+                        ['mountain_2', 'mountain_3'],
+                        ['mountain_3', 'mountain_4'],
+                    ],
+                    bossName: '鐵魔像',
+                    bossHp: 50,
+                    bossAtk: 12,
+                    bossDef: 6,
+                    bossGold: 50,
+                    bossSpeech: '🗿 此山是我開！',
+                    monsters: [
+                        { name: '殭屍', hp: 14, atk: 6, def: 2, gold: 6, emoji: '🧟', drops: [{ id: '鐵礦', rate: 0.2 }] },
+                        { name: '骷髏', hp: 16, atk: 7, def: 3, gold: 7, emoji: '💀', drops: [{ id: '骨頭', rate: 0.25 }] },
+                        { name: '蠹蟲', hp: 10, atk: 5, def: 4, gold: 4, emoji: '🐛', drops: [{ id: '石頭', rate: 0.4 }] },
+                        { name: '北極熊', hp: 20, atk: 8, def: 3, gold: 10, emoji: '🐻‍❄️', drops: [{ id: '生魚', rate: 0.3 }] },
+                        { name: '羊', hp: 8, atk: 1, def: 0, gold: 2, emoji: '🐑', drops: [{ id: '羊毛', rate: 0.5 }] },
+                    ],
+                    gatherResources: ['石頭', '鐵礦', '煤炭', '木材'],
+                },
+                '森林': {
+                    nodes: [
+                        { id: 'forest_0', name: '森林入口', row: 0, col: 1, isBoss: false },
+                        { id: 'forest_1', name: '蜘蛛巢穴', row: 1, col: 0, isBoss: false },
+                        { id: 'forest_2', name: '蘑菇沼澤', row: 1, col: 2, isBoss: false },
+                        { id: 'forest_3', name: '精靈樹屋', row: 2, col: 1, isBoss: false },
+                        { id: 'forest_4', name: '凋零骷髏祭壇', row: 3, col: 1, isBoss: true },
+                    ],
+                    connections: [
+                        ['forest_0', 'forest_1'],
+                        ['forest_0', 'forest_2'],
+                        ['forest_1', 'forest_3'],
+                        ['forest_2', 'forest_3'],
+                        ['forest_3', 'forest_4'],
+                    ],
+                    bossName: '凋零骷髏',
+                    bossHp: 55,
+                    bossAtk: 14,
+                    bossDef: 5,
+                    bossGold: 55,
+                    bossSpeech: '💀 森林的暗影！',
+                    monsters: [
+                        { name: '殭屍', hp: 15, atk: 6, def: 2, gold: 6, emoji: '🧟', drops: [{ id: '鐵礦', rate: 0.2 }] },
+                        { name: '骷髏', hp: 17, atk: 8, def: 3, gold: 8, emoji: '💀', drops: [{ id: '骨頭', rate: 0.25 }] },
+                        { name: '苦力怕', hp: 18, atk: 9, def: 0, gold: 8, emoji: '💥', drops: [{ id: '火藥', rate: 0.3 }] },
+                        { name: '蜘蛛', hp: 16, atk: 7, def: 2, gold: 7, emoji: '🕷️', drops: [{ id: '線', rate: 0.3 }] },
+                        { name: '狐狸', hp: 12, atk: 4, def: 1, gold: 5, emoji: '🦊', drops: [{ id: '甜漿果', rate: 0.4 }] },
+                        { name: '狼', hp: 18, atk: 8, def: 3, gold: 8, emoji: '🐺', drops: [{ id: '生豬肉', rate: 0.3 }] },
+                    ],
+                    gatherResources: ['木材', '蘋果', '甜漿果', '石頭'],
+                },
+                '乾旱': {
+                    nodes: [
+                        { id: 'arid_0', name: '沙漠綠洲', row: 0, col: 1, isBoss: false },
+                        { id: 'arid_1', name: '金字塔', row: 1, col: 0, isBoss: false },
+                        { id: 'arid_2', name: '仙人掌叢', row: 1, col: 2, isBoss: false },
+                        { id: 'arid_3', name: '遺跡神殿', row: 2, col: 1, isBoss: false },
+                        { id: 'arid_4', name: '烈焰使者的熔爐', row: 3, col: 1, isBoss: true },
+                    ],
+                    connections: [
+                        ['arid_0', 'arid_1'],
+                        ['arid_0', 'arid_2'],
+                        ['arid_1', 'arid_3'],
+                        ['arid_2', 'arid_3'],
+                        ['arid_3', 'arid_4'],
+                    ],
+                    bossName: '烈焰使者',
+                    bossHp: 60,
+                    bossAtk: 16,
+                    bossDef: 4,
+                    bossGold: 60,
+                    bossSpeech: '🔥 沙漠之火！',
+                    monsters: [
+                        { name: '殭屍', hp: 16, atk: 7, def: 2, gold: 7, emoji: '🧟', drops: [{ id: '鐵礦', rate: 0.2 }] },
+                        { name: '骷髏', hp: 18, atk: 9, def: 3, gold: 9, emoji: '💀', drops: [{ id: '骨頭', rate: 0.25 }] },
+                        { name: '苦力怕', hp: 19, atk: 10, def: 0, gold: 9, emoji: '💥', drops: [{ id: '火藥', rate: 0.3 }] },
+                        { name: '蜘蛛', hp: 17, atk: 8, def: 2, gold: 8, emoji: '🕷️', drops: [{ id: '線', rate: 0.3 }] },
+                        { name: '駱駝', hp: 20, atk: 5, def: 3, gold: 8, emoji: '🐫', drops: [{ id: '皮革', rate: 0.4 }] },
+                        { name: '毒蠍', hp: 14, atk: 10, def: 1, gold: 10, emoji: '🦂', drops: [{ id: '毒刺', rate: 0.2 }] },
+                    ],
+                    gatherResources: ['砂岩', '仙人掌', '金粒', '石頭'],
+                },
+                '洞穴': {
+                    nodes: [
+                        { id: 'cave_0', name: '洞口', row: 0, col: 1, isBoss: false },
+                        { id: 'cave_1', name: '鐘乳石洞', row: 1, col: 0, isBoss: false },
+                        { id: 'cave_2', name: '地下湖', row: 1, col: 2, isBoss: false },
+                        { id: 'cave_3', name: '廢棄礦坑', row: 2, col: 1, isBoss: false },
+                        { id: 'cave_4', name: '遠古守衛者巢穴', row: 3, col: 1, isBoss: true },
+                    ],
+                    connections: [
+                        ['cave_0', 'cave_1'],
+                        ['cave_0', 'cave_2'],
+                        ['cave_1', 'cave_3'],
+                        ['cave_2', 'cave_3'],
+                        ['cave_3', 'cave_4'],
+                    ],
+                    bossName: '遠古守衛者',
+                    bossHp: 70,
+                    bossAtk: 18,
+                    bossDef: 8,
+                    bossGold: 70,
+                    bossSpeech: '👁️ 深處的凝視！',
+                    monsters: [
+                        { name: '殭屍', hp: 18, atk: 8, def: 3, gold: 8, emoji: '🧟', drops: [{ id: '鐵礦', rate: 0.25 }] },
+                        { name: '骷髏', hp: 20, atk: 10, def: 4, gold: 10, emoji: '💀', drops: [{ id: '骨頭', rate: 0.3 }] },
+                        { name: '苦力怕', hp: 22, atk: 12, def: 0, gold: 10, emoji: '💥', drops: [{ id: '火藥', rate: 0.35 }] },
+                        { name: '蜘蛛', hp: 19, atk: 9, def: 3, gold: 9, emoji: '🕷️', drops: [{ id: '線', rate: 0.35 }] },
+                        { name: '蠹蟲', hp: 14, atk: 7, def: 6, gold: 6, emoji: '🐛', drops: [{ id: '石頭', rate: 0.5 }] },
+                        { name: '蝙蝠', hp: 10, atk: 2, def: 1, gold: 3, emoji: '🦇', drops: [{ id: '煤炭', rate: 0.3 }] },
+                    ],
+                    gatherResources: ['石頭', '鐵礦', '煤炭', '青金石', '鑽石', '紅石'],
+                },
+                '海洋': {
+                    nodes: [
+                        { id: 'ocean_0', name: '海灘', row: 0, col: 1, isBoss: false },
+                        { id: 'ocean_1', name: '沉船', row: 1, col: 0, isBoss: false },
+                        { id: 'ocean_2', name: '珊瑚礁', row: 1, col: 2, isBoss: false },
+                        { id: 'ocean_3', name: '海底神殿', row: 2, col: 1, isBoss: false },
+                        { id: 'ocean_4', name: '深海守衛王座', row: 3, col: 1, isBoss: true },
+                    ],
+                    connections: [
+                        ['ocean_0', 'ocean_1'],
+                        ['ocean_0', 'ocean_2'],
+                        ['ocean_1', 'ocean_3'],
+                        ['ocean_2', 'ocean_3'],
+                        ['ocean_3', 'ocean_4'],
+                    ],
+                    bossName: '深海守衛',
+                    bossHp: 80,
+                    bossAtk: 20,
+                    bossDef: 7,
+                    bossGold: 80,
+                    bossSpeech: '🌊 海的詛咒！',
+                    monsters: [
+                        { name: '殭屍', hp: 20, atk: 9, def: 3, gold: 9, emoji: '🧟', drops: [{ id: '鐵礦', rate: 0.25 }] },
+                        { name: '骷髏', hp: 22, atk: 11, def: 4, gold: 11, emoji: '💀', drops: [{ id: '骨頭', rate: 0.3 }] },
+                        { name: '苦力怕', hp: 24, atk: 13, def: 0, gold: 11, emoji: '💥', drops: [{ id: '火藥', rate: 0.35 }] },
+                        { name: '蜘蛛', hp: 21, atk: 10, def: 3, gold: 10, emoji: '🕷️', drops: [{ id: '線', rate: 0.35 }] },
+                        { name: '海豚', hp: 18, atk: 6, def: 2, gold: 8, emoji: '🐬', drops: [{ id: '生魚', rate: 0.4 }] },
+                        { name: '魷魚', hp: 15, atk: 3, def: 1, gold: 6, emoji: '🦑', drops: [{ id: '墨囊', rate: 0.5 }] },
+                    ],
+                    gatherResources: ['生魚', '海晶碎片', '石頭'],
+                },
+                '地獄': {
+                    nodes: [
+                        { id: 'nether_0', name: '地獄門', row: 0, col: 1, isBoss: false },
+                        { id: 'nether_1', name: '岩漿海', row: 1, col: 0, isBoss: false },
+                        { id: 'nether_2', name: '地獄堡壘', row: 1, col: 2, isBoss: false },
+                        { id: 'nether_3', name: '靈魂沙谷', row: 2, col: 1, isBoss: false },
+                        { id: 'nether_4', name: '凋零王座', row: 3, col: 1, isBoss: true },
+                    ],
+                    connections: [
+                        ['nether_0', 'nether_1'],
+                        ['nether_0', 'nether_2'],
+                        ['nether_1', 'nether_3'],
+                        ['nether_2', 'nether_3'],
+                        ['nether_3', 'nether_4'],
+                    ],
+                    bossName: '凋零',
+                    bossHp: 100,
+                    bossAtk: 25,
+                    bossDef: 10,
+                    bossGold: 100,
+                    bossSpeech: '💀 凋零降臨！',
+                    monsters: [
+                        { name: '殭屍豬人', hp: 25, atk: 12, def: 5, gold: 12, emoji: '🐷', drops: [{ id: '金粒', rate: 0.5 }] },
+                        { name: '烈焰使者', hp: 22, atk: 14, def: 4, gold: 14, emoji: '🔥', drops: [{ id: '烈焰棒', rate: 0.3 }] },
+                        { name: '岩漿怪', hp: 28, atk: 11, def: 6, gold: 13, emoji: '🟠', drops: [{ id: '岩漿膏', rate: 0.3 }] },
+                        { name: '地獄幽靈', hp: 30, atk: 16, def: 4, gold: 16, emoji: '👻', drops: [{ id: '幽靈之淚', rate: 0.2 }] },
+                        { name: '豬布林', hp: 24, atk: 13, def: 5, gold: 13, emoji: '🐗', drops: [{ id: '金粒', rate: 0.4 }] },
+                        { name: '凋零骷髏', hp: 32, atk: 18, def: 6, gold: 18, emoji: '💀', drops: [{ id: '煤炭', rate: 0.3 }] },
+                    ],
+                    gatherResources: ['地獄石', '石英', '螢石', '獄髓錠(超低機率)'],
+                },
+                '終界': {
+                    nodes: [
+                        { id: 'end_0', name: '終界傳送門', row: 0, col: 1, isBoss: false },
+                        { id: 'end_1', name: '終界島', row: 1, col: 0, isBoss: false },
+                        { id: 'end_2', name: '歌萊森林', row: 1, col: 2, isBoss: false },
+                        { id: 'end_3', name: '終界城', row: 2, col: 1, isBoss: false },
+                        { id: 'end_4', name: '終界龍巢', row: 3, col: 1, isBoss: true },
+                    ],
+                    connections: [
+                        ['end_0', 'end_1'],
+                        ['end_0', 'end_2'],
+                        ['end_1', 'end_3'],
+                        ['end_2', 'end_3'],
+                        ['end_3', 'end_4'],
+                    ],
+                    bossName: '終界龍',
+                    bossHp: 150,
+                    bossAtk: 30,
+                    bossDef: 12,
+                    bossGold: 150,
+                    bossSpeech: '🐉 終界之龍！',
+                    monsters: [
+                        { name: '終界使者', hp: 30, atk: 15, def: 6, gold: 15, emoji: '👾', drops: [{ id: '終界珍珠',
+                                rate: 0.5 }] },
+                        { name: '終界蟎', hp: 20, atk: 10, def: 4, gold: 10, emoji: '🪲', drops: [{ id: '終界珍珠',
+                                rate: 0.3 }] },
+                        { name: '潛影貝', hp: 35, atk: 12, def: 8, gold: 16, emoji: '🐚', drops: [{ id: '潛影殼',
+                                rate: 0.2 }] },
+                    ],
+                    gatherResources: ['終界石', '紫頌果', '終界珍珠'],
+                }
+            };
+
+            // 資源顯示名稱
+            const RESOURCE_NAMES = {
+                '木材': '🌳 木材',
+                '石頭': '🗻 石頭',
+                '小麥': '🌾 小麥',
+                '羊毛': '🐑 羊毛',
+                '鐵礦': '⛏️ 鐵礦',
+                '煤炭': '🔥 煤炭',
+                '蘋果': '🍎 蘋果',
+                '甜漿果': '🍓 甜漿果',
+                '砂岩': '🏜️ 砂岩',
+                '仙人掌': '🌵 仙人掌',
+                '金粒': '✨ 金粒',
+                '青金石': '🔷 青金石',
+                '鑽石': '💎 鑽石',
+                '紅石': '🔴 紅石',
+                '生魚': '🐟 生魚',
+                '海晶碎片': '💠 海晶碎片',
+                '地獄石': '🔥 地獄石',
+                '石英': '⬜ 石英',
+                '螢石': '💡 螢石',
+                '獄髓錠': '⚫ 獄髓錠',
+                '終界石': '🌌 終界石',
+                '紫頌果': '🍇 紫頌果',
+                '終界珍珠': '🌀 終界珍珠',
+                '骨頭': '🦴 骨頭',
+                '火藥': '💥 火藥',
+                '線': '🧵 線',
+                '生豬肉': '🥩 生豬肉',
+                '皮革': '🧶 皮革',
+                '毒刺': '🐍 毒刺',
+                '墨囊': '🖤 墨囊',
+                '烈焰棒': '🔥 烈焰棒',
+                '岩漿膏': '🧪 岩漿膏',
+                '幽靈之淚': '💧 幽靈之淚',
+                '潛影殼': '🐚 潛影殼',
+                '鞘翅': '🦅 鞘翅',
+            };
+
+            // ============================================================
+            // 1. 裝備升級樹
+            // ============================================================
+            const WEAPON_TREES = {
+                '劍': {
+                    path: ['木劍', '石劍', '銅劍', '鐵劍', '金劍', '鑽石劍', '獄髓劍'],
+                    upgradeCost: {
+                        '木劍': { resources: { '木材': 2 }, gold: 20 },
+                        '石劍': { resources: { '石頭': 2 }, gold: 40 },
+                        '銅劍': { resources: { '銅錠': 2 }, gold: 60 },
+                        '鐵劍': { resources: { '鐵礦': 2, '煤炭': 1 }, gold: 80 },
+                        '金劍': { resources: { '金粒': 4 }, gold: 100 },
+                        '鑽石劍': { resources: { '鑽石': 2 }, gold: 150 },
+                        '獄髓劍': { resources: { '獄髓錠': 2 }, gold: 200 },
+                    },
+                    baseAtk: { '木劍': 2, '石劍': 3, '銅劍': 4, '鐵劍': 5, '金劍': 6, '鑽石劍': 7, '獄髓劍': 9 },
+                },
+                '弓': {
+                    path: ['木弓', '短弓', '長弓', '獵弓', '毒弓', '火弓'],
+                    upgradeCost: {
+                        '木弓': { resources: { '木材': 3, '線': 1 }, gold: 30 },
+                        '短弓': { resources: { '木材': 4, '線': 2 }, gold: 50 },
+                        '長弓': { resources: { '木材': 5, '線': 3 }, gold: 70 },
+                        '獵弓': { resources: { '木材': 6, '線': 4 }, gold: 90 },
+                        '毒弓': { resources: { '木材': 7, '線': 5, '毒刺': 1 }, gold: 120 },
+                        '火弓': { resources: { '木材': 8, '線': 6, '烈焰棒': 1 }, gold: 150 },
+                    },
+                    baseAtk: { '木弓': 3, '短弓': 4, '長弓': 5, '獵弓': 6, '毒弓': 7, '火弓': 8 },
+                },
+                '弩': {
+                    path: ['輕弩', '重弩', '煙火弩'],
+                    upgradeCost: {
+                        '輕弩': { resources: { '木材': 5, '鐵礦': 2 }, gold: 60 },
+                        '重弩': { resources: { '鐵礦': 4, '煤炭': 2 }, gold: 100 },
+                        '煙火弩': { resources: { '鐵礦': 6, '火藥': 3 }, gold: 150 },
+                    },
+                    baseAtk: { '輕弩': 6, '重弩': 7, '煙火弩': 8 },
+                },
+                '打刀': {
+                    path: ['木刀', '石刀', '銅刀', '鐵刀', '金刀', '鑽石刀', '獄髓刀', '妖刀村正'],
+                    upgradeCost: {
+                        '木刀': { resources: { '木材': 2 }, gold: 25 },
+                        '石刀': { resources: { '石頭': 2 }, gold: 45 },
+                        '銅刀': { resources: { '銅錠': 2 }, gold: 65 },
+                        '鐵刀': { resources: { '鐵礦': 2, '煤炭': 1 }, gold: 85 },
+                        '金刀': { resources: { '金粒': 4 }, gold: 105 },
+                        '鑽石刀': { resources: { '鑽石': 2 }, gold: 155 },
+                        '獄髓刀': { resources: { '獄髓錠': 2 }, gold: 205 },
+                        '妖刀村正': { resources: { '獄髓錠': 3, '幽靈之淚': 2 }, gold: 300 },
+                    },
+                    baseAtk: { '木刀': 2, '石刀': 3, '銅刀': 4, '鐵刀': 5, '金刀': 6, '鑽石刀': 7, '獄髓刀': 9, '妖刀村正': 11 },
+                }
+            };
+
+            const ARMOR_TREE = {
+                path: ['皮甲', '鎖鏈甲', '鐵甲', '黃金甲', '鑽石甲', '獄髓甲', '飛行獄髓甲'],
+                upgradeCost: {
+                    '皮甲': { resources: { '皮革': 3 }, gold: 30 },
+                    '鎖鏈甲': { resources: { '鐵礦': 2 }, gold: 60 },
+                    '鐵甲': { resources: { '鐵礦': 4 }, gold: 100 },
+                    '黃金甲': { resources: { '金粒': 8 }, gold: 150 },
+                    '鑽石甲': { resources: { '鑽石': 4 }, gold: 250 },
+                    '獄髓甲': { resources: { '獄髓錠': 4 }, gold: 400 },
+                    '飛行獄髓甲': { resources: { '獄髓錠': 4, '鞘翅': 1 }, gold: 500 },
+                },
+                baseDef: { '皮甲': 1, '鎖鏈甲': 3, '鐵甲': 4, '黃金甲': 5, '鑽石甲': 6, '獄髓甲': 7, '飛行獄髓甲': 7 },
+                baseHp: { '皮甲': 2, '鎖鏈甲': 3, '鐵甲': 4, '黃金甲': 5, '鑽石甲': 6, '獄髓甲': 7, '飛行獄髓甲': 7 },
+                staminaBonus: { '飛行獄髓甲': 10 },
+            };
+
+            const SKILL_TREE = {
+                '治癒': { resources: { '羊毛': 3 }, gold: 50, desc: '回復 17 HP' },
+                '猛擊': { resources: { '鐵礦': 2, '煤炭': 1 }, gold: 80, desc: '攻擊力暫時+9' },
+            };
+
+            // ============================================================
+            // 2. 遊戲狀態
+            // ============================================================
+            function getDefaultState() {
+                return {
+                    playerName: '史蒂夫',
+                    level: 1,
+                    hp: 30,
+                    maxHp: 30,
+                    attack: 4,
+                    defense: 1,
+                    gold: 20,
+                    exp: 0,
+                    expNext: 20,
+                    baseAtk: 4,
+                    baseDef: 1,
+                    stamina: 50,
+                    maxStamina: 50,
+                    weapon: null,
+                    armor: null,
+                    unlockedWeapons: [],
+                    unlockedArmors: [],
+                    inventory: {},
+                    unlockedBiomes: ['平原'],
+                    currentBiome: '平原',
+                    currentNode: 'plains_0',
+                    unlockedNodes: new Set(['plains_0']),
+                    bossDefeated: {},
+                    teammates: [],
+                    skills: [],
+                    achievements: [],
+                    battleCooldown: 0,
+                    isFighting: false,
+                    battleMonster: null,
+                    totalKills: 0,
+                    staminaRegenTimer: null,
+                    autoSaveTimer: null,
+                };
+            }
+
+            let G = getDefaultState();
+
+            // ============================================================
+            // 3. 輔助函數
+            // ============================================================
+            function getBiomeNodes(biome) {
+                return BIOME_NODES[biome]?.nodes || [];
+            }
+
+            function getBiomeConnections(biome) {
+                return BIOME_NODES[biome]?.connections || [];
+            }
+
+            function getCurrentBiomeData() {
+                return BIOME_NODES[G.currentBiome];
+            }
+
+            function getCurrentNodes() {
+                return getBiomeNodes(G.currentBiome);
+            }
+
+            function getCurrentNode() {
+                return getCurrentNodes().find(n => n.id === G.currentNode);
+            }
+
+            function isBossNode(nodeId) {
+                const node = getCurrentNodes().find(n => n.id === nodeId);
+                return node && node.isBoss;
+            }
+
+            function getNeighbors(nodeId) {
+                const conns = getBiomeConnections(G.currentBiome);
+                const neighbors = [];
+                conns.forEach(pair => {
+                    if (pair[0] === nodeId) neighbors.push(pair[1]);
+                    if (pair[1] === nodeId) neighbors.push(pair[0]);
+                });
+                return neighbors;
+            }
+
+            function getLockedNeighbors(nodeId) {
+                return getNeighbors(nodeId).filter(id => !G.unlockedNodes.has(id));
+            }
+
+            function getResourceDisplay(id) {
+                return RESOURCE_NAMES[id] || id;
+            }
+
+            function addResource(id, amount) {
+                if (!G.inventory[id]) G.inventory[id] = 0;
+                G.inventory[id] += amount;
+                if (G.inventory[id] <= 0) delete G.inventory[id];
+            }
+
+            function hasResource(id, amount) {
+                return (G.inventory[id] || 0) >= amount;
+            }
+
+            function removeResource(id, amount) {
+                if (!hasResource(id, amount)) return false;
+                G.inventory[id] -= amount;
+                if (G.inventory[id] <= 0) delete G.inventory[id];
+                return true;
+            }
+
+            function hasEnoughStamina(amount) { return G.stamina >= amount; }
+
+            function consumeStamina(amount) {
+                if (G.stamina < amount) {
+                    logMessage(`⚠️ 體力不足！需要 ${amount} 點 (當前 ${G.stamina})`, 'stamina-msg');
+                    return false;
+                }
+                G.stamina = Math.max(0, G.stamina - amount);
+                updateUI();
+                return true;
+            }
+
+            function regenStamina(amount) {
+                G.stamina = Math.min(G.maxStamina, G.stamina + amount);
+                updateUI();
+            }
+
+            function startStaminaRegen() {
+                if (G.staminaRegenTimer) clearInterval(G.staminaRegenTimer);
+                G.staminaRegenTimer = setInterval(() => {
+                    if (!G.isFighting) regenStamina(1);
+                }, 3000);
+            }
+
+            function stopStaminaRegen() {
+                if (G.staminaRegenTimer) {
+                    clearInterval(G.staminaRegenTimer);
+                    G.staminaRegenTimer = null;
+                }
+            }
+
+            function isWeaponUnlocked(weaponName) {
+                return G.unlockedWeapons.includes(weaponName);
+            }
+
+            function isArmorUnlocked(armorName) {
+                return G.unlockedArmors.includes(armorName);
+            }
+
+            function unlockWeapon(weaponName) {
+                if (!G.unlockedWeapons.includes(weaponName)) {
+                    G.unlockedWeapons.push(weaponName);
+                }
+            }
+
+            function unlockArmor(armorName) {
+                if (!G.unlockedArmors.includes(armorName)) {
+                    G.unlockedArmors.push(armorName);
+                }
+            }
+
+            // ============================================================
+            // 4. UI更新
+            // ============================================================
+            function updateUI() {
+                document.getElementById('levelDisplay').textContent = G.level;
+                document.getElementById('hpDisplay').textContent = `${G.hp}/${G.maxHp}`;
+                document.getElementById('staminaDisplay').textContent = `${G.stamina}/${G.maxStamina}`;
+                document.getElementById('atkDisplay').textContent = G.attack;
+                document.getElementById('defDisplay').textContent = G.defense;
+                document.getElementById('goldDisplay').textContent = G.gold;
+                document.getElementById('achieveCount').textContent = G.achievements.length;
+
+                const pct = Math.min(100, (G.exp / G.expNext) * 100);
+                document.getElementById('expBarFill').style.width = pct + '%';
+                document.getElementById('expText').textContent = `經驗 ${G.exp} / ${G.expNext}`;
+
+                const staminaPct = Math.min(100, (G.stamina / G.maxStamina) * 100);
+                document.getElementById('staminaBarFill').style.width = staminaPct + '%';
+                const fill = document.getElementById('staminaBarFill');
+                if (staminaPct < 20) fill.style.background = 'linear-gradient(90deg, #ff4444, #ff6b6b)';
+                else if (staminaPct < 50) fill.style.background = 'linear-gradient(90deg, #f5d742, #f7b731)';
+                else fill.style.background = 'linear-gradient(90deg, #7ddfb3, #4ba392)';
+                document.getElementById('staminaText').textContent =
+                    `⚡ 體力 ${G.stamina} / ${G.maxStamina} · 每3秒恢復1`;
+
+                // 群落按鈕
+                const tabs = document.getElementById('regionTabs');
+                tabs.innerHTML = '';
+                BIOME_ORDER.forEach((biome, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'region-btn' + (biome === G.currentBiome ? ' active' : '');
+                    btn.textContent = biome;
+                    btn.dataset.biome = biome;
+                    btn.addEventListener('click', function() {
+                        switchBiome(biome);
+                    });
+                    if (!G.unlockedBiomes.includes(biome)) {
+                        btn.disabled = true;
+                        btn.style.opacity = '0.4';
+                    }
+                    tabs.appendChild(btn);
+                });
+
+                const node = getCurrentNode();
+                const biomeData = getCurrentBiomeData();
+                const bossStatus = G.bossDefeated[G.currentBiome] ? ' ✅ Boss已擊敗' : '';
+                document.getElementById('locName').textContent = node ? node.name : '???';
+                document.getElementById('locDetail').textContent = `${G.currentBiome}${bossStatus}`;
+                let detail = `武器: ${G.weapon || '空'} 防具: ${G.armor || '空'}`;
+                if (G.skills.length) detail += ` 技能: ${G.skills.join('、')}`;
+                if (G.teammates.length) detail += ` 隊友: ${G.teammates.join('、')}`;
+                document.getElementById('extraDetail').textContent = detail;
+
+                const fightBtn = document.getElementById('fightBtn');
+                if (G.battleCooldown > 0 || G.isFighting) {
+                    fightBtn.textContent = G.isFighting ? '⚔️ 戰鬥中...' : `⏳ 冷卻 (${G.battleCooldown})`;
+                    fightBtn.disabled = true;
+                } else {
+                    if (!hasEnoughStamina(12)) {
+                        fightBtn.textContent = '⚔️ 體力不足';
+                        fightBtn.disabled = true;
+                    } else if (isBossNode(G.currentNode)) {
+                        fightBtn.textContent = G.bossDefeated[G.currentBiome] ? '♻️ Boss重生' : '👹 Boss戰';
+                        fightBtn.disabled = false;
+                    } else {
+                        fightBtn.textContent = '⚔️ 戰鬥';
+                        fightBtn.disabled = false;
+                    }
+                }
+
+                const exploreBtn = document.getElementById('exploreBtn');
+                if (!hasEnoughStamina(8)) {
+                    exploreBtn.textContent = '🔍 體力不足';
+                    exploreBtn.disabled = true;
+                } else {
+                    exploreBtn.textContent = '🔍 探索';
+                    exploreBtn.disabled = false;
+                }
+
+                const skillBtn = document.getElementById('skillBtn');
+                if (G.skills.length === 0) {
+                    skillBtn.textContent = '✨ 無技能';
+                    skillBtn.disabled = true;
+                } else {
+                    const hasSkillStamina = G.skills.some(s => {
+                        const cost = s === '猛擊' ? 18 : 12;
+                        return hasEnoughStamina(cost);
+                    });
+                    if (!hasSkillStamina) {
+                        skillBtn.textContent = '✨ 體力不足';
+                        skillBtn.disabled = true;
+                    } else {
+                        skillBtn.textContent = '✨ 技能';
+                        skillBtn.disabled = false;
+                    }
+                }
+
+                updateBattleSceneTop();
+                checkAchievements();
+                const copyrightEl = document.getElementById('copyrightText');
+                if (copyrightEl && !copyrightEl.dataset.initialized) {
+                    const year = new Date().getFullYear();
+                    copyrightEl.textContent = `© ${year} ☕迪遜咖啡廳，版權所有。`;
+                    copyrightEl.dataset.initialized = 'true';
+                }
+                autoSave();
+            }
+
+            function updateBattleSceneTop() {
+                const playerDiv = document.getElementById('playerUnits');
+                const enemyDiv = document.getElementById('enemyUnits');
+                let playerHtml =
+                    `<div class="unit-icon">🧑 <span class="player-name">${G.playerName}</span><br><span class="hp-bar">❤️${G.hp}/${G.maxHp}</span></div>`;
+                G.teammates.forEach(t => {
+                    const icons = { '狼': '🐺', '村民': '🧑‍🌾', '悅靈': '✨', '鐵巨人': '🗿' };
+                    let extra = '';
+                    if (t === '狼') extra = '⚔️+3';
+                    else if (t === '村民') extra = '🛒 交易';
+                    else if (t === '悅靈') extra = '💚 治療';
+                    else if (t === '鐵巨人') extra = '🛡️+2';
+                    playerHtml +=
+                        `<div class="unit-icon">${icons[t]||'👤'} ${t}<span class="unit-extra">${extra}</span></div>`;
+                });
+                playerDiv.innerHTML = playerHtml;
+
+                const monster = G.battleMonster;
+                if (monster) {
+                    const hp = monster.currentHp !== undefined ? monster.currentHp : monster.hp;
+                    enemyDiv.innerHTML =
+                        `<div class="unit-icon">${monster.emoji||'👹'} ${monster.name}<br><span class="hp-bar">❤️${Math.max(0,hp)}/${monster.maxHp||monster.hp}</span></div>`;
+                } else {
+                    enemyDiv.innerHTML =
+                        `<div class="unit-icon">❓ <span class="monster-placeholder">???</span><br><span class="hp-bar">❤️??</span></div>`;
+                }
+            }
+
+            function addLog(msg, type = 'system') {
+                const logDiv = document.getElementById('combinedLog');
+                const entry = document.createElement('div');
+                entry.className = type;
+                entry.innerHTML = msg;
+                logDiv.prepend(entry);
+                while (logDiv.children.length > 30) logDiv.removeChild(logDiv.lastChild);
+            }
+
+            function logMessage(msg, type = 'system') { addLog(msg, type); }
+
+            function battleLog(msg, type = 'system') { addLog(msg, type); }
+
+            function tickCooldown() {
+                if (G.battleCooldown > 0) { G.battleCooldown--; }
+                updateUI();
+            }
+
+            function checkAchievements() {
+                const list = [
+                    { name: '初出茅廬', cond: () => G.level >= 2 },
+                    { name: '小有資財', cond: () => G.gold >= 100 },
+                    { name: '武器大師', cond: () => G.weapon && G.weapon.includes('鑽石') },
+                    { name: '團隊精神', cond: () => G.teammates.length >= 2 },
+                    { name: '三界行者', cond: () => G.unlockedBiomes.length >= 3 },
+                    { name: '技能達人', cond: () => G.skills.length >= 2 },
+                    { name: '屠龍者', cond: () => G.totalKills >= 20 },
+                    { name: '平原征服者', cond: () => G.bossDefeated['平原'] },
+                    { name: '山地征服者', cond: () => G.bossDefeated['山地'] },
+                    { name: '森林征服者', cond: () => G.bossDefeated['森林'] },
+                    { name: '乾旱征服者', cond: () => G.bossDefeated['乾旱'] },
+                    { name: '洞穴征服者', cond: () => G.bossDefeated['洞穴'] },
+                    { name: '海洋征服者', cond: () => G.bossDefeated['海洋'] },
+                    { name: '地獄征服者', cond: () => G.bossDefeated['地獄'] },
+                    { name: '終界征服者', cond: () => G.bossDefeated['終界'] },
+                    { name: '體力達人', cond: () => G.maxStamina >= 70 },
+                ];
+                let newAchieve = false;
+                list.forEach(a => {
+                    if (!G.achievements.includes(a.name) && a.cond()) {
+                        G.achievements.push(a.name);
+                        newAchieve = true;
+                        logMessage(`🏆 成就解鎖: ${a.name} !`);
+                    }
+                });
+                if (newAchieve) document.getElementById('achieveCount').textContent = G.achievements.length;
+            }
+
+            function updateStats() {
+                let atk = G.baseAtk;
+                let def = G.baseDef;
+                if (G.weapon) {
+                    let found = false;
+                    for (let tree of Object.values(WEAPON_TREES)) {
+                        if (tree.path.includes(G.weapon)) {
+                            atk += tree.baseAtk[G.weapon] || 0;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found && G.weapon.startsWith('獄髓劍')) atk += 10;
+                }
+                if (G.armor) {
+                    const idx = ARMOR_TREE.path.indexOf(G.armor);
+                    if (idx !== -1) {
+                        def += ARMOR_TREE.baseDef[G.armor] || 0;
+                    }
+                }
+                if (G.teammates.includes('狼')) atk += 3;
+                if (G.teammates.includes('鐵巨人')) def += 2;
+                G.attack = atk;
+                G.defense = def;
+            }
+
+            // ============================================================
+            // 5. 群落切換
+            // ============================================================
+            function switchBiome(biome) {
+                if (!G.unlockedBiomes.includes(biome)) {
+                    logMessage(`⚠️ 群落 ${biome} 尚未解鎖！`, 'system');
+                    return;
+                }
+                if (biome === G.currentBiome) return;
+                G.currentBiome = biome;
+                const nodes = getBiomeNodes(biome);
+                if (nodes.length > 0) {
+                    G.currentNode = nodes[0].id;
+                    if (!G.unlockedNodes.has(G.currentNode)) {
+                        G.unlockedNodes.add(G.currentNode);
+                    }
+                }
+                updateUI();
+                logMessage(`📍 進入 ${biome} 群落`);
+            }
+
+            // ============================================================
+            // 6. 探索
+            // ============================================================
+            function explore() {
+                tickCooldown();
+                if (!consumeStamina(8)) return;
+                const goldFound = 3 + Math.floor(Math.random() * 8) + G.level;
+                G.gold += goldFound;
+                let msg = `🔍 探索發現 ${goldFound} 金幣!`;
+
+                const locked = getLockedNeighbors(G.currentNode);
+                if (locked.length > 0 && Math.random() < 0.4) {
+                    const pick = locked[Math.floor(Math.random() * locked.length)];
+                    G.unlockedNodes.add(pick);
+                    const node = getCurrentNodes().find(n => n.id === pick);
+                    msg += ` 🗺️ 發現了新節點: ${node ? node.name : pick}!`;
+                    logMessage(`🗺️ 解鎖了新節點: ${node ? node.name : pick}`);
+                } else if (locked.length === 0) {
+                    msg += ` (此處沒有未探索的路徑)`;
+                }
+
+                if (!isBossNode(G.currentNode) && Math.random() < 0.15) {
+                    const chestReward = Math.random();
+                    if (chestReward < 0.6) {
+                        const goldBonus = 15 + Math.floor(Math.random() * 30);
+                        G.gold += goldBonus;
+                        msg += ` 🎁 發現寶箱! 獲得 ${goldBonus} 金幣!`;
+                    } else if (chestReward < 0.9) {
+                        const res = ['木材', '石頭', '小麥', '羊毛', '鐵礦', '煤炭'][Math.floor(Math.random() * 6)];
+                        const amt = 1 + Math.floor(Math.random() * 3);
+                        addResource(res, amt);
+                        msg += ` 🎁 發現寶箱! 獲得 ${getResourceDisplay(res)} x${amt}`;
+                    } else {
+                        const possible = ['木劍', '石劍', '木弓', '皮甲'];
+                        const item = possible[Math.floor(Math.random() * possible.length)];
+                        if (!G.weapon && (item.includes('劍') || item.includes('弓'))) {
+                            G.weapon = item;
+                            unlockWeapon(item);
+                            updateStats();
+                            msg += ` 🎁 傳說寶箱! 獲得 ${item}!`;
+                        } else if (!G.armor && item === '皮甲') {
+                            G.armor = item;
+                            unlockArmor(item);
+                            updateStats();
+                            msg += ` 🎁 傳說寶箱! 獲得 ${item}!`;
+                        } else {
+                            if (item.includes('劍') || item.includes('弓')) {
+                                unlockWeapon(item);
+                            } else if (item === '皮甲') {
+                                unlockArmor(item);
+                            }
+                            const goldVal = 30;
+                            G.gold += goldVal;
+                            msg += ` 🎁 寶箱開出 ${item}，但已有更好，轉為 ${goldVal} 金幣。`;
+                        }
+                    }
+                }
+                logMessage(msg);
+                updateUI();
+            }
+
+            // ============================================================
+            // 7. 戰鬥系統
+            // ============================================================
+            function startBattle(name, mHpBase, mAtkBase, mDefBase, goldBase, isBoss, drops, emoji) {
+                if (G.isFighting) return;
+                if (!consumeStamina(12)) {
+                    logMessage('⚠️ 體力不足，無法戰鬥！', 'stamina-msg');
+                    return;
+                }
+                G.isFighting = true;
+                updateUI();
+
+                const monster = {
+                    name: name,
+                    hp: mHpBase + Math.floor(G.level * 1.5),
+                    maxHp: mHpBase + Math.floor(G.level * 1.5),
+                    atk: mAtkBase + Math.floor(G.level * 0.6),
+                    def: mDefBase + Math.floor(G.level * 0.3),
+                    gold: goldBase,
+                    emoji: emoji || (isBoss ? '👑' : '👹'),
+                    currentHp: mHpBase + Math.floor(G.level * 1.5),
+                    drops: drops || [],
+                };
+                G.battleMonster = monster;
+                updateBattleSceneTop();
+
+                let mHp = monster.hp;
+                let mAtk = monster.atk;
+                let mDef = monster.def;
+                let playerAtk = G.attack;
+                let playerDef = G.defense;
+
+                const title = isBoss ? '👹 BOSS' : '⚔️';
+                battleLog(`${title} 遭遇 <strong>${name}</strong> (HP:${mHp} ATK:${mAtk} DEF:${mDef})`, 'system');
+
+                let playerHp = G.hp;
+                let turn = 0;
+
+                function doTurn() {
+                    if (G.teammates.includes('悅靈')) {
+                        playerHp = Math.min(playerHp + 2, G.maxHp);
+                        G.hp = playerHp;
+                        updateBattleSceneTop();
+                    }
+                    if (playerHp <= 0 || mHp <= 0 || turn >= 20) {
+                        finishBattle(playerHp, mHp, monster, goldBase, isBoss);
+                        return;
+                    }
+                    turn++;
+                    let dmg = Math.max(1, playerAtk - mDef + Math.floor(Math.random() * 4));
+                    mHp -= dmg;
+                    monster.currentHp = mHp;
+                    const attackEmojis = ['🗡️', '⚔️', '💥', '🔥', '💢'];
+                    const emoji2 = attackEmojis[Math.floor(Math.random() * attackEmojis.length)];
+                    battleLog(`▶ 第${turn}回合 你${emoji2}造成 <span class="dmg">${dmg}</span> 傷害 (怪物HP:${Math.max(0,mHp)})`,
+                        'player-attack');
+                    updateBattleSceneTop();
+                    if (mHp <= 0) {
+                        battleLog(`✅ 擊敗 ${name}!`, 'system');
+                        finishBattle(playerHp, mHp, monster, goldBase, isBoss);
+                        return;
+                    }
+
+                    let dmg2 = Math.max(1, mAtk - playerDef + Math.floor(Math.random() * 3));
+                    playerHp -= dmg2;
+                    const monsterEmojis = ['👊', '🦷', '🌪️', '💨', '❄️'];
+                    const mEmoji = monsterEmojis[Math.floor(Math.random() * monsterEmojis.length)];
+                    battleLog(`◀ 怪物${mEmoji}造成 <span class="dmg">${dmg2}</span> 傷害 (你的HP:${Math.max(0,playerHp)})`,
+                        'monster-attack');
+                    G.hp = playerHp;
+                    updateBattleSceneTop();
+                    if (playerHp <= 0) {
+                        battleLog(`💀 你被擊敗了...`, 'system');
+                        finishBattle(playerHp, mHp, monster, goldBase, isBoss);
+                        return;
+                    }
+                    setTimeout(doTurn, 700);
+                }
+                setTimeout(doTurn, 400);
+            }
+
+            function finishBattle(playerHp, mHp, monster, goldBase, isBoss) {
+                G.battleMonster = null;
+                G.isFighting = false;
+
+                if (playerHp <= 0) {
+                    G.hp = Math.max(1, Math.floor(G.maxHp * 0.3));
+                    logMessage(`💀 戰敗... 回復至 ${G.hp}HP`);
+                    G.battleCooldown = 1;
+                    tickCooldown();
+                    updateUI();
+                    return;
+                }
+                if (mHp <= 0) {
+                    G.hp = Math.min(G.maxHp, playerHp);
+                    const goldReward = Math.floor(goldBase + G.level * 2);
+                    G.gold += goldReward;
+                    const expGain = 15 + G.level * 4;
+                    G.exp += expGain;
+                    G.totalKills += 1;
+                    battleLog(`🏅 勝利! 獲得 ${goldReward}💰 ${expGain}EXP`, 'system');
+
+                    if (monster.drops) {
+                        monster.drops.forEach(drop => {
+                            if (Math.random() < drop.rate) {
+                                const amount = drop.amount || 1;
+                                addResource(drop.id, amount);
+                                battleLog(`📦 掉落: ${getResourceDisplay(drop.id)} x${amount}`, 'loot');
+                            }
+                        });
+                    }
+
+                    if (isBoss) {
+                        G.bossDefeated[G.currentBiome] = true;
+                        const idx = BIOME_ORDER.indexOf(G.currentBiome);
+                        if (idx < BIOME_ORDER.length - 1) {
+                            const next = BIOME_ORDER[idx + 1];
+                            if (!G.unlockedBiomes.includes(next)) {
+                                G.unlockedBiomes.push(next);
+                                logMessage(`🔓 解鎖新群落: ${next}!`);
+                            }
+                        }
+                        if (G.currentBiome === '終界') {
+                            addResource('鞘翅', 1);
+                            logMessage('🦅 擊敗終界龍，獲得鞘翅！可至商店升級飛行獄髓甲。');
+                        }
+                        battleLog(`👑 擊敗了 ${monster.name}！`, 'system');
+                    }
+
+                    while (G.exp >= G.expNext) {
+                        G.exp -= G.expNext;
+                        G.level++;
+                        G.maxHp += 8;
+                        G.hp = Math.min(G.hp + 8, G.maxHp);
+                        G.baseAtk += 1.5;
+                        G.baseDef += 0.5;
+                        G.maxStamina += 2;
+                        G.stamina = G.maxStamina;
+                        updateStats();
+                        G.expNext = Math.floor(G.expNext * 1.4) + 8;
+                        battleLog(`🎉 升級! Lv.${G.level} 體力上限+2，體力全回復!`, 'system');
+                    }
+                    updateStats();
+                    G.battleCooldown = 1;
+                    tickCooldown();
+                    updateUI();
+                    checkAchievements();
+                } else {
+                    logMessage('⚖️ 戰鬥結束，不分勝負');
+                    G.battleCooldown = 1;
+                    tickCooldown();
+                    updateUI();
+                }
+            }
+
+            function handleFight() {
+                if (G.isFighting) return;
+                if (G.battleCooldown > 0) {
+                    battleLog(`⏳ 冷卻中 (${G.battleCooldown} 回合)`, 'system');
+                    return;
+                }
+                if (!hasEnoughStamina(12)) {
+                    battleLog(`⚠️ 體力不足 (需要12點，當前${G.stamina})`, 'stamina-msg');
+                    return;
+                }
+                const node = getCurrentNode();
+                if (!node) { battleLog('⚠️ 無效節點', 'system'); return; }
+
+                const biomeData = getCurrentBiomeData();
+                const isBoss = node.isBoss;
+
+                if (isBoss) {
+                    if (G.bossDefeated[G.currentBiome]) {
+                        G.bossDefeated[G.currentBiome] = false;
+                        battleLog(`♻️ ${biomeData.bossName} 已重生！再次挑戰吧！`, 'system');
+                        logMessage(`♻️ ${biomeData.bossName} 已重生！`);
+                        updateUI();
+                        return;
+                    }
+                    battleLog(`👹 ${biomeData.bossName}: 「${biomeData.bossSpeech}」`, 'boss-speech');
+                    startBattle(biomeData.bossName, biomeData.bossHp, biomeData.bossAtk, biomeData.bossDef, biomeData
+                        .bossGold, true, [], '👑');
+                    return;
+                }
+
+                const pool = biomeData.monsters || [];
+                if (pool.length === 0) {
+                    battleLog('此處沒有怪物', 'system');
+                    return;
+                }
+                const monster = pool[Math.floor(Math.random() * pool.length)];
+                startBattle(monster.name, monster.hp, monster.atk, monster.def, monster.gold, false, monster.drops || [],
+                    monster.emoji || '👹');
+            }
+
+            // ============================================================
+            // 8. 採集
+            // ============================================================
+            function gather() {
+                tickCooldown();
+                if (!consumeStamina(6)) return;
+                const biomeData = getCurrentBiomeData();
+                const resources = biomeData.gatherResources || [];
+                if (resources.length === 0) {
+                    logMessage('此處沒有可採集的資源', 'system');
+                    return;
+                }
+                const res = resources[Math.floor(Math.random() * resources.length)];
+                let amount = 1 + Math.floor(Math.random() * 3);
+                if (res === '獄髓錠(超低機率)') {
+                    if (Math.random() < 0.05) {
+                        addResource('獄髓錠', 1);
+                        logMessage(`⛏️ 採集到 獄髓錠 x1 ! (稀有)`, 'loot');
+                    } else {
+                        addResource('地獄石', 1);
+                        logMessage(`⛏️ 採集到 地獄石 x1`, 'loot');
+                    }
+                } else {
+                    const resourceId = res.split('(')[0].trim();
+                    addResource(resourceId, amount);
+                    logMessage(`⛏️ 採集到 ${getResourceDisplay(resourceId)} x${amount}`, 'loot');
+                }
+                updateUI();
+            }
+
+            // ============================================================
+            // 9. 商店 (升級樹)
+            // ============================================================
+            function openShop() {
+                const overlay = document.createElement('div');
+                overlay.className = 'modal-overlay';
+                overlay.id = 'shopModal';
+                let html = `<div class="modal-box"><h3>🏪 商店 & 打造專屬自已的裝備！</h3>`;
+
+                // 武器升級
+                html += `<h4>⚔️ 武器升級</h4>`;
+                let weaponUpgradeFound = false;
+                for (let [treeName, tree] of Object.entries(WEAPON_TREES)) {
+                    const path = tree.path;
+                    let currentIdx = G.weapon ? path.indexOf(G.weapon) : -1;
+                    if (G.weapon && currentIdx === -1) {
+                        if (G.weapon.startsWith('獄髓劍')) {
+                            html += `<div class="modal-item" style="opacity:0.6;">當前武器 ${G.weapon} 已達最高級</div>`;
+                            continue;
+                        } else {
+                            continue;
+                        }
+                    }
+                    let nextIdx = (currentIdx === -1) ? 0 : currentIdx + 1;
+                    if (nextIdx < path.length) {
+                        const nextWeapon = path[nextIdx];
+                        if (isWeaponUnlocked(nextWeapon)) {
+                            html += `<div class="modal-item" style="opacity:0.6;">${nextWeapon} 已解鎖</div>`;
+                            continue;
+                        }
+                        const cost = tree.upgradeCost[nextWeapon];
+                        if (cost) {
+                            const costStr = Object.entries(cost.resources).map(([id, amt]) =>
+                                `${getResourceDisplay(id)} x${amt}`).join(' + ');
+                            const hasPre = (currentIdx === -1) ? true : (G.weapon === path[currentIdx]);
+                            if (!hasPre) {
+                                html += `<div class="modal-item" style="opacity:0.6;">需要先擁有 ${path[currentIdx]}</div>`;
+                                continue;
+                            }
+                            html += `<div class="modal-item">
+                                <span class="item-info">${nextWeapon} (🗡️+${tree.baseAtk[nextWeapon]})<br>
+                                <span style="font-size:0.7rem;color:#98bcc3;">需求: ${costStr} + ${cost.gold}💰</span>
+                                </span>
+                                <button data-shop="upgradeWeapon" data-tree="${treeName}" data-weapon="${nextWeapon}">升級</button>
+                            </div>`;
+                            weaponUpgradeFound = true;
+                        }
+                    } else {
+                        if (currentIdx === path.length - 1) {
+                            html += `<div class="modal-item" style="opacity:0.6;">${treeName} 已達最高級</div>`;
+                        }
+                    }
+                }
+                if (!weaponUpgradeFound) {
+                    html += `<div class="modal-item" style="opacity:0.6;">所有武器已達最高級或已解鎖</div>`;
+                }
+
+                // 防具升級
+                html += `<h4>🛡️ 防具升級</h4>`;
+                const armorPath = ARMOR_TREE.path;
+                let armorIdx = G.armor ? armorPath.indexOf(G.armor) : -1;
+                if (G.armor && armorIdx === -1) {
+                    html += `<div class="modal-item" style="opacity:0.6;">當前防具 ${G.armor} 已達最高級</div>`;
+                } else {
+                    let nextArmorIdx = (armorIdx === -1) ? 0 : armorIdx + 1;
+                    if (nextArmorIdx < armorPath.length) {
+                        const nextArmor = armorPath[nextArmorIdx];
+                        if (isArmorUnlocked(nextArmor)) {
+                            html += `<div class="modal-item" style="opacity:0.6;">${nextArmor} 已解鎖</div>`;
+                        } else {
+                            const cost = ARMOR_TREE.upgradeCost[nextArmor];
+                            if (cost) {
+                                const costStr = Object.entries(cost.resources).map(([id, amt]) =>
+                                    `${getResourceDisplay(id)} x${amt}`).join(' + ');
+                                const hasPre = (armorIdx === -1) ? true : (G.armor === armorPath[armorIdx]);
+                                if (!hasPre) {
+                                    html += `<div class="modal-item" style="opacity:0.6;">需要先擁有 ${armorPath[armorIdx]}</div>`;
+                                } else {
+                                    let bonus = `🛡️+${ARMOR_TREE.baseDef[nextArmor]}`;
+                                    if (ARMOR_TREE.baseHp[nextArmor]) bonus += ` ❤️+${ARMOR_TREE.baseHp[nextArmor]}`;
+                                    if (ARMOR_TREE.staminaBonus && ARMOR_TREE.staminaBonus[nextArmor]) bonus +=
+                                        ` ⚡+${ARMOR_TREE.staminaBonus[nextArmor]}`;
+                                    html += `<div class="modal-item">
+                                        <span class="item-info">${nextArmor} (${bonus})<br>
+                                        <span style="font-size:0.7rem;color:#98bcc3;">需求: ${costStr} + ${cost.gold}💰</span>
+                                        </span>
+                                        <button data-shop="upgradeArmor" data-armor="${nextArmor}">升級</button>
+                                    </div>`;
+                                }
+                            }
+                        }
+                    } else {
+                        html += `<div class="modal-item" style="opacity:0.6;">防具已達最高級</div>`;
+                    }
+                }
+
+                // 技能學習
+                html += `<h4>✨ 技能學習</h4>`;
+                for (let [skill, data] of Object.entries(SKILL_TREE)) {
+                    const owned = G.skills.includes(skill);
+                    const costStr = Object.entries(data.resources).map(([id, amt]) =>
+                        `${getResourceDisplay(id)} x${amt}`).join(' + ');
+                    html += `<div class="modal-item">
+                        <span class="item-info">${skill} (${data.desc}) ${owned?'✅ 已學會':''}<br>
+                        <span style="font-size:0.7rem;color:#98bcc3;">需求: ${costStr} + ${data.gold}💰</span>
+                        </span>
+                        ${!owned ? `<button data-shop="learnSkill" data-skill="${skill}">學習</button>` : ''}
+                    </div>`;
+                }
+
+                // 消耗品
+                html += `<h4>💚 消耗品</h4>`;
+                html += `<div class="modal-item">
+                    <span class="item-info">治療藥水 (回復20HP) <br><span style="font-size:0.7rem;color:#98bcc3;">需求: 小麥 x2 + 15💰</span></span>
+                    <button data-shop="potion">購買 (15💰)</button>
+                </div>`;
+                html += `<div class="modal-item" style="border-left-color:#f5d742;">
+                    <span class="item-info">🍞 麵包 (回復15體力) <br><span style="font-size:0.7rem;color:#98bcc3;">需求: 小麥 x3</span></span>
+                    <button data-shop="bread">合成 (小麥x3)</button>
+                </div>`;
+
+                if (G.weapon === '獄髓劍') {
+                    html += `<div class="modal-item">
+                        <span class="item-info">✨ 獄髓劍 → 獄髓劍(火炎附加I) <br><span style="font-size:0.7rem;color:#98bcc3;">需求: 青金石x3 + 10級 + 300💰</span></span>
+                        <button data-shop="enchant">附魔</button>
+                    </div>`;
+                }
+
+                html += `<button class="modal-close" id="closeShop">關閉</button></div>`;
+                overlay.innerHTML = html;
+                document.body.appendChild(overlay);
+
+                overlay.querySelectorAll('[data-shop]').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const type = this.dataset.shop;
+                        if (type === 'upgradeWeapon') {
+                            const treeName = this.dataset.tree;
+                            const weapon = this.dataset.weapon;
+                            const tree = WEAPON_TREES[treeName];
+                            const cost = tree.upgradeCost[weapon];
+                            let can = true;
+                            for (let [id, amt] of Object.entries(cost.resources)) {
+                                if (!hasResource(id, amt)) { can = false;
+                                    logMessage(`❌ 缺少 ${getResourceDisplay(id)} x${amt}`); break; }
+                            }
+                            if (!can) return;
+                            if (G.gold < cost.gold) { logMessage(`❌ 金幣不足，需要 ${cost.gold}`); return; }
+                            for (let [id, amt] of Object.entries(cost.resources)) {
+                                removeResource(id, amt);
+                            }
+                            G.gold -= cost.gold;
+                            G.weapon = weapon;
+                            unlockWeapon(weapon);
+                            updateStats();
+                            logMessage(`⚔️ 升級武器為 ${weapon}`);
+                            document.getElementById('shopModal')?.remove();
+                            openShop();
+                            updateUI();
+                        } else if (type === 'upgradeArmor') {
+                            const armor = this.dataset.armor;
+                            const cost = ARMOR_TREE.upgradeCost[armor];
+                            let can = true;
+                            for (let [id, amt] of Object.entries(cost.resources)) {
+                                if (!hasResource(id, amt)) { can = false;
+                                    logMessage(`❌ 缺少 ${getResourceDisplay(id)} x${amt}`); break; }
+                            }
+                            if (!can) return;
+                            if (G.gold < cost.gold) { logMessage(`❌ 金幣不足，需要 ${cost.gold}`); return; }
+                            for (let [id, amt] of Object.entries(cost.resources)) {
+                                removeResource(id, amt);
+                            }
+                            G.gold -= cost.gold;
+                            const hpBonus = ARMOR_TREE.baseHp[armor] || 0;
+                            if (hpBonus) {
+                                G.maxHp += hpBonus;
+                                G.hp = Math.min(G.hp + hpBonus, G.maxHp);
+                            }
+                            const staminaBonus = ARMOR_TREE.staminaBonus ? ARMOR_TREE.staminaBonus[armor] || 0 : 0;
+                            if (staminaBonus) {
+                                G.maxStamina += staminaBonus;
+                                G.stamina += staminaBonus;
+                            }
+                            G.armor = armor;
+                            unlockArmor(armor);
+                            updateStats();
+                            logMessage(`🛡️ 升級防具為 ${armor}`);
+                            document.getElementById('shopModal')?.remove();
+                            openShop();
+                            updateUI();
+                        } else if (type === 'learnSkill') {
+                            const skill = this.dataset.skill;
+                            const data = SKILL_TREE[skill];
+                            let can = true;
+                            for (let [id, amt] of Object.entries(data.resources)) {
+                                if (!hasResource(id, amt)) { can = false;
+                                    logMessage(`❌ 缺少 ${getResourceDisplay(id)} x${amt}`); break; }
+                            }
+                            if (!can) return;
+                            if (G.gold < data.gold) { logMessage(`❌ 金幣不足，需要 ${data.gold}`); return; }
+                            for (let [id, amt] of Object.entries(data.resources)) {
+                                removeResource(id, amt);
+                            }
+                            G.gold -= data.gold;
+                            G.skills.push(skill);
+                            logMessage(`✨ 學會技能: ${skill}`);
+                            document.getElementById('shopModal')?.remove();
+                            openShop();
+                            updateUI();
+                        } else if (type === 'potion') {
+                            if (G.gold < 15) { logMessage('❌ 金幣不足 15'); return; }
+                            if (!hasResource('小麥', 2)) { logMessage('❌ 需要小麥 x2'); return; }
+                            G.gold -= 15;
+                            removeResource('小麥', 2);
+                            G.hp = Math.min(G.maxHp, G.hp + 20);
+                            logMessage('💚 使用治療藥水，回復20 HP');
+                            updateUI();
+                        } else if (type === 'bread') {
+                            if (!hasResource('小麥', 3)) { logMessage('❌ 需要小麥 x3'); return; }
+                            removeResource('小麥', 3);
+                            const old = G.stamina;
+                            G.stamina = Math.min(G.maxStamina, G.stamina + 15);
+                            logMessage(`🍞 吃麵包，回復 ${G.stamina-old} 體力`);
+                            updateUI();
+                        } else if (type === 'enchant') {
+                            if (G.weapon !== '獄髓劍') { logMessage('❌ 需要裝備獄髓劍'); return; }
+                            if (!hasResource('青金石', 3)) { logMessage('❌ 需要青金石 x3'); return; }
+                            if (G.level < 10) { logMessage(`❌ 需要等級 10，當前 ${G.level}`); return; }
+                            if (G.gold < 300) { logMessage('❌ 需要 300 金幣'); return; }
+                            removeResource('青金石', 3);
+                            G.level -= 10;
+                            G.gold -= 300;
+                            G.weapon = '獄髓劍(火炎附加I)';
+                            unlockWeapon('獄髓劍(火炎附加I)');
+                            updateStats();
+                            logMessage('✨ 附魔成功！獄髓劍升級為 獄髓劍(火炎附加I)');
+                            document.getElementById('shopModal')?.remove();
+                            openShop();
+                            updateUI();
+                        }
+                    });
+                });
+
+                document.getElementById('closeShop').addEventListener('click', function() {
+                    document.getElementById('shopModal')?.remove();
+                });
+                overlay.addEventListener('click', function(e) {
+                    if (e.target === overlay) this.remove();
+                });
+            }
+
+            // ============================================================
+            // 10. 隊友招募
+            // ============================================================
+            const TEAM_POOL = [
+                { id: '狼', name: '🐺 狼', desc: '攻擊+3', cost: { '骨頭': 3, '生豬肉': 2 }, effect: { atk: 3 } },
+                { id: '村民', name: '🧑‍🌾 村民', desc: '交易折扣', cost: { '小麥': 5 }, effect: {} },
+                { id: '悅靈', name: '✨ 悅靈', desc: '每回合治療2HP', cost: { '螢石': 2, '幽靈之淚': 1 }, effect: {} },
+                { id: '鐵巨人', name: '🗿 鐵巨人', desc: '防禦+2', cost: { '鐵礦': 4 }, effect: { def: 2 } },
+            ];
+
+            function manageTeam() {
+                const available = TEAM_POOL.filter(t => !G.teammates.includes(t.id));
+                if (available.length === 0) {
+                    logMessage('👥 你已經擁有所有隊友!');
+                    return;
+                }
+                const overlay = document.createElement('div');
+                overlay.className = 'modal-overlay';
+                overlay.id = 'teamModal';
+                let html = `<div class="modal-box"><h3>👥 招募隊友</h3>`;
+                available.forEach((t, idx) => {
+                    const costStr = Object.entries(t.cost).map(([id, amt]) => `${getResourceDisplay(id)} x${amt}`).join(
+                        ' + ');
+                    html += `<div class="modal-item">
+                        <span class="item-info">${t.name} (${t.desc}) <br><span style="font-size:0.7rem;color:#98bcc3;">需求: ${costStr}</span></span>
+                        <button data-teamidx="${idx}">招募</button>
+                    </div>`;
+                });
+                html += `<button class="modal-close" id="closeTeam">關閉</button></div>`;
+                overlay.innerHTML = html;
+                document.body.appendChild(overlay);
+
+                overlay.querySelectorAll('[data-teamidx]').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const idx = parseInt(this.dataset.teamidx);
+                        const recruit = available[idx];
+                        if (!recruit) return;
+                        let can = true;
+                        for (let [id, amt] of Object.entries(recruit.cost)) {
+                            if (!hasResource(id, amt)) { can = false;
+                                logMessage(`❌ 缺少 ${getResourceDisplay(id)} x${amt}`); break; }
+                        }
+                        if (!can) return;
+                        for (let [id, amt] of Object.entries(recruit.cost)) {
+                            removeResource(id, amt);
+                        }
+                        G.teammates.push(recruit.id);
+                        if (recruit.effect.atk) G.attack += recruit.effect.atk;
+                        if (recruit.effect.def) G.defense += recruit.effect.def;
+                        logMessage(`👥 招募了 ${recruit.name}`);
+                        updateStats();
+                        updateUI();
+                        document.getElementById('teamModal')?.remove();
+                        manageTeam();
+                    });
+                });
+
+                document.getElementById('closeTeam').addEventListener('click', function() {
+                    document.getElementById('teamModal')?.remove();
+                });
+                overlay.addEventListener('click', function(e) {
+                    if (e.target === overlay) this.remove();
+                });
+            }
+
+            // ============================================================
+            // 11. 技能使用
+            // ============================================================
+            function useSkill() {
+                tickCooldown();
+                if (G.skills.length === 0) {
+                    logMessage('❌ 沒有技能');
+                    return;
+                }
+
+                const availableSkills = G.skills.filter(s => {
+                    const cost = s === '猛擊' ? 18 : 12;
+                    return hasEnoughStamina(cost);
+                });
+
+                if (availableSkills.length === 0) {
+                    logMessage(`⚠️ 體力不足，無法使用任何技能`, 'stamina-msg');
+                    return;
+                }
+
+                if (availableSkills.length === 1) {
+                    executeSkill(availableSkills[0]);
+                    return;
+                }
+
+                const overlay = document.createElement('div');
+                overlay.className = 'modal-overlay';
+                overlay.id = 'skillChoiceModal';
+                let html = `<div class="modal-box"><h3>✨ 選擇技能</h3>`;
+                G.skills.forEach(skillName => {
+                    const cost = skillName === '猛擊' ? 18 : 12;
+                    const canUse = hasEnoughStamina(cost);
+                    const status = canUse ? ` (消耗${cost}體力)` : ' ❌ 體力不足';
+                    let desc = '';
+                    if (skillName === '猛擊') desc = '⚡ 攻擊力暫時 +9 (消耗18體力)';
+                    else if (skillName === '治癒') desc = '💚 回復 17 HP (消耗12體力)';
+                    html += `<button class="skill-choice-btn" data-skill="${skillName}" ${!canUse?'disabled':''}>
+                        ${skillName}${status}<br><span style="font-size:0.7rem;color:#98bcc3;">${desc}</span>
+                    </button>`;
+                });
+                html += `<button class="modal-close" id="closeSkillChoice">取消</button></div>`;
+                overlay.innerHTML = html;
+                document.body.appendChild(overlay);
+
+                overlay.querySelectorAll('.skill-choice-btn').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const skillName = this.dataset.skill;
+                        document.getElementById('skillChoiceModal')?.remove();
+                        if (!this.disabled) {
+                            executeSkill(skillName);
+                        }
+                    });
+                });
+
+                document.getElementById('closeSkillChoice').addEventListener('click', function() {
+                    document.getElementById('skillChoiceModal')?.remove();
+                });
+                overlay.addEventListener('click', function(e) {
+                    if (e.target === overlay) this.remove();
+                });
+            }
+
+            function executeSkill(skillName) {
+                const cost = skillName === '猛擊' ? 18 : 12;
+                if (!hasEnoughStamina(cost)) {
+                    logMessage(`⚠️ 體力不足，使用 ${skillName} 需要 ${cost} 點體力`, 'stamina-msg');
+                    return;
+                }
+                if (!consumeStamina(cost)) return;
+
+                if (skillName === '猛擊') {
+                    if (G.battleCooldown > 0) {
+                        logMessage('⏳ 戰鬥冷卻中，無法使用');
+                        G.stamina = Math.min(G.maxStamina, G.stamina + cost);
+                        updateUI();
+                        return;
+                    }
+                    const bonus = 8 + G.level;
+                    G.attack += bonus;
+                    logMessage(`⚡ 猛擊！ 攻擊力暫時 +${bonus} (消耗${cost}體力)`);
+                    battleLog(`⚡ 使用猛擊！攻擊+${bonus} (持續4秒)`, 'system');
+                    setTimeout(() => {
+                        G.attack -= bonus;
+                        updateUI();
+                    }, 4000);
+                    G.battleCooldown = 0;
+                } else if (skillName === '治癒') {
+                    const heal = 15 + G.level * 2;
+                    G.hp = Math.min(G.maxHp, G.hp + heal);
+                    logMessage(`💚 治癒！回復 ${heal} HP (消耗${cost}體力)`);
+                    battleLog(`💚 使用治癒！回復 ${heal} HP`, 'heal');
+                }
+                updateUI();
+            }
+
+            // ============================================================
+            // 12. 裝備管理 (只顯示已解鎖的最高級)
+            // ============================================================
+            function showEquipment() {
+                const overlay = document.createElement('div');
+                overlay.className = 'modal-overlay';
+                overlay.id = 'equipModal';
+                let html = `<div class="modal-box"><h3>📦 裝備管理</h3>
+                    <div class="equip-grid">
+                        <div class="equip-item"><strong>🗡️ 武器</strong><br>${G.weapon || '空'}</div>
+                        <div class="equip-item"><strong>🛡️ 防具</strong><br>${G.armor || '空'}</div>
+                        <div class="equip-item"><strong>❤️ HP</strong><br>${G.hp}/${G.maxHp}</div>
+                        <div class="equip-item"><strong>⚡ 體力</strong><br>${G.stamina}/${G.maxStamina}</div>
+                        <div class="equip-item"><strong>🗡️ 攻擊</strong><br>${G.attack}</div>
+                        <div class="equip-item"><strong>🛡️ 防禦</strong><br>${G.defense}</div>
+                        <div class="equip-item"><strong>💰 金幣</strong><br>${G.gold}</div>
+                        <div class="equip-item"><strong>🏆 成就</strong><br>${G.achievements.length}</div>
+                    </div>
+                    <div style="font-size:0.8rem;"><strong>👥 隊友:</strong> ${G.teammates.length?G.teammates.join('、'):'無'}</div>
+                    <div style="font-size:0.8rem;"><strong>✨ 技能:</strong> ${G.skills.length?G.skills.join('、'):'無'}</div>
+                    <div style="font-size:0.8rem;"><strong>🗺️ 已解鎖群落:</strong> ${G.unlockedBiomes.join('、')}</div>
+                    <hr style="border-color:#3b6b73;margin:8px 0;">
+                    <div style="font-size:0.8rem;"><strong>武器切換 (已解鎖最高級):</strong></div>
+                    <div style="display:flex;flex-wrap:wrap;gap:4px;margin:4px 0;">`;
+
+                const weaponTrees = Object.keys(WEAPON_TREES);
+                let hasWeapon = false;
+                weaponTrees.forEach(treeName => {
+                    const tree = WEAPON_TREES[treeName];
+                    const path = tree.path;
+                    let highest = null;
+                    for (let i = path.length - 1; i >= 0; i--) {
+                        if (G.unlockedWeapons.includes(path[i])) {
+                            highest = path[i];
+                            break;
+                        }
+                    }
+                    if (highest) {
+                        hasWeapon = true;
+                        const equipped = (G.weapon === highest);
+                        html += `<button class="txt-btn" style="background:${equipped?'#5a7a4a':'#364f4b'};" data-equip-weapon="${highest}">${highest}</button>`;
+                    }
+                });
+                // 特殊武器
+                const allTreeWeapons = new Set();
+                Object.values(WEAPON_TREES).forEach(tree => tree.path.forEach(w => allTreeWeapons.add(w)));
+                G.unlockedWeapons.forEach(w => {
+                    if (!allTreeWeapons.has(w)) {
+                        hasWeapon = true;
+                        const equipped = (G.weapon === w);
+                        html += `<button class="txt-btn" style="background:${equipped?'#5a7a4a':'#364f4b'};" data-equip-weapon="${w}">${w}</button>`;
+                    }
+                });
+                if (!hasWeapon) {
+                    html += `<span style="color:#98bcc3;">（尚無已解鎖武器）</span>`;
+                }
+
+                html += `</div><div style="font-size:0.8rem;margin-top:6px;"><strong>防具切換 (已解鎖最高級):</strong></div>
+                    <div style="display:flex;flex-wrap:wrap;gap:4px;margin:4px 0;">`;
+                const armorPath = ARMOR_TREE.path;
+                let highestArmor = null;
+                for (let i = armorPath.length - 1; i >= 0; i--) {
+                    if (G.unlockedArmors.includes(armorPath[i])) {
+                        highestArmor = armorPath[i];
+                        break;
+                    }
+                }
+                if (highestArmor) {
+                    const equipped = (G.armor === highestArmor);
+                    html += `<button class="txt-btn" style="background:${equipped?'#5a7a4a':'#364f4b'};" data-equip-armor="${highestArmor}">${highestArmor}</button>`;
+                } else {
+                    html += `<span style="color:#98bcc3;">（尚無已解鎖防具）</span>`;
+                }
+                // 特殊防具
+                if (G.armor && !ARMOR_TREE.path.includes(G.armor)) {
+                    html += `<button class="txt-btn" style="background:#5a7a4a;" data-equip-armor="${G.armor}">${G.armor}</button>`;
+                }
+
+                html += `</div>
+                    <button class="modal-close" id="closeEquip">關閉</button></div>`;
+                overlay.innerHTML = html;
+                document.body.appendChild(overlay);
+
+                overlay.querySelectorAll('[data-equip-weapon]').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const w = this.dataset.equipWeapon;
+                        if (G.weapon === w) {
+                            G.weapon = null;
+                            logMessage('🗡️ 卸下武器');
+                        } else {
+                            G.weapon = w;
+                            logMessage(`🗡️ 裝備 ${w}`);
+                        }
+                        updateStats();
+                        updateUI();
+                        document.getElementById('equipModal')?.remove();
+                        showEquipment();
+                    });
+                });
+                overlay.querySelectorAll('[data-equip-armor]').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const a = this.dataset.equipArmor;
+                        if (G.armor === a) {
+                            G.armor = null;
+                            logMessage('🛡️ 卸下防具');
+                        } else {
+                            G.armor = a;
+                            logMessage(`🛡️ 裝備 ${a}`);
+                        }
+                        updateStats();
+                        updateUI();
+                        document.getElementById('equipModal')?.remove();
+                        showEquipment();
+                    });
+                });
+
+                document.getElementById('closeEquip').addEventListener('click', function() {
+                    document.getElementById('equipModal')?.remove();
+                });
+                overlay.addEventListener('click', function(e) {
+                    if (e.target === overlay) this.remove();
+                });
+            }
+
+            // ============================================================
+            // 13. 背包顯示
+            // ============================================================
+            function showInventory() {
+                const overlay = document.createElement('div');
+                overlay.className = 'modal-overlay';
+                overlay.id = 'inventoryModal';
+                let html = `<div class="modal-box"><h3>🎒 背包</h3>`;
+                html += `<div class="inventory-grid">`;
+                const keys = Object.keys(G.inventory).sort();
+                if (keys.length === 0) {
+                    html += `<div style="grid-column:1/-1;color:#98bcc3;">背包空空如也...</div>`;
+                } else {
+                    keys.forEach(id => {
+                        const count = G.inventory[id];
+                        html +=
+                            `<div class="inv-item">${getResourceDisplay(id)}<br><span class="count">x${count}</span></div>`;
+                    });
+                }
+                html += `</div>`;
+                html += `<div style="margin-top:12px;"><strong>🏆 成就 (${G.achievements.length})</strong><br>`;
+                if (G.achievements.length === 0) html += '尚無';
+                else html += G.achievements.join('、');
+                html += `</div>`;
+                html += `<button class="modal-close" id="closeInventory">關閉</button></div>`;
+                overlay.innerHTML = html;
+                document.body.appendChild(overlay);
+                document.getElementById('closeInventory').addEventListener('click', function() {
+                    document.getElementById('inventoryModal')?.remove();
+                });
+                overlay.addEventListener('click', function(e) {
+                    if (e.target === overlay) this.remove();
+                });
+            }
+
+            // ============================================================
+            // 14. 迷宮地圖 (網狀顯示)
+            // ============================================================
+            function openMap() {
+                const overlay = document.createElement('div');
+                overlay.className = 'modal-overlay';
+                overlay.id = 'mapModal';
+                const biome = G.currentBiome;
+                const nodes = getCurrentNodes();
+                const connections = getBiomeConnections(biome);
+
+                let maxRow = 0,
+                    maxCol = 0;
+                nodes.forEach(n => {
+                    if (n.row > maxRow) maxRow = n.row;
+                    if (n.col > maxCol) maxCol = n.col;
+                });
+
+                let html = `<div class="modal-box"><h3>🗺️ ${biome} 迷宮</h3>
+                    <div class="maze-container">`;
+
+                for (let r = 0; r <= maxRow; r++) {
+                    html += `<div class="maze-row">`;
+                    const rowNodes = nodes.filter(n => n.row === r).sort((a, b) => a.col - b.col);
+                    let currentCol = 0;
+                    rowNodes.forEach((node, idx) => {
+                        while (currentCol < node.col) {
+                            html +=
+                                `<div class="maze-cell locked" style="opacity:0.1;cursor:default;border-color:#1a3a3a;width:40px;">&nbsp;</div>`;
+                            currentCol++;
+                        }
+                        const unlocked = G.unlockedNodes.has(node.id);
+                        const current = node.id === G.currentNode;
+                        const isBoss = node.isBoss;
+                        let cls = 'maze-cell';
+                        if (current) cls += ' current';
+                        else if (unlocked) cls += ' unlocked';
+                        else cls += ' locked';
+                        let content = '';
+                        if (unlocked) {
+                            let nameDisplay = node.name;
+                            if (isBoss) nameDisplay += ' 👑';
+                            content = `<div class="cell-name">${nameDisplay}</div>`;
+                            if (isBoss && G.bossDefeated[biome]) content += `<div class="cell-boss">✅ 已擊敗</div>`;
+                        } else {
+                            content = `<div class="lock-icon">🔒</div>`;
+                        }
+                        html += `<div class="${cls}" data-node="${node.id}">${content}</div>`;
+                        currentCol = node.col + 1;
+                    });
+                    html += `</div>`;
+                    if (r < maxRow) {
+                        const nextRowNodes = nodes.filter(n => n.row === r + 1);
+                        html += `<div class="maze-connector" style="justify-content:center;gap:6px;">`;
+                        const thisRowIds = rowNodes.map(n => n.id);
+                        const nextRowIds = nextRowNodes.map(n => n.id);
+                        let hasConn = false;
+                        connections.forEach(pair => {
+                            if (thisRowIds.includes(pair[0]) && nextRowIds.includes(pair[1])) hasConn = true;
+                            if (thisRowIds.includes(pair[1]) && nextRowIds.includes(pair[0])) hasConn = true;
+                        });
+                        if (hasConn) {
+                            html += `<span class="line unlocked"></span>`;
+                        } else {
+                            html += `<span class="line"></span>`;
+                        }
+                        html += `</div>`;
+                    }
+                }
+
+                html += `<button class="modal-close" id="closeMap">關閉</button></div>`;
+                overlay.innerHTML = html;
+                document.body.appendChild(overlay);
+
+                overlay.querySelectorAll('.maze-cell.unlocked, .maze-cell.current').forEach(el => {
+                    el.addEventListener('click', function() {
+                        const nodeId = this.dataset.node;
+                        if (!nodeId) return;
+                        if (nodeId === G.currentNode) {
+                            logMessage('📍 你已經在這裡了');
+                            document.getElementById('mapModal')?.remove();
+                            return;
+                        }
+                        G.currentNode = nodeId;
+                        updateUI();
+                        logMessage(`📍 移動到 ${getCurrentNode().name}`);
+                        document.getElementById('mapModal')?.remove();
+                    });
+                });
+
+                document.getElementById('closeMap').addEventListener('click', function() {
+                    document.getElementById('mapModal')?.remove();
+                });
+                overlay.addEventListener('click', function(e) {
+                    if (e.target === overlay) this.remove();
+                });
+            }
+
+            // ============================================================
+            // 15. 存檔 / 讀檔
+            // ============================================================
+            function saveToTxt() {
+                const data = {
+                    playerName: G.playerName,
+                    level: G.level,
+                    hp: G.hp,
+                    maxHp: G.maxHp,
+                    attack: G.attack,
+                    defense: G.defense,
+                    gold: G.gold,
+                    exp: G.exp,
+                    expNext: G.expNext,
+                    baseAtk: G.baseAtk,
+                    baseDef: G.baseDef,
+                    stamina: G.stamina,
+                    maxStamina: G.maxStamina,
+                    weapon: G.weapon,
+                    armor: G.armor,
+                    unlockedWeapons: G.unlockedWeapons,
+                    unlockedArmors: G.unlockedArmors,
+                    inventory: G.inventory,
+                    unlockedBiomes: G.unlockedBiomes,
+                    currentBiome: G.currentBiome,
+                    currentNode: G.currentNode,
+                    unlockedNodes: [...G.unlockedNodes],
+                    bossDefeated: G.bossDefeated,
+                    teammates: G.teammates,
+                    skills: G.skills,
+                    achievements: G.achievements,
+                    battleCooldown: G.battleCooldown,
+                    totalKills: G.totalKills,
+                };
+                const json = JSON.stringify(data);
+                const blob = new Blob([json], { type: 'text/plain' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'mc_rpg_save.txt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                logMessage('💾 存檔已下載');
+            }
+
+            function loadFromFile(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        Object.assign(G, data);
+                        G.unlockedNodes = new Set(data.unlockedNodes || []);
+                        if (!G.bossDefeated) G.bossDefeated = {};
+                        if (!G.inventory) G.inventory = {};
+                        if (!G.skills) G.skills = [];
+                        if (!G.teammates) G.teammates = [];
+                        if (!G.achievements) G.achievements = [];
+                        if (!G.unlockedWeapons) G.unlockedWeapons = [];
+                        if (!G.unlockedArmors) G.unlockedArmors = [];
+                        updateStats();
+                        updateUI();
+                        logMessage('📂 存檔讀取成功!');
+                    } catch (err) {
+                        logMessage('❌ 讀取失敗，檔案格式錯誤');
+                    }
+                };
+                reader.readAsText(file);
+            }
+
+            function autoSave() {
+                try {
+                    const data = {
+                        playerName: G.playerName,
+                        level: G.level,
+                        hp: G.hp,
+                        maxHp: G.maxHp,
+                        attack: G.attack,
+                        defense: G.defense,
+                        gold: G.gold,
+                        exp: G.exp,
+                        expNext: G.expNext,
+                        baseAtk: G.baseAtk,
+                        baseDef: G.baseDef,
+                        stamina: G.stamina,
+                        maxStamina: G.maxStamina,
+                        weapon: G.weapon,
+                        armor: G.armor,
+                        unlockedWeapons: G.unlockedWeapons,
+                        unlockedArmors: G.unlockedArmors,
+                        inventory: G.inventory,
+                        unlockedBiomes: G.unlockedBiomes,
+                        currentBiome: G.currentBiome,
+                        currentNode: G.currentNode,
+                        unlockedNodes: [...G.unlockedNodes],
+                        bossDefeated: G.bossDefeated,
+                        teammates: G.teammates,
+                        skills: G.skills,
+                        achievements: G.achievements,
+                        battleCooldown: G.battleCooldown,
+                        totalKills: G.totalKills,
+                    };
+                    localStorage.setItem('mc_rpg_auto', JSON.stringify(data));
+                } catch (e) {}
+            }
+
+            function loadAutoSave() {
+                try {
+                    const raw = localStorage.getItem('mc_rpg_auto');
+                    if (!raw) return false;
+                    const data = JSON.parse(raw);
+                    Object.assign(G, data);
+                    G.unlockedNodes = new Set(data.unlockedNodes || []);
+                    if (!G.bossDefeated) G.bossDefeated = {};
+                    if (!G.inventory) G.inventory = {};
+                    if (!G.skills) G.skills = [];
+                    if (!G.teammates) G.teammates = [];
+                    if (!G.achievements) G.achievements = [];
+                    if (!G.unlockedWeapons) G.unlockedWeapons = [];
+                    if (!G.unlockedArmors) G.unlockedArmors = [];
+                    updateStats();
+                    updateUI();
+                    logMessage('📂 自動存檔已載入');
+                    return true;
+                } catch (e) { return false; }
+            }
+
+            // ============================================================
+            // 16. 重置遊戲 (回復最初值)
+            // ============================================================
+            function resetGame() {
+                if (!confirm('確定要重置遊戲嗎？所有進度將會遺失！')) return;
+                stopStaminaRegen();
+                if (G.autoSaveTimer) {
+                    clearInterval(G.autoSaveTimer);
+                    G.autoSaveTimer = null;
+                }
+                localStorage.removeItem('mc_rpg_auto');
+                G = getDefaultState();
+                const nameInput = document.getElementById('playerNameInput');
+                if (nameInput && nameInput.value.trim()) {
+                    G.playerName = nameInput.value.trim();
+                }
+                // 不添加初始资源
+                initGame(true);
+            }
+
+            // ============================================================
+            // 17. 初始化
+            // ============================================================
+            function initGame(skipAutoLoad) {
+                if (!skipAutoLoad) {
+                    const loaded = loadAutoSave();
+                    if (!loaded) {
+                        const def = getDefaultState();
+                        Object.assign(G, def);
+                        const nameInput = document.getElementById('playerNameInput');
+                        if (nameInput && nameInput.value.trim()) {
+                            G.playerName = nameInput.value.trim();
+                        }
+                        // 不添加初始资源
+                        G.unlockedBiomes = ['平原'];
+                        G.currentBiome = '平原';
+                        G.currentNode = 'plains_0';
+                        G.unlockedNodes.add('plains_0');
+                        G.bossDefeated = {};
+                        G.weapon = null;
+                        G.armor = null;
+                        G.unlockedWeapons = [];
+                        G.unlockedArmors = [];
+                        updateStats();
+                    }
+                } else {
+                    const nameInput = document.getElementById('playerNameInput');
+                    if (nameInput && nameInput.value.trim()) {
+                        G.playerName = nameInput.value.trim();
+                    }
+                    // 确保基本状态
+                    if (G.unlockedBiomes.length === 0) {
+                        G.unlockedBiomes = ['平原'];
+                    }
+                    if (G.unlockedNodes.size === 0) {
+                        G.unlockedNodes.add('plains_0');
+                    }
+                    G.currentBiome = '平原';
+                    G.currentNode = 'plains_0';
+                    G.bossDefeated = {};
+                    G.weapon = null;
+                    G.armor = null;
+                    G.unlockedWeapons = [];
+                    G.unlockedArmors = [];
+                    updateStats();
+                }
+
+                document.getElementById('combinedLog').innerHTML = '';
+                logMessage(`🟢 歡迎，${G.playerName}！`);
+                logMessage('⛏️ 採集資源，合成裝備，擊敗Boss解鎖新群落！');
+                logMessage('🌍 群落順序：平原 → 山地 → 森林 → 乾旱 → 洞穴 → 海洋 → 地獄 → 終界');
+                updateUI();
+                startStaminaRegen();
+                if (G.autoSaveTimer) clearInterval(G.autoSaveTimer);
+                G.autoSaveTimer = setInterval(autoSave, 30000);
+
+                const copyrightEl = document.getElementById('copyrightText');
+                if (copyrightEl) {
+                    const year = new Date().getFullYear();
+                    copyrightEl.textContent = `© ${year} ☕迪遜咖啡廳，版權所有。`;
+                }
+            }
+
+            // ============================================================
+            // 18. 啟動
+            // ============================================================
+            document.getElementById('startNewBtn').addEventListener('click', function() {
+                document.getElementById('coverScreen').classList.add('hidden');
+                document.getElementById('gameWrapper').style.display = 'block';
+                localStorage.removeItem('mc_rpg_auto');
+                const def = getDefaultState();
+                Object.assign(G, def);
+                const nameInput = document.getElementById('playerNameInput');
+                if (nameInput && nameInput.value.trim()) {
+                    G.playerName = nameInput.value.trim();
+                }
+                // 不添加初始资源
+                G.unlockedBiomes = ['平原'];
+                G.currentBiome = '平原';
+                G.currentNode = 'plains_0';
+                G.unlockedNodes.add('plains_0');
+                G.bossDefeated = {};
+                G.weapon = null;
+                G.armor = null;
+                G.unlockedWeapons = [];
+                G.unlockedArmors = [];
+                updateStats();
+                initGame(true);
+            });
+
+            document.getElementById('continueBtn').addEventListener('click', function() {
+                document.getElementById('coverScreen').classList.add('hidden');
+                document.getElementById('gameWrapper').style.display = 'block';
+                initGame(false);
+            });
+
+            document.querySelectorAll('[data-action]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const action = this.dataset.action;
+                    switch (action) {
+                        case 'explore':
+                            explore();
+                            break;
+                        case 'fight':
+                            handleFight();
+                            break;
+                        case 'shop':
+                            openShop();
+                            break;
+                        case 'skill':
+                            useSkill();
+                            break;
+                        case 'team':
+                            manageTeam();
+                            break;
+                        case 'equip':
+                            showEquipment();
+                            break;
+                        default:
+                            break;
+                    }
+                });
+            });
+
+            document.getElementById('mapBtn').addEventListener('click', openMap);
+            document.getElementById('inventoryBtn').addEventListener('click', showInventory);
+            document.getElementById('gatherBtn').addEventListener('click', gather);
+
+            document.getElementById('saveTxtBtn').addEventListener('click', saveToTxt);
+            document.getElementById('fileInput').addEventListener('change', function(e) {
+                if (this.files.length) loadFromFile(this.files[0]);
+                this.value = '';
+            });
+            document.getElementById('resetGameBtn').addEventListener('click', resetGame);
+
+            window.addEventListener('beforeunload', function() {
+                stopStaminaRegen();
+                if (G.autoSaveTimer) clearInterval(G.autoSaveTimer);
+                autoSave();
+            });
+        })();
+    </script>
+</body>
+</html>
