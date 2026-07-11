@@ -34,6 +34,12 @@
             position: relative;
         }
 
+        /* ===== 主選單 flex 排列 ===== */
+        #menuScreen {
+            display: flex;
+            flex-direction: column;
+        }
+
         .menu-title {
             text-align: center;
             margin-bottom: 15px;
@@ -108,12 +114,13 @@
             letter-spacing: 2px;
         }
 
-        /* 預覽棋盤（可隱藏） */
+        /* 預覽棋盤 */
         .preview-container {
             display: flex;
             justify-content: center;
             margin: 10px auto 25px;
             transition: all 0.3s ease;
+            flex-shrink: 0;
         }
         .preview-container.hidden {
             display: none;
@@ -163,28 +170,17 @@
         .lang-select:hover { background: rgba(255, 255, 255, 0.15); }
         .lang-select option { background: #1a1a2e; color: #fff; }
 
-        .btn-enter {
-            width: 100%;
-            padding: 16px;
-            border-radius: 30px;
-            border: none;
-            background: linear-gradient(135deg, #f7971e, #ffd200);
-            color: #1a1a2e;
-            font-weight: 700;
-            font-size: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 20px;
-            letter-spacing: 2px;
-            box-shadow: 0 4px 20px rgba(247, 151, 30, 0.3);
+        /* ===== 設定區（內含開始遊戲與返回按鈕） ===== */
+        #settingsArea {
+            display: none;
+            margin-top: 0;
+            flex-direction: column;
+            gap: 15px;
         }
-        .btn-enter:hover {
-            transform: scale(1.02);
-            box-shadow: 0 6px 30px rgba(247, 151, 30, 0.5);
+        #settingsArea.visible {
+            display: flex;
+            animation: fadeSlideDown 0.4s ease;
         }
-
-        #settingsArea { display: none; margin-top: 10px; }
-        #settingsArea.visible { display: block; animation: fadeSlideDown 0.4s ease; }
         @keyframes fadeSlideDown {
             from { opacity: 0; transform: translateY(-15px); }
             to { opacity: 1; transform: translateY(0); }
@@ -194,8 +190,8 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
-            margin-bottom: 30px;
         }
+
         .menu-row {
             display: flex;
             justify-content: space-between;
@@ -223,6 +219,7 @@
         .menu-row select:hover { background: rgba(255, 255, 255, 0.15); }
         .menu-row select option { background: #1a1a2e; color: #fff; }
 
+        /* 開始遊戲與返回按鈕 */
         .btn-start-game {
             width: 100%;
             padding: 14px;
@@ -234,19 +231,67 @@
             font-size: 18px;
             cursor: pointer;
             transition: all 0.3s;
-            margin-top: 5px;
             letter-spacing: 2px;
             box-shadow: 0 4px 20px rgba(78, 205, 196, 0.3);
+            margin-bottom: 10px; /* 與返回按鈕間距 */
         }
         .btn-start-game:hover {
             transform: scale(1.02);
             box-shadow: 0 6px 30px rgba(78, 205, 196, 0.5);
         }
 
+        .btn-enter {
+            width: 100%;
+            padding: 14px;
+            border-radius: 30px;
+            border: none;
+            background: linear-gradient(135deg, #f7971e, #ffd200);
+            color: #1a1a2e;
+            font-weight: 700;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 2px;
+            box-shadow: 0 4px 20px rgba(247, 151, 30, 0.3);
+            flex-shrink: 0;
+            position: relative;
+            z-index: 10;
+        }
+        .btn-enter:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 30px rgba(247, 151, 30, 0.5);
+        }
+
+        /* 外部進入遊戲按鈕（初始狀態） */
+        #btnEnterGameOuter {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            border-radius: 30px;
+            border: none;
+            background: linear-gradient(135deg, #f7971e, #ffd200);
+            color: #1a1a2e;
+            font-weight: 700;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+            box-shadow: 0 4px 20px rgba(247, 151, 30, 0.3);
+        }
+        #btnEnterGameOuter:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 30px rgba(247, 151, 30, 0.5);
+        }
+        #btnEnterGameOuter.hidden {
+            display: none;
+        }
+
         /* 遊戲畫面 */
         #gameScreen { display: none !important; }
         #gameScreen.active { display: block !important; }
 
+        /* 棋盤、狀態列等（維持原樣） */
         .board-container {
             position: relative;
             margin: 0 auto 20px;
@@ -453,7 +498,7 @@
         <div class="title-underline"></div>
         <div class="menu-sub" id="menuSub">✦ 選擇語言，然後進入遊戲 ✦</div>
 
-        <!-- 動態預覽棋盤（可隱藏） -->
+        <!-- 動態預覽棋盤 -->
         <div class="preview-container" id="previewContainer">
             <div class="preview-board" id="previewBoard">
                 <div class="preview-cell empty" data-pindex="0"></div>
@@ -479,8 +524,10 @@
             </select>
         </div>
 
-        <button class="btn-enter" id="btnEnterGame">▶ 進入遊戲</button>
+        <!-- 外部進入遊戲按鈕（初始顯示） -->
+        <button id="btnEnterGameOuter">▶ 進入遊戲</button>
 
+        <!-- 設定區（內含開始遊戲與返回按鈕） -->
         <div id="settingsArea">
             <div class="menu-settings">
                 <div class="menu-row">
@@ -513,7 +560,11 @@
                     </select>
                 </div>
             </div>
+
+            <!-- 開始遊戲（上） -->
             <button class="btn-start-game" id="btnStartGame">⚔️ 開始遊戲</button>
+            <!-- 返回按鈕（下） -->
+            <button class="btn-enter" id="btnEnterGame">🔙 返回</button>
         </div>
 
         <div class="footer" id="footerCopyright">v1.0 © 2025 ☕迪遜咖啡廳，版權所有。</div>
@@ -802,7 +853,8 @@
     const menuSub = document.getElementById('menuSub');
     const previewContainer = document.getElementById('previewContainer');
     const settingsArea = document.getElementById('settingsArea');
-    const btnEnterGame = document.getElementById('btnEnterGame');
+    const btnEnterGameOuter = document.getElementById('btnEnterGameOuter');
+    const btnEnterGame = document.getElementById('btnEnterGame');   // 內部返回按鈕
     const btnStartGame = document.getElementById('btnStartGame');
     const btnReset = document.getElementById('btnReset');
     const btnPlayAgain = document.getElementById('btnPlayAgain');
@@ -869,12 +921,10 @@
         btnReset.textContent = t('reset');
         btnPlayAgain.textContent = t('playAgain');
 
-        // 根據 settingsArea 是否可見設定 btnEnterGame
-        if (settingsArea.classList.contains('visible')) {
-            btnEnterGame.textContent = t('back');
-        } else {
-            btnEnterGame.textContent = t('enter');
-        }
+        // 外部按鈕文字
+        btnEnterGameOuter.textContent = t('enter');
+        // 內部返回按鈕文字
+        btnEnterGame.textContent = t('back');
 
         const year = new Date().getFullYear();
         footerCopyright.textContent = t('copyright', { year: year });
@@ -972,7 +1022,6 @@
 
         updateUI();
 
-        // AI 先手
         if (state.gameType === 'pvc' && state.firstMove === 'ai' && state.currentPlayer === 'X') {
             state.isProcessing = true;
             setTimeout(() => {
@@ -1200,8 +1249,11 @@
     let previewInterval = null;
 
     function startPreviewAnimation() {
+        if (previewInterval) {
+            clearInterval(previewInterval);
+            previewInterval = null;
+        }
         updatePreviewCells();
-        if (previewInterval) clearInterval(previewInterval);
         previewInterval = setInterval(() => {
             updatePreviewCells();
         }, 1500);
@@ -1250,19 +1302,30 @@
         });
     });
 
-    btnEnterGame.addEventListener('click', function() {
-        settingsArea.classList.toggle('visible');
-        if (settingsArea.classList.contains('visible')) {
-            btnEnterGame.textContent = t('back');
-            previewContainer.classList.add('hidden'); // 隱藏預覽棋盤
-        } else {
-            btnEnterGame.textContent = t('enter');
-            previewContainer.classList.remove('hidden'); // 顯示預覽棋盤
-            // 如果動畫已停止，重新啟動
-            if (!previewInterval) {
-                startPreviewAnimation();
-            }
+    // 外部「進入遊戲」按鈕
+    btnEnterGameOuter.addEventListener('click', function() {
+        // 隱藏外部按鈕，顯示設定區
+        btnEnterGameOuter.classList.add('hidden');
+        settingsArea.classList.add('visible');
+        previewContainer.classList.add('hidden');
+        if (previewInterval) {
+            clearInterval(previewInterval);
+            previewInterval = null;
         }
+        // 更新語言（確保按鈕文字）
+        btnEnterGame.textContent = t('back');
+    });
+
+    // 內部「返回」按鈕
+    btnEnterGame.addEventListener('click', function() {
+        // 隱藏設定區，顯示外部按鈕
+        settingsArea.classList.remove('visible');
+        btnEnterGameOuter.classList.remove('hidden');
+        previewContainer.classList.remove('hidden');
+        if (!previewInterval) {
+            startPreviewAnimation();
+        }
+        btnEnterGameOuter.textContent = t('enter');
     });
 
     btnStartGame.addEventListener('click', startGame);
@@ -1278,10 +1341,11 @@
         });
         overlay.classList.remove('show');
         updateUI();
+        // 恢復主選單狀態（設定區隱藏，外部按鈕顯示）
         settingsArea.classList.remove('visible');
-        btnEnterGame.textContent = t('enter');
-        previewContainer.classList.remove('hidden'); // 恢復顯示預覽棋盤
-        // 重新啟動預覽
+        btnEnterGameOuter.classList.remove('hidden');
+        previewContainer.classList.remove('hidden');
+        btnEnterGameOuter.textContent = t('enter');
         if (!previewInterval) {
             startPreviewAnimation();
         }
@@ -1292,11 +1356,13 @@
     langSelect.addEventListener('change', function() {
         state.lang = this.value;
         updateLanguage();
-        // 更新按鈕文字（保持狀態一致）
+        // 保持按鈕狀態
         if (settingsArea.classList.contains('visible')) {
             btnEnterGame.textContent = t('back');
+            btnEnterGameOuter.classList.add('hidden');
         } else {
-            btnEnterGame.textContent = t('enter');
+            btnEnterGameOuter.classList.remove('hidden');
+            btnEnterGameOuter.textContent = t('enter');
         }
     });
 
@@ -1312,7 +1378,8 @@
     menuScreen.style.display = 'block';
     gameScreen.classList.remove('active');
     settingsArea.classList.remove('visible');
-    btnEnterGame.textContent = t('enter');
+    btnEnterGameOuter.classList.remove('hidden');
+    btnEnterGameOuter.textContent = t('enter');
     previewContainer.classList.remove('hidden');
     updateUI();
     statusMessage.textContent = '▶ 點擊「開始遊戲」';
@@ -1321,7 +1388,6 @@
     stepBadge.textContent = '--';
     countBadge.style.display = 'none';
 
-    // 啟動預覽動畫
     startPreviewAnimation();
 </script>
 </body>
