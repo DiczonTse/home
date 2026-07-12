@@ -33586,7 +33586,7 @@ document.getElementById('utilitySelect').addEventListener('change', function(e) 
 const toolMap = {
     'calculator': 'tools/calculator.html',
     'weather': 'tools/weather.html',
-    'qr': 'tools/qr.html',
+    'qr_code_generator': 'tools/qr_code_generator.html',
     'timer': 'tools/timer.html',
     'stopper': 'tools/stopper.html',
     'youtube_thumbnails': 'tools/youtube_thumbnails.html'
@@ -33595,7 +33595,7 @@ const toolMap = {
 const toolTitles = {
     'calculator': '🧮 計算機',
     'weather': '⛅ 天氣預報',
-    'qr': '📎 二維碼生成器',
+    'qr_code_generator': '📎 二維碼生成器',
     'timer': '⏲️ 計時器',
     'stopper': '⏱️ 秒錶',
     'youtube_thumbnails': '📥 YouTube 預覽圖下載'
@@ -34414,7 +34414,7 @@ window.addEventListener('load', function() {
 
 // Hit Counter Functions
 function initializeHitCounter() {
-	const BASE_HIT_COUNT = 22655;
+	const BASE_HIT_COUNT = 23315;
 	const savedCount = localStorage.getItem('diczonCafeHitCount');
 	
 	// Parse and validate saved count
@@ -34453,7 +34453,7 @@ function updateHitCounterDisplay() {
 
 // Admin function to manually set hit count (run in browser console)
 function setHitCount(count) {
-	const baseHitCount = 22655;
+	const baseHitCount = 23315;
 	if (typeof count === 'number' && count >= 0) {
 		// Ensure count is not lower than base count
 		hitCount = Math.max(count, baseHitCount);
@@ -34469,16 +34469,16 @@ function setHitCount(count) {
 function resetHitCount() {
 	if (confirm('確定要重置訪問計數器嗎？')) {
 		// Reset to base value
-		hitCount = 22655;
-		localStorage.setItem('diczonCafeHitCount', '22655');
+		hitCount = 23315;
+		localStorage.setItem('diczonCafeHitCount', '23315');
 		updateHitCounterDisplay();
-		console.log('Hit counter reset to base count: 22655');
+		console.log('Hit counter reset to base count: 23315');
 	}
 }
 
 // Admin function to get current hit count (run in browser console)
 function getHitCount() {
-	const baseHitCount = 22655;
+	const baseHitCount = 23315;
 	const currentCount = Math.max(hitCount, baseHitCount);
 	console.log(`Current hit count: ${currentCount} (base: ${baseHitCount})`);
 	return currentCount;
@@ -34486,7 +34486,7 @@ function getHitCount() {
 
 // Admin function to get or set base hit count (run in browser console)
 function manageBaseHitCount(newBase) {
-	const currentBase = 22655; // You can make this configurable if needed
+	const currentBase = 23315; // You can make this configurable if needed
 	const savedCount = localStorage.getItem('diczonCafeHitCount');
 	const currentCount = savedCount ? parseInt(savedCount) : currentBase;
 	
