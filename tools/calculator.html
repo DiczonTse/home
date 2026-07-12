@@ -1,104 +1,550 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🧮 計算機</title>
-    <!-- 引用主样式（可选，也可以单独写样式） -->
-    <link rel="stylesheet" href="../style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🧮 精準計算機 · 深色模式</title>
     <style>
-        /* 额外调整，确保在 iframe 内显示良好 */
-        body {
+        /* ================================================================
+           全域 CSS 變數 (淺色 & 深色)
+           ================================================================ */
+        :root {
+            /* 淺色主題 */
+            --bg-color: #f0f2f5;
+            --text-color: #1e293b;
+            --card-bg: #ffffff;
+            --border-color: #dce1e9;
+            --button-bg: #3b82f6;
+            --button-hover: #2563eb;
+            --operator-bg: #eef2f6;
+            --operator-color: #1e4a7a;
+            --special-bg: #e8ecf3;
+            --special-color: #1e293b;
+            --equals-bg: #3b82f6;
+            --equals-color: white;
+            --display-bg: #f8fafc;
+            --shadow-color: rgba(0, 0, 0, 0.08);
+            --footer-color: #64748b;
+            --toggle-bg: #e2e8f0;
+            --toggle-icon: #1e293b;
+        }
+
+        [data-theme="dark"] {
+            /* 深色主題 */
+            --bg-color: #121212;
+            --text-color: #e8edf5;
+            --card-bg: #1e1e2a;
+            --border-color: #2d3748;
+            --button-bg: #4b7bec;
+            --button-hover: #3867d6;
+            --operator-bg: #2d3748;
+            --operator-color: #90b4f0;
+            --special-bg: #2a2a3a;
+            --special-color: #cbd5e1;
+            --equals-bg: #4b7bec;
+            --equals-color: white;
+            --display-bg: #16161f;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --footer-color: #94a3b8;
+            --toggle-bg: #2d3748;
+            --toggle-icon: #facc15;
+        }
+
+        /* ================================================================
+           通用樣式
+           ================================================================ */
+        * {
+            box-sizing: border-box;
             margin: 0;
-            padding: 20px;
-            background: var(--bg-color);
+            padding: 0;
+        }
+
+        body {
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            padding: 16px;
+            transition: background 0.3s, color 0.3s;
+            margin: 0;
         }
+
+        /* ================================================================
+           計算機容器
+           ================================================================ */
         .calculator-wrapper {
             width: 100%;
-            max-width: 400px;
-            margin: auto;
+            max-width: 420px;
+            background: var(--card-bg);
+            border-radius: 32px;
+            padding: 24px 20px 18px;
+            box-shadow: 0 20px 60px var(--shadow-color), 0 8px 24px rgba(0,0,0,0.05);
+            transition: background 0.3s, box-shadow 0.3s, border-color 0.3s;
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        /* ================================================================
+           標題列 + 主題切換按鈕
+           ================================================================ */
+        .calc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding: 0 4px;
+        }
+
+        .calc-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            letter-spacing: 0.3px;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        .theme-toggle {
+            background: var(--toggle-bg);
+            border: none;
+            border-radius: 40px;
+            width: 48px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .theme-toggle .toggle-slider {
+            width: 20px;
+            height: 20px;
+            background: var(--toggle-icon);
+            border-radius: 50%;
+            transition: transform 0.3s, background 0.3s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+        }
+
+        [data-theme="dark"] .theme-toggle .toggle-slider {
+            transform: translateX(20px);
+            background: #facc15;
+        }
+
+        .theme-toggle .toggle-icon {
+            font-size: 14px;
+            line-height: 1;
+            color: var(--toggle-icon);
+            transition: color 0.3s;
+        }
+
+        /* ================================================================
+           顯示區
+           ================================================================ */
+        .calculator-display {
+            background: var(--display-bg);
+            border-radius: 18px;
+            padding: 18px 22px;
+            margin-bottom: 20px;
+            font-size: 3rem;
+            font-weight: 600;
+            text-align: right;
+            letter-spacing: 0.5px;
+            color: var(--text-color);
+            min-height: 96px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+            word-break: break-all;
+            line-height: 1.2;
+            border: 1px solid var(--border-color);
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.02);
+            overflow: hidden;
+            transition: background 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        .calculator-display.shrink {
+            font-size: 2.2rem;
+        }
+
+        /* ================================================================
+           按鍵網格
+           ================================================================ */
+        .calculator-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .calc-btn {
+            padding: 18px 0;
+            font-size: 1.6rem;
+            font-weight: 500;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.12s ease;
+            font-family: inherit;
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--button-bg);
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .calc-btn:active {
+            transform: scale(0.94);
+        }
+
+        /* 數字按鈕 (覆蓋) */
+        .calc-btn:not(.operator):not(.special):not(.equals) {
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            box-shadow: none;
+        }
+        .calc-btn:not(.operator):not(.special):not(.equals):active {
+            background: var(--border-color);
+        }
+
+        /* 運算子 */
+        .calc-btn.operator {
+            background: var(--operator-bg);
+            color: var(--operator-color);
+            border: 1px solid transparent;
+        }
+        .calc-btn.operator:active {
+            background: var(--border-color);
+        }
+
+        /* 特殊功能 (C, Del, 括號) */
+        .calc-btn.special {
+            background: var(--special-bg);
+            color: var(--special-color);
+            border: 1px solid transparent;
+        }
+        .calc-btn.special:active {
+            background: var(--border-color);
+        }
+
+        /* 等號 */
+        .calc-btn.equals {
+            background: var(--equals-bg);
+            color: var(--equals-color);
+            border: none;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+        }
+        .calc-btn.equals:active {
+            background: var(--button-hover);
+            transform: scale(0.94);
+        }
+
+        /* ================================================================
+           頁腳
+           ================================================================ */
+        .calculator-footer {
+            margin-top: 18px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--footer-color);
+            letter-spacing: 0.4px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 14px;
+            transition: color 0.3s, border-color 0.3s;
+        }
+
+        .calculator-footer .coffee-icon {
+            display: inline-block;
+            margin-right: 6px;
+            font-size: 1rem;
+        }
+
+        /* ================================================================
+           響應式
+           ================================================================ */
+        @media (max-width: 480px) {
+            .calculator-wrapper {
+                padding: 16px 12px 14px;
+                border-radius: 24px;
+            }
+            .calculator-display {
+                font-size: 2.4rem;
+                padding: 14px 16px;
+                min-height: 76px;
+            }
+            .calculator-display.shrink {
+                font-size: 1.8rem;
+            }
+            .calc-btn {
+                padding: 14px 0;
+                font-size: 1.35rem;
+                border-radius: 14px;
+            }
+            .calculator-buttons {
+                gap: 10px;
+            }
+            .calc-title {
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .calculator-display {
+                font-size: 2rem;
+                padding: 10px 12px;
+                min-height: 64px;
+            }
+            .calc-btn {
+                padding: 12px 0;
+                font-size: 1.15rem;
+            }
+            .calculator-buttons {
+                gap: 8px;
+            }
+        }
+
+        /* ================================================================
+           錯誤閃爍動畫 (保留)
+           ================================================================ */
+        @keyframes pulse-error {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .calc-error {
+            animation: pulse-error 0.6s ease 2;
+            color: #ef4444 !important;
         }
     </style>
 </head>
 <body>
+
     <div class="calculator-wrapper">
-        <!-- 此处复制原来计算器的 HTML 结构（从原模态框中提取） -->
-        <div class="calculator">
-            <div class="calculator-display" id="calcDisplay">0</div>
-            <div class="calculator-buttons">
-                <button class="calc-btn special" onclick="calcInput('(')">(</button>
-                <button class="calc-btn special" onclick="calcInput(')')">)</button>
-                <button class="calc-btn special" onclick="clearDisplay()">C</button>
-                <button class="calc-btn operator" onclick="calcInput('/')">÷</button>
-                
-                <button class="calc-btn" onclick="calcInput('7')">7</button>
-                <button class="calc-btn" onclick="calcInput('8')">8</button>
-                <button class="calc-btn" onclick="calcInput('9')">9</button>
-                <button class="calc-btn operator" onclick="calcInput('*')">×</button>
-                
-                <button class="calc-btn" onclick="calcInput('4')">4</button>
-                <button class="calc-btn" onclick="calcInput('5')">5</button>
-                <button class="calc-btn" onclick="calcInput('6')">6</button>
-                <button class="calc-btn operator" onclick="calcInput('-')">−</button>
-                
-                <button class="calc-btn" onclick="calcInput('1')">1</button>
-                <button class="calc-btn" onclick="calcInput('2')">2</button>
-                <button class="calc-btn" onclick="calcInput('3')">3</button>
-                <button class="calc-btn operator" onclick="calcInput('+')">+</button>
-                
-                <button class="calc-btn" onclick="calcInput('0')">0</button>
-                <button class="calc-btn" onclick="calcInput('.')">.</button>
-                <button class="calc-btn special" onclick="deleteLastCharacter()">Del</button>
-                <button class="calc-btn equals" onclick="calculate()">=</button>
-            </div>
+        <!-- 標題列 + 主題切換 -->
+        <div class="calc-header">
+            <span class="calc-title">🧮 計算機</span>
+            <button class="theme-toggle" id="themeToggle" aria-label="切換深色/淺色模式">
+                <span class="toggle-icon">☀️</span>
+                <span class="toggle-slider"></span>
+                <span class="toggle-icon">🌙</span>
+            </button>
         </div>
+
+        <!-- 顯示區 -->
+        <div class="calculator-display" id="calcDisplay">0</div>
+
+        <!-- 按鍵 -->
+        <div class="calculator-buttons">
+            <button class="calc-btn special" data-action="lparen">(</button>
+            <button class="calc-btn special" data-action="rparen">)</button>
+            <button class="calc-btn special" data-action="clear">C</button>
+            <button class="calc-btn operator" data-action="divide">÷</button>
+
+            <button class="calc-btn" data-action="7">7</button>
+            <button class="calc-btn" data-action="8">8</button>
+            <button class="calc-btn" data-action="9">9</button>
+            <button class="calc-btn operator" data-action="multiply">×</button>
+
+            <button class="calc-btn" data-action="4">4</button>
+            <button class="calc-btn" data-action="5">5</button>
+            <button class="calc-btn" data-action="6">6</button>
+            <button class="calc-btn operator" data-action="subtract">−</button>
+
+            <button class="calc-btn" data-action="1">1</button>
+            <button class="calc-btn" data-action="2">2</button>
+            <button class="calc-btn" data-action="3">3</button>
+            <button class="calc-btn operator" data-action="add">+</button>
+
+            <button class="calc-btn" data-action="0">0</button>
+            <button class="calc-btn" data-action="dot">.</button>
+            <button class="calc-btn special" data-action="del">Del</button>
+            <button class="calc-btn equals" data-action="equals">=</button>
+        </div>
+
         <div class="calculator-footer">
-            <span class="coffee-icon">☕</span> 迪遜咖啡廳專用計算機
+            <span style="margin-left:10px;font-size:0.7rem;opacity:0.7;">V1.0.2</span>
+			<span class="coffee-icon">☕</span> 迪遜咖啡廳 · 精確計算機
         </div>
     </div>
 
-    <!-- 计算器的 JavaScript（从原 main.js 中提取相关函数） -->
     <script>
-        // 必须包含所有计算器逻辑
-        let calcValue = '';
-        let lastCalculation = '';
+        // ================================================================
+        //  🧮  計算機核心邏輯 (含浮點數修正)
+        // ================================================================
 
+        // -------- 狀態 --------
+        let calcValue = '0';
+        let justCalculated = false;
+
+        // -------- DOM 參考 --------
+        const display = document.getElementById('calcDisplay');
+
+        // -------- 浮點數修正函數 --------
+        function fixFloatingPoint(num) {
+            if (typeof num !== 'number' || !isFinite(num) || isNaN(num)) return num;
+            if (Number.isInteger(num)) return num;
+            return parseFloat(num.toFixed(10));
+        }
+
+        // -------- 顯示更新 --------
+        function updateDisplay(value) {
+            if (value === undefined || value === null) {
+                display.textContent = '0';
+                return;
+            }
+            let str = String(value);
+            if (typeof value === 'number' && isFinite(value)) {
+                if (Math.abs(value) > 1e15 || (Math.abs(value) < 1e-10 && value !== 0)) {
+                    str = value.toExponential(8);
+                }
+            }
+            display.textContent = str;
+            if (str.length > 14) {
+                display.classList.add('shrink');
+            } else {
+                display.classList.remove('shrink');
+            }
+        }
+
+        // -------- 輸入 --------
         function calcInput(val) {
+            if (justCalculated) {
+                if (val === '.' || /[0-9]/.test(val)) {
+                    calcValue = '0';
+                }
+                justCalculated = false;
+            }
             if (calcValue === '0' && val !== '.') {
                 calcValue = '';
             }
             calcValue += val;
-            document.getElementById('calcDisplay').textContent = calcValue;
+            updateDisplay(calcValue);
         }
 
+        // -------- 清除 / 刪除 --------
         function clearDisplay() {
             calcValue = '0';
-            document.getElementById('calcDisplay').textContent = calcValue;
+            justCalculated = false;
+            updateDisplay(calcValue);
         }
 
         function deleteLastCharacter() {
+            if (justCalculated) {
+                clearDisplay();
+                return;
+            }
             calcValue = calcValue.slice(0, -1);
             if (calcValue === '') calcValue = '0';
-            document.getElementById('calcDisplay').textContent = calcValue;
+            updateDisplay(calcValue);
         }
 
+        // -------- 計算 (核心修正) --------
         function calculate() {
             try {
-                const expression = calcValue.replace(/×/g, '*').replace(/÷/g, '/');
-                const result = eval(expression);
-                calcValue = result.toString();
-                document.getElementById('calcDisplay').textContent = calcValue;
-            } catch (e) {
-                document.getElementById('calcDisplay').textContent = 'Error';
+                let expression = calcValue
+                    .replace(/×/g, '*')
+                    .replace(/÷/g, '/')
+                    .replace(/−/g, '-');
+
+                if (!expression || expression.trim() === '') return;
+
+                const result = new Function(`return (${expression})`)();
+                const fixedResult = fixFloatingPoint(result);
+                calcValue = String(fixedResult);
+                justCalculated = true;
+                updateDisplay(calcValue);
+            } catch (error) {
+                display.textContent = 'Error';
+                display.classList.add('calc-error');
                 setTimeout(() => {
-                    document.getElementById('calcDisplay').textContent = calcValue || '0';
+                    display.classList.remove('calc-error');
+                    updateDisplay(calcValue || '0');
                 }, 1000);
             }
         }
+
+        // ================================================================
+        //  主題切換 (深色 / 淺色)
+        // ================================================================
+        const themeToggle = document.getElementById('themeToggle');
+
+        // 讀取儲存的主題偏好
+        const currentTheme = localStorage.getItem('calculator-theme') || 'light';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('calculator-theme', next);
+        });
+
+        // ================================================================
+        //  按鍵事件綁定 (使用 data-action)
+        // ================================================================
+        document.querySelectorAll('.calc-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const action = btn.dataset.action;
+
+                // 數字
+                if (action >= '0' && action <= '9') { calcInput(action); return; }
+                if (action === 'dot') { calcInput('.'); return; }
+                // 運算子
+                if (action === 'add') { calcInput('+'); return; }
+                if (action === 'subtract') { calcInput('−'); return; }
+                if (action === 'multiply') { calcInput('×'); return; }
+                if (action === 'divide') { calcInput('÷'); return; }
+                // 括號
+                if (action === 'lparen') { calcInput('('); return; }
+                if (action === 'rparen') { calcInput(')'); return; }
+                // 特殊
+                if (action === 'clear') { clearDisplay(); return; }
+                if (action === 'del') { deleteLastCharacter(); return; }
+                if (action === 'equals') { calculate(); return; }
+            });
+        });
+
+        // -------- 鍵盤支援 --------
+        document.addEventListener('keydown', (e) => {
+            const key = e.key;
+            if (/^[0-9]$/.test(key)) { e.preventDefault();
+                calcInput(key); return; }
+            if (key === '+') { e.preventDefault();
+                calcInput('+'); return; }
+            if (key === '-') { e.preventDefault();
+                calcInput('−'); return; }
+            if (key === '*') { e.preventDefault();
+                calcInput('×'); return; }
+            if (key === '/') { e.preventDefault();
+                calcInput('÷'); return; }
+            if (key === '.') { e.preventDefault();
+                calcInput('.'); return; }
+            if (key === '(') { e.preventDefault();
+                calcInput('('); return; }
+            if (key === ')') { e.preventDefault();
+                calcInput(')'); return; }
+            if (key === 'Enter' || key === '=') { e.preventDefault();
+                calculate(); return; }
+            if (key === 'Backspace') { e.preventDefault();
+                deleteLastCharacter(); return; }
+            if (key === 'Escape' || key === 'Delete') { e.preventDefault();
+                clearDisplay(); return; }
+        });
+
+        // -------- 初始化顯示 --------
+        updateDisplay(calcValue);
+
+        // 控制台測試
+        console.log('🧮 精準計算機已啟動 (深色模式支援)');
+        console.log('✅ 0.1+0.2 =', fixFloatingPoint(0.1 + 0.2));
+        console.log('✅ 1/3 =', fixFloatingPoint(1 / 3));
     </script>
+
 </body>
 </html>
