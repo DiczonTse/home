@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧮 計算機</title>
+    <!-- 引用主样式（可选，也可以单独写样式） -->
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        /* 额外调整，确保在 iframe 内显示良好 */
+        body {
+            margin: 0;
+            padding: 20px;
+            background: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .calculator-wrapper {
+            width: 100%;
+            max-width: 400px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-wrapper">
+        <!-- 此处复制原来计算器的 HTML 结构（从原模态框中提取） -->
+        <div class="calculator">
+            <div class="calculator-display" id="calcDisplay">0</div>
+            <div class="calculator-buttons">
+                <button class="calc-btn special" onclick="calcInput('(')">(</button>
+                <button class="calc-btn special" onclick="calcInput(')')">)</button>
+                <button class="calc-btn special" onclick="clearDisplay()">C</button>
+                <button class="calc-btn operator" onclick="calcInput('/')">÷</button>
+                
+                <button class="calc-btn" onclick="calcInput('7')">7</button>
+                <button class="calc-btn" onclick="calcInput('8')">8</button>
+                <button class="calc-btn" onclick="calcInput('9')">9</button>
+                <button class="calc-btn operator" onclick="calcInput('*')">×</button>
+                
+                <button class="calc-btn" onclick="calcInput('4')">4</button>
+                <button class="calc-btn" onclick="calcInput('5')">5</button>
+                <button class="calc-btn" onclick="calcInput('6')">6</button>
+                <button class="calc-btn operator" onclick="calcInput('-')">−</button>
+                
+                <button class="calc-btn" onclick="calcInput('1')">1</button>
+                <button class="calc-btn" onclick="calcInput('2')">2</button>
+                <button class="calc-btn" onclick="calcInput('3')">3</button>
+                <button class="calc-btn operator" onclick="calcInput('+')">+</button>
+                
+                <button class="calc-btn" onclick="calcInput('0')">0</button>
+                <button class="calc-btn" onclick="calcInput('.')">.</button>
+                <button class="calc-btn special" onclick="deleteLastCharacter()">Del</button>
+                <button class="calc-btn equals" onclick="calculate()">=</button>
+            </div>
+        </div>
+        <div class="calculator-footer">
+            <span class="coffee-icon">☕</span> 迪遜咖啡廳專用計算機
+        </div>
+    </div>
+
+    <!-- 计算器的 JavaScript（从原 main.js 中提取相关函数） -->
+    <script>
+        // 必须包含所有计算器逻辑
+        let calcValue = '';
+        let lastCalculation = '';
+
+        function calcInput(val) {
+            if (calcValue === '0' && val !== '.') {
+                calcValue = '';
+            }
+            calcValue += val;
+            document.getElementById('calcDisplay').textContent = calcValue;
+        }
+
+        function clearDisplay() {
+            calcValue = '0';
+            document.getElementById('calcDisplay').textContent = calcValue;
+        }
+
+        function deleteLastCharacter() {
+            calcValue = calcValue.slice(0, -1);
+            if (calcValue === '') calcValue = '0';
+            document.getElementById('calcDisplay').textContent = calcValue;
+        }
+
+        function calculate() {
+            try {
+                const expression = calcValue.replace(/×/g, '*').replace(/÷/g, '/');
+                const result = eval(expression);
+                calcValue = result.toString();
+                document.getElementById('calcDisplay').textContent = calcValue;
+            } catch (e) {
+                document.getElementById('calcDisplay').textContent = 'Error';
+                setTimeout(() => {
+                    document.getElementById('calcDisplay').textContent = calcValue || '0';
+                }, 1000);
+            }
+        }
+    </script>
+</body>
+</html>

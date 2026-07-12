@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⏲️ 計時器</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        /* 针对计时器在独立页面中的额外样式 */
+        body {
+            margin: 0;
+            padding: 20px;
+            background: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .timer-wrapper {
+            width: 100%;
+            max-width: 400px;
+        }
+        .timer-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .time-display {
+            font-size: 2.5em;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+            color: var(--button-bg);
+        }
+        .timer-input {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        .timer-input input {
+            width: 60px;
+            padding: 8px;
+            text-align: center;
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+        .timer-input span {
+            display: flex;
+            align-items: center;
+            font-size: 1.2em;
+        }
+        .timer-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .timer-controls button {
+            padding: 10px 20px;
+            background: var(--button-bg);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .timer-controls button:hover {
+            background: var(--button-hover);
+        }
+    </style>
+</head>
+<body>
+    <div class="timer-wrapper">
+        <h2 style="text-align:center; color: var(--text-color);">⏲️ 計時器</h2>
+        <div class="timer-container">
+            <div class="timer-input">
+                <input type="number" id="timerHours" min="0" max="23" value="0">
+                <span>:</span>
+                <input type="number" id="timerMinutes" min="0" max="59" value="0">
+                <span>:</span>
+                <input type="number" id="timerSeconds" min="0" max="59" value="0">
+            </div>
+            <div class="time-display" id="timerDisplay">00:00:00</div>
+            <div class="timer-controls">
+                <button onclick="startTimer()">▶️ 開始</button>
+                <button onclick="pauseTimer()">⏸️ 暫停</button>
+                <button onclick="resetTimer()">⏹️ 重置</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 计时器逻辑
+        let timerInterval = null;
+        let timerSeconds = 0;
+        let timerMinutes = 0;
+        let timerHours = 0;
+        let isTimerRunning = false;
+
+        function startTimer() {
+            if (!isTimerRunning) {
+                const hours = parseInt(document.getElementById('timerHours').value) || 0;
+                const minutes = parseInt(document.getElementById('timerMinutes').value) || 0;
+                const seconds = parseInt(document.getElementById('timerSeconds').value) || 0;
+                
+                timerHours = hours;
+                timerMinutes = minutes;
+                timerSeconds = seconds;
+                
+                isTimerRunning = true;
+                timerInterval = setInterval(updateTimer, 1000);
+            }
+        }
+
+        function pauseTimer() {
+            isTimerRunning = false;
+            clearInterval(timerInterval);
+        }
+
+        function resetTimer() {
+            isTimerRunning = false;
+            clearInterval(timerInterval);
+            timerHours = 0;
+            timerMinutes = 0;
+            timerSeconds = 0;
+            document.getElementById('timerHours').value = '0';
+            document.getElementById('timerMinutes').value = '0';
+            document.getElementById('timerSeconds').value = '0';
+            document.getElementById('timerDisplay').textContent = '00:00:00';
+        }
+
+        function updateTimer() {
+            if (timerSeconds > 0) {
+                timerSeconds--;
+            } else {
+                if (timerMinutes > 0) {
+                    timerMinutes--;
+                    timerSeconds = 59;
+                } else {
+                    if (timerHours > 0) {
+                        timerHours--;
+                        timerMinutes = 59;
+                        timerSeconds = 59;
+                    } else {
+                        // 计时结束
+                        clearInterval(timerInterval);
+                        isTimerRunning = false;
+                        document.getElementById('timerDisplay').textContent = '00:00:00';
+                        alert('計時器結束！');
+                        return;
+                    }
+                }
+            }
+            const displayHours = String(timerHours).padStart(2, '0');
+            const displayMinutes = String(timerMinutes).padStart(2, '0');
+            const displaySeconds = String(timerSeconds).padStart(2, '0');
+            document.getElementById('timerDisplay').textContent = `${displayHours}:${displayMinutes}:${displaySeconds}`;
+        }
+
+        // 清理定时器（页面关闭时）
+        window.addEventListener('beforeunload', function() {
+            if (timerInterval) clearInterval(timerInterval);
+        });
+    </script>
+</body>
+</html>
