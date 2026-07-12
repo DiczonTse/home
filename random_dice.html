@@ -170,14 +170,15 @@
 
 <script>
 // ============================================================
-//  Random Dice v10.0 — 新增鐵、賭、鎖骰子，調整價格與順序
+//  Random Dice v10.2 — 新增「擬態」骰子 (MIMIC)
+//  擬態：可與任何種類同星等合併，成為高一星隨機類型（含自己）
 // ============================================================
 
 // ========== 完整翻譯 ==========
 const translations = {
     'zh-TW': {
         coverTitle: '🎲 隨機骰子',
-        coverDesc: '🔥火・⚡雷・🌪️風・☠️毒・❄️冰・🔩鐵・🎲壞・🎰賭・🔒鎖<br>⭐ 合併最高 7 星 &nbsp;|&nbsp; 💰 費用每次 +10<br>🛡️ 每10關特殊Boss &nbsp;|&nbsp; ❤️ 僅 3 條命<br>🔗 拖曳骰子到同類同星上合併',
+        coverDesc: '🔥火・⚡雷・🌪️風・☠️毒・❄️冰<br>⭐ 合併最高 7 星 &nbsp;|&nbsp; 💰 費用每次 +10<br>🛡️ 每10關特殊Boss &nbsp;|&nbsp; ❤️ 僅 3 條命<br>🔗 拖曳骰子到同類同星上合併',
         startBtn: '開始遊戲',
         version: 'v1.0',
         copyright: '© {year} ☕迪遜咖啡廳，版權所有。',
@@ -206,19 +207,19 @@ const translations = {
         diceNames: {
             FIRE: '火', THUNDER: '雷', WIND: '風', POISON: '毒', ICE: '冰',
             IRON: '鐵', RANDOM: '壞', GAMBLE: '賭', LOCK: '鎖',
-            JOKER: '小丑', SAPLING: '樹苗'
+            MYSTERY: '隨機', MIMIC: '擬態', JOKER: '小丑', SAPLING: '樹苗'
         },
         diceDescs: {
             FIRE: '燃燒・濺射', THUNDER: '連鎖3目標', WIND: '極速攻撃',
             POISON: '持續毒傷', ICE: '疊加減速',
-            IRON: '打HP最高・BOSS2倍', RANDOM: '隨機目標・高攻',
+            IRON: 'BOSS2倍', RANDOM: '隨機目標',
             GAMBLE: '隨機傷害', LOCK: '機率暫停',
-            JOKER: '弱攻・特殊合併', SAPLING: '極弱・目標合併'
+            MYSTERY: '定時隨機變身', MIMIC: '任意合併', JOKER: '複製', SAPLING: '目標合併'
         },
         dicePrices: {
             FIRE: 0, THUNDER: 0, WIND: 0, POISON: 0, ICE: 0,
             IRON: 300, RANDOM: 300, GAMBLE: 300, LOCK: 300,
-            JOKER: 1500, SAPLING: 1500
+            MYSTERY: 900, MIMIC: 1200, JOKER: 1500, SAPLING: 1500
         },
         bossNames: {
             mage: '法師', lion: '獅王', snake: '大蛇', lamb: '沉默的羔羊',
@@ -263,10 +264,14 @@ const translations = {
         mergeMaxStar: '⭐ 已達最高星級 ({max}星)',
         toastLionScared: '🦁 咆哮！嚇跑了 {count} 顆1星骰子',
         toastStun: '🔒 暫停敵人 {dur}s！',
+        toastMysteryTransform: '❓ 變身！→ {name} ★{star}',
+        toastJokerCopy: '🃏 小丑複製 → {label} {name} ★{star}',
+        toastJokerMerge: '🃏 小丑合併！★{star} {name}',
+        toastMimicMerge: '🤡 擬態合併！★{star} {name}',
     },
     'zh-CN': {
         coverTitle: '🎲 随机骰子',
-        coverDesc: '🔥火・⚡雷・🌪️风・☠️毒・❄️冰・🔩铁・🎲坏・🎰赌・🔒锁<br>⭐ 合并最高 7 星 &nbsp;|&nbsp; 💰 费用每次 +10<br>🛡️ 每10关特殊Boss &nbsp;|&nbsp; ❤️ 仅 3 条命<br>🔗 拖曳骰子到同类同星上合并',
+        coverDesc: '🔥火・⚡雷・🌪️风・☠️毒・❄️冰<br>⭐ 合并最高 7 星 &nbsp;|&nbsp; 💰 费用每次 +10<br>🛡️ 每10关特殊Boss &nbsp;|&nbsp; ❤️ 仅 3 条命<br>🔗 拖曳骰子到同类同星上合并',
         startBtn: '开始游戏',
         version: 'v1.0',
         copyright: '© {year} ☕迪逊咖啡厅，版权所有。',
@@ -295,19 +300,19 @@ const translations = {
         diceNames: {
             FIRE: '火', THUNDER: '雷', WIND: '风', POISON: '毒', ICE: '冰',
             IRON: '铁', RANDOM: '坏', GAMBLE: '赌', LOCK: '锁',
-            JOKER: '小丑', SAPLING: '树苗'
+            MYSTERY: '随机', MIMIC: '拟态', JOKER: '小丑', SAPLING: '树苗'
         },
         diceDescs: {
             FIRE: '燃烧・溅射', THUNDER: '连锁3目标', WIND: '极速攻击',
             POISON: '持续毒伤', ICE: '叠加减速',
-            IRON: '打HP最高・BOSS2倍', RANDOM: '随机目标・高攻',
+            IRON: 'BOSS2倍', RANDOM: '随机目标',
             GAMBLE: '随机伤害', LOCK: '概率暂停',
-            JOKER: '弱攻・特殊合并', SAPLING: '极弱・目标合并'
+            MYSTERY: '定时随机变身', MIMIC: '任意合并', JOKER: '复制', SAPLING: '目标合并'
         },
         dicePrices: {
             FIRE: 0, THUNDER: 0, WIND: 0, POISON: 0, ICE: 0,
             IRON: 300, RANDOM: 300, GAMBLE: 300, LOCK: 300,
-            JOKER: 1500, SAPLING: 1500
+            MYSTERY: 900, MIMIC: 1200, JOKER: 1500, SAPLING: 1500
         },
         bossNames: {
             mage: '法师', lion: '狮王', snake: '大蛇', lamb: '沉默的羔羊',
@@ -352,10 +357,14 @@ const translations = {
         mergeMaxStar: '⭐ 已达最高星级 ({max}星)',
         toastLionScared: '🦁 咆哮！吓跑了 {count} 颗1星骰子',
         toastStun: '🔒 暂停敌人 {dur}s！',
+        toastMysteryTransform: '❓ 变身！→ {name} ★{star}',
+        toastJokerCopy: '🃏 小丑复制 → {label} {name} ★{star}',
+        toastJokerMerge: '🃏 小丑合并！★{star} {name}',
+        toastMimicMerge: '🤡 拟态合并！★{star} {name}',
     },
     'en': {
         coverTitle: '🎲 Random Dice',
-        coverDesc: '🔥Fire・⚡Thunder・🌪️Wind・☠️Poison・❄️Ice・🔩Iron・🎲Broken・🎰Gamble・🔒Lock<br>⭐ Merge up to 7 Stars &nbsp;|&nbsp; 💰 Cost +10 each roll<br>🛡️ Special Boss every 10 Waves &nbsp;|&nbsp; ❤️ Only 3 Lives<br>🔗 Drag dice to merge same type & star',
+        coverDesc: '🔥Fire・⚡Thunder・🌪️Wind・☠️Poison・❄️Ice<br>⭐ Merge up to 7 Stars &nbsp;|&nbsp; 💰 Cost +10 each roll<br>🛡️ Special Boss every 10 Waves &nbsp;|&nbsp; ❤️ Only 3 Lives<br>🔗 Drag dice to merge same type & star',
         startBtn: 'Start Game',
         version: 'v1.0',
         copyright: '© {year} ☕Diczon\'s Cafe, All Rights Reserved.',
@@ -384,19 +393,19 @@ const translations = {
         diceNames: {
             FIRE: 'Fire', THUNDER: 'Thunder', WIND: 'Wind', POISON: 'Poison', ICE: 'Ice',
             IRON: 'Iron', RANDOM: 'Broken', GAMBLE: 'Gamble', LOCK: 'Lock',
-            JOKER: 'Joker', SAPLING: 'Sapling'
+            MYSTERY: 'Random', MIMIC: 'Mimic', JOKER: 'Joker', SAPLING: 'Sapling'
         },
         diceDescs: {
             FIRE: 'Burn・Splash', THUNDER: 'Chain 3 targets', WIND: 'Rapid Attack',
             POISON: 'Damage over time', ICE: 'Stacking Slow',
-            IRON: 'Highest HP・2x Boss', RANDOM: 'Random target・High ATK',
+            IRON: '2x Boss', RANDOM: 'Random target',
             GAMBLE: 'Random dmg', LOCK: 'Stun chance',
-            JOKER: 'Weak・Special Merge', SAPLING: 'Very Weak・Target Merge'
+            MYSTERY: 'Timed random transform', MIMIC: 'Any merge', JOKER: 'Copy', SAPLING: 'Target Merge'
         },
         dicePrices: {
             FIRE: 0, THUNDER: 0, WIND: 0, POISON: 0, ICE: 0,
             IRON: 300, RANDOM: 300, GAMBLE: 300, LOCK: 300,
-            JOKER: 1500, SAPLING: 1500
+            MYSTERY: 900, MIMIC: 1200, JOKER: 1500, SAPLING: 1500
         },
         bossNames: {
             mage: 'Mage', lion: 'Lion King', snake: 'Serpent', lamb: 'Silent Lamb',
@@ -441,10 +450,14 @@ const translations = {
         mergeMaxStar: '⭐ Already max star ({max}★)',
         toastLionScared: '🦁 Roar! Scared away {count} 1-star dice',
         toastStun: '🔒 Stunned enemy for {dur}s!',
+        toastMysteryTransform: '❓ Transformed! → {name} ★{star}',
+        toastJokerCopy: '🃏 Joker copied → {label} {name} ★{star}',
+        toastJokerMerge: '🃏 Joker merged! ★{star} {name}',
+        toastMimicMerge: '🤡 Mimic merged! ★{star} {name}',
     },
     'ja': {
         coverTitle: '🎲 ランダムダイス',
-        coverDesc: '🔥火・⚡雷・🌪️風・☠️毒・❄️氷・🔩鉄・🎲壊・🎰賭・🔒鎖<br>⭐ 最大7つ星まで合体 &nbsp;|&nbsp; 💰 コスト毎回+10<br>🛡️ 10ウェーブごとに特殊ボス &nbsp;|&nbsp; ❤️ ライフ3つ<br>🔗 ドラッグして同種・同星を合体',
+        coverDesc: '🔥火・⚡雷・🌪️風・☠️毒・❄️氷<br>⭐ 最大7つ星まで合体 &nbsp;|&nbsp; 💰 コスト毎回+10<br>🛡️ 10ウェーブごとに特殊ボス &nbsp;|&nbsp; ❤️ ライフ3つ<br>🔗 ドラッグして同種・同星を合体',
         startBtn: 'ゲーム開始',
         version: 'v1.0',
         copyright: '© {year} ☕ディクソンカフェ，無断転載を禁じます。',
@@ -473,19 +486,19 @@ const translations = {
         diceNames: {
             FIRE: '火', THUNDER: '雷', WIND: '風', POISON: '毒', ICE: '氷',
             IRON: '鉄', RANDOM: '壊', GAMBLE: '賭', LOCK: '鎖',
-            JOKER: 'ジョーカー', SAPLING: '苗木'
+            MYSTERY: 'ランダム', MIMIC: '擬態', JOKER: 'ジョーカー', SAPLING: '苗木'
         },
         diceDescs: {
             FIRE: '燃焼・範囲', THUNDER: '3体連鎖', WIND: '超高速',
             POISON: '持続毒', ICE: '減速重ね掛け',
-            IRON: 'HP最大・ボス2倍', RANDOM: 'ランダム・高攻',
+            IRON: 'ボス2倍', RANDOM: 'ランダム',
             GAMBLE: 'ランダムダメ', LOCK: 'スタン確率',
-            JOKER: '弱・特殊合体', SAPLING: '極弱・対象合体'
+            MYSTERY: '定期ランダム変身', MIMIC: '任意合体', JOKER: 'コピー', SAPLING: '対象合体'
         },
         dicePrices: {
             FIRE: 0, THUNDER: 0, WIND: 0, POISON: 0, ICE: 0,
             IRON: 300, RANDOM: 300, GAMBLE: 300, LOCK: 300,
-            JOKER: 1500, SAPLING: 1500
+            MYSTERY: 900, MIMIC: 1200, JOKER: 1500, SAPLING: 1500
         },
         bossNames: {
             mage: '魔法使い', lion: 'ライオン王', snake: '大蛇', lamb: '沈黙の子羊',
@@ -530,10 +543,14 @@ const translations = {
         mergeMaxStar: '⭐ 最大星 ({max}★)',
         toastLionScared: '🦁 咆哮！1星ダイス {count} 個を追い払った！',
         toastStun: '🔒 敵を {dur}s スタン！',
+        toastMysteryTransform: '❓ 変身！→ {name} ★{star}',
+        toastJokerCopy: '🃏 ジョーカーコピー → {label} {name} ★{star}',
+        toastJokerMerge: '🃏 ジョーカー合体！★{star} {name}',
+        toastMimicMerge: '🤡 擬態合体！★{star} {name}',
     },
     'ko': {
         coverTitle: '🎲 랜덤 다이스',
-        coverDesc: '🔥불・⚡번개・🌪️바람・☠️독・❄️얼음・🔩철・🎲파손・🎰도박・🔒잠금<br>⭐ 최대 7성 합병 &nbsp;|&nbsp; 💰 비용 매회 +10<br>🛡️ 10웨이브마다 특수 보스 &nbsp;|&nbsp; ❤️ 목숨 3개<br>🔗 드래그하여 같은 종류·별 등급 합병',
+        coverDesc: '🔥불・⚡번개・🌪️바람・☠️독・❄️얼음<br>⭐ 최대 7성 합병 &nbsp;|&nbsp; 💰 비용 매회 +10<br>🛡️ 10웨이브마다 특수 보스 &nbsp;|&nbsp; ❤️ 목숨 3개<br>🔗 드래그하여 같은 종류·별 등급 합병',
         startBtn: '게임 시작',
         version: 'v1.0',
         copyright: '© {year} ☕딕슨 카페，판권 소유.',
@@ -562,19 +579,19 @@ const translations = {
         diceNames: {
             FIRE: '불', THUNDER: '번개', WIND: '바람', POISON: '독', ICE: '얼음',
             IRON: '철', RANDOM: '파손', GAMBLE: '도박', LOCK: '잠금',
-            JOKER: '조커', SAPLING: '묘목'
+            MYSTERY: '랜덤', MIMIC: '모방', JOKER: '조커', SAPLING: '묘목'
         },
         diceDescs: {
             FIRE: '연소・범위', THUNDER: '3체 연쇄', WIND: '초고속 공격',
             POISON: '지속 독', ICE: '중첩 감속',
-            IRON: 'HP최대・보스2배', RANDOM: '무작위・고공',
+            IRON: '보스2배', RANDOM: '무작위',
             GAMBLE: '랜덤 데미지', LOCK: '스턴 확률',
-            JOKER: '약공・특수 합병', SAPLING: '극약・대상 합병'
+            MYSTERY: '주기적 랜덤 변신', MIMIC: '임의 합병', JOKER: '복사', SAPLING: '대상 합병'
         },
         dicePrices: {
             FIRE: 0, THUNDER: 0, WIND: 0, POISON: 0, ICE: 0,
             IRON: 300, RANDOM: 300, GAMBLE: 300, LOCK: 300,
-            JOKER: 1500, SAPLING: 1500
+            MYSTERY: 900, MIMIC: 1200, JOKER: 1500, SAPLING: 1500
         },
         bossNames: {
             mage: '마법사', lion: '사자왕', snake: '대뱀', lamb: '침묵의 양',
@@ -619,6 +636,10 @@ const translations = {
         mergeMaxStar: '⭐ 최대 별 등급 ({max}★)',
         toastLionScared: '🦁 포효! 1성 주사위 {count}개 쫓아냄!',
         toastStun: '🔒 적을 {dur}s 스턴!',
+        toastMysteryTransform: '❓ 변신! → {name} ★{star}',
+        toastJokerCopy: '🃏 조커 복사 → {label} {name} ★{star}',
+        toastJokerMerge: '🃏 조커 합병! ★{star} {name}',
+        toastMimicMerge: '🤡 모방 합병! ★{star} {name}',
     }
 };
 let currentLang = 'zh-TW';
@@ -652,7 +673,7 @@ function getDefaultSaveData() {
         selectedDice: ['FIRE', 'THUNDER', 'WIND', 'POISON', 'ICE'],
         purchased: {
             IRON: false, RANDOM: false, GAMBLE: false, LOCK: false,
-            JOKER: false, SAPLING: false
+            MYSTERY: false, MIMIC: false, JOKER: false, SAPLING: false
         }
     };
 }
@@ -672,7 +693,6 @@ function loadSaveData() {
             saveData = data;
         } else saveData = getDefaultSaveData();
     } catch (e) { saveData = getDefaultSaveData(); }
-    // 修正 selectedDice
     saveData.selectedDice = saveData.selectedDice.filter(d => saveData.ownedDice.includes(d));
     const fallback = ['FIRE', 'THUNDER', 'WIND', 'POISON', 'ICE'];
     while (saveData.selectedDice.length < 5) {
@@ -795,6 +815,8 @@ const ALL_DICE_DEFS = {
     RANDOM: { label: '🎲', color: '#a29bfe', baseDamage: 50, damagePerStar: 10, baseInterval: 0.9, intervalPerLevel: 0, attackType: 'random' },
     GAMBLE: { label: '🎰', color: '#f1c40f', baseDamage: 7, damagePerStar: 10, baseInterval: 1.0, intervalPerLevel: -0.01, attackType: 'front', gambleMin: 7 },
     LOCK: { label: '🔒', color: '#3498db', baseDamage: 30, damagePerStar: 10, baseInterval: 0.8, intervalPerLevel: -0.01, attackType: 'front', lockStun: true },
+    MYSTERY: { label: '❓', color: '#805500', baseDamage: 30, damagePerStar: 0, baseInterval: 1.0, intervalPerLevel: 0, attackType: 'front', isMystery: true },
+    MIMIC: { label: '🤡', color: '#8e44ad', baseDamage: 30, damagePerStar: 50/6, baseInterval: 1.5, intervalPerLevel: 0, attackType: 'front', isMimic: true },
     JOKER: { label: '🃏', color: '#fd79a8', baseDamage: 40, damagePerStar: 5, baseInterval: 1.5, intervalPerLevel: 0, attackType: 'front', isJoker: true },
     SAPLING: { label: '🌱', color: '#55efc4', baseDamage: 10, damagePerStar: 10, baseInterval: 1.5, intervalPerLevel: 0, attackType: 'front', isSapling: true },
 };
@@ -837,35 +859,41 @@ function createDice(type, star) {
     const lv = upgradeLevels[type] || 1;
     const mult = getUpgradeMultiplier(type);
 
-    // 計算傷害（不同類型有不同公式）
     let dmg = 0;
     if (type === 'IRON') {
         const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
-        const star7Dmg = def.baseDamage + def.damagePerStar * (7 - 1); // 240
+        const star7Dmg = def.baseDamage + def.damagePerStar * (7 - 1);
         const maxDmg = 640;
         const ratio = 1 + (lv - 1) / (MAX_LEVEL - 1) * ((maxDmg / star7Dmg) - 1);
         dmg = baseDmg * ratio;
     } else if (type === 'GAMBLE') {
         const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
-        const star7Dmg = def.baseDamage + def.damagePerStar * (7 - 1); // 147
+        const star7Dmg = def.baseDamage + def.damagePerStar * (7 - 1);
         const maxDmg = 455;
         const ratio = 1 + (lv - 1) / (MAX_LEVEL - 1) * ((maxDmg / star7Dmg) - 1);
         dmg = baseDmg * ratio;
     } else if (type === 'LOCK') {
-        // 傷害只受升級等級影響：Lv1 30, LvMax 70
         dmg = def.baseDamage + (lv - 1) * (70 - def.baseDamage) / (MAX_LEVEL - 1);
+    } else if (type === 'MYSTERY') {
+        dmg = def.baseDamage * mult;
+    } else if (type === 'MIMIC') {
+        // 1星30，7星80，7星满级120
+        const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
+        const star7Dmg = def.baseDamage + def.damagePerStar * 6; // 80
+        const maxLvDmg = 120; // 7星满级目标
+        const ratio = 1 + (lv - 1) / (MAX_LEVEL - 1) * ((maxLvDmg / star7Dmg) - 1);
+        dmg = baseDmg * ratio;
     } else {
         dmg = (def.baseDamage + def.damagePerStar * (s - 1)) * mult;
     }
 
-    // 確保數值有效
     if (!isFinite(dmg) || dmg < 0) dmg = def.baseDamage || 10;
 
     let intervalBase = def.baseInterval + (def.intervalPerLevel || 0) * (lv - 1);
     intervalBase = Math.max(0.15, intervalBase);
     if (!isFinite(intervalBase) || intervalBase < 0.15) intervalBase = 0.5;
 
-    return {
+    const dice = {
         type, star: s, cooldown: 0,
         _damage: dmg,
         get damage() { return this._damage; },
@@ -880,13 +908,66 @@ function createDice(type, star) {
         get attackType() { return def.attackType || 'front'; },
         get isJoker() { return def.isJoker || false; },
         get isSapling() { return def.isSapling || false; },
+        get isMystery() { return def.isMystery || false; },
+        get isMimic() { return def.isMimic || false; },
         get burn() { return def.burn || false; },
         get bossMultiplier() { return def.bossMultiplier || 1; },
         get gambleMin() { return def.gambleMin || 0; },
         get lockStun() { return def.lockStun || false; },
     };
+
+    if (dice.isMystery) {
+        dice.transformTimer = getMysteryTransformTime(s, lv);
+        dice.transformInterval = dice.transformTimer;
+    }
+
+    return dice;
 }
 function randomDiceType(){ const keys=getActiveDiceKeys(); return keys.length?keys[randInt(0,keys.length-1)]:'FIRE'; }
+
+// ========== ❓隨機骰子變身時間計算 ==========
+function getMysteryTransformTime(star, level) {
+    if (star < 7) {
+        return 45 - (star - 1) * (45 - 33) / 6;
+    } else {
+        const baseTime = 33;
+        const minTime = 29;
+        const lv = Math.min(level, MAX_LEVEL);
+        return baseTime - (lv - 1) * (baseTime - minTime) / (MAX_LEVEL - 1);
+    }
+}
+
+// ========== ❓隨機骰子變身 ==========
+function transformMysteryDice(row, col, dice) {
+    if (!dice || !dice.isMystery) return;
+
+    let candidates = getActiveDiceKeys();
+    if (candidates.length === 0) {
+        return;
+    }
+    const newType = candidates[randInt(0, candidates.length - 1)];
+    const newStar = randInt(1, 7);
+    const newDice = createDice(newType, newStar);
+    if (newDice) {
+        newDice.cooldown = 0;
+        game.board[row][col] = newDice;
+
+        game.bossLockedDice = game.bossLockedDice.filter(d => !(d.row === row && d.col === col));
+
+        const data = getData();
+        const msg = data.toastMysteryTransform
+            .replace(/\{name\}/g, newDice.name)
+            .replace(/\{star\}/g, newStar);
+        showToast(msg, 1200);
+        addFloatingText(
+            boardX + col * CELL_SIZE + CELL_SIZE/2,
+            boardY + row * CELL_SIZE + CELL_SIZE/2,
+            `❓→${newDice.label}★${newStar}`,
+            '#9b59b6', 24
+        );
+        updateDicePreview(newDice);
+    }
+}
 
 // ========== 擲骰 ==========
 function rollDice(){
@@ -905,11 +986,92 @@ function rollDice(){
 function updateUI(){ const data=getData(); if(!game.gameOver&&game.gameStarted) document.getElementById('rollBtn').textContent=`🎲 ${data.rollBtn} (${game.diceCost})`; else if(game.gameOver) document.getElementById('rollBtn').textContent=`🎲 ${data.rollBtn}`; }
 function updateDicePreview(dice){ const preview=document.getElementById('dicePreview'); if(!dice){ preview.innerHTML=`<span class="empty" id="dicePreviewEmpty">${getData().dicePreviewEmpty}</span>`; return; } preview.innerHTML=`<div class="dice-icon" style="background:${dice.color};border-color:rgba(255,255,255,0.4);">${dice.label}</div><span style="font-weight:600;font-size:13px;">★${dice.star} ${dice.name}</span>`; }
 
-// ========== 拖曳合併 ==========
+// ========== 拖曳合併（含擬態） ==========
 function getGridPosFromPointer(e){ const rect=canvas.getBoundingClientRect(); const scaleX=canvas.width/rect.width, scaleY=canvas.height/rect.height; const mx=(e.clientX-rect.left)*scaleX, my=(e.clientY-rect.top)*scaleY; if(mx<boardX||my<boardY||mx>boardX+BOARD_WIDTH||my>boardY+BOARD_HEIGHT) return null; const col=Math.floor((mx-boardX)/CELL_SIZE), row=Math.floor((my-boardY)/CELL_SIZE); if(col<0||col>=COLS||row<0||row>=ROWS) return null; return {col,row,x:mx,y:my}; }
 function onPointerDown(e){ e.preventDefault(); if(game.gameOver||!game.gameStarted||game.bossAbilityActive){ if(game.bossAbilityActive) showToast('⏳ Boss能力發動中，請稍候'); return; } const rect=canvas.getBoundingClientRect(); const scaleX=canvas.width/rect.width, scaleY=canvas.height/rect.height; const mx=(e.clientX-rect.left)*scaleX, my=(e.clientY-rect.top)*scaleY; if(mx>=upgradeX&&mx<=upgradeX+UPGRADE_WIDTH&&my>=upgradeY&&my<=upgradeY+UPGRADE_HEIGHT){ const itemW=UPGRADE_WIDTH/Math.max(getActiveDiceKeys().length,5); const idx=Math.floor((mx-upgradeX)/itemW); const keys=getActiveDiceKeys(); if(idx<keys.length){ upgradeType(keys[idx]); } return; } const pos=getGridPosFromPointer(e); if(!pos) return; const {col,row}=pos; if(!isOccupied(col,row)) return; game.isDragging=true; game.dragData={col,row,startX:e.clientX,startY:e.clientY,moved:false,sourceDice:game.board[row][col]}; }
 function onPointerMove(e){ e.preventDefault(); if(!game.isDragging||!game.dragData) return; const dx=e.clientX-game.dragData.startX, dy=e.clientY-game.dragData.startY; if(Math.hypot(dx,dy)>10) game.dragData.moved=true; if(!game.dragData._lastMouse) game.dragData._lastMouse={}; game.dragData._lastMouse.x=e.clientX; game.dragData._lastMouse.y=e.clientY; }
-function onPointerUp(e){ e.preventDefault(); const data=getData(); if(!game.isDragging||!game.dragData){ if(!game.gameOver&&game.gameStarted&&!game.bossAbilityActive){ const pos=getGridPosFromPointer(e); if(pos&&isOccupied(pos.col,pos.row)){ const dice=game.board[pos.row][pos.col]; showToast(data.toastDiceInfo.replace(/\{label\}/g,dice.label).replace(/\{name\}/g,dice.name).replace(/\{star\}/g,dice.star).replace(/\{damage\}/g,Math.round(dice.damage))); } } game.isDragging=false; game.dragData=null; return; } if(!game.dragData.moved){ const dice=game.board[game.dragData.row]?.[game.dragData.col]; if(dice&&!game.bossAbilityActive){ showToast(data.toastDiceInfo.replace(/\{label\}/g,dice.label).replace(/\{name\}/g,dice.name).replace(/\{star\}/g,dice.star).replace(/\{damage\}/g,Math.round(dice.damage))); } game.isDragging=false; game.dragData=null; return; } if(game.bossAbilityActive){ showToast('⏳ Boss能力發動中，請稍候'); game.isDragging=false; game.dragData=null; return; } const pos=getGridPosFromPointer(e); if(pos){ const {col,row}=pos; const src=game.dragData; if(isOccupied(col,row)&&!(col===src.col&&row===src.row)){ const targetDice=game.board[row][col]; const sourceDice=game.board[src.row][src.col]; if(sourceDice&&targetDice){ const sameStar=sourceDice.star===targetDice.star; if(!sameStar){ showToast(data.mergeNeedSameStar); }else if(sourceDice.star>=game.maxStar){ showToast(data.mergeMaxStar.replace(/\{max\}/g,game.maxStar)); }else{ let merged=false; if(sourceDice.isSapling){ const newStar=sourceDice.star+1; const newDice=createDice(targetDice.type,newStar); if(newDice){ game.board[row][col]=newDice; game.board[src.row][src.col]=null; merged=true; showToast(data.toastMerge.replace(/\{star\}/g,newStar).replace(/\{name\}/g,newDice.name)); updateDicePreview(newDice); } }else if(sourceDice.isJoker){ const newStar=sourceDice.star+1; const newType=randomDiceType(); const newDice=createDice(newType,newStar); if(newDice){ game.board[row][col]=newDice; game.board[src.row][src.col]=null; merged=true; showToast(data.toastMerge.replace(/\{star\}/g,newStar).replace(/\{name\}/g,newDice.name)); updateDicePreview(newDice); } }else if(sourceDice.type===targetDice.type){ const newStar=sourceDice.star+1; const newType=randomDiceType(); const newDice=createDice(newType,newStar); if(newDice){ game.board[row][col]=newDice; game.board[src.row][src.col]=null; merged=true; showToast(data.toastMerge.replace(/\{star\}/g,newStar).replace(/\{name\}/g,newDice.name)); updateDicePreview(newDice); } }else{ showToast(data.mergeNeedSameType); } if(merged) updateUI(); } } }else showToast('❌ 無效的合併目標'); } game.isDragging=false; game.dragData=null; }
+function onPointerUp(e){ e.preventDefault(); const data=getData(); if(!game.isDragging||!game.dragData){ if(!game.gameOver&&game.gameStarted&&!game.bossAbilityActive){ const pos=getGridPosFromPointer(e); if(pos&&isOccupied(pos.col,pos.row)){ const dice=game.board[pos.row][pos.col]; showToast(data.toastDiceInfo.replace(/\{label\}/g,dice.label).replace(/\{name\}/g,dice.name).replace(/\{star\}/g,dice.star).replace(/\{damage\}/g,Math.round(dice.damage))); } } game.isDragging=false; game.dragData=null; return; } if(!game.dragData.moved){ const dice=game.board[game.dragData.row]?.[game.dragData.col]; if(dice&&!game.bossAbilityActive){ showToast(data.toastDiceInfo.replace(/\{label\}/g,dice.label).replace(/\{name\}/g,dice.name).replace(/\{star\}/g,dice.star).replace(/\{damage\}/g,Math.round(dice.damage))); } game.isDragging=false; game.dragData=null; return; } if(game.bossAbilityActive){ showToast('⏳ Boss能力發動中，請稍候'); game.isDragging=false; game.dragData=null; return; } const pos=getGridPosFromPointer(e); if(pos){ const {col,row}=pos; const src=game.dragData; if(isOccupied(col,row)&&!(col===src.col&&row===src.row)){ const targetDice=game.board[row][col]; const sourceDice=game.board[src.row][src.col]; if(sourceDice&&targetDice){ const sameStar=sourceDice.star===targetDice.star; if(!sameStar){ showToast(data.mergeNeedSameStar); }else if(sourceDice.star>=game.maxStar){ showToast(data.mergeMaxStar.replace(/\{max\}/g,game.maxStar)); }else{ let merged=false;
+                        // ---- 合併邏輯優先級 ----
+                        if(sourceDice.isSapling){
+                            // 樹苗：變成目標類型，星等+1
+                            const newStar=sourceDice.star+1;
+                            const newDice=createDice(targetDice.type,newStar);
+                            if(newDice){
+                                game.board[row][col]=newDice;
+                                game.board[src.row][src.col]=null;
+                                merged=true;
+                                showToast(data.toastMerge.replace(/\{star\}/g,newStar).replace(/\{name\}/g,newDice.name));
+                                updateDicePreview(newDice);
+                            }
+                        }else if(sourceDice.isJoker){
+                            if(targetDice.isJoker){
+                                // 小丑+小丑 → 合併升級隨機
+                                const newStar = sourceDice.star + 1;
+                                if(newStar > game.maxStar){
+                                    showToast(data.mergeMaxStar.replace(/\{max\}/g, game.maxStar));
+                                }else{
+                                    const newType = randomDiceType();
+                                    const newDice = createDice(newType, newStar);
+                                    if(newDice){
+                                        game.board[row][col] = newDice;
+                                        game.board[src.row][src.col] = null;
+                                        merged = true;
+                                        const mergeMsg = data.toastJokerMerge || data.toastMerge;
+                                        showToast(mergeMsg.replace(/\{star\}/g, newStar).replace(/\{name\}/g, newDice.name));
+                                        updateDicePreview(newDice);
+                                    }
+                                }
+                            }else{
+                                // 小丑+非小丑 → 複製
+                                const newDice = createDice(targetDice.type, targetDice.star);
+                                if(newDice){
+                                    newDice.cooldown = sourceDice.cooldown || 0;
+                                    game.board[src.row][src.col] = newDice;
+                                    game.bossLockedDice = game.bossLockedDice.filter(d => !(d.row === src.row && d.col === src.col));
+                                    merged = true;
+                                    const copyMsg = data.toastJokerCopy || `🃏 小丑複製 → {label} {name} ★{star}`;
+                                    showToast(copyMsg
+                                        .replace(/\{label\}/g, newDice.label)
+                                        .replace(/\{name\}/g, newDice.name)
+                                        .replace(/\{star\}/g, newDice.star), 1500);
+                                    updateDicePreview(newDice);
+                                }
+                            }
+                        }else if(sourceDice.isMimic){
+                            // ---- 擬態：可與任何種類同星等合併，成為高一星隨機類型（含自己） ----
+                            if(sourceDice.star >= game.maxStar){
+                                showToast(data.mergeMaxStar.replace(/\{max\}/g, game.maxStar));
+                            }else{
+                                const newStar = sourceDice.star + 1;
+                                const newType = randomDiceType(); // 從 activeDiceKeys 中隨機
+                                const newDice = createDice(newType, newStar);
+                                if(newDice){
+                                    game.board[row][col] = newDice;
+                                    game.board[src.row][src.col] = null;
+                                    merged = true;
+                                    const mimicMsg = data.toastMimicMerge || data.toastMerge;
+                                    showToast(mimicMsg.replace(/\{star\}/g, newStar).replace(/\{name\}/g, newDice.name));
+                                    updateDicePreview(newDice);
+                                }
+                            }
+                        }else if(sourceDice.type===targetDice.type){
+                            // 普通同類合併
+                            const newStar=sourceDice.star+1;
+                            const newType=randomDiceType();
+                            const newDice=createDice(newType,newStar);
+                            if(newDice){
+                                game.board[row][col]=newDice;
+                                game.board[src.row][src.col]=null;
+                                merged=true;
+                                showToast(data.toastMerge.replace(/\{star\}/g,newStar).replace(/\{name\}/g,newDice.name));
+                                updateDicePreview(newDice);
+                            }
+                        }else{
+                            showToast(data.mergeNeedSameType);
+                        }
+                        if(merged) updateUI();
+                    }
+                } }else showToast('❌ 無效的合併目標'); } game.isDragging=false; game.dragData=null; }
 canvas.addEventListener('pointerdown',onPointerDown); window.addEventListener('pointermove',onPointerMove); window.addEventListener('pointerup',onPointerUp); canvas.addEventListener('touchstart',(e)=>e.preventDefault(),{passive:false});
 
 // ========== 升級函數 ==========
@@ -974,6 +1136,7 @@ function spawnEnemy(){
             burnDamage: 0,
             poison: null,
             stunTimer: 0,
+            _lockedByLockDice: false,
         };
         if (!isFinite(bossEntity.hp) || bossEntity.hp <= 0) bossEntity.hp = 1000;
         if (!isFinite(bossEntity.maxHp) || bossEntity.maxHp <= 0) bossEntity.maxHp = 1000;
@@ -988,9 +1151,9 @@ function spawnEnemy(){
         if (game._bossAbilityTimeout) { clearTimeout(game._bossAbilityTimeout); game._bossAbilityTimeout = null; }
         return;
     }
-    const hpBase=40+game.wave*10;
+    const hpBase=70+game.wave*10;
     let hp=hpBase*(0.85+Math.random()*0.3);
-    let speed=1.0+game.wave*0.025;
+    let speed=0.8+game.wave*0.02;
     let reward=10+Math.floor(game.wave/2)*2;
     let size=1,type='normal';
     const rnd=Math.random();
@@ -1008,6 +1171,7 @@ function spawnEnemy(){
         isBoss:false, poison:null,
         burnTimer:0, burnDamage:0, slowStacks:0,
         stunTimer:0,
+        _lockedByLockDice: false,
     };
     game.enemies.push(enemy);
     game.enemiesSpawned++;
@@ -1039,13 +1203,42 @@ function updateEnemies(dt){
             if (!isFinite(e.slowStacks)) e.slowStacks = 0;
             if (!isFinite(e.stunTimer)) e.stunTimer = 0;
 
-            // 處理暫停（鎖骰子效果）
+            if (e.poison) {
+                e.poison.timer -= dt;
+                if (e.poison.timer <= 0) {
+                    e.poison = null;
+                } else {
+                    e.poison.nextTick -= dt;
+                    if (e.poison.nextTick <= 0) {
+                        const poisonDmg = (isFinite(e.poison.damagePerTick)) ? e.poison.damagePerTick : 0;
+                        e.hp -= poisonDmg;
+                        if (!isFinite(e.hp)) e.hp = 0;
+                        e.hitFlash = 0.2;
+                        addFloatingText(e.x, e.y - 20, `-${Math.round(poisonDmg)}`, '#a29bfe');
+                        e.poison.nextTick = e.poison.tickInterval;
+                    }
+                }
+            }
+            if (e.burnTimer && e.burnTimer > 0) {
+                e.burnTimer -= dt;
+                const burnDmg = (isFinite(e.burnDamage)) ? e.burnDamage * dt : 0;
+                e.hp -= burnDmg;
+                if (!isFinite(e.hp)) e.hp = 0;
+                e.hitFlash = 0.1;
+                if (e.burnTimer <= 0) e.burnTimer = 0;
+            }
+            if(e.hp<=0){
+                e.alive=false;
+                game.gold += (isFinite(e.reward)) ? e.reward : 0;
+                addFloatingText(e.x,e.y-30,`+$${e.reward}`,'#2ecc71',16);
+                if(e.isBoss && e.bossType) handleBossDeath(e);
+                updateUI();
+            }
             if (e.stunTimer > 0) {
                 e.stunTimer -= dt;
                 if (e.stunTimer < 0) e.stunTimer = 0;
-                continue; // 暫停期間不移動
+                continue;
             }
-
             let speedMul = 1;
             if (e.slowTimer > 0) {
                 e.slowTimer -= dt;
@@ -1087,37 +1280,7 @@ function updateEnemies(dt){
                 e.x += (dx/d) * step;
                 e.y += (dy/d) * step;
             }
-            if(e.poison){
-                e.poison.timer-=dt;
-                if(e.poison.timer<=0) e.poison=null;
-                else{
-                    e.poison.nextTick-=dt;
-                    if(e.poison.nextTick<=0){
-                        const poisonDmg = (isFinite(e.poison.damagePerTick)) ? e.poison.damagePerTick : 0;
-                        e.hp -= poisonDmg;
-                        if (!isFinite(e.hp)) e.hp = 0;
-                        e.hitFlash=0.2;
-                        addFloatingText(e.x,e.y-20,`-${Math.round(poisonDmg)}`,'#a29bfe');
-                        e.poison.nextTick=e.poison.tickInterval;
-                    }
-                }
-            }
-            if(e.burnTimer && e.burnTimer>0){
-                e.burnTimer-=dt;
-                const burnDmg = (isFinite(e.burnDamage)) ? e.burnDamage * dt : 0;
-                e.hp -= burnDmg;
-                if (!isFinite(e.hp)) e.hp = 0;
-                e.hitFlash=0.1;
-                if(e.burnTimer<=0) e.burnTimer=0;
-            }
             if(e.hitFlash>0) e.hitFlash-=dt;
-            if(e.hp<=0){
-                e.alive=false;
-                game.gold += (isFinite(e.reward)) ? e.reward : 0;
-                addFloatingText(e.x,e.y-30,`+$${e.reward}`,'#2ecc71',16);
-                if(e.isBoss && e.bossType) handleBossDeath(e);
-                updateUI();
-            }
         }
         game.enemies = game.enemies.filter(e => e.alive === true);
         if(game.currentBoss && !game.currentBoss.alive) game.currentBoss = null;
@@ -1279,6 +1442,7 @@ function triggerBossAbility(boss,phase){
                             isBoss:false, poison:null,
                             burnTimer:0, burnDamage:0, slowStacks:0,
                             stunTimer:0,
+                            _lockedByLockDice: false,
                         };
                         if (!isFinite(enemy.hp)) enemy.hp = 100;
                         if (!isFinite(enemy.maxHp)) enemy.maxHp = 100;
@@ -1474,6 +1638,7 @@ function handleBossDeath(boss){
                 poison:null, burnTimer:0, burnDamage:0, slowStacks:0,
                 stunTimer:0,
                 slimeLevel:(boss.slimeLevel||0)+1,
+                _lockedByLockDice: false,
             };
             if(child.slimeLevel<=2) game.enemies.push(child);
         }
@@ -1491,6 +1656,20 @@ function updateAttacks(dt){
             for (let c = 0; c < COLS; c++) {
                 const dice = board[r]?.[c];
                 if (!dice) continue;
+
+                if (dice.isMystery) {
+                    if (dice.transformTimer === undefined || dice.transformTimer === null) {
+                        const lv = upgradeLevels[dice.type] || 1;
+                        dice.transformTimer = getMysteryTransformTime(dice.star, lv);
+                        dice.transformInterval = dice.transformTimer;
+                    }
+                    dice.transformTimer -= dt;
+                    if (dice.transformTimer <= 0) {
+                        transformMysteryDice(r, c, dice);
+                        continue;
+                    }
+                }
+
                 try {
                     dice.cooldown = (dice.cooldown || 0) - dt;
                     if (dice.cooldown > 0) continue;
@@ -1510,7 +1689,6 @@ function updateAttacks(dt){
                         if (candidates.length === 0) continue;
                     }
 
-                    // 根據攻擊類型選擇目標
                     if (dice.attackType === 'random') {
                         target = candidates[randInt(0, candidates.length - 1)];
                     } else if (dice.attackType === 'highestHp') {
@@ -1520,7 +1698,7 @@ function updateAttacks(dt){
                             if (hpVal > maxHp) { maxHp = hpVal; target = e; }
                         }
                         if (!target) target = candidates[0];
-                    } else { // 'front' 或 'nearestExit'
+                    } else {
                         let maxIdx = -1;
                         for (const e of candidates) {
                             if (e.pathIndex > maxIdx) { maxIdx = e.pathIndex; target = e; }
@@ -1533,7 +1711,6 @@ function updateAttacks(dt){
                     let damage = dice.damage || 0;
                     if (typeof damage !== 'number' || !isFinite(damage)) damage = 0;
 
-                    // ---- 賭骰子：隨機傷害 [gambleMin, damage] ----
                     if (dice.type === 'GAMBLE') {
                         const minDmg = dice.gambleMin || 7;
                         const maxDmg = damage;
@@ -1541,13 +1718,11 @@ function updateAttacks(dt){
                         damage = (isFinite(randDmg)) ? randDmg : minDmg;
                     }
 
-                    // ---- 鐵骰子：對BOSS 2倍 ----
                     if (dice.type === 'IRON' && target.isBoss) {
                         damage *= 2;
                         if (!isFinite(damage)) damage = 0;
                     }
 
-                    // ---- 冰骰子：slowFactor ----
                     if (dice.slow && !isHacked) {
                         const slowDef = dice.slow;
                         const baseRate = (slowDef.baseRate !== undefined) ? slowDef.baseRate : 0.05;
@@ -1557,22 +1732,23 @@ function updateAttacks(dt){
                         if (!isFinite(target.slowFactor)) target.slowFactor = 0.05;
                     }
 
-                    // ---- 鎖骰子：暫停效果 ----
                     if (dice.type === 'LOCK' && !isHacked) {
+                        if (target._lockedByLockDice) {
+                            continue;
+                        }
                         const lv = upgradeLevels[dice.type] || 1;
                         const star = dice.star;
-                        // 概率：1星4% → 7星18%，7星Max Lv 26%
                         const baseProb = 0.04 + (star - 1) * (0.18 - 0.04) / 6;
                         const maxProb = 0.26;
                         const prob = baseProb + (lv - 1) / (MAX_LEVEL - 1) * (maxProb - 0.18);
                         const finalProb = (isFinite(prob) && prob > 0) ? Math.min(prob, 0.99) : 0.04;
                         if (Math.random() < finalProb) {
-                            // 持續時間：1星3.5s → 7星6.3s，7星Max Lv 8.3s
                             const baseDur = 3.5 + (star - 1) * (6.3 - 3.5) / 6;
                             const maxDur = 8.3;
                             const dur = baseDur + (lv - 1) / (MAX_LEVEL - 1) * (maxDur - 6.3);
                             const finalDur = (isFinite(dur) && dur > 0) ? dur : 3.5;
                             target.stunTimer = finalDur;
+                            target._lockedByLockDice = true;
                             const data = getData();
                             showToast(data.toastStun.replace(/\{dur\}/g, finalDur.toFixed(1)), 1200);
                             addFloatingText(target.x, target.y - 30, `🔒 ${finalDur.toFixed(1)}s`, '#3498db', 18);
@@ -1817,6 +1993,25 @@ function drawDice(ctx,x,y,size,dice){
         ctx.beginPath(); ctx.arc(cx,cy,dSize/2+4,0,Math.PI*2); ctx.stroke();
         ctx.shadowBlur=0;
     }
+    if (dice.isMystery && dice.transformTimer !== undefined) {
+        const remain = Math.max(0, dice.transformTimer);
+        const total = dice.transformInterval || 1;
+        const ratio = remain / total;
+        const barW = dSize * 0.7;
+        const barH = 4;
+        const barX = cx - barW/2;
+        const barY = y + dSize + 2;
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.beginPath(); ctx.roundRect(barX-1, barY-1, barW+2, barH+2, 2); ctx.fill();
+        ctx.fillStyle = ratio > 0.3 ? '#9b59b6' : '#e74c3c';
+        ctx.beginPath(); ctx.roundRect(barX, barY, barW * (1 - ratio), barH, 2); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.font = '9px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText(`${Math.ceil(remain)}s`, cx, barY + barH + 1);
+    }
+
     ctx.fillStyle='rgba(255,255,255,0.9)';
     ctx.font=`${Math.floor(size*0.35)}px sans-serif`;
     ctx.textAlign='center'; ctx.textBaseline='bottom';
@@ -1869,7 +2064,6 @@ function draw(){
     try {
         const data=getData();
         ctx.clearRect(0,0,W,H);
-        // 頂部欄
         ctx.fillStyle='rgba(13,18,34,0.6)';
         ctx.shadowColor='rgba(0,0,0,0.3)'; ctx.shadowBlur=10;
         ctx.beginPath(); ctx.roundRect(0,topBarY,600,TOP_BAR_H-2,12); ctx.fill();
@@ -1889,7 +2083,6 @@ function draw(){
         ctx.fillStyle='#f7d875';
         ctx.fillText(`💰 ${game.gold}`,xPos,topBarY+(TOP_BAR_H-2)/2);
 
-        // 棋盤
         for(let r=0; r<ROWS; r++){
             for(let c=0; c<COLS; c++){
                 try {
@@ -1917,8 +2110,8 @@ function draw(){
                             ctx.restore();
                         }
                     }
-                    if(c===0&&r===3){ ctx.fillStyle='rgba(46,204,113,0.25)'; ctx.font='18px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('▶',x+CELL_SIZE/2,y+CELL_SIZE/2); }
-                    if(c===6&&r===3){ ctx.fillStyle='rgba(231,76,60,0.25)'; ctx.font='18px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('◀',x+CELL_SIZE/2,y+CELL_SIZE/2); }
+                    if(c===0&&r===3){ ctx.fillStyle='rgba(46,204,113,0.25)'; ctx.font='18px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('🔺',x+CELL_SIZE/2,y+CELL_SIZE/2); }
+                    if(c===6&&r===3){ ctx.fillStyle='rgba(231,76,60,0.25)'; ctx.font='18px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('🔻',x+CELL_SIZE/2,y+CELL_SIZE/2); }
                     if(game.dragData&&game.dragData.col===c&&game.dragData.row===r&&game.isDragging){
                         ctx.strokeStyle='rgba(255,215,0,0.8)'; ctx.lineWidth=4; ctx.shadowColor='rgba(255,215,0,0.5)'; ctx.shadowBlur=16;
                         ctx.strokeRect(x+2,y+2,CELL_SIZE-4,CELL_SIZE-4); ctx.shadowBlur=0;
@@ -1935,7 +2128,7 @@ function draw(){
                         ctx.fillStyle='#f1c40f'; ctx.font='24px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
                         ctx.fillText('🔒',x+CELL_SIZE/2,y+CELL_SIZE/2);
                     }
-                } catch(e) { /* 忽略單個格子繪製錯誤 */ }
+                } catch(e) { }
             }
         }
         if(game.isDragging&&game.dragData&&game.dragData.moved){
@@ -1951,7 +2144,6 @@ function draw(){
                 ctx.globalAlpha=1.0;
             }
         }
-        // 敵人
         for(const e of game.enemies){
             if(!e.alive) continue;
             try {
@@ -2015,7 +2207,7 @@ function draw(){
                     ctx.fillStyle='rgba(52,152,219,0.3)'; ctx.beginPath(); ctx.arc(x,y,size*1.6,0,Math.PI*2); ctx.fill();
                     ctx.fillStyle='rgba(52,152,219,0.8)'; ctx.font='14px sans-serif'; ctx.fillText('🔒',x+size+14,y-size+2);
                 }
-            } catch(e) { /* 忽略單個敵人繪製錯誤 */ }
+            } catch(e) { }
         }
         if(game.bossCloud){
             const cloud=game.bossCloud;
@@ -2074,7 +2266,6 @@ function draw(){
             ctx.textAlign='left'; ctx.textBaseline='top';
             ctx.fillText(remainText,boardX+6,boardY-18);
         }
-        // 升級面板
         const ux=upgradeX, uy=upgradeY, uW=UPGRADE_WIDTH, uH=UPGRADE_HEIGHT;
         ctx.fillStyle='rgba(13,18,34,0.7)';
         ctx.shadowColor='rgba(0,0,0,0.3)'; ctx.shadowBlur=10;
@@ -2122,7 +2313,6 @@ function draw(){
                 ctx.fillText(`💰${cost}`,x+w/2,y+36);
             }
         }
-        // Toast
         if(game.toastTimer>0){
             const alpha=Math.min(1,game.toastTimer/0.3);
             ctx.globalAlpha=alpha;
@@ -2140,7 +2330,6 @@ function draw(){
             game.toastTimer-=1/60;
             if(game.toastTimer<0) game.toastTimer=0;
         }
-        // 表情
         const emojiX=300, emojiYPos=emojiY+4;
         ctx.font='32px sans-serif';
         ctx.textAlign='center'; ctx.textBaseline='top';
@@ -2214,8 +2403,8 @@ function updateShopUI(){
     document.getElementById('shopPointsDisplay').textContent=data.totalScore.replace(/\{score\}/g,saveData.totalScore);
     const grid=document.getElementById('shopDiceGrid');
     grid.innerHTML='';
-    // 商店順序：火、雷、風、毒、冰、鐵、壞、賭、鎖、小丑、樹苗
-    const allTypes=['FIRE','THUNDER','WIND','POISON','ICE','IRON','RANDOM','GAMBLE','LOCK','JOKER','SAPLING'];
+    // 順序：火雷風毒冰，鐵壞賭鎖，隨機，擬態，小丑，樹苗
+    const allTypes=['FIRE','THUNDER','WIND','POISON','ICE','IRON','RANDOM','GAMBLE','LOCK','MYSTERY','MIMIC','JOKER','SAPLING'];
     for(let type of allTypes){
         const def=ALL_DICE_DEFS[type]; if(!def) continue;
         const owned=saveData.ownedDice.includes(type);
@@ -2434,7 +2623,7 @@ game.activeDiceTypes=[...saveData.selectedDice];
 initUpgradeLevels(); initGameState(); game.gameStarted=false;
 bindEvents();
 requestAnimationFrame(gameLoop);
-console.log('🎲 Random Dice v10.0 — 新增鐵、賭、鎖骰子，調整價格與順序');
+console.log('🎲 Random Dice v10.2 — 新增擬態骰子 (MIMIC)');
 </script>
 </body>
 </html>
