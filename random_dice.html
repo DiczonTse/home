@@ -116,6 +116,9 @@
     </style>
 </head>
 <body>
+<!-- ========== 修復：添加背景音樂 <audio> 元素 ========== -->
+<audio id="bgmAudio" style="display:none;" preload="auto"></audio>
+
 <div class="game-wrapper" id="gameWrapper">
     <div class="start-overlay" id="startOverlay">
         <div class="deco-dice">🎲</div>
@@ -924,7 +927,6 @@ const GAME_MUSIC_URL = 'bgm.mp3';    // 遊戲中背景音樂
 
 // ========== 音效系統 ==========
 function initAudio() {
-    // 僅用於射擊音效
     try {
         if (!game.soundCtx) {
             game.soundCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -955,19 +957,77 @@ function playShootSound() {
     } catch(e) {}
 }
 
-// 背景音樂（外部檔案）
+// ========== 修復：背景音樂播放（支援錯誤處理與自動重試） ==========
+let bgmLoadAttempted = false;
+let bgmLoadFailed = false;
+
 function playBgMusic(loop) {
     const audio = document.getElementById('bgmAudio');
-    if (!audio) return;
-    // 選擇音樂檔案
-    let url = (loop === 'menu') ? MENU_MUSIC_URL : GAME_MUSIC_URL;
-    if (audio.src !== url) {
-        audio.src = url;
-        audio.load();
+    if (!audio) {
+        console.warn('🎵 bgmAudio 元素不存在');
+        return;
     }
+    // 如果之前加載失敗，不再重複嘗試（避免無限請求）
+    if (bgmLoadFailed) {
+        console.warn('🎵 背景音樂之前加載失敗，跳過播放');
+        return;
+    }
+
+    let url = (loop === 'menu') ? MENU_MUSIC_URL : GAME_MUSIC_URL;
+    // 如果 URL 為空或無效，跳過
+    if (!url || url === '') {
+        console.warn('🎵 音樂 URL 無效，跳過播放');
+        return;
+    }
+
+    // 如果已加載相同 URL 且正在播放，不重複加載
+    if (audio.src && audio.src.includes(url) && !audio.paused) {
+        return;
+    }
+
+    // 設置新的音源
+    audio.src = url;
     audio.loop = true;
-    audio.volume = 0.5; // 可調整音量 0~1
-    audio.play().catch(e => console.warn('BGM play error:', e));
+    audio.volume = 0.4; // 適中音量
+
+    // 加載並播放
+    audio.load();
+    bgmLoadAttempted = true;
+
+    audio.play()
+        .then(() => {
+            console.log(`🎵 背景音樂播放中: ${url}`);
+            bgmLoadFailed = false;
+        })
+        .catch(err => {
+            console.warn(`🎵 背景音樂播放失敗 (${url}):`, err.message);
+            // 如果是因為用戶未互動而失敗，嘗試在點擊時恢復
+            if (err.name === 'NotAllowedError') {
+                console.warn('🎵 瀏覽器要求用戶互動後才能播放，點擊畫面時將重試');
+                // 監聽一次點擊事件來恢復播放
+                const resumeAudio = () => {
+                    audio.play().catch(e => console.warn('🎵 重試播放仍失敗:', e.message));
+                    document.removeEventListener('click', resumeAudio);
+                    document.removeEventListener('touchstart', resumeAudio);
+                };
+                document.addEventListener('click', resumeAudio, { once: true });
+                document.addEventListener('touchstart', resumeAudio, { once: true });
+            } else if (err.message && err.message.includes('404')) {
+                // 文件不存在
+                bgmLoadFailed = true;
+                console.warn(`🎵 音樂檔案不存在: ${url}，請確認檔案是否放在正確目錄`);
+            } else {
+                bgmLoadFailed = true;
+            }
+        });
+
+    // 監聽加載錯誤（如 404）
+    audio.onerror = function(e) {
+        const errMsg = audio.error ? audio.error.message : '未知錯誤';
+        console.warn(`🎵 背景音樂加載錯誤 (${url}):`, errMsg);
+        bgmLoadFailed = true;
+        // 不重複嘗試
+    };
 }
 
 function stopBgMusic() {
@@ -975,6 +1035,7 @@ function stopBgMusic() {
     if (audio) {
         audio.pause();
         audio.currentTime = 0;
+        console.log('🎵 背景音樂已停止');
     }
 }
 
@@ -2152,6 +2213,8 @@ function restartGame(){
     document.getElementById('startOverlay').classList.remove('hidden');
     showToast(getData().toastRestart,1500);
     stopBgMusic();
+    // 回到封面播放選單音樂
+    playBgMusic('menu');
 }
 
 // ========== 繪製 ==========
