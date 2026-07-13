@@ -35,7 +35,7 @@ const urlsToCache = [
     '/pics/bookmark.png',
     '/tools/calculator.html',
     '/tools/weather.html',
-    '/tools/qr.html',
+    '/tools/qr_code_generator.html',
     '/tools/timer.html',
     '/tools/stopper.html',
     '/tools/youtube_thumbnails.html'
