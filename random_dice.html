@@ -89,6 +89,8 @@
         .gameover-overlay .btn-restart:active { transform:scale(0.94); box-shadow:0 4px 15px rgba(245,166,35,0.2); }
         #fileInput { display:none; }
         .merge-hint { color:#6a7a9a; font-size:12px; text-align:center; padding:4px 0 0 0; opacity:0.7; }
+        #fishModeBtn { position:absolute; bottom:12px; right:12px; background:rgba(0,0,0,0.6); border:1px solid #3d4d6e; color:#aab8d0; padding:6px 14px; border-radius:20px; font-size:12px; cursor:pointer; z-index:20; transition:all 0.3s; backdrop-filter:blur(4px); }
+        #fishModeBtn.active { border-color:#f7d875; color:#f7d875; background:rgba(245,166,35,0.15); }
         @media (max-width:420px) {
             .game-wrapper { padding:10px; }
             .btn { font-size:13px; padding:8px 12px; min-width:100px; height:40px; }
@@ -109,6 +111,7 @@
             .shop-dice-item .icon { font-size:24px; }
             .shop-select-slot { width:44px; height:44px; font-size:22px; }
             .shop-overlay h2 { font-size:22px; }
+            #fishModeBtn { font-size:10px; padding:4px 10px; bottom:8px; right:8px; }
         }
     </style>
 </head>
@@ -137,7 +140,7 @@
         </div>
         <button class="btn-start" id="startBtn">開始遊戲</button>
         <div class="footer">
-            <span class="version" id="coverVersion">v1.0.6</span>
+            <span class="version" id="coverVersion">v1.1.0</span>
             <span class="copyright" id="coverCopyright">© 2026 ☕迪遜咖啡廳，版權所有。</span>
         </div>
     </div>
@@ -153,7 +156,7 @@
         </div>
         <button class="shop-confirm-btn" id="shopConfirmBtn">✅ 確認</button>
     </div>
-    <div class="board-container"><canvas id="gameCanvas" width="600" height="600"></canvas></div>
+    <div class="board-container"><canvas id="gameCanvas" width="600" height="600"></canvas><button id="fishModeBtn">🐟 摸魚</button></div>
     <div class="controls">
         <div class="dice-preview" id="dicePreview"><span class="empty" id="dicePreviewEmpty">✨升級</span></div>
         <button class="btn gold" id="rollBtn">🎲 擲骰 (10)</button>
@@ -170,17 +173,16 @@
 
 <script>
 // ============================================================
-//  Random Dice v10.2 — 新增「擬態」骰子 (MIMIC)
-//  擬態：可與任何種類同星等合併，成為高一星隨機類型（含自己）
+// Random Dice v1.1.0 — 修正 Boss 從第5關開始，波數顯示移至左上角
 // ============================================================
 
-// ========== 完整翻譯 ==========
+// ========== 完整翻譯（省略，與原版相同） ==========
 const translations = {
     'zh-TW': {
         coverTitle: '🎲 隨機骰子',
-        coverDesc: '🔥火・⚡雷・🌪️風・☠️毒・❄️冰<br>⭐ 合併最高 7 星 &nbsp;|&nbsp; 💰 費用每次 +10<br>🛡️ 每10關特殊Boss &nbsp;|&nbsp; ❤️ 僅 3 條命<br>🔗 拖曳骰子到同類同星上合併',
+        coverDesc: '🔥火・⚡雷・🌪️風・☠️毒・❄️冰<br>⭐ 合併最高 7 星 &nbsp;|&nbsp; 💰 費用每次 +10<br>🛡️ Boss規則重構 &nbsp;|&nbsp; ❤️ 僅 3 條命<br>🔗 拖曳骰子到同類同星上合併',
         startBtn: '開始遊戲',
-        version: 'v1.0.6',
+        version: 'v1.1.0',
         copyright: '© {year} ☕迪遜咖啡廳，版權所有。',
         gameTitle: '🎲 Random Dice',
         rollBtn: '擲骰',
@@ -223,7 +225,8 @@ const translations = {
         },
         bossNames: {
             mage: '法師', lion: '獅王', snake: '大蛇', lamb: '沉默的羔羊',
-            knight: '騎士', hacker: '黑客', slime: '史萊姆', magnet: '磁力王', cloud: '飛雲'
+            knight: '騎士', hacker: '黑客', slime: '史萊姆', magnet: '磁力王', cloud: '飛雲',
+            balistic: '蛇尾雞'
         },
         bossAppear: '👑 {name} 出現！',
         bossWarningMage: '🔥 法師準備隕石！快合併骰子！',
@@ -234,6 +237,7 @@ const translations = {
         bossWarningHacker: '💻 黑客入侵！快合併被控制的骰子！',
         bossWarningMagnet: '🧲 磁力王強制合併！',
         bossWarningCloud: '☁️ 飛雲釋放迷霧！',
+        bossWarningBalistic: '🐔 蛇尾雞召喚中Boss！',
         toastPlace: '🎲 放置 {label} {name} ★{star} (花費 {cost} 💰)',
         toastMerge: '⭐ 合併成功！★{star} {name}',
         toastFull: '❌ 棋盤已滿！請合併',
@@ -243,7 +247,7 @@ const translations = {
         toastGameOver: '💀 遊戲結束！到達 {wave} 波',
         toastRestart: '回到標題',
         toastGameStart: '🎮 遊戲開始！拖曳骰子合併',
-        waveRemain: '🌊 第 {wave} 波  {count} 剩餘',
+        waveRemain: '🌊 第 {wave} 波 剩餘 {count} 隻',
         costLabel: '擲骰費用: {cost} 💰',
         hackedHeal: '+{dmg}',
         upgradeSuccess: '⬆ {name} 升級至 Lv{level}！',
@@ -268,12 +272,19 @@ const translations = {
         toastJokerCopy: '🃏 小丑複製 → {label} {name} ★{star}',
         toastJokerMerge: '🃏 小丑合併！★{star} {name}',
         toastMimicMerge: '🤡 擬態合併！★{star} {name}',
+        toastBalisticSummon: '🐔 蛇尾雞召喚中Boss！',
+        toastMiniBossSpawn: '👾 中Boss {name} 出現！',
+        toastSlimeSplit: '🟢 史萊姆分裂！',
+        fishModeOn: '🐟 摸魚模式 ON',
+        fishModeOff: '🐟 摸魚模式 OFF',
+        confirmLeave: '⚠️ 確定要離開遊戲嗎？進度將不會儲存！',
+        need5Dice: '❌ 請在商店中選擇5顆骰子！',
     },
     'zh-CN': {
         coverTitle: '🎲 随机骰子',
-        coverDesc: '🔥火・⚡雷・🌪️风・☠️毒・❄️冰<br>⭐ 合并最高 7 星 &nbsp;|&nbsp; 💰 费用每次 +10<br>🛡️ 每10关特殊Boss &nbsp;|&nbsp; ❤️ 仅 3 条命<br>🔗 拖曳骰子到同类同星上合并',
+        coverDesc: '🔥火・⚡雷・🌪️风・☠️毒・❄️冰<br>⭐ 合并最高 7 星 &nbsp;|&nbsp; 💰 费用每次 +10<br>🛡️ Boss规则重构 &nbsp;|&nbsp; ❤️ 仅 3 条命<br>🔗 拖曳骰子到同类同星上合并',
         startBtn: '开始游戏',
-        version: 'v1.0.6',
+        version: 'v1.1.0',
         copyright: '© {year} ☕迪逊咖啡厅，版权所有。',
         gameTitle: '🎲 Random Dice',
         rollBtn: '掷骰',
@@ -316,7 +327,8 @@ const translations = {
         },
         bossNames: {
             mage: '法师', lion: '狮王', snake: '大蛇', lamb: '沉默的羔羊',
-            knight: '骑士', hacker: '黑客', slime: '史莱姆', magnet: '磁力王', cloud: '飞云'
+            knight: '骑士', hacker: '黑客', slime: '史莱姆', magnet: '磁力王', cloud: '飞云',
+            balistic: '蛇尾鸡'
         },
         bossAppear: '👑 {name} 出现！',
         bossWarningMage: '🔥 法师准备陨石！快合并骰子！',
@@ -327,6 +339,7 @@ const translations = {
         bossWarningHacker: '💻 黑客入侵！快合并被控制的骰子！',
         bossWarningMagnet: '🧲 磁力王强制合并！',
         bossWarningCloud: '☁️ 飞云释放迷雾！',
+        bossWarningBalistic: '🐔 蛇尾鸡召唤中Boss！',
         toastPlace: '🎲 放置 {label} {name} ★{star} (花费 {cost} 💰)',
         toastMerge: '⭐ 合并成功！★{star} {name}',
         toastFull: '❌ 棋盘已满！请合并',
@@ -336,7 +349,7 @@ const translations = {
         toastGameOver: '💀 游戏结束！到达 {wave} 波',
         toastRestart: '回到标题',
         toastGameStart: '🎮 游戏开始！拖曳骰子合并',
-        waveRemain: '🌊 第 {wave} 波  {count} 剩余',
+        waveRemain: '🌊 第 {wave} 波 剩余 {count} 只',
         costLabel: '掷骰费用: {cost} 💰',
         hackedHeal: '+{dmg}',
         upgradeSuccess: '⬆ {name} 升级至 Lv{level}！',
@@ -361,12 +374,19 @@ const translations = {
         toastJokerCopy: '🃏 小丑复制 → {label} {name} ★{star}',
         toastJokerMerge: '🃏 小丑合并！★{star} {name}',
         toastMimicMerge: '🤡 拟态合并！★{star} {name}',
+        toastBalisticSummon: '🐔 蛇尾鸡召唤中Boss！',
+        toastMiniBossSpawn: '👾 中Boss {name} 出现！',
+        toastSlimeSplit: '🟢 史莱姆分裂！',
+        fishModeOn: '🐟 摸鱼模式 ON',
+        fishModeOff: '🐟 摸鱼模式 OFF',
+        confirmLeave: '⚠️ 确定要离开游戏吗？进度将不会保存！',
+        need5Dice: '❌ 请在商店中选择5颗骰子！',
     },
     'en': {
         coverTitle: '🎲 Random Dice',
-        coverDesc: '🔥Fire・⚡Thunder・🌪️Wind・☠️Poison・❄️Ice<br>⭐ Merge up to 7 Stars &nbsp;|&nbsp; 💰 Cost +10 each roll<br>🛡️ Special Boss every 10 Waves &nbsp;|&nbsp; ❤️ Only 3 Lives<br>🔗 Drag dice to merge same type & star',
+        coverDesc: '🔥Fire・⚡Thunder・🌪️Wind・☠️Poison・❄️Ice<br>⭐ Merge up to 7 Stars &nbsp;|&nbsp; 💰 Cost +10 each roll<br>🛡️ Boss Rules Refactored &nbsp;|&nbsp; ❤️ Only 3 Lives<br>🔗 Drag dice to merge same type & star',
         startBtn: 'Start Game',
-        version: 'v1.0.6',
+        version: 'v1.1.0',
         copyright: '© {year} ☕Diczon\'s Cafe, All Rights Reserved.',
         gameTitle: '🎲 Random Dice',
         rollBtn: 'Roll',
@@ -409,7 +429,8 @@ const translations = {
         },
         bossNames: {
             mage: 'Mage', lion: 'Lion King', snake: 'Serpent', lamb: 'Silent Lamb',
-            knight: 'Knight', hacker: 'Hacker', slime: 'Slime', magnet: 'Magnet King', cloud: 'Flying Cloud'
+            knight: 'Knight', hacker: 'Hacker', slime: 'Slime', magnet: 'Magnet King', cloud: 'Flying Cloud',
+            balistic: 'Balistic Chicken'
         },
         bossAppear: '👑 {name} appears!',
         bossWarningMage: '🔥 Mage casting meteor! Merge the targeted die!',
@@ -420,6 +441,7 @@ const translations = {
         bossWarningHacker: '💻 Hacker入侵! Merge hacked dice to cure!',
         bossWarningMagnet: '🧲 Magnet King forces merge!',
         bossWarningCloud: '☁️ Flying Cloud releases mist!',
+        bossWarningBalistic: '🐔 Balistic Chicken summons Mini-Boss!',
         toastPlace: '🎲 Placed {label} {name} ★{star} (Cost {cost} 💰)',
         toastMerge: '⭐ Merge successful! ★{star} {name}',
         toastFull: '❌ Board full! Merge some dice',
@@ -454,12 +476,19 @@ const translations = {
         toastJokerCopy: '🃏 Joker copied → {label} {name} ★{star}',
         toastJokerMerge: '🃏 Joker merged! ★{star} {name}',
         toastMimicMerge: '🤡 Mimic merged! ★{star} {name}',
+        toastBalisticSummon: '🐔 Balistic Chicken summons Mini-Boss!',
+        toastMiniBossSpawn: '👾 Mini-Boss {name} appears!',
+        toastSlimeSplit: '🟢 Slime split!',
+        fishModeOn: '🐟 Fish Mode ON',
+        fishModeOff: '🐟 Fish Mode OFF',
+        confirmLeave: '⚠️ Leave game? Progress will not be saved!',
+        need5Dice: '❌ Please select 5 dice in the shop!',
     },
     'ja': {
         coverTitle: '🎲 ランダムダイス',
-        coverDesc: '🔥火・⚡雷・🌪️風・☠️毒・❄️氷<br>⭐ 最大7つ星まで合体 &nbsp;|&nbsp; 💰 コスト毎回+10<br>🛡️ 10ウェーブごとに特殊ボス &nbsp;|&nbsp; ❤️ ライフ3つ<br>🔗 ドラッグして同種・同星を合体',
+        coverDesc: '🔥火・⚡雷・🌪️風・☠️毒・❄️氷<br>⭐ 最大7つ星まで合体 &nbsp;|&nbsp; 💰 コスト毎回+10<br>🛡️ Bossルール再構築 &nbsp;|&nbsp; ❤️ ライフ3つ<br>🔗 ドラッグして同種・同星を合体',
         startBtn: 'ゲーム開始',
-        version: 'v1.0.6',
+        version: 'v1.1.0',
         copyright: '© {year} ☕ディクソンカフェ，無断転載を禁じます。',
         gameTitle: '🎲 Random Dice',
         rollBtn: 'ダイス',
@@ -502,7 +531,8 @@ const translations = {
         },
         bossNames: {
             mage: '魔法使い', lion: 'ライオン王', snake: '大蛇', lamb: '沈黙の子羊',
-            knight: '騎士', hacker: 'ハッカー', slime: 'スライム', magnet: '磁力王', cloud: '飛雲'
+            knight: '騎士', hacker: 'ハッカー', slime: 'スライム', magnet: '磁力王', cloud: '飛雲',
+            balistic: '蛇尾鶏'
         },
         bossAppear: '👑 {name} 出現！',
         bossWarningMage: '🔥 魔法使いが隕石！合体せよ！',
@@ -513,6 +543,7 @@ const translations = {
         bossWarningHacker: '💻 ハッカー制御！合体で解除！',
         bossWarningMagnet: '🧲 磁力王が強制合体！',
         bossWarningCloud: '☁️ 飛雲が霧を放出！',
+        bossWarningBalistic: '🐔 蛇尾鶏が中ボス召喚！',
         toastPlace: '🎲 {label} {name} ★{star} (コスト {cost} 💰)',
         toastMerge: '⭐ 合体成功！★{star} {name}',
         toastFull: '❌ ボード満杯！合体して',
@@ -547,12 +578,19 @@ const translations = {
         toastJokerCopy: '🃏 ジョーカーコピー → {label} {name} ★{star}',
         toastJokerMerge: '🃏 ジョーカー合体！★{star} {name}',
         toastMimicMerge: '🤡 擬態合体！★{star} {name}',
+        toastBalisticSummon: '🐔 蛇尾鶏が中ボス召喚！',
+        toastMiniBossSpawn: '👾 中ボス {name} 出現！',
+        toastSlimeSplit: '🟢 スライム分裂！',
+        fishModeOn: '🐟 魚モード ON',
+        fishModeOff: '🐟 魚モード OFF',
+        confirmLeave: '⚠️ ゲームを離れますか？進捗は保存されません！',
+        need5Dice: '❌ ショップで5個のダイスを選択してください！',
     },
     'ko': {
         coverTitle: '🎲 랜덤 다이스',
-        coverDesc: '🔥불・⚡번개・🌪️바람・☠️독・❄️얼음<br>⭐ 최대 7성 합병 &nbsp;|&nbsp; 💰 비용 매회 +10<br>🛡️ 10웨이브마다 특수 보스 &nbsp;|&nbsp; ❤️ 목숨 3개<br>🔗 드래그하여 같은 종류·별 등급 합병',
+        coverDesc: '🔥불・⚡번개・🌪️바람・☠️독・❄️얼음<br>⭐ 최대 7성 합병 &nbsp;|&nbsp; 💰 비용 매회 +10<br>🛡️ Boss 규칙 재구성 &nbsp;|&nbsp; ❤️ 목숨 3개<br>🔗 드래그하여 같은 종류·별 등급 합병',
         startBtn: '게임 시작',
-        version: 'v1.0.6',
+        version: 'v1.1.0',
         copyright: '© {year} ☕딕슨 카페，판권 소유.',
         gameTitle: '🎲 Random Dice',
         rollBtn: '주사위',
@@ -595,7 +633,8 @@ const translations = {
         },
         bossNames: {
             mage: '마법사', lion: '사자왕', snake: '대뱀', lamb: '침묵의 양',
-            knight: '기사', hacker: '해커', slime: '슬라임', magnet: '자기왕', cloud: '비운'
+            knight: '기사', hacker: '해커', slime: '슬라임', magnet: '자기왕', cloud: '비운',
+            balistic: '사미계'
         },
         bossAppear: '👑 {name} 등장!',
         bossWarningMage: '🔥 마법사 운석! 주사위 합병!',
@@ -606,6 +645,7 @@ const translations = {
         bossWarningHacker: '💻 해커 제어! 합병으로 해제!',
         bossWarningMagnet: '🧲 자기왕 강제 합병!',
         bossWarningCloud: '☁️ 비운 안개 방출!',
+        bossWarningBalistic: '🐔 사미계 중Boss 소환!',
         toastPlace: '🎲 {label} {name} ★{star} (비용 {cost} 💰)',
         toastMerge: '⭐ 합병 성공! ★{star} {name}',
         toastFull: '❌ 보드 가득! 합병하세요',
@@ -640,6 +680,13 @@ const translations = {
         toastJokerCopy: '🃏 조커 복사 → {label} {name} ★{star}',
         toastJokerMerge: '🃏 조커 합병! ★{star} {name}',
         toastMimicMerge: '🤡 모방 합병! ★{star} {name}',
+        toastBalisticSummon: '🐔 사미계 중Boss 소환!',
+        toastMiniBossSpawn: '👾 중Boss {name} 등장!',
+        toastSlimeSplit: '🟢 슬라임 분열!',
+        fishModeOn: '🐟 물고기 모드 ON',
+        fishModeOff: '🐟 물고기 모드 OFF',
+        confirmLeave: '⚠️ 게임을 떠나시겠습니까? 진행 상황이 저장되지 않습니다!',
+        need5Dice: '❌ 상점에서 5개 주사위를 선택하세요!',
     }
 };
 let currentLang = 'zh-TW';
@@ -663,6 +710,64 @@ function getDiceName(type) { return getData().diceNames[type] || type; }
 function getDiceDesc(type) { return getData().diceDescs[type] || ''; }
 function getDicePrice(type) { return getData().dicePrices[type] || 0; }
 function getBossName(id) { return getData().bossNames[id] || id; }
+
+// ========== isfinal 保護 ==========
+const CONST = Object.freeze({
+    MAX_STAR: 7,
+    MAX_LEVEL: 5,
+    COLS: 7,
+    ROWS: 4,
+    BOARD_WIDTH: 600,
+    BOARD_HEIGHT: 342,
+    TOP_BAR_H: 36,
+    UPGRADE_HEIGHT: 100,
+    CELL_SIZE: 600 / 7,
+    PATH: Object.freeze([
+        { col: 0, row: 3 }, { col: 0, row: 2 }, { col: 0, row: 1 }, { col: 0, row: 0 },
+        { col: 1, row: 0 }, { col: 2, row: 0 }, { col: 3, row: 0 }, { col: 4, row: 0 },
+        { col: 5, row: 0 }, { col: 6, row: 0 }, { col: 6, row: 1 }, { col: 6, row: 2 }, { col: 6, row: 3 }
+    ]),
+    UPGRADE_MULTIPLIERS: Object.freeze([1.0, 1.2, 1.4, 1.6, 2.0]),
+    UPGRADE_COSTS: Object.freeze([0, 100, 200, 400, 700]),
+    BOSS_TYPES: Object.freeze([
+        { id: 'mage', nameKey: 'mage', emoji: '🧙', color: '#9b59b6' },
+        { id: 'lion', nameKey: 'lion', emoji: '🦁', color: '#e67e22' },
+        { id: 'snake', nameKey: 'snake', emoji: '🐍', color: '#2ecc71' },
+        { id: 'lamb', nameKey: 'lamb', emoji: '🐑', color: '#f1c40f' },
+        { id: 'knight', nameKey: 'knight', emoji: '🛡️', color: '#3498db' },
+        { id: 'hacker', nameKey: 'hacker', emoji: '💻', color: '#2c3e50' },
+        { id: 'slime', nameKey: 'slime', emoji: '🟢', color: '#27ae60' },
+        { id: 'magnet', nameKey: 'magnet', emoji: '🧲', color: '#e74c3c' },
+        { id: 'cloud', nameKey: 'cloud', emoji: '☁️', color: '#ecf0f1' },
+        { id: 'balistic', nameKey: 'balistic', emoji: '🐔', color: '#e67e22' }
+    ]),
+    MINI_BOSS_TYPES: Object.freeze([
+        { id: 'mage', nameKey: 'mage', emoji: '🧙', color: '#9b59b6' },
+        { id: 'lion', nameKey: 'lion', emoji: '🦁', color: '#e67e22' },
+        { id: 'lamb', nameKey: 'lamb', emoji: '🐑', color: '#f1c40f' },
+        { id: 'knight', nameKey: 'knight', emoji: '🛡️', color: '#3498db' },
+        { id: 'hacker', nameKey: 'hacker', emoji: '💻', color: '#2c3e50' },
+        { id: 'slime', nameKey: 'slime', emoji: '🟢', color: '#27ae60' },
+        { id: 'magnet', nameKey: 'magnet', emoji: '🧲', color: '#e74c3c' },
+        { id: 'cloud', nameKey: 'cloud', emoji: '☁️', color: '#ecf0f1' },
+        { id: 'tank', nameKey: 'tank', emoji: '🛡️', color: '#e67e22' }
+    ]),
+    ALL_DICE_DEFS: Object.freeze({
+        FIRE: Object.freeze({ label: '🔥', color: '#e17055', baseDamage: 20, damagePerStar: 3, baseInterval: 0.8, intervalPerLevel: -0.01, splash: 0.6, burn: true, attackType: 'front' }),
+        THUNDER: Object.freeze({ label: '⚡', color: '#fdcb6e', baseDamage: 30, damagePerStar: 3, baseInterval: 0.7, intervalPerLevel: -0.02, chain: { count: 3, range: 2.5, damageFactors: [1.0, 0.7, 0.3] }, attackType: 'front' }),
+        WIND: Object.freeze({ label: '🌪️', color: '#74b9ff', baseDamage: 20, damagePerStar: 3, baseInterval: 0.45, intervalPerLevel: -0.045, attackType: 'front' }),
+        POISON: Object.freeze({ label: '☠️', color: '#6c5ce7', baseDamage: 20, damagePerStar: 2, baseInterval: 1.3, intervalPerLevel: 0, poison: { damageBase: 50, damagePerStar: 5, duration: 3, tick: 0.5 }, attackType: 'front' }),
+        ICE: Object.freeze({ label: '❄️', color: '#4fc3f7', baseDamage: 30, damagePerStar: 3, baseInterval: 1.5, intervalPerLevel: -0.02, slow: { baseRate: 0.05, ratePerStar: 0.02, maxStacks: 3, stackRate: 0.5 }, attackType: 'front' }),
+        IRON: Object.freeze({ label: '🔩', color: '#95a5a6', baseDamage: 100, damagePerStar: 10, baseInterval: 1.0, intervalPerLevel: 0, attackType: 'highestHp', bossMultiplier: 2 }),
+        RANDOM: Object.freeze({ label: '🎲', color: '#a29bfe', baseDamage: 50, damagePerStar: 10, baseInterval: 0.9, intervalPerLevel: 0, attackType: 'random' }),
+        GAMBLE: Object.freeze({ label: '🎰', color: '#f1c40f', baseDamage: 7, damagePerStar: 10, baseInterval: 1.0, intervalPerLevel: -0.01, attackType: 'front', gambleMin: 7 }),
+        LOCK: Object.freeze({ label: '🔒', color: '#3498db', baseDamage: 30, damagePerStar: 10, baseInterval: 0.8, intervalPerLevel: -0.01, attackType: 'front', lockStun: true }),
+        MYSTERY: Object.freeze({ label: '❓', color: '#805500', baseDamage: 30, damagePerStar: 0, baseInterval: 1.0, intervalPerLevel: 0, attackType: 'front', isMystery: true }),
+        MIMIC: Object.freeze({ label: '🤡', color: '#8e44ad', baseDamage: 30, damagePerStar: 50/6, baseInterval: 1.5, intervalPerLevel: 0, attackType: 'front', isMimic: true }),
+        JOKER: Object.freeze({ label: '🃏', color: '#fd79a8', baseDamage: 40, damagePerStar: 5, baseInterval: 1.5, intervalPerLevel: 0, attackType: 'front', isJoker: true }),
+        SAPLING: Object.freeze({ label: '🌱', color: '#55efc4', baseDamage: 10, damagePerStar: 10, baseInterval: 1.5, intervalPerLevel: 0, attackType: 'front', isSapling: true }),
+    })
+});
 
 // ========== 保存系統 ==========
 const STORAGE_KEY = 'randomDiceSaveData';
@@ -770,22 +875,21 @@ function importSave(file) {
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const W = 600, H = 600;
-const TOP_BAR_H = 36, PANEL_GAP = 4;
-const BOARD_WIDTH = 600, BOARD_HEIGHT = Math.floor(BOARD_WIDTH * 4 / 7);
-const UPGRADE_WIDTH = 600, UPGRADE_HEIGHT = 100;
+const TOP_BAR_H = CONST.TOP_BAR_H;
+const PANEL_GAP = 4;
+const BOARD_WIDTH = CONST.BOARD_WIDTH;
+const BOARD_HEIGHT = CONST.BOARD_HEIGHT;
+const UPGRADE_WIDTH = 600;
+const UPGRADE_HEIGHT = CONST.UPGRADE_HEIGHT;
 const TOAST_HEIGHT = 40, EMOJI_HEIGHT = 32;
 const topBarY = 0, boardY = topBarY + TOP_BAR_H;
 const upgradeY = boardY + BOARD_HEIGHT + PANEL_GAP;
 const toastY = upgradeY + UPGRADE_HEIGHT + 2;
 const emojiY = toastY + TOAST_HEIGHT + 2;
 const boardX = 0, upgradeX = 0;
-const COLS = 7, ROWS = 4;
-const CELL_SIZE = BOARD_WIDTH / COLS;
-const PATH = [
-    { col: 0, row: 3 }, { col: 0, row: 2 }, { col: 0, row: 1 }, { col: 0, row: 0 },
-    { col: 1, row: 0 }, { col: 2, row: 0 }, { col: 3, row: 0 }, { col: 4, row: 0 },
-    { col: 5, row: 0 }, { col: 6, row: 0 }, { col: 6, row: 1 }, { col: 6, row: 2 }, { col: 6, row: 3 }
-];
+const COLS = CONST.COLS, ROWS = CONST.ROWS;
+const CELL_SIZE = CONST.CELL_SIZE;
+const PATH = CONST.PATH;
 const PATH_PIXELS = PATH.map(p => ({ x: boardX + p.col * CELL_SIZE + CELL_SIZE/2, y: boardY + p.row * CELL_SIZE + CELL_SIZE/2 }));
 
 // ========== 遊戲狀態 ==========
@@ -793,7 +897,7 @@ let game = {
     board: [], gold: 100, diceCost: 10, lives: 3, wave: 0,
     enemies: [], projectiles: [], isWaveActive: false,
     enemiesSpawned: 0, enemiesPerWave: 0, spawnTimer: 0, spawnInterval: 0.9,
-    gameOver: false, lastTime: 0, screenFlash: 0, maxStar: 7,
+    gameOver: false, lastTime: 0, screenFlash: 0, maxStar: CONST.MAX_STAR,
     gameStarted: false, dragData: null, isDragging: false,
     floatingTexts: [], currentBoss: null,
     bossLockedDice: [], bossHackedDice: [], bossCloud: null,
@@ -802,38 +906,96 @@ let game = {
     toastMessage: '', toastTimer: 0, toastDuration: 0,
     activeDiceTypes: [], bossAbilityActive: false,
     _bossAbilityTimeout: null,
+    hasBoss: false, bossCount: 0,
+    miniBossSpawned: 0,
+    fishMode: false,
+    bulletsToRemove: [],
+    soundCtx: null,
+    bgMusic: null,
+    shootSound: null,
 };
 
-// ========== 骰子定義 ==========
-const ALL_DICE_DEFS = {
-    FIRE: { label: '🔥', color: '#e17055', baseDamage: 20, damagePerStar: 3, baseInterval: 0.8, intervalPerLevel: -0.01, splash: 0.6, burn: true, attackType: 'front' },
-    THUNDER: { label: '⚡', color: '#fdcb6e', baseDamage: 30, damagePerStar: 3, baseInterval: 0.7, intervalPerLevel: -0.02, chain: { count: 3, range: 2.5, damageFactors: [1.0,0.7,0.3] }, attackType: 'front' },
-    WIND: { label: '🌪️', color: '#74b9ff', baseDamage: 20, damagePerStar: 3, baseInterval: 0.45, intervalPerLevel: -0.045, attackType: 'front' },
-    POISON: { label: '☠️', color: '#6c5ce7', baseDamage: 20, damagePerStar: 2, baseInterval: 1.3, intervalPerLevel: 0, poison: { damageBase: 50, damagePerStar: 5, duration: 3, tick: 0.5 }, attackType: 'front' },
-    ICE: { label: '❄️', color: '#4fc3f7', baseDamage: 30, damagePerStar: 3, baseInterval: 1.5, intervalPerLevel: -0.02, slow: { baseRate: 0.05, ratePerStar: 0.02, maxStacks: 3, stackRate: 0.5 }, attackType: 'front' },
-    IRON: { label: '🔩', color: '#95a5a6', baseDamage: 100, damagePerStar: 10, baseInterval: 1.0, intervalPerLevel: 0, attackType: 'highestHp', bossMultiplier: 2 },
-    RANDOM: { label: '🎲', color: '#a29bfe', baseDamage: 50, damagePerStar: 10, baseInterval: 0.9, intervalPerLevel: 0, attackType: 'random' },
-    GAMBLE: { label: '🎰', color: '#f1c40f', baseDamage: 7, damagePerStar: 10, baseInterval: 1.0, intervalPerLevel: -0.01, attackType: 'front', gambleMin: 7 },
-    LOCK: { label: '🔒', color: '#3498db', baseDamage: 30, damagePerStar: 10, baseInterval: 0.8, intervalPerLevel: -0.01, attackType: 'front', lockStun: true },
-    MYSTERY: { label: '❓', color: '#805500', baseDamage: 30, damagePerStar: 0, baseInterval: 1.0, intervalPerLevel: 0, attackType: 'front', isMystery: true },
-    MIMIC: { label: '🤡', color: '#8e44ad', baseDamage: 30, damagePerStar: 50/6, baseInterval: 1.5, intervalPerLevel: 0, attackType: 'front', isMimic: true },
-    JOKER: { label: '🃏', color: '#fd79a8', baseDamage: 40, damagePerStar: 5, baseInterval: 1.5, intervalPerLevel: 0, attackType: 'front', isJoker: true },
-    SAPLING: { label: '🌱', color: '#55efc4', baseDamage: 10, damagePerStar: 10, baseInterval: 1.5, intervalPerLevel: 0, attackType: 'front', isSapling: true },
-};
+// ================================================================
+// 音效系統 — 背景音樂使用外部檔案，射擊音效使用合成
+// ================================================================
+// 設定外部音樂檔案路徑（請修改為您的實際檔案位置）
+const MENU_MUSIC_URL = 'menu.mp3';   // 選單背景音樂
+const GAME_MUSIC_URL = 'bgm.mp3';    // 遊戲中背景音樂
 
-function getActiveDiceKeys() { return game.activeDiceTypes.length ? game.activeDiceTypes : ['FIRE','THUNDER','WIND','POISON','ICE']; }
-
-// ========== 升級系統 ==========
-const UPGRADE_MULTIPLIERS = [1.0,1.2,1.4,1.6,2.0];
-const UPGRADE_COSTS = [0,100,200,400,700];
-const MAX_LEVEL = 5;
-let upgradeLevels = {};
-function initUpgradeLevels() {
-    upgradeLevels = {};
-    for (let key of getActiveDiceKeys()) upgradeLevels[key] = 1;
+// ========== 音效系統 ==========
+function initAudio() {
+    // 僅用於射擊音效
+    try {
+        if (!game.soundCtx) {
+            game.soundCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (game.soundCtx.state === 'suspended') {
+            game.soundCtx.resume();
+        }
+        return true;
+    } catch(e) { return false; }
 }
-function getUpgradeMultiplier(type) { const lv = upgradeLevels[type] || 1; return UPGRADE_MULTIPLIERS[Math.min(lv-1, UPGRADE_MULTIPLIERS.length-1)]; }
-function getUpgradeCost(type) { const lv = upgradeLevels[type] || 1; if (lv >= MAX_LEVEL) return null; return UPGRADE_COSTS[lv]; }
+
+// 射擊音效（合成）
+function playShootSound() {
+    try {
+        if (!initAudio()) return;
+        const ctx = game.soundCtx;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(800, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.08);
+    } catch(e) {}
+}
+
+// 背景音樂（外部檔案）
+function playBgMusic(loop) {
+    const audio = document.getElementById('bgmAudio');
+    if (!audio) return;
+    // 選擇音樂檔案
+    let url = (loop === 'menu') ? MENU_MUSIC_URL : GAME_MUSIC_URL;
+    if (audio.src !== url) {
+        audio.src = url;
+        audio.load();
+    }
+    audio.loop = true;
+    audio.volume = 0.5; // 可調整音量 0~1
+    audio.play().catch(e => console.warn('BGM play error:', e));
+}
+
+function stopBgMusic() {
+    const audio = document.getElementById('bgmAudio');
+    if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+    }
+}
+
+// ========== 離開確認 ==========
+window.addEventListener('beforeunload', function(e) {
+    const data = getData();
+    const msg = data.confirmLeave || '⚠️ 確定要離開遊戲嗎？進度將不會儲存！';
+    e.preventDefault();
+    e.returnValue = msg;
+    return msg;
+});
+
+// ========== 摸魚模式 ==========
+let fishMode = false;
+document.getElementById('fishModeBtn').addEventListener('click', function() {
+    const data = getData();
+    fishMode = !fishMode;
+    this.classList.toggle('active');
+    this.textContent = fishMode ? '🐟 摸魚 ON' : '🐟 摸魚';
+    showToast(fishMode ? data.fishModeOn : data.fishModeOff);
+});
 
 // ========== 工具 ==========
 function rand(min,max){ return Math.random()*(max-min)+min; }
@@ -853,7 +1015,7 @@ function getEmptyCells(){ let cells=[]; for(let r=0;r<ROWS;r++) for(let c=0;c<CO
 // ========== 骰子創建 ==========
 function createDice(type, star) {
     star = star || 1;
-    const def = ALL_DICE_DEFS[type];
+    const def = CONST.ALL_DICE_DEFS[type];
     if (!def) return null;
     const s = clamp(star, 1, game.maxStar);
     const lv = upgradeLevels[type] || 1;
@@ -864,29 +1026,27 @@ function createDice(type, star) {
         const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
         const star7Dmg = def.baseDamage + def.damagePerStar * (7 - 1);
         const maxDmg = 640;
-        const ratio = 1 + (lv - 1) / (MAX_LEVEL - 1) * ((maxDmg / star7Dmg) - 1);
+        const ratio = 1 + (lv - 1) / (CONST.MAX_LEVEL - 1) * ((maxDmg / star7Dmg) - 1);
         dmg = baseDmg * ratio;
     } else if (type === 'GAMBLE') {
         const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
         const star7Dmg = def.baseDamage + def.damagePerStar * (7 - 1);
         const maxDmg = 455;
-        const ratio = 1 + (lv - 1) / (MAX_LEVEL - 1) * ((maxDmg / star7Dmg) - 1);
+        const ratio = 1 + (lv - 1) / (CONST.MAX_LEVEL - 1) * ((maxDmg / star7Dmg) - 1);
         dmg = baseDmg * ratio;
     } else if (type === 'LOCK') {
-        dmg = def.baseDamage + (lv - 1) * (70 - def.baseDamage) / (MAX_LEVEL - 1);
+        dmg = def.baseDamage + (lv - 1) * (70 - def.baseDamage) / (CONST.MAX_LEVEL - 1);
     } else if (type === 'MYSTERY') {
         dmg = def.baseDamage * mult;
     } else if (type === 'MIMIC') {
-        // 1星30，7星80，7星满级120
         const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
-        const star7Dmg = def.baseDamage + def.damagePerStar * 6; // 80
-        const maxLvDmg = 120; // 7星满级目标
-        const ratio = 1 + (lv - 1) / (MAX_LEVEL - 1) * ((maxLvDmg / star7Dmg) - 1);
+        const star7Dmg = def.baseDamage + def.damagePerStar * 6;
+        const maxLvDmg = 120;
+        const ratio = 1 + (lv - 1) / (CONST.MAX_LEVEL - 1) * ((maxLvDmg / star7Dmg) - 1);
         dmg = baseDmg * ratio;
     } else {
         dmg = (def.baseDamage + def.damagePerStar * (s - 1)) * mult;
     }
-
     if (!isFinite(dmg) || dmg < 0) dmg = def.baseDamage || 10;
 
     let intervalBase = def.baseInterval + (def.intervalPerLevel || 0) * (lv - 1);
@@ -915,45 +1075,35 @@ function createDice(type, star) {
         get gambleMin() { return def.gambleMin || 0; },
         get lockStun() { return def.lockStun || false; },
     };
-
     if (dice.isMystery) {
         dice.transformTimer = getMysteryTransformTime(s, lv);
         dice.transformInterval = dice.transformTimer;
     }
-
     return dice;
 }
 function randomDiceType(){ const keys=getActiveDiceKeys(); return keys.length?keys[randInt(0,keys.length-1)]:'FIRE'; }
 
-// ========== ❓隨機骰子變身時間計算 ==========
 function getMysteryTransformTime(star, level) {
     if (star < 7) {
         return 45 - (star - 1) * (45 - 33) / 6;
     } else {
         const baseTime = 33;
         const minTime = 29;
-        const lv = Math.min(level, MAX_LEVEL);
-        return baseTime - (lv - 1) * (baseTime - minTime) / (MAX_LEVEL - 1);
+        const lv = Math.min(level, CONST.MAX_LEVEL);
+        return baseTime - (lv - 1) * (baseTime - minTime) / (CONST.MAX_LEVEL - 1);
     }
 }
-
-// ========== ❓隨機骰子變身 ==========
 function transformMysteryDice(row, col, dice) {
     if (!dice || !dice.isMystery) return;
-
     let candidates = getActiveDiceKeys();
-    if (candidates.length === 0) {
-        return;
-    }
+    if (candidates.length === 0) return;
     const newType = candidates[randInt(0, candidates.length - 1)];
     const newStar = randInt(1, 7);
     const newDice = createDice(newType, newStar);
     if (newDice) {
         newDice.cooldown = 0;
         game.board[row][col] = newDice;
-
         game.bossLockedDice = game.bossLockedDice.filter(d => !(d.row === row && d.col === col));
-
         const data = getData();
         const msg = data.toastMysteryTransform
             .replace(/\{name\}/g, newDice.name)
@@ -986,99 +1136,49 @@ function rollDice(){
 function updateUI(){ const data=getData(); if(!game.gameOver&&game.gameStarted) document.getElementById('rollBtn').textContent=`🎲 ${data.rollBtn} (${game.diceCost})`; else if(game.gameOver) document.getElementById('rollBtn').textContent=`🎲 ${data.rollBtn}`; }
 function updateDicePreview(dice){ const preview=document.getElementById('dicePreview'); if(!dice){ preview.innerHTML=`<span class="empty" id="dicePreviewEmpty">${getData().dicePreviewEmpty}</span>`; return; } preview.innerHTML=`<div class="dice-icon" style="background:${dice.color};border-color:rgba(255,255,255,0.4);">${dice.label}</div><span style="font-weight:600;font-size:13px;">★${dice.star} ${dice.name}</span>`; }
 
-// ========== 拖曳合併（含擬態） ==========
+// ========== 拖曳合併 ==========
 function getGridPosFromPointer(e){ const rect=canvas.getBoundingClientRect(); const scaleX=canvas.width/rect.width, scaleY=canvas.height/rect.height; const mx=(e.clientX-rect.left)*scaleX, my=(e.clientY-rect.top)*scaleY; if(mx<boardX||my<boardY||mx>boardX+BOARD_WIDTH||my>boardY+BOARD_HEIGHT) return null; const col=Math.floor((mx-boardX)/CELL_SIZE), row=Math.floor((my-boardY)/CELL_SIZE); if(col<0||col>=COLS||row<0||row>=ROWS) return null; return {col,row,x:mx,y:my}; }
 function onPointerDown(e){ e.preventDefault(); if(game.gameOver||!game.gameStarted||game.bossAbilityActive){ if(game.bossAbilityActive) showToast('⏳ Boss能力發動中，請稍候'); return; } const rect=canvas.getBoundingClientRect(); const scaleX=canvas.width/rect.width, scaleY=canvas.height/rect.height; const mx=(e.clientX-rect.left)*scaleX, my=(e.clientY-rect.top)*scaleY; if(mx>=upgradeX&&mx<=upgradeX+UPGRADE_WIDTH&&my>=upgradeY&&my<=upgradeY+UPGRADE_HEIGHT){ const itemW=UPGRADE_WIDTH/Math.max(getActiveDiceKeys().length,5); const idx=Math.floor((mx-upgradeX)/itemW); const keys=getActiveDiceKeys(); if(idx<keys.length){ upgradeType(keys[idx]); } return; } const pos=getGridPosFromPointer(e); if(!pos) return; const {col,row}=pos; if(!isOccupied(col,row)) return; game.isDragging=true; game.dragData={col,row,startX:e.clientX,startY:e.clientY,moved:false,sourceDice:game.board[row][col]}; }
 function onPointerMove(e){ e.preventDefault(); if(!game.isDragging||!game.dragData) return; const dx=e.clientX-game.dragData.startX, dy=e.clientY-game.dragData.startY; if(Math.hypot(dx,dy)>10) game.dragData.moved=true; if(!game.dragData._lastMouse) game.dragData._lastMouse={}; game.dragData._lastMouse.x=e.clientX; game.dragData._lastMouse.y=e.clientY; }
-function onPointerUp(e){ e.preventDefault(); const data=getData(); if(!game.isDragging||!game.dragData){ if(!game.gameOver&&game.gameStarted&&!game.bossAbilityActive){ const pos=getGridPosFromPointer(e); if(pos&&isOccupied(pos.col,pos.row)){ const dice=game.board[pos.row][pos.col]; showToast(data.toastDiceInfo.replace(/\{label\}/g,dice.label).replace(/\{name\}/g,dice.name).replace(/\{star\}/g,dice.star).replace(/\{damage\}/g,Math.round(dice.damage))); } } game.isDragging=false; game.dragData=null; return; } if(!game.dragData.moved){ const dice=game.board[game.dragData.row]?.[game.dragData.col]; if(dice&&!game.bossAbilityActive){ showToast(data.toastDiceInfo.replace(/\{label\}/g,dice.label).replace(/\{name\}/g,dice.name).replace(/\{star\}/g,dice.star).replace(/\{damage\}/g,Math.round(dice.damage))); } game.isDragging=false; game.dragData=null; return; } if(game.bossAbilityActive){ showToast('⏳ Boss能力發動中，請稍候'); game.isDragging=false; game.dragData=null; return; } const pos=getGridPosFromPointer(e); if(pos){ const {col,row}=pos; const src=game.dragData; if(isOccupied(col,row)&&!(col===src.col&&row===src.row)){ const targetDice=game.board[row][col]; const sourceDice=game.board[src.row][src.col]; if(sourceDice&&targetDice){ const sameStar=sourceDice.star===targetDice.star; if(!sameStar){ showToast(data.mergeNeedSameStar); }else if(sourceDice.star>=game.maxStar){ showToast(data.mergeMaxStar.replace(/\{max\}/g,game.maxStar)); }else{ let merged=false;
-                        // ---- 合併邏輯優先級 ----
+function onPointerUp(e){ e.preventDefault(); const data=getData(); if(!game.isDragging||!game.dragData){ if(!game.gameOver&&game.gameStarted&&!game.bossAbilityActive){ const pos=getGridPosFromPointer(e); if(pos&&isOccupied(pos.col,pos.row)){ const dice=game.board[pos.row][pos.col]; showToast(data.toastDiceInfo.replace(/\{label\}/g,dice.label).replace(/\{name\}/g,dice.name).replace(/\{star\}/g,dice.star).replace(/\{damage\}/g,Math.round(dice.damage))); } } game.isDragging=false; game.dragData=null; return; } if(!game.dragData.moved){ const dice=game.board[game.dragData.row]?.[game.dragData.col]; if(dice&&!game.bossAbilityActive){ showToast(data.toastDiceInfo.replace(/\{label\}/g,dice.label).replace(/\{name\}/g,dice.name).replace(/\{star\}/g,dice.star).replace(/\{damage\}/g,Math.round(dice.damage))); } game.isDragging=false; game.dragData=null; return; } if(game.bossAbilityActive){ showToast('⏳ Boss能力發動中，請稍候'); game.isDragging=false; game.dragData=null; return; } const pos=getGridPosFromPointer(e); if(pos){ const {col,row}=pos; const src=game.dragData; if(isOccupied(col,row)&&!(col===src.col&&row===src.row)){ const targetDice=game.board[row][col]; const sourceDice=game.board[src.row][src.col]; if(sourceDice&&targetDice){ const sameStar=sourceDice.star===targetDice.star; if(!sameStar){ showToast(data.mergeNeedSameStar); }else if(sourceDice.star>=game.maxStar && !sourceDice.isJoker && !sourceDice.isMimic){ showToast(data.mergeMaxStar.replace(/\{max\}/g,game.maxStar)); }else{ let merged=false;
                         if(sourceDice.isSapling){
-                            // 樹苗：變成目標類型，星等+1
                             const newStar=sourceDice.star+1;
-                            const newDice=createDice(targetDice.type,newStar);
-                            if(newDice){
-                                game.board[row][col]=newDice;
-                                game.board[src.row][src.col]=null;
-                                merged=true;
-                                showToast(data.toastMerge.replace(/\{star\}/g,newStar).replace(/\{name\}/g,newDice.name));
-                                updateDicePreview(newDice);
-                            }
+                            if(newStar>game.maxStar){ showToast(data.mergeMaxStar.replace(/\{max\}/g,game.maxStar)); }
+                            else { const newDice=createDice(targetDice.type,newStar); if(newDice){ game.board[row][col]=newDice; game.board[src.row][src.col]=null; merged=true; showToast(data.toastMerge.replace(/\{star\}/g,newStar).replace(/\{name\}/g,newDice.name)); updateDicePreview(newDice); } }
                         }else if(sourceDice.isJoker){
                             if(targetDice.isJoker){
-                                // 小丑+小丑 → 合併升級隨機
-                                const newStar = sourceDice.star + 1;
-                                if(newStar > game.maxStar){
-                                    showToast(data.mergeMaxStar.replace(/\{max\}/g, game.maxStar));
-                                }else{
-                                    const newType = randomDiceType();
-                                    const newDice = createDice(newType, newStar);
-                                    if(newDice){
-                                        game.board[row][col] = newDice;
-                                        game.board[src.row][src.col] = null;
-                                        merged = true;
-                                        const mergeMsg = data.toastJokerMerge || data.toastMerge;
-                                        showToast(mergeMsg.replace(/\{star\}/g, newStar).replace(/\{name\}/g, newDice.name));
-                                        updateDicePreview(newDice);
-                                    }
-                                }
+                                const newStar=sourceDice.star+1;
+                                if(newStar>game.maxStar){ showToast(data.mergeMaxStar.replace(/\{max\}/g,game.maxStar)); }
+                                else { const newType=randomDiceType(); const newDice=createDice(newType,newStar); if(newDice){ game.board[row][col]=newDice; game.board[src.row][src.col]=null; merged=true; const mergeMsg=data.toastJokerMerge||data.toastMerge; showToast(mergeMsg.replace(/\{star\}/g,newStar).replace(/\{name\}/g,newDice.name)); updateDicePreview(newDice); } }
                             }else{
-                                // 小丑+非小丑 → 複製
-                                const newDice = createDice(targetDice.type, targetDice.star);
-                                if(newDice){
-                                    newDice.cooldown = sourceDice.cooldown || 0;
-                                    game.board[src.row][src.col] = newDice;
-                                    game.bossLockedDice = game.bossLockedDice.filter(d => !(d.row === src.row && d.col === src.col));
-                                    merged = true;
-                                    const copyMsg = data.toastJokerCopy || `🃏 小丑複製 → {label} {name} ★{star}`;
-                                    showToast(copyMsg
-                                        .replace(/\{label\}/g, newDice.label)
-                                        .replace(/\{name\}/g, newDice.name)
-                                        .replace(/\{star\}/g, newDice.star), 1500);
-                                    updateDicePreview(newDice);
-                                }
+                                const newDice=createDice(targetDice.type,targetDice.star);
+                                if(newDice){ newDice.cooldown=sourceDice.cooldown||0; game.board[src.row][src.col]=newDice; game.bossLockedDice=game.bossLockedDice.filter(d=>!(d.row===src.row&&d.col===src.col)); merged=true; const copyMsg=data.toastJokerCopy||'🃏 小丑複製 → {label} {name} ★{star}'; showToast(copyMsg.replace(/\{label\}/g,newDice.label).replace(/\{name\}/g,newDice.name).replace(/\{star\}/g,newDice.star),1500); updateDicePreview(newDice); }
                             }
                         }else if(sourceDice.isMimic){
-                            // ---- 擬態：可與任何種類同星等合併，成為高一星隨機類型（含自己） ----
-                            if(sourceDice.star >= game.maxStar){
-                                showToast(data.mergeMaxStar.replace(/\{max\}/g, game.maxStar));
-                            }else{
-                                const newStar = sourceDice.star + 1;
-                                const newType = randomDiceType(); // 從 activeDiceKeys 中隨機
-                                const newDice = createDice(newType, newStar);
-                                if(newDice){
-                                    game.board[row][col] = newDice;
-                                    game.board[src.row][src.col] = null;
-                                    merged = true;
-                                    const mimicMsg = data.toastMimicMerge || data.toastMerge;
-                                    showToast(mimicMsg.replace(/\{star\}/g, newStar).replace(/\{name\}/g, newDice.name));
-                                    updateDicePreview(newDice);
-                                }
-                            }
+                            if(sourceDice.star>=game.maxStar){ showToast(data.mergeMaxStar.replace(/\{max\}/g,game.maxStar)); }
+                            else { const newStar=sourceDice.star+1; const newType=randomDiceType(); const newDice=createDice(newType,newStar); if(newDice){ game.board[row][col]=newDice; game.board[src.row][src.col]=null; merged=true; const mimicMsg=data.toastMimicMerge||data.toastMerge; showToast(mimicMsg.replace(/\{star\}/g,newStar).replace(/\{name\}/g,newDice.name)); updateDicePreview(newDice); } }
                         }else if(sourceDice.type===targetDice.type){
-                            // 普通同類合併
                             const newStar=sourceDice.star+1;
-                            const newType=randomDiceType();
-                            const newDice=createDice(newType,newStar);
-                            if(newDice){
-                                game.board[row][col]=newDice;
-                                game.board[src.row][src.col]=null;
-                                merged=true;
-                                showToast(data.toastMerge.replace(/\{star\}/g,newStar).replace(/\{name\}/g,newDice.name));
-                                updateDicePreview(newDice);
-                            }
-                        }else{
-                            showToast(data.mergeNeedSameType);
-                        }
+                            if(newStar>game.maxStar){ showToast(data.mergeMaxStar.replace(/\{max\}/g,game.maxStar)); }
+                            else { const newType=randomDiceType(); const newDice=createDice(newType,newStar); if(newDice){ game.board[row][col]=newDice; game.board[src.row][src.col]=null; merged=true; showToast(data.toastMerge.replace(/\{star\}/g,newStar).replace(/\{name\}/g,newDice.name)); updateDicePreview(newDice); } }
+                        }else{ showToast(data.mergeNeedSameType); }
                         if(merged) updateUI();
                     }
                 } }else showToast('❌ 無效的合併目標'); } game.isDragging=false; game.dragData=null; }
 canvas.addEventListener('pointerdown',onPointerDown); window.addEventListener('pointermove',onPointerMove); window.addEventListener('pointerup',onPointerUp); canvas.addEventListener('touchstart',(e)=>e.preventDefault(),{passive:false});
 
-// ========== 升級函數 ==========
+// ========== 升級 ==========
+let upgradeLevels = {};
+function initUpgradeLevels() {
+    upgradeLevels = {};
+    for (let key of getActiveDiceKeys()) upgradeLevels[key] = 1;
+}
+function getUpgradeMultiplier(type) { const lv=upgradeLevels[type]||1; return CONST.UPGRADE_MULTIPLIERS[Math.min(lv-1, CONST.UPGRADE_MULTIPLIERS.length-1)]; }
+function getUpgradeCost(type) { const lv=upgradeLevels[type]||1; if(lv>=CONST.MAX_LEVEL) return null; return CONST.UPGRADE_COSTS[lv]; }
 function upgradeType(type){
     if(game.bossAbilityActive){ showToast('⏳ Boss能力發動中，請稍候'); return false; }
-    const data=getData(); const lv=upgradeLevels[type]||1; if(lv>=MAX_LEVEL){ showToast(data.upgradeMax); return false; }
-    const cost=UPGRADE_COSTS[lv]; if(game.gold<cost){ showToast(data.upgradeFail.replace(/\{cost\}/g,cost)); return false; }
+    const data=getData(); const lv=upgradeLevels[type]||1; if(lv>=CONST.MAX_LEVEL){ showToast(data.upgradeMax); return false; }
+    const cost=CONST.UPGRADE_COSTS[lv]; if(game.gold<cost){ showToast(data.upgradeFail.replace(/\{cost\}/g,cost)); return false; }
     game.gold-=cost; upgradeLevels[type]=lv+1;
     for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){ const dice=game.board[r][c]; if(dice&&dice.type===type){ const newDice=createDice(type,dice.star); newDice.cooldown=dice.cooldown; game.board[r][c]=newDice; } }
     updateDicePreview(); updateUI(); const name=getDiceName(type);
@@ -1088,46 +1188,61 @@ function upgradeType(type){
 }
 function getTotalStars(type){ let sum=0; for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){ const dice=game.board[r][c]; if(dice&&dice.type===type) sum+=dice.star; } return sum; }
 
-// ========== Boss 系統 ==========
-const BOSS_TYPES = [
-    { id: 'mage', nameKey: 'mage', emoji: '🧙', color: '#9b59b6' },
-    { id: 'lion', nameKey: 'lion', emoji: '🦁', color: '#e67e22' },
-    { id: 'snake', nameKey: 'snake', emoji: '🐍', color: '#2ecc71' },
-    { id: 'lamb', nameKey: 'lamb', emoji: '🐑', color: '#f1c40f' },
-    { id: 'knight', nameKey: 'knight', emoji: '🛡️', color: '#3498db' },
-    { id: 'hacker', nameKey: 'hacker', emoji: '💻', color: '#2c3e50' },
-    { id: 'slime', nameKey: 'slime', emoji: '🟢', color: '#27ae60' },
-    { id: 'magnet', nameKey: 'magnet', emoji: '🧲', color: '#e74c3c' },
-    { id: 'cloud', nameKey: 'cloud', emoji: '☁️', color: '#ecf0f1' },
-];
+// ========== Boss & 敵人生成 ==========
+function getEnemyHp(wave, index) {
+    // 第wave波（從1開始），第index隻（從0開始）
+    // 公式: 100 + wave * 10 * (index + 1)
+    const hp = 100 + wave * 10 * (index + 1);
+    return Math.max(1, Math.round(hp));
+}
 
-// ========== 敵人生成 ==========
 function spawnEnemy(){
     if(game.gameOver||!game.isWaveActive) return;
     if(game.enemiesSpawned>=game.enemiesPerWave) return;
-    let isBoss=false, bossType=null;
-    if(game.wave%10===0 && game.hasBoss){
-        isBoss=true; game.hasBoss=false;
-        const randIdx=randInt(0,BOSS_TYPES.length-1);
-        const typeDef=BOSS_TYPES[randIdx];
-        bossType=typeDef.id;
-        const hpBase = 150 + game.wave * 20;
-        const hp = (isFinite(hpBase) && hpBase > 0) ? hpBase * 4.5 : 1000;
-        const speed = 0.5 + game.wave * 0.01;
-        const reward = 60 + game.wave * 4;
+
+    const idx = game.enemiesSpawned;
+    const wave = game.wave;
+
+    // 檢查是否為Boss關卡 — 修正為從第5關開始，每10關一次 (5,15,25,35,45)
+    let isBossWave = false;
+    let bossCount = 0;
+    if (wave >= 5 && wave <= 45 && (wave - 5) % 10 === 0) {
+        isBossWave = true;
+        bossCount = 1;
+    } else if (wave > 45 && wave % 2 === 0) {
+        isBossWave = true;
+        bossCount = 2;
+    }
+
+    if (isBossWave && game.bossCount < bossCount) {
+        // 生成Boss
+        const bossIdx = game.bossCount;
+        game.bossCount++;
+        let bossTypeId = 'mage';
+        const availBoss = CONST.BOSS_TYPES.filter(b => b.id !== 'balistic');
+        const randIdx = randInt(0, availBoss.length - 1);
+        bossTypeId = availBoss[randIdx].id;
+
+        // 計算boss血量
+        const prevWaveLastHp = wave > 1 ? getEnemyHp(wave - 1, 9) : 100;
+        const waveFactor = wave * 10;
+        const hpMultiplier = 5 + 1.5 * (wave - 5);
+        const bossHp = (prevWaveLastHp + waveFactor) * hpMultiplier;
+        const finalHp = Math.max(100, Math.round(bossHp));
+
         const bossEntity = {
             pathIndex: 0,
             x: PATH_PIXELS[0].x,
             y: PATH_PIXELS[0].y,
-            hp: hp,
-            maxHp: hp,
-            speed: (isFinite(speed) && speed > 0) ? speed : 0.8,
-            reward: (isFinite(reward) && reward > 0) ? reward : 100,
+            hp: finalHp,
+            maxHp: finalHp,
+            speed: 0.6,
+            reward: 80 + wave * 5,
             type: 'boss',
             size: 1.8,
             isBoss: true,
             alive: true,
-            bossType: bossType,
+            bossType: bossTypeId,
             abilityPhase: 0,
             slowStacks: 0,
             slowFactor: 0,
@@ -1137,40 +1252,51 @@ function spawnEnemy(){
             poison: null,
             stunTimer: 0,
             _lockedByLockDice: false,
+            isBalistic: bossTypeId === 'balistic',
+            miniBossCounter: 0,
         };
-        if (!isFinite(bossEntity.hp) || bossEntity.hp <= 0) bossEntity.hp = 1000;
-        if (!isFinite(bossEntity.maxHp) || bossEntity.maxHp <= 0) bossEntity.maxHp = 1000;
-        if (!isFinite(bossEntity.speed) || bossEntity.speed <= 0) bossEntity.speed = 0.8;
-        if (!isFinite(bossEntity.reward) || bossEntity.reward <= 0) bossEntity.reward = 100;
-        const bossName=getBossName(bossType);
-        showToast(getData().bossAppear.replace(/\{name\}/g,bossName),2000);
-        game.currentBoss=bossEntity;
+        const bossName = getBossName(bossTypeId);
+        showToast(getData().bossAppear.replace(/\{name\}/g, bossName), 2000);
+        game.currentBoss = bossEntity;
         game.enemies.push(bossEntity);
         game.enemiesSpawned++;
         game.bossAbilityActive = false;
         if (game._bossAbilityTimeout) { clearTimeout(game._bossAbilityTimeout); game._bossAbilityTimeout = null; }
         return;
     }
-    const hpBase=70+game.wave*10;
-    let hp=hpBase*(0.85+Math.random()*0.3);
-    let speed=0.8+game.wave*0.02;
-    let reward=10+Math.floor(game.wave/2)*2;
-    let size=1,type='normal';
-    const rnd=Math.random();
-    if(rnd<0.15&&game.wave>2){ type='tank'; hp*=2.0; reward+=5; size=1.3; }
-    else if(rnd<0.25&&game.wave>1){ type='fast'; hp*=0.7; reward+=3; size=0.8; speed*=1.6; }
-    hp = (isFinite(hp) && hp > 0) ? hp : 100;
-    speed = (isFinite(speed) && speed > 0) ? speed : 1.0;
-    reward = (isFinite(reward) && reward > 0) ? reward : 10;
-    const enemy={
-        pathIndex:0,
-        x:PATH_PIXELS[0].x, y:PATH_PIXELS[0].y,
-        hp, maxHp:hp, speed, reward, type, size,
-        slowTimer:0, slowFactor:0,
-        hitFlash:0, alive:true,
-        isBoss:false, poison:null,
-        burnTimer:0, burnDamage:0, slowStacks:0,
-        stunTimer:0,
+
+    // 普通小怪
+    const hp = getEnemyHp(wave, idx);
+    let speed = 1.0;
+    let reward = 10 + Math.floor(wave / 2) * 2;
+    let size = 1, type = 'normal';
+    const rnd = Math.random();
+
+    // 坦克小怪改為中boss之一，不再作為普通小怪生成 — 保留fast小怪
+    if (rnd < 0.12 && wave > 3) {
+        type = 'fast';
+        const hpVal = getEnemyHp(wave, idx)/ 2;
+        const baseSpeed = 1.0;
+        speed = baseSpeed * 2;
+        reward += 5;
+        size = 0.8;
+    } else {
+        speed = 1.0;
+    }
+
+    const enemy = {
+        pathIndex: 0,
+        x: PATH_PIXELS[0].x, y: PATH_PIXELS[0].y,
+        hp: hp, maxHp: hp,
+        speed: speed,
+        reward: reward,
+        type: type,
+        size: size,
+        slowTimer: 0, slowFactor: 0,
+        hitFlash: 0, alive: true,
+        isBoss: false, poison: null,
+        burnTimer: 0, burnDamage: 0, slowStacks: 0,
+        stunTimer: 0,
         _lockedByLockDice: false,
     };
     game.enemies.push(enemy);
@@ -1257,9 +1383,7 @@ function updateEnemies(dt){
             const dx=target.x-e.x, dy=target.y-e.y;
             const d=Math.hypot(dx,dy);
             const step = e.speed * dt * 60 * speedMul;
-            if (!isFinite(step) || step < 0) {
-                continue;
-            }
+            if (!isFinite(step) || step < 0) continue;
             if(d<step){
                 e.x=target.x; e.y=target.y;
                 e.pathIndex=targetIdx;
@@ -1297,6 +1421,7 @@ function updateEnemies(dt){
             game.bossHackedDice = [];
             game.bossCloud = null;
             game.bossAbilityActive = false;
+            game.bossCount = 0;
             if (game._bossAbilityTimeout) { clearTimeout(game._bossAbilityTimeout); game._bossAbilityTimeout = null; }
             if(!game.gameOver){
                 startWave();
@@ -1361,6 +1486,7 @@ function triggerBossAbility(boss,phase){
         game.bossAbilityActive = false;
         game._bossAbilityTimeout = null;
     }, 10000);
+
     switch(type){
         case 'mage': {
             showToast(data.bossWarningMage, 2500);
@@ -1602,6 +1728,53 @@ function triggerBossAbility(boss,phase){
             },1000);
             break;
         }
+        case 'balistic': {
+            // 蛇尾雞：召喚一隻中Boss
+            showToast(data.bossWarningBalistic || data.toastBalisticSummon, 1500);
+            setTimeout(()=>{
+                try{
+                    if(!boss.alive){ game.bossAbilityActive=false; if(game._bossAbilityTimeout){clearTimeout(game._bossAbilityTimeout);game._bossAbilityTimeout=null;} return; }
+                    // 生成中Boss
+                    const miniBossIdx = game.miniBossSpawned + 1;
+                    game.miniBossSpawned = miniBossIdx;
+                    const availMini = CONST.MINI_BOSS_TYPES.filter(b => b.id !== 'balistic');
+                    const randIdx2 = randInt(0, availMini.length - 1);
+                    const mbType = availMini[randIdx2];
+                    // 中boss血量 = 該關卡小怪基礎血量 * (5 + 1.5 * (序數-1))
+                    const baseHp = getEnemyHp(game.wave, 0);
+                    const mbHp = baseHp * (5 + 1.5 * (miniBossIdx - 1));
+                    const finalMbHp = Math.max(50, Math.round(mbHp));
+
+                    const mb = {
+                        pathIndex: Math.min(boss.pathIndex + 2, PATH_PIXELS.length - 1),
+                        x: PATH_PIXELS[Math.min(boss.pathIndex + 2, PATH_PIXELS.length - 1)].x,
+                        y: PATH_PIXELS[Math.min(boss.pathIndex + 2, PATH_PIXELS.length - 1)].y,
+                        hp: finalMbHp,
+                        maxHp: finalMbHp,
+                        speed: 0.8,
+                        reward: 60 + game.wave * 3,
+                        type: 'miniBoss',
+                        size: 1.3,
+                        isBoss: false,
+                        alive: true,
+                        bossType: null,
+                        isMiniBoss: true,
+                        miniBossType: mbType.id,
+                        slowStacks: 0, slowFactor: 0, slowTimer: 0,
+                        burnTimer: 0, burnDamage: 0,
+                        poison: null, stunTimer: 0,
+                        hitFlash: 0,
+                        _lockedByLockDice: false,
+                    };
+                    game.enemies.push(mb);
+                    const mbName = getBossName(mbType.id);
+                    showToast(data.toastMiniBossSpawn.replace(/\{name\}/g, mbName), 1500);
+                }catch(e){ console.warn('Balistic ability error:',e); }
+                game.bossAbilityActive=false;
+                if(game._bossAbilityTimeout){clearTimeout(game._bossAbilityTimeout);game._bossAbilityTimeout=null;}
+            },1200);
+            break;
+        }
         default: {
             game.bossAbilityActive=false;
             if(game._bossAbilityTimeout){clearTimeout(game._bossAbilityTimeout);game._bossAbilityTimeout=null;}
@@ -1622,27 +1795,49 @@ function updateBossContinuousEffects(dt){
     }
 }
 function handleBossDeath(boss){
-    if(boss.bossType==='slime'){
-        const childHp = (isFinite(boss.maxHp)) ? boss.maxHp / 3 : 100;
-        const childSpeed = (isFinite(boss.speed)) ? boss.speed * 0.8 : 0.8;
-        for(let i=0;i<2;i++){
-            const child={
-                pathIndex:boss.pathIndex,
-                x:boss.x+(i===0?-20:20),
-                y:boss.y+(i===0?-20:20),
-                hp:childHp, maxHp:childHp, speed:childSpeed,
-                reward:Math.floor((isFinite(boss.reward) ? boss.reward : 50) / 2),
-                type:'normal', size:boss.size*0.7,
-                isBoss:false, alive:true,
-                slowTimer:0, slowFactor:0, hitFlash:0,
-                poison:null, burnTimer:0, burnDamage:0, slowStacks:0,
-                stunTimer:0,
-                slimeLevel:(boss.slimeLevel||0)+1,
+    const data = getData();
+    if(boss.bossType === 'slime' || boss.isMiniBoss && boss.miniBossType === 'slime') {
+        // 史萊姆分裂
+        const isFirst = !boss.slimeLevel || boss.slimeLevel === 0;
+        const isSecond = boss.slimeLevel === 1;
+        let childHpRatio = 0.3;
+        let speedRatio = 0.8;
+        if (isSecond) {
+            childHpRatio = 0.3;
+            speedRatio = 0.6;
+        }
+        const childHp = (isFinite(boss.maxHp)) ? boss.maxHp * childHpRatio : 100;
+        const childSpeed = (isFinite(boss.speed)) ? boss.speed * speedRatio : 0.6;
+        const childCount = 2;
+        for(let i=0;i<childCount;i++){
+            const offsetX = (i===0 ? -25 : 25) + (isSecond ? 10 : 0);
+            const offsetY = (i===0 ? -25 : 25) + (isSecond ? 10 : 0);
+            const child = {
+                pathIndex: boss.pathIndex,
+                x: boss.x + offsetX,
+                y: boss.y + offsetY,
+                hp: childHp, maxHp: childHp,
+                speed: childSpeed,
+                reward: Math.floor((isFinite(boss.reward) ? boss.reward : 50) / 2),
+                type: 'miniBoss',
+                size: (boss.size || 1.3) * 0.7,
+                isBoss: false,
+                alive: true,
+                isMiniBoss: true,
+                miniBossType: boss.isMiniBoss ? boss.miniBossType : 'slime',
+                bossType: null,
+                slimeLevel: (boss.slimeLevel || 0) + 1,
+                slowTimer: 0, slowFactor: 0, hitFlash: 0,
+                poison: null, burnTimer: 0, burnDamage: 0,
+                slowStacks: 0, stunTimer: 0,
                 _lockedByLockDice: false,
             };
-            if(child.slimeLevel<=2) game.enemies.push(child);
+            if (child.slimeLevel <= 2) {
+                game.enemies.push(child);
+                addFloatingText(child.x, child.y-20, `🟢 分裂!`, '#27ae60', 16);
+            }
         }
-        showToast('🟢 史萊姆分裂！');
+        showToast(data.toastSlimeSplit, 1200);
     }
     game.bossAbilityActive=false;
     if (game._bossAbilityTimeout) { clearTimeout(game._bossAbilityTimeout); game._bossAbilityTimeout = null; }
@@ -1733,19 +1928,17 @@ function updateAttacks(dt){
                     }
 
                     if (dice.type === 'LOCK' && !isHacked) {
-                        if (target._lockedByLockDice) {
-                            continue;
-                        }
+                        if (target._lockedByLockDice) continue;
                         const lv = upgradeLevels[dice.type] || 1;
                         const star = dice.star;
                         const baseProb = 0.04 + (star - 1) * (0.18 - 0.04) / 6;
                         const maxProb = 0.26;
-                        const prob = baseProb + (lv - 1) / (MAX_LEVEL - 1) * (maxProb - 0.18);
+                        const prob = baseProb + (lv - 1) / (CONST.MAX_LEVEL - 1) * (maxProb - 0.18);
                         const finalProb = (isFinite(prob) && prob > 0) ? Math.min(prob, 0.99) : 0.04;
                         if (Math.random() < finalProb) {
                             const baseDur = 3.5 + (star - 1) * (6.3 - 3.5) / 6;
                             const maxDur = 8.3;
-                            const dur = baseDur + (lv - 1) / (MAX_LEVEL - 1) * (maxDur - 6.3);
+                            const dur = baseDur + (lv - 1) / (CONST.MAX_LEVEL - 1) * (maxDur - 6.3);
                             const finalDur = (isFinite(dur) && dur > 0) ? dur : 3.5;
                             target.stunTimer = finalDur;
                             target._lockedByLockDice = true;
@@ -1842,6 +2035,7 @@ function updateAttacks(dt){
                         }
                     }
 
+                    // 發射子彈
                     game.projectiles.push({
                         x: pos.x, y: pos.y,
                         target: target,
@@ -1850,8 +2044,13 @@ function updateAttacks(dt){
                         color: isHacked ? '#2ecc71' : dice.color,
                         damage: damage,
                         isCrit: false,
-                        type: dice.type
+                        type: dice.type,
+                        alive: true,
+                        x: pos.x, y: pos.y,
                     });
+
+                    // 射擊音效
+                    playShootSound();
 
                 } catch (diceError) {
                     console.warn('Attack error for dice at', r, c, diceError);
@@ -1866,12 +2065,27 @@ function updateAttacks(dt){
 function updateProjectiles(dt){
     for(let i=game.projectiles.length-1;i>=0;i--){
         const p=game.projectiles[i];
-        if(!p.target||!p.target.alive){ game.projectiles.splice(i,1); continue; }
+        if(!p.alive) { game.projectiles.splice(i,1); continue; }
+        if(!p.target||!p.target.alive){
+            // 消散特效
+            addFloatingText(p.x, p.y, '✨', '#ffd93d', 28);
+            p.alive = false;
+            game.projectiles.splice(i,1);
+            continue;
+        }
         const dx=p.target.x-p.x, dy=p.target.y-p.y;
         const d=Math.hypot(dx,dy);
         const step=p.speed*dt;
-        if(d<step){ p.x=p.target.x; p.y=p.target.y; game.projectiles.splice(i,1); }
-        else{ p.x+=(dx/d)*step; p.y+=(dy/d)*step; }
+        if(d<step){
+            p.x=p.target.x; p.y=p.target.y;
+            // 命中消散特效
+            addFloatingText(p.x, p.y, '', '#ffd93d', 28);
+            p.alive = false;
+            game.projectiles.splice(i,1);
+        }else{
+            p.x+=(dx/d)*step;
+            p.y+=(dy/d)*step;
+        }
     }
 }
 
@@ -1880,9 +2094,9 @@ function startWave(){
     if(game.isWaveActive) return;
     game.wave++;
     game.enemiesSpawned=0;
-    game.enemiesPerWave=4+game.wave*2;
-    if(game.wave%10===0){ game.hasBoss=true; game.enemiesPerWave+=1; }
-    else game.hasBoss=false;
+    game.enemiesPerWave=10;
+    game.bossCount=0;
+    game.miniBossSpawned=0;
     game.isWaveActive=true;
     game.spawnTimer=0;
     game.spawnInterval=Math.max(0.35,0.9-game.wave*0.02);
@@ -1913,6 +2127,7 @@ function showGameOver(){
     document.getElementById('gameoverOverlay').classList.add('visible');
     document.getElementById('rollBtn').disabled=true;
     updateCoverUI();
+    stopBgMusic();
 }
 
 function restartGame(){
@@ -1927,7 +2142,7 @@ function restartGame(){
     game._markedDice=[]; game.emoji='😎'; game.emojiTimer=0;
     game.waveCompleted=false; game.enemyReachedTwoThirds=false;
     game._lastGold=100; game.toastMessage=''; game.toastTimer=0;
-    game.bossAbilityActive=false;
+    game.bossAbilityActive=false; game.bossCount=0; game.miniBossSpawned=0;
     if (game._bossAbilityTimeout) { clearTimeout(game._bossAbilityTimeout); game._bossAbilityTimeout = null; }
     game.activeDiceTypes=[...saveData.selectedDice];
     initUpgradeLevels(); initBoard();
@@ -1936,10 +2151,23 @@ function restartGame(){
     updateUI(); updateDicePreview(null);
     document.getElementById('startOverlay').classList.remove('hidden');
     showToast(getData().toastRestart,1500);
+    stopBgMusic();
 }
 
 // ========== 繪製 ==========
 function drawDicePips(ctx,cx,cy,size,star){
+    if (star >= 7) {
+        // 顯示「7」字，不顯示點數
+        ctx.fillStyle = '#fff';
+        ctx.font = `bold ${size * 0.55}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = 'rgba(255,215,0,0.5)';
+        ctx.shadowBlur = 20;
+        ctx.fillText('7', cx, cy + 2);
+        ctx.shadowBlur = 0;
+        return;
+    }
     const s=Math.min(star,6);
     const dotRadius=size*0.09;
     const offset=size*0.28;
@@ -1959,7 +2187,7 @@ function drawDicePips(ctx,cx,cy,size,star){
 }
 function drawDice(ctx,x,y,size,dice){
     if(!dice) return;
-    const def=ALL_DICE_DEFS[dice.type];
+    const def=CONST.ALL_DICE_DEFS[dice.type];
     if(!def) return;
     const margin=6,radius=10;
     const cx=x+size/2, cy=y+size/2;
@@ -1986,13 +2214,18 @@ function drawDice(ctx,x,y,size,dice){
     ctx.fill();
     ctx.shadowBlur=0; ctx.shadowOffsetY=0;
     ctx.strokeStyle='rgba(255,255,255,0.2)'; ctx.lineWidth=1.5; ctx.stroke();
+
+    // 7星時顯示「7」字，不顯示泡泡（取消發光邊框）
     drawDicePips(ctx,cx,cy,dSize,dice.star);
-    if(dice.star>=game.maxStar){
+
+    // 只有非7星才顯示泡泡效果
+    if(dice.star >= game.maxStar && dice.star < 7){
         ctx.shadowColor=def.color; ctx.shadowBlur=30;
         ctx.strokeStyle='rgba(255,215,0,0.5)'; ctx.lineWidth=3;
         ctx.beginPath(); ctx.arc(cx,cy,dSize/2+4,0,Math.PI*2); ctx.stroke();
         ctx.shadowBlur=0;
     }
+
     if (dice.isMystery && dice.transformTimer !== undefined) {
         const remain = Math.max(0, dice.transformTimer);
         const total = dice.transformInterval || 1;
@@ -2064,6 +2297,25 @@ function draw(){
     try {
         const data=getData();
         ctx.clearRect(0,0,W,H);
+
+        // 摸魚模式
+        if (fishMode && game.gameStarted && !game.gameOver) {
+            ctx.fillStyle = '#0b0e1a';
+            ctx.fillRect(0,0,W,H);
+            ctx.fillStyle = '#f7d875';
+            ctx.font = 'bold 48px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(`🐟 第 ${game.wave} 波`, W/2, H/2-20);
+            ctx.fillStyle = '#aab8d0';
+            ctx.font = '20px sans-serif';
+            ctx.fillText(`剩餘 ${game.enemies.length} 隻`, W/2, H/2+50);
+            ctx.fillStyle = '#6a7a8a';
+            ctx.font = '16px sans-serif';
+            ctx.fillText(`💰 ${game.gold}  ❤️ ${game.lives}`, W/2, H/2+100);
+            return;
+        }
+
         ctx.fillStyle='rgba(13,18,34,0.6)';
         ctx.shadowColor='rgba(0,0,0,0.3)'; ctx.shadowBlur=10;
         ctx.beginPath(); ctx.roundRect(0,topBarY,600,TOP_BAR_H-2,12); ctx.fill();
@@ -2082,6 +2334,15 @@ function draw(){
         xPos-=ctx.measureText(`❤️ ${game.lives}`).width+16;
         ctx.fillStyle='#f7d875';
         ctx.fillText(`💰 ${game.gold}`,xPos,topBarY+(TOP_BAR_H-2)/2);
+
+        // 波數顯示移至左上角，放大字體
+        ctx.textAlign='left';
+        ctx.textBaseline='top';
+        ctx.fillStyle='rgba(255,255,255,0.9)';
+        ctx.font='bold 22px sans-serif';
+        const remain = game.enemies.filter(e=>e.alive).length;
+        const remainText = game.isWaveActive ? `🌊 ${game.wave} 剩${remain}隻` : `🌊 ${game.wave}`;
+        ctx.fillText(remainText, 10, topBarY + 4);
 
         for(let r=0; r<ROWS; r++){
             for(let c=0; c<COLS; c++){
@@ -2150,7 +2411,9 @@ function draw(){
                 if (!isFinite(e.x) || !isFinite(e.y)) continue;
                 const size=18*(e.size||1);
                 const x=e.x, y=e.y;
-                let col=e.isBoss?(BOSS_TYPES.find(b=>b.id===e.bossType)?.color||'#8e44ad'):(e.type==='tank'?'#e67e22':e.type==='fast'?'#2ecc71':'#e74c3c');
+                let col = e.isBoss ? (CONST.BOSS_TYPES.find(b=>b.id===e.bossType)?.color||'#8e44ad') :
+                           (e.isMiniBoss ? (CONST.MINI_BOSS_TYPES.find(b=>b.id===e.miniBossType)?.color||'#8e44ad') :
+                           (e.type==='tank'?'#e67e22':e.type==='fast'?'#2ecc71':'#e74c3c'));
                 const grad=ctx.createRadialGradient(x,y,2,x,y,size*1.6);
                 grad.addColorStop(0,'rgba(255,70,70,0.15)');
                 grad.addColorStop(1,'rgba(255,70,70,0)');
@@ -2163,7 +2426,7 @@ function draw(){
                 ctx.shadowBlur=0;
                 ctx.strokeStyle='rgba(255,255,255,0.2)'; ctx.lineWidth=1.5; ctx.stroke();
                 if(e.isBoss&&e.bossType){
-                    const bossDef=BOSS_TYPES.find(b=>b.id===e.bossType);
+                    const bossDef=CONST.BOSS_TYPES.find(b=>b.id===e.bossType);
                     const bossName=getBossName(e.bossType);
                     ctx.fillStyle='#fff';
                     ctx.font='bold 14px sans-serif';
@@ -2175,6 +2438,14 @@ function draw(){
                     ctx.lineWidth=3;
                     ctx.beginPath(); ctx.arc(x,y,size*1.2,0,Math.PI*2); ctx.stroke();
                     ctx.shadowBlur=0;
+                }
+                if(e.isMiniBoss && e.miniBossType){
+                    const mbDef=CONST.MINI_BOSS_TYPES.find(b=>b.id===e.miniBossType);
+                    const mbName=getBossName(e.miniBossType);
+                    ctx.fillStyle='#d0d8e8';
+                    ctx.font='bold 12px sans-serif';
+                    ctx.textAlign='center'; ctx.textBaseline='bottom';
+                    ctx.fillText((mbDef?.emoji||'👾')+' '+mbName,x,y-size-10);
                 }
                 const hpW=size*2.2, hpH=4;
                 const hpX=x-hpW/2, hpY=y-size-8;
@@ -2189,7 +2460,9 @@ function draw(){
                 ctx.fillStyle='rgba(255,255,255,0.7)';
                 ctx.font=`${size}px sans-serif`;
                 ctx.textAlign='center'; ctx.textBaseline='middle';
-                const icon=e.isBoss?(BOSS_TYPES.find(b=>b.id===e.bossType)?.emoji||'👑'):(e.type==='tank'?'🛡️':e.type==='fast'?'💨':'👾');
+                let icon = e.isBoss ? (CONST.BOSS_TYPES.find(b=>b.id===e.bossType)?.emoji||'👑') :
+                           (e.isMiniBoss ? (CONST.MINI_BOSS_TYPES.find(b=>b.id===e.miniBossType)?.emoji||'👾') :
+                           (e.type==='tank'?'🛡️':e.type==='fast'?'💨':'👾'));
                 ctx.fillText(icon,x,y+1);
                 if((e.slowTimer||0)>0 || (e.slowStacks||0)>0){
                     ctx.fillStyle='rgba(100,200,255,0.25)'; ctx.beginPath(); ctx.arc(x,y,size*1.6,0,Math.PI*2); ctx.fill();
@@ -2222,6 +2495,7 @@ function draw(){
             ctx.fillText(`☁️ ${Math.ceil(cloud.timer)}s`,cloud.x,cloud.y-cloud.radius-5);
         }
         for(const p of game.projectiles){
+            if(!p.alive) continue;
             const size=p.isCrit?8:5;
             const grad=ctx.createRadialGradient(p.x,p.y,1,p.x,p.y,size+4);
             grad.addColorStop(0,p.color);
@@ -2257,15 +2531,6 @@ function draw(){
             ctx.fillRect(0,0,W,H);
             game.screenFlash-=0.02;
         }
-        if(game.isWaveActive&&!game.gameOver){
-            const remainText=data.waveRemain.replace(/\{wave\}/g,game.wave).replace(/\{count\}/g,game.enemies.length);
-            ctx.fillStyle='rgba(255,255,255,0.08)';
-            ctx.fillRect(boardX,boardY-20,180,18);
-            ctx.fillStyle='rgba(255,255,255,0.7)';
-            ctx.font='11px sans-serif';
-            ctx.textAlign='left'; ctx.textBaseline='top';
-            ctx.fillText(remainText,boardX+6,boardY-18);
-        }
         const ux=upgradeX, uy=upgradeY, uW=UPGRADE_WIDTH, uH=UPGRADE_HEIGHT;
         ctx.fillStyle='rgba(13,18,34,0.7)';
         ctx.shadowColor='rgba(0,0,0,0.3)'; ctx.shadowBlur=10;
@@ -2278,11 +2543,11 @@ function draw(){
         const pad=4;
         for(let i=0;i<activeKeys.length;i++){
             const type=activeKeys[i];
-            const def=ALL_DICE_DEFS[type];
+            const def=CONST.ALL_DICE_DEFS[type];
             if(!def) continue;
             const lv=upgradeLevels[type]||1;
-            const maxed=lv>=MAX_LEVEL;
-            const cost=maxed?null:UPGRADE_COSTS[lv];
+            const maxed=lv>=CONST.MAX_LEVEL;
+            const cost=maxed?null:CONST.UPGRADE_COSTS[lv];
             const canAfford=cost!==null&&game.gold>=cost;
             const totalStars=getTotalStars(type);
             const x=ux+i*itemW+pad/2, y=uy+pad/2, w=itemW-pad, h=uH-pad;
@@ -2403,10 +2668,9 @@ function updateShopUI(){
     document.getElementById('shopPointsDisplay').textContent=data.totalScore.replace(/\{score\}/g,saveData.totalScore);
     const grid=document.getElementById('shopDiceGrid');
     grid.innerHTML='';
-    // 順序：火雷風毒冰，鐵壞賭鎖，隨機，擬態，小丑，樹苗
     const allTypes=['FIRE','THUNDER','WIND','POISON','ICE','IRON','RANDOM','GAMBLE','LOCK','MYSTERY','MIMIC','JOKER','SAPLING'];
     for(let type of allTypes){
-        const def=ALL_DICE_DEFS[type]; if(!def) continue;
+        const def=CONST.ALL_DICE_DEFS[type]; if(!def) continue;
         const owned=saveData.ownedDice.includes(type);
         const price=getDicePrice(type);
         const div=document.createElement('div');
@@ -2447,7 +2711,7 @@ function updateShopSelection(){
         slot.className='shop-select-slot'+(i<saveData.selectedDice.length?' filled':'');
         const type=i<saveData.selectedDice.length?saveData.selectedDice[i]:null;
         if(type){
-            const def=ALL_DICE_DEFS[type];
+            const def=CONST.ALL_DICE_DEFS[type];
             slot.textContent=def?def.label:'?';
             slot.dataset.type=type;
             slot.dataset.index=i;
@@ -2476,7 +2740,7 @@ function showDicePicker(index){
     picker.innerHTML='';
     picker.className='shop-dice-picker visible';
     for(let type of saveData.ownedDice){
-        const def=ALL_DICE_DEFS[type];
+        const def=CONST.ALL_DICE_DEFS[type];
         if(!def) continue;
         const div=document.createElement('div');
         div.className='pick-item';
@@ -2519,13 +2783,20 @@ function initGameState(){
     game._markedDice=[]; game.emoji='😎'; game.emojiTimer=0;
     game.waveCompleted=false; game.enemyReachedTwoThirds=false;
     game._lastGold=100; game.toastMessage=''; game.toastTimer=0;
-    game.bossAbilityActive=false;
+    game.bossAbilityActive=false; game.bossCount=0; game.miniBossSpawned=0;
     if (game._bossAbilityTimeout) { clearTimeout(game._bossAbilityTimeout); game._bossAbilityTimeout = null; }
     initBoard(); updateUI(); updateDicePreview(null);
 }
 
+function getActiveDiceKeys() { return game.activeDiceTypes.length ? game.activeDiceTypes : ['FIRE','THUNDER','WIND','POISON','ICE']; }
+
 function bindEvents(){
     document.getElementById('startBtn').addEventListener('click',function(){
+        // 檢查是否帶齊5顆骰子
+        if (saveData.selectedDice.length < 5) {
+            showToast(getData().need5Dice);
+            return;
+        }
         document.getElementById('startOverlay').classList.add('hidden');
         game.gameStarted=true;
         game.activeDiceTypes=[...saveData.selectedDice];
@@ -2536,6 +2807,9 @@ function bindEvents(){
         document.getElementById('rollBtn').textContent=`🎲 ${data.rollBtn} (${game.diceCost})`;
         showToast(data.toastGameStart,1500);
         startWave();
+        // 播放遊戲背景音樂
+        stopBgMusic();
+        playBgMusic('game');
     });
     document.getElementById('restartBtn').addEventListener('click',restartGame);
     document.getElementById('rollBtn').addEventListener('click',rollDice);
@@ -2609,8 +2883,8 @@ document.getElementById('coverTitle').textContent=initData.coverTitle;
 document.getElementById('coverDesc').innerHTML=initData.coverDesc;
 document.getElementById('startBtn').textContent=initData.startBtn;
 document.getElementById('coverVersion').textContent=initData.version;
-const year=new Date().getFullYear();
-document.getElementById('coverCopyright').textContent=initData.copyright.replace(/\{year\}/g,year);
+const year2=new Date().getFullYear();
+document.getElementById('coverCopyright').textContent=initData.copyright.replace(/\{year\}/g,year2);
 document.getElementById('dicePreviewEmpty').textContent=initData.dicePreviewEmpty;
 document.getElementById('gameoverTitle').textContent=initData.gameoverTitle;
 document.getElementById('restartBtn').textContent=initData.restartBtn;
@@ -2622,8 +2896,12 @@ document.getElementById('mergeHint').textContent=initData.mergeHint;
 game.activeDiceTypes=[...saveData.selectedDice];
 initUpgradeLevels(); initGameState(); game.gameStarted=false;
 bindEvents();
+
+// 封面音樂
+playBgMusic('menu');
+
 requestAnimationFrame(gameLoop);
-console.log('🎲 Random Dice v1.0.6 — 新增擬態骰子 (MIMIC)');
+console.log('🎲 Random Dice v1.1.0 — Boss從第5關開始，波數顯示左上角');
 </script>
 </body>
 </html>
