@@ -16,17 +16,17 @@
 	</head>
 	<body>
 		<header>
-			<button class="theme-toggle" id="themeToggle">🌙</button>
-			<button class="clock-btn" id="clockBtn" onclick="showClockModal()">🕒</button>
+			<button class="theme-toggle" id="themeToggle" title="切換深色/淺色主題">🌙</button>
+<button class="clock-btn" id="clockBtn" onclick="showClockModal()" title="顯示時鐘">🕒</button>
 			<!--🔰網頁書籤管理工具-->
-			<button class="stealth-btn" id="stealthBtn" onclick="showStealthModeModal()">🐟</button>
-			<button class="settings-btn" onclick="showSettingsModal()">🔒</button>
+			<button class="stealth-btn" id="stealthBtn" onclick="showStealthModeModal()" title="啟動摸魚模式">🐟</button>
+<button class="settings-btn" onclick="showSettingsModal()" title="敏感內容設定">🔒</button>
 			<a href="bookmarks_manager.html" target="_parent">
 				<img id="headerImage" src="pics/diczon_cafe.png" alt="header_image" width="40%" style="max-width:40%;">
 			</a>
 			<!--<h1><a href="index.html" target="_parent" style="text-decoration:none; color:green;">🔰網頁書籤管理工具</a></h1>-->
-			<button class="help-btn" onclick="showHelpModal()">❓</button>
-			<button class="version-btn" onclick="openHistoryDialog()" style="text-decoration: none; display: flex; align-items: center; justify-content: center; border: none; background: var(--version-btn-bg); color: white; border-radius: 20px; width: 40px; height: 40px; font-size: 20px; cursor: pointer; box-shadow: 0 2px 4px var(--shadow-color); transition: background-color 0.3s ease;">💡</button>
+			<button class="help-btn" onclick="showHelpModal()" title="使用指南">❓</button>
+<button class="version-btn" onclick="openHistoryDialog()" title="版本更新記錄">💡</button>
 		</header>
 		
 		<!-- 摸魚模式模態框 -->
@@ -551,7 +551,7 @@
 						<option value="task_manager.html">↳ 📝每日任務</option>
 					</optgroup>
 					<optgroup label="🎮小遊戲">
-						<option value="">↳ 敬請期待！</option>
+						<option value="random_dice.html">↳ 🎲隨機骰子！</option>
 					</optgroup>
 				</select>
 				<select id="tagFilter">
@@ -945,16 +945,9 @@
 			</div>
 		</dialog>
 		<!-- 通用工具模态框 -->
-		<dialog id="toolDialog" style="width: 90%; max-width: 900px; height: 90%; max-height: 90vh; border: none; border-radius: 12px; padding: 0; background: transparent; overflow: hidden;">
-			<div style="display: flex; flex-direction: column; height: 100%; background: var(--card-bg); border-radius: 12px; box-shadow: 0 8px 30px var(--shadow-color);">
-				<!-- 标题栏 -->
-				<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; border-bottom: 1px solid var(--border-color); background: var(--header-bg); border-radius: 12px 12px 0 0;">
-					<span id="toolDialogTitle" style="font-size: 1.2em; font-weight: bold; color: var(--button-bg);">工具</span>
-					<button onclick="closeToolDialog()" style="background: var(--close-btn-bg); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 20px; cursor: pointer; transition: 0.2s;">✕</button>
-				</div>
-				<!-- iframe 容器 -->
-				<iframe id="toolIframe" src="" style="flex: 1; width: 100%; border: none; border-radius: 0 0 12px 12px;"></iframe>
-			</div>
+		<dialog id="toolDialog" style="width: 90%; max-width: 900px; height: 90%; max-height: 90vh; border: none; border-radius: 12px; padding: 20px; background: var(--card-bg); box-shadow: 0 8px 30px var(--shadow-color); overflow: hidden; position: relative;">
+			<button class="tool-close-btn" onclick="closeToolDialog()"></button>
+			<iframe id="toolIframe" src="" style="width: 100%; height: 100%; border: none; border-radius: 8px;"></iframe>
 		</dialog>
 		<footer>
 			<p>© 2026 ☕迪遜咖啡廳，版權所有。<span id="hitCounter" class="hit-counter"></span></p>
