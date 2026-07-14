@@ -33551,9 +33551,12 @@ document.getElementById('languageSelect').addEventListener('change', function(e)
 function openToolDialog(toolType) {
     const dialog = document.getElementById('toolDialog');
     const iframe = document.getElementById('toolIframe');
-    const title = document.getElementById('toolDialogTitle');
+    const title = document.getElementById('toolDialogTitle'); // 虽然不再显示，但可以保留
 
-    if (!dialog || !iframe) return;
+    if (!dialog || !iframe) {
+        console.error('找不到 toolDialog 或 toolIframe 元素');
+        return;
+    }
 
     const src = toolMap[toolType];
     if (!src) {
@@ -33561,9 +33564,9 @@ function openToolDialog(toolType) {
         return;
     }
 
-    title.textContent = toolTitles[toolType] || '工具';
+    if (title) title.textContent = toolTitles[toolType] || '工具';
     iframe.src = src;
-    dialog.showModal(); // 顯示模態框
+    dialog.showModal(); // 关键调用
 }
 
 // ========== 關閉工具對話框 ==========

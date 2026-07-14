@@ -2703,6 +2703,61 @@ input:checked + .slider:before {
     flex: 1;
 }
 
+/* ===== 工具模态框（无标题，按钮右下角，仿摸鱼模式） ===== */
+#toolDialog {
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 8px 30px var(--shadow-color);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 关闭按钮 - 仿摸鱼模式（右下角透明毛玻璃） */
+.tool-close-btn {
+    position: absolute;
+    bottom: 18px;
+    right: 18px;
+    width: 40px;
+    height: 40px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(4px);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: all 0.25s ease;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    padding: 0;
+    line-height: 1;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+.tool-close-btn:hover {
+    background: rgba(232, 17, 35, 0.85);
+    border-color: rgba(232, 17, 35, 0.9);
+    color: white;
+    transform: scale(1.08);
+    box-shadow: 0 4px 20px rgba(232, 17, 35, 0.4);
+}
+.tool-close-btn:active {
+    transform: scale(0.92);
+}
+.tool-close-btn::before {
+    content: "✕";
+    font-weight: 300;
+}
+
+/* 确保 iframe 在深色/浅色模式下背景正确 */
+#toolIframe {
+    background: var(--bg-color);
+    border-radius: 8px;
+}
+
 /* 遮罩层（点击外部关闭） */
 #toolOverlay {
     display: none;
