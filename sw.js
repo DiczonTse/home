@@ -41,7 +41,7 @@ const urlsToCache = [
     '/tools/youtube_thumbnails.html'
 ];
 
-// 安装 Service Worker
+// 安裝 Service Worker
 self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME)
@@ -71,34 +71,35 @@ self.addEventListener('activate', event => {
     event.waitUntil(clients.claim());
 });
 
-// 拦截请求并返回缓存（网络优先策略）
+// 攔截請求並返回（真正的網路優先策略）
 self.addEventListener('fetch', event => {
+    // 僅處理 GET 請求
+    if (event.request.method !== 'GET') return;
+
     event.respondWith(
-        caches.match(event.request)
+        fetch(event.request)
             .then(response => {
-                // 缓存命中则返回，否则尝试网络请求
-                if (response) {
-                    return response;
+                // 如果網路請求成功（狀態碼 200），克隆並更新快取
+                if (response && response.status === 200 && response.type === 'basic') {
+                    const responseToCache = response.clone();
+                    caches.open(CACHE_NAME).then(cache => {
+                        cache.put(event.request, responseToCache);
+                    });
                 }
-                return fetch(event.request)
-                    .then(response => {
-                        // 检查有效响应
-                        if (!response || response.status !== 200 || response.type !== 'basic') {
-                            return response;
+                return response;
+            })
+            .catch(() => {
+                // 網路失敗或斷線時，降級讀取快取
+                return caches.match(event.request)
+                    .then(cachedResponse => {
+                        if (cachedResponse) {
+                            return cachedResponse;
                         }
-                        // 克隆响应以存储到缓存
-                        const responseToCache = response.clone();
-                        caches.open(CACHE_NAME)
-                            .then(cache => {
-                                cache.put(event.request, responseToCache);
-                            });
-                        return response;
-                    })
-                    .catch(() => {
-                        // 离线时返回自定义离线页面（可选）
-                        return new Response('离线状态，请联网后重试', {
+                        // 快取也沒有時，返回自訂離線提示
+                        return new Response('離線狀態，且無快取資源，請聯網後重試', {
                             status: 503,
-                            statusText: 'Service Unavailable'
+                            statusText: 'Service Unavailable',
+                            headers: new Headers({ 'Content-Type': 'text/plain; charset=utf-8' })
                         });
                     });
             })
