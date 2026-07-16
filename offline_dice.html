@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Offline Dice</title>
     <style>
-        /* === 样式与您原先保持一致，仅微调部分颜色，无功能改动 === */
         * {
             margin: 0;
             padding: 0;
@@ -304,6 +303,13 @@
         .cover-buttons .btn-cover.save:hover {
             background: rgba(116, 185, 255, 0.2);
         }
+        .cover-buttons .btn-cover.leaderboard-btn {
+            border-color: #f7d875;
+            color: #f7d875;
+        }
+        .cover-buttons .btn-cover.leaderboard-btn:hover {
+            background: rgba(247, 216, 117, 0.2);
+        }
         .start-overlay .btn-start {
             background: linear-gradient(145deg, #f5a623, #d4891b);
             border: none;
@@ -371,7 +377,7 @@
             background: linear-gradient(135deg, #f7d875, #f5a623);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
         .shop-overlay .shop-points {
             font-size: 16px;
@@ -392,76 +398,91 @@
         .shop-overlay .shop-close:hover {
             color: #fff;
         }
-        .shop-dice-grid {
+        .shop-chest-grid {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 8px;
+            gap: 12px;
             width: 100%;
             max-width: 440px;
             margin: 4px 0 8px 0;
         }
-        .shop-dice-item {
+        .shop-chest-item {
             background: rgba(20, 30, 50, 0.6);
             border: 1px solid #3d4d6e;
-            border-radius: 12px;
-            padding: 10px 12px;
-            width: 100px;
+            border-radius: 16px;
+            padding: 12px 14px;
+            width: 46%;
+            min-width: 140px;
             text-align: center;
             transition: border-color 0.2s;
+            position: relative;
         }
-        .shop-dice-item.owned {
-            border-color: #f7d875;
-            background: rgba(245, 166, 35, 0.08);
+        .shop-chest-item.completed {
+            opacity: 0.4;
+            border-color: #2ecc71;
         }
-        .shop-dice-item .icon {
-            font-size: 32px;
+        .shop-chest-item .chest-icon {
+            font-size: 38px;
             display: block;
         }
-        .shop-dice-item .dname {
-            font-size: 13px;
-            font-weight: 600;
+        .shop-chest-item .chest-name {
+            font-size: 16px;
+            font-weight: 700;
             color: #e8edf5;
             margin: 2px 0;
         }
-        .shop-dice-item .desc {
-            font-size: 10px;
-            color: #8a9fc0;
-            line-height: 1.3;
-        }
-        .shop-dice-item .price {
-            font-size: 12px;
+        .shop-chest-item .chest-cost {
+            font-size: 14px;
             color: #f7d875;
-            margin: 4px 0;
+            margin: 2px 0;
         }
-        .shop-dice-item .btn-buy {
+        .shop-chest-item .chest-remain {
+            font-size: 12px;
+            color: #8a9fc0;
+            margin: 2px 0;
+        }
+        .shop-chest-item .btn-draw {
             background: linear-gradient(145deg, #f5a623, #d4891b);
             border: none;
             color: #0b0e1a;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 700;
-            padding: 4px 14px;
-            border-radius: 20px;
+            padding: 6px 24px;
+            border-radius: 24px;
             cursor: pointer;
             transition: transform 0.15s;
+            margin-top: 4px;
         }
-        .shop-dice-item .btn-buy:active {
+        .shop-chest-item .btn-draw:active {
             transform: scale(0.94);
         }
-        .shop-dice-item .btn-buy:disabled {
+        .shop-chest-item .btn-draw:disabled {
             opacity: 0.4;
             transform: none !important;
             pointer-events: none;
         }
-        .shop-dice-item .owned-badge {
+        .shop-chest-item .completed-badge {
             color: #2ecc71;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 700;
+            margin-top: 4px;
+        }
+        .shop-chest-item .chest-dice-list {
+            font-size: 11px;
+            color: #6a7a8a;
+            margin-top: 2px;
+        }
+        .shop-chest-item .chest-dice-list .got {
+            color: #2ecc71;
+        }
+        .shop-chest-item .chest-dice-list .missing {
+            color: #8a9fc0;
         }
         .shop-select-section {
             width: 100%;
             max-width: 440px;
-            margin: 4px 0;
+            margin: 2px 0;
         }
         .shop-select-section .label {
             font-size: 14px;
@@ -471,14 +492,14 @@
         }
         .shop-select-grid {
             display: flex;
-            gap: 6px;
+            gap: 10px;
             justify-content: center;
             flex-wrap: wrap;
         }
         .shop-select-slot {
-            width: 52px;
-            height: 52px;
-            border-radius: 10px;
+            width: 58px;
+            height: 58px;
+            border-radius: 12px;
             border: 2px solid #3d4d6e;
             background: rgba(13, 18, 34, 0.5);
             display: flex;
@@ -486,21 +507,43 @@
             justify-content: center;
             font-size: 28px;
             cursor: pointer;
-            transition: border-color 0.2s;
+            transition: all 0.25s;
             position: relative;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            font-weight: 700;
+            color: #aab8d0;
         }
         .shop-select-slot.filled {
             border-color: #f7d875;
-            background: rgba(245, 166, 35, 0.08);
+            background: rgba(245, 166, 35, 0.12);
+            box-shadow: 0 0 20px rgba(245, 166, 35, 0.08), inset 0 0 12px rgba(245, 166, 35, 0.05);
+            color: #fff;
         }
         .shop-select-slot:hover {
             border-color: #f5a623;
+            transform: scale(1.04);
         }
         .shop-select-slot .slot-label {
             position: absolute;
             bottom: 2px;
             font-size: 8px;
             color: #8a9fc0;
+            opacity: 0.7;
+        }
+        .shop-select-slot.filled .slot-label {
+            color: #f7d875;
+            opacity: 0.8;
+        }
+        .shop-select-slot .dice-dot {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            pointer-events: none;
+        }
+        .shop-select-slot.filled .dice-dot {
+            background: rgba(255, 215, 0, 0.25);
         }
         .shop-dice-picker {
             display: none;
@@ -549,6 +592,291 @@
             margin: 6px 0;
         }
         .shop-confirm-btn:active {
+            transform: scale(0.94);
+        }
+        .shop-owned-section {
+            width: 100%;
+            max-width: 440px;
+            margin: 6px 0 2px 0;
+        }
+        .shop-owned-section .label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #aab8d0;
+            margin-bottom: 4px;
+            text-align: center;
+        }
+        .shop-owned-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            padding: 4px 0;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+        .shop-owned-grid::-webkit-scrollbar {
+            width: 4px;
+        }
+        .shop-owned-grid::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+        .shop-owned-grid::-webkit-scrollbar-thumb {
+            background: #3d4d6e;
+            border-radius: 4px;
+        }
+        .shop-owned-item {
+            background: rgba(20, 30, 50, 0.6);
+            border: 2px solid #3d4d6e;
+            border-radius: 14px;
+            padding: 8px 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.25s;
+            width: 70px;
+            height: 70px;
+            min-width: 60px;
+            min-height: 60px;
+            flex: 0 0 auto;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            gap: 2px;
+        }
+        .shop-owned-item:hover {
+            border-color: #f5a623;
+            background: rgba(245, 166, 35, 0.12);
+            transform: scale(1.05);
+            box-shadow: 0 0 24px rgba(245, 166, 35, 0.12);
+        }
+        .shop-owned-item .oi-icon {
+            font-size: 30px;
+            line-height: 1;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+        .shop-owned-item .oi-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1.1;
+            text-align: center;
+            width: 100%;
+        }
+        .shop-owned-item .oi-name {
+            font-size: 11px;
+            font-weight: 700;
+            color: #e8edf5;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+        .shop-owned-item .oi-desc {
+            font-size: 8px;
+            color: #8a9fc0;
+            opacity: 0.7;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+        .shop-owned-item .oi-star {
+            font-size: 9px;
+            color: #f7d875;
+            margin-left: auto;
+            padding-left: 6px;
+        }
+        .shop-owned-item .dice-dot-grid {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            border-radius: 14px;
+            overflow: hidden;
+            opacity: 0.15;
+        }
+        .shop-owned-item .dice-dot-grid .dot {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .shop-owned-item .dice-dot-grid .dot:nth-child(1) {
+            top: 18%;
+            left: 18%;
+        }
+        .shop-owned-item .dice-dot-grid .dot:nth-child(2) {
+            top: 18%;
+            right: 18%;
+        }
+        .shop-owned-item .dice-dot-grid .dot:nth-child(3) {
+            bottom: 18%;
+            left: 18%;
+        }
+        .shop-owned-item .dice-dot-grid .dot:nth-child(4) {
+            bottom: 18%;
+            right: 18%;
+        }
+        .shop-owned-item .dice-dot-grid .dot:nth-child(5) {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .shop-owned-item .dice-dot-grid .dot:nth-child(6) {
+            top: 50%;
+            left: 18%;
+            transform: translateY(-50%);
+        }
+        .shop-owned-item .dice-dot-grid .dot:nth-child(7) {
+            top: 50%;
+            right: 18%;
+            transform: translateY(-50%);
+        }
+        .shop-owned-item .dice-dot-grid .dot:nth-child(8) {
+            top: 18%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .shop-owned-item .dice-dot-grid .dot:nth-child(9) {
+            bottom: 18%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .dice-detail-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 28px;
+            background: rgba(0, 0, 0, 0.88);
+            backdrop-filter: blur(10px);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 150;
+            padding: 24px 20px;
+            animation: fadeInPop 0.3s ease-out;
+        }
+        .dice-detail-overlay.visible {
+            display: flex;
+        }
+        @keyframes fadeInPop {
+            0% {
+                opacity: 0;
+                transform: scale(0.92);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .dice-detail-overlay .dd-close {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            font-size: 28px;
+            color: #8a9fc0;
+            cursor: pointer;
+            background: none;
+            border: none;
+            transition: color 0.2s;
+        }
+        .dice-detail-overlay .dd-close:hover {
+            color: #fff;
+        }
+        .dice-detail-overlay .dd-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 6px;
+        }
+        .dice-detail-overlay .dd-icon {
+            font-size: 56px;
+            line-height: 1;
+        }
+        .dice-detail-overlay .dd-title {
+            text-align: left;
+        }
+        .dice-detail-overlay .dd-title .dd-name {
+            font-size: 26px;
+            font-weight: 800;
+            color: #fff;
+        }
+        .dice-detail-overlay .dd-title .dd-desc {
+            font-size: 15px;
+            color: #aab8d0;
+        }
+        .dice-detail-overlay .dd-body {
+            width: 100%;
+            max-width: 380px;
+            background: rgba(13, 18, 34, 0.6);
+            border-radius: 14px;
+            padding: 14px 18px;
+            margin: 6px 0 10px 0;
+            border: 1px solid rgba(60, 80, 120, 0.3);
+        }
+        .dice-detail-overlay .dd-body .dd-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 14px;
+        }
+        .dice-detail-overlay .dd-body .dd-row:last-child {
+            border-bottom: none;
+        }
+        .dice-detail-overlay .dd-body .dd-row .dd-label {
+            color: #8a9fc0;
+        }
+        .dice-detail-overlay .dd-body .dd-row .dd-value {
+            color: #e8edf5;
+            font-weight: 600;
+        }
+        .dice-detail-overlay .dd-body .dd-row .dd-value.highlight {
+            color: #f7d875;
+        }
+        .dice-detail-overlay .dd-body .dd-special {
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px solid rgba(255, 215, 0, 0.15);
+        }
+        .dice-detail-overlay .dd-body .dd-special .dd-special-label {
+            color: #f7d875;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .dice-detail-overlay .dd-body .dd-special .dd-special-text {
+            color: #c8d0e0;
+            font-size: 13px;
+            margin-top: 2px;
+        }
+        .dice-detail-overlay .dd-footer {
+            font-size: 12px;
+            color: #5a6a8a;
+            text-align: center;
+            margin-top: 2px;
+        }
+        .dice-detail-overlay .dd-btn {
+            background: linear-gradient(145deg, #f5a623, #d4891b);
+            border: none;
+            color: #0b0e1a;
+            font-size: 16px;
+            font-weight: 700;
+            padding: 8px 32px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: transform 0.15s;
+            margin-top: 4px;
+        }
+        .dice-detail-overlay .dd-btn:active {
             transform: scale(0.94);
         }
         .gameover-overlay {
@@ -672,6 +1000,283 @@
             border-color: #ff6b6b;
             color: #ff6b6b;
         }
+        .draw-result-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 28px;
+            background: rgba(0, 0, 0, 0.88);
+            backdrop-filter: blur(8px);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 120;
+            padding: 24px;
+            text-align: center;
+            animation: fadeInPop 0.4s ease-out;
+        }
+        .draw-result-overlay.visible {
+            display: flex;
+        }
+        .draw-result-overlay .draw-icon {
+            font-size: 80px;
+            margin-bottom: 6px;
+            animation: bounceDraw 0.6s ease-out;
+        }
+        @keyframes bounceDraw {
+            0% {
+                transform: scale(0.3) rotate(-20deg);
+                opacity: 0;
+            }
+            60% {
+                transform: scale(1.2) rotate(5deg);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+        }
+        .draw-result-overlay .draw-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #f7d875;
+            margin-bottom: 2px;
+        }
+        .draw-result-overlay .draw-sub {
+            font-size: 18px;
+            color: #e8edf5;
+            margin-bottom: 6px;
+        }
+        .draw-result-overlay .draw-dice-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: rgba(20, 30, 50, 0.6);
+            border: 2px solid #f7d875;
+            border-radius: 16px;
+            padding: 12px 28px;
+            margin: 6px 0 12px 0;
+        }
+        .draw-result-overlay .draw-dice-box .dd-label {
+            font-size: 48px;
+        }
+        .draw-result-overlay .draw-dice-box .dd-info {
+            text-align: left;
+        }
+        .draw-result-overlay .draw-dice-box .dd-info .dd-name {
+            font-size: 22px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .draw-result-overlay .draw-dice-box .dd-info .dd-desc {
+            font-size: 14px;
+            color: #aab8d0;
+        }
+        .draw-result-overlay .draw-btn {
+            background: linear-gradient(145deg, #f5a623, #d4891b);
+            border: none;
+            color: #0b0e1a;
+            font-size: 18px;
+            font-weight: 800;
+            padding: 10px 36px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: transform 0.15s;
+            margin-top: 4px;
+        }
+        .draw-result-overlay .draw-btn:active {
+            transform: scale(0.94);
+        }
+        .leaderboard-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 28px;
+            background: rgba(11, 14, 26, 0.96);
+            backdrop-filter: blur(10px);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            z-index: 130;
+            padding: 24px 16px;
+            overflow-y: auto;
+        }
+        .leaderboard-overlay.visible {
+            display: flex;
+        }
+        .leaderboard-overlay h2 {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #f7d875, #f5a623);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+        .leaderboard-overlay .lb-close {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            font-size: 28px;
+            color: #8a9fc0;
+            cursor: pointer;
+            background: none;
+            border: none;
+            transition: color 0.2s;
+        }
+        .leaderboard-overlay .lb-close:hover {
+            color: #fff;
+        }
+        .leaderboard-overlay .lb-list {
+            width: 100%;
+            max-width: 400px;
+            margin: 8px 0;
+            flex: 1;
+            overflow-y: auto;
+        }
+        .leaderboard-overlay .lb-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 14px;
+            margin: 4px 0;
+            background: rgba(20, 30, 50, 0.4);
+            border-radius: 10px;
+            border: 1px solid rgba(60, 80, 120, 0.3);
+            transition: background 0.2s;
+        }
+        .leaderboard-overlay .lb-item:nth-child(1) {
+            border-color: #f7d875;
+            background: rgba(245, 166, 35, 0.12);
+        }
+        .leaderboard-overlay .lb-item:nth-child(2) {
+            border-color: #c0c0c0;
+            background: rgba(192, 192, 192, 0.08);
+        }
+        .leaderboard-overlay .lb-item:nth-child(3) {
+            border-color: #cd7f32;
+            background: rgba(205, 127, 50, 0.08);
+        }
+        .leaderboard-overlay .lb-rank {
+            font-weight: 700;
+            font-size: 18px;
+            color: #f7d875;
+            width: 36px;
+            text-align: center;
+        }
+        .leaderboard-overlay .lb-name {
+            font-weight: 600;
+            font-size: 16px;
+            color: #e8edf5;
+            flex: 1;
+            text-align: left;
+            padding-left: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .leaderboard-overlay .lb-wave {
+            font-weight: 700;
+            font-size: 16px;
+            color: #74b9ff;
+            padding: 0 8px;
+        }
+        .leaderboard-overlay .lb-score {
+            font-size: 14px;
+            color: #f7d875;
+            padding: 0 8px;
+        }
+        .leaderboard-overlay .lb-empty {
+            color: #6a7a8a;
+            font-size: 16px;
+            padding: 20px 0;
+            text-align: center;
+        }
+        .leaderboard-overlay .lb-footer {
+            font-size: 11px;
+            color: #5a6a8a;
+            margin-top: 4px;
+        }
+        .lb-name-input-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 28px;
+            background: rgba(0, 0, 0, 0.82);
+            backdrop-filter: blur(6px);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 140;
+            padding: 24px;
+            text-align: center;
+        }
+        .lb-name-input-overlay.visible {
+            display: flex;
+        }
+        .lb-name-input-overlay h3 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #f7d875;
+            margin-bottom: 4px;
+        }
+        .lb-name-input-overlay p {
+            color: #aab8d0;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .lb-name-input-overlay input {
+            background: rgba(13, 18, 34, 0.8);
+            border: 2px solid #3d4d6e;
+            border-radius: 30px;
+            padding: 12px 20px;
+            font-size: 18px;
+            color: #fff;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+        .lb-name-input-overlay input:focus {
+            border-color: #f7d875;
+        }
+        .lb-name-input-overlay .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .lb-name-input-overlay .btn-group button {
+            background: linear-gradient(145deg, #f5a623, #d4891b);
+            border: none;
+            color: #0b0e1a;
+            font-size: 18px;
+            font-weight: 700;
+            padding: 10px 32px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+        .lb-name-input-overlay .btn-group button:active {
+            transform: scale(0.94);
+        }
+        .lb-name-input-overlay .btn-group button.secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: #aab8d0;
+            border: 1px solid #3d4d6e;
+        }
         @media (max-width:420px) {
             .game-wrapper {
                 padding: 10px;
@@ -727,16 +1332,17 @@
             .gameover-overlay p {
                 font-size: 18px;
             }
-            .shop-dice-item {
-                width: 80px;
-                padding: 6px 8px;
+            .shop-chest-item {
+                width: 100%;
+                min-width: 120px;
+                padding: 10px 12px;
             }
-            .shop-dice-item .icon {
-                font-size: 24px;
+            .shop-chest-item .chest-icon {
+                font-size: 30px;
             }
             .shop-select-slot {
-                width: 44px;
-                height: 44px;
+                width: 50px;
+                height: 50px;
                 font-size: 22px;
             }
             .shop-overlay h2 {
@@ -755,14 +1361,76 @@
                 bottom: 12px;
                 left: 12px;
             }
+            .draw-result-overlay .draw-icon {
+                font-size: 56px;
+            }
+            .draw-result-overlay .draw-title {
+                font-size: 22px;
+            }
+            .draw-result-overlay .draw-dice-box .dd-label {
+                font-size: 36px;
+            }
+            .draw-result-overlay .draw-dice-box .dd-info .dd-name {
+                font-size: 18px;
+            }
+            .leaderboard-overlay h2 {
+                font-size: 22px;
+            }
+            .leaderboard-overlay .lb-item {
+                padding: 6px 10px;
+            }
+            .leaderboard-overlay .lb-rank {
+                font-size: 15px;
+                width: 28px;
+            }
+            .leaderboard-overlay .lb-name {
+                font-size: 14px;
+            }
+            .leaderboard-overlay .lb-wave {
+                font-size: 14px;
+            }
+            .lb-name-input-overlay h3 {
+                font-size: 20px;
+            }
+            .lb-name-input-overlay input {
+                font-size: 16px;
+                padding: 10px 16px;
+                width: 90%;
+            }
+            .shop-owned-item {
+                width: 58px;
+                height: 58px;
+                min-width: 50px;
+                min-height: 50px;
+                padding: 4px 3px;
+            }
+            .shop-owned-item .oi-icon {
+                font-size: 24px;
+            }
+            .shop-owned-item .oi-name {
+                font-size: 9px;
+            }
+            .shop-owned-item .oi-desc {
+                font-size: 7px;
+            }
+            .dice-detail-overlay .dd-icon {
+                font-size: 40px;
+            }
+            .dice-detail-overlay .dd-title .dd-name {
+                font-size: 20px;
+            }
+            .dice-detail-overlay .dd-body .dd-row {
+                font-size: 12px;
+            }
         }
     </style>
 </head>
 <body>
     <audio id="bgmAudio" style="display:none;" preload="auto"></audio>
+    <audio id="shopBgmAudio" style="display:none;" preload="auto"></audio>
 
     <div class="game-wrapper" id="gameWrapper">
-        <!-- 起始覆蓋層 -->
+        <!-- ===== 起始覆蓋層 ===== -->
         <div class="start-overlay" id="startOverlay">
             <div class="deco-dice">🎲</div>
             <div class="deco-dice">🎲</div>
@@ -780,31 +1448,98 @@
             <div class="footer"><span class="score-display" id="coverScore">🏆 累積分數: 0</span></div>
             <div class="cover-buttons">
                 <button class="btn-cover primary" id="shopBtn">🏪 商店</button>
+                <button class="btn-cover leaderboard-btn" id="leaderboardBtn">🏆 排行榜</button>
                 <button class="btn-cover save" id="saveBtn">💾 儲存</button>
                 <button class="btn-cover save" id="loadBtn">📂 載入</button>
                 <button class="btn-cover danger" id="resetBtn">🔄 重設</button>
             </div>
             <button class="btn-start" id="startBtn">開始遊戲</button>
             <div class="footer">
-                <span class="version" id="coverVersion">v2.3.0</span>
+                <span class="version" id="coverVersion">v2.6.0</span>
                 <span class="copyright" id="coverCopyright">© 2026 ☕迪遜咖啡廳，版權所有。</span>
             </div>
         </div>
 
-        <!-- 商店 -->
+        <!-- ===== 商店 ===== -->
         <div class="shop-overlay" id="shopOverlay">
             <button class="shop-close" id="shopCloseBtn">✕</button>
             <h2 id="shopTitle">🏪 商店</h2>
             <div class="shop-points" id="shopPointsDisplay">🏆 累積分數: 0</div>
-            <div class="shop-dice-grid" id="shopDiceGrid"></div>
+            <div class="shop-chest-grid" id="shopChestGrid"></div>
             <div class="shop-select-section">
                 <div class="label" id="shopSelectLabel">🎯 選擇攜帶的5顆骰子：</div>
                 <div class="shop-select-grid" id="shopSelectGrid"></div>
                 <div class="shop-dice-picker" id="shopDicePicker"></div>
             </div>
+
+            <!-- ===== 已獲得骰子列表 (方形按鈕) ===== -->
+            <div class="shop-owned-section">
+                <div class="label" id="shopOwnedLabel">🎲 已獲得骰子 (點擊查看數值)</div>
+                <div class="shop-owned-grid" id="shopOwnedGrid"></div>
+            </div>
+
             <button class="shop-confirm-btn" id="shopConfirmBtn">✅ 確認</button>
         </div>
 
+        <!-- ===== 骰子詳細數值彈窗 ===== -->
+        <div class="dice-detail-overlay" id="diceDetailOverlay">
+            <button class="dd-close" id="ddCloseBtn">✕</button>
+            <div class="dd-header">
+                <span class="dd-icon" id="ddIcon">🔥</span>
+                <div class="dd-title">
+                    <div class="dd-name" id="ddName">火焰骰子</div>
+                    <div class="dd-desc" id="ddDesc">燃燒・濺射</div>
+                </div>
+            </div>
+            <div class="dd-body" id="ddBody">
+                <div class="dd-row"><span class="dd-label">基礎傷害</span><span class="dd-value" id="ddBaseDmg">20</span></div>
+                <div class="dd-row"><span class="dd-label">每星傷害</span><span class="dd-value" id="ddPerStar">+3</span></div>
+                <div class="dd-row"><span class="dd-label">基礎攻速</span><span class="dd-value" id="ddBaseInterval">0.80s</span></div>
+                <div class="dd-row"><span class="dd-label">每級攻速</span><span class="dd-value" id="ddPerLevel">-0.01s</span></div>
+                <div class="dd-special">
+                    <div class="dd-special-label">⚡ 特殊能力</div>
+                    <div class="dd-special-text" id="ddSpecialText">濺射 (60%範圍傷害) · 燃燒 (持續2秒)</div>
+                </div>
+            </div>
+            <button class="dd-btn" id="ddConfirmBtn">👍 知道了</button>
+            <div class="dd-footer">點擊外部或按鈕關閉</div>
+        </div>
+
+        <!-- ===== 抽獎結果覆蓋層 ===== -->
+        <div class="draw-result-overlay" id="drawResultOverlay">
+            <div class="draw-icon" id="drawIcon">🎲</div>
+            <div class="draw-title" id="drawTitle">🎉 恭喜獲得！</div>
+            <div class="draw-sub" id="drawSub">你抽到了新的骰子！</div>
+            <div class="draw-dice-box">
+                <span class="dd-label" id="drawDiceLabel">🔥</span>
+                <div class="dd-info">
+                    <div class="dd-name" id="drawDiceName">火焰骰子</div>
+                    <div class="dd-desc" id="drawDiceDesc">燃燒・濺射</div>
+                </div>
+            </div>
+            <button class="draw-btn" id="drawConfirmBtn">🎉 太好了！</button>
+        </div>
+
+        <!-- ===== 排行榜覆蓋層 ===== -->
+        <div class="leaderboard-overlay" id="leaderboardOverlay">
+            <button class="lb-close" id="lbCloseBtn">✕</button>
+            <h2>🏆 最高波數排行榜</h2>
+            <div class="lb-list" id="lbList"></div>
+            <div class="lb-footer">僅顯示前10名</div>
+        </div>
+
+        <!-- ===== 排行榜輸入名稱覆蓋層 ===== -->
+        <div class="lb-name-input-overlay" id="lbNameInputOverlay">
+            <h3>🏆 恭喜進入排行榜！</h3>
+            <p id="lbInputDesc">請輸入你的名稱以記錄成績</p>
+            <input type="text" id="lbNameInput" maxlength="12" placeholder="輸入名稱..." autocomplete="off" />
+            <div class="btn-group">
+                <button id="lbNameConfirmBtn">✅ 確認</button>
+                <button class="secondary" id="lbNameSkipBtn">跳過</button>
+            </div>
+        </div>
+
+        <!-- ===== 遊戲主體 ===== -->
         <div class="board-container">
             <canvas id="gameCanvas" width="600" height="600"></canvas>
             <button id="fishModeBtn">🐟 摸魚</button>
@@ -835,9 +1570,9 @@
         const translations = {
             'zh-TW': {
                 coverTitle: '🎲 離線骰子',
-                coverDesc: '🔥火・⚡雷・🌪️風・☠️毒・❄️冰・💰金礦・🧛中介<br>⭐ 合併最高 7 星 &nbsp;|&nbsp; 💰 費用每次 +10<br>🛡️ Boss能力全面更新 &nbsp;|&nbsp; ❤️ 僅 3 條命<br>🔗 拖曳骰子到同類同星上合併',
+                coverDesc: '🔥火・⚡雷・🌪️風・☠️毒・❄️冰<br>⭐ 合併最高 7 星 &nbsp;|&nbsp; 💰 費用每次 +10<br>🛡️ Boss能力全面更新 &nbsp;|&nbsp; ❤️ 僅 3 條命<br>🔗 拖曳骰子到同類同星上合併',
                 startBtn: '開始遊戲',
-                version: 'v2.3.0',
+                version: 'v2.6.0',
                 copyright: '© {year} ☕迪遜咖啡廳，版權所有。',
                 gameTitle: '🎲 Offline Dice',
                 rollBtn: '擲骰',
@@ -861,6 +1596,7 @@
                 loadBtn: '📂 載入',
                 resetBtn: '🔄 重設',
                 shopSelectHint: '點擊空位選擇骰子，點擊已選骰子可移除',
+                shopOwnedLabel: '🎲 已獲得骰子 (點擊查看數值)',
                 diceNames: {
                     FIRE: '火',
                     THUNDER: '雷',
@@ -876,7 +1612,8 @@
                     MIMIC: '擬態',
                     VAMPIRE: '中介',
                     JOKER: '小丑',
-                    SAPLING: '樹苗'
+                    SAPLING: '樹苗',
+                    TAICHI: '太極'
                 },
                 diceDescs: {
                     FIRE: '燃燒・濺射',
@@ -891,9 +1628,10 @@
                     GOLDMINE: '生產金幣',
                     MYSTERY: '定時隨機變身',
                     MIMIC: '任意合併',
-                    VAMPIRE: '標記・吸血',
+                    VAMPIRE: '吸血',
                     JOKER: '複製',
-                    SAPLING: '目標合併'
+                    SAPLING: '目標合併',
+                    TAICHI: '陰陽調和'
                 },
                 dicePrices: {
                     FIRE: 0,
@@ -910,7 +1648,20 @@
                     MIMIC: 1200,
                     VAMPIRE: 1200,
                     JOKER: 1500,
-                    SAPLING: 1500
+                    SAPLING: 1500,
+                    TAICHI: 1500
+                },
+                chestNames: {
+                    common: '一般寶箱',
+                    rare: '稀有寶箱',
+                    epic: '史詩寶箱',
+                    legendary: '傳奇寶箱'
+                },
+                chestDescs: {
+                    common: '抽 300 積分骰子',
+                    rare: '抽 900 積分骰子',
+                    epic: '抽 1200 積分骰子',
+                    legendary: '抽 1500 積分骰子'
                 },
                 bossNames: {
                     mage: '魔術師',
@@ -957,7 +1708,7 @@
                 loadFail: '❌ 讀取失敗，檔案格式錯誤',
                 resetConfirm: '⚠️ 確定要重設所有資料嗎？此操作無法復原！',
                 resetDone: '🔄 已重設所有資料',
-                shopBuySuccess: '✅ 成功購買 {name}！',
+                shopBuySuccess: '✅ 成功抽到 {name}！',
                 shopBuyFail: '❌ 積分不足！需要 {cost} 🏆',
                 shopAlreadyOwned: '✅ 已擁有此骰子',
                 mergeNeedSameType: '❌ 普通合併需同類型，或使用小丑/樹苗特殊合併',
@@ -983,12 +1734,58 @@
                 vampireAbsorb: '🧛 吸收 +${gold}',
                 vampireKillBonus: '🧛 擊殺獎勵 +${gold}',
                 vampireAttack: '🧛 攻擊 {name} -{dmg}',
+                chestComplete: '🎉 已抽齊所有骰子！',
+                drawResult: '🎲 抽到 {name}！',
+                taichiYin: '☯️ 陰 啟動！攻速提升 {pct}%',
+                taichiYang: '☯️ 陽 啟動！攻擊力提升 {pct}%',
+                taichiHarmony: '☯️ 和諧 啟動！攻速+攻擊力+額外傷害！',
+                taichiYinDesc: '陰：攻速 +{pct}%',
+                taichiYangDesc: '陽：攻擊力 +{pct}%',
+                taichiHarmonyDesc: '和諧：全效果 + 額外傷害',
+                leaderboardTitle: '🏆 最高波數排行榜',
+                lbEmpty: '尚無記錄，快來挑戰吧！',
+                lbRank: '#{rank}',
+                lbName: '玩家',
+                lbWave: '波數',
+                lbScore: '積分',
+                lbInputTitle: '🏆 恭喜進入排行榜！',
+                lbInputDesc: '你的波數 {wave} 已進入前10名！請輸入名稱：',
+                lbInputPlaceholder: '輸入名稱...',
+                lbConfirm: '✅ 確認',
+                lbSkip: '跳過',
+                lbSaved: '✅ 已記錄你的成績！',
+                lbClose: '關閉',
+                lbYourRank: '🎯 你的排名: #{rank}',
+                hitSound: '💥 受到攻擊！',
+                detailTitle: '🎲 骰子詳細數值',
+                detailBaseDmg: '基礎傷害',
+                detailPerStar: '每星傷害',
+                detailBaseInterval: '基礎攻速',
+                detailPerLevel: '每級攻速',
+                detailSpecial: '⚡ 特殊能力',
+                detailClose: '👍 知道了',
+                detailSpecialNone: '無特殊能力',
+                detailSplash: '濺射 ({pct}% 範圍傷害)',
+                detailChain: '連鎖 {count} 個目標',
+                detailPoison: '持續毒傷 (每 {tick}s {dmg} 傷害)',
+                detailSlow: '疊加減速 (每層 {pct}%)',
+                detailBurn: '燃燒 (持續 {dur}s)',
+                detailBossMultiplier: '對 Boss 造成 {mult}x 傷害',
+                detailGamble: '隨機傷害 (最低 {min})',
+                detailLock: '機率暫停敵人',
+                detailGoldmine: '生產金幣 (每次 {gold}💰)',
+                detailMystery: '定時隨機變身 (每 {time}s)',
+                detailMimic: '可與任意骰子合併',
+                detailVampire: '吸血 · 標記敵人吸取金幣',
+                detailJoker: '複製目標骰子 · 可與任意合併',
+                detailSapling: '可與任意骰子合併提升星級',
+                detailTaichi: '陰陽調和 · 橫列/直行觸發能力'
             },
             'zh-CN': {
                 coverTitle: '🎲 离线骰子',
-                coverDesc: '🔥火・⚡雷・🌪️风・☠️毒・❄️冰・💰金矿・🧛中介<br>⭐ 合并最高 7 星 &nbsp;|&nbsp; 💰 费用每次 +10<br>🛡️ Boss能力全面更新 &nbsp;|&nbsp; ❤️ 仅 3 条命<br>🔗 拖曳骰子到同类同星上合并',
+                coverDesc: '🔥火・⚡雷・🌪️风・☠️毒・❄️冰<br>⭐ 合并最高 7 星 &nbsp;|&nbsp; 💰 费用每次 +10<br>🛡️ Boss能力全面更新 &nbsp;|&nbsp; ❤️ 仅 3 条命<br>🔗 拖曳骰子到同类同星上合并',
                 startBtn: '开始游戏',
-                version: 'v2.3.0',
+                version: 'v2.6.0',
                 copyright: '© {year} ☕迪逊咖啡厅，版权所有。',
                 gameTitle: '🎲 Offline Dice',
                 rollBtn: '掷骰',
@@ -1012,6 +1809,7 @@
                 loadBtn: '📂 载入',
                 resetBtn: '🔄 重设',
                 shopSelectHint: '点击空位选择骰子，点击已选骰子可移除',
+                shopOwnedLabel: '🎲 已获得骰子 (点击查看数值)',
                 diceNames: {
                     FIRE: '火',
                     THUNDER: '雷',
@@ -1027,7 +1825,8 @@
                     MIMIC: '拟态',
                     VAMPIRE: '中介',
                     JOKER: '小丑',
-                    SAPLING: '树苗'
+                    SAPLING: '树苗',
+                    TAICHI: '太极'
                 },
                 diceDescs: {
                     FIRE: '燃烧・溅射',
@@ -1042,9 +1841,10 @@
                     GOLDMINE: '生产金币',
                     MYSTERY: '定时随机变身',
                     MIMIC: '任意合并',
-                    VAMPIRE: '标记・吸血',
+                    VAMPIRE: '吸血',
                     JOKER: '复制',
-                    SAPLING: '目标合并'
+                    SAPLING: '目标合并',
+                    TAICHI: '阴阳调和'
                 },
                 dicePrices: {
                     FIRE: 0,
@@ -1061,7 +1861,20 @@
                     MIMIC: 1200,
                     VAMPIRE: 1200,
                     JOKER: 1500,
-                    SAPLING: 1500
+                    SAPLING: 1500,
+                    TAICHI: 1500
+                },
+                chestNames: {
+                    common: '普通宝箱',
+                    rare: '稀有宝箱',
+                    epic: '史诗宝箱',
+                    legendary: '传奇宝箱'
+                },
+                chestDescs: {
+                    common: '抽 300 积分骰子',
+                    rare: '抽 900 积分骰子',
+                    epic: '抽 1200 积分骰子',
+                    legendary: '抽 1500 积分骰子'
                 },
                 bossNames: {
                     mage: '魔术师',
@@ -1108,7 +1921,7 @@
                 loadFail: '❌ 读取失败，档案格式错误',
                 resetConfirm: '⚠️ 确定要重置所有数据吗？此操作无法复原！',
                 resetDone: '🔄 已重置所有数据',
-                shopBuySuccess: '✅ 成功购买 {name}！',
+                shopBuySuccess: '✅ 成功抽到 {name}！',
                 shopBuyFail: '❌ 积分不足！需要 {cost} 🏆',
                 shopAlreadyOwned: '✅ 已拥有此骰子',
                 mergeNeedSameType: '❌ 普通合并需同类型，或使用小丑/树苗特殊合并',
@@ -1134,12 +1947,58 @@
                 vampireAbsorb: '🧛 吸收 +${gold}',
                 vampireKillBonus: '🧛 击杀奖励 +${gold}',
                 vampireAttack: '🧛 攻击 {name} -{dmg}',
+                chestComplete: '🎉 已抽齐所有骰子！',
+                drawResult: '🎲 抽到 {name}！',
+                taichiYin: '☯️ 阴 启动！攻速提升 {pct}%',
+                taichiYang: '☯️ 阳 启动！攻击力提升 {pct}%',
+                taichiHarmony: '☯️ 和谐 启动！攻速+攻击力+额外伤害！',
+                taichiYinDesc: '阴：攻速 +{pct}%',
+                taichiYangDesc: '阳：攻击力 +{pct}%',
+                taichiHarmonyDesc: '和谐：全效果 + 额外伤害',
+                leaderboardTitle: '🏆 最高波数排行榜',
+                lbEmpty: '暂无记录，快来挑战吧！',
+                lbRank: '#{rank}',
+                lbName: '玩家',
+                lbWave: '波数',
+                lbScore: '积分',
+                lbInputTitle: '🏆 恭喜进入排行榜！',
+                lbInputDesc: '你的波数 {wave} 已进入前10名！请输入名称：',
+                lbInputPlaceholder: '输入名称...',
+                lbConfirm: '✅ 确认',
+                lbSkip: '跳过',
+                lbSaved: '✅ 已记录你的成绩！',
+                lbClose: '关闭',
+                lbYourRank: '🎯 你的排名: #{rank}',
+                hitSound: '💥 受到攻击！',
+                detailTitle: '🎲 骰子详细数值',
+                detailBaseDmg: '基础伤害',
+                detailPerStar: '每星伤害',
+                detailBaseInterval: '基础攻速',
+                detailPerLevel: '每级攻速',
+                detailSpecial: '⚡ 特殊能力',
+                detailClose: '👍 知道了',
+                detailSpecialNone: '无特殊能力',
+                detailSplash: '溅射 ({pct}% 范围伤害)',
+                detailChain: '连锁 {count} 个目标',
+                detailPoison: '持续毒伤 (每 {tick}s {dmg} 伤害)',
+                detailSlow: '叠加减速 (每层 {pct}%)',
+                detailBurn: '燃烧 (持续 {dur}s)',
+                detailBossMultiplier: '对 Boss 造成 {mult}x 伤害',
+                detailGamble: '随机伤害 (最低 {min})',
+                detailLock: '概率暂停敌人',
+                detailGoldmine: '生产金币 (每次 {gold}💰)',
+                detailMystery: '定时随机变身 (每 {time}s)',
+                detailMimic: '可与任意骰子合并',
+                detailVampire: '吸血 · 标记敌人吸取金币',
+                detailJoker: '复制目标骰子 · 可与任意合并',
+                detailSapling: '可与任意骰子合并提升星级',
+                detailTaichi: '阴阳调和 · 横列/直行触发能力'
             },
             'en': {
                 coverTitle: '🎲 Offline Dice',
-                coverDesc: '🔥Fire・⚡Thunder・🌪️Wind・☠️Poison・❄️Ice・💰Gold Mine・🧛Mediator<br>⭐ Merge up to 7 Stars &nbsp;|&nbsp; 💰 Cost +10 each roll<br>🛡️ Boss abilities fully revamped &nbsp;|&nbsp; ❤️ Only 3 Lives<br>🔗 Drag dice to merge same type & star',
+                coverDesc: '🔥Fire・⚡Thunder・🌪️Wind・☠️Poison・❄️Ice<br>⭐ Merge up to 7 Stars &nbsp;|&nbsp; 💰 Cost +10 each roll<br>🛡️ Boss abilities fully revamped &nbsp;|&nbsp; ❤️ Only 3 Lives<br>🔗 Drag dice to merge same type & star',
                 startBtn: 'Start Game',
-                version: 'v2.3.0',
+                version: 'v2.6.0',
                 copyright: '© {year} ☕Diczon\'s Cafe, All Rights Reserved.',
                 gameTitle: '🎲 Offline Dice',
                 rollBtn: 'Roll',
@@ -1163,6 +2022,7 @@
                 loadBtn: '📂 Load',
                 resetBtn: '🔄 Reset',
                 shopSelectHint: 'Click empty slot to select, click selected to remove',
+                shopOwnedLabel: '🎲 Owned Dice (click to view stats)',
                 diceNames: {
                     FIRE: 'Fire',
                     THUNDER: 'Thunder',
@@ -1178,7 +2038,8 @@
                     MIMIC: 'Mimic',
                     VAMPIRE: 'Mediator',
                     JOKER: 'Joker',
-                    SAPLING: 'Sapling'
+                    SAPLING: 'Sapling',
+                    TAICHI: 'Taichi'
                 },
                 diceDescs: {
                     FIRE: 'Burn・Splash',
@@ -1193,9 +2054,10 @@
                     GOLDMINE: 'Produce gold',
                     MYSTERY: 'Timed random transform',
                     MIMIC: 'Any merge',
-                    VAMPIRE: 'Mark・Leech',
+                    VAMPIRE: 'Leech',
                     JOKER: 'Copy',
-                    SAPLING: 'Target Merge'
+                    SAPLING: 'Target Merge',
+                    TAICHI: 'Yin-Yang'
                 },
                 dicePrices: {
                     FIRE: 0,
@@ -1212,7 +2074,20 @@
                     MIMIC: 1200,
                     VAMPIRE: 1200,
                     JOKER: 1500,
-                    SAPLING: 1500
+                    SAPLING: 1500,
+                    TAICHI: 1500
+                },
+                chestNames: {
+                    common: 'Common Chest',
+                    rare: 'Rare Chest',
+                    epic: 'Epic Chest',
+                    legendary: 'Legendary Chest'
+                },
+                chestDescs: {
+                    common: 'Draw 300-point dice',
+                    rare: 'Draw 900-point dice',
+                    epic: 'Draw 1200-point dice',
+                    legendary: 'Draw 1500-point dice'
                 },
                 bossNames: {
                     mage: 'Magician',
@@ -1259,7 +2134,7 @@
                 loadFail: '❌ Load failed, invalid format',
                 resetConfirm: '⚠️ Reset all data? This cannot be undone!',
                 resetDone: '🔄 All data reset',
-                shopBuySuccess: '✅ Purchased {name}!',
+                shopBuySuccess: '✅ Drew {name}!',
                 shopBuyFail: '❌ Not enough points! Need {cost} 🏆',
                 shopAlreadyOwned: '✅ Already owned',
                 mergeNeedSameType: '❌ Normal merge needs same type, or use Joker/Sapling special',
@@ -1285,12 +2160,58 @@
                 vampireAbsorb: '🧛 Absorb +${gold}',
                 vampireKillBonus: '🧛 Kill Bonus +${gold}',
                 vampireAttack: '🧛 Attack {name} -{dmg}',
+                chestComplete: '🎉 All dice collected!',
+                drawResult: '🎲 Drew {name}!',
+                taichiYin: '☯️ Yin activated! ATK Speed +{pct}%',
+                taichiYang: '☯️ Yang activated! ATK +{pct}%',
+                taichiHarmony: '☯️ Harmony activated! ATK Speed+ATK+Extra DMG!',
+                taichiYinDesc: 'Yin: ATK Speed +{pct}%',
+                taichiYangDesc: 'Yang: ATK +{pct}%',
+                taichiHarmonyDesc: 'Harmony: All effects + Extra DMG',
+                leaderboardTitle: '🏆 Highest Wave Leaderboard',
+                lbEmpty: 'No records yet, come challenge!',
+                lbRank: '#{rank}',
+                lbName: 'Player',
+                lbWave: 'Wave',
+                lbScore: 'Score',
+                lbInputTitle: '🏆 Congratulations!',
+                lbInputDesc: 'Your wave {wave} is in top 10! Enter your name:',
+                lbInputPlaceholder: 'Enter name...',
+                lbConfirm: '✅ Confirm',
+                lbSkip: 'Skip',
+                lbSaved: '✅ Record saved!',
+                lbClose: 'Close',
+                lbYourRank: '🎯 Your rank: #{rank}',
+                hitSound: '💥 Hit!',
+                detailTitle: '🎲 Dice Details',
+                detailBaseDmg: 'Base Damage',
+                detailPerStar: 'Per Star',
+                detailBaseInterval: 'Base Speed',
+                detailPerLevel: 'Per Level',
+                detailSpecial: '⚡ Special Ability',
+                detailClose: '👍 Got it',
+                detailSpecialNone: 'No special ability',
+                detailSplash: 'Splash ({pct}% area damage)',
+                detailChain: 'Chain {count} targets',
+                detailPoison: 'Poison (every {tick}s {dmg} dmg)',
+                detailSlow: 'Stacking Slow ({pct}% per stack)',
+                detailBurn: 'Burn (lasts {dur}s)',
+                detailBossMultiplier: '{mult}x damage to Boss',
+                detailGamble: 'Random damage (min {min})',
+                detailLock: 'Chance to stun enemies',
+                detailGoldmine: 'Produce gold ({gold}💰 each)',
+                detailMystery: 'Transform randomly every {time}s',
+                detailMimic: 'Merge with any dice',
+                detailVampire: 'Leech · Mark enemies to absorb gold',
+                detailJoker: 'Copy target dice · Merge with any',
+                detailSapling: 'Merge with any dice to increase star',
+                detailTaichi: 'Yin-Yang · Row/Column triggers ability'
             },
             'ja': {
                 coverTitle: '🎲 オフラインダイス',
-                coverDesc: '🔥火・⚡雷・🌪️風・☠️毒・❄️氷・💰金鉱・🧛仲介<br>⭐ 最大7つ星まで合体 &nbsp;|&nbsp; 💰 コスト毎回+10<br>🛡️ Boss能力完全刷新 &nbsp;|&nbsp; ❤️ ライフ3つ<br>🔗 ドラッグして同種・同星を合体',
+                coverDesc: '🔥火・⚡雷・🌪️風・☠️毒・❄️氷<br>⭐ 最大7つ星まで合体 &nbsp;|&nbsp; 💰 コスト毎回+10<br>🛡️ Boss能力完全刷新 &nbsp;|&nbsp; ❤️ ライフ3つ<br>🔗 ドラッグして同種・同星を合体',
                 startBtn: 'ゲーム開始',
-                version: 'v2.3.0',
+                version: 'v2.6.0',
                 copyright: '© {year} ☕ディクソンカフェ，無断転載を禁じます。',
                 gameTitle: '🎲 Offline Dice',
                 rollBtn: 'ダイス',
@@ -1314,6 +2235,7 @@
                 loadBtn: '📂 読み込み',
                 resetBtn: '🔄 リセット',
                 shopSelectHint: '空きをクリック選択、選択済みをクリックで解除',
+                shopOwnedLabel: '🎲 所有ダイス (クリックで詳細)',
                 diceNames: {
                     FIRE: '火',
                     THUNDER: '雷',
@@ -1329,7 +2251,8 @@
                     MIMIC: '擬態',
                     VAMPIRE: '仲介',
                     JOKER: 'ジョーカー',
-                    SAPLING: '苗木'
+                    SAPLING: '苗木',
+                    TAICHI: '太極'
                 },
                 diceDescs: {
                     FIRE: '燃焼・範囲',
@@ -1344,9 +2267,10 @@
                     GOLDMINE: '金生産',
                     MYSTERY: '定期ランダム変身',
                     MIMIC: '任意合体',
-                    VAMPIRE: 'マーク・吸血',
+                    VAMPIRE: '吸血',
                     JOKER: 'コピー',
-                    SAPLING: '対象合体'
+                    SAPLING: '対象合体',
+                    TAICHI: '陰陽調和'
                 },
                 dicePrices: {
                     FIRE: 0,
@@ -1363,7 +2287,20 @@
                     MIMIC: 1200,
                     VAMPIRE: 1200,
                     JOKER: 1500,
-                    SAPLING: 1500
+                    SAPLING: 1500,
+                    TAICHI: 1500
+                },
+                chestNames: {
+                    common: '一般宝箱',
+                    rare: 'レア宝箱',
+                    epic: 'エピック宝箱',
+                    legendary: 'レジェンド宝箱'
+                },
+                chestDescs: {
+                    common: '300ポイントダイスを抽選',
+                    rare: '900ポイントダイスを抽選',
+                    epic: '1200ポイントダイスを抽選',
+                    legendary: '1500ポイントダイスを抽選'
                 },
                 bossNames: {
                     mage: '魔術師',
@@ -1410,7 +2347,7 @@
                 loadFail: '❌ 読み込み失敗',
                 resetConfirm: '⚠️ 全てリセット？戻せません！',
                 resetDone: '🔄 リセット完了',
-                shopBuySuccess: '✅ {name} 購入！',
+                shopBuySuccess: '✅ {name} を入手！',
                 shopBuyFail: '❌ ポイント不足！ {cost} 🏆 必要',
                 shopAlreadyOwned: '✅ 所有済み',
                 mergeNeedSameType: '❌ 通常は同種、またはジョーカー/苗木特殊',
@@ -1436,12 +2373,58 @@
                 vampireAbsorb: '🧛 吸収 +${gold}',
                 vampireKillBonus: '🧛 撃破ボーナス +${gold}',
                 vampireAttack: '🧛 攻撃 {name} -{dmg}',
+                chestComplete: '🎉 全てのダイスを入手！',
+                drawResult: '🎲 {name} を入手！',
+                taichiYin: '☯️ 陰 発動！攻撃速度 +{pct}%',
+                taichiYang: '☯️ 陽 発動！攻撃力 +{pct}%',
+                taichiHarmony: '☯️ 和諧 発動！攻撃速度+攻撃力+追加ダメージ！',
+                taichiYinDesc: '陰：攻撃速度 +{pct}%',
+                taichiYangDesc: '陽：攻撃力 +{pct}%',
+                taichiHarmonyDesc: '和諧：全効果 + 追加ダメージ',
+                leaderboardTitle: '🏆 最高ウェーブランキング',
+                lbEmpty: 'まだ記録がありません、挑戦しよう！',
+                lbRank: '#{rank}',
+                lbName: 'プレイヤー',
+                lbWave: 'ウェーブ',
+                lbScore: 'スコア',
+                lbInputTitle: '🏆 ランキング入りおめでとう！',
+                lbInputDesc: 'あなたのウェーブ {wave} はトップ10に入りました！名前を入力：',
+                lbInputPlaceholder: '名前を入力...',
+                lbConfirm: '✅ 確認',
+                lbSkip: 'スキップ',
+                lbSaved: '✅ 記録を保存しました！',
+                lbClose: '閉じる',
+                lbYourRank: '🎯 あなたのランク: #{rank}',
+                hitSound: '💥 攻撃を受けた！',
+                detailTitle: '🎲 ダイス詳細',
+                detailBaseDmg: '基本ダメージ',
+                detailPerStar: '星毎',
+                detailBaseInterval: '基本速度',
+                detailPerLevel: 'レベル毎',
+                detailSpecial: '⚡ 特殊能力',
+                detailClose: '👍 了解',
+                detailSpecialNone: '特殊能力なし',
+                detailSplash: '範囲 ({pct}% 範囲ダメージ)',
+                detailChain: '連鎖 {count} 体',
+                detailPoison: '毒 (毎 {tick}s {dmg} ダメージ)',
+                detailSlow: '減速重ね (毎層 {pct}%)',
+                detailBurn: '燃焼 ({dur}s 持続)',
+                detailBossMultiplier: 'ボスに {mult}x ダメージ',
+                detailGamble: 'ランダムダメージ (最低 {min})',
+                detailLock: '確率でスタン',
+                detailGoldmine: '金生産 (毎回 {gold}💰)',
+                detailMystery: '定期ランダム変身 (毎 {time}s)',
+                detailMimic: '任意のダイスと合体可能',
+                detailVampire: '吸血・敵をマークして金を吸収',
+                detailJoker: '対象ダイスをコピー・任意合体',
+                detailSapling: '任意のダイスと合体で星上昇',
+                detailTaichi: '陰陽調和・列/行で能力発動'
             },
             'ko': {
                 coverTitle: '🎲 오프라인 주사위',
-                coverDesc: '🔥불・⚡번개・🌪️바람・☠️독・❄️얼음・💰금광・🧛중개<br>⭐ 최대 7성 합병 &nbsp;|&nbsp; 💰 비용 매회 +10<br>🛡️ Boss 능력 완전 개편 &nbsp;|&nbsp; ❤️ 목숨 3개<br>🔗 드래그하여 같은 종류·별 등급 합병',
+                coverDesc: '🔥불・⚡번개・🌪️바람・☠️독・❄️얼음<br>⭐ 최대 7성 합병 &nbsp;|&nbsp; 💰 비용 매회 +10<br>🛡️ Boss 능력 완전 개편 &nbsp;|&nbsp; ❤️ 목숨 3개<br>🔗 드래그하여 같은 종류·별 등급 합병',
                 startBtn: '게임 시작',
-                version: 'v2.3.0',
+                version: 'v2.6.0',
                 copyright: '© {year} ☕딕슨 카페，판권 소유.',
                 gameTitle: '🎲 Offline Dice',
                 rollBtn: '주사위',
@@ -1465,6 +2448,7 @@
                 loadBtn: '📂 불러오기',
                 resetBtn: '🔄 초기화',
                 shopSelectHint: '빈 슬롯 클릭 선택, 선택된 것 클릭 제거',
+                shopOwnedLabel: '🎲 보유 주사위 (클릭하여 수치 확인)',
                 diceNames: {
                     FIRE: '불',
                     THUNDER: '번개',
@@ -1480,7 +2464,8 @@
                     MIMIC: '모방',
                     VAMPIRE: '중개',
                     JOKER: '조커',
-                    SAPLING: '묘목'
+                    SAPLING: '묘목',
+                    TAICHI: '태극'
                 },
                 diceDescs: {
                     FIRE: '연소・범위',
@@ -1495,9 +2480,10 @@
                     GOLDMINE: '금 생산',
                     MYSTERY: '주기적 랜덤 변신',
                     MIMIC: '임의 합병',
-                    VAMPIRE: '표시・흡혈',
+                    VAMPIRE: '흡혈',
                     JOKER: '복사',
-                    SAPLING: '대상 합병'
+                    SAPLING: '대상 합병',
+                    TAICHI: '음양 조화'
                 },
                 dicePrices: {
                     FIRE: 0,
@@ -1514,7 +2500,20 @@
                     MIMIC: 1200,
                     VAMPIRE: 1200,
                     JOKER: 1500,
-                    SAPLING: 1500
+                    SAPLING: 1500,
+                    TAICHI: 1500
+                },
+                chestNames: {
+                    common: '일반 상자',
+                    rare: '희귀 상자',
+                    epic: '에픽 상자',
+                    legendary: '전설 상자'
+                },
+                chestDescs: {
+                    common: '300 포인트 주사위 뽑기',
+                    rare: '900 포인트 주사위 뽑기',
+                    epic: '1200 포인트 주사위 뽑기',
+                    legendary: '1500 포인트 주사위 뽑기'
                 },
                 bossNames: {
                     mage: '마법사',
@@ -1561,7 +2560,7 @@
                 loadFail: '❌ 불러오기 실패',
                 resetConfirm: '⚠️ 모든 데이터 초기화? 되돌릴 수 없음!',
                 resetDone: '🔄 초기화 완료',
-                shopBuySuccess: '✅ {name} 구매 성공!',
+                shopBuySuccess: '✅ {name} 획득!',
                 shopBuyFail: '❌ 포인트 부족! {cost} 🏆 필요',
                 shopAlreadyOwned: '✅ 이미 보유 중',
                 mergeNeedSameType: '❌ 일반 합병은 같은 종류, 또는 조커/묘목 특수',
@@ -1587,6 +2586,52 @@
                 vampireAbsorb: '🧛 흡수 +${gold}',
                 vampireKillBonus: '🧛 처치 보너스 +${gold}',
                 vampireAttack: '🧛 공격 {name} -{dmg}',
+                chestComplete: '🎉 모든 주사위 획득!',
+                drawResult: '🎲 {name} 획득!',
+                taichiYin: '☯️ 음 발동! 공격속도 +{pct}%',
+                taichiYang: '☯️ 양 발동! 공격력 +{pct}%',
+                taichiHarmony: '☯️ 조화 발동! 공격속도+공격력+추가데미지!',
+                taichiYinDesc: '음: 공격속도 +{pct}%',
+                taichiYangDesc: '양: 공격력 +{pct}%',
+                taichiHarmonyDesc: '조화: 모든 효과 + 추가데미지',
+                leaderboardTitle: '🏆 최고 웨이브 랭킹',
+                lbEmpty: '기록이 없습니다, 도전하세요!',
+                lbRank: '#{rank}',
+                lbName: '플레이어',
+                lbWave: '웨이브',
+                lbScore: '점수',
+                lbInputTitle: '🏆 랭킹 진입 축하!',
+                lbInputDesc: '당신의 웨이브 {wave} 가 톱10에 진입했습니다! 이름 입력:',
+                lbInputPlaceholder: '이름 입력...',
+                lbConfirm: '✅ 확인',
+                lbSkip: '건너뛰기',
+                lbSaved: '✅ 기록 저장 완료!',
+                lbClose: '닫기',
+                lbYourRank: '🎯 당신의 순위: #{rank}',
+                hitSound: '💥 공격 받음!',
+                detailTitle: '🎲 주사위 상세 수치',
+                detailBaseDmg: '기본 데미지',
+                detailPerStar: '별 등급당',
+                detailBaseInterval: '기본 공격속도',
+                detailPerLevel: '레벨당',
+                detailSpecial: '⚡ 특수 능력',
+                detailClose: '👍 확인',
+                detailSpecialNone: '특수 능력 없음',
+                detailSplash: '범위 공격 ({pct}% 범위 데미지)',
+                detailChain: '연쇄 {count}개 대상',
+                detailPoison: '지속 독 (매 {tick}s {dmg} 데미지)',
+                detailSlow: '중첩 감속 (스택당 {pct}%)',
+                detailBurn: '연소 ({dur}s 지속)',
+                detailBossMultiplier: '보스에게 {mult}x 데미지',
+                detailGamble: '랜덤 데미지 (최소 {min})',
+                detailLock: '확률로 적 스턴',
+                detailGoldmine: '금 생산 (매번 {gold}💰)',
+                detailMystery: '주기적 랜덤 변신 (매 {time}s)',
+                detailMimic: '모든 주사위와 합병 가능',
+                detailVampire: '흡혈 · 적 표시하여 금 흡수',
+                detailJoker: '대상 주사위 복사 · 모든 합병 가능',
+                detailSapling: '모든 주사위와 합병하여 별 상승',
+                detailTaichi: '음양 조화 · 행/열로 능력 발동'
             }
         };
 
@@ -1599,7 +2644,7 @@
             for (let key in fallback) {
                 result[key] = (langData && langData[key] !== undefined) ? langData[key] : fallback[key];
             }
-            const nested = ['diceNames', 'diceDescs', 'dicePrices', 'bossNames'];
+            const nested = ['diceNames', 'diceDescs', 'dicePrices', 'bossNames', 'chestNames', 'chestDescs'];
             for (let nk of nested) {
                 result[nk] = {};
                 for (let sub in fallback[nk]) {
@@ -1644,7 +2689,7 @@
                 { id: 'lion', nameKey: 'lion', emoji: '🦁', color: '#e67e22' },
                 { id: 'snake', nameKey: 'snake', emoji: '🐍', color: '#2ecc71' },
                 { id: 'lamb', nameKey: 'lamb', emoji: '🐑', color: '#f1c40f' },
-                { id: 'knight', nameKey: 'knight', emoji: '🛡️', color: '#3498db' },
+                { id: 'knight', nameKey: 'knight', emoji: '⚔️', color: '#3498db' },
                 { id: 'hacker', nameKey: 'hacker', emoji: '💻', color: '#2c3e50' },
                 { id: 'slime', nameKey: 'slime', emoji: '🟢', color: '#27ae60' },
                 { id: 'magnet', nameKey: 'magnet', emoji: '🧲', color: '#e74c3c' },
@@ -1666,8 +2711,8 @@
                 WIND: Object.freeze({ label: '🌪️', color: '#74b9ff', baseDamage: 20, damagePerStar: 3, baseInterval: 0.45,
                     intervalPerLevel: -0.045, attackType: 'front' }),
                 POISON: Object.freeze({ label: '☠️', color: '#6c5ce7', baseDamage: 20, damagePerStar: 2, baseInterval: 1.3,
-                    intervalPerLevel: 0, poison: { damageBase: 50, damagePerStar: 5, duration: Number.POSITIVE_INFINITY, tick: 1 },
-                    attackType: 'front' }),
+                    intervalPerLevel: 0, poison: { damageBase: 50, damagePerStar: 5, duration: Number.POSITIVE_INFINITY,
+                        tick: 1 }, attackType: 'front' }),
                 ICE: Object.freeze({ label: '❄️', color: '#4fc3f7', baseDamage: 30, damagePerStar: 3, baseInterval: 1.5,
                     intervalPerLevel: -0.02, slow: { baseRate: 0.05, ratePerStar: 0.02, maxStacks: 3, stackRate: 0.5 },
                     attackType: 'front' }),
@@ -1692,8 +2737,106 @@
                     intervalPerLevel: 0, attackType: 'front', isJoker: true }),
                 SAPLING: Object.freeze({ label: '🌱', color: '#55efc4', baseDamage: 10, damagePerStar: 10,
                     baseInterval: 1.5, intervalPerLevel: 0, attackType: 'front', isSapling: true }),
+                TAICHI: Object.freeze({ label: '☯️', color: '#6c5ce7', baseDamage: 120, damagePerStar: 40,
+                    baseInterval: 0.8, intervalPerLevel: -0.01, attackType: 'front', isTaichi: true })
             })
         });
+
+        // 寶箱分組定義
+        const CHEST_GROUPS = {
+            common: {
+                id: 'common',
+                cost: 300,
+                dice: ['IRON', 'RANDOM', 'GAMBLE', 'LOCK'],
+                icon: '📦',
+                emoji: '📦'
+            },
+            rare: {
+                id: 'rare',
+                cost: 900,
+                dice: ['GOLDMINE', 'MYSTERY'],
+                icon: '🛍️',
+                emoji: '🛍️'
+            },
+            epic: {
+                id: 'epic',
+                cost: 1200,
+                dice: ['MIMIC', 'VAMPIRE'],
+                icon: '💝',
+                emoji: '💝'
+            },
+            legendary: {
+                id: 'legendary',
+                cost: 1500,
+                dice: ['JOKER', 'SAPLING', 'TAICHI'],
+                icon: '🎁',
+                emoji: '🎁'
+            }
+        };
+
+        // ================================================================
+        // 排行榜系統 (整合進存檔)
+        // ================================================================
+        function getDefaultLeaderboard() {
+            return [
+                { name: '迪遜', wave: 32, score: 160, date: '2026-07-15' },
+                { name: '咖啡廳', wave: 28, score: 140, date: '2026-07-14' },
+                { name: '太極大師', wave: 25, score: 125, date: '2026-07-13' },
+                { name: '骰子王', wave: 21, score: 105, date: '2026-07-12' },
+                { name: '摸魚高手', wave: 18, score: 90, date: '2026-07-11' },
+                { name: 'Boss殺手', wave: 15, score: 75, date: '2026-07-10' },
+                { name: '合併達人', wave: 12, score: 60, date: '2026-07-09' },
+                { name: '新手玩家', wave: 8, score: 40, date: '2026-07-08' },
+            ];
+        }
+
+        function getLeaderboard() {
+            if (!saveData || !saveData.leaderboard || !Array.isArray(saveData.leaderboard)) {
+                return getDefaultLeaderboard();
+            }
+            const entries = saveData.leaderboard.slice();
+            entries.sort((a, b) => b.wave - a.wave);
+            return entries.slice(0, 10);
+        }
+
+        function saveLeaderboard(entries) {
+            entries.sort((a, b) => b.wave - a.wave);
+            const top10 = entries.slice(0, 10);
+            if (saveData) {
+                saveData.leaderboard = top10;
+                saveSaveData();
+            }
+        }
+
+        function addLeaderboardEntry(name, wave, score) {
+            const entries = getLeaderboard();
+            entries.push({ name: name.trim() || '匿名', wave, score, date: new Date().toISOString().slice(0, 10) });
+            entries.sort((a, b) => b.wave - a.wave);
+            const top10 = entries.slice(0, 10);
+            if (saveData) {
+                saveData.leaderboard = top10;
+                saveSaveData();
+            }
+            return top10;
+        }
+
+        function isRankingWave(wave) {
+            const entries = getLeaderboard();
+            if (entries.length < 10) return true;
+            const minWave = entries[entries.length - 1].wave;
+            return wave > minWave;
+        }
+
+        function getRankForWave(wave) {
+            const entries = getLeaderboard();
+            let rank = 1;
+            for (const e of entries) {
+                if (wave > e.wave) break;
+                rank++;
+                if (wave === e.wave) break;
+            }
+            return Math.min(rank, 10);
+        }
 
         // ========== 保存系統 ==========
         const STORAGE_KEY = 'offlineDiceSaveData';
@@ -1713,8 +2856,10 @@
                     MIMIC: false,
                     VAMPIRE: false,
                     JOKER: false,
-                    SAPLING: false
-                }
+                    SAPLING: false,
+                    TAICHI: false
+                },
+                leaderboard: getDefaultLeaderboard()
             };
         }
         let saveData = null;
@@ -1730,6 +2875,9 @@
                     }
                     for (let key in def.purchased) {
                         if (!(key in data.purchased)) data.purchased[key] = false;
+                    }
+                    if (!data.leaderboard || !Array.isArray(data.leaderboard)) {
+                        data.leaderboard = def.leaderboard;
                     }
                     saveData = data;
                 } else saveData = getDefaultSaveData();
@@ -1757,11 +2905,16 @@
 
         function saveSaveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData)); }
 
-        function resetAllData() { if (confirm(getData().resetConfirm)) { saveData = getDefaultSaveData();
+        function resetAllData() {
+            const data = getData();
+            if (confirm(data.resetConfirm)) {
+                saveData = getDefaultSaveData();
                 saveSaveData();
                 updateCoverUI();
                 updateShopUI();
-                showToast(getData().resetDone); } }
+                showToast(data.resetDone);
+            }
+        }
 
         function exportSave() {
             const data = getData();
@@ -1787,6 +2940,9 @@
                     }
                     for (let key in def.purchased) {
                         if (!(key in parsed.purchased)) throw new Error('Invalid format');
+                    }
+                    if (!parsed.leaderboard || !Array.isArray(parsed.leaderboard)) {
+                        parsed.leaderboard = def.leaderboard;
                     }
                     saveData = parsed;
                     saveData.selectedDice = saveData.selectedDice.filter(d => saveData.ownedDice.includes(d));
@@ -1896,11 +3052,20 @@
             bossSkillCooldown: 0,
             vampireMarks: {},
             _enemyIdCounter: 0,
+            taichiYinActive: false,
+            taichiYangActive: false,
+            taichiHarmonyActive: false,
+            taichiYinBuff: 0,
+            taichiYangBuff: 0,
+            taichiBestStar: 0,
+            taichiBestLevel: 0,
+            _taichiGlowTimer: 0,
         };
 
         // ========== 音效系統 ==========
         const MENU_MUSIC_URL = 'menu.mp3';
         const GAME_MUSIC_URL = 'bgm.mp3';
+        const SHOP_MUSIC_URL = 'shop.mp3';
 
         function initAudio() {
             try {
@@ -1933,7 +3098,48 @@
             } catch (e) {}
         }
 
+        function playHitSound() {
+            if (!soundEnabled) return;
+            try {
+                if (!initAudio()) return;
+                const ctx = game.soundCtx;
+                const bufferSize = ctx.sampleRate * 0.12;
+                const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    const env = Math.exp(-i / (bufferSize * 0.3));
+                    data[i] = (Math.random() * 2 - 1) * env * 0.5;
+                }
+                const noise = ctx.createBufferSource();
+                noise.buffer = buffer;
+                const gainNode = ctx.createGain();
+                gainNode.gain.setValueAtTime(0.25, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+                const filter = ctx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(300, ctx.currentTime);
+                filter.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.12);
+                noise.connect(filter);
+                filter.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                noise.start(ctx.currentTime);
+                noise.stop(ctx.currentTime + 0.12);
+                const osc = ctx.createOscillator();
+                const g2 = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(120, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.1);
+                g2.gain.setValueAtTime(0.15, ctx.currentTime);
+                g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+                osc.connect(g2);
+                g2.connect(ctx.destination);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.1);
+            } catch (e) {}
+        }
+
         let bgmLoadFailed = false;
+        let shopBgmLoadFailed = false;
 
         function playBgMusic(loop) {
             if (!soundEnabled) {
@@ -1980,6 +3186,39 @@
             }
         }
 
+        function playShopBgm() {
+            if (!soundEnabled) {
+                stopShopBgm();
+                return;
+            }
+            const audio = document.getElementById('shopBgmAudio');
+            if (!audio) return;
+            if (shopBgmLoadFailed) return;
+            if (audio.src && audio.src.includes(SHOP_MUSIC_URL) && !audio.paused) return;
+            audio.src = SHOP_MUSIC_URL;
+            audio.loop = true;
+            audio.volume = 0.35;
+            audio.load();
+            audio.play()
+                .then(() => { shopBgmLoadFailed = false; })
+                .catch(err => {
+                    console.warn('🎵 商店音樂播放失敗:', err.message);
+                    shopBgmLoadFailed = true;
+                });
+            audio.onerror = function(e) {
+                console.warn('🎵 商店音樂加載錯誤:', audio.error ? audio.error.message : '未知');
+                shopBgmLoadFailed = true;
+            };
+        }
+
+        function stopShopBgm() {
+            const audio = document.getElementById('shopBgmAudio');
+            if (audio) {
+                audio.pause();
+                audio.currentTime = 0;
+            }
+        }
+
         // ========== 浮動音符按鈕 ==========
         const soundToggleBtn = document.getElementById('soundToggleBtn');
         soundToggleBtn.addEventListener('click', function(e) {
@@ -1997,6 +3236,7 @@
                 }
             } else {
                 stopBgMusic();
+                stopShopBgm();
             }
         });
 
@@ -2082,6 +3322,9 @@
                 const perStar = def.damagePerStar;
                 dmg = base + perStar * (s - 1);
                 dmg = Math.round(dmg * 10) / 10;
+            } else if (type === 'TAICHI') {
+                const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
+                dmg = baseDmg * mult;
             } else {
                 dmg = (def.baseDamage + def.damagePerStar * (s - 1)) * mult;
             }
@@ -2121,6 +3364,7 @@
                 get isMimic() { return def.isMimic || false; },
                 get isGoldmine() { return def.isGoldmine || false; },
                 get isVampire() { return def.isVampire || false; },
+                get isTaichi() { return def.isTaichi || false; },
                 get burn() { return def.burn || false; },
                 get bossMultiplier() { return def.bossMultiplier || 1; },
                 get gambleMin() { return def.gambleMin || 0; },
@@ -2327,8 +3571,8 @@
                     if (sourceDice && targetDice) {
                         const sameStar = sourceDice.star === targetDice.star;
                         if (!sameStar) { showToast(data.mergeNeedSameStar); } else if (sourceDice.star >= game.maxStar && !
-                                sourceDice.isJoker && !sourceDice.isMimic) { showToast(data.mergeMaxStar.replace(/\{max\}/g,
-                                game.maxStar)); } else {
+                                sourceDice.isJoker && !sourceDice.isMimic) { showToast(data.mergeMaxStar.replace(
+                                /\{max\}/g, game.maxStar)); } else {
                             let merged = false;
                             if (game.bossLockedDice.some(d => (d.row === row && d.col === col) || (d.row === src.row && d
                                     .col === src.col))) {
@@ -2481,7 +3725,6 @@
         function getTotalStars(type) { let sum = 0; for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) { const dice =
                     game.board[r][c]; if (dice && dice.type === type) sum += dice.star; } return sum; }
 
-        // ★ 獎勵基底：一開始每隻小怪 $10，每5關 +$10
         function getNormalReward(wave) {
             return 10 + Math.floor((wave - 1) / 5) * 10;
         }
@@ -2491,12 +3734,10 @@
             return 100 + wave * 10 * (index + 1);
         }
 
-        // ★ 修改：MINI_BOSS 波次：3,8,13,18,... 每5關，至48
         function isMiniBossWave(wave) {
             return wave >= 3 && wave <= 48 && wave % 5 === 3;
         }
 
-        // ★ 修改：單BOSS波次：5,10,15,... 每5關至50；雙BOSS：51,53,55,... 每2關
         function isBossWave(wave) {
             if (wave >= 5 && wave <= 50 && wave % 5 === 0) return true;
             if (wave >= 51 && wave % 2 === 1) return true;
@@ -2526,7 +3767,6 @@
             const bossCount = getBossCountForWave(wave);
             const baseReward = getNormalReward(wave);
 
-            // ---- MINI_BOSS 波次：先出 MINI_BOSS（带头），再出10只小怪 ----
             if (isMiniBoss) {
                 if (game.enemiesSpawned === 0 && game.bossCount < 1) {
                     const avail = CONST.MINI_BOSS_TYPES;
@@ -2627,7 +3867,6 @@
                 return;
             }
 
-            // ---- BOSS 波次 ----
             if (isBoss && game.bossCount < bossCount) {
                 const bossIdx = game.bossCount;
                 game.bossCount++;
@@ -2703,7 +3942,6 @@
                 return;
             }
 
-            // ---- 普通小怪 (非Boss/MINI_BOSS波次) ----
             const idx = game.enemiesSpawned;
             let hp = getEnemyHp(wave, idx);
             let speed = 1.0;
@@ -2854,6 +4092,7 @@
                             e.alive = false;
                             handleVampireKill(e);
                             game.lives--;
+                            playHitSound();
                             game.screenFlash = 0.4;
                             if (game.lives <= 0) {
                                 game.lives = 0;
@@ -2955,13 +4194,10 @@
             }
         }
 
-        // ★★★ 修復：史萊姆只分裂 2 次（不無限分裂）★★★
         function handleMiniBossDeath(boss) {
             if (boss.isMiniBoss && boss.miniBossType === 'slime') {
                 const data = getData();
-                // 繼承父級的 slimeLevel，從 0 開始，每次 +1
                 const newLevel = (boss.slimeLevel || 0) + 1;
-                // 只有 slimeLevel <= 2 時才分裂（總共分裂 2 次）
                 if (newLevel <= 2) {
                     const childHp = (isFinite(boss.maxHp)) ? boss.maxHp * 0.3 : 100;
                     const childSpeed = (isFinite(boss.speed)) ? boss.speed * 0.8 : 0.6;
@@ -2983,7 +4219,7 @@
                             isMiniBoss: true,
                             miniBossType: 'slime',
                             bossType: null,
-                            slimeLevel: newLevel, // 繼承分裂等級
+                            slimeLevel: newLevel,
                             slowTimer: 0,
                             slowFactor: 0,
                             hitFlash: 0,
@@ -3011,6 +4247,11 @@
             if (!game.currentBoss || !game.currentBoss.alive || !game.currentBoss.isBoss) return;
             const boss = game.currentBoss;
 
+            if (boss.bossType === 'lion' && boss.dashTimer && boss.dashTimer > 0) {
+                boss.dashTimer -= dt;
+                if (boss.dashTimer < 0) boss.dashTimer = 0;
+            }
+
             boss.skillTimer += dt;
 
             switch (boss.bossType) {
@@ -3028,7 +4269,7 @@
                             boss.skillCooldown = 5;
                             boss.skillTimer = 0;
                         } else {
-                            triggerLionDash(boss);
+                            triggerLionDashV2(boss);
                             boss.skillTimer = 0;
                         }
                     }
@@ -3097,7 +4338,6 @@
             }
         }
 
-        // ---- 騎士 ----
         function triggerKnightAbility(boss) {
             const data = getData();
             showToast(data.bossWarningKnight, 1500);
@@ -3120,7 +4360,6 @@
             addFloatingText(boss.x, boss.y - 40, '🛡️ 變換!', '#3498db', 24);
         }
 
-        // ---- 獅子王 ----
         function triggerLionRoar(boss) {
             const data = getData();
             showToast(data.bossWarningLion, 1500);
@@ -3157,18 +4396,13 @@
             boss.skillTimer = 0;
         }
 
-        function triggerLionDash(boss) {
-            const steps = 2;
-            const newIdx = Math.min(boss.pathIndex + steps, PATH_PIXELS.length - 1);
-            boss.pathIndex = newIdx;
-            boss.x = PATH_PIXELS[newIdx].x;
-            boss.y = PATH_PIXELS[newIdx].y;
-            addFloatingText(boss.x, boss.y - 30, '💨 衝刺!', '#e67e22', 22);
-            showToast('🦁 獅子王衝刺！', 1000);
+        function triggerLionDashV2(boss) {
+            boss.dashTimer = 2.0;
+            addFloatingText(boss.x, boss.y - 30, '💨 加速衝刺!', '#e67e22', 22);
+            showToast('🦁 獅子王加速衝刺！持續2秒', 1200);
             boss.skillTimer = 0;
         }
 
-        // ---- 魔術師 ----
         function triggerMageMeteor(boss) {
             const data = getData();
             showToast(data.bossWarningMage, 2000);
@@ -3223,7 +4457,6 @@
             boss.skillTimer = 0;
         }
 
-        // ---- 駭客 ----
         function triggerHackerAbility(boss) {
             const data = getData();
             showToast(data.bossWarningHacker, 1500);
@@ -3245,7 +4478,6 @@
             boss.skillTimer = 0;
         }
 
-        // ---- 磁力王 ----
         function triggerMagnetAbility(boss) {
             const data = getData();
             showToast(data.bossWarningMagnet, 1500);
@@ -3323,7 +4555,6 @@
             boss.skillTimer = 0;
         }
 
-        // ---- 雞尾蛇 ----
         function triggerBalisticAbility(boss) {
             const data = getData();
             showToast(data.bossWarningBalistic, 1500);
@@ -3373,7 +4604,6 @@
             boss.skillTimer = 0;
         }
 
-        // ---- 沉默的羔羊 ----
         function triggerLambAbility(boss) {
             const data = getData();
             showToast(data.bossWarningLamb, 1500);
@@ -3395,7 +4625,6 @@
             boss.skillTimer = 0;
         }
 
-        // ---- 蛇王 ----
         function triggerSnakeAbility(boss) {
             const data = getData();
             showToast(data.bossWarningSnake, 1200);
@@ -3457,7 +4686,6 @@
             boss.skillTimer = 0;
         }
 
-        // ---- 飛雲 ----
         function triggerCloudAbility(boss) {
             const data = getData();
             showToast(data.bossWarningCloud, 1200);
@@ -3477,7 +4705,6 @@
             boss.skillTimer = 0;
         }
 
-        // ---- 大Boss 史萊姆死亡 (保留原有分裂邏輯，與修復後的迷你Boss分裂一致) ----
         function handleBossDeath(boss) {
             const data = getData();
             if (boss.bossType === 'slime' || boss.isMiniBoss && boss.miniBossType === 'slime') {
@@ -3523,7 +4750,6 @@
                         _lockedByLockDice: false,
                         _enemyId: ++game._enemyIdCounter,
                     };
-                    // 只有 slimeLevel <= 2 才繼續分裂（總共分裂2次）
                     if (child.slimeLevel <= 2) {
                         game.enemies.push(child);
                         addFloatingText(child.x, child.y - 20, `🟢 分裂!`, '#27ae60', 16);
@@ -3536,8 +4762,232 @@
                 game._bossAbilityTimeout = null; }
         }
 
+        // ================================================================
+        // 太極骰子能力檢測 (修復：只對達成連線的該行/列骰子生效)
+        // ================================================================
+        function updateTaichiAbilities(dt) {
+            // 1. 收集所有太極骰子的位置與資訊
+            let taichiPositions = [];
+            let maxStar = 0,
+                maxLevel = 0;
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const dice = game.board[r]?.[c];
+                    if (dice && dice.isTaichi) {
+                        const lv = upgradeLevels[dice.type] || 1;
+                        taichiPositions.push({ row: r, col: c, star: dice.star, level: lv, dice: dice });
+                        if (dice.star > maxStar) maxStar = dice.star;
+                        if (lv > maxLevel) maxLevel = lv;
+                    }
+                }
+            }
+            if (taichiPositions.length === 0) {
+                // 沒有太極骰子，重置所有狀態
+                game.taichiYinActive = false;
+                game.taichiYangActive = false;
+                game.taichiHarmonyActive = false;
+                game.taichiYinBuff = 0;
+                game.taichiYangBuff = 0;
+                game.taichiBestStar = 0;
+                game.taichiBestLevel = 0;
+                game._taichiGlowTimer = 0;
+                return;
+            }
+
+            game.taichiBestStar = maxStar;
+            game.taichiBestLevel = maxLevel;
+
+            // 2. 計算所有陰連線 (垂直連續3個以上) 和陽連線 (水平連續5個以上)
+            const yinSet = new Set(); // 儲存 "row,col" 字串
+            const yangSet = new Set();
+
+            // ---- 陰：垂直方向 (同一列) ----
+            for (let c = 0; c < COLS; c++) {
+                let consecutive = 0;
+                let startRow = -1;
+                for (let r = 0; r < ROWS; r++) {
+                    const dice = game.board[r]?.[c];
+                    const isTaichi = dice && dice.isTaichi;
+                    if (isTaichi) {
+                        if (consecutive === 0) startRow = r;
+                        consecutive++;
+                        if (consecutive >= 3) {
+                            // 從 startRow 到 r 的所有太極骰子都屬於陰
+                            for (let rr = startRow; rr <= r; rr++) {
+                                const d = game.board[rr]?.[c];
+                                if (d && d.isTaichi) {
+                                    yinSet.add(`${rr},${c}`);
+                                }
+                            }
+                        }
+                    } else {
+                        consecutive = 0;
+                        startRow = -1;
+                    }
+                }
+            }
+
+            // ---- 陽：水平方向 (同一行) ----
+            for (let r = 0; r < ROWS; r++) {
+                let consecutive = 0;
+                let startCol = -1;
+                for (let c = 0; c < COLS; c++) {
+                    const dice = game.board[r]?.[c];
+                    const isTaichi = dice && dice.isTaichi;
+                    if (isTaichi) {
+                        if (consecutive === 0) startCol = c;
+                        consecutive++;
+                        if (consecutive >= 5) {
+                            for (let cc = startCol; cc <= c; cc++) {
+                                const d = game.board[r]?.[cc];
+                                if (d && d.isTaichi) {
+                                    yangSet.add(`${r},${cc}`);
+                                }
+                            }
+                        }
+                    } else {
+                        consecutive = 0;
+                        startCol = -1;
+                    }
+                }
+            }
+
+            // 3. 重置所有太極骰子的覆蓋屬性，恢復基礎值
+            for (const pos of taichiPositions) {
+                const dice = pos.dice;
+                // 重置傷害到基礎值
+                const baseDmg = CONST.ALL_DICE_DEFS['TAICHI']?.baseDamage || 120;
+                const perStar = CONST.ALL_DICE_DEFS['TAICHI']?.damagePerStar || 40;
+                const lv = upgradeLevels['TAICHI'] || 1;
+                const mult = getUpgradeMultiplier('TAICHI');
+                let base = (baseDmg + perStar * (dice.star - 1)) * mult;
+                dice._damage = base;
+                // 清除覆蓋
+                delete dice._intervalOverride;
+                delete dice._origInterval;
+                delete dice._origDamage;
+                // 清除狀態標記
+                delete dice._yinActive;
+                delete dice._yangActive;
+                delete dice._harmonyActive;
+            }
+
+            // 4. 計算增益參數 (基於最高星與等級)
+            const starRatio = (maxStar - 1) / 6;
+            const yinBasePct = 120 + starRatio * (360 - 120);
+            const yangBasePct = 200 + starRatio * (600 - 200);
+            const yinPct = yinBasePct + (maxLevel - 1) * 20;
+            const yangPct = yangBasePct + (maxLevel - 1) * 40;
+            const yinBuff = yinPct / 100;
+            const yangBuff = yangPct / 100;
+
+            // 5. 對每個太極骰子，根據它是否在 yinSet / yangSet 中應用增益
+            let harmonyCount = 0;
+            for (const pos of taichiPositions) {
+                const key = `${pos.row},${pos.col}`;
+                const dice = pos.dice;
+                const inYin = yinSet.has(key);
+                const inYang = yangSet.has(key);
+
+                if (inYin && inYang) {
+                    // 和諧：陰 + 陽 + 額外傷害
+                    harmonyCount++;
+                    dice._yinActive = true;
+                    dice._yangActive = true;
+                    dice._harmonyActive = true;
+
+                    // 攻速
+                    const baseInterval = CONST.ALL_DICE_DEFS['TAICHI']?.baseInterval || 0.8;
+                    const origInterval = baseInterval + (CONST.ALL_DICE_DEFS['TAICHI']?.intervalPerLevel || 0) * (pos.level -
+                        1);
+                    const newInterval = origInterval / (1 + yinBuff);
+                    dice._intervalOverride = Math.max(0.15, newInterval);
+
+                    // 攻擊力 (基礎 * 陽增益 + 額外)
+                    const baseDmg = CONST.ALL_DICE_DEFS['TAICHI']?.baseDamage || 120;
+                    const perStar = CONST.ALL_DICE_DEFS['TAICHI']?.damagePerStar || 40;
+                    const lv = upgradeLevels['TAICHI'] || 1;
+                    const mult = getUpgradeMultiplier('TAICHI');
+                    let dmg = (baseDmg + perStar * (dice.star - 1)) * mult;
+                    const newDmg = dmg * (1 + yangBuff);
+                    const extraDmg = dice.star * 10 * (1 + (lv - 1) * 0.1);
+                    dice._damage = newDmg + extraDmg;
+
+                } else if (inYin) {
+                    // 純陰：攻速提升
+                    dice._yinActive = true;
+                    const baseInterval = CONST.ALL_DICE_DEFS['TAICHI']?.baseInterval || 0.8;
+                    const origInterval = baseInterval + (CONST.ALL_DICE_DEFS['TAICHI']?.intervalPerLevel || 0) * (pos.level -
+                        1);
+                    const newInterval = origInterval / (1 + yinBuff);
+                    dice._intervalOverride = Math.max(0.15, newInterval);
+
+                } else if (inYang) {
+                    // 純陽：攻擊力提升
+                    dice._yangActive = true;
+                    const baseDmg = CONST.ALL_DICE_DEFS['TAICHI']?.baseDamage || 120;
+                    const perStar = CONST.ALL_DICE_DEFS['TAICHI']?.damagePerStar || 40;
+                    const lv = upgradeLevels['TAICHI'] || 1;
+                    const mult = getUpgradeMultiplier('TAICHI');
+                    let dmg = (baseDmg + perStar * (dice.star - 1)) * mult;
+                    const newDmg = dmg * (1 + yangBuff);
+                    dice._damage = newDmg;
+                }
+                // 否則保持基礎值
+            }
+
+            // 6. 更新全局狀態 (用於顯示)
+            game.taichiYinActive = yinSet.size > 0;
+            game.taichiYangActive = yangSet.size > 0;
+            game.taichiHarmonyActive = harmonyCount > 0;
+            game.taichiYinBuff = yinBuff;
+            game.taichiYangBuff = yangBuff;
+
+            if (game.taichiHarmonyActive || game.taichiYinActive || game.taichiYangActive) {
+                game._taichiGlowTimer += dt;
+            } else {
+                game._taichiGlowTimer = 0;
+            }
+
+            // 7. 顯示提示 (只在狀態變化時顯示，避免 spam)
+            // 用靜態變量記錄上次狀態
+            if (typeof updateTaichiAbilities._lastState === 'undefined') {
+                updateTaichiAbilities._lastState = { yin: false, yang: false, harmony: false };
+            }
+            const last = updateTaichiAbilities._lastState;
+            const current = { yin: game.taichiYinActive, yang: game.taichiYangActive, harmony: game.taichiHarmonyActive };
+
+            if (current.harmony && !last.harmony) {
+                const data = getData();
+                showToast(data.taichiHarmony, 1500);
+                addFloatingText(W / 2, boardY + BOARD_HEIGHT + 60,
+                    `☯️ 和諧 +${Math.round(yinPct)}%攻速 +${Math.round(yangPct)}%攻擊 + 額外`,
+                    '#6c5ce7', 26);
+            } else if (current.yin && !last.yin && !current.harmony) {
+                const data = getData();
+                showToast(data.taichiYin.replace(/\{pct\}/g, Math.round(yinPct)), 1200);
+                addFloatingText(W / 2, boardY + BOARD_HEIGHT + 60,
+                    `☯️ 陰 +${Math.round(yinPct)}%攻速`, '#6c5ce7', 24);
+            } else if (current.yang && !last.yang && !current.harmony) {
+                const data = getData();
+                showToast(data.taichiYang.replace(/\{pct\}/g, Math.round(yangPct)), 1200);
+                addFloatingText(W / 2, boardY + BOARD_HEIGHT + 60,
+                    `☯️ 陽 +${Math.round(yangPct)}%攻擊`, '#6c5ce7', 24);
+            }
+
+            // 如果狀態變為無，清除提示
+            if (!current.yin && !current.yang && !current.harmony && (last.yin || last.yang || last.harmony)) {
+                // 可以選擇顯示結束提示，但為了減少干擾，不顯示
+            }
+
+            updateTaichiAbilities._lastState = { ...current };
+        }
+
         // ========== 攻擊 ==========
         function updateAttacks(dt) {
+            // 先更新太極狀態（每個太極骰子獨立計算）
+            updateTaichiAbilities(dt);
+
             try {
                 const board = game.board;
                 for (let r = 0; r < ROWS; r++) {
@@ -3583,7 +5033,6 @@
                             }
                         }
 
-                        // VAMPIRE 骰子特殊處理
                         if (dice.isVampire) {
                             dice.cooldown = (dice.cooldown || 0) - dt;
                             if (dice.cooldown <= 0) {
@@ -3687,8 +5136,11 @@
                             continue;
                         }
 
-                        // ---- 普通骰子攻擊 ----
                         try {
+                            let interval = dice.interval;
+                            if (dice._intervalOverride !== undefined) {
+                                interval = dice._intervalOverride;
+                            }
                             dice.cooldown = (dice.cooldown || 0) - dt;
                             if (dice.cooldown > 0) continue;
 
@@ -3729,7 +5181,7 @@
                             }
                             if (!target) continue;
 
-                            dice.cooldown = dice.interval || 0.5;
+                            dice.cooldown = interval;
                             let damage = dice.damage || 0;
                             if (typeof damage !== 'number' || !isFinite(damage)) damage = 0;
 
@@ -3983,7 +5435,44 @@
             document.getElementById('rollBtn').disabled = true;
             updateCoverUI();
             stopBgMusic();
+            stopShopBgm();
+
+            if (isRankingWave(game.wave)) {
+                const rank = getRankForWave(game.wave);
+                const desc = data.lbInputDesc.replace(/\{wave\}/g, game.wave);
+                document.getElementById('lbInputDesc').textContent = desc;
+                document.getElementById('lbNameInput').value = '';
+                document.getElementById('lbNameInputOverlay').classList.add('visible');
+                document.getElementById('lbNameInput').focus();
+                window._pendingLeaderboard = { wave: game.wave, score: scoreEarned };
+            }
         }
+
+        document.getElementById('lbNameConfirmBtn').addEventListener('click', function() {
+            const name = document.getElementById('lbNameInput').value.trim() || '匿名';
+            const pending = window._pendingLeaderboard || { wave: game.wave, score: 0 };
+            const entries = addLeaderboardEntry(name, pending.wave, pending.score);
+            document.getElementById('lbNameInputOverlay').classList.remove('visible');
+            const data = getData();
+            showToast(data.lbSaved, 2000);
+            window._pendingLeaderboard = null;
+            updateLeaderboardUI();
+            const rank = getRankForWave(pending.wave);
+            setTimeout(() => {
+                showToast(data.lbYourRank.replace(/\{rank\}/g, rank), 3000);
+            }, 500);
+        });
+
+        document.getElementById('lbNameSkipBtn').addEventListener('click', function() {
+            document.getElementById('lbNameInputOverlay').classList.remove('visible');
+            window._pendingLeaderboard = null;
+        });
+
+        document.getElementById('lbNameInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('lbNameConfirmBtn').click();
+            }
+        });
 
         function restartGame() {
             game.gameOver = false;
@@ -4019,22 +5508,48 @@
             game.bossCount = 0;
             game.miniBossSpawned = 0;
             game._enemyIdCounter = 0;
+            game.taichiYinActive = false;
+            game.taichiYangActive = false;
+            game.taichiHarmonyActive = false;
+            game.taichiYinBuff = 0;
+            game.taichiYangBuff = 0;
+            game.taichiBestStar = 0;
+            game.taichiBestLevel = 0;
+            game._taichiGlowTimer = 0;
             if (game._bossAbilityTimeout) { clearTimeout(game._bossAbilityTimeout);
                 game._bossAbilityTimeout = null; }
             game.activeDiceTypes = [...saveData.selectedDice];
             initUpgradeLevels();
             initBoard();
             document.getElementById('gameoverOverlay').classList.remove('visible');
+            document.getElementById('lbNameInputOverlay').classList.remove('visible');
             document.getElementById('rollBtn').disabled = false;
             updateUI();
             updateDicePreview(null);
             document.getElementById('startOverlay').classList.remove('hidden');
             showToast(getData().toastRestart, 1500);
             stopBgMusic();
+            stopShopBgm();
             playBgMusic('menu');
         }
 
         // ========== 繪製 ==========
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, radii) {
+                const r = typeof radii === 'number' ? radii : (radii || 0);
+                this.moveTo(x + r, y);
+                this.lineTo(x + w - r, y);
+                this.quadraticCurveTo(x + w, y, x + w, y + r);
+                this.lineTo(x + w, y + h - r);
+                this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+                this.lineTo(x + r, y + h);
+                this.quadraticCurveTo(x, y + h, x, y + h - r);
+                this.lineTo(x, y + r);
+                this.quadraticCurveTo(x, y, x + r, y);
+                return this;
+            };
+        }
+
         function drawDicePips(ctx, cx, cy, size, star) {
             if (star >= 7) {
                 ctx.fillStyle = '#fff';
@@ -4205,6 +5720,74 @@
                 ctx.fillText(`🩸${Math.ceil(remain)}s`, cx, barY + barH + 1);
             }
 
+            if (dice.isTaichi) {
+                let status = '';
+                let glowColor = '';
+                let pulse = 0;
+                const hasYin = dice._yinActive || false;
+                const hasYang = dice._yangActive || false;
+                const hasHarmony = dice._harmonyActive || false;
+
+                if (hasHarmony) {
+                    status = '☯️';
+                    glowColor = 'rgba(255,215,0,';
+                    pulse = 0.6 + 0.4 * Math.sin(game._taichiGlowTimer * 3);
+                } else if (hasYin) {
+                    status = '⬇️';
+                    glowColor = 'rgba(108,92,231,';
+                    pulse = 0.5 + 0.4 * Math.sin(game._taichiGlowTimer * 2.5);
+                } else if (hasYang) {
+                    status = '➡️';
+                    glowColor = 'rgba(231,76,60,';
+                    pulse = 0.5 + 0.4 * Math.sin(game._taichiGlowTimer * 2.8);
+                }
+
+                if (status) {
+                    const glowSize = dSize / 2 + 12 + 6 * Math.sin(game._taichiGlowTimer * 2);
+                    ctx.shadowColor = glowColor + '0.8)';
+                    ctx.shadowBlur = 30 + 15 * Math.sin(game._taichiGlowTimer * 2.5);
+                    ctx.strokeStyle = glowColor + (0.4 + 0.3 * pulse) + ')';
+                    ctx.lineWidth = 3 + 2 * pulse;
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, glowSize, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+
+                    ctx.fillStyle = 'rgba(255,255,255,0.95)';
+                    ctx.font = `bold ${Math.floor(size*0.22)}px sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'bottom';
+                    ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                    ctx.shadowBlur = 8;
+                    ctx.fillText(status, cx, y + size - 2);
+                    ctx.shadowBlur = 0;
+
+                    if (hasHarmony) {
+                        for (let i = 0; i < 8; i++) {
+                            const angle = (i / 8) * Math.PI * 2 + game._taichiGlowTimer * 1.2;
+                            const dist = dSize / 2 + 8 + 6 * Math.sin(game._taichiGlowTimer * 1.8 + i);
+                            const px = cx + Math.cos(angle) * dist;
+                            const py = cy + Math.sin(angle) * dist;
+                            ctx.fillStyle = `rgba(255,215,0,${0.3+0.2*Math.sin(game._taichiGlowTimer*2+i)})`;
+                            ctx.beginPath();
+                            ctx.arc(px, py, 4 + 2 * Math.sin(game._taichiGlowTimer * 1.5 + i), 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+                }
+
+                if (status) {
+                    ctx.fillStyle = 'rgba(255,215,0,0.9)';
+                    ctx.font = `bold ${Math.floor(size*0.3)}px sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'bottom';
+                    ctx.shadowColor = 'rgba(0,0,0,0.6)';
+                    ctx.shadowBlur = 4;
+                    ctx.fillText(status, cx, y + size - 4);
+                    ctx.shadowBlur = 0;
+                }
+            }
+
             ctx.fillStyle = 'rgba(255,255,255,0.9)';
             ctx.font = `${Math.floor(size*0.35)}px sans-serif`;
             ctx.textAlign = 'center';
@@ -4216,10 +5799,10 @@
             ctx.textBaseline = 'top';
             ctx.fillText(dice.name, cx, y + 4);
             if (dice.cooldown > 0 && !dice.isVampire) {
-                const ratio = dice.cooldown / dice.interval;
+                const ratio = dice.cooldown / (dice._intervalOverride || dice.interval);
                 ctx.fillStyle = 'rgba(0,0,0,0.3)';
                 ctx.beginPath();
-                ctx.arc(cx, cy, dSize / 2 - 2, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * ratio);
+                ctx.arc(cx, cy, dSize / 2 - 2, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(ratio, 1));
                 ctx.fill();
             }
         }
@@ -4257,6 +5840,8 @@
                 ctx.clearRect(0, 0, W, H);
 
                 if (fishMode && game.gameStarted && !game.gameOver) {
+                    const totalRemain = (game.enemiesPerWave || 0) - (game.enemiesKilledThisWave || 0);
+                    const remain = game.isWaveActive ? Math.max(0, totalRemain) : 0;
                     ctx.fillStyle = '#0b0e1a';
                     ctx.fillRect(0, 0, W, H);
                     ctx.fillStyle = '#f7d875';
@@ -4266,7 +5851,7 @@
                     ctx.fillText(`🐟 第 ${game.wave} 波`, W / 2, H / 2 - 20);
                     ctx.fillStyle = '#aab8d0';
                     ctx.font = '20px sans-serif';
-                    ctx.fillText(`剩餘 ${game.enemies.length} 隻`, W / 2, H / 2 + 50);
+                    ctx.fillText(`剩餘 ${remain} 隻`, W / 2, H / 2 + 50);
                     ctx.fillStyle = '#6a7a8a';
                     ctx.font = '16px sans-serif';
                     ctx.fillText(`💰 ${game.gold}  ❤️ ${game.lives}`, W / 2, H / 2 + 100);
@@ -4399,6 +5984,40 @@
                                 ctx.textBaseline = 'middle';
                                 ctx.fillText('💻', x + CELL_SIZE / 2, y + CELL_SIZE / 2);
                             }
+                            if (dice && dice.isTaichi) {
+                                const hasYin = dice._yinActive || false;
+                                const hasYang = dice._yangActive || false;
+                                const hasHarmony = dice._harmonyActive || false;
+                                if (hasYin || hasYang || hasHarmony) {
+                                    ctx.fillStyle = 'rgba(255,215,0,0.08)';
+                                    ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+                                }
+                                if (hasHarmony) {
+                                    ctx.fillStyle = 'rgba(255,215,0,0.2)';
+                                    ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+                                    ctx.fillStyle = 'rgba(255,215,0,0.8)';
+                                    ctx.font = '20px sans-serif';
+                                    ctx.textAlign = 'center';
+                                    ctx.textBaseline = 'middle';
+                                    ctx.fillText('☯️', x + CELL_SIZE / 2, y + CELL_SIZE / 2);
+                                } else if (hasYin) {
+                                    ctx.fillStyle = 'rgba(108,92,231,0.15)';
+                                    ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+                                    ctx.fillStyle = 'rgba(108,92,231,0.6)';
+                                    ctx.font = '18px sans-serif';
+                                    ctx.textAlign = 'right';
+                                    ctx.textBaseline = 'top';
+                                    ctx.fillText('⬇️', x + CELL_SIZE - 4, y + 2);
+                                } else if (hasYang) {
+                                    ctx.fillStyle = 'rgba(231,76,60,0.15)';
+                                    ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+                                    ctx.fillStyle = 'rgba(231,76,60,0.6)';
+                                    ctx.font = '18px sans-serif';
+                                    ctx.textAlign = 'left';
+                                    ctx.textBaseline = 'bottom';
+                                    ctx.fillText('➡️', x + 4, y + CELL_SIZE - 2);
+                                }
+                            }
                         } catch (e) {}
                     }
                 }
@@ -4494,6 +6113,17 @@
                                 ctx.arc(x, y, size * 1.4, 0, Math.PI * 2);
                                 ctx.stroke();
                                 ctx.setLineDash([]);
+                            }
+                            if (e.bossType === 'lion' && e.dashTimer && e.dashTimer > 0) {
+                                ctx.fillStyle = 'rgba(255,200,50,0.4)';
+                                ctx.beginPath();
+                                ctx.arc(x, y, size * 1.8, 0, Math.PI * 2);
+                                ctx.fill();
+                                ctx.fillStyle = '#f7d875';
+                                ctx.font = 'bold 14px sans-serif';
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'top';
+                                ctx.fillText(`💨 ${e.dashTimer.toFixed(1)}s`, x, y + size + 6);
                             }
                         }
                         if (e.isMiniBoss && e.miniBossType) {
@@ -4802,6 +6432,14 @@
             game.miniBossSpawned = 0;
             game._scoreAdded = false;
             game._enemyIdCounter = 0;
+            game.taichiYinActive = false;
+            game.taichiYangActive = false;
+            game.taichiHarmonyActive = false;
+            game.taichiYinBuff = 0;
+            game.taichiYangBuff = 0;
+            game.taichiBestStar = 0;
+            game.taichiBestLevel = 0;
+            game._taichiGlowTimer = 0;
             if (game._bossAbilityTimeout) { clearTimeout(game._bossAbilityTimeout);
                 game._bossAbilityTimeout = null; }
             initBoard();
@@ -4813,61 +6451,277 @@
                 'POISON', 'ICE'
             ]; }
 
-        // ========== UI 更新 ==========
-        function updateCoverUI() {
-            const data = getData();
-            document.getElementById('coverScore').textContent = data.totalScore.replace(/\{score\}/g, saveData.totalScore);
-            document.getElementById('shopBtn').innerHTML = data.shopBtn;
-            document.getElementById('saveBtn').innerHTML = data.saveBtn;
-            document.getElementById('loadBtn').innerHTML = data.loadBtn;
-            document.getElementById('resetBtn').innerHTML = data.resetBtn;
+        // ========== 商店（寶箱抽獎系統） ==========
+        function getChestStatus(chestId) {
+            const group = CHEST_GROUPS[chestId];
+            if (!group) return null;
+            const allOwned = group.dice.every(d => saveData.ownedDice.includes(d));
+            const missing = group.dice.filter(d => !saveData.ownedDice.includes(d));
+            return {
+                allOwned,
+                missing,
+                total: group.dice.length,
+                ownedCount: group.dice.length - missing.length,
+            };
         }
 
+        function drawChest(chestId) {
+            const group = CHEST_GROUPS[chestId];
+            if (!group) return;
+            const data = getData();
+            const status = getChestStatus(chestId);
+            if (status.allOwned) return;
+
+            const grid = document.getElementById('shopChestGrid');
+            const div = document.createElement('div');
+            div.className = 'shop-chest-item';
+            const chestName = data.chestNames[chestId] || chestId;
+            const chestDesc = data.chestDescs[chestId] || '';
+            const icon = group.icon || '📦';
+            const cost = group.cost;
+
+            let diceListHtml = '';
+            for (const d of group.dice) {
+                const owned = saveData.ownedDice.includes(d);
+                const label = CONST.ALL_DICE_DEFS[d]?.label || '?';
+                const name = getDiceName(d);
+                diceListHtml += `<span class="${owned?'got':'missing'}">${label} ${name}</span> `;
+            }
+
+            div.innerHTML = `
+                <span class="chest-icon">${icon}</span>
+                <div class="chest-name">${chestName}</div>
+                <div class="chest-cost">🏆 ${cost} 積分</div>
+                <div class="chest-remain">剩餘 ${status.missing.length} / ${status.total} 個</div>
+                <div class="chest-dice-list">${diceListHtml}</div>
+                <button class="btn-draw" data-chest="${chestId}" ${status.missing.length===0?'disabled':''}>
+                    ${status.missing.length===0 ? '✅ 已抽齊' : '🎲 抽獎'}
+                </button>
+            `;
+            grid.appendChild(div);
+
+            const btn = div.querySelector('.btn-draw');
+            if (btn && !btn.disabled) {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    drawFromChest(chestId);
+                });
+            }
+        }
+
+        function showDrawResult(diceType) {
+            const def = CONST.ALL_DICE_DEFS[diceType];
+            if (!def) return;
+            const data = getData();
+            const name = getDiceName(diceType);
+            const desc = getDiceDesc(diceType);
+            const label = def.label;
+
+            document.getElementById('drawIcon').textContent = label;
+            document.getElementById('drawTitle').textContent = '🎉 恭喜獲得！';
+            document.getElementById('drawSub').textContent = `你抽到了新的骰子！`;
+            document.getElementById('drawDiceLabel').textContent = label;
+            document.getElementById('drawDiceName').textContent = `${name}`;
+            document.getElementById('drawDiceDesc').textContent = desc;
+
+            document.getElementById('drawResultOverlay').classList.add('visible');
+
+            document.getElementById('drawConfirmBtn').onclick = function() {
+                document.getElementById('drawResultOverlay').classList.remove('visible');
+            };
+            document.getElementById('drawResultOverlay').onclick = function(e) {
+                if (e.target === this) {
+                    this.classList.remove('visible');
+                }
+            };
+        }
+
+        function drawFromChest(chestId) {
+            const data = getData();
+            const group = CHEST_GROUPS[chestId];
+            if (!group) return;
+            const status = getChestStatus(chestId);
+            if (status.allOwned) {
+                showToast(data.chestComplete);
+                updateShopUI();
+                return;
+            }
+            if (status.missing.length === 0) {
+                showToast(data.chestComplete);
+                updateShopUI();
+                return;
+            }
+            const cost = group.cost;
+            if (saveData.totalScore < cost) {
+                showToast(data.shopBuyFail.replace(/\{cost\}/g, cost));
+                return;
+            }
+
+            const candidates = status.missing;
+            const chosen = candidates[randInt(0, candidates.length - 1)];
+
+            saveData.totalScore -= cost;
+            saveData.ownedDice.push(chosen);
+            saveData.purchased[chosen] = true;
+            saveSaveData();
+
+            const chosenName = getDiceName(chosen);
+            const chosenLabel = CONST.ALL_DICE_DEFS[chosen]?.label || '?';
+            showToast(data.drawResult.replace(/\{name\}/g, `${chosenLabel} ${chosenName}`), 2000);
+            addFloatingText(W / 2, H / 2 - 20, `🎲 ${chosenLabel} ${chosenName}`, '#f7d875', 32);
+
+            showDrawResult(chosen);
+
+            const newStatus = getChestStatus(chestId);
+            if (newStatus.allOwned) {
+                showToast(data.chestComplete, 2000);
+            }
+
+            updateCoverUI();
+            updateShopUI();
+        }
+
+        // ===== 顯示骰子詳細數值 =====
+        function showDiceDetail(diceType) {
+            const def = CONST.ALL_DICE_DEFS[diceType];
+            if (!def) return;
+            const data = getData();
+            const name = getDiceName(diceType);
+            const desc = getDiceDesc(diceType);
+
+            document.getElementById('ddIcon').textContent = def.label;
+            document.getElementById('ddName').textContent = name;
+            document.getElementById('ddDesc').textContent = desc;
+
+            document.getElementById('ddBaseDmg').textContent = def.baseDamage;
+            document.getElementById('ddPerStar').textContent = `+${def.damagePerStar}`;
+            document.getElementById('ddBaseInterval').textContent = `${def.baseInterval.toFixed(2)}s`;
+            const perLevel = def.intervalPerLevel || 0;
+            document.getElementById('ddPerLevel').textContent = perLevel < 0 ? `${perLevel.toFixed(2)}s` : `${perLevel.toFixed(2)}s`;
+
+            let specialParts = [];
+
+            if (def.splash && def.splash > 0) {
+                const pct = Math.round(def.splash * 100);
+                specialParts.push(data.detailSplash.replace(/\{pct\}/g, pct));
+            }
+            if (def.chain && def.chain.count > 0) {
+                specialParts.push(data.detailChain.replace(/\{count\}/g, def.chain.count));
+            }
+            if (def.poison) {
+                const tick = def.poison.tick || 0.5;
+                const dmg = def.poison.damageBase || 0;
+                specialParts.push(data.detailPoison.replace(/\{tick\}/g, tick).replace(/\{dmg\}/g, dmg));
+            }
+            if (def.slow) {
+                const pct = Math.round((def.slow.baseRate || 0.05) * 100);
+                specialParts.push(data.detailSlow.replace(/\{pct\}/g, pct));
+            }
+            if (def.burn) {
+                specialParts.push(data.detailBurn.replace(/\{dur\}/g, '2'));
+            }
+            if (def.bossMultiplier && def.bossMultiplier > 1) {
+                specialParts.push(data.detailBossMultiplier.replace(/\{mult\}/g, def.bossMultiplier));
+            }
+            if (def.gambleMin !== undefined && def.gambleMin > 0) {
+                specialParts.push(data.detailGamble.replace(/\{min\}/g, def.gambleMin));
+            }
+            if (def.lockStun) {
+                specialParts.push(data.detailLock);
+            }
+            if (def.isGoldmine) {
+                const goldAmt = 3;
+                specialParts.push(data.detailGoldmine.replace(/\{gold\}/g, goldAmt));
+            }
+            if (def.isMystery) {
+                const time = 45;
+                specialParts.push(data.detailMystery.replace(/\{time\}/g, time));
+            }
+            if (def.isMimic) {
+                specialParts.push(data.detailMimic);
+            }
+            if (def.isVampire) {
+                specialParts.push(data.detailVampire);
+            }
+            if (def.isJoker) {
+                specialParts.push(data.detailJoker);
+            }
+            if (def.isSapling) {
+                specialParts.push(data.detailSapling);
+            }
+            if (def.isTaichi) {
+                specialParts.push(data.detailTaichi);
+            }
+
+            if (specialParts.length === 0) {
+                specialParts.push(data.detailSpecialNone);
+            }
+
+            document.getElementById('ddSpecialText').textContent = specialParts.join(' · ');
+
+            document.getElementById('diceDetailOverlay').classList.add('visible');
+        }
+
+        // ===== 渲染已獲得骰子列表 (方形按鈕) =====
+        function renderOwnedDice() {
+            const grid = document.getElementById('shopOwnedGrid');
+            grid.innerHTML = '';
+            const owned = saveData.ownedDice || [];
+
+            const baseDice = ['FIRE', 'THUNDER', 'WIND', 'POISON', 'ICE'];
+            const extraDice = owned.filter(d => !baseDice.includes(d));
+            const sorted = [...baseDice.filter(d => owned.includes(d)), ...extraDice];
+
+            for (const type of sorted) {
+                const def = CONST.ALL_DICE_DEFS[type];
+                if (!def) continue;
+                const name = getDiceName(type);
+                const desc = getDiceDesc(type);
+
+                const div = document.createElement('div');
+                div.className = 'shop-owned-item';
+                const dots = `
+                    <div class="dice-dot-grid">
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                    </div>
+                `;
+                div.innerHTML = `
+                    ${dots}
+                    <span class="oi-icon">${def.label}</span>
+                    <div class="oi-info">
+                        <span class="oi-name">${name}</span>
+                        <span class="oi-desc">${desc}</span>
+                    </div>
+                `;
+                div.addEventListener('click', () => {
+                    showDiceDetail(type);
+                });
+                grid.appendChild(div);
+            }
+        }
+
+        // ===== 更新商店UI =====
         function updateShopUI() {
             const data = getData();
             document.getElementById('shopPointsDisplay').textContent = data.totalScore.replace(/\{score\}/g, saveData
                 .totalScore);
-            const grid = document.getElementById('shopDiceGrid');
+            const grid = document.getElementById('shopChestGrid');
             grid.innerHTML = '';
-            const allTypes = ['FIRE', 'THUNDER', 'WIND', 'POISON', 'ICE', 'IRON', 'RANDOM', 'GAMBLE', 'LOCK', 'GOLDMINE',
-                'MYSTERY', 'MIMIC', 'VAMPIRE', 'JOKER', 'SAPLING'
-            ];
-            for (let type of allTypes) {
-                const def = CONST.ALL_DICE_DEFS[type];
-                if (!def) continue;
-                const owned = saveData.ownedDice.includes(type);
-                const price = getDicePrice(type);
-                const div = document.createElement('div');
-                div.className = 'shop-dice-item' + (owned ? ' owned' : '');
-                div.innerHTML = `
-                    <span class="icon">${def.label}</span>
-                    <div class="dname">${getDiceName(type)}</div>
-                    <div class="desc">${getDiceDesc(type)}</div>
-                    ${owned?`<div class="owned-badge">${data.ownedBadge}</div>`:
-                    `<div class="price">🏆 ${price}</div><button class="btn-buy" data-type="${type}">${data.buy}</button>`}
-                `;
-                grid.appendChild(div);
-                if (!owned) {
-                    const btn = div.querySelector('.btn-buy');
-                    btn.addEventListener('click', (e) => { e.stopPropagation();
-                        purchaseDice(type); });
-                }
-            }
-            updateShopSelection();
-        }
 
-        function purchaseDice(type) {
-            const data = getData();
-            if (saveData.ownedDice.includes(type)) { showToast(data.shopAlreadyOwned); return; }
-            const price = getDicePrice(type);
-            if (saveData.totalScore < price) { showToast(data.shopBuyFail.replace(/\{cost\}/g, price)); return; }
-            saveData.totalScore -= price;
-            saveData.ownedDice.push(type);
-            saveData.purchased[type] = true;
-            saveSaveData();
-            showToast(data.shopBuySuccess.replace(/\{name\}/g, getDiceName(type)));
-            updateCoverUI();
-            updateShopUI();
+            for (const chestId of ['common', 'rare', 'epic', 'legendary']) {
+                drawChest(chestId);
+            }
+
+            updateShopSelection();
+            renderOwnedDice();
         }
 
         function updateShopSelection() {
@@ -4878,9 +6732,16 @@
                 const slot = document.createElement('div');
                 slot.className = 'shop-select-slot' + (i < saveData.selectedDice.length ? ' filled' : '');
                 const type = i < saveData.selectedDice.length ? saveData.selectedDice[i] : null;
+                const dots = `
+                    <span class="dice-dot" style="top:16%;left:16%;"></span>
+                    <span class="dice-dot" style="top:16%;right:16%;"></span>
+                    <span class="dice-dot" style="bottom:16%;left:16%;"></span>
+                    <span class="dice-dot" style="bottom:16%;right:16%;"></span>
+                    <span class="dice-dot" style="top:50%;left:50%;transform:translate(-50%,-50%);"></span>
+                `;
                 if (type) {
                     const def = CONST.ALL_DICE_DEFS[type];
-                    slot.textContent = def ? def.label : '?';
+                    slot.innerHTML = `${dots}${def ? def.label : '?'}<span class="slot-label">${getDiceName(type)}</span>`;
                     slot.dataset.type = type;
                     slot.dataset.index = i;
                     slot.addEventListener('click', (e) => {
@@ -4895,7 +6756,7 @@
                         }
                     });
                 } else {
-                    slot.textContent = '+';
+                    slot.innerHTML = `${dots}+`;
                     slot.dataset.index = i;
                     slot.addEventListener('click', (e) => { e.stopPropagation();
                         showDicePicker(i); });
@@ -4942,6 +6803,41 @@
             picker.appendChild(cancel);
         }
 
+        // ========== 排行榜 UI ==========
+        function updateLeaderboardUI() {
+            const entries = getLeaderboard();
+            const list = document.getElementById('lbList');
+            list.innerHTML = '';
+            if (entries.length === 0) {
+                list.innerHTML = `<div class="lb-empty">${getData().lbEmpty}</div>`;
+                return;
+            }
+            for (let i = 0; i < entries.length; i++) {
+                const e = entries[i];
+                const div = document.createElement('div');
+                div.className = 'lb-item';
+                const rank = i + 1;
+                const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
+                div.innerHTML = `
+                    <span class="lb-rank">${medal}</span>
+                    <span class="lb-name">${e.name || '匿名'}</span>
+                    <span class="lb-wave">🌊 ${e.wave}</span>
+                    <span class="lb-score">🏆 ${e.score}</span>
+                `;
+                list.appendChild(div);
+            }
+        }
+
+        // ========== UI 更新 ==========
+        function updateCoverUI() {
+            const data = getData();
+            document.getElementById('coverScore').textContent = data.totalScore.replace(/\{score\}/g, saveData.totalScore);
+            document.getElementById('shopBtn').innerHTML = data.shopBtn;
+            document.getElementById('saveBtn').innerHTML = data.saveBtn;
+            document.getElementById('loadBtn').innerHTML = data.loadBtn;
+            document.getElementById('resetBtn').innerHTML = data.resetBtn;
+        }
+
         // ========== 綁定事件 ==========
         function bindEvents() {
             document.getElementById('startBtn').addEventListener('click', function() {
@@ -4961,6 +6857,7 @@
                 showToast(data.toastGameStart, 1500);
                 startWave();
                 stopBgMusic();
+                stopShopBgm();
                 playBgMusic('game');
             });
             document.getElementById('restartBtn').addEventListener('click', restartGame);
@@ -4969,14 +6866,30 @@
             document.getElementById('shopBtn').addEventListener('click', function() {
                 document.getElementById('shopOverlay').classList.add('visible');
                 updateShopUI();
+                if (soundEnabled) {
+                    stopBgMusic();
+                    playShopBgm();
+                }
             });
             document.getElementById('shopCloseBtn').addEventListener('click', function() {
                 document.getElementById('shopOverlay').classList.remove('visible');
                 document.getElementById('shopDicePicker').className = 'shop-dice-picker';
+                stopShopBgm();
+                if (game.gameStarted && !game.gameOver && soundEnabled) {
+                    playBgMusic('game');
+                } else if (!game.gameStarted && soundEnabled) {
+                    playBgMusic('menu');
+                }
             });
             document.getElementById('shopConfirmBtn').addEventListener('click', function() {
                 document.getElementById('shopOverlay').classList.remove('visible');
                 document.getElementById('shopDicePicker').className = 'shop-dice-picker';
+                stopShopBgm();
+                if (game.gameStarted && !game.gameOver && soundEnabled) {
+                    playBgMusic('game');
+                } else if (!game.gameStarted && soundEnabled) {
+                    playBgMusic('menu');
+                }
                 game.activeDiceTypes = [...saveData.selectedDice];
                 initUpgradeLevels();
                 if (game.gameStarted && !game.gameOver) {
@@ -5026,12 +6939,40 @@
                     document.getElementById('shopSelectLabel').textContent = data.shopSelectLabel;
                     document.getElementById('shopConfirmBtn').textContent = data.shopConfirm;
                     document.getElementById('mergeHint').textContent = data.mergeHint;
+                    document.getElementById('shopOwnedLabel').textContent = data.shopOwnedLabel;
                     updateCoverUI();
                     updateDicePreview(null);
                     updateUI();
+                    updateLeaderboardUI();
+                    renderOwnedDice();
                     showToast('🌐 Language changed', 1000);
                     if (game.gameStarted) draw();
                 });
+            });
+
+            document.getElementById('leaderboardBtn').addEventListener('click', function() {
+                document.getElementById('leaderboardOverlay').classList.add('visible');
+                updateLeaderboardUI();
+            });
+            document.getElementById('lbCloseBtn').addEventListener('click', function() {
+                document.getElementById('leaderboardOverlay').classList.remove('visible');
+            });
+            document.getElementById('leaderboardOverlay').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('visible');
+                }
+            });
+
+            document.getElementById('ddCloseBtn').addEventListener('click', function() {
+                document.getElementById('diceDetailOverlay').classList.remove('visible');
+            });
+            document.getElementById('ddConfirmBtn').addEventListener('click', function() {
+                document.getElementById('diceDetailOverlay').classList.remove('visible');
+            });
+            document.getElementById('diceDetailOverlay').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('visible');
+                }
             });
 
             window.addEventListener('beforeunload', function(e) {
@@ -5069,6 +7010,7 @@
         document.getElementById('shopSelectLabel').textContent = initData.shopSelectLabel;
         document.getElementById('shopConfirmBtn').textContent = initData.shopConfirm;
         document.getElementById('mergeHint').textContent = initData.mergeHint;
+        document.getElementById('shopOwnedLabel').textContent = initData.shopOwnedLabel;
 
         soundEnabled = true;
         soundToggleBtn.textContent = '🔊';
@@ -5079,6 +7021,9 @@
         initGameState();
         game.gameStarted = false;
         bindEvents();
+
+        updateLeaderboardUI();
+        renderOwnedDice();
 
         playBgMusic('menu');
 
@@ -5108,7 +7053,7 @@
         }
 
         requestAnimationFrame(gameLoop);
-        console.log('🎲 Offline Dice v2.3.0 - 波次/Boss全面更新');
+        console.log('🎲 Offline Dice v2.6.0 - 太極連線修復 (只對達成條件的該行/列骰子生效)');
     </script>
 </body>
 </html>
