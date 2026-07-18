@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Offline Dice</title>
     <style>
-        /* ===== 所有樣式保持不變 ===== */
         * {
             margin: 0;
             padding: 0;
@@ -1449,15 +1448,10 @@
             </div>
             <div class="footer"><span class="score-display" id="coverScore">🏆 累積分數: 0</span></div>
             <div class="cover-buttons">
-                <!-- 商店按鈕使用翻譯 -->
                 <button class="btn-cover primary" id="shopBtn">🏪 商店</button>
-                <!-- 排行榜按鈕使用翻譯 -->
                 <button class="btn-cover leaderboard-btn" id="leaderboardBtn">🏆 排行榜</button>
-                <!-- 儲存按鈕使用翻譯 -->
                 <button class="btn-cover save" id="saveBtn">💾 儲存</button>
-                <!-- 載入按鈕使用翻譯 -->
                 <button class="btn-cover save" id="loadBtn">📂 載入</button>
-                <!-- 重設按鈕使用翻譯 -->
                 <button class="btn-cover danger" id="resetBtn">🔄 重設</button>
             </div>
             <button class="btn-start" id="startBtn">開始遊戲</button>
@@ -1479,7 +1473,6 @@
                 <div class="shop-dice-picker" id="shopDicePicker"></div>
             </div>
 
-            <!-- ===== 已獲得骰子列表 (方形按鈕) ===== -->
             <div class="shop-owned-section">
                 <div class="label" id="shopOwnedLabel">🎲 已獲得骰子 (點擊查看數值)</div>
                 <div class="shop-owned-grid" id="shopOwnedGrid"></div>
@@ -1524,7 +1517,6 @@
                     <div class="dd-desc" id="drawDiceDesc">燃燒・濺射</div>
                 </div>
             </div>
-            <!-- 「🎉 太好了！」按鈕使用翻譯 -->
             <button class="draw-btn" id="drawConfirmBtn">🎉 太好了！</button>
         </div>
 
@@ -1573,7 +1565,7 @@
 
     <script>
         // ================================================================
-        // 翻譯 (完整) — 已補上 leaderboardBtn 與 drawGreat
+        // 翻譯 (完整)
         // ================================================================
         const translations = {
             'zh-TW': {
@@ -1722,7 +1714,7 @@
                 toastGameOver: '💀 遊戲結束！到達 {wave} 波',
                 toastRestart: '回到標題',
                 toastGameStart: '🎮 遊戲開始！拖曳骰子合併',
-                waveRemain: '🌊 第 {wave} 波 剩{remain}隻',
+                waveRemain: '🌊 {wave} 👾 {remain}',
                 fishWave: '🐟 第 {wave} 波',
                 fishRemain: '剩餘 {remain} 隻',
                 costLabel: '擲骰費用: {cost} 💰',
@@ -1962,7 +1954,7 @@
                 toastGameOver: '💀 游戏结束！到达 {wave} 波',
                 toastRestart: '回到标题',
                 toastGameStart: '🎮 游戏开始！拖曳骰子合并',
-                waveRemain: '🌊 第 {wave} 波 剩{remain}只',
+                waveRemain: '🌊 {wave} 👾 {remain}',
                 fishWave: '🐟 第 {wave} 波',
                 fishRemain: '剩余 {remain} 只',
                 costLabel: '掷骰费用: {cost} 💰',
@@ -2442,7 +2434,7 @@
                 toastGameOver: '💀 ゲームオーバー！第 {wave} 到達',
                 toastRestart: 'タイトルへ',
                 toastGameStart: '🎮 ゲーム開始！ドラッグ合体',
-                waveRemain: '🌊 第 {wave}  {remain} 残り',
+                waveRemain: '🌊 {wave} 👾 {remain}',
                 fishWave: '🐟 第 {wave} ウェーブ',
                 fishRemain: '残り {remain} 体',
                 costLabel: 'コスト: {cost} 💰',
@@ -2682,7 +2674,7 @@
                 toastGameOver: '💀 게임 오버! {wave} 웨이브 도달',
                 toastRestart: '제목으로',
                 toastGameStart: '🎮 게임 시작! 드래그 합병',
-                waveRemain: '🌊 {wave}  {remain} 남음',
+                waveRemain: '🌊 {wave} 👾 {remain}',
                 fishWave: '🐟 {wave} 웨이브',
                 fishRemain: '{remain} 마리 남음',
                 costLabel: '비용: {cost} 💰',
@@ -2928,7 +2920,7 @@
                 { name: 'TenPercent', wave: 28, score: 140, date: '2026-07-14' },
                 { name: 'トニー Gaming HK', wave: 25, score: 125, date: '2026-07-13' },
                 { name: '方丈', wave: 21, score: 105, date: '2026-07-12' },
-                { name: '태극권 사범', wave: 18, score: 90, date: '2026-07-11' },
+                { name: '태극권 사범 지 지에', wave: 18, score: 90, date: '2026-07-11' },
                 { name: '摸鱼高手', wave: 15, score: 75, date: '2026-07-10' },
                 { name: '小智', wave: 12, score: 60, date: '2026-07-09' },
                 { name: 'AAA', wave: 8, score: 40, date: '2026-07-08' },
@@ -3206,6 +3198,8 @@
             taichiBestStar: 0,
             taichiBestLevel: 0,
             _taichiGlowTimer: 0,
+            // ===== ★ 新增：骰子高亮目標 =====
+            highlightTarget: null, // { type: 'FIRE', star: 1 }
         };
 
         // ========== 音效系統 ==========
@@ -3214,7 +3208,6 @@
         const SHOP_MUSIC_URL = 'Offline Dice - Shop.mp3';
         const RANK_MUSIC_URL = 'Offline Dice - Rank.mp3';
 
-        // BGM 輪播列表
         const BGM_LIST = [
             { url: 'Offline Dice - Dice Rush.mp3', label: 'BGM 1' },
             { url: 'Offline Dice - Last Wave Hold.mp3', label: 'BGM 2' },
@@ -3248,7 +3241,7 @@
                 osc.type = 'square';
                 osc.frequency.setValueAtTime(800, ctx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.08);
-                gain.gain.setValueAtTime(0.18, ctx.currentTime);
+                gain.gain.setValueAtTime(0.05, ctx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
                 osc.start(ctx.currentTime);
                 osc.stop(ctx.currentTime + 0.08);
@@ -3410,6 +3403,7 @@
             const audio = document.getElementById('rankAudio');
             if (!audio) return;
             if (rankBgmLoadFailed) return;
+            // ★ 修正：如果已經在播放 Rank 音樂，直接返回，不重新載入
             if (audio.src && audio.src.includes(RANK_MUSIC_URL) && !audio.paused) {
                 return;
             }
@@ -3763,6 +3757,8 @@
             }
             game.isDragging = true;
             game.dragData = { col, row, startX: e.clientX, startY: e.clientY, moved: false, sourceDice: game.board[row][col] };
+            // ★ 開始拖拽時清除高亮
+            game.highlightTarget = null;
         }
 
         function onPointerMove(e) {
@@ -3779,33 +3775,93 @@
         function onPointerUp(e) {
             e.preventDefault();
             const data = getData();
+
+            // 先檢查是否點擊在空白區域（用於取消高亮）
+            const pos = getGridPosFromPointer(e);
+            if (pos && !isOccupied(pos.col, pos.row) && !game.isDragging) {
+                // 點擊空白區域 -> 取消高亮
+                game.highlightTarget = null;
+            }
+
             if (!game.isDragging || !game.dragData) {
+                // 如果沒有拖拽，但點擊了骰子（顯示資訊 + 高亮邏輯）
                 if (!game.gameOver && game.gameStarted && !game.bossAbilityActive) {
-                    const pos = getGridPosFromPointer(e);
-                    if (pos && isOccupied(pos.col, pos.row)) {
-                        const dice = game.board[pos.row][pos.col];
+                    const clickPos = getGridPosFromPointer(e);
+                    if (clickPos && isOccupied(clickPos.col, clickPos.row)) {
+                        const dice = game.board[clickPos.row][clickPos.col];
+                        // 顯示資訊
                         showToast(data.toastDiceInfo.replace(/\{label\}/g, dice.label).replace(/\{name\}/g, dice.name)
                             .replace(/\{star\}/g, dice.star).replace(/\{damage\}/g, Math.round(dice.damage)));
+
+                        // ★★★ 高亮邏輯：同類型同點數的骰子 ★★★
+                        if (game.bossLockedDice.some(d => d.row === clickPos.row && d.col === clickPos.col)) {
+                            // 被封印的骰子不觸發高亮
+                            game.highlightTarget = null;
+                        } else if (game.bossClouds && game.bossClouds.some(c => {
+                                const cellX = boardX + clickPos.col * CELL_SIZE;
+                                const cellY = boardY + clickPos.row * CELL_SIZE;
+                                return c.active && c.x < cellX + CELL_SIZE && c.x + c.w > cellX &&
+                                    c.y < cellY + CELL_SIZE && c.y + c.h > cellY;
+                            })) {
+                            // 雲霧中的骰子不觸發高亮
+                            game.highlightTarget = null;
+                        } else {
+                            const current = game.highlightTarget;
+                            // 如果點擊的是同一個骰子（相同類型+相同星級），切換高亮（取消）
+                            if (current && current.type === dice.type && current.star === dice.star) {
+                                game.highlightTarget = null;
+                            } else {
+                                // 設置新的高亮目標
+                                game.highlightTarget = {
+                                    type: dice.type,
+                                    star: dice.star
+                                };
+                            }
+                        }
                     }
                 }
                 game.isDragging = false;
                 game.dragData = null;
                 return;
             }
+
+            // 以下為拖拽合併邏輯（原有）
             if (!game.dragData.moved) {
                 const dice = game.board[game.dragData.row]?.[game.dragData.col];
                 if (dice && !game.bossAbilityActive) {
                     showToast(data.toastDiceInfo.replace(/\{label\}/g, dice.label).replace(/\{name\}/g, dice.name)
                         .replace(/\{star\}/g, dice.star).replace(/\{damage\}/g, Math.round(dice.damage)));
+                    // ★ 拖拽時點擊骰子也觸發高亮（但拖拽移動後取消）
+                    if (!game.dragData.moved) {
+                        if (game.bossLockedDice.some(d => d.row === game.dragData.row && d.col === game.dragData.col)) {
+                            game.highlightTarget = null;
+                        } else if (game.bossClouds && game.bossClouds.some(c => {
+                                const cellX = boardX + game.dragData.col * CELL_SIZE;
+                                const cellY = boardY + game.dragData.row * CELL_SIZE;
+                                return c.active && c.x < cellX + CELL_SIZE && c.x + c.w > cellX &&
+                                    c.y < cellY + CELL_SIZE && c.y + c.h > cellY;
+                            })) {
+                            game.highlightTarget = null;
+                        } else {
+                            const current = game.highlightTarget;
+                            if (current && current.type === dice.type && current.star === dice.star) {
+                                game.highlightTarget = null;
+                            } else {
+                                game.highlightTarget = { type: dice.type, star: dice.star };
+                            }
+                        }
+                    }
                 }
                 game.isDragging = false;
                 game.dragData = null;
                 return;
             }
+
             if (game.bossAbilityActive) { showToast('⏳ Boss能力發動中，請稍候');
                 game.isDragging = false;
-                game.dragData = null; return; }
-            const pos = getGridPosFromPointer(e);
+                game.dragData = null;
+                game.highlightTarget = null; return; }
+
             if (pos) {
                 const { col, row } = pos;
                 const src = game.dragData;
@@ -3900,11 +3956,20 @@
                             if (merged) {
                                 game.bossHackedDice = game.bossHackedDice.filter(d => !(d.row === row && d.col === col) &&
                                     !(d.row === src.row && d.col === src.col));
+                                // ★ 合併後清除高亮
+                                game.highlightTarget = null;
                                 updateUI();
                             }
                         }
                     }
-                } else showToast('❌ 無效的合併目標');
+                } else {
+                    // 點擊空白區域或自身 -> 取消高亮
+                    game.highlightTarget = null;
+                    showToast('❌ 無效的合併目標');
+                }
+            } else {
+                // 點擊空白區域 -> 取消高亮
+                game.highlightTarget = null;
             }
             game.isDragging = false;
             game.dragData = null;
@@ -4486,7 +4551,7 @@
                 game._bossAbilityTimeout = null; }
         }
 
-        // ========== Boss 技能 (僅大Boss) ==========
+        // ========== Boss 技能 ==========
         function updateBossAbilities(dt) {
             if (!game.currentBoss || !game.currentBoss.alive || !game.currentBoss.isBoss) return;
             const boss = game.currentBoss;
@@ -5227,7 +5292,7 @@
         }
 
         // ================================================================
-        // 光骰子攻速加成輔助函數
+        // 光骰子攻速加成輔助
         // ================================================================
         function calculateLightBonus(row, col) {
             let totalBonus = 0;
@@ -5726,7 +5791,6 @@
                 const rankMsg = data.lbInputDescRank.replace(/\{rank\}/g, rank).replace(/\{wave\}/g, game.wave);
                 document.getElementById('lbInputDesc').textContent = rankMsg;
                 document.getElementById('lbNameInput').value = '';
-                // ★ 確保按鈕文字為當前語言 ★
                 document.getElementById('lbNameConfirmBtn').textContent = data.lbConfirm;
                 document.getElementById('lbNameSkipBtn').textContent = data.lbSkip;
                 document.getElementById('lbNameInputOverlay').classList.add('visible');
@@ -5740,6 +5804,7 @@
             }
         }
 
+        // ★ 修改：排行榜確認按鈕 - 確保 Rank 音樂持續播放 ★
         document.getElementById('lbNameConfirmBtn').addEventListener('click', function() {
             const name = document.getElementById('lbNameInput').value.trim() || '匿名';
             const pending = window._pendingLeaderboard || { wave: game.wave, score: 0 };
@@ -5753,19 +5818,35 @@
             setTimeout(() => {
                 showToast(data.lbYourRank.replace(/\{rank\}/g, rank), 3000);
             }, 500);
+
+            // ★ 關鍵修正：遊戲結束時，如果 Rank 音樂正在播放，不做任何操作，保持播放
+            const rankAudio = document.getElementById('rankAudio');
+            const isRankPlaying = rankAudio && rankAudio.src && rankAudio.src.includes(RANK_MUSIC_URL) && !rankAudio.paused;
+
             if (game.gameOver) {
-                if (soundEnabled) playRankBgm();
+                if (!isRankPlaying && soundEnabled) {
+                    playRankBgm();
+                }
+                // 如果已經在播放，什麼也不做，音樂繼續
             } else {
                 stopRankBgm();
                 if (soundEnabled) playBgMusic('menu');
             }
         });
 
+        // ★ 修改：排行榜跳過按鈕 - 確保 Rank 音樂持續播放 ★
         document.getElementById('lbNameSkipBtn').addEventListener('click', function() {
             document.getElementById('lbNameInputOverlay').classList.remove('visible');
             window._pendingLeaderboard = null;
+
+            const rankAudio = document.getElementById('rankAudio');
+            const isRankPlaying = rankAudio && rankAudio.src && rankAudio.src.includes(RANK_MUSIC_URL) && !rankAudio.paused;
+
             if (game.gameOver) {
-                if (soundEnabled) playRankBgm();
+                if (!isRankPlaying && soundEnabled) {
+                    playRankBgm();
+                }
+                // 如果已經在播放，什麼也不做，音樂繼續
             } else {
                 stopRankBgm();
                 if (soundEnabled) playBgMusic('menu');
@@ -5820,6 +5901,7 @@
             game.taichiBestStar = 0;
             game.taichiBestLevel = 0;
             game._taichiGlowTimer = 0;
+            game.highlightTarget = null; // ★ 清除高亮
             if (game._bossAbilityTimeout) { clearTimeout(game._bossAbilityTimeout);
                 game._bossAbilityTimeout = null; }
             game.activeDiceTypes = [...saveData.selectedDice];
@@ -5926,7 +6008,7 @@
             ctx.shadowBlur = 0;
         }
 
-        // ===== 光骰子光暈獨立繪製函數 =====
+        // ===== 光骰子光暈 =====
         function drawLightGlow(ctx, x, y, size, dice, alphaMul) {
             if (!dice || !dice.isLight) return;
             const dSize = size - 12;
@@ -6034,10 +6116,6 @@
                 ctx.arc(cx, cy, dSize / 2 + 4, 0, Math.PI * 2);
                 ctx.stroke();
                 ctx.shadowBlur = 0;
-            }
-
-            if (dice.isLight) {
-                // 光暈由 drawLightGlow 負責，此處不重複繪製
             }
 
             if (dice.isMystery && dice.transformTimer !== undefined) {
@@ -6328,7 +6406,7 @@
                     }
                 }
 
-                // ---- 繪製骰子（不包含光骰子的光暈，光暈在頂層單獨繪製） ----
+                // ---- 繪製骰子 ----
                 for (let r = 0; r < ROWS; r++) {
                     for (let c = 0; c < COLS; c++) {
                         try {
@@ -6399,11 +6477,67 @@
                                     ctx.fillText('➡️', x + 4, y + CELL_SIZE - 2);
                                 }
                             }
+
+                            // ★★★ 骰子高亮遮罩 ★★★
+                            if (game.highlightTarget && dice &&
+                                game.highlightTarget.type === dice.type &&
+                                game.highlightTarget.star === dice.star) {
+                                const pulse = 0.6 + 0.4 * Math.sin(game.lastTime * 0.003);
+                                const glowSize = CELL_SIZE + 6 * pulse;
+                                const offset = (CELL_SIZE - glowSize) / 2;
+
+                                // 外層發光
+                                ctx.shadowColor = `rgba(255,215,0,${0.5*pulse})`;
+                                ctx.shadowBlur = 20 + 10 * pulse;
+                                ctx.strokeStyle = `rgba(255,215,0,${0.5+0.3*pulse})`;
+                                ctx.lineWidth = 3 + 2 * pulse;
+                                ctx.beginPath();
+                                ctx.roundRect(x + offset - 2, y + offset - 2, glowSize + 4, glowSize + 4, 6);
+                                ctx.stroke();
+
+                                // 內層光暈
+                                ctx.shadowColor = `rgba(255,215,0,${0.2*pulse})`;
+                                ctx.shadowBlur = 30 + 15 * pulse;
+                                ctx.fillStyle = `rgba(255,215,0,${0.08+0.06*pulse})`;
+                                ctx.beginPath();
+                                ctx.roundRect(x + offset, y + offset, glowSize, glowSize, 6);
+                                ctx.fill();
+
+                                // 角落標記
+                                ctx.shadowBlur = 0;
+                                const dotSize = 6 + 2 * pulse;
+                                const dotPos = 8;
+                                const corners = [
+                                    [x + dotPos, y + dotPos],
+                                    [x + CELL_SIZE - dotPos, y + dotPos],
+                                    [x + dotPos, y + CELL_SIZE - dotPos],
+                                    [x + CELL_SIZE - dotPos, y + CELL_SIZE - dotPos]
+                                ];
+                                for (const [cx2, cy2] of corners) {
+                                    ctx.fillStyle = `rgba(255,215,0,${0.6+0.3*pulse})`;
+                                    ctx.shadowColor = 'rgba(255,215,0,0.5)';
+                                    ctx.shadowBlur = 12;
+                                    ctx.beginPath();
+                                    ctx.arc(cx2, cy2, dotSize, 0, Math.PI * 2);
+                                    ctx.fill();
+                                }
+                                ctx.shadowBlur = 0;
+
+                                // 點數文字提示
+                                ctx.fillStyle = `rgba(255,215,0,${0.7+0.3*pulse})`;
+                                ctx.font = `bold ${14+2*pulse}px sans-serif`;
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'top';
+                                ctx.shadowColor = 'rgba(0,0,0,0.6)';
+                                ctx.shadowBlur = 6;
+                                ctx.fillText(`✦ ★${dice.star}`, x + CELL_SIZE / 2, y + CELL_SIZE + 4);
+                                ctx.shadowBlur = 0;
+                            }
                         } catch (e) {}
                     }
                 }
 
-                // ---- 在頂層繪製光骰子的光暈（確保不被任何骰子覆蓋） ----
+                // ---- 光骰子光暈 ----
                 for (let r = 0; r < ROWS; r++) {
                     for (let c = 0; c < COLS; c++) {
                         const dice = game.board[r]?.[c];
@@ -6845,6 +6979,7 @@
             game.taichiBestStar = 0;
             game.taichiBestLevel = 0;
             game._taichiGlowTimer = 0;
+            game.highlightTarget = null;
             if (game._bossAbilityTimeout) { clearTimeout(game._bossAbilityTimeout);
                 game._bossAbilityTimeout = null; }
             initBoard();
@@ -6857,7 +6992,7 @@
                 'POISON', 'ICE'
             ]; }
 
-        // ========== 商店（寶箱抽獎系統） ==========
+        // ========== 商店 ==========
         function getChestStatus(chestId) {
             const group = CHEST_GROUPS[chestId];
             if (!group) return null;
@@ -6933,8 +7068,6 @@
             document.getElementById('drawDiceLabel').textContent = label;
             document.getElementById('drawDiceName').textContent = `${name}`;
             document.getElementById('drawDiceDesc').textContent = desc;
-
-            // 設定「🎉 太好了！」按鈕文字為翻譯
             document.getElementById('drawConfirmBtn').textContent = data.drawGreat;
 
             document.getElementById('drawResultOverlay').classList.add('visible');
@@ -6994,7 +7127,6 @@
             updateShopUI();
         }
 
-        // ===== 顯示骰子詳細數值 =====
         function showDiceDetail(diceType) {
             const def = CONST.ALL_DICE_DEFS[diceType];
             if (!def) return;
@@ -7088,7 +7220,6 @@
             document.getElementById('diceDetailOverlay').classList.add('visible');
         }
 
-        // ===== 渲染已獲得骰子列表 =====
         function renderOwnedDice() {
             const grid = document.getElementById('shopOwnedGrid');
             grid.innerHTML = '';
@@ -7134,7 +7265,6 @@
             }
         }
 
-        // ===== 更新商店UI =====
         function updateShopUI() {
             const data = getData();
             document.getElementById('shopPointsDisplay').textContent = data.totalScore.replace(/\{score\}/g, saveData
@@ -7259,14 +7389,11 @@
         function updateCoverUI() {
             const data = getData();
             document.getElementById('coverScore').textContent = data.totalScore.replace(/\{score\}/g, saveData.totalScore);
-            // 商店、儲存、載入、重設按鈕使用翻譯
             document.getElementById('shopBtn').innerHTML = data.shopBtn;
-			document.getElementById('saveBtn').innerHTML = data.saveBtn;
-			document.getElementById('loadBtn').innerHTML = data.loadBtn;
-			document.getElementById('resetBtn').innerHTML = data.resetBtn;
-            // 排行榜按鈕使用翻譯
+            document.getElementById('saveBtn').innerHTML = data.saveBtn;
+            document.getElementById('loadBtn').innerHTML = data.loadBtn;
+            document.getElementById('resetBtn').innerHTML = data.resetBtn;
             document.getElementById('leaderboardBtn').innerHTML = data.leaderboardBtn;
-            // 抽獎結果「太好了」按鈕（如果顯示中）
             if (document.getElementById('drawResultOverlay').classList.contains('visible')) {
                 document.getElementById('drawConfirmBtn').textContent = data.drawGreat;
             }
@@ -7352,69 +7479,61 @@
                 if (e.target.files.length > 0) { importSave(e.target.files[0]);
                     e.target.value = ''; }
             });
-			document.querySelectorAll('.lang-btn').forEach(function(btn) {
-				btn.addEventListener('click', function() {
-					const lang = btn.dataset.lang;
-					if (lang === currentLang) return;
-					currentLang = lang;
-					document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-					btn.classList.add('active');
+            document.querySelectorAll('.lang-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const lang = btn.dataset.lang;
+                    if (lang === currentLang) return;
+                    currentLang = lang;
+                    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
 
-					const data = getData();
+                    const data = getData();
 
-					// ---- 更新所有静态文本（确保所有 ID 正确） ----
-					document.getElementById('coverTitle').textContent = data.coverTitle;
-					document.getElementById('coverDesc').innerHTML = data.coverDesc;
-					document.getElementById('startBtn').textContent = data.startBtn;
-					document.getElementById('coverVersion').textContent = data.version;
-					const year = new Date().getFullYear();
-					document.getElementById('coverCopyright').textContent = data.copyright.replace(/\{year\}/g, year);
-					document.getElementById('dicePreviewEmpty').textContent = data.dicePreviewEmpty;
-					document.getElementById('gameoverTitle').textContent = data.gameoverTitle;
-					document.getElementById('restartBtn').textContent = data.restartBtn;
-					document.getElementById('shopTitle').textContent = data.shopTitle;
-					document.getElementById('shopSelectLabel').textContent = data.shopSelectLabel;
-					document.getElementById('shopConfirmBtn').textContent = data.shopConfirm;
-					document.getElementById('mergeHint').textContent = data.mergeHint;
-					document.getElementById('shopOwnedLabel').textContent = data.shopOwnedLabel;
-					document.getElementById('lbTitle').textContent = data.leaderboardTitle;
-					document.getElementById('lbFooter').textContent = data.lbFooter;
-					document.getElementById('lbInputTitle').textContent = data.lbInputTitle;
-					document.getElementById('lbInputDesc').textContent = data.lbInputDesc;
+                    document.getElementById('coverTitle').textContent = data.coverTitle;
+                    document.getElementById('coverDesc').innerHTML = data.coverDesc;
+                    document.getElementById('startBtn').textContent = data.startBtn;
+                    document.getElementById('coverVersion').textContent = data.version;
+                    const year = new Date().getFullYear();
+                    document.getElementById('coverCopyright').textContent = data.copyright.replace(/\{year\}/g, year);
+                    document.getElementById('dicePreviewEmpty').textContent = data.dicePreviewEmpty;
+                    document.getElementById('gameoverTitle').textContent = data.gameoverTitle;
+                    document.getElementById('restartBtn').textContent = data.restartBtn;
+                    document.getElementById('shopTitle').textContent = data.shopTitle;
+                    document.getElementById('shopSelectLabel').textContent = data.shopSelectLabel;
+                    document.getElementById('shopConfirmBtn').textContent = data.shopConfirm;
+                    document.getElementById('mergeHint').textContent = data.mergeHint;
+                    document.getElementById('shopOwnedLabel').textContent = data.shopOwnedLabel;
+                    document.getElementById('lbTitle').textContent = data.leaderboardTitle;
+                    document.getElementById('lbFooter').textContent = data.lbFooter;
+                    document.getElementById('lbInputTitle').textContent = data.lbInputTitle;
+                    document.getElementById('lbInputDesc').textContent = data.lbInputDesc;
+                    document.getElementById('lbNameInput').placeholder = data.lbInputPlaceholder;
+                    document.getElementById('lbNameConfirmBtn').textContent = data.lbConfirm;
+                    document.getElementById('lbNameSkipBtn').textContent = data.lbSkip;
 
-					// ★★★ 修正点：设置输入框的 placeholder 而非 textContent ★★★
-					document.getElementById('lbNameInput').placeholder = data.lbInputPlaceholder;
+                    document.getElementById('shopBtn').innerHTML = data.shopBtn;
+                    document.getElementById('leaderboardBtn').innerHTML = data.leaderboardBtn;
+                    document.getElementById('saveBtn').innerHTML = data.saveBtn;
+                    document.getElementById('loadBtn').innerHTML = data.loadBtn;
+                    document.getElementById('resetBtn').innerHTML = data.resetBtn;
 
-					document.getElementById('lbNameConfirmBtn').textContent = data.lbConfirm;
-					document.getElementById('lbNameSkipBtn').textContent = data.lbSkip;
+                    document.getElementById('coverScore').textContent = data.totalScore.replace(/\{score\}/g, saveData.totalScore);
 
-					// ---- 直接设置封面按钮文字（确保立即生效） ----
-					document.getElementById('shopBtn').innerHTML = data.shopBtn;
-					document.getElementById('leaderboardBtn').innerHTML = data.leaderboardBtn;
-					document.getElementById('saveBtn').innerHTML = data.saveBtn;
-					document.getElementById('loadBtn').innerHTML = data.loadBtn;
-					document.getElementById('resetBtn').innerHTML = data.resetBtn;
+                    if (document.getElementById('drawResultOverlay').classList.contains('visible')) {
+                        document.getElementById('drawConfirmBtn').textContent = data.drawGreat;
+                    }
 
-					// 更新总分数显示
-					document.getElementById('coverScore').textContent = data.totalScore.replace(/\{score\}/g, saveData.totalScore);
+                    updateDicePreview(null);
+                    updateUI();
+                    updateLeaderboardUI();
+                    updateFishModeButton();
+                    renderOwnedDice();
 
-					// 如果抽奖结果覆盖层可见，更新其按钮
-					if (document.getElementById('drawResultOverlay').classList.contains('visible')) {
-						document.getElementById('drawConfirmBtn').textContent = data.drawGreat;
-					}
-
-					// 更新其他动态组件
-					updateDicePreview(null);
-					updateUI();
-					updateLeaderboardUI();
-					updateFishModeButton();
-					renderOwnedDice();
-
-					console.log('✅ 语言已切换至：', currentLang);
-					showToast('🌐 Language changed', 1000);
-					if (game.gameStarted) draw();
-				});
-			});
+                    console.log('✅ 語言已切換至：', currentLang);
+                    showToast('🌐 Language changed', 1000);
+                    if (game.gameStarted) draw();
+                });
+            });
             document.getElementById('leaderboardBtn').addEventListener('click', function() {
                 document.getElementById('leaderboardOverlay').classList.add('visible');
                 updateLeaderboardUI();
@@ -7549,7 +7668,7 @@
         }
 
         requestAnimationFrame(gameLoop);
-        console.log('🎲 Offline Dice v2.7.0 - 翻譯修復：封面按鈕與遊戲結束排行榜按鈕');
+        console.log('🎲 Offline Dice v2.7.0 - 新增骰子高亮遮罩 & 排行榜音樂持續播放');
     </script>
 </body>
 </html>
