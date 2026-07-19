@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Offline Dice</title>
+    <!-- 样式完全保留，未做修改 -->
     <style>
-        /* ===== 全部樣式保持不變 ===== */
         * {
             margin: 0;
             padding: 0;
@@ -1566,7 +1566,7 @@
 
     <script>
         // ================================================================
-        // 翻譯 (完整)
+        // ★★★ 翻譯 (完整) - 已補齊遺漏的 Boss 技能翻譯 ★★★
         // ================================================================
         const translations = {
             'zh-TW': {
@@ -1807,7 +1807,11 @@
                 detailJoker: '複製目標骰子 · 可與任意合併',
                 detailSapling: '可與任意骰子合併提升星級',
                 detailTaichi: '陰陽調和 · 橫列/直行觸發能力',
-                detailLight: '光環 · 增加上、下、左、右一格骰子攻速 (+{pct}%)'
+                detailLight: '光環 · 增加上、下、左、右一格骰子攻速 (+{pct}%)',
+                // ★★★ 新增：Boss 技能遺漏翻譯 ★★★
+                bossHackerMark: '💻 黑客標記!',
+                bossHackerHacked: '💻 {count} 顆骰子被黑客改造，合成可解除',
+                bossShield: '🛡️ 護盾!'
             },
             'zh-CN': {
                 coverTitle: '🎲 离线骰子',
@@ -2047,7 +2051,11 @@
                 detailJoker: '复制目标骰子 · 可与任意合并',
                 detailSapling: '可与任意骰子合并提升星级',
                 detailTaichi: '阴阳调和 · 横列/直行触发能力',
-                detailLight: '光环 · 增加上、下、左、右一格骰子攻速 (+{pct}%)'
+                detailLight: '光环 · 增加上、下、左、右一格骰子攻速 (+{pct}%)',
+                // ★★★ 新增 ★★★
+                bossHackerMark: '💻 黑客标记!',
+                bossHackerHacked: '💻 {count} 颗骰子被黑客改造，合成可解除',
+                bossShield: '🛡️ 护盾!'
             },
             'en': {
                 coverTitle: '🎲 Offline Dice',
@@ -2287,7 +2295,11 @@
                 detailJoker: 'Copy target dice · Merge with any',
                 detailSapling: 'Merge with any dice to increase star',
                 detailTaichi: 'Yin-Yang · Row/Column triggers ability',
-                detailLight: 'Aura · Boost adjacent dice ATK Speed (+{pct}%)'
+                detailLight: 'Aura · Boost adjacent dice ATK Speed (+{pct}%)',
+                // ★★★ 新增 ★★★
+                bossHackerMark: '💻 Hacker Mark!',
+                bossHackerHacked: '💻 {count} dice have been hacked, merge to remove',
+                bossShield: '🛡️ Shield!'
             },
             'ja': {
                 coverTitle: '🎲 オフラインダイス',
@@ -2527,7 +2539,11 @@
                 detailJoker: '対象ダイスをコピー・任意合体',
                 detailSapling: '任意のダイスと合体で星上昇',
                 detailTaichi: '陰陽調和・列/行で能力発動',
-                detailLight: 'オーラ・隣接ダイスの攻撃速度上昇 (+{pct}%)'
+                detailLight: 'オーラ・隣接ダイスの攻撃速度上昇 (+{pct}%)',
+                // ★★★ 新增 ★★★
+                bossHackerMark: '💻 ハッカーマーク!',
+                bossHackerHacked: '💻 {count} 個のダイスがハッキングされました、合体で解除',
+                bossShield: '🛡️ シールド!'
             },
             'ko': {
                 coverTitle: '🎲 오프라인 주사위',
@@ -2767,7 +2783,11 @@
                 detailJoker: '대상 주사위 복사 · 모든 합병 가능',
                 detailSapling: '모든 주사위와 합병하여 별 상승',
                 detailTaichi: '음양 조화 · 행/열로 능력 발동',
-                detailLight: '오라 · 인접 주사위 공격속도 증가 (+{pct}%)'
+                detailLight: '오라 · 인접 주사위 공격속도 증가 (+{pct}%)',
+                // ★★★ 新增 ★★★
+                bossHackerMark: '💻 해커 마크!',
+                bossHackerHacked: '💻 {count} 개의 주사위가 해킹되었습니다, 합병으로 해제',
+                bossShield: '🛡️ 쉴드!'
             }
         };
 
@@ -3396,7 +3416,7 @@
         }
 
         // ★★★★★ 核心修復：排行榜音樂無縫播放（增強版） ★★★★★
-        // 核心邏輯：如果音樂已加載但被暫停，直接恢復播放，而非重新加載
+        // 修改：在恢復播放失敗時不重新加載，避免音樂停止再播放
         let _rankBgmRetryCount = 0;
         const RANK_BGM_MAX_RETRY = 3;
 
@@ -3412,13 +3432,12 @@
             if (audio.src && audio.src.includes(RANK_MUSIC_URL)) {
                 // 如果正在播放，什麼也不做（音樂繼續無縫播放）
                 if (!audio.paused) {
-                    // 重置重試計數，表示音樂正常播放中
                     _rankBgmRetryCount = 0;
                     return;
                 }
 
                 // 音樂被暫停 → 直接恢復播放（無縫銜接，不重新加載）
-                // 這是核心修復：絕不在此處重新設置 src，僅調用 play()
+                // ★★★ 核心修復：恢復播放失敗時絕不重新加載 ★★★
                 audio.play()
                     .then(() => {
                         _rankBgmRetryCount = 0;
@@ -3426,30 +3445,23 @@
                     })
                     .catch(err => {
                         console.warn('🎵 恢復排行榜音樂播放失敗:', err.message);
-                        // 如果恢復失敗且重試次數未達上限，嘗試重新加載
-                        if (_rankBgmRetryCount < RANK_BGM_MAX_RETRY) {
-                            _rankBgmRetryCount++;
-                            console.warn(`🎵 重試加載排行榜音樂 (${_rankBgmRetryCount}/${RANK_BGM_MAX_RETRY})`);
-                            // 重新加載
-                            rankBgmLoadFailed = false;
-                            audio.src = RANK_MUSIC_URL;
-                            audio.loop = true;
-                            audio.volume = 0.4;
-                            audio.load();
-                            audio.play()
-                                .then(() => {
-                                    _rankBgmRetryCount = 0;
-                                    rankBgmLoadFailed = false;
-                                })
-                                .catch(e => {
-                                    console.warn('🎵 重試加載失敗:', e.message);
-                                    rankBgmLoadFailed = true;
-                                });
-                        } else {
-                            // 重試次數已達上限，設置失敗標誌
-                            rankBgmLoadFailed = true;
-                            console.warn('🎵 排行榜音樂加載失敗，已達重試上限');
+                        // ★★★ 不再重新加載，僅等待用戶交互（如自動播放策略） ★★★
+                        if (err.name === 'NotAllowedError') {
+                            // 自動播放被阻止，添加一次性事件監聽
+                            const resumeRankAudio = () => {
+                                audio.play()
+                                    .then(() => {
+                                        rankBgmLoadFailed = false;
+                                        console.log('🎵 排行榜音樂在用戶交互後播放成功');
+                                    })
+                                    .catch(e => console.warn('🎵 用戶交互後播放仍失敗:', e.message));
+                                document.removeEventListener('click', resumeRankAudio);
+                                document.removeEventListener('touchstart', resumeRankAudio);
+                            };
+                            document.addEventListener('click', resumeRankAudio, { once: true });
+                            document.addEventListener('touchstart', resumeRankAudio, { once: true });
                         }
+                        // ★★★ 不重試加載，保留當前 src ★★★
                     });
                 return;
             }
@@ -3479,11 +3491,7 @@
                 })
                 .catch(err => {
                     console.warn('🎵 排行榜音樂播放失敗:', err.message);
-                    // 如果播放失敗（可能是自動播放策略），保留 src，等待用戶交互
-                    // 不立即設置 rankBgmLoadFailed = true，因為可能是自動播放策略
-                    // 在用戶點擊確認/跳過時會再次嘗試
                     if (err.name === 'NotAllowedError') {
-                        // 自動播放被阻止，添加事件監聽器在用戶交互時重試
                         const resumeRankAudio = () => {
                             audio.play()
                                 .then(() => {
@@ -3503,12 +3511,9 @@
 
             audio.onerror = function(e) {
                 console.warn('🎵 排行榜音樂加載錯誤:', audio.error ? audio.error.message : '未知');
-                // 只有在真正的加載錯誤時才設置失敗標誌
                 if (audio.error && audio.error.code === 4) {
-                    // MEDIA_ERR_SRC_NOT_SUPPORTED 或網絡錯誤
                     rankBgmLoadFailed = true;
                 } else {
-                    // 其他錯誤可能是暫時的，不立即設置失敗
                     console.warn('🎵 排行榜音樂加載暫時性錯誤，將重試');
                 }
             };
@@ -3519,10 +3524,8 @@
             if (audio) {
                 audio.pause();
                 audio.currentTime = 0;
-                // ★ 注意：不清空 src，以便後續可以恢復播放
-                // 不清除 src 是實現無縫播放的關鍵
+                // 不清空 src，以便後續可以恢復播放
             }
-            // 重置重試計數
             _rankBgmRetryCount = 0;
         }
 
@@ -4743,7 +4746,7 @@
                     }
                 }
             }
-            addFloatingText(boss.x, boss.y - 40, '🛡️ 變換!', '#3498db', 24);
+            addFloatingText(boss.x, boss.y - 40, '⚔ 變換!', '#3498db', 24);
             playHitSound();
         }
 
@@ -4828,6 +4831,7 @@
             boss.skillTimer = 0;
         }
 
+        // ★★★ 修改點：使用翻譯 bossShield ★★★
         function triggerMageCleanse(boss) {
             const data = getData();
             boss.poison = null;
@@ -4837,7 +4841,8 @@
             boss.stunTimer = 0;
             boss.slowFactor = 0;
             boss.shieldTimer = 2.0;
-            addFloatingText(boss.x, boss.y - 30, '🛡️ 護盾!', '#2ecc71', 22);
+            // 使用翻譯
+            addFloatingText(boss.x, boss.y - 30, data.bossShield, '#2ecc71', 22);
             showToast(data.bossMageCleanse, 1500);
             playShootSound();
             boss.skillPhase = 2;
@@ -4855,6 +4860,7 @@
             boss.skillTimer = 0;
         }
 
+        // ★★★ 修改點：使用翻譯 bossHackerMark 和 bossHackerHacked ★★★
         function triggerHackerAbility(boss) {
             const data = getData();
             showToast(data.bossWarningHacker, 1500);
@@ -4872,8 +4878,10 @@
                 if (pick) hacked.push(pick);
             }
             game.bossHackedDice = game.bossHackedDice.concat(hacked);
-            addFloatingText(boss.x, boss.y - 30, '💻 黑客標記!', '#2c3e50', 22);
-            showToast(`💻 ${hacked.length} 顆骰子被黑客改造，合成可解除`);
+            // 使用翻譯
+            addFloatingText(boss.x, boss.y - 30, data.bossHackerMark, '#2c3e50', 22);
+            const hackedMsg = data.bossHackerHacked.replace(/\{count\}/g, hacked.length);
+            showToast(hackedMsg);
             if (hacked.length > 0) playHitSound();
             boss.skillTimer = 0;
         }
@@ -7720,7 +7728,7 @@
         }
 
         requestAnimationFrame(gameLoop);
-        console.log('🎲 Offline Dice v2.7.1 - 新增光骰子');
+        console.log('🎲 Offline Dice v2.7.2 - 修復Boss技能翻譯與排行榜音樂無縫播放');
     </script>
 </body>
 </html>
