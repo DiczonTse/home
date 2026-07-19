@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Offline Dice</title>
     <style>
+        /* ===== 全部樣式保持不變 ===== */
         * {
             margin: 0;
             padding: 0;
@@ -1456,7 +1457,7 @@
             </div>
             <button class="btn-start" id="startBtn">開始遊戲</button>
             <div class="footer">
-                <span class="version" id="coverVersion">v2.7.0</span>
+                <span class="version" id="coverVersion">v2.7.2</span>
                 <span class="copyright" id="coverCopyright">© 2026 ☕迪遜咖啡廳，版權所有。</span>
             </div>
         </div>
@@ -1572,7 +1573,7 @@
                 coverTitle: '🎲 離線骰子',
                 coverDesc: '🔥火・⚡雷・🌪️風・☠️毒・❄️冰<br>⭐ 合併最高 7 點 &nbsp;|&nbsp; 💰 費用每次 +10<br>❤️ 僅 3 條命 &nbsp;|&nbsp; 👾各種敵人等你來挑戰<br>🔗 拖曳骰子到同類同點數骰子上合併',
                 startBtn: '開始遊戲',
-                version: 'v2.7.0',
+                version: 'v2.7.2',
                 copyright: '© {year} ☕迪遜咖啡廳，版權所有。',
                 gameTitle: '🎲 Offline Dice',
                 rollBtn: '擲骰',
@@ -1812,7 +1813,7 @@
                 coverTitle: '🎲 离线骰子',
                 coverDesc: '🔥火・⚡雷・🌪️风・☠️毒・❄️冰<br>⭐ 合并最高 7 点 &nbsp;|&nbsp; 💰 费用每次 +10<br>❤️ 仅 3 条命 &nbsp;|&nbsp; 👾各种敌人等你来挑战<br>🔗 拖曳骰子到同类同点数骰子上合并',
                 startBtn: '开始游戏',
-                version: 'v2.7.0',
+                version: 'v2.7.2',
                 copyright: '© {year} ☕迪逊咖啡厅，版权所有。',
                 gameTitle: '🎲 Offline Dice',
                 rollBtn: '掷骰',
@@ -2052,7 +2053,7 @@
                 coverTitle: '🎲 Offline Dice',
                 coverDesc: '🔥Fire・⚡Lightning・🌪️Wind・☠️Poison・❄️Ice<br>⭐ Merge up to 7 point on die &nbsp;|&nbsp; 💰 Cost +10 each roll<br>❤️ Only 3 lives &nbsp;|&nbsp; 👾 Various enemies await your challenge<br>🔗 Drag a die onto another of same type and point to merge',
                 startBtn: 'Start Game',
-                version: 'v2.7.0',
+                version: 'v2.7.2',
                 copyright: '© {year} ☕Diczon\'s Cafe, All Rights Reserved.',
                 gameTitle: '🎲 Offline Dice',
                 rollBtn: 'Roll',
@@ -2292,7 +2293,7 @@
                 coverTitle: '🎲 オフラインダイス',
                 coverDesc: '🔥火・⚡雷・🌪️風・☠️毒・❄️氷<br>⭐ 最大7つ点まで合体 &nbsp;|&nbsp; 💰 コスト毎回+10<br>❤️ ライフ3つ &nbsp;|&nbsp; 👾 様々な敵が待つ<br>🔗 ドラッグして同種・同点を合体',
                 startBtn: 'ゲーム開始',
-                version: 'v2.7.0',
+                version: 'v2.7.2',
                 copyright: '© {year} ☕ディクソンカフェ，無断転載を禁じます。',
                 gameTitle: '🎲 Offline Dice',
                 rollBtn: 'ダイス',
@@ -2532,7 +2533,7 @@
                 coverTitle: '🎲 오프라인 주사위',
                 coverDesc: '🔥불・⚡번개・🌪️바람・☠️독・❄️얼음<br>⭐ 최대 7성 합병 &nbsp;|&nbsp; 💰 비용 매회 +10<br>❤️ 목숨 3개 &nbsp;|&nbsp; 👾 다양한 적과 대결<br>🔗 동일 종류·점수 다이스 합성',
                 startBtn: '게임 시작',
-                version: 'v2.7.0',
+                version: 'v2.7.2',
                 copyright: '© {year} ☕딕슨 카페，판권 소유.',
                 gameTitle: '🎲 Offline Dice',
                 rollBtn: '주사위',
@@ -3198,8 +3199,7 @@
             taichiBestStar: 0,
             taichiBestLevel: 0,
             _taichiGlowTimer: 0,
-            // ===== ★ 新增：骰子高亮目標 =====
-            highlightTarget: null, // { type: 'FIRE', star: 1 }
+            highlightTarget: null,
         };
 
         // ========== 音效系統 ==========
@@ -3395,6 +3395,11 @@
             }
         }
 
+        // ★★★★★ 核心修復：排行榜音樂無縫播放（增強版） ★★★★★
+        // 核心邏輯：如果音樂已加載但被暫停，直接恢復播放，而非重新加載
+        let _rankBgmRetryCount = 0;
+        const RANK_BGM_MAX_RETRY = 3;
+
         function playRankBgm() {
             if (!soundEnabled) {
                 stopRankBgm();
@@ -3402,26 +3407,110 @@
             }
             const audio = document.getElementById('rankAudio');
             if (!audio) return;
-            if (rankBgmLoadFailed) return;
-            // ★ 修正：如果已經在播放 Rank 音樂，直接返回，不重新載入
-            if (audio.src && audio.src.includes(RANK_MUSIC_URL) && !audio.paused) {
+
+            // ---- 情況1：已經加載了排行榜音樂 ----
+            if (audio.src && audio.src.includes(RANK_MUSIC_URL)) {
+                // 如果正在播放，什麼也不做（音樂繼續無縫播放）
+                if (!audio.paused) {
+                    // 重置重試計數，表示音樂正常播放中
+                    _rankBgmRetryCount = 0;
+                    return;
+                }
+
+                // 音樂被暫停 → 直接恢復播放（無縫銜接，不重新加載）
+                // 這是核心修復：絕不在此處重新設置 src，僅調用 play()
+                audio.play()
+                    .then(() => {
+                        _rankBgmRetryCount = 0;
+                        console.log('🎵 排行榜音樂已恢復播放（無縫）');
+                    })
+                    .catch(err => {
+                        console.warn('🎵 恢復排行榜音樂播放失敗:', err.message);
+                        // 如果恢復失敗且重試次數未達上限，嘗試重新加載
+                        if (_rankBgmRetryCount < RANK_BGM_MAX_RETRY) {
+                            _rankBgmRetryCount++;
+                            console.warn(`🎵 重試加載排行榜音樂 (${_rankBgmRetryCount}/${RANK_BGM_MAX_RETRY})`);
+                            // 重新加載
+                            rankBgmLoadFailed = false;
+                            audio.src = RANK_MUSIC_URL;
+                            audio.loop = true;
+                            audio.volume = 0.4;
+                            audio.load();
+                            audio.play()
+                                .then(() => {
+                                    _rankBgmRetryCount = 0;
+                                    rankBgmLoadFailed = false;
+                                })
+                                .catch(e => {
+                                    console.warn('🎵 重試加載失敗:', e.message);
+                                    rankBgmLoadFailed = true;
+                                });
+                        } else {
+                            // 重試次數已達上限，設置失敗標誌
+                            rankBgmLoadFailed = true;
+                            console.warn('🎵 排行榜音樂加載失敗，已達重試上限');
+                        }
+                    });
                 return;
             }
+
+            // ---- 情況2：首次加載或切換到排行榜音樂 ----
+            // 如果之前加載失敗，重置狀態
+            if (rankBgmLoadFailed) {
+                rankBgmLoadFailed = false;
+                _rankBgmRetryCount = 0;
+            }
+
+            // 停止其他音樂
             stopBgMusic();
             stopShopBgm();
+
+            // 首次加載
             audio.src = RANK_MUSIC_URL;
             audio.loop = true;
             audio.volume = 0.4;
             audio.load();
+
             audio.play()
-                .then(() => { rankBgmLoadFailed = false; })
+                .then(() => {
+                    rankBgmLoadFailed = false;
+                    _rankBgmRetryCount = 0;
+                    console.log('🎵 排行榜音樂首次播放成功');
+                })
                 .catch(err => {
                     console.warn('🎵 排行榜音樂播放失敗:', err.message);
-                    rankBgmLoadFailed = true;
+                    // 如果播放失敗（可能是自動播放策略），保留 src，等待用戶交互
+                    // 不立即設置 rankBgmLoadFailed = true，因為可能是自動播放策略
+                    // 在用戶點擊確認/跳過時會再次嘗試
+                    if (err.name === 'NotAllowedError') {
+                        // 自動播放被阻止，添加事件監聽器在用戶交互時重試
+                        const resumeRankAudio = () => {
+                            audio.play()
+                                .then(() => {
+                                    rankBgmLoadFailed = false;
+                                    console.log('🎵 排行榜音樂在用戶交互後播放成功');
+                                })
+                                .catch(e => console.warn('🎵 用戶交互後播放仍失敗:', e.message));
+                            document.removeEventListener('click', resumeRankAudio);
+                            document.removeEventListener('touchstart', resumeRankAudio);
+                        };
+                        document.addEventListener('click', resumeRankAudio, { once: true });
+                        document.addEventListener('touchstart', resumeRankAudio, { once: true });
+                    } else {
+                        rankBgmLoadFailed = true;
+                    }
                 });
+
             audio.onerror = function(e) {
                 console.warn('🎵 排行榜音樂加載錯誤:', audio.error ? audio.error.message : '未知');
-                rankBgmLoadFailed = true;
+                // 只有在真正的加載錯誤時才設置失敗標誌
+                if (audio.error && audio.error.code === 4) {
+                    // MEDIA_ERR_SRC_NOT_SUPPORTED 或網絡錯誤
+                    rankBgmLoadFailed = true;
+                } else {
+                    // 其他錯誤可能是暫時的，不立即設置失敗
+                    console.warn('🎵 排行榜音樂加載暫時性錯誤，將重試');
+                }
             };
         }
 
@@ -3430,7 +3519,11 @@
             if (audio) {
                 audio.pause();
                 audio.currentTime = 0;
+                // ★ 注意：不清空 src，以便後續可以恢復播放
+                // 不清除 src 是實現無縫播放的關鍵
             }
+            // 重置重試計數
+            _rankBgmRetryCount = 0;
         }
 
         // ========== 浮動音符按鈕 ==========
@@ -3755,10 +3848,14 @@
                 showToast('☁️ 雲霧中無法操作');
                 return;
             }
+
+            const dice = game.board[row][col];
+            if (dice) {
+                game.highlightTarget = { type: dice.type, star: dice.star };
+            }
+
             game.isDragging = true;
             game.dragData = { col, row, startX: e.clientX, startY: e.clientY, moved: false, sourceDice: game.board[row][col] };
-            // ★ 開始拖拽時清除高亮
-            game.highlightTarget = null;
         }
 
         function onPointerMove(e) {
@@ -3776,72 +3873,27 @@
             e.preventDefault();
             const data = getData();
 
-            // 先檢查是否點擊在空白區域（用於取消高亮）
             const pos = getGridPosFromPointer(e);
             if (pos && !isOccupied(pos.col, pos.row) && !game.isDragging) {
-                // 點擊空白區域 -> 取消高亮
                 game.highlightTarget = null;
             }
 
             if (!game.isDragging || !game.dragData) {
-                // 如果沒有拖拽，但點擊了骰子（顯示資訊 + 高亮邏輯）
                 if (!game.gameOver && game.gameStarted && !game.bossAbilityActive) {
                     const clickPos = getGridPosFromPointer(e);
                     if (clickPos && isOccupied(clickPos.col, clickPos.row)) {
                         const dice = game.board[clickPos.row][clickPos.col];
-                        // 顯示資訊
                         showToast(data.toastDiceInfo.replace(/\{label\}/g, dice.label).replace(/\{name\}/g, dice.name)
                             .replace(/\{star\}/g, dice.star).replace(/\{damage\}/g, Math.round(dice.damage)));
 
-                        // ★★★ 高亮邏輯：同類型同點數的骰子 ★★★
-                        if (game.bossLockedDice.some(d => d.row === clickPos.row && d.col === clickPos.col)) {
-                            // 被封印的骰子不觸發高亮
-                            game.highlightTarget = null;
-                        } else if (game.bossClouds && game.bossClouds.some(c => {
+                        if (game.bossLockedDice.some(d => d.row === clickPos.row && d.col === clickPos.col) ||
+                            (game.bossClouds && game.bossClouds.some(c => {
                                 const cellX = boardX + clickPos.col * CELL_SIZE;
                                 const cellY = boardY + clickPos.row * CELL_SIZE;
                                 return c.active && c.x < cellX + CELL_SIZE && c.x + c.w > cellX &&
                                     c.y < cellY + CELL_SIZE && c.y + c.h > cellY;
-                            })) {
-                            // 雲霧中的骰子不觸發高亮
-                            game.highlightTarget = null;
-                        } else {
-                            const current = game.highlightTarget;
-                            // 如果點擊的是同一個骰子（相同類型+相同星級），切換高亮（取消）
-                            if (current && current.type === dice.type && current.star === dice.star) {
-                                game.highlightTarget = null;
-                            } else {
-                                // 設置新的高亮目標
-                                game.highlightTarget = {
-                                    type: dice.type,
-                                    star: dice.star
-                                };
-                            }
-                        }
-                    }
-                }
-                game.isDragging = false;
-                game.dragData = null;
-                return;
-            }
-
-            // 以下為拖拽合併邏輯（原有）
-            if (!game.dragData.moved) {
-                const dice = game.board[game.dragData.row]?.[game.dragData.col];
-                if (dice && !game.bossAbilityActive) {
-                    showToast(data.toastDiceInfo.replace(/\{label\}/g, dice.label).replace(/\{name\}/g, dice.name)
-                        .replace(/\{star\}/g, dice.star).replace(/\{damage\}/g, Math.round(dice.damage)));
-                    // ★ 拖拽時點擊骰子也觸發高亮（但拖拽移動後取消）
-                    if (!game.dragData.moved) {
-                        if (game.bossLockedDice.some(d => d.row === game.dragData.row && d.col === game.dragData.col)) {
-                            game.highlightTarget = null;
-                        } else if (game.bossClouds && game.bossClouds.some(c => {
-                                const cellX = boardX + game.dragData.col * CELL_SIZE;
-                                const cellY = boardY + game.dragData.row * CELL_SIZE;
-                                return c.active && c.x < cellX + CELL_SIZE && c.x + c.w > cellX &&
-                                    c.y < cellY + CELL_SIZE && c.y + c.h > cellY;
-                            })) {
-                            game.highlightTarget = null;
+                            }))) {
+                            // 封印或雲霧中的骰子不觸發高亮
                         } else {
                             const current = game.highlightTarget;
                             if (current && current.type === dice.type && current.star === dice.star) {
@@ -3857,10 +3909,37 @@
                 return;
             }
 
+            if (!game.dragData.moved) {
+                const dice = game.board[game.dragData.row]?.[game.dragData.col];
+                if (dice && !game.bossAbilityActive) {
+                    showToast(data.toastDiceInfo.replace(/\{label\}/g, dice.label).replace(/\{name\}/g, dice.name)
+                        .replace(/\{star\}/g, dice.star).replace(/\{damage\}/g, Math.round(dice.damage)));
+                    if (game.bossLockedDice.some(d => d.row === game.dragData.row && d.col === game.dragData.col) ||
+                        (game.bossClouds && game.bossClouds.some(c => {
+                            const cellX = boardX + game.dragData.col * CELL_SIZE;
+                            const cellY = boardY + game.dragData.row * CELL_SIZE;
+                            return c.active && c.x < cellX + CELL_SIZE && c.x + c.w > cellX &&
+                                c.y < cellY + CELL_SIZE && c.y + c.h > cellY;
+                        }))) {
+                        // 不做任何高亮變更
+                    } else {
+                        const current = game.highlightTarget;
+                        if (current && current.type === dice.type && current.star === dice.star) {
+                            game.highlightTarget = null;
+                        } else {
+                            game.highlightTarget = { type: dice.type, star: dice.star };
+                        }
+                    }
+                }
+                game.isDragging = false;
+                game.dragData = null;
+                return;
+            }
+
             if (game.bossAbilityActive) { showToast('⏳ Boss能力發動中，請稍候');
                 game.isDragging = false;
                 game.dragData = null;
-                game.highlightTarget = null; return; }
+                return; }
 
             if (pos) {
                 const { col, row } = pos;
@@ -3956,20 +4035,16 @@
                             if (merged) {
                                 game.bossHackedDice = game.bossHackedDice.filter(d => !(d.row === row && d.col === col) &&
                                     !(d.row === src.row && d.col === src.col));
-                                // ★ 合併後清除高亮
                                 game.highlightTarget = null;
                                 updateUI();
                             }
                         }
                     }
                 } else {
-                    // 點擊空白區域或自身 -> 取消高亮
-                    game.highlightTarget = null;
-                    showToast('❌ 無效的合併目標');
+                    // 點擊空白區域或自身 -> 取消高亮（已在前面處理）
                 }
             } else {
-                // 點擊空白區域 -> 取消高亮
-                game.highlightTarget = null;
+                // 點擊空白區域 -> 取消高亮（已在前面處理）
             }
             game.isDragging = false;
             game.dragData = null;
@@ -5777,15 +5852,9 @@
             document.getElementById('rollBtn').disabled = true;
             updateCoverUI();
 
-            const rankAudio = document.getElementById('rankAudio');
-            const isRankPlaying = rankAudio && rankAudio.src && rankAudio.src.includes(RANK_MUSIC_URL) && !rankAudio.paused;
-
             if (isRankingWave(game.wave)) {
-                if (!isRankPlaying) {
-                    stopBgMusic();
-                    stopShopBgm();
-                    playRankBgm();
-                }
+                // ★ 使用修復後的 playRankBgm，無縫播放
+                playRankBgm();
 
                 const rank = getRankForWave(game.wave);
                 const rankMsg = data.lbInputDescRank.replace(/\{rank\}/g, rank).replace(/\{wave\}/g, game.wave);
@@ -5804,7 +5873,7 @@
             }
         }
 
-        // ★ 修改：排行榜確認按鈕 - 確保 Rank 音樂持續播放 ★
+        // ★★★★★ 排行榜確認按鈕 - 確保音樂無縫持續 ★★★★★
         document.getElementById('lbNameConfirmBtn').addEventListener('click', function() {
             const name = document.getElementById('lbNameInput').value.trim() || '匿名';
             const pending = window._pendingLeaderboard || { wave: game.wave, score: 0 };
@@ -5819,34 +5888,22 @@
                 showToast(data.lbYourRank.replace(/\{rank\}/g, rank), 3000);
             }, 500);
 
-            // ★ 關鍵修正：遊戲結束時，如果 Rank 音樂正在播放，不做任何操作，保持播放
-            const rankAudio = document.getElementById('rankAudio');
-            const isRankPlaying = rankAudio && rankAudio.src && rankAudio.src.includes(RANK_MUSIC_URL) && !rankAudio.paused;
-
+            // ★ 遊戲結束時，確保排行榜音樂繼續播放（無縫）
             if (game.gameOver) {
-                if (!isRankPlaying && soundEnabled) {
-                    playRankBgm();
-                }
-                // 如果已經在播放，什麼也不做，音樂繼續
+                playRankBgm(); // 內部會檢查是否已在播放，不會重新加載
             } else {
                 stopRankBgm();
                 if (soundEnabled) playBgMusic('menu');
             }
         });
 
-        // ★ 修改：排行榜跳過按鈕 - 確保 Rank 音樂持續播放 ★
+        // ★★★★★ 排行榜跳過按鈕 - 確保音樂無縫持續 ★★★★★
         document.getElementById('lbNameSkipBtn').addEventListener('click', function() {
             document.getElementById('lbNameInputOverlay').classList.remove('visible');
             window._pendingLeaderboard = null;
 
-            const rankAudio = document.getElementById('rankAudio');
-            const isRankPlaying = rankAudio && rankAudio.src && rankAudio.src.includes(RANK_MUSIC_URL) && !rankAudio.paused;
-
             if (game.gameOver) {
-                if (!isRankPlaying && soundEnabled) {
-                    playRankBgm();
-                }
-                // 如果已經在播放，什麼也不做，音樂繼續
+                playRankBgm(); // 內部會檢查是否已在播放，不會重新加載
             } else {
                 stopRankBgm();
                 if (soundEnabled) playBgMusic('menu');
@@ -5901,7 +5958,7 @@
             game.taichiBestStar = 0;
             game.taichiBestLevel = 0;
             game._taichiGlowTimer = 0;
-            game.highlightTarget = null; // ★ 清除高亮
+            game.highlightTarget = null;
             if (game._bossAbilityTimeout) { clearTimeout(game._bossAbilityTimeout);
                 game._bossAbilityTimeout = null; }
             game.activeDiceTypes = [...saveData.selectedDice];
@@ -6008,7 +6065,6 @@
             ctx.shadowBlur = 0;
         }
 
-        // ===== 光骰子光暈 =====
         function drawLightGlow(ctx, x, y, size, dice, alphaMul) {
             if (!dice || !dice.isLight) return;
             const dSize = size - 12;
@@ -6486,7 +6542,6 @@
                                 const glowSize = CELL_SIZE + 6 * pulse;
                                 const offset = (CELL_SIZE - glowSize) / 2;
 
-                                // 外層發光
                                 ctx.shadowColor = `rgba(255,215,0,${0.5*pulse})`;
                                 ctx.shadowBlur = 20 + 10 * pulse;
                                 ctx.strokeStyle = `rgba(255,215,0,${0.5+0.3*pulse})`;
@@ -6495,7 +6550,6 @@
                                 ctx.roundRect(x + offset - 2, y + offset - 2, glowSize + 4, glowSize + 4, 6);
                                 ctx.stroke();
 
-                                // 內層光暈
                                 ctx.shadowColor = `rgba(255,215,0,${0.2*pulse})`;
                                 ctx.shadowBlur = 30 + 15 * pulse;
                                 ctx.fillStyle = `rgba(255,215,0,${0.08+0.06*pulse})`;
@@ -6503,7 +6557,6 @@
                                 ctx.roundRect(x + offset, y + offset, glowSize, glowSize, 6);
                                 ctx.fill();
 
-                                // 角落標記
                                 ctx.shadowBlur = 0;
                                 const dotSize = 6 + 2 * pulse;
                                 const dotPos = 8;
@@ -6523,7 +6576,6 @@
                                 }
                                 ctx.shadowBlur = 0;
 
-                                // 點數文字提示
                                 ctx.fillStyle = `rgba(255,215,0,${0.7+0.3*pulse})`;
                                 ctx.font = `bold ${14+2*pulse}px sans-serif`;
                                 ctx.textAlign = 'center';
@@ -7668,7 +7720,7 @@
         }
 
         requestAnimationFrame(gameLoop);
-        console.log('🎲 Offline Dice v2.7.0 - 新增骰子高亮遮罩 & 排行榜音樂持續播放');
+        console.log('🎲 Offline Dice v2.7.1 - 新增光骰子');
     </script>
 </body>
 </html>
