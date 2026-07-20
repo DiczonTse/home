@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Offline Dice</title>
-    <!-- 样式完全保留，未做修改 -->
     <style>
+        /* ===== 保留原有全部样式，仅微调 ===== */
         * {
             margin: 0;
             padding: 0;
@@ -1430,9 +1430,10 @@
     <audio id="bgmAudio" style="display:none;" preload="auto"></audio>
     <audio id="shopBgmAudio" style="display:none;" preload="auto"></audio>
     <audio id="rankAudio" style="display:none;" preload="auto"></audio>
+    <audio id="deckBuildAudio" style="display:none;" preload="auto"></audio>
 
     <div class="game-wrapper" id="gameWrapper">
-        <!-- ===== 起始覆蓋層 ===== -->
+        <!-- 起始覆蓋層 -->
         <div class="start-overlay" id="startOverlay">
             <div class="deco-dice">🎲</div>
             <div class="deco-dice">🎲</div>
@@ -1457,12 +1458,12 @@
             </div>
             <button class="btn-start" id="startBtn">開始遊戲</button>
             <div class="footer">
-                <span class="version" id="coverVersion">v2.7.2</span>
+                <span class="version" id="coverVersion">v2.7.6</span>
                 <span class="copyright" id="coverCopyright">© 2026 ☕迪遜咖啡廳，版權所有。</span>
             </div>
         </div>
 
-        <!-- ===== 商店 ===== -->
+        <!-- 商店 -->
         <div class="shop-overlay" id="shopOverlay">
             <button class="shop-close" id="shopCloseBtn">✕</button>
             <h2 id="shopTitle">🏪 商店</h2>
@@ -1473,16 +1474,14 @@
                 <div class="shop-select-grid" id="shopSelectGrid"></div>
                 <div class="shop-dice-picker" id="shopDicePicker"></div>
             </div>
-
             <div class="shop-owned-section">
                 <div class="label" id="shopOwnedLabel">🎲 已獲得骰子 (點擊查看數值)</div>
                 <div class="shop-owned-grid" id="shopOwnedGrid"></div>
             </div>
-
             <button class="shop-confirm-btn" id="shopConfirmBtn">✅ 確認</button>
         </div>
 
-        <!-- ===== 骰子詳細數值彈窗 ===== -->
+        <!-- 骰子詳細數值彈窗 -->
         <div class="dice-detail-overlay" id="diceDetailOverlay">
             <button class="dd-close" id="ddCloseBtn">✕</button>
             <div class="dd-header">
@@ -1506,7 +1505,7 @@
             <div class="dd-footer" id="ddFooter">點擊外部或按鈕關閉</div>
         </div>
 
-        <!-- ===== 抽獎結果覆蓋層 ===== -->
+        <!-- 抽獎結果覆蓋層 -->
         <div class="draw-result-overlay" id="drawResultOverlay">
             <div class="draw-icon" id="drawIcon">🎲</div>
             <div class="draw-title" id="drawTitle">🎉 恭喜獲得！</div>
@@ -1521,7 +1520,7 @@
             <button class="draw-btn" id="drawConfirmBtn">🎉 太好了！</button>
         </div>
 
-        <!-- ===== 排行榜覆蓋層 ===== -->
+        <!-- 排行榜覆蓋層 -->
         <div class="leaderboard-overlay" id="leaderboardOverlay">
             <button class="lb-close" id="lbCloseBtn">✕</button>
             <h2 id="lbTitle">🏆 最高波數排行榜</h2>
@@ -1529,7 +1528,7 @@
             <div class="lb-footer" id="lbFooter">僅顯示前10名</div>
         </div>
 
-        <!-- ===== 排行榜輸入名稱覆蓋層 ===== -->
+        <!-- 排行榜輸入名稱覆蓋層 -->
         <div class="lb-name-input-overlay" id="lbNameInputOverlay">
             <h3 id="lbInputTitle">🏆 恭喜進入排行榜！</h3>
             <p id="lbInputDesc">請輸入你的名稱以記錄成績</p>
@@ -1540,7 +1539,7 @@
             </div>
         </div>
 
-        <!-- ===== 遊戲主體 ===== -->
+        <!-- 遊戲主體 -->
         <div class="board-container">
             <canvas id="gameCanvas" width="600" height="600"></canvas>
             <button id="fishModeBtn">🐟 摸魚</button>
@@ -1566,14 +1565,14 @@
 
     <script>
         // ================================================================
-        // ★★★ 翻譯 (完整) - 已補齊遺漏的 Boss 技能翻譯 ★★★
+        // 翻譯 (完整) - 棒球骰子改為「超高攻」並加入擊殺訊息
         // ================================================================
         const translations = {
             'zh-TW': {
                 coverTitle: '🎲 離線骰子',
                 coverDesc: '🔥火・⚡雷・🌪️風・☠️毒・❄️冰<br>⭐ 合併最高 7 點 &nbsp;|&nbsp; 💰 費用每次 +10<br>❤️ 僅 3 條命 &nbsp;|&nbsp; 👾各種敵人等你來挑戰<br>🔗 拖曳骰子到同類同點數骰子上合併',
                 startBtn: '開始遊戲',
-                version: 'v2.7.2',
+                version: 'v2.7.6',
                 copyright: '© {year} ☕迪遜咖啡廳，版權所有。',
                 gameTitle: '🎲 Offline Dice',
                 rollBtn: '擲骰',
@@ -1603,6 +1602,12 @@
                 shopRemain: '剩餘 {got} / {total} 個',
                 shopDraw: '🎲 抽獎',
                 shopDrawComplete: '🎉 已抽齊所有骰子！',
+                dash: '💨 加速衝刺!',
+                transform: '⚔️ 變換!',
+                meteor: '💥 隕石!',
+                seal: '🔒 封印!',
+                immune: '🛡️ 免疫增加',
+                baseballKill: '💫 棒球骰子 擊殺！',
                 diceNames: {
                     FIRE: '火',
                     THUNDER: '雷',
@@ -1620,7 +1625,8 @@
                     VAMPIRE: '中介',
                     JOKER: '小丑',
                     SAPLING: '樹苗',
-                    TAICHI: '太極'
+                    TAICHI: '太極',
+                    BASEBALL: '棒球'
                 },
                 diceDescs: {
                     FIRE: '燃燒・濺射',
@@ -1639,7 +1645,8 @@
                     VAMPIRE: '吸血',
                     JOKER: '複製',
                     SAPLING: '目標合併',
-                    TAICHI: '陰陽調和'
+                    TAICHI: '陰陽調和',
+                    BASEBALL: '超高攻'
                 },
                 dicePrices: {
                     FIRE: 0,
@@ -1654,6 +1661,7 @@
                     GOLDMINE: 900,
                     LIGHT: 900,
                     MYSTERY: 900,
+                    BASEBALL: 900,
                     MIMIC: 1200,
                     VAMPIRE: 1200,
                     JOKER: 1500,
@@ -1682,7 +1690,7 @@
                     slime: '史萊姆',
                     magnet: '磁力王',
                     cloud: '飛雲',
-                    balistic: '雞尾蛇',
+                    balistic: '蛇尾雞',
                     tank: '坦克'
                 },
                 bossAppear: '👑 {name} 出現！',
@@ -1694,7 +1702,7 @@
                 bossWarningHacker: '💻 駭客入侵！被標記的骰子會補血！',
                 bossWarningMagnet: '🧲 磁力王強制合成！',
                 bossWarningCloud: '☁️ 飛雲釋放迷霧！',
-                bossWarningBalistic: '🐔 雞尾蛇召喚中Boss！',
+                bossWarningBalistic: '🐔 蛇尾雞召喚中Boss！',
                 bossLionDash: '🦁 獅子王加速衝刺！持續 {dur}s',
                 bossMageCleanse: '🧙 魔術師清除異常並獲得護盾！',
                 bossMageHeal: '🧙 魔術師自療！',
@@ -1742,7 +1750,7 @@
                 toastJokerCopy: '🃏 小丑複製 → {label} {name} ★{star}',
                 toastJokerMerge: '🃏 小丑合併！★{star} {name}',
                 toastMimicMerge: '🤡 擬態合併！★{star} {name}',
-                toastBalisticSummon: '🐔 雞尾蛇召喚中Boss！',
+                toastBalisticSummon: '🐔 蛇尾雞召喚中Boss！',
                 toastMiniBossSpawn: '👾 中Boss {name} 出現！',
                 toastSlimeSplit: '🟢 史萊姆分裂！',
                 fishModeOn: '🐟 摸魚模式 ON',
@@ -1808,7 +1816,7 @@
                 detailSapling: '可與任意骰子合併提升星級',
                 detailTaichi: '陰陽調和 · 橫列/直行觸發能力',
                 detailLight: '光環 · 增加上、下、左、右一格骰子攻速 (+{pct}%)',
-                // ★★★ 新增：Boss 技能遺漏翻譯 ★★★
+                detailBaseball: '超高攻 (速度增益轉化為攻擊力增益，例如光骰子速度加成)',
                 bossHackerMark: '💻 黑客標記!',
                 bossHackerHacked: '💻 {count} 顆骰子被黑客改造，合成可解除',
                 bossShield: '🛡️ 護盾!'
@@ -1817,7 +1825,7 @@
                 coverTitle: '🎲 离线骰子',
                 coverDesc: '🔥火・⚡雷・🌪️风・☠️毒・❄️冰<br>⭐ 合并最高 7 点 &nbsp;|&nbsp; 💰 费用每次 +10<br>❤️ 仅 3 条命 &nbsp;|&nbsp; 👾各种敌人等你来挑战<br>🔗 拖曳骰子到同类同点数骰子上合并',
                 startBtn: '开始游戏',
-                version: 'v2.7.2',
+                version: 'v2.7.6',
                 copyright: '© {year} ☕迪逊咖啡厅，版权所有。',
                 gameTitle: '🎲 Offline Dice',
                 rollBtn: '掷骰',
@@ -1847,6 +1855,12 @@
                 shopRemain: '剩余 {got} / {total} 个',
                 shopDraw: '🎲 抽奖',
                 shopDrawComplete: '🎉 已抽齐所有骰子！',
+                dash: '💨 加速冲刺!',
+                transform: '⚔️ 变换!',
+                meteor: '💥 陨石!',
+                seal: '🔒 封印!',
+                immune: '🛡️ 免疫增加',
+                baseballKill: '💫 棒球骰子 击杀！',
                 diceNames: {
                     FIRE: '火',
                     THUNDER: '雷',
@@ -1864,7 +1878,8 @@
                     VAMPIRE: '中介',
                     JOKER: '小丑',
                     SAPLING: '树苗',
-                    TAICHI: '太极'
+                    TAICHI: '太极',
+                    BASEBALL: '棒球'
                 },
                 diceDescs: {
                     FIRE: '燃烧・溅射',
@@ -1883,7 +1898,8 @@
                     VAMPIRE: '吸血',
                     JOKER: '复制',
                     SAPLING: '目标合并',
-                    TAICHI: '阴阳调和'
+                    TAICHI: '阴阳调和',
+                    BASEBALL: '超高攻'
                 },
                 dicePrices: {
                     FIRE: 0,
@@ -1898,6 +1914,7 @@
                     GOLDMINE: 900,
                     LIGHT: 900,
                     MYSTERY: 900,
+                    BASEBALL: 900,
                     MIMIC: 1200,
                     VAMPIRE: 1200,
                     JOKER: 1500,
@@ -1926,7 +1943,7 @@
                     slime: '史莱姆',
                     magnet: '磁力王',
                     cloud: '飞云',
-                    balistic: '鸡尾蛇',
+                    balistic: '蛇尾鸡',
                     tank: '坦克'
                 },
                 bossAppear: '👑 {name} 出现！',
@@ -1938,7 +1955,7 @@
                 bossWarningHacker: '💻 骇客入侵！被标记的骰子会补血！',
                 bossWarningMagnet: '🧲 磁力王强制合成！',
                 bossWarningCloud: '☁️ 飞云释放迷雾！',
-                bossWarningBalistic: '🐔 鸡尾蛇召唤中Boss！',
+                bossWarningBalistic: '🐔 蛇尾鸡召唤中Boss！',
                 bossLionDash: '🦁 狮子王加速冲刺！持续 {dur}s',
                 bossMageCleanse: '🧙 魔术师清除异常并获得护盾！',
                 bossMageHeal: '🧙 魔术师自疗！',
@@ -1986,7 +2003,7 @@
                 toastJokerCopy: '🃏 小丑复制 → {label} {name} ★{star}',
                 toastJokerMerge: '🃏 小丑合并！★{star} {name}',
                 toastMimicMerge: '🤡 拟态合并！★{star} {name}',
-                toastBalisticSummon: '🐔 鸡尾蛇召唤中Boss！',
+                toastBalisticSummon: '🐔 蛇尾鸡召唤中Boss！',
                 toastMiniBossSpawn: '👾 中Boss {name} 出现！',
                 toastSlimeSplit: '🟢 史莱姆分裂！',
                 fishModeOn: '🐟 摸鱼模式 ON',
@@ -2052,7 +2069,7 @@
                 detailSapling: '可与任意骰子合并提升星级',
                 detailTaichi: '阴阳调和 · 横列/直行触发能力',
                 detailLight: '光环 · 增加上、下、左、右一格骰子攻速 (+{pct}%)',
-                // ★★★ 新增 ★★★
+                detailBaseball: '超高攻 (速度增益转化为攻击力增益，例如光骰子速度加成)',
                 bossHackerMark: '💻 黑客标记!',
                 bossHackerHacked: '💻 {count} 颗骰子被黑客改造，合成可解除',
                 bossShield: '🛡️ 护盾!'
@@ -2061,7 +2078,7 @@
                 coverTitle: '🎲 Offline Dice',
                 coverDesc: '🔥Fire・⚡Lightning・🌪️Wind・☠️Poison・❄️Ice<br>⭐ Merge up to 7 point on die &nbsp;|&nbsp; 💰 Cost +10 each roll<br>❤️ Only 3 lives &nbsp;|&nbsp; 👾 Various enemies await your challenge<br>🔗 Drag a die onto another of same type and point to merge',
                 startBtn: 'Start Game',
-                version: 'v2.7.2',
+                version: 'v2.7.6',
                 copyright: '© {year} ☕Diczon\'s Cafe, All Rights Reserved.',
                 gameTitle: '🎲 Offline Dice',
                 rollBtn: 'Roll',
@@ -2091,6 +2108,12 @@
                 shopRemain: 'Remaining {got} / {total}',
                 shopDraw: '🎲 Draw',
                 shopDrawComplete: '🎉 All dice collected!',
+                dash: '💨 Dash!',
+                transform: '⚔️ Transform!',
+                meteor: '💥 Meteor!',
+                seal: '🔒 Seal!',
+                immune: '🛡️ Immune!',
+                baseballKill: '💫 Baseball Die Kill!',
                 diceNames: {
                     FIRE: 'Fire',
                     THUNDER: 'Thunder',
@@ -2108,7 +2131,8 @@
                     VAMPIRE: 'Mediator',
                     JOKER: 'Joker',
                     SAPLING: 'Sapling',
-                    TAICHI: 'Taichi'
+                    TAICHI: 'Taichi',
+                    BASEBALL: 'Baseball'
                 },
                 diceDescs: {
                     FIRE: 'Burn・Splash',
@@ -2127,7 +2151,8 @@
                     VAMPIRE: 'Leech',
                     JOKER: 'Copy',
                     SAPLING: 'Target Merge',
-                    TAICHI: 'Yin-Yang'
+                    TAICHI: 'Yin-Yang',
+                    BASEBALL: '超高攻'
                 },
                 dicePrices: {
                     FIRE: 0,
@@ -2142,6 +2167,7 @@
                     GOLDMINE: 900,
                     LIGHT: 900,
                     MYSTERY: 900,
+                    BASEBALL: 900,
                     MIMIC: 1200,
                     VAMPIRE: 1200,
                     JOKER: 1500,
@@ -2296,7 +2322,7 @@
                 detailSapling: 'Merge with any dice to increase star',
                 detailTaichi: 'Yin-Yang · Row/Column triggers ability',
                 detailLight: 'Aura · Boost adjacent dice ATK Speed (+{pct}%)',
-                // ★★★ 新增 ★★★
+                detailBaseball: '超高攻 (Speed boost → ATK boost, e.g. Light dice speed bonus)',
                 bossHackerMark: '💻 Hacker Mark!',
                 bossHackerHacked: '💻 {count} dice have been hacked, merge to remove',
                 bossShield: '🛡️ Shield!'
@@ -2305,7 +2331,7 @@
                 coverTitle: '🎲 オフラインダイス',
                 coverDesc: '🔥火・⚡雷・🌪️風・☠️毒・❄️氷<br>⭐ 最大7つ点まで合体 &nbsp;|&nbsp; 💰 コスト毎回+10<br>❤️ ライフ3つ &nbsp;|&nbsp; 👾 様々な敵が待つ<br>🔗 ドラッグして同種・同点を合体',
                 startBtn: 'ゲーム開始',
-                version: 'v2.7.2',
+                version: 'v2.7.6',
                 copyright: '© {year} ☕ディクソンカフェ，無断転載を禁じます。',
                 gameTitle: '🎲 Offline Dice',
                 rollBtn: 'ダイス',
@@ -2335,6 +2361,12 @@
                 shopRemain: '残り {got} / {total} 個',
                 shopDraw: '🎲 抽選',
                 shopDrawComplete: '🎉 全てのダイスを入手！',
+                dash: '💨 加速ダッシュ!',
+                transform: '⚔️ 変換!',
+                meteor: '💥 隕石!',
+                seal: '🔒 封印!',
+                immune: '🛡️ 免疫増加',
+                baseballKill: '💫 野球ダイス 撃殺！',
                 diceNames: {
                     FIRE: '火',
                     THUNDER: '雷',
@@ -2352,7 +2384,8 @@
                     VAMPIRE: '仲介',
                     JOKER: 'ジョーカー',
                     SAPLING: '苗木',
-                    TAICHI: '太極'
+                    TAICHI: '太極',
+                    BASEBALL: '野球'
                 },
                 diceDescs: {
                     FIRE: '燃焼・範囲',
@@ -2371,7 +2404,8 @@
                     VAMPIRE: '吸血',
                     JOKER: 'コピー',
                     SAPLING: '対象合体',
-                    TAICHI: '陰陽調和'
+                    TAICHI: '陰陽調和',
+                    BASEBALL: '超高攻'
                 },
                 dicePrices: {
                     FIRE: 0,
@@ -2386,6 +2420,7 @@
                     GOLDMINE: 900,
                     LIGHT: 900,
                     MYSTERY: 900,
+                    BASEBALL: 900,
                     MIMIC: 1200,
                     VAMPIRE: 1200,
                     JOKER: 1500,
@@ -2540,7 +2575,7 @@
                 detailSapling: '任意のダイスと合体で星上昇',
                 detailTaichi: '陰陽調和・列/行で能力発動',
                 detailLight: 'オーラ・隣接ダイスの攻撃速度上昇 (+{pct}%)',
-                // ★★★ 新增 ★★★
+                detailBaseball: '超高攻 (速度ブーストを攻撃力ブーストに変換，例：光ダイスの速度ボーナス)',
                 bossHackerMark: '💻 ハッカーマーク!',
                 bossHackerHacked: '💻 {count} 個のダイスがハッキングされました、合体で解除',
                 bossShield: '🛡️ シールド!'
@@ -2549,7 +2584,7 @@
                 coverTitle: '🎲 오프라인 주사위',
                 coverDesc: '🔥불・⚡번개・🌪️바람・☠️독・❄️얼음<br>⭐ 최대 7성 합병 &nbsp;|&nbsp; 💰 비용 매회 +10<br>❤️ 목숨 3개 &nbsp;|&nbsp; 👾 다양한 적과 대결<br>🔗 동일 종류·점수 다이스 합성',
                 startBtn: '게임 시작',
-                version: 'v2.7.2',
+                version: 'v2.7.6',
                 copyright: '© {year} ☕딕슨 카페，판권 소유.',
                 gameTitle: '🎲 Offline Dice',
                 rollBtn: '주사위',
@@ -2579,6 +2614,12 @@
                 shopRemain: '남음 {got} / {total} 개',
                 shopDraw: '🎲 뽑기',
                 shopDrawComplete: '🎉 모든 주사위 획득!',
+                dash: '💨 가속 돌진!',
+                transform: '⚔️ 변환!',
+                meteor: '💥 운석!',
+                seal: '🔒 봉인!',
+                immune: '🛡️ 면역 증가',
+                baseballKill: '💫 야구 주사위 처치!',
                 diceNames: {
                     FIRE: '불',
                     THUNDER: '번개',
@@ -2596,7 +2637,8 @@
                     VAMPIRE: '중개',
                     JOKER: '조커',
                     SAPLING: '묘목',
-                    TAICHI: '태극'
+                    TAICHI: '태극',
+                    BASEBALL: '야구'
                 },
                 diceDescs: {
                     FIRE: '연소・범위',
@@ -2615,7 +2657,8 @@
                     VAMPIRE: '흡혈',
                     JOKER: '복사',
                     SAPLING: '대상 합병',
-                    TAICHI: '음양 조화'
+                    TAICHI: '음양 조화',
+                    BASEBALL: '超高攻'
                 },
                 dicePrices: {
                     FIRE: 0,
@@ -2630,6 +2673,7 @@
                     GOLDMINE: 900,
                     LIGHT: 900,
                     MYSTERY: 900,
+                    BASEBALL: 900,
                     MIMIC: 1200,
                     VAMPIRE: 1200,
                     JOKER: 1500,
@@ -2784,7 +2828,7 @@
                 detailSapling: '모든 주사위와 합병하여 별 상승',
                 detailTaichi: '음양 조화 · 행/열로 능력 발동',
                 detailLight: '오라 · 인접 주사위 공격속도 증가 (+{pct}%)',
-                // ★★★ 新增 ★★★
+                detailBaseball: '超高攻 (속도 부스트를 공격력 부스트로 변환, 예: 빛 주사위 속도 보너스)',
                 bossHackerMark: '💻 해커 마크!',
                 bossHackerHacked: '💻 {count} 개의 주사위가 해킹되었습니다, 합병으로 해제',
                 bossShield: '🛡️ 쉴드!'
@@ -2821,6 +2865,7 @@
 
         // ========== 全域音效開關 ==========
         let soundEnabled = true;
+        let _isGameOverDeckBuildPlaying = false;
 
         // ========== CONST ==========
         const CONST = Object.freeze({
@@ -2896,11 +2941,12 @@
                 SAPLING: Object.freeze({ label: '🌱', color: '#55efc4', baseDamage: 10, damagePerStar: 10,
                     baseInterval: 1.5, intervalPerLevel: 0, attackType: 'front', isSapling: true }),
                 TAICHI: Object.freeze({ label: '☯️', color: '#6c5ce7', baseDamage: 120, damagePerStar: 40,
-                    baseInterval: 0.8, intervalPerLevel: -0.01, attackType: 'front', isTaichi: true })
+                    baseInterval: 0.8, intervalPerLevel: -0.01, attackType: 'front', isTaichi: true }),
+                BASEBALL: Object.freeze({ label: '💫', color: '#e67e22', baseDamage: 3000, damagePerStar: 40,
+                    baseInterval: 4.0, intervalPerLevel: 0, attackType: 'front', isBaseball: true })
             })
         });
 
-        // ===== 寶箱分組 =====
         const CHEST_GROUPS = {
             common: {
                 id: 'common',
@@ -2912,7 +2958,7 @@
             rare: {
                 id: 'rare',
                 cost: 900,
-                dice: ['GOLDMINE', 'LIGHT', 'MYSTERY'],
+                dice: ['GOLDMINE', 'LIGHT', 'MYSTERY', 'BASEBALL'],
                 icon: '🛍️',
                 emoji: '🛍️'
             },
@@ -2933,7 +2979,7 @@
         };
 
         // ================================================================
-        // 排行榜系統
+        // 排行榜系統 (保持不變)
         // ================================================================
         function getDefaultLeaderboard() {
             return [
@@ -3012,6 +3058,7 @@
                     GOLDMINE: false,
                     LIGHT: false,
                     MYSTERY: false,
+                    BASEBALL: false,
                     MIMIC: false,
                     VAMPIRE: false,
                     JOKER: false,
@@ -3227,6 +3274,7 @@
         const GAME_MUSIC_URL = 'Offline Dice - Dice Rush.mp3';
         const SHOP_MUSIC_URL = 'Offline Dice - Shop.mp3';
         const RANK_MUSIC_URL = 'Offline Dice - Rank.mp3';
+        const DECK_BUILD_URL = 'Offline Dice - Deck Build.mp3';
 
         const BGM_LIST = [
             { url: 'Offline Dice - Dice Rush.mp3', label: 'BGM 1' },
@@ -3305,6 +3353,46 @@
                 g2.connect(ctx.destination);
                 osc.start(ctx.currentTime);
                 osc.stop(ctx.currentTime + 0.1);
+            } catch (e) {}
+        }
+
+        function playBossSkillSound() {
+            if (!soundEnabled) return;
+            try {
+                if (!initAudio()) return;
+                const ctx = game.soundCtx;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.25);
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.25);
+                const bufferSize = ctx.sampleRate * 0.15;
+                const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                const d = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    const env = Math.exp(-i / (bufferSize * 0.2));
+                    d[i] = (Math.random() * 2 - 1) * env * 0.4;
+                }
+                const noise = ctx.createBufferSource();
+                noise.buffer = buffer;
+                const g2 = ctx.createGain();
+                g2.gain.setValueAtTime(0.5, ctx.currentTime);
+                g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+                const filter = ctx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(300, ctx.currentTime);
+                filter.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.15);
+                noise.connect(filter);
+                filter.connect(g2);
+                g2.connect(ctx.destination);
+                noise.start(ctx.currentTime);
+                noise.stop(ctx.currentTime + 0.15);
             } catch (e) {}
         }
 
@@ -3415,11 +3503,6 @@
             }
         }
 
-        // ★★★★★ 核心修復：排行榜音樂無縫播放（增強版） ★★★★★
-        // 修改：在恢復播放失敗時不重新加載，避免音樂停止再播放
-        let _rankBgmRetryCount = 0;
-        const RANK_BGM_MAX_RETRY = 3;
-
         function playRankBgm() {
             if (!soundEnabled) {
                 stopRankBgm();
@@ -3428,111 +3511,143 @@
             const audio = document.getElementById('rankAudio');
             if (!audio) return;
 
-            // ---- 情況1：已經加載了排行榜音樂 ----
             if (audio.src && audio.src.includes(RANK_MUSIC_URL)) {
-                // 如果正在播放，什麼也不做（音樂繼續無縫播放）
-                if (!audio.paused) {
-                    _rankBgmRetryCount = 0;
-                    return;
-                }
-
-                // 音樂被暫停 → 直接恢復播放（無縫銜接，不重新加載）
-                // ★★★ 核心修復：恢復播放失敗時絕不重新加載 ★★★
-                audio.play()
-                    .then(() => {
-                        _rankBgmRetryCount = 0;
-                        console.log('🎵 排行榜音樂已恢復播放（無縫）');
-                    })
-                    .catch(err => {
-                        console.warn('🎵 恢復排行榜音樂播放失敗:', err.message);
-                        // ★★★ 不再重新加載，僅等待用戶交互（如自動播放策略） ★★★
-                        if (err.name === 'NotAllowedError') {
-                            // 自動播放被阻止，添加一次性事件監聽
-                            const resumeRankAudio = () => {
-                                audio.play()
-                                    .then(() => {
-                                        rankBgmLoadFailed = false;
-                                        console.log('🎵 排行榜音樂在用戶交互後播放成功');
-                                    })
-                                    .catch(e => console.warn('🎵 用戶交互後播放仍失敗:', e.message));
-                                document.removeEventListener('click', resumeRankAudio);
-                                document.removeEventListener('touchstart', resumeRankAudio);
-                            };
-                            document.addEventListener('click', resumeRankAudio, { once: true });
-                            document.addEventListener('touchstart', resumeRankAudio, { once: true });
-                        }
-                        // ★★★ 不重試加載，保留當前 src ★★★
-                    });
+                if (!audio.paused) return;
+                audio.play().catch(err => {
+                    if (err.name === 'NotAllowedError') {
+                        const resume = () => {
+                            audio.play().catch(() => {});
+                            document.removeEventListener('click', resume);
+                            document.removeEventListener('touchstart', resume);
+                        };
+                        document.addEventListener('click', resume, { once: true });
+                        document.addEventListener('touchstart', resume, { once: true });
+                    }
+                });
                 return;
             }
 
-            // ---- 情況2：首次加載或切換到排行榜音樂 ----
-            // 如果之前加載失敗，重置狀態
-            if (rankBgmLoadFailed) {
-                rankBgmLoadFailed = false;
-                _rankBgmRetryCount = 0;
-            }
-
-            // 停止其他音樂
             stopBgMusic();
             stopShopBgm();
-
-            // 首次加載
             audio.src = RANK_MUSIC_URL;
             audio.loop = true;
             audio.volume = 0.4;
             audio.load();
-
-            audio.play()
-                .then(() => {
-                    rankBgmLoadFailed = false;
-                    _rankBgmRetryCount = 0;
-                    console.log('🎵 排行榜音樂首次播放成功');
-                })
-                .catch(err => {
-                    console.warn('🎵 排行榜音樂播放失敗:', err.message);
-                    if (err.name === 'NotAllowedError') {
-                        const resumeRankAudio = () => {
-                            audio.play()
-                                .then(() => {
-                                    rankBgmLoadFailed = false;
-                                    console.log('🎵 排行榜音樂在用戶交互後播放成功');
-                                })
-                                .catch(e => console.warn('🎵 用戶交互後播放仍失敗:', e.message));
-                            document.removeEventListener('click', resumeRankAudio);
-                            document.removeEventListener('touchstart', resumeRankAudio);
-                        };
-                        document.addEventListener('click', resumeRankAudio, { once: true });
-                        document.addEventListener('touchstart', resumeRankAudio, { once: true });
-                    } else {
-                        rankBgmLoadFailed = true;
-                    }
-                });
-
-            audio.onerror = function(e) {
-                console.warn('🎵 排行榜音樂加載錯誤:', audio.error ? audio.error.message : '未知');
-                if (audio.error && audio.error.code === 4) {
-                    rankBgmLoadFailed = true;
-                } else {
-                    console.warn('🎵 排行榜音樂加載暫時性錯誤，將重試');
+            audio.play().catch(err => {
+                if (err.name === 'NotAllowedError') {
+                    const resume = () => {
+                        audio.play().catch(() => {});
+                        document.removeEventListener('click', resume);
+                        document.removeEventListener('touchstart', resume);
+                    };
+                    document.addEventListener('click', resume, { once: true });
+                    document.addEventListener('touchstart', resume, { once: true });
                 }
-            };
+            });
         }
 
         function stopRankBgm() {
             const audio = document.getElementById('rankAudio');
             if (audio) {
                 audio.pause();
-                audio.currentTime = 0;
-                // 不清空 src，以便後續可以恢復播放
             }
-            _rankBgmRetryCount = 0;
         }
 
-        // ========== 浮動音符按鈕 ==========
+        function playDeckBuildBgm() {
+            if (!soundEnabled) {
+                stopDeckBuildBgm();
+                return;
+            }
+            const audio = document.getElementById('deckBuildAudio');
+            if (!audio) return;
+
+            if (audio.src && audio.src.includes(DECK_BUILD_URL)) {
+                if (!audio.paused) {
+                    _isGameOverDeckBuildPlaying = true;
+                    return;
+                }
+                audio.play()
+                    .then(() => { _isGameOverDeckBuildPlaying = true; })
+                    .catch(err => {
+                        if (err.name === 'NotAllowedError') {
+                            const resume = () => {
+                                audio.play().catch(() => {});
+                                document.removeEventListener('click', resume);
+                                document.removeEventListener('touchstart', resume);
+                            };
+                            document.addEventListener('click', resume, { once: true });
+                            document.addEventListener('touchstart', resume, { once: true });
+                        }
+                    });
+                return;
+            }
+
+            stopBgMusic();
+            stopShopBgm();
+            stopRankBgm();
+            audio.src = DECK_BUILD_URL;
+            audio.loop = true;
+            audio.volume = 0.4;
+            audio.load();
+            audio.play()
+                .then(() => { _isGameOverDeckBuildPlaying = true; })
+                .catch(err => {
+                    if (err.name === 'NotAllowedError') {
+                        const resume = () => {
+                            audio.play().catch(() => {});
+                            document.removeEventListener('click', resume);
+                            document.removeEventListener('touchstart', resume);
+                        };
+                        document.addEventListener('click', resume, { once: true });
+                        document.addEventListener('touchstart', resume, { once: true });
+                    }
+                });
+            audio.onerror = function(e) {
+                console.warn('🎵 Deck Build 音樂加載錯誤:', audio.error ? audio.error.message : '未知');
+            };
+        }
+
+        function stopDeckBuildBgm() {
+            const audio = document.getElementById('deckBuildAudio');
+            if (audio) {
+                audio.pause();
+                audio.currentTime = 0;
+            }
+            _isGameOverDeckBuildPlaying = false;
+        }
+
+        function toggleDeckBuildBgm() {
+            const audio = document.getElementById('deckBuildAudio');
+            if (!audio) return;
+            if (_isGameOverDeckBuildPlaying) {
+                audio.pause();
+                _isGameOverDeckBuildPlaying = false;
+            } else {
+                if (audio.src && audio.src.includes(DECK_BUILD_URL)) {
+                    audio.play().catch(() => {});
+                    _isGameOverDeckBuildPlaying = true;
+                } else {
+                    playDeckBuildBgm();
+                }
+            }
+        }
+
+        // ========== 浮動音符按鈕 (增強 Game Over 控制) ==========
         const soundToggleBtn = document.getElementById('soundToggleBtn');
         soundToggleBtn.addEventListener('click', function(e) {
             e.stopPropagation();
+
+            const gameoverOpen = document.getElementById('gameoverOverlay').classList.contains('visible');
+
+            if (gameoverOpen) {
+                toggleDeckBuildBgm();
+                this.textContent = _isGameOverDeckBuildPlaying ? '🔊' : '🔇';
+                this.classList.toggle('muted', !_isGameOverDeckBuildPlaying);
+                const data = getData();
+                showToast(_isGameOverDeckBuildPlaying ? '▶️ Deck Build 播放中' : '⏸️ Deck Build 已暫停', 1200);
+                return;
+            }
+
             soundEnabled = !soundEnabled;
             this.textContent = soundEnabled ? '🔊' : '🔇';
             this.classList.toggle('muted', !soundEnabled);
@@ -3542,10 +3657,9 @@
                 const shopOpen = document.getElementById('shopOverlay').classList.contains('visible');
                 const lbOpen = document.getElementById('leaderboardOverlay').classList.contains('visible');
                 const lbNameOpen = document.getElementById('lbNameInputOverlay').classList.contains('visible');
-                const gameoverOpen = document.getElementById('gameoverOverlay').classList.contains('visible');
                 if (shopOpen) {
                     playShopBgm();
-                } else if (lbOpen || lbNameOpen || gameoverOpen) {
+                } else if (lbOpen || lbNameOpen) {
                     playRankBgm();
                 } else {
                     if (game.gameStarted && !game.gameOver) {
@@ -3558,6 +3672,7 @@
                 stopBgMusic();
                 stopShopBgm();
                 stopRankBgm();
+                stopDeckBuildBgm();
             }
         });
 
@@ -3656,6 +3771,10 @@
             } else if (type === 'TAICHI') {
                 const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
                 dmg = baseDmg * mult;
+            } else if (type === 'BASEBALL') {
+                const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
+                const lvBonus = (lv - 1) * 80;
+                dmg = baseDmg + lvBonus;
             } else {
                 dmg = (def.baseDamage + def.damagePerStar * (s - 1)) * mult;
             }
@@ -3699,6 +3818,7 @@
                 get isVampire() { return def.isVampire || false; },
                 get isTaichi() { return def.isTaichi || false; },
                 get isLight() { return def.isLight || false; },
+                get isBaseball() { return def.isBaseball || false; },
                 get burn() { return def.burn || false; },
                 get bossMultiplier() { return def.bossMultiplier || 1; },
                 get gambleMin() { return def.gambleMin || 0; },
@@ -3802,7 +3922,7 @@
                 `<div class="dice-icon" style="background:${dice.color};border-color:rgba(255,255,255,0.4);">${dice.label}</div><span style="font-weight:600;font-size:13px;">★${dice.star} ${dice.name}</span>`;
         }
 
-        // ========== 拖曳合併 ==========
+        // ========== 拖曳合併 (含 isfinal 保護) ==========
         function getGridPosFromPointer(e) {
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width,
@@ -4629,7 +4749,7 @@
                 game._bossAbilityTimeout = null; }
         }
 
-        // ========== Boss 技能 ==========
+        // ========== Boss 技能 (保留原有) ==========
         function updateBossAbilities(dt) {
             if (!game.currentBoss || !game.currentBoss.alive || !game.currentBoss.isBoss) return;
             const boss = game.currentBoss;
@@ -4729,6 +4849,7 @@
         function triggerKnightAbility(boss) {
             const data = getData();
             showToast(data.bossWarningKnight, 1500);
+            showToast(data.transform, 800);
             playShootSound();
             const activeTypes = getActiveDiceKeys();
             if (activeTypes.length === 0) return;
@@ -4746,7 +4867,7 @@
                     }
                 }
             }
-            addFloatingText(boss.x, boss.y - 40, '⚔ 變換!', '#3498db', 24);
+            addFloatingText(boss.x, boss.y - 40, data.transform, '#3498db', 24);
             playHitSound();
         }
 
@@ -4792,8 +4913,9 @@
             const data = getData();
             const dur = 0.5;
             boss.dashTimer = dur;
-            addFloatingText(boss.x, boss.y - 30, '💨 加速衝刺!', '#e67e22', 22);
+            addFloatingText(boss.x, boss.y - 30, data.dash, '#e67e22', 22);
             showToast(data.bossLionDash.replace(/\{dur\}/g, dur.toFixed(1)), 1200);
+            showToast(data.dash, 600);
             playShootSound();
             boss.skillTimer = 0;
         }
@@ -4801,6 +4923,7 @@
         function triggerMageMeteor(boss) {
             const data = getData();
             showToast(data.bossWarningMage, 2000);
+            showToast(data.meteor, 800);
             playShootSound();
             let diceCells = [];
             for (let r = 0; r < ROWS; r++) {
@@ -4818,7 +4941,7 @@
                         game.board[pick.row][pick.col] = null;
                         addFloatingText(boardX + pick.col * CELL_SIZE + CELL_SIZE / 2,
                             boardY + pick.row * CELL_SIZE + CELL_SIZE / 2,
-                            '💥 隕石!', '#ff6b6b', 26);
+                            data.meteor, '#ff6b6b', 26);
                         showToast(data.bossMeteorDestroy);
                         playHitSound();
                     } else {
@@ -4831,7 +4954,6 @@
             boss.skillTimer = 0;
         }
 
-        // ★★★ 修改點：使用翻譯 bossShield ★★★
         function triggerMageCleanse(boss) {
             const data = getData();
             boss.poison = null;
@@ -4841,9 +4963,9 @@
             boss.stunTimer = 0;
             boss.slowFactor = 0;
             boss.shieldTimer = 2.0;
-            // 使用翻譯
             addFloatingText(boss.x, boss.y - 30, data.bossShield, '#2ecc71', 22);
             showToast(data.bossMageCleanse, 1500);
+            showToast(data.immune, 800);
             playShootSound();
             boss.skillPhase = 2;
             boss.skillTimer = 0;
@@ -4860,7 +4982,6 @@
             boss.skillTimer = 0;
         }
 
-        // ★★★ 修改點：使用翻譯 bossHackerMark 和 bossHackerHacked ★★★
         function triggerHackerAbility(boss) {
             const data = getData();
             showToast(data.bossWarningHacker, 1500);
@@ -4878,10 +4999,8 @@
                 if (pick) hacked.push(pick);
             }
             game.bossHackedDice = game.bossHackedDice.concat(hacked);
-            // 使用翻譯
             addFloatingText(boss.x, boss.y - 30, data.bossHackerMark, '#2c3e50', 22);
-            const hackedMsg = data.bossHackerHacked.replace(/\{count\}/g, hacked.length);
-            showToast(hackedMsg);
+            showToast(data.bossHackerHacked.replace(/\{count\}/g, hacked.length));
             if (hacked.length > 0) playHitSound();
             boss.skillTimer = 0;
         }
@@ -5019,6 +5138,7 @@
         function triggerLambAbility(boss) {
             const data = getData();
             showToast(data.bossWarningLamb, 1500);
+            showToast(data.seal, 800);
             playShootSound();
             let diceCells = [];
             for (let r = 0; r < ROWS; r++) {
@@ -5033,7 +5153,7 @@
                 if (pick) locked.push(pick);
             }
             game.bossLockedDice = game.bossLockedDice.concat(locked);
-            addFloatingText(boss.x, boss.y - 30, '🔒 封印!', '#f1c40f', 22);
+            addFloatingText(boss.x, boss.y - 30, data.seal, '#f1c40f', 22);
             showToast(data.bossLambSeal.replace(/\{count\}/g, locked.length));
             if (locked.length > 0) playHitSound();
             boss.skillTimer = 0;
@@ -5180,7 +5300,7 @@
         }
 
         // ================================================================
-        // 太極骰子能力檢測
+        // 太極骰子能力檢測 (保持原樣)
         // ================================================================
         function updateTaichiAbilities(dt) {
             let taichiPositions = [];
@@ -5399,7 +5519,7 @@
             return totalBonus;
         }
 
-        // ========== 攻擊 ==========
+        // ========== 攻擊 (含棒球骰子特殊能力 & 擊殺特效) ==========
         function updateAttacks(dt) {
             updateTaichiAbilities(dt);
 
@@ -5610,6 +5730,23 @@
                             let damage = dice.damage || 0;
                             if (typeof damage !== 'number' || !isFinite(damage)) damage = 0;
 
+                            // ★ 棒球骰子特殊能力：速度增益轉化為攻擊力增益 ★
+                            if (dice.isBaseball) {
+                                const speedBonus = calculateLightBonus(r, c);
+                                if (speedBonus > 0) {
+                                    const atkBonus = speedBonus;
+                                    damage = damage * (1 + atkBonus);
+                                    if (Math.random() < 0.02) {
+                                        addFloatingText(
+                                            boardX + c * CELL_SIZE + CELL_SIZE / 2,
+                                            boardY + r * CELL_SIZE + CELL_SIZE / 2 - 14,
+                                            `💫 +${Math.round(atkBonus*100)}%`,
+                                            '#f7d875', 16
+                                        );
+                                    }
+                                }
+                            }
+
                             if (dice.type === 'GAMBLE') {
                                 const minDmg = dice.gambleMin || 7;
                                 const maxDmg = damage;
@@ -5654,6 +5791,7 @@
                             }
 
                             const hasShield = target.shieldTimer && target.shieldTimer > 0;
+                            const targetWasAlive = target.alive && target.hp > 0;
 
                             if (isHacked) {
                                 const healAmount = damage * 0.5;
@@ -5675,6 +5813,17 @@
                                 if (!isFinite(target.hp)) target.hp = 0;
                                 target.hitFlash = 0.2;
                                 addFloatingText(target.x, target.y - 20, `-${Math.round(safeDmg)}`, '#ffd93d', 18);
+
+                                if (target.hp <= 0 && targetWasAlive) {
+                                    // ★ 棒球骰子擊殺：僅播放 💥 和 BOSS 音效，移除額外粒子與飛出特效 ★
+                                    if (dice.isBaseball) {
+                                        addFloatingText(target.x, target.y - 20, '💥', '#ff6b6b', 48);
+                                        playBossSkillSound();
+                                        // Toast 顯示 1000ms，使用翻譯
+                                        const data = getData();
+                                        showToast(data.baseballKill || '💫 棒球骰子 擊殺！', 1000);
+                                    }
+                                }
 
                                 if (dice.burn) {
                                     target.burnTimer = 2.0;
@@ -5715,10 +5864,17 @@
                                         const splashDmg = damage * 0.5;
                                         const safeSplash = (typeof splashDmg === 'number' && isFinite(splashDmg)) ?
                                             splashDmg : 0;
+                                        const wasAlive = e.alive && e.hp > 0;
                                         e.hp = (e.hp || 0) - safeSplash;
                                         if (!isFinite(e.hp)) e.hp = 0;
                                         e.hitFlash = 0.15;
                                         addFloatingText(e.x, e.y - 20, `-${Math.round(safeSplash)}`, '#ff9f43', 16);
+                                        if (e.hp <= 0 && wasAlive && dice.isBaseball) {
+                                            addFloatingText(e.x, e.y - 20, '💥', '#ff6b6b', 36);
+                                            playBossSkillSound();
+                                            const data = getData();
+                                            showToast(data.baseballKill || '💫 棒球骰子 擊殺！', 1000);
+                                        }
                                     }
                                 }
                             }
@@ -5742,11 +5898,18 @@
                                     const chainDmg = damage * factors[i];
                                     const safeChainDmg = (typeof chainDmg === 'number' && isFinite(chainDmg)) ?
                                         chainDmg : 0;
+                                    const wasAlive = nextTarget.alive && nextTarget.hp > 0;
                                     nextTarget.hp = (nextTarget.hp || 0) - safeChainDmg;
                                     if (!isFinite(nextTarget.hp)) nextTarget.hp = 0;
                                     nextTarget.hitFlash = 0.2;
                                     addFloatingText(nextTarget.x, nextTarget.y - 20, `-${Math.round(safeChainDmg)}`,
                                         '#fdcb6e', 16);
+                                    if (nextTarget.hp <= 0 && wasAlive && dice.isBaseball) {
+                                        addFloatingText(nextTarget.x, nextTarget.y - 20, '💥', '#ff6b6b', 36);
+                                        playBossSkillSound();
+                                        const data = getData();
+                                        showToast(data.baseballKill || '💫 棒球骰子 擊殺！', 1000);
+                                    }
                                     hitList.push(nextTarget);
                                     currentTarget = nextTarget;
                                 }
@@ -5860,10 +6023,9 @@
             document.getElementById('rollBtn').disabled = true;
             updateCoverUI();
 
-            if (isRankingWave(game.wave)) {
-                // ★ 使用修復後的 playRankBgm，無縫播放
-                playRankBgm();
+            const isRanking = isRankingWave(game.wave);
 
+            if (isRanking) {
                 const rank = getRankForWave(game.wave);
                 const rankMsg = data.lbInputDescRank.replace(/\{rank\}/g, rank).replace(/\{wave\}/g, game.wave);
                 document.getElementById('lbInputDesc').textContent = rankMsg;
@@ -5873,15 +6035,22 @@
                 document.getElementById('lbNameInputOverlay').classList.add('visible');
                 document.getElementById('lbNameInput').focus();
                 window._pendingLeaderboard = { wave: game.wave, score: scoreEarned };
+
+                stopBgMusic();
+                stopShopBgm();
+                stopDeckBuildBgm();
+                playRankBgm();
             } else {
                 stopBgMusic();
                 stopShopBgm();
                 stopRankBgm();
-                if (soundEnabled) playRankBgm();
+                playDeckBuildBgm();
+                soundToggleBtn.textContent = '🔊';
+                soundToggleBtn.classList.remove('muted');
             }
         }
 
-        // ★★★★★ 排行榜確認按鈕 - 確保音樂無縫持續 ★★★★★
+        // ★★★★★ 排行榜確認按鈕 ★★★★★
         document.getElementById('lbNameConfirmBtn').addEventListener('click', function() {
             const name = document.getElementById('lbNameInput').value.trim() || '匿名';
             const pending = window._pendingLeaderboard || { wave: game.wave, score: 0 };
@@ -5896,25 +6065,24 @@
                 showToast(data.lbYourRank.replace(/\{rank\}/g, rank), 3000);
             }, 500);
 
-            // ★ 遊戲結束時，確保排行榜音樂繼續播放（無縫）
             if (game.gameOver) {
-                playRankBgm(); // 內部會檢查是否已在播放，不會重新加載
-            } else {
                 stopRankBgm();
-                if (soundEnabled) playBgMusic('menu');
+                playDeckBuildBgm();
+                soundToggleBtn.textContent = '🔊';
+                soundToggleBtn.classList.remove('muted');
             }
         });
 
-        // ★★★★★ 排行榜跳過按鈕 - 確保音樂無縫持續 ★★★★★
+        // ★★★★★ 排行榜跳過按鈕 ★★★★★
         document.getElementById('lbNameSkipBtn').addEventListener('click', function() {
             document.getElementById('lbNameInputOverlay').classList.remove('visible');
             window._pendingLeaderboard = null;
 
             if (game.gameOver) {
-                playRankBgm(); // 內部會檢查是否已在播放，不會重新加載
-            } else {
                 stopRankBgm();
-                if (soundEnabled) playBgMusic('menu');
+                playDeckBuildBgm();
+                soundToggleBtn.textContent = '🔊';
+                soundToggleBtn.classList.remove('muted');
             }
         });
 
@@ -5983,10 +6151,16 @@
             stopBgMusic();
             stopShopBgm();
             stopRankBgm();
+            stopDeckBuildBgm();
+            _isGameOverDeckBuildPlaying = false;
+            soundToggleBtn.textContent = '🔊';
+            soundToggleBtn.classList.remove('muted');
             playBgMusic('menu');
         }
 
-        // ========== 繪製 ==========
+        document.getElementById('restartBtn').addEventListener('click', restartGame);
+
+        // ========== 繪製 (含 isfinal 保護) ==========
         if (!CanvasRenderingContext2D.prototype.roundRect) {
             CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, radii) {
                 const r = typeof radii === 'number' ? radii : (radii || 0);
@@ -6129,12 +6303,18 @@
             ctx.fillText('⚡', x + size - 4, y + size - 4);
         }
 
-        function drawDice(ctx, x, y, size, dice) {
-            if (!dice) return;
+        // ★ 繪製骰子 (含 isfinal 保護，並傳入行列) ★
+        function drawDice(ctx, x, y, size, dice, row, col) {
+            // ★ isfinal 保護：若骰子無效或類型無效則直接返回 ★
+            if (!dice || !dice.type) return;
             const def = CONST.ALL_DICE_DEFS[dice.type];
             if (!def) return;
+
+            // 額外檢查：如果骰子正在被合併標記（由外部標記），則跳過繪製
+            if (dice._isFinal === false) return;
+
             const margin = 6,
-                radius = 10;
+                radius = Math.min(10, size * 0.12);
             const cx = x + size / 2,
                 cy = y + size / 2;
             const dSize = size - margin * 2;
@@ -6169,6 +6349,7 @@
             ctx.lineWidth = 1.5;
             ctx.stroke();
 
+            // 繪製點數 (四角裝飾點)
             drawDicePips(ctx, cx, cy, dSize, dice.star);
 
             if (dice.star >= game.maxStar && dice.star < 7) {
@@ -6297,11 +6478,36 @@
                 }
             }
 
+            // ★ 棒球骰子顯示速度轉化攻擊力百分比，放在左上角避免遮蓋 label ★
+            if (dice.isBaseball) {
+                // 使用傳入的 row, col 計算光加成，若無則跳過
+                let lightBonus = 0;
+                if (row !== undefined && col !== undefined) {
+                    lightBonus = calculateLightBonus(row, col);
+                }
+                if (lightBonus > 0) {
+                    const pct = Math.round(lightBonus * 100);
+                    ctx.fillStyle = 'rgba(255,215,0,0.85)';
+                    ctx.font = `bold ${Math.floor(size*0.13)}px sans-serif`;
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'top';
+                    ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                    ctx.shadowBlur = 4;
+                    ctx.fillText(`💫+${pct}%`, x + 4, y + 2);
+                    ctx.shadowBlur = 0;
+                }
+            }
+
+            // ★ 繪製 label (💫 等) 在骰子中央偏下，確保顯示 ★
             ctx.fillStyle = 'rgba(255,255,255,0.9)';
-            ctx.font = `${Math.floor(size*0.35)}px sans-serif`;
+            ctx.font = `bold ${Math.floor(size*0.35)}px sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'bottom';
-            ctx.fillText(def.label, cx, y + size - 8);
+            ctx.shadowColor = 'rgba(0,0,0,0.3)';
+            ctx.shadowBlur = 4;
+            ctx.fillText(def.label, cx, y + size - 6);
+            ctx.shadowBlur = 0;
+            // 骰子名稱放在頂部
             ctx.fillStyle = 'rgba(255,255,255,0.5)';
             ctx.font = `${Math.floor(size*0.12)}px sans-serif`;
             ctx.textAlign = 'center';
@@ -6470,7 +6676,7 @@
                     }
                 }
 
-                // ---- 繪製骰子 ----
+                // ---- 繪製骰子 (含 isfinal 保護) ----
                 for (let r = 0; r < ROWS; r++) {
                     for (let c = 0; c < COLS; c++) {
                         try {
@@ -6478,7 +6684,10 @@
                                 y = boardY + r * CELL_SIZE;
                             const dice = (game.board[r] && game.board[r][c]) ? game.board[r][c] : null;
                             if (dice) {
-                                drawDice(ctx, x, y, CELL_SIZE, dice);
+                                // ★ 再次確認骰子有效且未被標記為不可繪製 ★
+                                if (!dice._isFinal) {
+                                    drawDice(ctx, x, y, CELL_SIZE, dice, r, c);
+                                }
                             }
                             if (game._markedDice && game._markedDice.some(d => d.row === r && d.col === c)) {
                                 ctx.fillStyle = 'rgba(255,0,0,0.4)';
@@ -6542,7 +6751,7 @@
                                 }
                             }
 
-                            // ★★★ 骰子高亮遮罩 ★★★
+                            // ★ 骰子高亮遮罩 ★
                             if (game.highlightTarget && dice &&
                                 game.highlightTarget.type === dice.type &&
                                 game.highlightTarget.star === dice.star) {
@@ -6645,6 +6854,7 @@
                             cy = (my - rect.top) * scaleY;
                         const sz = CELL_SIZE * 0.6;
                         ctx.globalAlpha = 0.7;
+                        // 拖拽時不計算光加成，傳入 undefined
                         drawDice(ctx, cx - sz / 2, cy - sz / 2, sz, dice);
                         ctx.globalAlpha = 1.0;
                     }
@@ -7052,7 +7262,7 @@
                 'POISON', 'ICE'
             ]; }
 
-        // ========== 商店 ==========
+        // ========== 商店 (保持原樣) ==========
         function getChestStatus(chestId) {
             const group = CHEST_GROUPS[chestId];
             if (!group) return null;
@@ -7187,6 +7397,7 @@
             updateShopUI();
         }
 
+        // ========== 骰子詳細 ==========
         function showDiceDetail(diceType) {
             const def = CONST.ALL_DICE_DEFS[diceType];
             if (!def) return;
@@ -7266,6 +7477,9 @@
                 const star = 1;
                 const pct = 6 + (star - 1) * 0.6 + (lv - 1) * 1;
                 specialParts.push(data.detailLight.replace(/\{pct\}/g, pct.toFixed(1)));
+            }
+            if (def.isBaseball) {
+                specialParts.push(data.detailBaseball || '超高攻 (速度增益轉化為攻擊力增益)');
             }
 
             if (specialParts.length === 0) {
@@ -7480,6 +7694,8 @@
                 stopBgMusic();
                 stopShopBgm();
                 stopRankBgm();
+                stopDeckBuildBgm();
+                _isGameOverDeckBuildPlaying = false;
                 playBgMusic('game');
             });
             document.getElementById('restartBtn').addEventListener('click', restartGame);
@@ -7600,13 +7816,21 @@
                 if (soundEnabled) {
                     stopBgMusic();
                     stopShopBgm();
+                    stopDeckBuildBgm();
                     playRankBgm();
                 }
             });
             document.getElementById('lbCloseBtn').addEventListener('click', function() {
                 document.getElementById('leaderboardOverlay').classList.remove('visible');
                 if (game.gameOver) {
-                    if (soundEnabled) playRankBgm();
+                    if (soundEnabled) {
+                        const audio = document.getElementById('deckBuildAudio');
+                        if (!audio.src || !audio.src.includes(DECK_BUILD_URL) || audio.paused) {
+                            playDeckBuildBgm();
+                        } else {
+                            audio.play().catch(() => {});
+                        }
+                    }
                 } else {
                     stopRankBgm();
                     if (soundEnabled) {
@@ -7619,7 +7843,14 @@
                 if (e.target === this) {
                     this.classList.remove('visible');
                     if (game.gameOver) {
-                        if (soundEnabled) playRankBgm();
+                        if (soundEnabled) {
+                            const audio = document.getElementById('deckBuildAudio');
+                            if (!audio.src || !audio.src.includes(DECK_BUILD_URL) || audio.paused) {
+                                playDeckBuildBgm();
+                            } else {
+                                audio.play().catch(() => {});
+                            }
+                        }
                     } else {
                         stopRankBgm();
                         if (soundEnabled) {
@@ -7728,7 +7959,7 @@
         }
 
         requestAnimationFrame(gameLoop);
-        console.log('🎲 Offline Dice v2.7.2 - 修復Boss技能翻譯與排行榜音樂無縫播放');
+        console.log('🎲 Offline Dice v2.7.6 - 修復棒球骰子顯示、四角點與拖拽繪製');
     </script>
 </body>
 </html>
