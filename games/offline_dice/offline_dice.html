@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Offline Dice</title>
     <style>
-        /* ===== 保留原有全部样式，仅微调 ===== */
         * {
             margin: 0;
             padding: 0;
@@ -1001,6 +1000,45 @@
             border-color: #ff6b6b;
             color: #ff6b6b;
         }
+        /* 全屏按钮样式 - 右下角 */
+        #fullscreenBtn {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            z-index: 200;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #f7d875;
+            cursor: pointer;
+            transition: all 0.25s;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+            touch-action: manipulation;
+            user-select: none;
+        }
+        #fullscreenBtn:hover {
+            background: rgba(245, 166, 35, 0.2);
+            border-color: #f5a623;
+            transform: scale(1.05);
+        }
+        #fullscreenBtn:active {
+            transform: scale(0.92);
+        }
+        #fullscreenBtn.is-fullscreen {
+            color: #2ecc71;
+            border-color: #2ecc71;
+        }
+        #fullscreenBtn.is-fullscreen:hover {
+            background: rgba(46, 204, 113, 0.2);
+            border-color: #2ecc71;
+        }
         .draw-result-overlay {
             position: absolute;
             top: 0;
@@ -1362,6 +1400,13 @@
                 bottom: 12px;
                 left: 12px;
             }
+            #fullscreenBtn {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+                bottom: 12px;
+                right: 12px;
+            }
             .draw-result-overlay .draw-icon {
                 font-size: 56px;
             }
@@ -1545,7 +1590,11 @@
             <button id="fishModeBtn">🐟 摸魚</button>
         </div>
 
+        <!-- 音效按鈕 (左下) -->
         <button id="soundToggleBtn" title="音效開關">🔊</button>
+
+        <!-- ★ 全屏按鈕 (右下) ★ -->
+        <button id="fullscreenBtn" title="全屏顯示">⛶</button>
 
         <div class="controls">
             <div class="dice-preview" id="dicePreview"><span class="empty" id="dicePreviewEmpty">✨升級</span></div>
@@ -1565,12 +1614,12 @@
 
     <script>
         // ================================================================
-        // 翻譯 (完整) - 棒球骰子改為「超高攻」並加入擊殺訊息
+        // 翻譯 (完整)
         // ================================================================
         const translations = {
             'zh-TW': {
                 coverTitle: '🎲 離線骰子',
-                coverDesc: '🔥火・⚡雷・🌪️風・☠️毒・❄️冰<br>⭐ 合併最高 7 點 &nbsp;|&nbsp; 💰 費用每次 +10<br>❤️ 僅 3 條命 &nbsp;|&nbsp; 👾各種敵人等你來挑戰<br>🔗 拖曳骰子到同類同點數骰子上合併',
+                coverDesc: '🔥火・⚡雷・🌩️旱雷・🌪️風・☠️毒・❄️冰<br>⭐ 合併最高 7 點 &nbsp;|&nbsp; 💰 費用每次 +10<br>❤️ 僅 3 條命 &nbsp;|&nbsp; 👾各種敵人等你來挑戰<br>🔗 拖曳骰子到同類同點數骰子上合併',
                 startBtn: '開始遊戲',
                 version: 'v2.7.6',
                 copyright: '© {year} ☕迪遜咖啡廳，版權所有。',
@@ -1608,6 +1657,8 @@
                 seal: '🔒 封印!',
                 immune: '🛡️ 免疫增加',
                 baseballKill: '💫 棒球骰子 擊殺！',
+                droughtThunderChain: '🌩️ 雷擊連鎖！ {count} 個目標！',
+                droughtThunderHit: '⚡ 雷擊 -{dmg}',
                 diceNames: {
                     FIRE: '火',
                     THUNDER: '雷',
@@ -1626,7 +1677,8 @@
                     JOKER: '小丑',
                     SAPLING: '樹苗',
                     TAICHI: '太極',
-                    BASEBALL: '棒球'
+                    BASEBALL: '棒球',
+                    DROUGHT_THUNDER: '旱雷'
                 },
                 diceDescs: {
                     FIRE: '燃燒・濺射',
@@ -1646,7 +1698,8 @@
                     JOKER: '複製',
                     SAPLING: '目標合併',
                     TAICHI: '陰陽調和',
-                    BASEBALL: '超高攻'
+                    BASEBALL: '超高攻',
+                    DROUGHT_THUNDER: '雷擊・連鎖增傷'
                 },
                 dicePrices: {
                     FIRE: 0,
@@ -1663,6 +1716,7 @@
                     MYSTERY: 900,
                     BASEBALL: 900,
                     MIMIC: 1200,
+                    DROUGHT_THUNDER: 1200,
                     VAMPIRE: 1200,
                     JOKER: 1500,
                     SAPLING: 1500,
@@ -1817,13 +1871,14 @@
                 detailTaichi: '陰陽調和 · 橫列/直行觸發能力',
                 detailLight: '光環 · 增加上、下、左、右一格骰子攻速 (+{pct}%)',
                 detailBaseball: '超高攻 (速度增益轉化為攻擊力增益，例如光骰子速度加成)',
+                detailDroughtThunder: '雷擊連鎖 · 對目標造成額外雷擊傷害，目標數量 = 星數，傷害遞增50%',
                 bossHackerMark: '💻 黑客標記!',
                 bossHackerHacked: '💻 {count} 顆骰子被黑客改造，合成可解除',
                 bossShield: '🛡️ 護盾!'
             },
             'zh-CN': {
                 coverTitle: '🎲 离线骰子',
-                coverDesc: '🔥火・⚡雷・🌪️风・☠️毒・❄️冰<br>⭐ 合并最高 7 点 &nbsp;|&nbsp; 💰 费用每次 +10<br>❤️ 仅 3 条命 &nbsp;|&nbsp; 👾各种敌人等你来挑战<br>🔗 拖曳骰子到同类同点数骰子上合并',
+                coverDesc: '🔥火・⚡雷・🌩️旱雷・🌪️风・☠️毒・❄️冰<br>⭐ 合并最高 7 点 &nbsp;|&nbsp; 💰 费用每次 +10<br>❤️ 仅 3 条命 &nbsp;|&nbsp; 👾各种敌人等你来挑战<br>🔗 拖曳骰子到同类同点数骰子上合并',
                 startBtn: '开始游戏',
                 version: 'v2.7.6',
                 copyright: '© {year} ☕迪逊咖啡厅，版权所有。',
@@ -1861,6 +1916,8 @@
                 seal: '🔒 封印!',
                 immune: '🛡️ 免疫增加',
                 baseballKill: '💫 棒球骰子 击杀！',
+                droughtThunderChain: '🌩️ 雷击连锁！ {count} 个目标！',
+                droughtThunderHit: '⚡ 雷击 -{dmg}',
                 diceNames: {
                     FIRE: '火',
                     THUNDER: '雷',
@@ -1879,7 +1936,8 @@
                     JOKER: '小丑',
                     SAPLING: '树苗',
                     TAICHI: '太极',
-                    BASEBALL: '棒球'
+                    BASEBALL: '棒球',
+                    DROUGHT_THUNDER: '旱雷'
                 },
                 diceDescs: {
                     FIRE: '燃烧・溅射',
@@ -1899,7 +1957,8 @@
                     JOKER: '复制',
                     SAPLING: '目标合并',
                     TAICHI: '阴阳调和',
-                    BASEBALL: '超高攻'
+                    BASEBALL: '超高攻',
+                    DROUGHT_THUNDER: '雷击・连锁增伤'
                 },
                 dicePrices: {
                     FIRE: 0,
@@ -1916,6 +1975,7 @@
                     MYSTERY: 900,
                     BASEBALL: 900,
                     MIMIC: 1200,
+                    DROUGHT_THUNDER: 1200,
                     VAMPIRE: 1200,
                     JOKER: 1500,
                     SAPLING: 1500,
@@ -2070,13 +2130,14 @@
                 detailTaichi: '阴阳调和 · 横列/直行触发能力',
                 detailLight: '光环 · 增加上、下、左、右一格骰子攻速 (+{pct}%)',
                 detailBaseball: '超高攻 (速度增益转化为攻击力增益，例如光骰子速度加成)',
+                detailDroughtThunder: '雷击连锁 · 对目标造成额外雷击伤害，目标数量 = 星数，伤害递增50%',
                 bossHackerMark: '💻 黑客标记!',
                 bossHackerHacked: '💻 {count} 颗骰子被黑客改造，合成可解除',
                 bossShield: '🛡️ 护盾!'
             },
             'en': {
                 coverTitle: '🎲 Offline Dice',
-                coverDesc: '🔥Fire・⚡Lightning・🌪️Wind・☠️Poison・❄️Ice<br>⭐ Merge up to 7 point on die &nbsp;|&nbsp; 💰 Cost +10 each roll<br>❤️ Only 3 lives &nbsp;|&nbsp; 👾 Various enemies await your challenge<br>🔗 Drag a die onto another of same type and point to merge',
+                coverDesc: '🔥Fire・⚡Lightning・🌩️Drought Thunder・🌪️Wind・☠️Poison・❄️Ice<br>⭐ Merge up to 7 point on die &nbsp;|&nbsp; 💰 Cost +10 each roll<br>❤️ Only 3 lives &nbsp;|&nbsp; 👾 Various enemies await your challenge<br>🔗 Drag a die onto another of same type and point to merge',
                 startBtn: 'Start Game',
                 version: 'v2.7.6',
                 copyright: '© {year} ☕Diczon\'s Cafe, All Rights Reserved.',
@@ -2114,6 +2175,8 @@
                 seal: '🔒 Seal!',
                 immune: '🛡️ Immune!',
                 baseballKill: '💫 Baseball Die Kill!',
+                droughtThunderChain: '🌩️ Thunder Chain! {count} targets!',
+                droughtThunderHit: '⚡ Thunder -{dmg}',
                 diceNames: {
                     FIRE: 'Fire',
                     THUNDER: 'Thunder',
@@ -2132,7 +2195,8 @@
                     JOKER: 'Joker',
                     SAPLING: 'Sapling',
                     TAICHI: 'Taichi',
-                    BASEBALL: 'Baseball'
+                    BASEBALL: 'Baseball',
+                    DROUGHT_THUNDER: 'Drought Thunder'
                 },
                 diceDescs: {
                     FIRE: 'Burn・Splash',
@@ -2152,7 +2216,8 @@
                     JOKER: 'Copy',
                     SAPLING: 'Target Merge',
                     TAICHI: 'Yin-Yang',
-                    BASEBALL: '超高攻'
+                    BASEBALL: 'Super High ATK',
+                    DROUGHT_THUNDER: 'Thunder・Chain Boost'
                 },
                 dicePrices: {
                     FIRE: 0,
@@ -2169,6 +2234,7 @@
                     MYSTERY: 900,
                     BASEBALL: 900,
                     MIMIC: 1200,
+                    DROUGHT_THUNDER: 1200,
                     VAMPIRE: 1200,
                     JOKER: 1500,
                     SAPLING: 1500,
@@ -2322,14 +2388,15 @@
                 detailSapling: 'Merge with any dice to increase star',
                 detailTaichi: 'Yin-Yang · Row/Column triggers ability',
                 detailLight: 'Aura · Boost adjacent dice ATK Speed (+{pct}%)',
-                detailBaseball: '超高攻 (Speed boost → ATK boost, e.g. Light dice speed bonus)',
+                detailBaseball: 'Super High ATK (Speed boost → ATK boost, e.g. Light dice speed bonus)',
+                detailDroughtThunder: 'Thunder Chain · Extra thunder damage to targets = star count, damage +50% per bounce',
                 bossHackerMark: '💻 Hacker Mark!',
                 bossHackerHacked: '💻 {count} dice have been hacked, merge to remove',
                 bossShield: '🛡️ Shield!'
             },
             'ja': {
                 coverTitle: '🎲 オフラインダイス',
-                coverDesc: '🔥火・⚡雷・🌪️風・☠️毒・❄️氷<br>⭐ 最大7つ点まで合体 &nbsp;|&nbsp; 💰 コスト毎回+10<br>❤️ ライフ3つ &nbsp;|&nbsp; 👾 様々な敵が待つ<br>🔗 ドラッグして同種・同点を合体',
+                coverDesc: '🔥火・⚡雷・🌩️乾雷暴・🌪️風・☠️毒・❄️氷<br>⭐ 最大7つ点まで合体 &nbsp;|&nbsp; 💰 コスト毎回+10<br>❤️ ライフ3つ &nbsp;|&nbsp; 👾 様々な敵が待つ<br>🔗 ドラッグして同種・同点を合体',
                 startBtn: 'ゲーム開始',
                 version: 'v2.7.6',
                 copyright: '© {year} ☕ディクソンカフェ，無断転載を禁じます。',
@@ -2367,6 +2434,8 @@
                 seal: '🔒 封印!',
                 immune: '🛡️ 免疫増加',
                 baseballKill: '💫 野球ダイス 撃殺！',
+                droughtThunderChain: '🌩️ 雷連鎖！ {count} 体！',
+                droughtThunderHit: '⚡ 雷 -{dmg}',
                 diceNames: {
                     FIRE: '火',
                     THUNDER: '雷',
@@ -2385,7 +2454,8 @@
                     JOKER: 'ジョーカー',
                     SAPLING: '苗木',
                     TAICHI: '太極',
-                    BASEBALL: '野球'
+                    BASEBALL: '野球',
+                    DROUGHT_THUNDER: '乾雷暴'
                 },
                 diceDescs: {
                     FIRE: '燃焼・範囲',
@@ -2405,7 +2475,8 @@
                     JOKER: 'コピー',
                     SAPLING: '対象合体',
                     TAICHI: '陰陽調和',
-                    BASEBALL: '超高攻'
+                    BASEBALL: '超高攻',
+                    DROUGHT_THUNDER: '雷撃・連鎖増傷'
                 },
                 dicePrices: {
                     FIRE: 0,
@@ -2422,6 +2493,7 @@
                     MYSTERY: 900,
                     BASEBALL: 900,
                     MIMIC: 1200,
+                    DROUGHT_THUNDER: 1200,
                     VAMPIRE: 1200,
                     JOKER: 1500,
                     SAPLING: 1500,
@@ -2576,13 +2648,14 @@
                 detailTaichi: '陰陽調和・列/行で能力発動',
                 detailLight: 'オーラ・隣接ダイスの攻撃速度上昇 (+{pct}%)',
                 detailBaseball: '超高攻 (速度ブーストを攻撃力ブーストに変換，例：光ダイスの速度ボーナス)',
+                detailDroughtThunder: '雷連鎖・対象に追加雷ダメージ，目標数=星数，ダメージ50%増加',
                 bossHackerMark: '💻 ハッカーマーク!',
                 bossHackerHacked: '💻 {count} 個のダイスがハッキングされました、合体で解除',
                 bossShield: '🛡️ シールド!'
             },
             'ko': {
                 coverTitle: '🎲 오프라인 주사위',
-                coverDesc: '🔥불・⚡번개・🌪️바람・☠️독・❄️얼음<br>⭐ 최대 7성 합병 &nbsp;|&nbsp; 💰 비용 매회 +10<br>❤️ 목숨 3개 &nbsp;|&nbsp; 👾 다양한 적과 대결<br>🔗 동일 종류·점수 다이스 합성',
+                coverDesc: '🔥불・⚡번개・🌩️마른번개・🌪️바람・☠️독・❄️얼음<br>⭐ 최대 7성 합병 &nbsp;|&nbsp; 💰 비용 매회 +10<br>❤️ 목숨 3개 &nbsp;|&nbsp; 👾 다양한 적과 대결<br>🔗 동일 종류·점수 다이스 합성',
                 startBtn: '게임 시작',
                 version: 'v2.7.6',
                 copyright: '© {year} ☕딕슨 카페，판권 소유.',
@@ -2620,6 +2693,8 @@
                 seal: '🔒 봉인!',
                 immune: '🛡️ 면역 증가',
                 baseballKill: '💫 야구 주사위 처치!',
+                droughtThunderChain: '🌩️ 번개 연쇄! {count} 개 대상!',
+                droughtThunderHit: '⚡ 번개 -{dmg}',
                 diceNames: {
                     FIRE: '불',
                     THUNDER: '번개',
@@ -2638,7 +2713,8 @@
                     JOKER: '조커',
                     SAPLING: '묘목',
                     TAICHI: '태극',
-                    BASEBALL: '야구'
+                    BASEBALL: '야구',
+                    DROUGHT_THUNDER: '마른번개'
                 },
                 diceDescs: {
                     FIRE: '연소・범위',
@@ -2658,7 +2734,8 @@
                     JOKER: '복사',
                     SAPLING: '대상 합병',
                     TAICHI: '음양 조화',
-                    BASEBALL: '超高攻'
+                    BASEBALL: '초고공',
+                    DROUGHT_THUNDER: '번개・연쇄 증폭'
                 },
                 dicePrices: {
                     FIRE: 0,
@@ -2675,6 +2752,7 @@
                     MYSTERY: 900,
                     BASEBALL: 900,
                     MIMIC: 1200,
+                    DROUGHT_THUNDER: 1200,
                     VAMPIRE: 1200,
                     JOKER: 1500,
                     SAPLING: 1500,
@@ -2828,7 +2906,8 @@
                 detailSapling: '모든 주사위와 합병하여 별 상승',
                 detailTaichi: '음양 조화 · 행/열로 능력 발동',
                 detailLight: '오라 · 인접 주사위 공격속도 증가 (+{pct}%)',
-                detailBaseball: '超高攻 (속도 부스트를 공격력 부스트로 변환, 예: 빛 주사위 속도 보너스)',
+                detailBaseball: '초고공 (속도 부스트를 공격력 부스트로 변환, 예: 빛 주사위 속도 보너스)',
+                detailDroughtThunder: '번개 연쇄 · 대상에 추가 번개 데미지, 목표 수 = 별 수, 데미지 50% 증가',
                 bossHackerMark: '💻 해커 마크!',
                 bossHackerHacked: '💻 {count} 개의 주사위가 해킹되었습니다, 합병으로 해제',
                 bossShield: '🛡️ 쉴드!'
@@ -2904,46 +2983,37 @@
                 { id: 'balistic', nameKey: 'balistic', emoji: '🐔', color: '#e67e22' }
             ]),
             ALL_DICE_DEFS: Object.freeze({
-                FIRE: Object.freeze({ label: '🔥', color: '#e17055', baseDamage: 20, damagePerStar: 3, baseInterval: 0.8,
-                    intervalPerLevel: -0.01, splash: 0.6, burn: true, attackType: 'front' }),
-                THUNDER: Object.freeze({ label: '⚡', color: '#fdcb6e', baseDamage: 30, damagePerStar: 3, baseInterval: 0.7,
-                    intervalPerLevel: -0.02, chain: { count: 3, range: 2.5, damageFactors: [1.0, 0.7, 0.3] },
-                    attackType: 'front' }),
-                WIND: Object.freeze({ label: '🌪️', color: '#74b9ff', baseDamage: 20, damagePerStar: 3, baseInterval: 0.45,
-                    intervalPerLevel: -0.045, attackType: 'front' }),
-                POISON: Object.freeze({ label: '☠️', color: '#6c5ce7', baseDamage: 20, damagePerStar: 2, baseInterval: 1.3,
-                    intervalPerLevel: 0, poison: { damageBase: 50, damagePerStar: 5, duration: Number.POSITIVE_INFINITY,
-                        tick: 1 }, attackType: 'front' }),
-                ICE: Object.freeze({ label: '❄️', color: '#4fc3f7', baseDamage: 30, damagePerStar: 3, baseInterval: 1.5,
-                    intervalPerLevel: -0.02, slow: { baseRate: 0.05, ratePerStar: 0.02, maxStacks: 3, stackRate: 0.5 },
-                    attackType: 'front' }),
-                IRON: Object.freeze({ label: '🔩', color: '#95a5a6', baseDamage: 100, damagePerStar: 10, baseInterval: 1.0,
-                    intervalPerLevel: 0, attackType: 'highestHp', bossMultiplier: 2 }),
-                RANDOM: Object.freeze({ label: '🎲', color: '#a29bfe', baseDamage: 50, damagePerStar: 10, baseInterval: 0.9,
-                    intervalPerLevel: 0, attackType: 'random' }),
-                GAMBLE: Object.freeze({ label: '🎰', color: '#f1c40f', baseDamage: 7, damagePerStar: 10, baseInterval: 1.0,
-                    intervalPerLevel: -0.01, attackType: 'front', gambleMin: 7 }),
-                LOCK: Object.freeze({ label: '🔒', color: '#3498db', baseDamage: 30, damagePerStar: 10, baseInterval: 0.8,
-                    intervalPerLevel: -0.01, attackType: 'front', lockStun: true }),
-                GOLDMINE: Object.freeze({ label: '⛏️', color: '#f1c40f', baseDamage: 0, damagePerStar: 0, baseInterval: 10,
-                    intervalPerLevel: -0.857, attackType: 'none', isGoldmine: true }),
-                LIGHT: Object.freeze({ label: '💡', color: '#f9ca24', baseDamage: 0, damagePerStar: 0, baseInterval: 1.0,
-                    intervalPerLevel: 0, attackType: 'none', isLight: true }),
-                MYSTERY: Object.freeze({ label: '❓', color: '#805500', baseDamage: 30, damagePerStar: 0, baseInterval: 1.0,
-                    intervalPerLevel: 0, attackType: 'front', isMystery: true }),
-                MIMIC: Object.freeze({ label: '🤡', color: '#8e44ad', baseDamage: 30, damagePerStar: 50 / 6,
-                    baseInterval: 1.5, intervalPerLevel: 0, attackType: 'front', isMimic: true }),
-                VAMPIRE: Object.freeze({ label: '🧛', color: '#8e44ad', baseDamage: 10, damagePerStar: 20 / 6,
-                    baseInterval: 1.3, intervalPerLevel: 0, attackType: 'front', isVampire: true,
-                    absorbBaseGold: 1, absorbGoldPerLevel: 3, absorbBaseInterval: 5, absorbIntervalPerLevel: -0.25 }),
-                JOKER: Object.freeze({ label: '🃏', color: '#fd79a8', baseDamage: 40, damagePerStar: 5, baseInterval: 1.5,
-                    intervalPerLevel: 0, attackType: 'front', isJoker: true }),
-                SAPLING: Object.freeze({ label: '🌱', color: '#55efc4', baseDamage: 10, damagePerStar: 10,
-                    baseInterval: 1.5, intervalPerLevel: 0, attackType: 'front', isSapling: true }),
-                TAICHI: Object.freeze({ label: '☯️', color: '#6c5ce7', baseDamage: 120, damagePerStar: 40,
-                    baseInterval: 0.8, intervalPerLevel: -0.01, attackType: 'front', isTaichi: true }),
-                BASEBALL: Object.freeze({ label: '💫', color: '#e67e22', baseDamage: 3000, damagePerStar: 40,
-                    baseInterval: 4.0, intervalPerLevel: 0, attackType: 'front', isBaseball: true })
+                FIRE: Object.freeze({ label: '🔥', color: '#e17055', baseDamage: 20, damagePerStar: 3, baseInterval: 0.8, intervalPerLevel: -0.01, splash: 0.6, burn: true, attackType: 'front' }),
+                THUNDER: Object.freeze({ label: '⚡', color: '#fdcb6e', baseDamage: 30, damagePerStar: 3, baseInterval: 0.7, intervalPerLevel: -0.02, chain: { count: 3, range: 2.5, damageFactors: [1.0, 0.7, 0.3] }, attackType: 'front' }),
+                WIND: Object.freeze({ label: '🌪️', color: '#74b9ff', baseDamage: 20, damagePerStar: 3, baseInterval: 0.45, intervalPerLevel: -0.045, attackType: 'front' }),
+                POISON: Object.freeze({ label: '☠️', color: '#6c5ce7', baseDamage: 20, damagePerStar: 2, baseInterval: 1.3, intervalPerLevel: 0, poison: { damageBase: 50, damagePerStar: 5, duration: Number.POSITIVE_INFINITY, tick: 1 }, attackType: 'front' }),
+                ICE: Object.freeze({ label: '❄️', color: '#4fc3f7', baseDamage: 30, damagePerStar: 3, baseInterval: 1.5, intervalPerLevel: -0.02, slow: { baseRate: 0.05, ratePerStar: 0.02, maxStacks: 3, stackRate: 0.5 }, attackType: 'front' }),
+                IRON: Object.freeze({ label: '🔩', color: '#95a5a6', baseDamage: 100, damagePerStar: 10, baseInterval: 1.0, intervalPerLevel: 0, attackType: 'highestHp', bossMultiplier: 2 }),
+                RANDOM: Object.freeze({ label: '🎲', color: '#a29bfe', baseDamage: 50, damagePerStar: 10, baseInterval: 0.9, intervalPerLevel: 0, attackType: 'random' }),
+                GAMBLE: Object.freeze({ label: '🎰', color: '#f1c40f', baseDamage: 7, damagePerStar: 10, baseInterval: 1.0, intervalPerLevel: -0.01, attackType: 'front', gambleMin: 7 }),
+                LOCK: Object.freeze({ label: '🔒', color: '#3498db', baseDamage: 30, damagePerStar: 10, baseInterval: 0.8, intervalPerLevel: -0.01, attackType: 'front', lockStun: true }),
+                GOLDMINE: Object.freeze({ label: '⛏️', color: '#f1c40f', baseDamage: 0, damagePerStar: 0, baseInterval: 10, intervalPerLevel: -0.857, attackType: 'none', isGoldmine: true }),
+                LIGHT: Object.freeze({ label: '💡', color: '#f9ca24', baseDamage: 0, damagePerStar: 0, baseInterval: 1.0, intervalPerLevel: 0, attackType: 'none', isLight: true }),
+                MYSTERY: Object.freeze({ label: '❓', color: '#805500', baseDamage: 30, damagePerStar: 0, baseInterval: 1.0, intervalPerLevel: 0, attackType: 'front', isMystery: true }),
+                MIMIC: Object.freeze({ label: '🤡', color: '#8e44ad', baseDamage: 30, damagePerStar: 50 / 6, baseInterval: 1.5, intervalPerLevel: 0, attackType: 'front', isMimic: true }),
+                DROUGHT_THUNDER: Object.freeze({
+                    label: '🌩️',
+                    color: '#8B008B',
+                    baseDamage: 20,
+                    damagePerStar: 50 / 6,
+                    baseInterval: 0.8,
+                    intervalPerLevel: 0,
+                    attackType: 'front',
+                    isDroughtThunder: true,
+                    thunderBaseDamage: 50,
+                    thunderDamagePerStar: 40 / 6,
+                    thunderDamagePerLevel: 50,
+                }),
+                VAMPIRE: Object.freeze({ label: '🧛', color: '#8e44ad', baseDamage: 10, damagePerStar: 20 / 6, baseInterval: 1.3, intervalPerLevel: 0, attackType: 'front', isVampire: true, absorbBaseGold: 1, absorbGoldPerLevel: 3, absorbBaseInterval: 5, absorbIntervalPerLevel: -0.25 }),
+                JOKER: Object.freeze({ label: '🃏', color: '#fd79a8', baseDamage: 40, damagePerStar: 5, baseInterval: 1.5, intervalPerLevel: 0, attackType: 'front', isJoker: true }),
+                SAPLING: Object.freeze({ label: '🌱', color: '#55efc4', baseDamage: 10, damagePerStar: 10, baseInterval: 1.5, intervalPerLevel: 0, attackType: 'front', isSapling: true }),
+                TAICHI: Object.freeze({ label: '☯️', color: '#6c5ce7', baseDamage: 120, damagePerStar: 40, baseInterval: 0.8, intervalPerLevel: -0.01, attackType: 'front', isTaichi: true }),
+                BASEBALL: Object.freeze({ label: '💫', color: '#e67e22', baseDamage: 3000, damagePerStar: 40, baseInterval: 4.0, intervalPerLevel: 0, attackType: 'front', isBaseball: true })
             })
         });
 
@@ -2965,7 +3035,7 @@
             epic: {
                 id: 'epic',
                 cost: 1200,
-                dice: ['MIMIC', 'VAMPIRE'],
+                dice: ['MIMIC', 'DROUGHT_THUNDER', 'VAMPIRE'],
                 icon: '💝',
                 emoji: '💝'
             },
@@ -2979,7 +3049,7 @@
         };
 
         // ================================================================
-        // 排行榜系統 (保持不變)
+        // 排行榜系統
         // ================================================================
         function getDefaultLeaderboard() {
             return [
@@ -3060,6 +3130,7 @@
                     MYSTERY: false,
                     BASEBALL: false,
                     MIMIC: false,
+                    DROUGHT_THUNDER: false,
                     VAMPIRE: false,
                     JOKER: false,
                     SAPLING: false,
@@ -3281,7 +3352,6 @@
             { url: 'Offline Dice - Last Wave Hold.mp3', label: 'BGM 2' },
             { url: 'Offline Dice - Fortress Charge.mp3', label: 'BGM 3' },
             { url: 'Offline Dice - Dice Riot.mp3', label: 'BGM 4' },
-            { url: 'Offline Dice - Deck Build.mp3', label: 'BGM 5' },
         ];
         let currentBgmIndex = 0;
 
@@ -3632,7 +3702,7 @@
             }
         }
 
-        // ========== 浮動音符按鈕 (增強 Game Over 控制) ==========
+        // ========== 浮動音符按鈕 ==========
         const soundToggleBtn = document.getElementById('soundToggleBtn');
         soundToggleBtn.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -3675,6 +3745,74 @@
                 stopDeckBuildBgm();
             }
         });
+
+        // ========== 全屏按鈕 (新增) ==========
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+        function toggleFullscreen() {
+            const el = document.documentElement;
+            const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement ||
+                document.mozFullScreenElement || document.msFullscreenElement;
+
+            if (!isFullscreen) {
+                // 進入全屏
+                if (el.requestFullscreen) {
+                    el.requestFullscreen().catch(err => {
+                        console.warn('全屏請求失敗:', err);
+                        showToast('⚠️ 無法進入全屏模式', 1500);
+                    });
+                } else if (el.webkitRequestFullscreen) {
+                    el.webkitRequestFullscreen();
+                } else if (el.mozRequestFullScreen) {
+                    el.mozRequestFullScreen();
+                } else if (el.msRequestFullscreen) {
+                    el.msRequestFullscreen();
+                } else {
+                    showToast('⚠️ 瀏覽器不支援全屏功能', 1500);
+                }
+            } else {
+                // 退出全屏
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().catch(err => {
+                        console.warn('退出全屏失敗:', err);
+                    });
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }
+        }
+
+        function updateFullscreenIcon() {
+            const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement ||
+                document.mozFullScreenElement || document.msFullscreenElement;
+            if (isFullscreen) {
+                fullscreenBtn.textContent = '⛶';
+                fullscreenBtn.classList.add('is-fullscreen');
+                fullscreenBtn.title = '退出全屏';
+            } else {
+                fullscreenBtn.textContent = '⛶';
+                fullscreenBtn.classList.remove('is-fullscreen');
+                fullscreenBtn.title = '全屏顯示';
+            }
+        }
+
+        fullscreenBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            toggleFullscreen();
+        });
+
+        // 監聽全屏變化事件 (兼容各瀏覽器)
+        document.addEventListener('fullscreenchange', updateFullscreenIcon);
+        document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
+        document.addEventListener('mozfullscreenchange', updateFullscreenIcon);
+        document.addEventListener('MSFullscreenChange', updateFullscreenIcon);
+
+        // 初始化圖標狀態
+        updateFullscreenIcon();
 
         // ========== 摸魚模式 ==========
         let fishMode = false;
@@ -3729,7 +3867,7 @@
         function getEmptyCells() { let cells = []; for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++)
             if (!isOccupied(c, r)) cells.push({ col: c, row: r }); return cells; }
 
-        // ========== 骰子創建 ==========
+        // ========== 骰子創建 (含 isfinal 保護) ==========
         function createDice(type, star) {
             star = star || 1;
             const def = CONST.ALL_DICE_DEFS[type];
@@ -3775,6 +3913,10 @@
                 const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
                 const lvBonus = (lv - 1) * 80;
                 dmg = baseDmg + lvBonus;
+            } else if (type === 'DROUGHT_THUNDER') {
+                const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
+                const lvBonus = (lv - 1) * 0;
+                dmg = baseDmg + lvBonus;
             } else {
                 dmg = (def.baseDamage + def.damagePerStar * (s - 1)) * mult;
             }
@@ -3800,6 +3942,7 @@
                 star: s,
                 cooldown: 0,
                 _damage: dmg,
+                _isFinal: true,
                 get damage() { return this._damage; },
                 get interval() { return intervalBase; },
                 get label() { return def.label; },
@@ -3819,6 +3962,7 @@
                 get isTaichi() { return def.isTaichi || false; },
                 get isLight() { return def.isLight || false; },
                 get isBaseball() { return def.isBaseball || false; },
+                get isDroughtThunder() { return def.isDroughtThunder || false; },
                 get burn() { return def.burn || false; },
                 get bossMultiplier() { return def.bossMultiplier || 1; },
                 get gambleMin() { return def.gambleMin || 0; },
@@ -3827,6 +3971,9 @@
                 get absorbGoldPerLevel() { return def.absorbGoldPerLevel || 3; },
                 get absorbBaseInterval() { return def.absorbBaseInterval || 5; },
                 get absorbIntervalPerLevel() { return def.absorbIntervalPerLevel || -0.25; },
+                get thunderBaseDamage() { return def.thunderBaseDamage || 50; },
+                get thunderDamagePerStar() { return def.thunderDamagePerStar || 40 / 6; },
+                get thunderDamagePerLevel() { return def.thunderDamagePerLevel || 50; },
             };
             if (dice.isMystery) {
                 dice.transformTimer = getMysteryTransformTime(s, lv);
@@ -3842,6 +3989,9 @@
                 const absorbInterval = def.absorbBaseInterval + def.absorbIntervalPerLevel * (lv - 1);
                 dice.absorbCooldown = Math.max(1.5, absorbInterval);
                 dice._absorbTimer = 0;
+            }
+            if (dice.isDroughtThunder) {
+                dice._thunderCooldown = 0;
             }
             return dice;
         }
@@ -3973,6 +4123,11 @@
             }
 
             const dice = game.board[row][col];
+            if (dice && dice._isFinal === false) {
+                showToast('⏳ 骰子正在合併中，請稍候');
+                return;
+            }
+
             if (dice) {
                 game.highlightTarget = { type: dice.type, star: dice.star };
             }
@@ -4006,23 +4161,23 @@
                     const clickPos = getGridPosFromPointer(e);
                     if (clickPos && isOccupied(clickPos.col, clickPos.row)) {
                         const dice = game.board[clickPos.row][clickPos.col];
-                        showToast(data.toastDiceInfo.replace(/\{label\}/g, dice.label).replace(/\{name\}/g, dice.name)
-                            .replace(/\{star\}/g, dice.star).replace(/\{damage\}/g, Math.round(dice.damage)));
-
-                        if (game.bossLockedDice.some(d => d.row === clickPos.row && d.col === clickPos.col) ||
-                            (game.bossClouds && game.bossClouds.some(c => {
-                                const cellX = boardX + clickPos.col * CELL_SIZE;
-                                const cellY = boardY + clickPos.row * CELL_SIZE;
-                                return c.active && c.x < cellX + CELL_SIZE && c.x + c.w > cellX &&
-                                    c.y < cellY + CELL_SIZE && c.y + c.h > cellY;
-                            }))) {
-                            // 封印或雲霧中的骰子不觸發高亮
-                        } else {
-                            const current = game.highlightTarget;
-                            if (current && current.type === dice.type && current.star === dice.star) {
-                                game.highlightTarget = null;
+                        if (dice && dice._isFinal !== false) {
+                            showToast(data.toastDiceInfo.replace(/\{label\}/g, dice.label).replace(/\{name\}/g, dice.name)
+                                .replace(/\{star\}/g, dice.star).replace(/\{damage\}/g, Math.round(dice.damage)));
+                            if (game.bossLockedDice.some(d => d.row === clickPos.row && d.col === clickPos.col) ||
+                                (game.bossClouds && game.bossClouds.some(c => {
+                                    const cellX = boardX + clickPos.col * CELL_SIZE;
+                                    const cellY = boardY + clickPos.row * CELL_SIZE;
+                                    return c.active && c.x < cellX + CELL_SIZE && c.x + c.w > cellX &&
+                                        c.y < cellY + CELL_SIZE && c.y + c.h > cellY;
+                                }))) {
                             } else {
-                                game.highlightTarget = { type: dice.type, star: dice.star };
+                                const current = game.highlightTarget;
+                                if (current && current.type === dice.type && current.star === dice.star) {
+                                    game.highlightTarget = null;
+                                } else {
+                                    game.highlightTarget = { type: dice.type, star: dice.star };
+                                }
                             }
                         }
                     }
@@ -4034,7 +4189,7 @@
 
             if (!game.dragData.moved) {
                 const dice = game.board[game.dragData.row]?.[game.dragData.col];
-                if (dice && !game.bossAbilityActive) {
+                if (dice && !game.bossAbilityActive && dice._isFinal !== false) {
                     showToast(data.toastDiceInfo.replace(/\{label\}/g, dice.label).replace(/\{name\}/g, dice.name)
                         .replace(/\{star\}/g, dice.star).replace(/\{damage\}/g, Math.round(dice.damage)));
                     if (game.bossLockedDice.some(d => d.row === game.dragData.row && d.col === game.dragData.col) ||
@@ -4044,7 +4199,6 @@
                             return c.active && c.x < cellX + CELL_SIZE && c.x + c.w > cellX &&
                                 c.y < cellY + CELL_SIZE && c.y + c.h > cellY;
                         }))) {
-                        // 不做任何高亮變更
                     } else {
                         const current = game.highlightTarget;
                         if (current && current.type === dice.type && current.star === dice.star) {
@@ -4071,6 +4225,12 @@
                     const targetDice = game.board[row][col];
                     const sourceDice = game.board[src.row][src.col];
                     if (sourceDice && targetDice) {
+                        if (sourceDice._isFinal === false || targetDice._isFinal === false) {
+                            showToast('⏳ 骰子正在合併中，請稍候');
+                            game.isDragging = false;
+                            game.dragData = null;
+                            return;
+                        }
                         const sameStar = sourceDice.star === targetDice.star;
                         if (!sameStar) { showToast(data.mergeNeedSameStar); } else if (sourceDice.star >= game.maxStar && !
                                 sourceDice.isJoker && !sourceDice.isMimic) { showToast(data.mergeMaxStar.replace(
@@ -4091,11 +4251,15 @@
                                     ))) {
                                 showToast('☁️ 雲霧中無法操作');
                             } else {
+                                if (sourceDice._isFinal !== false) sourceDice._isFinal = false;
+                                if (targetDice._isFinal !== false) targetDice._isFinal = false;
+
                                 if (sourceDice.isSapling) {
                                     const newStar = sourceDice.star + 1;
                                     if (newStar > game.maxStar) { showToast(data.mergeMaxStar.replace(/\{max\}/g, game
                                             .maxStar)); } else { const newDice = createDice(targetDice.type,
-                                            newStar); if (newDice) { game.board[row][col] = newDice;
+                                            newStar); if (newDice) { newDice._isFinal = true;
+                                            game.board[row][col] = newDice;
                                             game.board[src.row][src.col] = null;
                                             merged = true;
                                             showToast(data.toastMerge.replace(/\{star\}/g, newStar).replace(
@@ -4108,6 +4272,7 @@
                                                 /\{max\}/g, game.maxStar)); } else { const newType =
                                                 randomDiceType();
                                             const newDice = createDice(newType, newStar); if (newDice) {
+                                                newDice._isFinal = true;
                                                 game.board[row][col] = newDice;
                                                 game.board[src.row][src.col] = null;
                                                 merged = true;
@@ -4117,8 +4282,10 @@
                                                 updateDicePreview(newDice); } }
                                     } else {
                                         const newDice = createDice(targetDice.type, targetDice.star);
-                                        if (newDice) { newDice.cooldown = sourceDice.cooldown || 0;
+                                        if (newDice) { newDice._isFinal = true;
+                                            newDice.cooldown = sourceDice.cooldown || 0;
                                             game.board[src.row][src.col] = newDice;
+                                            targetDice._isFinal = true;
                                             game.bossLockedDice = game.bossLockedDice.filter(d => !(d.row ===
                                                 src.row && d.col === src.col));
                                             merged = true;
@@ -4135,6 +4302,7 @@
                                             .star + 1;
                                         const newType = randomDiceType();
                                         const newDice = createDice(newType, newStar); if (newDice) {
+                                            newDice._isFinal = true;
                                             game.board[row][col] = newDice;
                                             game.board[src.row][src.col] = null;
                                             merged = true;
@@ -4147,6 +4315,7 @@
                                     if (newStar > game.maxStar) { showToast(data.mergeMaxStar.replace(/\{max\}/g,
                                             game.maxStar)); } else { const newType = randomDiceType();
                                         const newDice = createDice(newType, newStar); if (newDice) {
+                                            newDice._isFinal = true;
                                             game.board[row][col] = newDice;
                                             game.board[src.row][src.col] = null;
                                             merged = true;
@@ -4160,14 +4329,15 @@
                                     !(d.row === src.row && d.col === src.col));
                                 game.highlightTarget = null;
                                 updateUI();
+                            } else {
+                                if (sourceDice) sourceDice._isFinal = true;
+                                if (targetDice) targetDice._isFinal = true;
                             }
                         }
                     }
                 } else {
-                    // 點擊空白區域或自身 -> 取消高亮（已在前面處理）
                 }
             } else {
-                // 點擊空白區域 -> 取消高亮（已在前面處理）
             }
             game.isDragging = false;
             game.dragData = null;
@@ -4202,22 +4372,28 @@
             upgradeLevels[type] = lv + 1;
             for (let r = 0; r < ROWS; r++) {
                 for (let c = 0; c < COLS; c++) {
-                    const dice = game.board[r][c];
+                    const dice = game.board[r]?.[c];
                     if (dice && dice.type === type) {
                         const newDice = createDice(type, dice.star);
-                        newDice.cooldown = dice.cooldown;
-                        if (dice.isMystery && dice.transformTimer !== undefined) {
-                            newDice.transformTimer = dice.transformTimer;
-                            newDice.transformInterval = dice.transformInterval;
+                        if (newDice) {
+                            newDice._isFinal = true;
+                            newDice.cooldown = dice.cooldown;
+                            if (dice.isMystery && dice.transformTimer !== undefined) {
+                                newDice.transformTimer = dice.transformTimer;
+                                newDice.transformInterval = dice.transformInterval;
+                            }
+                            if (dice.isGoldmine && dice.goldAmount !== undefined) {
+                                newDice.goldAmount = dice.goldAmount;
+                            }
+                            if (dice.isVampire && dice._absorbTimer !== undefined) {
+                                newDice._absorbTimer = dice._absorbTimer || 0;
+                                newDice.absorbCooldown = dice.absorbCooldown || 5;
+                            }
+                            if (dice.isDroughtThunder && dice._thunderCooldown !== undefined) {
+                                newDice._thunderCooldown = dice._thunderCooldown || 0;
+                            }
+                            game.board[r][c] = newDice;
                         }
-                        if (dice.isGoldmine && dice.goldAmount !== undefined) {
-                            newDice.goldAmount = dice.goldAmount;
-                        }
-                        if (dice.isVampire && dice._absorbTimer !== undefined) {
-                            newDice._absorbTimer = dice._absorbTimer || 0;
-                            newDice.absorbCooldown = dice.absorbCooldown || 5;
-                        }
-                        game.board[r][c] = newDice;
                     }
                 }
             }
@@ -4749,7 +4925,7 @@
                 game._bossAbilityTimeout = null; }
         }
 
-        // ========== Boss 技能 (保留原有) ==========
+        // ========== Boss 技能 ==========
         function updateBossAbilities(dt) {
             if (!game.currentBoss || !game.currentBoss.alive || !game.currentBoss.isBoss) return;
             const boss = game.currentBoss;
@@ -4857,10 +5033,11 @@
                 for (let c = 0; c < COLS; c++) {
                     if (isPathCell(c, r)) continue;
                     const dice = game.board[r][c];
-                    if (dice) {
+                    if (dice && dice._isFinal !== false) {
                         const newType = activeTypes[randInt(0, activeTypes.length - 1)];
                         const newDice = createDice(newType, dice.star);
                         if (newDice) {
+                            newDice._isFinal = true;
                             newDice.cooldown = dice.cooldown || 0;
                             game.board[r][c] = newDice;
                         }
@@ -4880,7 +5057,8 @@
             for (let r = 0; r < ROWS; r++) {
                 for (let c = 0; c < COLS; c++) {
                     if (isPathCell(c, r)) continue;
-                    if (game.board[r][c]) diceList.push({ row: r, col: c, dice: game.board[r][c] });
+                    if (game.board[r][c] && game.board[r][c]._isFinal !== false) diceList.push({ row: r, col: c, dice: game
+                            .board[r][c] });
                 }
             }
             const numToDowngrade = Math.floor(diceList.length * 0.5);
@@ -4895,6 +5073,7 @@
                 } else {
                     const newDice = createDice(dice.type, dice.star - 1);
                     if (newDice) {
+                        newDice._isFinal = true;
                         newDice.cooldown = dice.cooldown || 0;
                         game.board[row][col] = newDice;
                         count++;
@@ -4929,7 +5108,7 @@
             for (let r = 0; r < ROWS; r++) {
                 for (let c = 0; c < COLS; c++) {
                     if (isPathCell(c, r)) continue;
-                    if (game.board[r][c]) diceCells.push({ row: r, col: c });
+                    if (game.board[r][c] && game.board[r][c]._isFinal !== false) diceCells.push({ row: r, col: c });
                 }
             }
             if (diceCells.length === 0) return;
@@ -4990,7 +5169,7 @@
             for (let r = 0; r < ROWS; r++) {
                 for (let c = 0; c < COLS; c++) {
                     if (isPathCell(c, r)) continue;
-                    if (game.board[r][c]) diceCells.push({ row: r, col: c });
+                    if (game.board[r][c] && game.board[r][c]._isFinal !== false) diceCells.push({ row: r, col: c });
                 }
             }
             let hacked = [];
@@ -5015,6 +5194,7 @@
                 for (let c = 0; c < COLS; c++) {
                     if (isPathCell(c, r)) continue;
                     if (!game.board[r] || !game.board[r][c]) continue;
+                    if (game.board[r][c]._isFinal === false) continue;
                     if (game.bossLockedDice.some(d => d.row === r && d.col === c)) continue;
                     if (game.bossClouds && game.bossClouds.some(cloud => {
                             const cellX = boardX + c * CELL_SIZE;
@@ -5063,6 +5243,7 @@
             const newStar = dice1.star + 1;
             const newDice = createDice(dice1.type, newStar);
             if (newDice) {
+                newDice._isFinal = true;
                 newDice.cooldown = dice1.cooldown || 0;
                 game.board[pick1.row][pick1.col] = newDice;
                 game.board[pick2.row][pick2.col] = null;
@@ -5144,7 +5325,7 @@
             for (let r = 0; r < ROWS; r++) {
                 for (let c = 0; c < COLS; c++) {
                     if (isPathCell(c, r)) continue;
-                    if (game.board[r][c]) diceCells.push({ row: r, col: c });
+                    if (game.board[r][c] && game.board[r][c]._isFinal !== false) diceCells.push({ row: r, col: c });
                 }
             }
             let locked = [];
@@ -5300,7 +5481,7 @@
         }
 
         // ================================================================
-        // 太極骰子能力檢測 (保持原樣)
+        // 太極骰子能力檢測
         // ================================================================
         function updateTaichiAbilities(dt) {
             let taichiPositions = [];
@@ -5309,7 +5490,7 @@
             for (let r = 0; r < ROWS; r++) {
                 for (let c = 0; c < COLS; c++) {
                     const dice = game.board[r]?.[c];
-                    if (dice && dice.isTaichi) {
+                    if (dice && dice.isTaichi && dice._isFinal !== false) {
                         const lv = upgradeLevels[dice.type] || 1;
                         taichiPositions.push({ row: r, col: c, star: dice.star, level: lv, dice: dice });
                         if (dice.star > maxStar) maxStar = dice.star;
@@ -5340,14 +5521,14 @@
                 let startRow = -1;
                 for (let r = 0; r < ROWS; r++) {
                     const dice = game.board[r]?.[c];
-                    const isTaichi = dice && dice.isTaichi;
+                    const isTaichi = dice && dice.isTaichi && dice._isFinal !== false;
                     if (isTaichi) {
                         if (consecutive === 0) startRow = r;
                         consecutive++;
                         if (consecutive >= 3) {
                             for (let rr = startRow; rr <= r; rr++) {
                                 const d = game.board[rr]?.[c];
-                                if (d && d.isTaichi) {
+                                if (d && d.isTaichi && d._isFinal !== false) {
                                     yinSet.add(`${rr},${c}`);
                                 }
                             }
@@ -5364,14 +5545,14 @@
                 let startCol = -1;
                 for (let c = 0; c < COLS; c++) {
                     const dice = game.board[r]?.[c];
-                    const isTaichi = dice && dice.isTaichi;
+                    const isTaichi = dice && dice.isTaichi && dice._isFinal !== false;
                     if (isTaichi) {
                         if (consecutive === 0) startCol = c;
                         consecutive++;
                         if (consecutive >= 5) {
                             for (let cc = startCol; cc <= c; cc++) {
                                 const d = game.board[r]?.[cc];
-                                if (d && d.isTaichi) {
+                                if (d && d.isTaichi && d._isFinal !== false) {
                                     yangSet.add(`${r},${cc}`);
                                 }
                             }
@@ -5495,7 +5676,7 @@
         }
 
         // ================================================================
-        // 光骰子攻速加成輔助
+        // 光骰子攻速加成輔助 (含 isfinal 保護)
         // ================================================================
         function calculateLightBonus(row, col) {
             let totalBonus = 0;
@@ -5509,6 +5690,7 @@
                 if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) continue;
                 const neighbor = game.board[nr]?.[nc];
                 if (!neighbor || !neighbor.isLight) continue;
+                if (neighbor._isFinal === false) continue;
                 const lv = upgradeLevels[neighbor.type] || 1;
                 const star = neighbor.star;
                 const baseBonus = 0.06 + (star - 1) * 0.006;
@@ -5519,7 +5701,7 @@
             return totalBonus;
         }
 
-        // ========== 攻擊 (含棒球骰子特殊能力 & 擊殺特效) ==========
+        // ========== 攻擊 (含旱雷雷擊連鎖 & isfinal 保護) ==========
         function updateAttacks(dt) {
             updateTaichiAbilities(dt);
 
@@ -5529,6 +5711,7 @@
                     for (let c = 0; c < COLS; c++) {
                         const dice = board[r]?.[c];
                         if (!dice) continue;
+                        if (dice._isFinal === false) continue;
 
                         if (dice.isLight) {
                             continue;
@@ -5686,6 +5869,129 @@
                             }
                             interval = Math.max(0.15, interval);
 
+                            // ★ 旱雷骰子特殊處理：雷擊連鎖 ★
+                            if (dice.isDroughtThunder) {
+                                dice.cooldown = (dice.cooldown || 0) - dt;
+                                if (dice.cooldown > 0) continue;
+
+                                const isHacked = game.bossHackedDice.some(d => d.row === r && d.col === c);
+                                const pos = { x: boardX + c * CELL_SIZE + CELL_SIZE / 2, y: boardY + r * CELL_SIZE + CELL_SIZE / 2 };
+
+                                let candidates = [];
+                                for (const e of game.enemies) {
+                                    if (!e.alive) continue;
+                                    candidates.push(e);
+                                }
+                                if (candidates.length === 0) continue;
+
+                                let target = null;
+                                let maxIdx = -1;
+                                for (const e of candidates) {
+                                    if (e.pathIndex > maxIdx) { maxIdx = e.pathIndex;
+                                        target = e; }
+                                }
+                                if (!target) target = candidates[0];
+                                if (!target) continue;
+
+                                dice.cooldown = interval;
+
+                                let normalDamage = dice.damage || 0;
+                                if (typeof normalDamage !== 'number' || !isFinite(normalDamage)) normalDamage = 0;
+
+                                const lv = upgradeLevels[dice.type] || 1;
+                                const star = dice.star;
+                                const thunderBase = dice.thunderBaseDamage || 50;
+                                const thunderPerStar = dice.thunderDamagePerStar || 40 / 6;
+                                const thunderPerLevel = dice.thunderDamagePerLevel || 50;
+                                let thunderDmg = thunderBase + thunderPerStar * (star - 1) + thunderPerLevel * (lv - 1);
+                                thunderDmg = Math.round(thunderDmg * 10) / 10;
+
+                                const totalDmg = normalDamage + thunderDmg;
+                                if (isHacked) {
+                                    const healAmount = totalDmg * 0.5;
+                                    target.hp = (target.hp || 0) + healAmount;
+                                    if (!isFinite(target.hp)) target.hp = 0;
+                                    target.hitFlash = 0.2;
+                                    addFloatingText(target.x, target.y - 20, `+${Math.round(healAmount)}`, '#2ecc71', 18);
+                                } else if (target.shieldTimer && target.shieldTimer > 0) {
+                                    addFloatingText(target.x, target.y - 20, '🛡️ 免疫', '#2ecc71', 18);
+                                } else {
+                                    const safeDmg = (typeof totalDmg === 'number' && isFinite(totalDmg)) ? totalDmg : 0;
+                                    const wasAlive = target.alive && target.hp > 0;
+                                    target.hp = (target.hp || 0) - safeDmg;
+                                    if (!isFinite(target.hp)) target.hp = 0;
+                                    target.hitFlash = 0.2;
+                                    addFloatingText(target.x, target.y - 20, `-${Math.round(safeDmg)}`, '#ffd93d', 18);
+                                }
+
+                                // ★ 雷擊連鎖：目標數量 = 星數，每次從所有敵人選取不同目標 ★
+                                const chainCount = star;
+                                if (chainCount > 1) {
+                                    let hitList = [target];
+                                    let currentFactor = 1.0;
+                                    const data = getData();
+
+                                    for (let i = 0; i < chainCount - 1; i++) {
+                                        let nextTarget = null;
+                                        let maxPathIdx = -1;
+                                        for (const e of game.enemies) {
+                                            if (!e.alive || hitList.includes(e)) continue;
+                                            if (e.pathIndex > maxPathIdx) {
+                                                maxPathIdx = e.pathIndex;
+                                                nextTarget = e;
+                                            }
+                                        }
+                                        if (!nextTarget) break;
+
+                                        currentFactor *= 1.5;
+                                        const chainDmg = thunderDmg * currentFactor;
+                                        const safeChainDmg = (typeof chainDmg === 'number' && isFinite(chainDmg)) ? chainDmg : 0;
+
+                                        const wasAlive2 = nextTarget.alive && nextTarget.hp > 0;
+                                        if (isHacked) {
+                                            const healAmt = safeChainDmg * 0.5;
+                                            nextTarget.hp = (nextTarget.hp || 0) + healAmt;
+                                            if (!isFinite(nextTarget.hp)) nextTarget.hp = 0;
+                                            nextTarget.hitFlash = 0.2;
+                                            addFloatingText(nextTarget.x, nextTarget.y - 20, `+${Math.round(healAmt)}`, '#2ecc71', 16);
+                                        } else if (nextTarget.shieldTimer && nextTarget.shieldTimer > 0) {
+                                            addFloatingText(nextTarget.x, nextTarget.y - 20, '🛡️ 免疫', '#2ecc71', 16);
+                                        } else {
+                                            nextTarget.hp = (nextTarget.hp || 0) - safeChainDmg;
+                                            if (!isFinite(nextTarget.hp)) nextTarget.hp = 0;
+                                            nextTarget.hitFlash = 0.2;
+                                            const pct = Math.round((currentFactor - 1) * 100);
+                                            addFloatingText(nextTarget.x, nextTarget.y - 20,
+                                                `⚡ -${Math.round(safeChainDmg)} (${pct}%)`, '#8B008B', 16);
+                                        }
+                                        hitList.push(nextTarget);
+
+                                        if (i === 0) {
+                                            showToast(data.droughtThunderChain.replace(/\{count\}/g, chainCount), 800);
+                                        }
+                                    }
+                                }
+
+                                game.projectiles.push({
+                                    x: pos.x,
+                                    y: pos.y,
+                                    target: target,
+                                    speed: 400,
+                                    life: 0.6,
+                                    color: isHacked ? '#2ecc71' : dice.color,
+                                    damage: normalDamage,
+                                    isCrit: false,
+                                    type: dice.type,
+                                    alive: true,
+                                    x: pos.x,
+                                    y: pos.y,
+                                });
+
+                                playShootSound();
+                                continue;
+                            }
+
+                            // ===== 非旱雷骰子的普通攻擊邏輯 =====
                             dice.cooldown = (dice.cooldown || 0) - dt;
                             if (dice.cooldown > 0) continue;
 
@@ -5730,7 +6036,6 @@
                             let damage = dice.damage || 0;
                             if (typeof damage !== 'number' || !isFinite(damage)) damage = 0;
 
-                            // ★ 棒球骰子特殊能力：速度增益轉化為攻擊力增益 ★
                             if (dice.isBaseball) {
                                 const speedBonus = calculateLightBonus(r, c);
                                 if (speedBonus > 0) {
@@ -5814,15 +6119,11 @@
                                 target.hitFlash = 0.2;
                                 addFloatingText(target.x, target.y - 20, `-${Math.round(safeDmg)}`, '#ffd93d', 18);
 
-                                if (target.hp <= 0 && targetWasAlive) {
-                                    // ★ 棒球骰子擊殺：僅播放 💥 和 BOSS 音效，移除額外粒子與飛出特效 ★
-                                    if (dice.isBaseball) {
-                                        addFloatingText(target.x, target.y - 20, '💥', '#ff6b6b', 48);
-                                        playBossSkillSound();
-                                        // Toast 顯示 1000ms，使用翻譯
-                                        const data = getData();
-                                        showToast(data.baseballKill || '💫 棒球骰子 擊殺！', 1000);
-                                    }
+                                if (target.hp <= 0 && targetWasAlive && dice.isBaseball) {
+                                    addFloatingText(target.x, target.y - 20, '💥', '#ff6b6b', 48);
+                                    playBossSkillSound();
+                                    const data = getData();
+                                    showToast(data.baseballKill || '💫 棒球骰子 擊殺！', 1000);
                                 }
 
                                 if (dice.burn) {
@@ -6050,7 +6351,6 @@
             }
         }
 
-        // ★★★★★ 排行榜確認按鈕 ★★★★★
         document.getElementById('lbNameConfirmBtn').addEventListener('click', function() {
             const name = document.getElementById('lbNameInput').value.trim() || '匿名';
             const pending = window._pendingLeaderboard || { wave: game.wave, score: 0 };
@@ -6073,7 +6373,6 @@
             }
         });
 
-        // ★★★★★ 排行榜跳過按鈕 ★★★★★
         document.getElementById('lbNameSkipBtn').addEventListener('click', function() {
             document.getElementById('lbNameInputOverlay').classList.remove('visible');
             window._pendingLeaderboard = null;
@@ -6249,6 +6548,7 @@
 
         function drawLightGlow(ctx, x, y, size, dice, alphaMul) {
             if (!dice || !dice.isLight) return;
+            if (dice._isFinal === false) return;
             const dSize = size - 12;
             const cx = x + size / 2,
                 cy = y + size / 2;
@@ -6303,15 +6603,11 @@
             ctx.fillText('⚡', x + size - 4, y + size - 4);
         }
 
-        // ★ 繪製骰子 (含 isfinal 保護，並傳入行列) ★
         function drawDice(ctx, x, y, size, dice, row, col) {
-            // ★ isfinal 保護：若骰子無效或類型無效則直接返回 ★
             if (!dice || !dice.type) return;
+            if (dice._isFinal === false) return;
             const def = CONST.ALL_DICE_DEFS[dice.type];
             if (!def) return;
-
-            // 額外檢查：如果骰子正在被合併標記（由外部標記），則跳過繪製
-            if (dice._isFinal === false) return;
 
             const margin = 6,
                 radius = Math.min(10, size * 0.12);
@@ -6349,7 +6645,6 @@
             ctx.lineWidth = 1.5;
             ctx.stroke();
 
-            // 繪製點數 (四角裝飾點)
             drawDicePips(ctx, cx, cy, dSize, dice.star);
 
             if (dice.star >= game.maxStar && dice.star < 7) {
@@ -6478,9 +6773,7 @@
                 }
             }
 
-            // ★ 棒球骰子顯示速度轉化攻擊力百分比，放在左上角避免遮蓋 label ★
             if (dice.isBaseball) {
-                // 使用傳入的 row, col 計算光加成，若無則跳過
                 let lightBonus = 0;
                 if (row !== undefined && col !== undefined) {
                     lightBonus = calculateLightBonus(row, col);
@@ -6498,7 +6791,24 @@
                 }
             }
 
-            // ★ 繪製 label (💫 等) 在骰子中央偏下，確保顯示 ★
+            if (dice.isDroughtThunder) {
+                const star = dice.star;
+                const lv = upgradeLevels[dice.type] || 1;
+                const thunderBase = dice.thunderBaseDamage || 50;
+                const thunderPerStar = dice.thunderDamagePerStar || 40 / 6;
+                const thunderPerLevel = dice.thunderDamagePerLevel || 50;
+                let thunderDmg = thunderBase + thunderPerStar * (star - 1) + thunderPerLevel * (lv - 1);
+                thunderDmg = Math.round(thunderDmg * 10) / 10;
+                ctx.fillStyle = 'rgba(139,0,139,0.85)';
+                ctx.font = `bold ${Math.floor(size*0.12)}px sans-serif`;
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'top';
+                ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                ctx.shadowBlur = 4;
+                ctx.fillText(`⚡×${star} ${thunderDmg}`, x + size - 4, y + 2);
+                ctx.shadowBlur = 0;
+            }
+
             ctx.fillStyle = 'rgba(255,255,255,0.9)';
             ctx.font = `bold ${Math.floor(size*0.35)}px sans-serif`;
             ctx.textAlign = 'center';
@@ -6507,13 +6817,12 @@
             ctx.shadowBlur = 4;
             ctx.fillText(def.label, cx, y + size - 6);
             ctx.shadowBlur = 0;
-            // 骰子名稱放在頂部
             ctx.fillStyle = 'rgba(255,255,255,0.5)';
             ctx.font = `${Math.floor(size*0.12)}px sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'top';
             ctx.fillText(dice.name, cx, y + 4);
-            if (dice.cooldown > 0 && !dice.isVampire && !dice.isLight) {
+            if (dice.cooldown > 0 && !dice.isVampire && !dice.isLight && !dice.isDroughtThunder) {
                 const ratio = dice.cooldown / (dice._intervalOverride || dice.interval);
                 ctx.fillStyle = 'rgba(0,0,0,0.3)';
                 ctx.beginPath();
@@ -6548,7 +6857,7 @@
             return `rgb(${r},${g},${b})`;
         }
 
-        // ========== 主繪製函數 ==========
+        // ========== 主繪製函數 (含 isfinal 保護) ==========
         function draw() {
             ctx.globalAlpha = 1.0;
             try {
@@ -6683,11 +6992,8 @@
                             const x = boardX + c * CELL_SIZE,
                                 y = boardY + r * CELL_SIZE;
                             const dice = (game.board[r] && game.board[r][c]) ? game.board[r][c] : null;
-                            if (dice) {
-                                // ★ 再次確認骰子有效且未被標記為不可繪製 ★
-                                if (!dice._isFinal) {
-                                    drawDice(ctx, x, y, CELL_SIZE, dice, r, c);
-                                }
+                            if (dice && dice._isFinal !== false) {
+                                drawDice(ctx, x, y, CELL_SIZE, dice, r, c);
                             }
                             if (game._markedDice && game._markedDice.some(d => d.row === r && d.col === c)) {
                                 ctx.fillStyle = 'rgba(255,0,0,0.4)';
@@ -6716,7 +7022,7 @@
                                 ctx.textBaseline = 'middle';
                                 ctx.fillText('💻', x + CELL_SIZE / 2, y + CELL_SIZE / 2);
                             }
-                            if (dice && dice.isTaichi) {
+                            if (dice && dice.isTaichi && dice._isFinal !== false) {
                                 const hasYin = dice._yinActive || false;
                                 const hasYang = dice._yangActive || false;
                                 const hasHarmony = dice._harmonyActive || false;
@@ -6751,8 +7057,7 @@
                                 }
                             }
 
-                            // ★ 骰子高亮遮罩 ★
-                            if (game.highlightTarget && dice &&
+                            if (game.highlightTarget && dice && dice._isFinal !== false &&
                                 game.highlightTarget.type === dice.type &&
                                 game.highlightTarget.star === dice.star) {
                                 const pulse = 0.6 + 0.4 * Math.sin(game.lastTime * 0.003);
@@ -6810,7 +7115,7 @@
                 for (let r = 0; r < ROWS; r++) {
                     for (let c = 0; c < COLS; c++) {
                         const dice = game.board[r]?.[c];
-                        if (dice && dice.isLight) {
+                        if (dice && dice.isLight && dice._isFinal !== false) {
                             const x = boardX + c * CELL_SIZE,
                                 y = boardY + r * CELL_SIZE;
                             drawLightGlow(ctx, x, y, CELL_SIZE, dice, 1.0);
@@ -6844,7 +7149,7 @@
                 if (game.isDragging && game.dragData && game.dragData.moved) {
                     const dice = (game.board[game.dragData.row] && game.board[game.dragData.row][game.dragData.col]) ?
                         game.board[game.dragData.row][game.dragData.col] : null;
-                    if (dice && game.dragData._lastMouse) {
+                    if (dice && dice._isFinal !== false && game.dragData._lastMouse) {
                         const mx = game.dragData._lastMouse.x,
                             my = game.dragData._lastMouse.y;
                         const rect = canvas.getBoundingClientRect();
@@ -6854,7 +7159,6 @@
                             cy = (my - rect.top) * scaleY;
                         const sz = CELL_SIZE * 0.6;
                         ctx.globalAlpha = 0.7;
-                        // 拖拽時不計算光加成，傳入 undefined
                         drawDice(ctx, cx - sz / 2, cy - sz / 2, sz, dice);
                         ctx.globalAlpha = 1.0;
                     }
@@ -7262,7 +7566,7 @@
                 'POISON', 'ICE'
             ]; }
 
-        // ========== 商店 (保持原樣) ==========
+        // ========== 商店 (含旱雷) ==========
         function getChestStatus(chestId) {
             const group = CHEST_GROUPS[chestId];
             if (!group) return null;
@@ -7397,13 +7701,14 @@
             updateShopUI();
         }
 
-        // ========== 骰子詳細 ==========
+        // ========== 骰子詳細 (含旱雷) ==========
         function showDiceDetail(diceType) {
             const def = CONST.ALL_DICE_DEFS[diceType];
             if (!def) return;
             const data = getData();
             const name = getDiceName(diceType);
             const desc = getDiceDesc(diceType);
+            const perStar = def.damagePerStar;
 
             document.getElementById('ddIcon').textContent = def.label;
             document.getElementById('ddName').textContent = name;
@@ -7412,7 +7717,7 @@
             document.getElementById('ddBaseDmgLabel').textContent = data.detailBaseDmg;
             document.getElementById('ddBaseDmg').textContent = def.baseDamage;
             document.getElementById('ddPerStarLabel').textContent = data.detailPerStar;
-            document.getElementById('ddPerStar').textContent = `+${def.damagePerStar}`;
+            document.getElementById('ddPerStar').textContent = `+${Number.isInteger(perStar) ? perStar : perStar.toFixed(1)}`;
             document.getElementById('ddBaseIntervalLabel').textContent = data.detailBaseInterval;
             document.getElementById('ddBaseInterval').textContent = `${def.baseInterval.toFixed(2)}s`;
             document.getElementById('ddPerLevelLabel').textContent = data.detailPerLevel;
@@ -7479,7 +7784,10 @@
                 specialParts.push(data.detailLight.replace(/\{pct\}/g, pct.toFixed(1)));
             }
             if (def.isBaseball) {
-                specialParts.push(data.detailBaseball || '超高攻 (速度增益轉化為攻擊力增益)');
+                specialParts.push(data.detailBaseball);
+            }
+            if (def.isDroughtThunder) {
+                specialParts.push(data.detailDroughtThunder);
             }
 
             if (specialParts.length === 0) {
@@ -7737,6 +8045,7 @@
                             if (dice) {
                                 const newDice = createDice(dice.type, dice.star);
                                 if (newDice) {
+                                    newDice._isFinal = true;
                                     newDice.cooldown = dice.cooldown;
                                     game.board[r][c] = newDice;
                                 }
@@ -7959,7 +8268,7 @@
         }
 
         requestAnimationFrame(gameLoop);
-        console.log('🎲 Offline Dice v2.7.6 - 修復棒球骰子顯示、四角點與拖拽繪製');
+        console.log('🎲 Offline Dice v2.7.6 - 新增全屏按鈕、旱雷骰子、雷擊連鎖');
     </script>
 </body>
 </html>
