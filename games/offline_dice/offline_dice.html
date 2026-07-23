@@ -1614,7 +1614,7 @@
 
     <script>
         // ================================================================
-        // 翻譯 (完整) - 新增 shieldExpiredFloating
+        // 翻譯 (完整) - 新增 SPIKE 相關
         // ================================================================
         const translations = {
             'zh-TW': {
@@ -1664,6 +1664,12 @@
                 shieldExpiredFloating: '🛡️ 消失',
                 shieldBlock: '🛡️ 敵人被盾牌阻擋！',
                 shieldCooldown: '🛡️ 下次盾牌在 {time}s 後',
+                // ★ SPIKE 翻譯
+                spikePlaced: '🌵 尖刺已放置！持續 {dur}s',
+                spikeExpired: '🌵 尖刺消失了！',
+                spikeExpiredFloating: '🌵 消失',
+                spikeHit: '🌵 尖刺 -{dmg}',
+                spikeNext: '🌵 下次尖刺在 {time}s 後',
                 diceNames: {
                     FIRE: '火',
                     THUNDER: '雷',
@@ -1684,7 +1690,8 @@
                     SAPLING: '樹苗',
                     TAICHI: '太極',
                     BASEBALL: '棒球',
-                    DROUGHT_THUNDER: '旱雷'
+                    DROUGHT_THUNDER: '旱雷',
+                    SPIKE: '尖刺' // ★
                 },
                 diceDescs: {
                     FIRE: '燃燒・濺射',
@@ -1706,7 +1713,8 @@
                     SAPLING: '目標合併',
                     TAICHI: '陰陽調和',
                     BASEBALL: '超高攻',
-                    DROUGHT_THUNDER: '雷擊・連鎖增傷'
+                    DROUGHT_THUNDER: '雷擊・連鎖增傷',
+                    SPIKE: '放置尖刺陷阱' // ★
                 },
                 dicePrices: {
                     FIRE: 0,
@@ -1720,6 +1728,7 @@
                     LOCK: 300,
                     GOLDMINE: 900,
                     LIGHT: 900,
+                    SPIKE: 900, // ★
                     MYSTERY: 900,
                     BASEBALL: 900,
                     MIMIC: 1200,
@@ -1881,6 +1890,9 @@
                 detailLight: '光環 · 增加上、下、左、右一格骰子攻速 (+{pct}%)',
                 detailBaseball: '超高攻 (速度增益轉化為攻擊力增益，例如光骰子速度加成)',
                 detailDroughtThunder: '雷擊連鎖 · 對目標造成額外雷擊傷害，目標數量 = 星數，傷害遞增50%',
+                // ★ SPIKE 詳細
+                detailSpike: '放置尖刺陷阱 (每 {interval}s 放置，持續 {duration}s) · 每級+0.75s · 每0.5s造成傷害',
+                detailSpikeDamage: '傷害 {dmg} (1星) ~ {dmgMax} (7星) · 每級+100',
                 bossHackerMark: '💻 黑客標記!',
                 bossHackerHacked: '💻 {count} 顆骰子被黑客改造，合成可解除',
                 bossShield: '🛡️ 護盾!'
@@ -1932,6 +1944,11 @@
                 shieldExpiredFloating: '🛡️ 消失',
                 shieldBlock: '🛡️ 敌人被盾牌阻挡！',
                 shieldCooldown: '🛡️ 下次盾牌在 {time}s 后',
+                spikePlaced: '🌵 尖刺已放置！持续 {dur}s',
+                spikeExpired: '🌵 尖刺消失了！',
+                spikeExpiredFloating: '🌵 消失',
+                spikeHit: '🌵 尖刺 -{dmg}',
+                spikeNext: '🌵 下次尖刺在 {time}s 后',
                 diceNames: {
                     FIRE: '火',
                     THUNDER: '雷',
@@ -1952,7 +1969,8 @@
                     SAPLING: '树苗',
                     TAICHI: '太极',
                     BASEBALL: '棒球',
-                    DROUGHT_THUNDER: '旱雷'
+                    DROUGHT_THUNDER: '旱雷',
+                    SPIKE: '尖刺'
                 },
                 diceDescs: {
                     FIRE: '燃烧・溅射',
@@ -1974,7 +1992,8 @@
                     SAPLING: '目标合并',
                     TAICHI: '阴阳调和',
                     BASEBALL: '超高攻',
-                    DROUGHT_THUNDER: '雷击・连锁增伤'
+                    DROUGHT_THUNDER: '雷击・连锁增伤',
+                    SPIKE: '放置尖刺陷阱'
                 },
                 dicePrices: {
                     FIRE: 0,
@@ -1988,6 +2007,7 @@
                     LOCK: 300,
                     GOLDMINE: 900,
                     LIGHT: 900,
+                    SPIKE: 900,
                     MYSTERY: 900,
                     BASEBALL: 900,
                     MIMIC: 1200,
@@ -2149,6 +2169,8 @@
                 detailLight: '光环 · 增加上、下、左、右一格骰子攻速 (+{pct}%)',
                 detailBaseball: '超高攻 (速度增益转化为攻击力增益，例如光骰子速度加成)',
                 detailDroughtThunder: '雷击连锁 · 对目标造成额外雷击伤害，目标数量 = 星数，伤害递增50%',
+                detailSpike: '放置尖刺陷阱 (每 {interval}s 放置，持续 {duration}s) · 每级+0.75s · 每0.5s造成伤害',
+                detailSpikeDamage: '伤害 {dmg} (1星) ~ {dmgMax} (7星) · 每级+100',
                 bossHackerMark: '💻 黑客标记!',
                 bossHackerHacked: '💻 {count} 颗骰子被黑客改造，合成可解除',
                 bossShield: '🛡️ 护盾!'
@@ -2200,6 +2222,11 @@
                 shieldExpiredFloating: '🛡️ Expired',
                 shieldBlock: '🛡️ Enemy blocked by shield!',
                 shieldCooldown: '🛡️ Next shield in {time}s',
+                spikePlaced: '🌵 Spike placed! lasts {dur}s',
+                spikeExpired: '🌵 Spike expired!',
+                spikeExpiredFloating: '🌵 Expired',
+                spikeHit: '🌵 Spike -{dmg}',
+                spikeNext: '🌵 Next spike in {time}s',
                 diceNames: {
                     FIRE: 'Fire',
                     THUNDER: 'Thunder',
@@ -2220,7 +2247,8 @@
                     SAPLING: 'Sapling',
                     TAICHI: 'Taichi',
                     BASEBALL: 'Baseball',
-                    DROUGHT_THUNDER: 'Drought Thunder'
+                    DROUGHT_THUNDER: 'Drought Thunder',
+                    SPIKE: 'Spike'
                 },
                 diceDescs: {
                     FIRE: 'Burn・Splash',
@@ -2242,7 +2270,8 @@
                     SAPLING: 'Target Merge',
                     TAICHI: 'Yin-Yang',
                     BASEBALL: 'Super High ATK',
-                    DROUGHT_THUNDER: 'Thunder・Chain Boost'
+                    DROUGHT_THUNDER: 'Thunder・Chain Boost',
+                    SPIKE: 'Place spike trap'
                 },
                 dicePrices: {
                     FIRE: 0,
@@ -2256,6 +2285,7 @@
                     LOCK: 300,
                     GOLDMINE: 900,
                     LIGHT: 900,
+                    SPIKE: 900,
                     MYSTERY: 900,
                     BASEBALL: 900,
                     MIMIC: 1200,
@@ -2417,6 +2447,8 @@
                 detailLight: 'Aura · Boost adjacent dice ATK Speed (+{pct}%)',
                 detailBaseball: 'Super High ATK (Speed boost → ATK boost, e.g. Light dice speed bonus)',
                 detailDroughtThunder: 'Thunder Chain · Extra thunder damage to targets = star count, damage +50% per bounce',
+                detailSpike: 'Place spike trap (every {interval}s, lasts {duration}s) · +0.75s per level · damage every 0.5s',
+                detailSpikeDamage: 'Damage {dmg} (1★) ~ {dmgMax} (7★) · +100 per level',
                 bossHackerMark: '💻 Hacker Mark!',
                 bossHackerHacked: '💻 {count} dice have been hacked, merge to remove',
                 bossShield: '🛡️ Shield!'
@@ -2468,6 +2500,11 @@
                 shieldExpiredFloating: '🛡️ 消滅',
                 shieldBlock: '🛡️ 敵がシールドにブロック！',
                 shieldCooldown: '🛡️ 次シールド {time}s 後',
+                spikePlaced: '🌵 スパイク設置！ {dur}s 持続',
+                spikeExpired: '🌵 スパイク消滅！',
+                spikeExpiredFloating: '🌵 消滅',
+                spikeHit: '🌵 スパイク -{dmg}',
+                spikeNext: '🌵 次スパイク {time}s 後',
                 diceNames: {
                     FIRE: '火',
                     THUNDER: '雷',
@@ -2488,7 +2525,8 @@
                     SAPLING: '苗木',
                     TAICHI: '太極',
                     BASEBALL: '野球',
-                    DROUGHT_THUNDER: '乾雷暴'
+                    DROUGHT_THUNDER: '乾雷暴',
+                    SPIKE: 'スパイク'
                 },
                 diceDescs: {
                     FIRE: '燃焼・範囲',
@@ -2510,7 +2548,8 @@
                     SAPLING: '対象合体',
                     TAICHI: '陰陽調和',
                     BASEBALL: '超高攻',
-                    DROUGHT_THUNDER: '雷撃・連鎖増傷'
+                    DROUGHT_THUNDER: '雷撃・連鎖増傷',
+                    SPIKE: 'スパイクトラップ設置'
                 },
                 dicePrices: {
                     FIRE: 0,
@@ -2524,6 +2563,7 @@
                     LOCK: 300,
                     GOLDMINE: 900,
                     LIGHT: 900,
+                    SPIKE: 900,
                     MYSTERY: 900,
                     BASEBALL: 900,
                     MIMIC: 1200,
@@ -2685,6 +2725,8 @@
                 detailLight: 'オーラ・隣接ダイスの攻撃速度上昇 (+{pct}%)',
                 detailBaseball: '超高攻 (速度ブーストを攻撃力ブーストに変換，例：光ダイスの速度ボーナス)',
                 detailDroughtThunder: '雷連鎖・対象に追加雷ダメージ，目標数=星数，ダメージ50%増加',
+                detailSpike: 'スパイクトラップ設置 (毎 {interval}s、{duration}s 持続) · レベル毎+0.75s · 0.5s毎にダメージ',
+                detailSpikeDamage: 'ダメージ {dmg} (1★) ~ {dmgMax} (7★) · レベル毎+100',
                 bossHackerMark: '💻 ハッカーマーク!',
                 bossHackerHacked: '💻 {count} 個のダイスがハッキングされました、合体で解除',
                 bossShield: '🛡️ シールド!'
@@ -2736,6 +2778,11 @@
                 shieldExpiredFloating: '🛡️ 소멸',
                 shieldBlock: '🛡️ 적이 방패에 차단!',
                 shieldCooldown: '🛡️ 다음 방패 {time}s 후',
+                spikePlaced: '🌵 가시 설치! {dur}s 지속',
+                spikeExpired: '🌵 가시 소멸!',
+                spikeExpiredFloating: '🌵 소멸',
+                spikeHit: '🌵 가시 -{dmg}',
+                spikeNext: '🌵 다음 가시 {time}s 후',
                 diceNames: {
                     FIRE: '불',
                     THUNDER: '번개',
@@ -2756,7 +2803,8 @@
                     SAPLING: '묘목',
                     TAICHI: '태극',
                     BASEBALL: '야구',
-                    DROUGHT_THUNDER: '마른번개'
+                    DROUGHT_THUNDER: '마른번개',
+                    SPIKE: '가시'
                 },
                 diceDescs: {
                     FIRE: '연소・범위',
@@ -2778,7 +2826,8 @@
                     SAPLING: '대상 합병',
                     TAICHI: '음양 조화',
                     BASEBALL: '초고공',
-                    DROUGHT_THUNDER: '번개・연쇄 증폭'
+                    DROUGHT_THUNDER: '번개・연쇄 증폭',
+                    SPIKE: '가시 함정 설치'
                 },
                 dicePrices: {
                     FIRE: 0,
@@ -2792,6 +2841,7 @@
                     LOCK: 300,
                     GOLDMINE: 900,
                     LIGHT: 900,
+                    SPIKE: 900,
                     MYSTERY: 900,
                     BASEBALL: 900,
                     MIMIC: 1200,
@@ -2953,6 +3003,8 @@
                 detailLight: '오라 · 인접 주사위 공격속도 증가 (+{pct}%)',
                 detailBaseball: '초고공 (속도 부스트를 공격력 부스트로 변환, 예: 빛 주사위 속도 보너스)',
                 detailDroughtThunder: '번개 연쇄 · 대상에 추가 번개 데미지, 목표 수 = 별 수, 데미지 50% 증가',
+                detailSpike: '가시 함정 설치 (매 {interval}s, {duration}s 지속) · 레벨당 +0.75s · 0.5s마다 데미지',
+                detailSpikeDamage: '데미지 {dmg} (1★) ~ {dmgMax} (7★) · 레벨당 +100',
                 bossHackerMark: '💻 해커 마크!',
                 bossHackerHacked: '💻 {count} 개의 주사위가 해킹되었습니다, 합병으로 해제',
                 bossShield: '🛡️ 쉴드!'
@@ -3053,6 +3105,24 @@
                     intervalPerLevel: -0.857, attackType: 'none', isGoldmine: true }),
                 LIGHT: Object.freeze({ label: '💡', color: '#f9ca24', baseDamage: 0, damagePerStar: 0, baseInterval: 1.0,
                     intervalPerLevel: 0, attackType: 'none', isLight: true }),
+                // ★ SPIKE 骰子定義（放在 LIGHT 後面）
+                SPIKE: Object.freeze({
+                    label: '🌵',
+                    color: '#2ecc71',
+                    baseDamage: 0,
+                    damagePerStar: 0,
+                    baseInterval: 5.0,
+                    intervalPerLevel: 0,
+                    attackType: 'none',
+                    isSpike: true,
+                    spikeDamageBase: 110,
+                    spikeDamagePerStar: 20,
+                    spikeDamagePerLevel: 100,
+                    spikeDurationBase: 2.0,
+                    spikeDurationPerLevel: 0.75,
+                    spikeIntervalBase: 5.0,
+                    spikeIntervalPerStar: -0.04,
+                }),
                 MYSTERY: Object.freeze({ label: '❓', color: '#805500', baseDamage: 30, damagePerStar: 0, baseInterval: 1.0,
                     intervalPerLevel: 0, attackType: 'front', isMystery: true }),
                 MIMIC: Object.freeze({ label: '🤡', color: '#8e44ad', baseDamage: 30, damagePerStar: 50 / 6, baseInterval: 1.5,
@@ -3099,6 +3169,7 @@
             })
         });
 
+        // ★ CHEST_GROUPS 中 rare 寶箱加入 SPIKE（放在 LIGHT 後面）
         const CHEST_GROUPS = {
             common: {
                 id: 'common',
@@ -3110,7 +3181,7 @@
             rare: {
                 id: 'rare',
                 cost: 900,
-                dice: ['GOLDMINE', 'LIGHT', 'MYSTERY', 'BASEBALL'],
+                dice: ['GOLDMINE', 'LIGHT', 'SPIKE', 'MYSTERY', 'BASEBALL'],
                 icon: '🛍️',
                 emoji: '🛍️'
             },
@@ -3131,7 +3202,7 @@
         };
 
         // ================================================================
-        // 排行榜系統
+        // 排行榜系統（與原版相同）
         // ================================================================
         function getDefaultLeaderboard() {
             return [
@@ -3140,7 +3211,7 @@
                 { name: 'トニー Gaming HK', wave: 25, score: 125, date: '2026-07-13' },
                 { name: '方丈', wave: 21, score: 105, date: '2026-07-12' },
                 { name: '태극권 사범 지 지에', wave: 18, score: 90, date: '2026-07-11' },
-                { name: '摸鱼高手', wave: 15, score: 75, date: '2026-07-10' },
+                { name: '摸魚高手', wave: 15, score: 75, date: '2026-07-10' },
                 { name: '小智', wave: 12, score: 60, date: '2026-07-09' },
                 { name: 'AAA', wave: 8, score: 40, date: '2026-07-08' },
             ];
@@ -3209,6 +3280,7 @@
                     LOCK: false,
                     GOLDMINE: false,
                     LIGHT: false,
+                    SPIKE: false, // ★
                     MYSTERY: false,
                     BASEBALL: false,
                     MIMIC: false,
@@ -3220,7 +3292,7 @@
                     TAICHI: false
                 },
                 leaderboard: getDefaultLeaderboard(),
-                soundEnabled: true // ★ 新增：音效狀態存檔
+                soundEnabled: true
             };
         }
         let saveData = null;
@@ -3264,14 +3336,13 @@
                     }
                 }
             }
-            // ★ 從存檔恢復音效狀態
             soundEnabled = saveData.soundEnabled !== undefined ? saveData.soundEnabled : true;
             saveSaveData();
         }
 
         function saveSaveData() {
             if (saveData) {
-                saveData.soundEnabled = soundEnabled; // ★ 存檔時記錄音效狀態
+                saveData.soundEnabled = soundEnabled;
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
             }
         }
@@ -3377,7 +3448,7 @@
         const PATH_PIXELS = PATH.map(p => ({ x: boardX + p.col * CELL_SIZE + CELL_SIZE / 2, y: boardY + p.row * CELL_SIZE +
                     CELL_SIZE / 2 }));
 
-        // ========== 遊戲狀態 ==========
+        // ========== 遊戲狀態（新增 spikes 陣列） ==========
         let game = {
             board: [],
             gold: 100,
@@ -3440,9 +3511,10 @@
             _taichiGlowTimer: 0,
             highlightTarget: null,
             shields: [],
+            spikes: [], // ★ 尖刺陣列
         };
 
-        // ========== 音效系統 ==========
+        // ========== 音效系統（與原版相同） ==========
         const MENU_MUSIC_URL = 'Offline Dice - Title.mp3';
         const GAME_MUSIC_URL = 'Offline Dice - Dice Rush.mp3';
         const SHOP_MUSIC_URL = 'Offline Dice - Shop.mp3';
@@ -3804,33 +3876,20 @@
             }
         }
 
-        // ================================================================
-        // ★ 統一浮動按鈕狀態：全程跟據 soundEnabled 顯示，不分場景 ★
-        // ================================================================
         function updateSoundButtonIcon() {
-            // 一律根據 soundEnabled 顯示，切換場景不會改變
             soundToggleBtn.textContent = soundEnabled ? '🔊' : '🔇';
             soundToggleBtn.classList.toggle('muted', !soundEnabled);
         }
 
-        // ================================================================
-        // ★ 音效按鈕點擊事件：切換 soundEnabled 並同步所有音樂 ★
-        // ================================================================
+        const soundToggleBtn = document.getElementById('soundToggleBtn');
         soundToggleBtn.addEventListener('click', function(e) {
             e.stopPropagation();
-
-            // 切換音效狀態
             soundEnabled = !soundEnabled;
-
-            // 儲存到存檔
             if (saveData) {
                 saveData.soundEnabled = soundEnabled;
                 saveSaveData();
             }
-
-            // 根據新狀態控制所有音樂
             if (soundEnabled) {
-                // 判斷目前在哪個界面，播放對應音樂
                 const shopOpen = document.getElementById('shopOverlay').classList.contains('visible');
                 const lbOpen = document.getElementById('leaderboardOverlay').classList.contains('visible');
                 const rankInputOpen = document.getElementById('lbNameInputOverlay').classList.contains('visible');
@@ -3853,14 +3912,12 @@
                     }
                 }
             } else {
-                // 靜音：停止所有音樂
                 stopBgMusic();
                 stopShopBgm();
                 stopRankBgm();
                 stopDeckBuildBgm();
                 _isGameOverDeckBuildPlaying = false;
             }
-
             updateSoundButtonIcon();
             const data = getData();
             showToast(soundEnabled ? data.soundOn : data.soundOff, 1200);
@@ -3983,7 +4040,7 @@
         function getEmptyCells() { let cells = []; for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++)
                 if (!isOccupied(c, r)) cells.push({ col: c, row: r }); return cells; }
 
-        // ========== 骰子創建 (含 isfinal 保護) ==========
+        // ========== 骰子創建（含 SPIKE 特殊處理 & isfinal 保護） ==========
         function createDice(type, star) {
             star = star || 1;
             const def = CONST.ALL_DICE_DEFS[type];
@@ -4038,13 +4095,23 @@
                 const maxDmg = 60;
                 const ratio = 1 + (lv - 1) / (CONST.MAX_LEVEL - 1) * ((maxDmg / 60) - 1);
                 dmg = baseDmg * ratio;
+            } else if (type === 'SPIKE') {
+                // ★ SPIKE 本身不攻擊，傷害由尖刺造成
+                dmg = 0;
             } else {
                 dmg = (def.baseDamage + def.damagePerStar * (s - 1)) * mult;
             }
             if (!isFinite(dmg) || dmg < 0) dmg = def.baseDamage || 10;
 
             let intervalBase = def.baseInterval + (def.intervalPerLevel || 0) * (lv - 1);
-            if (type === 'GOLDMINE') {
+
+            // ★ SPIKE 放置間隔隨星級變化：5s(1星) ~ 4.76s(7星)
+            if (type === 'SPIKE') {
+                const baseInt = def.spikeIntervalBase || 5;
+                const perStar = def.spikeIntervalPerStar || -0.04;
+                intervalBase = baseInt + (s - 1) * perStar;
+                intervalBase = Math.max(1.0, intervalBase);
+            } else if (type === 'GOLDMINE') {
                 const baseInterval = 10;
                 const minInterval = 4;
                 intervalBase = baseInterval - (s - 1) * (baseInterval - minInterval) / (7 - 1);
@@ -4087,6 +4154,7 @@
                 get isBaseball() { return def.isBaseball || false; },
                 get isDroughtThunder() { return def.isDroughtThunder || false; },
                 get isShield() { return def.isShield || false; },
+                get isSpike() { return def.isSpike || false; }, // ★
                 get burn() { return def.burn || false; },
                 get bossMultiplier() { return def.bossMultiplier || 1; },
                 get gambleMin() { return def.gambleMin || 0; },
@@ -4103,7 +4171,16 @@
                 get shieldDuration() { return def.shieldDuration || 3; },
                 get shieldDurationPerStar() { return def.shieldDurationPerStar || 4 / 6; },
                 get shieldDurationPerLevel() { return def.shieldDurationPerLevel || 0.5; },
+                // ★ SPIKE 屬性
+                get spikeDamageBase() { return def.spikeDamageBase || 110; },
+                get spikeDamagePerStar() { return def.spikeDamagePerStar || 20; },
+                get spikeDamagePerLevel() { return def.spikeDamagePerLevel || 100; },
+                get spikeDurationBase() { return def.spikeDurationBase || 2.0; },
+                get spikeDurationPerLevel() { return def.spikeDurationPerLevel || 0.75; },
+                get spikeIntervalBase() { return def.spikeIntervalBase || 5.0; },
+                get spikeIntervalPerStar() { return def.spikeIntervalPerStar || -0.04; },
             };
+
             if (dice.isMystery) {
                 dice.transformTimer = getMysteryTransformTime(s, lv);
                 dice.transformInterval = dice.transformTimer;
@@ -4125,6 +4202,14 @@
             if (dice.isShield) {
                 const interval = dice.shieldInterval + dice.shieldIntervalPerStar * (s - 1);
                 dice._shieldPlaceTimer = Math.max(1.0, interval);
+            }
+            // ★ SPIKE 骰子：記錄放置計時器
+            if (dice.isSpike) {
+                dice._spikePlaceTimer = 0;
+                // 計算尖刺傷害（用於顯示）
+                const spikeDmg = dice.spikeDamageBase + (s - 1) * dice.spikeDamagePerStar + (lv - 1) * dice
+                .spikeDamagePerLevel;
+                dice._spikeDamage = Math.round(spikeDmg);
             }
             return dice;
         }
@@ -4206,7 +4291,7 @@
                 `<div class="dice-icon" style="background:${dice.color};border-color:rgba(255,255,255,0.4);">${dice.label}</div><span style="font-weight:600;font-size:13px;">★${dice.star} ${dice.name}</span>`;
         }
 
-        // ========== 拖曳合併 (含 isfinal 保護) ==========
+        // ========== 拖曳合併（含 isfinal 保護） ==========
         function getGridPosFromPointer(e) {
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width,
@@ -4529,6 +4614,9 @@
                             if (dice.isShield && dice._shieldPlaceTimer !== undefined) {
                                 newDice._shieldPlaceTimer = dice._shieldPlaceTimer || 0;
                             }
+                            if (dice.isSpike && dice._spikePlaceTimer !== undefined) {
+                                newDice._spikePlaceTimer = dice._spikePlaceTimer || 0;
+                            }
                             game.board[r][c] = newDice;
                         }
                     }
@@ -4806,7 +4894,7 @@
             game.enemiesSpawned++;
         }
 
-        // ========== 更新敵人與 Boss 技能 ==========
+        // ========== 更新敵人 & Boss 技能 ==========
         function updateEnemies(dt) {
             try {
                 if (game.currentBoss && game.currentBoss.alive && game.currentBoss.isBoss) {
@@ -4821,7 +4909,7 @@
                 game.enemyReachedTwoThirds = anyAtTwoThirds;
                 updateEmoji();
 
-                // ★ 盾牌更新與消失（已改為翻譯） ★
+                // 盾牌更新
                 const data = getData();
                 for (const shield of game.shields) {
                     if (!shield.active) continue;
@@ -4833,6 +4921,51 @@
                     }
                 }
                 game.shields = game.shields.filter(s => s.active);
+
+                // ★ 尖刺更新
+                for (const spike of game.spikes) {
+                    if (!spike.active) continue;
+                    spike.timer -= dt;
+                    // 每0.5s造成一次傷害
+                    spike.damageTimer -= dt;
+                    if (spike.damageTimer <= 0) {
+                        spike.damageTimer = 0.5;
+                        // 對範圍內敵人造成傷害
+                        for (const e of game.enemies) {
+                            if (!e.alive) continue;
+                            const d = dist(e, spike);
+                            if (d < CELL_SIZE * 0.45) {
+                                // 檢查盾牌
+                                if (e.shieldTimer && e.shieldTimer > 0) {
+                                    addFloatingText(e.x, e.y - 20, '🛡️ 免疫', '#2ecc71', 14);
+                                    continue;
+                                }
+                                const safeDmg = (typeof spike.damage === 'number' && isFinite(spike.damage)) ? spike
+                                    .damage : 0;
+                                e.hp -= safeDmg;
+                                if (!isFinite(e.hp)) e.hp = 0;
+                                e.hitFlash = 0.2;
+                                const dmgMsg = getData().spikeHit.replace(/\{dmg\}/g, Math.round(safeDmg));
+                                addFloatingText(e.x, e.y - 20, `🌵 -${Math.round(safeDmg)}`, '#2ecc71', 16);
+                                if (Math.random() < 0.3) {
+                                    showToast(dmgMsg, 500);
+                                }
+                                if (e.hp <= 0) {
+                                    e.alive = false;
+                                    game.enemiesKilledThisWave++;
+                                    game.gold += (isFinite(e.reward)) ? e.reward : 0;
+                                    addFloatingText(e.x, e.y - 30, `+$${e.reward}`, '#2ecc71', 16);
+                                }
+                            }
+                        }
+                    }
+                    if (spike.timer <= 0) {
+                        spike.active = false;
+                        showToast(data.spikeExpired, 800);
+                        addFloatingText(spike.x, spike.y - 20, data.spikeExpiredFloating, '#2ecc71', 18);
+                    }
+                }
+                game.spikes = game.spikes.filter(s => s.active);
 
                 for (let i = game.enemies.length - 1; i >= 0; i--) {
                     const e = game.enemies[i];
@@ -5644,9 +5777,7 @@
                 game._bossAbilityTimeout = null; }
         }
 
-        // ================================================================
-        // 太極骰子能力檢測
-        // ================================================================
+        // ========== 太極骰子能力檢測 ==========
         function updateTaichiAbilities(dt) {
             let taichiPositions = [];
             let maxStar = 0,
@@ -5839,9 +5970,7 @@
             updateTaichiAbilities._lastState = { ...current };
         }
 
-        // ================================================================
-        // 光骰子攻速加成輔助 (含 isfinal 保護)
-        // ================================================================
+        // ========== 光骰子攻速加成輔助 ==========
         function calculateLightBonus(row, col) {
             let totalBonus = 0;
             const neighbors = [
@@ -5865,7 +5994,7 @@
             return totalBonus;
         }
 
-        // ========== 攻擊 (含旱雷雷擊連鎖、盾牌放置 & isfinal 保護) ==========
+        // ========== 攻擊（含 SPIKE 放置 & isfinal 保護） ==========
         function updateAttacks(dt) {
             updateTaichiAbilities(dt);
 
@@ -5906,6 +6035,65 @@
                                     cloud.y < cellY + CELL_SIZE && cloud.y + cloud.h > cellY;
                             })) continue;
 
+                        // ★ SPIKE 骰子：放置尖刺
+                        if (dice.isSpike) {
+                            const interval = dice.interval;
+                            dice._spikePlaceTimer = (dice._spikePlaceTimer || 0) - dt;
+                            if (dice._spikePlaceTimer <= 0) {
+                                dice._spikePlaceTimer = interval;
+
+                                const pathIndices = [];
+                                for (let i = 1; i < PATH_PIXELS.length - 1; i++) {
+                                    pathIndices.push(i);
+                                }
+                                if (pathIndices.length === 0) continue;
+
+                                const idx = pathIndices[randInt(0, pathIndices.length - 1)];
+                                const pos = PATH_PIXELS[idx];
+
+                                // 檢查該位置是否已有尖刺
+                                let hasSpikeHere = false;
+                                for (const s of game.spikes) {
+                                    if (!s.active) continue;
+                                    if (Math.abs(s.x - pos.x) < CELL_SIZE * 0.3 && Math.abs(s.y - pos.y) < CELL_SIZE *
+                                        0.3) {
+                                        hasSpikeHere = true;
+                                        break;
+                                    }
+                                }
+                                if (hasSpikeHere) continue;
+
+                                const star = dice.star;
+                                const lv = upgradeLevels[dice.type] || 1;
+                                // 計算持續時間：2s(Lv1) ~ 5s(Lv Max)
+                                const durationBase = dice.spikeDurationBase + dice.spikeDurationPerLevel * (lv - 1);
+                                const duration = Math.max(0.5, durationBase);
+                                // 計算傷害：110(1星) ~ 230(7星) + 每級100
+                                const dmgBase = dice.spikeDamageBase + (star - 1) * dice.spikeDamagePerStar +
+                                    (lv - 1) * dice.spikeDamagePerLevel;
+                                const damage = Math.round(dmgBase);
+
+                                const spike = {
+                                    x: pos.x,
+                                    y: pos.y,
+                                    col: PATH[idx].col,
+                                    row: PATH[idx].row,
+                                    duration: duration,
+                                    timer: duration,
+                                    damage: damage,
+                                    damageTimer: 0.5,
+                                    active: true,
+                                };
+                                game.spikes.push(spike);
+
+                                const data = getData();
+                                showToast(data.spikePlaced.replace(/\{dur\}/g, duration.toFixed(1)), 1200);
+                                addFloatingText(pos.x, pos.y - 20, `🌵 ${duration.toFixed(1)}s`, '#2ecc71', 20);
+                                playShootSound();
+                            }
+                            continue;
+                        }
+
                         if (dice.isMystery) {
                             if (dice.transformTimer === undefined || dice.transformTimer === null) {
                                 const lv = upgradeLevels[dice.type] || 1;
@@ -5920,7 +6108,7 @@
                         }
 
                         if (dice.isShield) {
-                            // 攻擊邏輯
+                            // 盾牌骰子的攻擊邏輯（與原版相同）
                             let interval = dice.interval;
                             const lightBonus = calculateLightBonus(r, c);
                             if (lightBonus > 0) {
@@ -5994,7 +6182,7 @@
                                 }
                             }
 
-                            // ★ 盾牌放置邏輯 ★
+                            // 盾牌放置邏輯（與原版相同）
                             const star = dice.star;
                             const lv = upgradeLevels[dice.type] || 1;
                             const intervalBase = dice.shieldInterval + dice.shieldIntervalPerStar * (star - 1);
@@ -6635,7 +6823,6 @@
                 document.getElementById('lbNameInput').focus();
                 window._pendingLeaderboard = { wave: game.wave, score: scoreEarned };
 
-                // ★ 完全跟隨 soundEnabled，不強制開啟 ★
                 stopBgMusic();
                 stopShopBgm();
                 stopDeckBuildBgm();
@@ -6657,7 +6844,6 @@
             }
         }
 
-        // 排名輸入確認按鈕
         document.getElementById('lbNameConfirmBtn').addEventListener('click', function() {
             const name = document.getElementById('lbNameInput').value.trim() || '匿名';
             const pending = window._pendingLeaderboard || { wave: game.wave, score: 0 };
@@ -6684,7 +6870,6 @@
             }
         });
 
-        // 排名輸入跳過按鈕（同理）
         document.getElementById('lbNameSkipBtn').addEventListener('click', function() {
             document.getElementById('lbNameInputOverlay').classList.remove('visible');
             window._pendingLeaderboard = null;
@@ -6750,6 +6935,7 @@
             game._taichiGlowTimer = 0;
             game.highlightTarget = null;
             game.shields = [];
+            game.spikes = []; // ★ 重置尖刺
             if (game._bossAbilityTimeout) { clearTimeout(game._bossAbilityTimeout);
                 game._bossAbilityTimeout = null; }
             game.activeDiceTypes = [...saveData.selectedDice];
@@ -6775,7 +6961,7 @@
 
         document.getElementById('restartBtn').addEventListener('click', restartGame);
 
-        // ========== 繪製 (含盾牌繪製) ==========
+        // ========== 繪製（含尖刺繪製） ==========
         if (!CanvasRenderingContext2D.prototype.roundRect) {
             CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, radii) {
                 const r = typeof radii === 'number' ? radii : (radii || 0);
@@ -7148,6 +7334,37 @@
                 ctx.fillText(`🛡️${Math.ceil(remain)}s`, cx, barY + barH + 1);
             }
 
+            // ★ SPIKE 骰子顯示放置計時器
+            if (dice.isSpike && dice._spikePlaceTimer !== undefined) {
+                const remain = Math.max(0, dice._spikePlaceTimer);
+                const barW = dSize * 0.7;
+                const barH = 4;
+                const barX = cx - barW / 2;
+                const barY = y + dSize + 2;
+                const total = Math.max(0.1, dice.interval);
+                const ratio = total > 0 ? remain / total : 0;
+                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                ctx.beginPath();
+                ctx.roundRect(barX - 1, barY - 1, barW + 2, barH + 2, 2);
+                ctx.fill();
+                ctx.fillStyle = '#2ecc71';
+                ctx.beginPath();
+                ctx.roundRect(barX, barY, barW * (1 - Math.min(1, ratio)), barH, 2);
+                ctx.fill();
+                ctx.fillStyle = 'rgba(255,255,255,0.7)';
+                ctx.font = '9px monospace';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                ctx.fillText(`🌵${Math.ceil(remain)}s`, cx, barY + barH + 1);
+                // 顯示尖刺傷害
+                const spikeDmg = dice._spikeDamage || 110;
+                ctx.fillStyle = 'rgba(255,255,255,0.6)';
+                ctx.font = `bold ${Math.floor(size*0.1)}px sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.fillText(`⚔${spikeDmg}`, cx, y + size - 2);
+            }
+
             ctx.fillStyle = 'rgba(255,255,255,0.9)';
             ctx.font = `bold ${Math.floor(size*0.35)}px sans-serif`;
             ctx.textAlign = 'center';
@@ -7161,7 +7378,8 @@
             ctx.textAlign = 'center';
             ctx.textBaseline = 'top';
             ctx.fillText(dice.name, cx, y + 4);
-            if (dice.cooldown > 0 && !dice.isVampire && !dice.isLight && !dice.isDroughtThunder && !dice.isShield) {
+            if (dice.cooldown > 0 && !dice.isVampire && !dice.isLight && !dice.isDroughtThunder && !dice.isShield && !dice
+                .isSpike) {
                 const ratio = dice.cooldown / (dice._intervalOverride || dice.interval);
                 ctx.fillStyle = 'rgba(0,0,0,0.3)';
                 ctx.beginPath();
@@ -7196,7 +7414,7 @@
             return `rgb(${r},${g},${b})`;
         }
 
-        // ========== 主繪製函數 (含盾牌繪製) ==========
+        // ========== 主繪製函數（含尖刺繪製） ==========
         function draw() {
             ctx.globalAlpha = 1.0;
             try {
@@ -7323,6 +7541,43 @@
                     }
                 }
 
+                // ★ 繪製尖刺
+                for (const spike of game.spikes) {
+                    if (!spike.active) continue;
+                    const x = spike.x - CELL_SIZE / 2;
+                    const y = spike.y - CELL_SIZE / 2;
+                    const pulse = 0.8 + 0.2 * Math.sin(game.lastTime * 0.003 + spike.timer * 2);
+                    ctx.shadowColor = 'rgba(46,204,113,0.5)';
+                    ctx.shadowBlur = 20 * pulse;
+                    ctx.fillStyle = `rgba(46,204,113,${0.2*pulse})`;
+                    ctx.beginPath();
+                    ctx.roundRect(x + 4, y + 4, CELL_SIZE - 8, CELL_SIZE - 8, 8);
+                    ctx.fill();
+                    ctx.strokeStyle = `rgba(46,204,113,${0.5*pulse})`;
+                    ctx.lineWidth = 2 * pulse;
+                    ctx.beginPath();
+                    ctx.roundRect(x + 2, y + 2, CELL_SIZE - 4, CELL_SIZE - 4, 10);
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = 'rgba(46,204,113,0.9)';
+                    ctx.font = `bold ${CELL_SIZE * 0.5}px sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('🌵', spike.x, spike.y + 2);
+                    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                    ctx.font = `bold ${CELL_SIZE * 0.14}px sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'bottom';
+                    ctx.fillText(`${spike.timer.toFixed(1)}s`, spike.x, spike.y + CELL_SIZE / 2 - 4);
+                    // 顯示傷害
+                    ctx.fillStyle = 'rgba(255,200,100,0.9)';
+                    ctx.font = `bold ${CELL_SIZE * 0.12}px sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'top';
+                    ctx.fillText(`⚔${spike.damage}`, spike.x, spike.y - CELL_SIZE / 2 + 4);
+                }
+
+                // 盾牌繪製
                 for (const shield of game.shields) {
                     if (!shield.active) continue;
                     const x = shield.x - CELL_SIZE / 2;
@@ -7911,6 +8166,7 @@
             game._taichiGlowTimer = 0;
             game.highlightTarget = null;
             game.shields = [];
+            game.spikes = []; // ★
             if (game._bossAbilityTimeout) { clearTimeout(game._bossAbilityTimeout);
                 game._bossAbilityTimeout = null; }
             initBoard();
@@ -7923,7 +8179,7 @@
                 'POISON', 'ICE'
             ]; }
 
-        // ========== 商店 (含旱雷 & 盾) ==========
+        // ========== 商店 ==========
         function getChestStatus(chestId) {
             const group = CHEST_GROUPS[chestId];
             if (!group) return null;
@@ -8058,7 +8314,7 @@
             updateShopUI();
         }
 
-        // ========== 骰子詳細 (含盾) ==========
+        // ========== 骰子詳細（含 SPIKE） ==========
         function showDiceDetail(diceType) {
             const def = CONST.ALL_DICE_DEFS[diceType];
             if (!def) return;
@@ -8151,6 +8407,19 @@
             }
             if (def.isDroughtThunder) {
                 specialParts.push(data.detailDroughtThunder);
+            }
+            // ★ SPIKE 詳細
+            if (def.isSpike) {
+                const interval = (def.spikeIntervalBase || 5) + (def.spikeIntervalPerStar || -0.04) * 0;
+                const duration = (def.spikeDurationBase || 2) + (def.spikeDurationPerLevel || 0.75) * 0;
+                const dmg = (def.spikeDamageBase || 110) + (def.spikeDamagePerLevel || 100) * 0;
+                const dmgMax = (def.spikeDamageBase || 110) + (def.spikeDamagePerStar || 20) * 6 +
+                    (def.spikeDamagePerLevel || 100) * (CONST.MAX_LEVEL - 1);
+                let spikeDesc = data.detailSpike.replace(/\{interval\}/g, interval.toFixed(2))
+                    .replace(/\{duration\}/g, duration.toFixed(1));
+                spikeDesc += ' · ' + data.detailSpikeDamage.replace(/\{dmg\}/g, dmg).replace(/\{dmgMax\}/g, Math.round(
+                    dmgMax));
+                specialParts.push(spikeDesc);
             }
 
             if (specialParts.length === 0) {
@@ -8502,57 +8771,50 @@
                 updateSoundButtonIcon();
             });
             document.getElementById('lbCloseBtn').addEventListener('click', function() {
-				document.getElementById('leaderboardOverlay').classList.remove('visible');
-				
-				// ★ 先停止排行榜音樂，無論音效開關狀態
-				stopRankBgm();
-
-				if (soundEnabled) {
-					if (game.gameOver) {
-						playDeckBuildBgm();
-					} else {
-						if (game.gameStarted && !game.gameOver) {
-							playBgMusic('game');
-						} else {
-							playBgMusic('menu');
-						}
-					}
-				} else {
-					// 靜音狀態下，停止所有音樂（但 stopRankBgm 已執行，此處可保留）
-					stopBgMusic();
-					stopShopBgm();
-					stopDeckBuildBgm();
-				}
-				updateSoundButtonIcon();
-			});
-			document.getElementById('leaderboardOverlay').addEventListener('click', function(e) {
-				if (e.target === this) {
-					this.classList.remove('visible');
-					
-					// ★ 先停止排行榜音樂
-					stopRankBgm();
-
-					if (game.gameOver) {
-						if (soundEnabled) {
-							const audio = document.getElementById('deckBuildAudio');
-							if (!audio.src || !audio.src.includes(DECK_BUILD_URL) || audio.paused) {
-								playDeckBuildBgm();
-							} else {
-								audio.play().catch(() => {});
-							}
-						}
-					} else {
-						if (soundEnabled) {
-							if (game.gameStarted && !game.gameOver) {
-								playBgMusic('game');
-							} else {
-								playBgMusic('menu');
-							}
-						}
-					}
-					updateSoundButtonIcon();
-				}
-			});
+                document.getElementById('leaderboardOverlay').classList.remove('visible');
+                stopRankBgm();
+                if (soundEnabled) {
+                    if (game.gameOver) {
+                        playDeckBuildBgm();
+                    } else {
+                        if (game.gameStarted && !game.gameOver) {
+                            playBgMusic('game');
+                        } else {
+                            playBgMusic('menu');
+                        }
+                    }
+                } else {
+                    stopBgMusic();
+                    stopShopBgm();
+                    stopDeckBuildBgm();
+                }
+                updateSoundButtonIcon();
+            });
+            document.getElementById('leaderboardOverlay').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('visible');
+                    stopRankBgm();
+                    if (game.gameOver) {
+                        if (soundEnabled) {
+                            const audio = document.getElementById('deckBuildAudio');
+                            if (!audio.src || !audio.src.includes(DECK_BUILD_URL) || audio.paused) {
+                                playDeckBuildBgm();
+                            } else {
+                                audio.play().catch(() => {});
+                            }
+                        }
+                    } else {
+                        if (soundEnabled) {
+                            if (game.gameStarted && !game.gameOver) {
+                                playBgMusic('game');
+                            } else {
+                                playBgMusic('menu');
+                            }
+                        }
+                    }
+                    updateSoundButtonIcon();
+                }
+            });
 
             document.getElementById('ddCloseBtn').addEventListener('click', function() {
                 document.getElementById('diceDetailOverlay').classList.remove('visible');
@@ -8611,7 +8873,6 @@
         document.getElementById('lbNameConfirmBtn').textContent = initData.lbConfirm;
         document.getElementById('lbNameSkipBtn').textContent = initData.lbSkip;
 
-        // 從存檔恢復音效狀態
         soundEnabled = saveData.soundEnabled !== undefined ? saveData.soundEnabled : true;
         updateSoundButtonIcon();
 
@@ -8653,7 +8914,7 @@
         }
 
         requestAnimationFrame(gameLoop);
-        console.log('🎲 Offline Dice v2.7.7 - 音效按鈕狀態全程同步，切換場景不再重置');
+        console.log('🎲 Offline Dice v2.7.7 - 新增尖刺骰子 🌵');
     </script>
 </body>
 </html>
