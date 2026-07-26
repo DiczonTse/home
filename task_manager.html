@@ -2,228 +2,350 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
-	<title>📝每日任務</title>
+    <title>📝每日任務</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* 原有的CSS保持不變 */
+        /* ===== 基礎重置 & 變數 ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
-        
+
         :root {
+            /* 淺色主題 */
+            --bg-primary: #f0f2f5;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --bg-input: #fafafa;
+            --bg-header: linear-gradient(135deg, #4361ee, #7209b7);
+            --bg-footer: linear-gradient(135deg, #4361ee, #7209b7);
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --text-inverse: #ffffff;
+            --border-color: #e9ecef;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.12);
             --primary: #4361ee;
             --primary-dark: #3a56d4;
             --secondary: #7209b7;
             --success: #4cc9f0;
             --danger: #f72585;
             --warning: #f8961e;
-            --light: #f8f9fa;
-            --dark: #212529;
             --gray: #6c757d;
-            --border-radius: 12px;
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
+            --border-radius: 14px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --nav-bg: #ffffff;
+            --nav-shadow: 0 -2px 15px rgba(0, 0, 0, 0.08);
+            --toast-bg: #212529;
+            --toast-text: #ffffff;
+            --overlay-bg: rgba(0, 0, 0, 0.5);
+            --filter-bg: #ffffff;
+            --filter-text: #6c757d;
+            --filter-active-bg: #4361ee;
+            --filter-active-text: #ffffff;
+            --priority-high-bg: #ffe6e6;
+            --priority-high-text: #d63031;
+            --priority-medium-bg: #fff9e6;
+            --priority-medium-text: #f39c12;
+            --priority-low-bg: #e6f7ff;
+            --priority-low-text: #3498db;
+            --completed-color: #adb5bd;
+            --scrollbar-track: #f1f1f1;
+            --scrollbar-thumb: #c1c1c1;
         }
-        
+
+        /* 暗色主題 */
+        [data-theme="dark"] {
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --bg-card: #252525;
+            --bg-input: #2a2a2a;
+            --bg-header: linear-gradient(135deg, #1a1a2e, #16213e);
+            --bg-footer: linear-gradient(135deg, #1a1a2e, #16213e);
+            --text-primary: #e8e8e8;
+            --text-secondary: #a0a0a0;
+            --text-inverse: #e8e8e8;
+            --border-color: #333333;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.5);
+            --primary: #5a7aff;
+            --primary-dark: #4a6ae8;
+            --secondary: #9b3dd9;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --gray: #888888;
+            --nav-bg: #1e1e1e;
+            --nav-shadow: 0 -2px 15px rgba(0, 0, 0, 0.4);
+            --toast-bg: #333333;
+            --toast-text: #e8e8e8;
+            --overlay-bg: rgba(0, 0, 0, 0.7);
+            --filter-bg: #2a2a2a;
+            --filter-text: #a0a0a0;
+            --filter-active-bg: #5a7aff;
+            --filter-active-text: #ffffff;
+            --priority-high-bg: #3d1a1a;
+            --priority-high-text: #ff6b6b;
+            --priority-medium-bg: #3d2e1a;
+            --priority-medium-text: #f7c948;
+            --priority-low-bg: #1a2a3d;
+            --priority-low-text: #6bb5ff;
+            --completed-color: #555555;
+            --scrollbar-track: #2a2a2a;
+            --scrollbar-thumb: #444444;
+        }
+
+        /* ===== 全域樣式 ===== */
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft JhengHei', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: #f0f2f5;
-            color: var(--dark);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
             line-height: 1.6;
             padding: 0;
             margin: 0;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
-        
-        /* Header Styles */
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--scrollbar-track);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-thumb);
+            border-radius: 8px;
+        }
+
+        /* ===== Header ===== */
         header {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: var(--bg-header);
             color: white;
-            padding: 1.5rem 1rem;
+            padding: 1rem 1rem 0.8rem 1rem;
             box-shadow: var(--shadow);
             position: sticky;
             top: 0;
             z-index: 100;
+            transition: background 0.3s ease;
         }
-        
+
         .header-content {
             max-width: 800px;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
-        
+
+        .header-left {
+            display: flex;
+            flex-direction: column;
+        }
+
         .app-title {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 700;
+            letter-spacing: 0.5px;
         }
-        
+
+        .app-title a {
+            text-decoration: none;
+            color: #ffb347;
+            transition: var(--transition);
+        }
+        .app-title a:hover {
+            color: #ffa500;
+        }
+
         .date-display {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             opacity: 0.9;
-            margin-top: 0.25rem;
+            margin-top: 0.1rem;
         }
-        
-        /* Main Container */
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 1rem;
-            flex: 1;
-            width: 100%;
-            transition: var(--transition);
-        }
-		
-		/* Footer Styles */
-		footer {
-			background: linear-gradient(135deg, var(--primary), var(--secondary));
-			color: white;
-			padding: 2rem 1rem;
-			margin-top: auto;
-		}
 
-		.footer-content {
-			max-width: 800px;
-			margin: 0 auto;
-			text-align: center;
-		}
-
-		.footer-title {
-			font-size: 1.5rem;
-			font-weight: 700;
-			margin-bottom: 0.5rem;
-		}
-
-		.footer-subtitle {
-			font-size: 0.9rem;
-			opacity: 0.9;
-			margin-bottom: 1.5rem;
-		}
-
-		.footer-links {
-			display: flex;
-			justify-content: center;
-			gap: 1.5rem;
-			margin-bottom: 1.5rem;
-			flex-wrap: wrap;
-		}
-
-		.footer-link {
-			color: white;
-			text-decoration: none;
-			font-size: 0.9rem;
-			opacity: 0.9;
-			transition: var(--transition);
-		}
-
-		.footer-link:hover {
-			opacity: 1;
-			text-decoration: underline;
-		}
-
-		.footer-info {
-			font-size: 0.8rem;
-			opacity: 0.7;
-			border-top: 1px solid rgba(255, 255, 255, 0.1);
-			padding-top: 1rem;
-			margin-top: 1rem;
-		}
-
-		.footer-info a {
-			color: var(--success);
-			text-decoration: none;
-		}
-
-		.footer-info a:hover {
-			text-decoration: underline;
-		}
-
-		/* Responsive Footer */
-		@media (max-width: 768px) {
-			footer {
-				padding: 1.5rem 1rem;
-			}
-			
-			.footer-links {
-				gap: 1rem;
-			}
-			
-			.footer-link {
-				font-size: 0.85rem;
-			}
-		}
-        
-        /* Task Form */
-        .task-form {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-            transform-origin: top;
-            max-height: 1000px;
-            overflow: hidden;
-        }
-        
-        .task-form.collapsed {
-            display: none;
-        }
-        
-        .form-title {
-            font-size: 1.25rem;
-            margin-bottom: 1rem;
-            color: var(--dark);
+        .header-actions {
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
-        
+
+        .header-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            backdrop-filter: blur(4px);
+        }
+
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.05);
+        }
+
+        .header-btn:active {
+            transform: scale(0.92);
+        }
+
+        /* ===== Main Container ===== */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1rem 1rem 6rem 1rem;
+            flex: 1;
+            width: 100%;
+            transition: var(--transition);
+        }
+
+        /* ===== 移動端表單（彈出式） ===== */
+        .mobile-form-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--overlay-bg);
+            z-index: 200;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            transition: opacity 0.3s ease;
+        }
+
+        .mobile-form-overlay.open {
+            display: block;
+            opacity: 1;
+        }
+
+        .mobile-form-container {
+            display: none; /* 預設隱藏，由 JS 控制 */
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-card);
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            padding: 1.5rem 1.5rem 2rem 1.5rem;
+            max-height: 85vh;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+            z-index: 201;
+            box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.2);
+            will-change: transform;
+        }
+
+        .mobile-form-container.open {
+            display: block; /* 顯示時為 block */
+            transform: translateY(0);
+        }
+
+        .mobile-form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .mobile-form-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .form-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.1rem;
+        }
+
+        .close-mobile-form {
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+
+        .close-mobile-form:hover {
+            background: var(--border-color);
+        }
+
+        /* ===== 表單元件 ===== */
         .form-group {
             margin-bottom: 1.25rem;
         }
-        
+
         label {
             display: block;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
             font-weight: 600;
-            color: var(--dark);
+            color: var(--text-primary);
+            font-size: 0.95rem;
         }
-        
-        input, textarea, select {
+
+        input,
+        textarea,
+        select {
             width: 100%;
-            padding: 0.875rem;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            padding: 0.8rem 1rem;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
             font-size: 1rem;
             transition: var(--transition);
-            background-color: #fafafa;
+            background-color: var(--bg-input);
+            color: var(--text-primary);
+            font-family: inherit;
         }
-        
-        input:focus, textarea:focus, select:focus {
+
+        input:focus,
+        textarea:focus,
+        select:focus {
             border-color: var(--primary);
             outline: none;
-            background-color: white;
             box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
         }
-        
+
         textarea {
-            min-height: 100px;
+            min-height: 90px;
             resize: vertical;
         }
-        
+
         .btn {
-            padding: 0.875rem 1.5rem;
+            padding: 0.8rem 1.5rem;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             font-size: 1rem;
             font-weight: 600;
@@ -233,304 +355,381 @@
             justify-content: center;
             gap: 0.5rem;
             min-height: 50px;
+            font-family: inherit;
         }
-        
+
         .btn-primary {
             background-color: var(--primary);
             color: white;
             width: 100%;
         }
-        
-        .btn-primary:hover, .btn-primary:active {
+
+        .btn-primary:hover {
             background-color: var(--primary-dark);
+            transform: translateY(-1px);
         }
-        
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
         .btn-secondary {
             background-color: var(--gray);
             color: white;
             width: 48%;
         }
-        
+
         .btn-secondary:hover {
-            background-color: #5a6268;
+            opacity: 0.85;
         }
-        
+
         .btn-success {
             background-color: var(--success);
             color: white;
             width: 48%;
         }
-        
+
         .btn-success:hover {
-            background-color: #3ab8e0;
+            opacity: 0.85;
         }
-        
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            opacity: 0.85;
+        }
+
         .form-buttons {
             display: flex;
             gap: 4%;
             justify-content: space-between;
         }
-        
-        /* Task Filters */
+
+        .form-buttons .btn {
+            flex: 1;
+        }
+
+        /* ===== 過濾按鈕 ===== */
         .task-filters {
             display: flex;
             gap: 0.5rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
             overflow-x: auto;
-            padding-bottom: 0.5rem;
+            padding: 0.25rem 0 0.5rem 0;
             -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
         }
-        
+
         .task-filters::-webkit-scrollbar {
             display: none;
         }
-        
+
         .filter-btn {
-            padding: 0.75rem 1rem;
+            padding: 0.6rem 1.2rem;
             border: none;
-            border-radius: 8px;
-            background-color: white;
-            color: var(--gray);
+            border-radius: 20px;
+            background-color: var(--filter-bg);
+            color: var(--filter-text);
             font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
             white-space: nowrap;
             box-shadow: var(--shadow);
             flex-shrink: 0;
+            font-size: 0.9rem;
         }
-        
+
         .filter-btn.active {
-            background-color: var(--primary);
-            color: white;
+            background-color: var(--filter-active-bg);
+            color: var(--filter-active-text);
+            box-shadow: 0 2px 12px rgba(67, 97, 238, 0.25);
         }
-        
-        /* Tasks Container */
+
+        .filter-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* ===== 任務容器 ===== */
         .tasks-container {
-            background: white;
+            background: var(--bg-card);
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
             overflow: hidden;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
+            transition: background 0.3s ease, box-shadow 0.3s ease;
         }
-        
+
         .tasks-header {
-            padding: 1.25rem;
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #eee;
+            padding: 1rem 1.25rem;
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
             font-weight: 600;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            color: var(--text-primary);
+            transition: background 0.3s ease, border-color 0.3s ease;
         }
-        
+
         .task-count {
-            font-size: 0.9rem;
-            color: var(--gray);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
         }
-        
+
         .task-list {
             list-style-type: none;
         }
-        
+
+        /* ===== 任務項目 ===== */
         .task-item {
-            padding: 1.25rem;
-            border-bottom: 1px solid #eee;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: flex-start;
-            gap: 1rem;
-            transition: var(--transition);
+            gap: 0.9rem;
+            transition: background 0.2s ease;
             position: relative;
+            background: var(--bg-card);
         }
-        
+
         .task-item:last-child {
             border-bottom: none;
         }
-        
+
+        .task-item:hover {
+            background: var(--bg-secondary);
+        }
+
         .task-checkbox {
-            width: 22px;
-            height: 22px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
-            border: 2px solid #ddd;
+            border: 2px solid var(--border-color);
             flex-shrink: 0;
-            margin-top: 0.25rem;
+            margin-top: 0.15rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: var(--transition);
+            background: var(--bg-input);
         }
-        
+
         .task-checkbox.checked {
             background-color: var(--primary);
             border-color: var(--primary);
             color: white;
         }
-        
+
+        .task-checkbox:active {
+            transform: scale(0.85);
+        }
+
         .task-content {
             flex: 1;
-            min-width: 0; /* Prevents overflow */
+            min-width: 0;
         }
-        
+
         .task-title {
             font-weight: 600;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.3rem;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
             word-break: break-word;
+            color: var(--text-primary);
         }
-        
+
         .task-description {
-            color: var(--gray);
+            color: var(--text-secondary);
             font-size: 0.9rem;
             line-height: 1.5;
             word-break: break-word;
         }
-        
+
         .task-priority {
             display: inline-flex;
             align-items: center;
-            gap: 0.25rem;
-            padding: 0.25rem 0.75rem;
+            gap: 0.3rem;
+            padding: 0.2rem 0.7rem;
             border-radius: 20px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 600;
             flex-shrink: 0;
         }
-        
+
         .priority-high {
-            background-color: #ffe6e6;
-            color: #d63031;
+            background-color: var(--priority-high-bg);
+            color: var(--priority-high-text);
         }
-        
+
         .priority-medium {
-            background-color: #fff9e6;
-            color: #f39c12;
+            background-color: var(--priority-medium-bg);
+            color: var(--priority-medium-text);
         }
-        
+
         .priority-low {
-            background-color: #e6f7ff;
-            color: #3498db;
+            background-color: var(--priority-low-bg);
+            color: var(--priority-low-text);
         }
-        
+
         .task-actions {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.3rem;
             flex-shrink: 0;
+            align-items: center;
         }
-        
+
         .action-btn {
-            width: 36px;
-            height: 36px;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
             border: none;
             background: transparent;
-            color: var(--gray);
+            color: var(--text-secondary);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: var(--transition);
+            font-size: 0.9rem;
         }
-        
+
         .action-btn:hover {
-            background-color: #f0f0f0;
+            background-color: var(--border-color);
         }
-        
+
         .edit-btn:hover {
             color: var(--primary);
-            background-color: #e6f0ff;
+            background-color: rgba(67, 97, 238, 0.1);
         }
-        
+
         .delete-btn:hover {
             color: var(--danger);
-            background-color: #ffe6e6;
+            background-color: rgba(247, 37, 133, 0.1);
         }
-        
+
         .task-item.completed .task-title {
             text-decoration: line-through;
-            color: #aaa;
+            color: var(--completed-color);
         }
-        
+
         .task-item.completed .task-description {
-            color: #ccc;
+            color: var(--completed-color);
         }
-        
-        /* Empty State */
+
+        .task-item.completed .task-priority {
+            opacity: 0.5;
+        }
+
+        /* ===== 空狀態 ===== */
         .empty-state {
             text-align: center;
             padding: 3rem 1.5rem;
-            color: var(--gray);
+            color: var(--text-secondary);
         }
-        
+
         .empty-icon {
             font-size: 3.5rem;
-            margin-bottom: 1rem;
+            margin-bottom: 0.8rem;
             opacity: 0.5;
         }
-        
+
         .empty-text {
             font-size: 1.1rem;
-            margin-bottom: 0.5rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            color: var(--text-primary);
         }
-        
+
         .empty-subtext {
             font-size: 0.9rem;
+            color: var(--text-secondary);
         }
-        
-        /* Bottom Navigation */
+
+        /* ===== 底部導航 ===== */
         .bottom-nav {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            background: white;
+            background: var(--nav-bg);
             display: flex;
-            padding: 0.75rem 1rem;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem 0.5rem env(safe-area-inset-bottom, 0.5rem) 0.5rem;
+            box-shadow: var(--nav-shadow);
             z-index: 100;
+            border-top: 1px solid var(--border-color);
+            transition: background 0.3s ease, box-shadow 0.3s ease;
         }
-        
+
         .nav-btn {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 0.25rem;
-            padding: 0.5rem;
+            gap: 0.15rem;
+            padding: 0.4rem 0;
             background: transparent;
             border: none;
-            color: var(--gray);
+            color: var(--text-secondary);
             cursor: pointer;
             transition: var(--transition);
-            border-radius: 8px;
+            border-radius: 10px;
+            font-family: inherit;
+            position: relative;
         }
-        
+
         .nav-btn.active {
             color: var(--primary);
         }
-        
+
+        .nav-btn:active {
+            transform: scale(0.92);
+        }
+
         .nav-icon {
-            font-size: 1.25rem;
+            font-size: 1.3rem;
+            line-height: 1;
         }
-        
+
         .nav-text {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 600;
+            letter-spacing: 0.3px;
         }
-        
-        /* Add Task FAB */
+
+        .nav-badge {
+            position: absolute;
+            top: 2px;
+            right: 50%;
+            transform: translateX(calc(50% + 18px));
+            background: var(--danger);
+            color: white;
+            font-size: 0.6rem;
+            padding: 0.1rem 0.4rem;
+            border-radius: 10px;
+            font-weight: 700;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        /* ===== FAB ===== */
         .fab {
             position: fixed;
             bottom: 5rem;
-            right: 1rem;
-            width: 60px;
-            height: 60px;
+            right: 1.2rem;
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
             background: var(--primary);
             color: white;
             border: none;
-            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+            box-shadow: 0 4px 16px rgba(67, 97, 238, 0.35);
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -539,290 +738,417 @@
             z-index: 99;
             transition: var(--transition);
         }
-        
+
         .fab:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(67, 97, 238, 0.4);
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 6px 24px rgba(67, 97, 238, 0.45);
         }
-        
-        /* Swipe Actions */
-        .task-item {
-            touch-action: pan-x pan-y;
+
+        .fab:active {
+            transform: scale(0.9);
         }
-        
-        /* Responsive Adjustments */
-        @media (min-width: 768px) {
-            .container {
-                padding: 2rem;
-            }
-            
-            .task-filters {
-                justify-content: center;
-            }
-            
-            .filter-btn {
-                padding: 0.875rem 1.5rem;
-            }
-            
-            .bottom-nav {
-                display: none;
-            }
-            
-            .fab {
-                display: none;
-            }
-            
-            .task-form.collapsed {
-                display: block;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .header-content {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.5rem;
-            }
-            
-            .app-title {
-                font-size: 1.25rem;
-            }
-            
-            .task-item {
-                padding: 1rem;
-            }
-            
-            .task-actions {
-                flex-direction: column;
-            }
-            
-            /* 移動端優化：表單展開時調整容器 */
-            .container.form-expanded {
-                padding-bottom: 6rem;
-            }
-        }
-        
-        /* Animation for new tasks */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .task-item.new {
-            animation: fadeIn 0.3s ease;
-        }
-        
-        /* Focus states for accessibility */
-        button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
-            outline: 2px solid var(--primary);
-            outline-offset: 2px;
-        }
-        
-        /* Toast Notification */
+
+        /* ===== Toast ===== */
         .toast {
             position: fixed;
-            bottom: 5rem;
+            bottom: 5.5rem;
             left: 50%;
             transform: translateX(-50%) translateY(100px);
-            background: var(--dark);
-            color: white;
-            padding: 0.75rem 1.5rem;
+            background: var(--toast-bg);
+            color: var(--toast-text);
+            padding: 0.7rem 1.8rem;
             border-radius: 30px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
             z-index: 1000;
             opacity: 0;
-            transition: transform 0.3s ease, opacity 0.3s ease;
+            transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.35s ease;
             font-weight: 600;
+            font-size: 0.95rem;
+            pointer-events: none;
+            white-space: nowrap;
+            max-width: 90vw;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-        
+
         .toast.show {
             transform: translateX(-50%) translateY(0);
             opacity: 1;
         }
-        
-        /* 新增：移動端表單優化 */
-        .mobile-form-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 200;
+
+        /* ===== Footer ===== */
+        footer {
+            background: var(--bg-footer);
+            color: white;
+            padding: 2rem 1rem;
+            margin-top: auto;
+            transition: background 0.3s ease;
         }
-        
-        .mobile-form-container {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            border-radius: var(--border-radius) var(--border-radius) 0 0;
-            padding: 1.5rem;
-            max-height: 85vh;
-            overflow-y: auto;
-            transform: translateY(100%);
-            transition: transform 0.3s ease;
-            z-index: 201;
-            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.15);
+
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
         }
-        
-        .mobile-form-container.open {
-            transform: translateY(0);
+
+        .footer-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
         }
-        
-        .mobile-form-header {
+
+        .footer-subtitle {
+            font-size: 0.85rem;
+            opacity: 0.85;
+            margin-bottom: 1.2rem;
+        }
+
+        .footer-links {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .mobile-form-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--dark);
-        }
-        
-        .close-mobile-form {
-            background: transparent;
-            border: none;
-            font-size: 1.5rem;
-            color: var(--gray);
-            cursor: pointer;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
             justify-content: center;
+            gap: 1.2rem;
+            margin-bottom: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            color: white;
+            text-decoration: none;
+            font-size: 0.85rem;
+            opacity: 0.85;
             transition: var(--transition);
         }
-        
-        .close-mobile-form:hover {
-            background-color: #f0f0f0;
+
+        .footer-link:hover {
+            opacity: 1;
+            text-decoration: underline;
         }
-        
-        /* Edit form specific styles */
-        .form-subtitle {
-            font-size: 0.9rem;
-            color: var(--gray);
-            margin-top: -0.5rem;
-            margin-bottom: 1rem;
+
+        .footer-info {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 1rem;
+            margin-top: 1rem;
         }
-        
-        .cancel-edit-btn {
-            background-color: transparent;
-            color: var(--gray);
-            border: 1px solid #ddd;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
+
+        .footer-info a {
+            color: #4cc9f0;
+            text-decoration: none;
+        }
+        .footer-info a:hover {
+            text-decoration: underline;
+        }
+
+        /* ===== 工具選單（彈出） ===== */
+        .tools-menu {
+            position: fixed;
+            bottom: 5.5rem;
+            right: 1rem;
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            padding: 0.5rem;
+            z-index: 150;
+            min-width: 180px;
+            transform: scale(0.9) translateY(10px);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.25s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .tools-menu.open {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .tools-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.7rem 1rem;
+            border: none;
+            background: transparent;
+            color: var(--text-primary);
             cursor: pointer;
+            width: 100%;
+            border-radius: 8px;
             font-size: 0.9rem;
-            margin-left: 1rem;
+            font-weight: 500;
+            transition: var(--transition);
+            font-family: inherit;
         }
-        
-        .cancel-edit-btn:hover {
-            background-color: #f8f9fa;
+
+        .tools-menu-item:hover {
+            background: var(--border-color);
+        }
+
+        .tools-menu-item:active {
+            transform: scale(0.97);
+        }
+
+        .tools-menu-item i {
+            width: 20px;
+            text-align: center;
+            color: var(--primary);
+        }
+
+        /* ===== 隱藏檔案輸入 ===== */
+        .file-input-hidden {
+            display: none;
+        }
+
+        /* ===== 動畫 ===== */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .task-item.new {
+            animation: fadeInUp 0.3s ease;
+        }
+
+        /* ===== 響應式 ===== */
+        @media (min-width: 768px) {
+            .container {
+                padding: 1.5rem 2rem 7rem 2rem;
+            }
+
+            .task-filters {
+                justify-content: center;
+                gap: 0.7rem;
+            }
+
+            .filter-btn {
+                padding: 0.7rem 1.6rem;
+                font-size: 0.95rem;
+            }
+
+            .task-item {
+                padding: 1.2rem 1.5rem;
+            }
+
+            .mobile-form-container {
+                max-width: 500px;
+                left: 50%;
+                right: auto;
+                transform: translateX(-50%) translateY(100%);
+                border-radius: var(--border-radius);
+                bottom: 10vh;
+                max-height: 80vh;
+            }
+
+            .mobile-form-container.open {
+                transform: translateX(-50%) translateY(0);
+            }
+
+            .mobile-form-overlay.open {
+                display: block;
+            }
+
+            .fab {
+                right: 2rem;
+                bottom: 6rem;
+                width: 60px;
+                height: 60px;
+                font-size: 1.6rem;
+            }
+
+            .toast {
+                bottom: 6.5rem;
+                font-size: 1rem;
+                padding: 0.8rem 2rem;
+            }
+
+            .bottom-nav {
+                padding: 0.6rem 1rem env(safe-area-inset-bottom, 0.6rem) 1rem;
+            }
+
+            .nav-btn {
+                padding: 0.5rem 0;
+            }
+
+            .nav-icon {
+                font-size: 1.4rem;
+            }
+            .nav-text {
+                font-size: 0.75rem;
+            }
+
+            .tools-menu {
+                right: 2rem;
+                bottom: 6.5rem;
+                min-width: 200px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-content {
+                flex-direction: row;
+                align-items: center;
+            }
+
+            .app-title {
+                font-size: 1.2rem;
+            }
+
+            .date-display {
+                font-size: 0.75rem;
+            }
+
+            .header-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
+
+            .task-item {
+                padding: 0.8rem 1rem;
+                gap: 0.7rem;
+            }
+
+            .task-title {
+                font-size: 0.95rem;
+            }
+
+            .task-checkbox {
+                width: 22px;
+                height: 22px;
+            }
+
+            .mobile-form-container {
+                padding: 1.2rem 1.2rem 1.5rem 1.2rem;
+            }
+
+            .btn {
+                min-height: 44px;
+                font-size: 0.95rem;
+                padding: 0.7rem 1rem;
+            }
+        }
+
+        /* ===== 暗色模式過渡 ===== */
+        body,
+        .bg-card,
+        .bg-secondary,
+        .bg-primary,
+        .tasks-container,
+        .task-item,
+        .mobile-form-container,
+        .tools-menu,
+        .bottom-nav,
+        header,
+        footer {
+            transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+        }
+
+        /* ===== 聚焦狀態 ===== */
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        /* ===== 選取文字 ===== */
+        ::selection {
+            background: var(--primary);
+            color: white;
         }
     </style>
 </head>
 <body>
+
+    <!-- ===== HEADER ===== -->
     <header>
         <div class="header-content">
-            <div>
-                <h1 class="app-title"><a href="index.html" target="_parent" style="text-decoration:none; color:orange;">📝每日任務</a></h1>
+            <div class="header-left">
+                <h1 class="app-title"><a href="#" style="text-decoration:none; color:#ffb347;">📝每日任務</a></h1>
                 <div class="date-display" id="currentDate"></div>
+            </div>
+            <div class="header-actions">
+                <button class="header-btn" id="themeToggle" title="切換暗色模式" aria-label="切換暗色模式">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="header-btn" id="toolsToggle" title="工具" aria-label="工具">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
             </div>
         </div>
     </header>
-    
+
+    <!-- ===== MAIN ===== -->
     <main class="container" id="mainContainer">
-        <section class="task-form collapsed" id="taskFormSection">
-            <h2 class="form-title"><i class="fas fa-plus-circle"></i> <span id="formTitle">增加任務</span></h2>
-            <p class="form-subtitle" id="formSubtitle">請輸入新任務的詳細資料</p>
-            <form id="taskForm">
-                <input type="hidden" id="taskId" value="">
-                <div class="form-group">
-                    <label for="taskTitle">任務名稱</label>
-                    <input type="text" id="taskTitle" placeholder="要完成的任務" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="taskDescription">任務內容</label>
-                    <textarea id="taskDescription" placeholder="詳細內容"></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="taskPriority">次序</label>
-                    <select id="taskPriority">
-                        <option value="low">瑣事</option>
-                        <option value="medium">次要</option>
-                        <option value="high" selected>優先</option>
-                    </select>
-                </div>
-                
-                <div class="form-buttons">
-                    <button type="button" class="btn btn-secondary" id="cancelEditBtn" style="display:none;">
-                        <i class="fas fa-times"></i> 取消
-                    </button>
-                    <button type="submit" class="btn btn-primary" id="submitBtn">
-                        <i class="fas fa-plus"></i> 增加任務
-                    </button>
-                </div>
-            </form>
-        </section>
-        
+
+        <!-- ===== 過濾器 ===== -->
         <section class="task-filters">
-            <button class="filter-btn active" data-filter="all">所有任務</button>
-            <button class="filter-btn" data-filter="active">處理中</button>
-            <button class="filter-btn" data-filter="completed">已完成</button>
-            <button class="filter-btn" data-filter="high">優先</button>
+            <button class="filter-btn active" data-filter="all">📋 所有</button>
+            <button class="filter-btn" data-filter="active">⏳ 處理中</button>
+            <button class="filter-btn" data-filter="completed">✅ 已完成</button>
+            <button class="filter-btn" data-filter="high">⭐ 優先</button>
         </section>
-        
+
+        <!-- ===== 任務列表 ===== -->
         <section class="tasks-container">
             <div class="tasks-header">
-                <span>今日任務</span>
+                <span>📌 今日任務</span>
                 <span class="task-count" id="taskCount">0 個任務</span>
             </div>
-            
-            <ul class="task-list" id="taskList">
-                <!-- Tasks will be added here dynamically -->
-            </ul>
+            <ul class="task-list" id="taskList"></ul>
         </section>
+
+        <!-- 底部佔位，避免被導航遮擋 -->
+        <div style="height: 0.5rem;"></div>
     </main>
-	
-	<footer>
+
+    <!-- ===== FOOTER ===== -->
+    <footer>
         <div class="footer-content">
             <h2 class="footer-title">📝每日任務</h2>
             <p class="footer-subtitle">您的個人任務管理助手</p>
-            
             <div class="footer-links">
-                <a href="index.html" class="footer-link">首頁</a>
-                <a href="index.html" class="footer-link">關於我們</a>
-                <a href="index.html" class="footer-link">隱私政策</a>
-                <a href="index.html" class="footer-link">使用條款</a>
+                <a href="#" class="footer-link">首頁</a>
+                <a href="#" class="footer-link">關於我們</a>
+                <a href="#" class="footer-link">隱私政策</a>
+                <a href="#" class="footer-link">使用條款</a>
                 <a href="mailto:tsedkn@gmail.com" class="footer-link">聯繫我們</a>
             </div>
-            
             <div class="footer-info">
-                <p>© <span id="currentYear"></span> 每日任務管理工具 - 保持專注，完成每日任務！</p>
-                <p>任務每日重置功能已啟用，幫助您專注於當日目標。</p>
-                <p>如有任何問題，<a href="mailto:tsedkn@gmail.com">請聯繫支援團隊。</a></p>
+                <p>© <span id="currentYear"></span> 每日任務管理工具 · 保持專注，完成每日任務！</p>
+                <p>任務每日自動重置 · <a href="mailto:tsedkn@gmail.com">支援團隊</a></p>
             </div>
         </div>
     </footer>
-    
-    <!-- 移動端表單覆蓋層 -->
+
+    <!-- ===== 工具選單 ===== -->
+    <div class="tools-menu" id="toolsMenu">
+        <button class="tools-menu-item" id="exportTxtBtn">
+            <i class="fas fa-file-export"></i> 匯出 TXT
+        </button>
+        <button class="tools-menu-item" id="importTxtBtn">
+            <i class="fas fa-file-import"></i> 匯入 TXT
+        </button>
+        <button class="tools-menu-item" id="clearAllBtn" style="color: var(--danger);">
+            <i class="fas fa-trash-alt" style="color: var(--danger);"></i> 清除所有任務
+        </button>
+    </div>
+
+    <!-- ===== 移動端表單（彈出） ===== -->
     <div class="mobile-form-overlay" id="mobileFormOverlay"></div>
-    <div class="mobile-form-container" id="mobileFormContainer">
+    <div class="mobile-form-container" id="mobileFormContainer" style="display: none;">
         <div class="mobile-form-header">
             <div>
-                <h2 class="mobile-form-title" id="mobileFormTitle">增加任務</h2>
-                <p class="form-subtitle" id="mobileFormSubtitle">請輸入新任務的詳細資料</p>
+                <h2 class="mobile-form-title" id="mobileFormTitle">📝 新增任務</h2>
+                <p class="form-subtitle" id="mobileFormSubtitle">請輸入任務詳細資料</p>
             </div>
             <button class="close-mobile-form" id="closeMobileForm">
                 <i class="fas fa-times"></i>
@@ -831,39 +1157,36 @@
         <form id="mobileTaskForm">
             <input type="hidden" id="mobileTaskId" value="">
             <div class="form-group">
-                <label for="mobileTaskTitle">任務名稱</label>
-                <input type="text" id="mobileTaskTitle" placeholder="要完成的任務" required>
+                <label for="mobileTaskTitle">📌 任務名稱</label>
+                <input type="text" id="mobileTaskTitle" placeholder="要完成的任務" required autocomplete="off">
             </div>
-            
             <div class="form-group">
-                <label for="mobileTaskDescription">任務內容</label>
-                <textarea id="mobileTaskDescription" placeholder="詳細內容"></textarea>
+                <label for="mobileTaskDescription">📄 任務內容</label>
+                <textarea id="mobileTaskDescription" placeholder="詳細內容（可選）"></textarea>
             </div>
-            
             <div class="form-group">
-                <label for="mobileTaskPriority">次序</label>
+                <label for="mobileTaskPriority">⚡ 次序</label>
                 <select id="mobileTaskPriority">
                     <option value="low">瑣事</option>
                     <option value="medium">次要</option>
                     <option value="high" selected>優先</option>
                 </select>
             </div>
-            
             <div class="form-buttons">
                 <button type="button" class="btn btn-secondary" id="mobileCancelEditBtn" style="display:none;">
                     <i class="fas fa-times"></i> 取消
                 </button>
                 <button type="submit" class="btn btn-primary" id="mobileSubmitBtn">
-                    <i class="fas fa-plus"></i> 增加任務
+                    <i class="fas fa-plus"></i> 新增任務
                 </button>
             </div>
         </form>
     </div>
-    
-    <!-- Toast Notification -->
+
+    <!-- ===== Toast ===== -->
     <div class="toast" id="toast"></div>
-    
-    <!-- Mobile Bottom Navigation -->
+
+    <!-- ===== 底部導航 ===== -->
     <nav class="bottom-nav">
         <button class="nav-btn active" id="navHome">
             <i class="fas fa-home nav-icon"></i>
@@ -874,605 +1197,663 @@
             <span class="nav-text">已完成</span>
         </button>
         <button class="nav-btn" id="navAdd">
-            <i class="fas fa-plus nav-icon"></i>
-            <span class="nav-text">增加任務</span>
+            <i class="fas fa-plus-circle nav-icon"></i>
+            <span class="nav-text">新增</span>
+        </button>
+        <button class="nav-btn" id="navTools">
+            <i class="fas fa-tools nav-icon"></i>
+            <span class="nav-text">工具</span>
         </button>
     </nav>
-    
-    <!-- Floating Action Button for Mobile -->
-    <button class="fab" id="fabButton">
+
+    <!-- ===== FAB ===== -->
+    <button class="fab" id="fabButton" aria-label="新增任務">
         <i class="fas fa-plus"></i>
     </button>
 
+    <!-- ===== 隱藏檔案輸入 ===== -->
+    <input type="file" id="fileInput" class="file-input-hidden" accept=".txt">
+
+    <!-- ============================================================ -->
+    <!-- ===== JAVASCRIPT ===== -->
     <script>
-        // ==================== 每日重置功能 ====================
-		(function() {
-			const RESET_KEY = 'dailyTasks_lastReset';
-			const TASKS_KEY = 'dailyTasks';
-			
-			// 取得今天的日期字串（YYYY-MM-DD格式）
-			function getTodayString() {
-				const now = new Date();
-				return `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
-			}
-			
-			// 檢查並執行每日重置
-			function performDailyReset() {
-				const today = getTodayString();
-				const lastReset = localStorage.getItem(RESET_KEY);
-				
-				// 如果是新的一天，重置任務狀態
-				if (lastReset !== today) {
-					console.log(`重置任務狀態：上次重置 ${lastReset}，今天 ${today}`);
-					
-					// 取得現有任務
-					const savedTasks = localStorage.getItem(TASKS_KEY);
-					if (savedTasks) {
-						try {
-							let tasks = JSON.parse(savedTasks);
-							
-							// 重置所有任務的完成狀態
-							tasks = tasks.map(task => ({
-								...task,
-								completed: false,
-								updatedAt: new Date().toISOString()
-							}));
-							
-							// 儲存重置後的任務
-							localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
-							console.log(`已重置 ${tasks.length} 個任務的狀態為未完成`);
-							
-							// 顯示重置通知（可選）
-							if (window.location.href.indexOf('reset-notification') === -1) {
-								console.log('每日任務狀態已重置完成');
-							}
-						} catch (error) {
-							console.error('重置任務狀態時出錯:', error);
-						}
-					}
-					
-					// 更新重置日期
-					localStorage.setItem(RESET_KEY, today);
-					
-					return true;
-				}
-				return false;
-			}
-			
-			// 初始化時執行重置檢查
-			performDailyReset();
-		})();
-		
-		// DOM Elements
-        const taskForm = document.getElementById('taskForm');
-        const mobileTaskForm = document.getElementById('mobileTaskForm');
-        const taskList = document.getElementById('taskList');
-        const taskCount = document.getElementById('taskCount');
-        const currentDate = document.getElementById('currentDate');
-        const filterButtons = document.querySelectorAll('.filter-btn');
-        const fabButton = document.getElementById('fabButton');
-        const taskFormSection = document.getElementById('taskFormSection');
-        const mainContainer = document.getElementById('mainContainer');
-        const toast = document.getElementById('toast');
-        const navHome = document.getElementById('navHome');
-        const navCompleted = document.getElementById('navCompleted');
-        const navAdd = document.getElementById('navAdd');
-        const mobileFormOverlay = document.getElementById('mobileFormOverlay');
-        const mobileFormContainer = document.getElementById('mobileFormContainer');
-        const closeMobileForm = document.getElementById('closeMobileForm');
-        
-        // 表單元素
-        const taskIdInput = document.getElementById('taskId');
-        const taskTitleInput = document.getElementById('taskTitle');
-        const taskDescriptionInput = document.getElementById('taskDescription');
-        const taskPrioritySelect = document.getElementById('taskPriority');
-        const submitBtn = document.getElementById('submitBtn');
-        const cancelEditBtn = document.getElementById('cancelEditBtn');
-        const formTitle = document.getElementById('formTitle');
-        const formSubtitle = document.getElementById('formSubtitle');
-        
-        const mobileTaskIdInput = document.getElementById('mobileTaskId');
-        const mobileTaskTitleInput = document.getElementById('mobileTaskTitle');
-        const mobileTaskDescriptionInput = document.getElementById('mobileTaskDescription');
-        const mobileTaskPrioritySelect = document.getElementById('mobileTaskPriority');
-        const mobileSubmitBtn = document.getElementById('mobileSubmitBtn');
-        const mobileCancelEditBtn = document.getElementById('mobileCancelEditBtn');
-        const mobileFormTitle = document.getElementById('mobileFormTitle');
-        const mobileFormSubtitle = document.getElementById('mobileFormSubtitle');
-        
-        // Initialize tasks array
-        let tasks = JSON.parse(localStorage.getItem('dailyTasks')) || [];
-        let currentFilter = 'all';
-        let editingTaskId = null;
-        
-        // 中文日期顯示
-        function updateChineseDate() {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = now.getMonth() + 1;
-            const date = now.getDate();
-            const day = now.getDay();
-            
-            // 中文星期幾
-            const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-            const weekday = weekdays[day];
-            
-            // 格式: 2025年1月1日 星期三
-            currentDate.textContent = `${year}年${month}月${date}日 ${weekday}`;
-        }
-        
-        // Set current date in Chinese
-        updateChineseDate();
-		
-		// Set current year in footer
-		const currentYear = new Date().getFullYear();
-		document.getElementById('currentYear').textContent = currentYear;
-        
-        // Save tasks to localStorage
-        function saveTasks() {
-            localStorage.setItem('dailyTasks', JSON.stringify(tasks));
-            updateTaskList();
-        }
-        
-        // Update task count
-        function updateTaskCount() {
-            const totalTasks = tasks.length;
-            const completedTasks = tasks.filter(task => task.completed).length;
-            taskCount.textContent = `${completedTasks}/${totalTasks} 個任務`;
-        }
-        
-        // Show toast notification
-        function showToast(message) {
-            toast.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-        
-        // 移動端表單控制
-        function openMobileForm() {
-            mobileFormOverlay.style.display = 'block';
-            mobileFormContainer.classList.add('open');
-            document.body.style.overflow = 'hidden'; // 防止背景滾動
-            
-            // 短暫延遲後聚焦到輸入框
-            setTimeout(() => {
-                mobileTaskTitleInput.focus();
-            }, 300);
-        }
-        
-        function closeMobileFormHandler() {
-            mobileFormContainer.classList.remove('open');
-            setTimeout(() => {
-                mobileFormOverlay.style.display = 'none';
-                document.body.style.overflow = ''; // 恢復背景滾動
-                resetForm('mobile');
-            }, 300);
-        }
-        
-        // 重置表單（新建任務模式）
-        function resetForm(formType = 'desktop') {
-            editingTaskId = null;
-            
-            if (formType === 'desktop') {
-                taskIdInput.value = '';
-                taskTitleInput.value = '';
-                taskDescriptionInput.value = '';
-                taskPrioritySelect.value = 'high';
-                
-                formTitle.textContent = '增加任務';
-                formSubtitle.textContent = '請輸入新任務的詳細資料';
-                submitBtn.innerHTML = '<i class="fas fa-plus"></i> 增加任務';
-                cancelEditBtn.style.display = 'none';
-            } else {
-                mobileTaskIdInput.value = '';
-                mobileTaskTitleInput.value = '';
-                mobileTaskDescriptionInput.value = '';
-                mobileTaskPrioritySelect.value = 'high';
-                
-                mobileFormTitle.textContent = '增加任務';
-                mobileFormSubtitle.textContent = '請輸入新任務的詳細資料';
-                mobileSubmitBtn.innerHTML = '<i class="fas fa-plus"></i> 增加任務';
-                mobileCancelEditBtn.style.display = 'none';
+        (function() {
+            'use strict';
+
+            // ============================================================
+            //  1. 每日重置
+            // ============================================================
+            const RESET_KEY = 'dailyTasks_lastReset';
+            const TASKS_KEY = 'dailyTasks';
+            const THEME_KEY = 'dailyTasks_theme';
+
+            function getTodayString() {
+                const now = new Date();
+                return `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`;
             }
-        }
-        
-        // 設置表單為編輯模式
-        function setFormToEditMode(task, formType = 'desktop') {
-            editingTaskId = task.id;
-            
-            if (formType === 'desktop') {
-                taskIdInput.value = task.id;
-                taskTitleInput.value = task.title;
-                taskDescriptionInput.value = task.description || '';
-                taskPrioritySelect.value = task.priority;
-                
-                formTitle.textContent = '編輯任務';
-                formSubtitle.textContent = '修改任務資料';
-                submitBtn.innerHTML = '<i class="fas fa-save"></i> 更新任務';
-                cancelEditBtn.style.display = 'flex';
-            } else {
-                mobileTaskIdInput.value = task.id;
-                mobileTaskTitleInput.value = task.title;
-                mobileTaskDescriptionInput.value = task.description || '';
-                mobileTaskPrioritySelect.value = task.priority;
-                
-                mobileFormTitle.textContent = '編輯任務';
+
+            function performDailyReset() {
+                const today = getTodayString();
+                const lastReset = localStorage.getItem(RESET_KEY);
+                if (lastReset !== today) {
+                    const saved = localStorage.getItem(TASKS_KEY);
+                    if (saved) {
+                        try {
+                            let tasks = JSON.parse(saved);
+                            tasks = tasks.map(t => ({ ...t, completed: false, updatedAt: new Date().toISOString() }));
+                            localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+                            console.log(`[每日重置] 已重置 ${tasks.length} 個任務`);
+                        } catch (e) { console.error(e); }
+                    }
+                    localStorage.setItem(RESET_KEY, today);
+                    return true;
+                }
+                return false;
+            }
+            performDailyReset();
+
+            // ============================================================
+            //  2. 狀態 & DOM 引用
+            // ============================================================
+            let tasks = JSON.parse(localStorage.getItem(TASKS_KEY)) || [];
+            let currentFilter = 'all';
+            let editingTaskId = null;
+            let isDark = localStorage.getItem(THEME_KEY) === 'dark';
+
+            // DOM
+            const taskList = document.getElementById('taskList');
+            const taskCount = document.getElementById('taskCount');
+            const currentDateEl = document.getElementById('currentDate');
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const fab = document.getElementById('fabButton');
+            const toast = document.getElementById('toast');
+
+            // 導航
+            const navHome = document.getElementById('navHome');
+            const navCompleted = document.getElementById('navCompleted');
+            const navAdd = document.getElementById('navAdd');
+            const navTools = document.getElementById('navTools');
+
+            // 工具選單
+            const toolsMenu = document.getElementById('toolsMenu');
+            const toolsToggle = document.getElementById('toolsToggle');
+            const exportBtn = document.getElementById('exportTxtBtn');
+            const importBtn = document.getElementById('importTxtBtn');
+            const clearAllBtn = document.getElementById('clearAllBtn');
+            const fileInput = document.getElementById('fileInput');
+
+            // 暗色模式
+            const themeToggle = document.getElementById('themeToggle');
+
+            // 移動端表單
+            const mobileFormOverlay = document.getElementById('mobileFormOverlay');
+            const mobileFormContainer = document.getElementById('mobileFormContainer');
+            const closeMobileForm = document.getElementById('closeMobileForm');
+            const mobileTaskForm = document.getElementById('mobileTaskForm');
+            const mobileTaskId = document.getElementById('mobileTaskId');
+            const mobileTaskTitle = document.getElementById('mobileTaskTitle');
+            const mobileTaskDesc = document.getElementById('mobileTaskDescription');
+            const mobileTaskPriority = document.getElementById('mobileTaskPriority');
+            const mobileSubmitBtn = document.getElementById('mobileSubmitBtn');
+            const mobileCancelBtn = document.getElementById('mobileCancelEditBtn');
+            const mobileFormTitle = document.getElementById('mobileFormTitle');
+            const mobileFormSubtitle = document.getElementById('mobileFormSubtitle');
+
+            // ============================================================
+            //  3. 日期
+            // ============================================================
+            function updateDate() {
+                const now = new Date();
+                const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+                currentDateEl.textContent =
+                    `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 ${weekdays[now.getDay()]}`;
+            }
+            updateDate();
+
+            // Footer 年份
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+            // ============================================================
+            //  4. 暗色模式
+            // ============================================================
+            function applyTheme(dark) {
+                isDark = dark;
+                document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+                localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light');
+                const icon = themeToggle.querySelector('i');
+                icon.className = dark ? 'fas fa-sun' : 'fas fa-moon';
+            }
+
+            // 初始套用
+            if (isDark) applyTheme(true);
+            else applyTheme(false);
+
+            // 監聽系統偏好
+            const media = window.matchMedia('(prefers-color-scheme: dark)');
+            if (!localStorage.getItem(THEME_KEY)) {
+                applyTheme(media.matches);
+            }
+            media.addEventListener('change', (e) => {
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(e.matches);
+                }
+            });
+
+            themeToggle.addEventListener('click', () => {
+                applyTheme(!isDark);
+            });
+
+            // ============================================================
+            //  5. 儲存 & 渲染
+            // ============================================================
+            function saveTasks() {
+                localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+                render();
+            }
+
+            function render() {
+                const filtered = tasks.filter(task => {
+                    if (currentFilter === 'active') return !task.completed;
+                    if (currentFilter === 'completed') return task.completed;
+                    if (currentFilter === 'high') return task.priority === 'high';
+                    return true;
+                });
+
+                if (filtered.length === 0) {
+                    taskList.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">📭</div>
+                            <p class="empty-text">沒有任務</p>
+                            <p class="empty-subtext">點擊下方「+」新增任務吧！</p>
+                        </div>
+                    `;
+                } else {
+                    taskList.innerHTML = filtered.map((task, idx) => `
+                        <li class="task-item ${task.completed ? 'completed' : ''} ${idx === filtered.length-1 && !editingTaskId ? 'new' : ''}" data-id="${task.id}">
+                            <div class="task-checkbox ${task.completed ? 'checked' : ''}">
+                                ${task.completed ? '<i class="fas fa-check" style="font-size:12px;"></i>' : ''}
+                            </div>
+                            <div class="task-content">
+                                <div class="task-title">
+                                    ${escapeHtml(task.title)}
+                                    <span class="task-priority priority-${task.priority}">
+                                        <i class="fas fa-${task.priority === 'high' ? 'exclamation-circle' : task.priority === 'medium' ? 'minus-circle' : 'info-circle'}"></i>
+                                        ${task.priority === 'high' ? '優先' : task.priority === 'medium' ? '次要' : '瑣事'}
+                                    </span>
+                                </div>
+                                ${task.description ? `<div class="task-description">${escapeHtml(task.description)}</div>` : ''}
+                            </div>
+                            <div class="task-actions">
+                                <button class="action-btn edit-btn" title="編輯"><i class="fas fa-edit"></i></button>
+                                <button class="action-btn delete-btn" title="刪除"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </li>
+                    `).join('');
+
+                    // 事件綁定
+                    document.querySelectorAll('.task-checkbox').forEach(el => {
+                        el.addEventListener('click', function() {
+                            const id = this.closest('.task-item').dataset.id;
+                            toggleTask(id);
+                        });
+                    });
+                    document.querySelectorAll('.edit-btn').forEach(el => {
+                        el.addEventListener('click', function() {
+                            const id = this.closest('.task-item').dataset.id;
+                            openEditForm(id);
+                        });
+                    });
+                    document.querySelectorAll('.delete-btn').forEach(el => {
+                        el.addEventListener('click', function() {
+                            const id = this.closest('.task-item').dataset.id;
+                            deleteTask(id);
+                        });
+                    });
+                }
+
+                // 更新計數
+                const total = tasks.length;
+                const done = tasks.filter(t => t.completed).length;
+                taskCount.textContent = `${done}/${total} 個任務`;
+            }
+
+            // 簡單防 XSS
+            function escapeHtml(str) {
+                if (!str) return '';
+                return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+            }
+
+            // ============================================================
+            //  6. CRUD
+            // ============================================================
+            function addTask(title, desc, priority) {
+                const task = {
+                    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+                    title: title.trim(),
+                    description: desc.trim(),
+                    priority: priority || 'high',
+                    completed: false,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+                tasks.push(task);
+                saveTasks();
+                showToast('✅ 任務已新增！');
+                closeMobileFormHandler();
+            }
+
+            function updateTask(id, title, desc, priority) {
+                tasks = tasks.map(t => {
+                    if (t.id === id) {
+                        return { ...t, title: title.trim(), description: desc.trim(), priority, updatedAt: new Date()
+                                .toISOString() };
+                    }
+                    return t;
+                });
+                saveTasks();
+                showToast('✏️ 任務已更新！');
+                closeMobileFormHandler();
+            }
+
+            function toggleTask(id) {
+                tasks = tasks.map(t => {
+                    if (t.id === id) {
+                        const completed = !t.completed;
+                        showToast(completed ? '🎉 任務完成！' : '🔄 任務已重啟');
+                        return { ...t, completed, updatedAt: new Date().toISOString() };
+                    }
+                    return t;
+                });
+                saveTasks();
+            }
+
+            function deleteTask(id) {
+                if (!confirm('確定要刪除此任務嗎？')) return;
+                tasks = tasks.filter(t => t.id !== id);
+                if (editingTaskId === id) resetForm();
+                saveTasks();
+                showToast('🗑️ 任務已刪除');
+            }
+
+            function clearAllTasks() {
+                if (tasks.length === 0) { showToast('沒有任務可清除'); return; }
+                if (!confirm('確定要清除所有任務嗎？此操作無法復原！')) return;
+                tasks = [];
+                saveTasks();
+                showToast('🗑️ 已清除所有任務');
+                closeToolsMenu();
+            }
+
+            // ============================================================
+            //  7. 表單（移動端彈出） - 增強顯示控制
+            // ============================================================
+            function openForm() {
+                resetForm();
+                // 先設定 display: block 並強制重排，再添加 open 類以觸發過渡
+                mobileFormContainer.style.display = 'block';
+                mobileFormOverlay.classList.add('open');
+                // 使用 requestAnimationFrame 確保 display 生效後再添加 open 類
+                requestAnimationFrame(() => {
+                    mobileFormContainer.classList.add('open');
+                    document.body.style.overflow = 'hidden';
+                    setTimeout(() => mobileTaskTitle.focus(), 350);
+                });
+            }
+
+            function closeMobileFormHandler() {
+                mobileFormContainer.classList.remove('open');
+                mobileFormOverlay.classList.remove('open');
+                document.body.style.overflow = '';
+                // 等待過渡結束後隱藏（過渡時間 350ms）
+                setTimeout(() => {
+                    mobileFormContainer.style.display = 'none';
+                }, 350);
+                resetForm();
+            }
+
+            function resetForm() {
+                editingTaskId = null;
+                mobileTaskId.value = '';
+                mobileTaskTitle.value = '';
+                mobileTaskDesc.value = '';
+                mobileTaskPriority.value = 'high';
+                mobileFormTitle.textContent = '📝 新增任務';
+                mobileFormSubtitle.textContent = '請輸入任務詳細資料';
+                mobileSubmitBtn.innerHTML = '<i class="fas fa-plus"></i> 新增任務';
+                mobileCancelBtn.style.display = 'none';
+            }
+
+            function openEditForm(id) {
+                const task = tasks.find(t => t.id === id);
+                if (!task) return;
+                editingTaskId = id;
+                mobileTaskId.value = id;
+                mobileTaskTitle.value = task.title;
+                mobileTaskDesc.value = task.description || '';
+                mobileTaskPriority.value = task.priority;
+                mobileFormTitle.textContent = '✏️ 編輯任務';
                 mobileFormSubtitle.textContent = '修改任務資料';
                 mobileSubmitBtn.innerHTML = '<i class="fas fa-save"></i> 更新任務';
-                mobileCancelEditBtn.style.display = 'flex';
+                mobileCancelBtn.style.display = 'flex';
+                openForm();
             }
-        }
-        
-        // Toggle task form visibility (桌面端使用)
-        function toggleTaskForm() {
-            const isMobile = window.innerWidth < 768;
-            if (!isMobile) {
-                taskFormSection.classList.toggle('collapsed');
-                // Update FAB icon based on form state
-                const fabIcon = fabButton.querySelector('i');
-                if (taskFormSection.classList.contains('collapsed')) {
-                    fabIcon.className = 'fas fa-plus';
+
+            // 表單提交
+            mobileTaskForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const title = mobileTaskTitle.value.trim();
+                if (!title) { showToast('請輸入任務名稱！'); return; }
+                const desc = mobileTaskDesc.value.trim();
+                const priority = mobileTaskPriority.value;
+                const id = mobileTaskId.value;
+
+                if (id) {
+                    updateTask(id, title, desc, priority);
                 } else {
-                    fabIcon.className = 'fas fa-times';
-                    // Focus on the first input when form opens
-                    taskTitleInput.focus();
+                    addTask(title, desc, priority);
                 }
-            }
-        }
-        
-        // Render tasks based on current filter
-        function updateTaskList() {
-            const filteredTasks = tasks.filter(task => {
-                if (currentFilter === 'active') return !task.completed;
-                if (currentFilter === 'completed') return task.completed;
-                if (currentFilter === 'high') return task.priority === 'high';
-                return true; // 'all'
             });
-            
-            if (filteredTasks.length === 0) {
-                taskList.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">📝</div>
-                        <p class="empty-text">未有任務</p>
-                        <p class="empty-subtext">接受任務吧！</p>
-                    </div>
-                `;
-            } else {
-                taskList.innerHTML = filteredTasks.map((task, index) => `
-                    <li class="task-item ${task.completed ? 'completed' : ''} ${index === filteredTasks.length - 1 && !editingTaskId ? 'new' : ''}" data-id="${task.id}">
-                        <div class="task-checkbox ${task.completed ? 'checked' : ''}">
-                            ${task.completed ? '<i class="fas fa-check" style="font-size: 12px;"></i>' : ''}
-                        </div>
-                        <div class="task-content">
-                            <div class="task-title">
-                                ${task.title}
-                                <span class="task-priority priority-${task.priority}">
-                                    <i class="fas fa-${task.priority === 'high' ? 'exclamation-circle' : task.priority === 'medium' ? 'minus-circle' : 'info-circle'}"></i>
-                                    ${task.priority === 'high' ? '優先' : task.priority === 'medium' ? '次要' : '瑣事'}
-                                </span>
-                            </div>
-                            ${task.description ? `<div class="task-description">${task.description}</div>` : ''}
-                        </div>
-                        <div class="task-actions">
-                            <button class="action-btn edit-btn" title="編輯任務">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="action-btn delete-btn" title="刪除任務">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </li>
-                `).join('');
-                
-                // Add event listeners to checkboxes and buttons
-                document.querySelectorAll('.task-checkbox').forEach((checkbox) => {
-                    checkbox.addEventListener('click', function() {
-                        const taskId = this.closest('.task-item').dataset.id;
-                        toggleTaskCompletion(taskId);
-                    });
-                });
-                
-                document.querySelectorAll('.edit-btn').forEach((button) => {
-                    button.addEventListener('click', function() {
-                        const taskId = this.closest('.task-item').dataset.id;
-                        editTask(taskId);
-                    });
-                });
-                
-                document.querySelectorAll('.delete-btn').forEach((button) => {
-                    button.addEventListener('click', function() {
-                        const taskId = this.closest('.task-item').dataset.id;
-                        deleteTask(taskId);
-                    });
-                });
-            }
-            
-            updateTaskCount();
-        }
-        
-        // Add a new task
-        function addTask(title, description, priority) {
-            const newTask = {
-                id: Date.now().toString(),
-                title,
-                description,
-                priority,
-                completed: false,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            };
-            
-            tasks.push(newTask);
-            saveTasks();
-            
-            // Show success message
-            showToast('成功接受任務！');
-            
-            // Close mobile form if open
-            if (window.innerWidth < 768) {
+
+            mobileCancelBtn.addEventListener('click', function() {
+                resetForm();
                 closeMobileFormHandler();
-            } else {
-                // Reset form
-                resetForm('desktop');
-            }
-            
-            // Scroll to the new task
-            setTimeout(() => {
-                const newTaskElement = document.querySelector('.task-item.new');
-                if (newTaskElement) {
-                    newTaskElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                    newTaskElement.classList.remove('new');
-                }
-            }, 300);
-        }
-        
-        // Edit a task
-        function editTask(taskId) {
-            const task = tasks.find(t => t.id === taskId);
-            if (!task) return;
-            
-            // 根據設備類型打開相應的表單
-            if (window.innerWidth < 768) {
-                // 移動端：打開移動表單
-                setFormToEditMode(task, 'mobile');
-                openMobileForm();
-            } else {
-                // 桌面端：顯示表單並設置為編輯模式
-                if (taskFormSection.classList.contains('collapsed')) {
-                    taskFormSection.classList.remove('collapsed');
-                    const fabIcon = fabButton.querySelector('i');
-                    fabIcon.className = 'fas fa-times';
-                }
-                setFormToEditMode(task, 'desktop');
-                taskFormSection.scrollIntoView({ behavior: 'smooth' });
-            }
-        }
-        
-        // Update an existing task
-        function updateTask(taskId, title, description, priority) {
-            tasks = tasks.map(task => {
-                if (task.id === taskId) {
-                    return {
-                        ...task,
-                        title,
-                        description,
-                        priority,
-                        updatedAt: new Date().toISOString()
-                    };
-                }
-                return task;
+                showToast('已取消編輯');
             });
-            
-            saveTasks();
-            showToast('任務已更新！');
-            resetForm(window.innerWidth < 768 ? 'mobile' : 'desktop');
-            
-            // Close mobile form if open
-            if (window.innerWidth < 768) {
-                closeMobileFormHandler();
-            }
-        }
-        
-        // Toggle task completion
-        function toggleTaskCompletion(taskId) {
-            tasks = tasks.map(task => {
-                if (task.id === taskId) {
-                    const updatedTask = { 
-                        ...task, 
-                        completed: !task.completed,
-                        updatedAt: new Date().toISOString()
-                    };
-                    showToast(updatedTask.completed ? '任務完成！' : '任務列為處理中');
-                    return updatedTask;
-                }
-                return task;
+
+            closeMobileForm.addEventListener('click', closeMobileFormHandler);
+            mobileFormOverlay.addEventListener('click', closeMobileFormHandler);
+
+            // ============================================================
+            //  8. 過濾器
+            // ============================================================
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFilter = this.dataset.filter;
+                    render();
+                    document.querySelectorAll('.nav-btn').forEach(n => n.classList.remove('active'));
+                    if (currentFilter === 'all') navHome.classList.add('active');
+                    else if (currentFilter === 'completed') navCompleted.classList.add('active');
+                    else if (currentFilter === 'active') navHome.classList.add('active');
+                    else if (currentFilter === 'high') navHome.classList.add('active');
+                });
             });
-            saveTasks();
-        }
-        
-        // Delete a task
-        function deleteTask(taskId) {
-            if (confirm('確認要刪除任務？')) {
-                tasks = tasks.filter(task => task.id !== taskId);
-                saveTasks();
-                showToast('已刪除任務');
-                
-                // 如果正在編輯被刪除的任務，重置表單
-                if (editingTaskId === taskId) {
-                    resetForm(window.innerWidth < 768 ? 'mobile' : 'desktop');
-                }
-            }
-        }
-        
-        // Event listener for form submission (桌面端)
-        taskForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const title = taskTitleInput.value.trim();
-            const description = taskDescriptionInput.value.trim();
-            const priority = taskPrioritySelect.value;
-            const taskId = taskIdInput.value;
-            
-            if (!title) {
-                showToast('請輸入任務名稱！');
-                return;
-            }
-            
-            if (taskId) {
-                // 更新現有任務
-                updateTask(taskId, title, description, priority);
-            } else {
-                // 添加新任務
-                addTask(title, description, priority);
-            }
-        });
-        
-        // Event listener for mobile form submission
-        mobileTaskForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const title = mobileTaskTitleInput.value.trim();
-            const description = mobileTaskDescriptionInput.value.trim();
-            const priority = mobileTaskPrioritySelect.value;
-            const taskId = mobileTaskIdInput.value;
-            
-            if (!title) {
-                showToast('請輸入任務名稱！');
-                return;
-            }
-            
-            if (taskId) {
-                // 更新現有任務
-                updateTask(taskId, title, description, priority);
-            } else {
-                // 添加新任務
-                addTask(title, description, priority);
-            }
-        });
-        
-        // Cancel edit button event (桌面端)
-        cancelEditBtn.addEventListener('click', function() {
-            resetForm('desktop');
-            showToast('已取消編輯');
-        });
-        
-        // Cancel edit button event (移動端)
-        mobileCancelEditBtn.addEventListener('click', function() {
-            resetForm('mobile');
-            closeMobileFormHandler();
-            showToast('已取消編輯');
-        });
-        
-        // Event listeners for filter buttons
-        filterButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                filterButtons.forEach(btn => btn.classList.remove('active'));
+
+            // ============================================================
+            //  9. 底部導航
+            // ============================================================
+            navHome.addEventListener('click', function() {
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
-                currentFilter = this.dataset.filter;
-                updateTaskList();
+                filterBtns.forEach(b => b.classList.remove('active'));
+                document.querySelector('[data-filter="all"]').classList.add('active');
+                currentFilter = 'all';
+                render();
+                closeToolsMenu();
+                if (mobileFormContainer.classList.contains('open')) closeMobileFormHandler();
             });
-        });
-        
-        // FAB button to show form on mobile
-        fabButton.addEventListener('click', function() {
-            if (window.innerWidth < 768) {
-                resetForm('mobile');
-                openMobileForm();
-            } else {
-                if (editingTaskId) {
-                    resetForm('desktop');
+
+            navCompleted.addEventListener('click', function() {
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                filterBtns.forEach(b => b.classList.remove('active'));
+                document.querySelector('[data-filter="completed"]').classList.add('active');
+                currentFilter = 'completed';
+                render();
+                closeToolsMenu();
+                if (mobileFormContainer.classList.contains('open')) closeMobileFormHandler();
+            });
+
+            navAdd.addEventListener('click', function() {
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                resetForm();
+                openForm();
+                closeToolsMenu();
+            });
+
+            navTools.addEventListener('click', function(e) {
+                e.stopPropagation();
+                toolsMenu.classList.toggle('open');
+                if (mobileFormContainer.classList.contains('open')) closeMobileFormHandler();
+            });
+
+            // ============================================================
+            //  10. 工具選單
+            // ============================================================
+            function closeToolsMenu() {
+                toolsMenu.classList.remove('open');
+            }
+
+            toolsToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                toolsMenu.classList.toggle('open');
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!toolsMenu.contains(e.target) && e.target !== toolsToggle && !e.target.closest('.header-actions')) {
+                    closeToolsMenu();
                 }
-                toggleTaskForm();
-            }
-        });
-        
-        // Bottom navigation event listeners
-        navHome.addEventListener('click', function() {
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-            document.querySelector('[data-filter="all"]').classList.add('active');
-            currentFilter = 'all';
-            updateTaskList();
-            
-            // Close form if open on mobile
-            if (window.innerWidth < 768 && mobileFormContainer.classList.contains('open')) {
-                closeMobileFormHandler();
-            }
-        });
-        
-        navCompleted.addEventListener('click', function() {
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-            document.querySelector('[data-filter="completed"]').classList.add('active');
-            currentFilter = 'completed';
-            updateTaskList();
-            
-            // Close form if open on mobile
-            if (window.innerWidth < 768 && mobileFormContainer.classList.contains('open')) {
-                closeMobileFormHandler();
-            }
-        });
-        
-        navAdd.addEventListener('click', function() {
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-            
-            // Show the task form
-            if (window.innerWidth < 768) {
-                resetForm('mobile');
-                openMobileForm();
-            } else {
-                // On desktop, just scroll to the form
-                if (taskFormSection.classList.contains('collapsed')) {
-                    taskFormSection.classList.remove('collapsed');
-                    const fabIcon = fabButton.querySelector('i');
-                    fabIcon.className = 'fas fa-times';
+            });
+
+            // ============================================================
+            //  11. 匯出 TXT
+            // ============================================================
+            function exportTxt() {
+                if (tasks.length === 0) {
+                    showToast('沒有任務可匯出');
+                    return;
                 }
-                taskFormSection.scrollIntoView({ behavior: 'smooth' });
-                resetForm('desktop');
+
+                let lines = [];
+                lines.push('=== 📝 每日任務匯出 ===');
+                lines.push(`匯出時間: ${new Date().toLocaleString('zh-TW')}`);
+                lines.push(`總任務數: ${tasks.length}`);
+                lines.push('');
+
+                tasks.forEach((task, idx) => {
+                    lines.push(`--- 任務 ${idx + 1} ---`);
+                    lines.push(`標題: ${task.title}`);
+                    lines.push(`內容: ${task.description || '(無)'}`);
+                    const priorityMap = { high: '優先', medium: '次要', low: '瑣事' };
+                    lines.push(`優先級: ${priorityMap[task.priority] || task.priority}`);
+                    lines.push(`狀態: ${task.completed ? '已完成' : '處理中'}`);
+                    lines.push(`建立: ${new Date(task.createdAt).toLocaleString('zh-TW')}`);
+                    lines.push(`更新: ${new Date(task.updatedAt).toLocaleString('zh-TW')}`);
+                    lines.push('');
+                });
+
+                const content = lines.join('\n');
+                const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `每日任務_${new Date().toISOString().slice(0,10)}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast('📤 匯出成功！');
+                closeToolsMenu();
             }
-        });
-        
-        // Close mobile form events
-        closeMobileForm.addEventListener('click', closeMobileFormHandler);
-        mobileFormOverlay.addEventListener('click', closeMobileFormHandler);
-        
-        // Initialize the app
-        updateTaskList();
-        
-        // Adjust layout on window resize
-        window.addEventListener('resize', function() {
-            if (window.innerWidth >= 768) {
-                taskFormSection.classList.remove('collapsed');
-                fabButton.style.display = 'none';
-                // Close mobile form if open
-                if (mobileFormContainer.classList.contains('open')) {
-                    closeMobileFormHandler();
-                }
-            } else {
-                fabButton.style.display = 'flex';
-                // Only collapse the form if we're switching from desktop to mobile
-                if (!taskFormSection.classList.contains('collapsed')) {
-                    taskFormSection.classList.add('collapsed');
-                }
+
+            exportBtn.addEventListener('click', exportTxt);
+
+            // ============================================================
+            //  12. 匯入 TXT
+            // ============================================================
+            function importTxt(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const text = e.target.result;
+                        const lines = text.split('\n').map(l => l.trim()).filter(l => l !== '');
+                        if (lines.length < 3) {
+                            showToast('⚠️ 檔案格式無效');
+                            return;
+                        }
+
+                        if (!lines[0].includes('每日任務匯出')) {
+                            showToast('⚠️ 不支援的檔案格式');
+                            return;
+                        }
+
+                        const imported = [];
+                        let current = null;
+                        let reading = false;
+
+                        for (const line of lines) {
+                            if (line.startsWith('--- 任務')) {
+                                if (current && current.title) {
+                                    imported.push(current);
+                                }
+                                current = { title: '', description: '', priority: 'high', completed: false };
+                                reading = true;
+                                continue;
+                            }
+                            if (!reading || !current) continue;
+
+                            if (line.startsWith('標題:')) {
+                                current.title = line.replace('標題:', '').trim();
+                            } else if (line.startsWith('內容:')) {
+                                current.description = line.replace('內容:', '').trim();
+                                if (current.description === '(無)') current.description = '';
+                            } else if (line.startsWith('優先級:')) {
+                                const p = line.replace('優先級:', '').trim();
+                                const map = { '優先': 'high', '次要': 'medium', '瑣事': 'low' };
+                                current.priority = map[p] || 'high';
+                            } else if (line.startsWith('狀態:')) {
+                                const s = line.replace('狀態:', '').trim();
+                                current.completed = s === '已完成';
+                            }
+                        }
+
+                        if (current && current.title) {
+                            imported.push(current);
+                        }
+
+                        if (imported.length === 0) {
+                            showToast('⚠️ 沒有找到有效的任務資料');
+                            return;
+                        }
+
+                        const choice = confirm(
+                            `找到 ${imported.length} 個任務。\n\n點擊「確定」覆蓋所有現有任務\n點擊「取消」合併到現有任務中`
+                        );
+
+                        if (choice) {
+                            tasks = imported.map(t => ({
+                                ...t,
+                                id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            }));
+                        } else {
+                            for (const t of imported) {
+                                tasks.push({
+                                    ...t,
+                                    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+                                    createdAt: new Date().toISOString(),
+                                    updatedAt: new Date().toISOString()
+                                });
+                            }
+                        }
+
+                        saveTasks();
+                        showToast(`📥 成功匯入 ${imported.length} 個任務！`);
+                        closeToolsMenu();
+                        filterBtns.forEach(b => b.classList.remove('active'));
+                        document.querySelector('[data-filter="all"]').classList.add('active');
+                        currentFilter = 'all';
+                        render();
+
+                    } catch (err) {
+                        console.error(err);
+                        showToast('⚠️ 匯入失敗：' + err.message);
+                    }
+                };
+                reader.readAsText(file, 'UTF-8');
             }
-        });
-        
-        // Initialize based on current screen size
-        if (window.innerWidth >= 768) {
-            taskFormSection.classList.remove('collapsed');
-            fabButton.style.display = 'none';
-        } else {
-            fabButton.style.display = 'flex';
-        }
-        
-        // 初始化表單狀態
-        resetForm('desktop');
-        resetForm('mobile');
+
+            importBtn.addEventListener('click', function() {
+                fileInput.click();
+                closeToolsMenu();
+            });
+
+            fileInput.addEventListener('change', function(e) {
+                if (this.files && this.files.length > 0) {
+                    importTxt(this.files[0]);
+                }
+                this.value = '';
+            });
+
+            // ============================================================
+            //  13. 清除所有任務
+            // ============================================================
+            clearAllBtn.addEventListener('click', function() {
+                clearAllTasks();
+            });
+
+            // ============================================================
+            //  14. FAB
+            // ============================================================
+            fab.addEventListener('click', function() {
+                resetForm();
+                openForm();
+                closeToolsMenu();
+            });
+
+            // ============================================================
+            //  15. Toast
+            // ============================================================
+            let toastTimer = null;
+
+            function showToast(msg) {
+                toast.textContent = msg;
+                toast.classList.add('show');
+                clearTimeout(toastTimer);
+                toastTimer = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2600);
+            }
+
+            // ============================================================
+            //  16. 鍵盤快速鍵 (ESC 關閉)
+            // ============================================================
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    if (mobileFormContainer.classList.contains('open')) {
+                        closeMobileFormHandler();
+                    }
+                    if (toolsMenu.classList.contains('open')) {
+                        closeToolsMenu();
+                    }
+                }
+                if (e.key === 'D' && e.ctrlKey && e.shiftKey) {
+                    e.preventDefault();
+                    applyTheme(!isDark);
+                }
+            });
+
+            // ============================================================
+            //  17. 初始化：強制關閉表單，確保頁面載入後完全隱藏
+            // ============================================================
+            render();
+
+            // 確保表單完全隱藏（關閉動畫且 display:none）
+            resetForm();
+            mobileFormContainer.classList.remove('open');
+            mobileFormContainer.style.display = 'none';
+            mobileFormOverlay.classList.remove('open');
+            document.body.style.overflow = '';
+
+            console.log('📝 每日任務已載入，任務數:', tasks.length);
+            console.log('🌓 暗色模式:', isDark ? '開啟' : '關閉');
+            console.log('💡 快捷鍵: Ctrl+Shift+D 切換暗色模式');
+
+        })();
     </script>
 </body>
 </html>
