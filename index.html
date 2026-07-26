@@ -334,7 +334,7 @@
 
             /* ===== 修复1: 手机版缩小标题与搜索栏空隙 ===== */
             header {
-				margin: 2px 0 2px;
+                margin: 2px 0 2px;
                 padding: 6px 10px;
             }
             .search-container {
@@ -1111,15 +1111,17 @@
             color: #d4d4d4;
             font-family: 'Segoe UI', system-ui, sans-serif;
         }
+
+        /* ===== 摸魚模式關閉按鈕 (改為跟隨工具modal關閉按鈕設計) ===== */
         .stealth-mode-close-btn {
             position: fixed;
-            top: 10px;
-            right: 14px;
+            top: 12px;
+            right: 16px;
             width: 40px;
             height: 40px;
             border: none;
-            background: rgba(255, 0, 0, 0.5);
-            color: #fff;
+            background: var(--close-bg);
+            color: var(--text);
             border-radius: 50%;
             font-size: 22px;
             cursor: pointer;
@@ -1127,11 +1129,23 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            opacity: 0.5;
-            transition: opacity 0.3s;
+            transition: background 0.2s, transform 0.2s, opacity 0.2s;
+            backdrop-filter: blur(2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            opacity: 0.7;
         }
         .stealth-mode-close-btn:hover {
+            background: var(--close-hover);
+            transform: scale(1.08);
             opacity: 1;
+        }
+        /* 暗色模式下確保按鈕文字可見 */
+        [data-theme="dark"] .stealth-mode-close-btn {
+            color: #e0e0e0;
+            background: rgba(180, 180, 180, 0.2);
+        }
+        [data-theme="dark"] .stealth-mode-close-btn:hover {
+            background: rgba(180, 180, 180, 0.4);
         }
 
         /* ===== 工具 Dialog — 關閉按鈕在右下角，點擊外部關閉 ===== */
@@ -1259,6 +1273,7 @@
             left: 50%;
             transform: translate(-50%, -50%);
             margin: 0;
+            color: var(--text);
         }
         #stealthDialog::backdrop {
             background: var(--modal-overlay);
@@ -1278,6 +1293,7 @@
             margin: 0;
             font-size: 1.2rem;
             font-weight: 600;
+            color: var(--header-text);
         }
         #stealthDialog .stealth-dialog-header .stealth-dialog-close {
             background: none;
@@ -1297,9 +1313,14 @@
             padding: 20px 24px 24px;
             overflow-y: auto;
             max-height: 70vh;
+            color: var(--text);
         }
         #stealthDialog .stealth-dialog-body .setting-item {
             padding: 10px 0;
+            color: var(--text);
+        }
+        #stealthDialog .stealth-dialog-body .setting-label {
+            color: var(--text);
         }
         #stealthDialog .stealth-dialog-body .help-content {
             font-size: 0.9rem;
@@ -1315,6 +1336,43 @@
             border-radius: 4px;
             font-size: 0.9rem;
         }
+        #stealthDialog .stealth-dialog-body select option {
+            background: var(--card-bg);
+            color: var(--text);
+        }
+
+        /* ---- 暗色模式下摸魚Dialog文字强制白色 ---- */
+        [data-theme="dark"] #stealthDialog {
+            color: #e0e0e0;
+        }
+        [data-theme="dark"] #stealthDialog .stealth-dialog-body {
+            color: #e0e0e0;
+        }
+        [data-theme="dark"] #stealthDialog .stealth-dialog-body .setting-item {
+            color: #e0e0e0;
+        }
+        [data-theme="dark"] #stealthDialog .stealth-dialog-body .setting-label {
+            color: #e0e0e0;
+        }
+        [data-theme="dark"] #stealthDialog .stealth-dialog-body .help-content {
+            color: #e0e0e0;
+        }
+        [data-theme="dark"] #stealthDialog .stealth-dialog-body select {
+            background: #2a2a2a;
+            color: #e0e0e0;
+            border-color: #444;
+        }
+        [data-theme="dark"] #stealthDialog .stealth-dialog-body select option {
+            background: #2a2a2a;
+            color: #e0e0e0;
+        }
+        [data-theme="dark"] #stealthDialog .stealth-dialog-body .switch .slider {
+            background: #444;
+        }
+        [data-theme="dark"] #stealthDialog .stealth-dialog-body .switch input:checked+.slider {
+            background: #666;
+        }
+
         @media (max-width:600px) {
             #stealthDialog {
                 width: 96%;
@@ -1836,7 +1894,7 @@
     </dialog>
 
     <div class="stealth-mode-overlay" id="stealthOverlay">
-        <button class="stealth-mode-close-btn" onclick="disableStealthMode()">✕</button>
+        <button class="stealth-mode-close-btn" onclick="disableStealthMode()" title="關閉摸魚模式">✕</button>
         <div id="stealthInterfaceContainer"></div>
     </div>
 
@@ -2924,48 +2982,45 @@
         // 2. DATA: 卡片
         // ===================================================================
         let cards = [{
-			"trd_chi": "科學超電磁砲",
-			"sim_chi": "科学超电磁炮",
-			"eng": "A Certain Scientific Railgun",
-			"jap": "とある科学の超電磁砲",
-			"kor": "어떤 과학의 초전자포",
-			"icon": "🎧",
-			"category": "music",
-			"tags": ["music", "ost", "音樂", "音乐", "音楽", "음악"],
-			"anchor": "A_Certain_Scientific_Railgun_OST",
-			"url": "https://www.youtube.com/watch?v=hWPWuAzIjhc&list=PLrLxjs6exsshqb-WCpkDOOshx9u0Oq4VI",
-			"thumbnail": "https://img.youtube.com/vi/q_sQUK418mM/hqdefault.jpg",
-			"dateAdded": "2025-05-10T00:00:00.000Z"
-		  },
-		  {
-			"trd_chi": "命運之子",
-			"sim_chi": "命运之子",
-			"eng": "Destiny Child",
-			"jap": "デスティニーチャイルド",
-			"kor": "데스티니 차일드",
-			"icon": "🎧",
-			"category": "music",
-			"tags": ["music", "ost", "音樂", "音乐", "音楽", "음악", "rip", "r.i.p."],
-			"anchor": "Destiny_Child_OST",
-			"url": "https://www.youtube.com/watch?v=g-SaLUaZaZ0&list=PLrLxjs6exsshbySX-zfdeTwx7dzHP-1Ai",
-			"thumbnail": "https://img.youtube.com/vi/PzPv0zAZ-9c/hqdefault.jpg",
-			"dateAdded": "2025-03-19T00:00:00.000Z"
-		  },
-		  {
-			"trd_chi": "隨機骰子",
-			"sim_chi": "随机骰子",
-			"eng": "Random Dice",
-			"jap": "ランダム·ダイス",
-			"kor": "랜덤 다이스: 디펜스",
-			"icon": "🎧",
-			"category": "music",
-			"tags": ["music", "ost", "音樂", "音乐", "音楽", "음악"],
-			"anchor": "Random_Dice_OST",
-			"url": "https://www.youtube.com/watch?v=wMjmCdsRhRg&list=PLrLxjs6exsshyGMsSaXLbqkAotPEDowlc",
-			"thumbnail": "https://img.youtube.com/vi/XarqUWfUx-c/hqdefault.jpg",
-			"dateAdded": "2025-03-20T00:00:00.000Z"
-		  },
-		  {
+            "trd_chi": "科學超電磁砲",
+            "sim_chi": "科学超电磁炮",
+            "eng": "A Certain Scientific Railgun",
+            "jap": "とある科学の超電磁砲",
+            "kor": "어떤 과학의 초전자포",
+            "icon": "🎧",
+            "category": "music",
+            "tags": ["music", "ost", "音樂", "音乐", "音楽", "음악"],
+            "anchor": "A_Certain_Scientific_Railgun_OST",
+            "url": "https://www.youtube.com/watch?v=hWPWuAzIjhc&list=PLrLxjs6exsshqb-WCpkDOOshx9u0Oq4VI",
+            "thumbnail": "https://img.youtube.com/vi/q_sQUK418mM/hqdefault.jpg",
+            "dateAdded": "2025-05-10T00:00:00.000Z"
+        }, {
+            "trd_chi": "命運之子",
+            "sim_chi": "命运之子",
+            "eng": "Destiny Child",
+            "jap": "デスティニーチャイルド",
+            "kor": "데스티니 차일드",
+            "icon": "🎧",
+            "category": "music",
+            "tags": ["music", "ost", "音樂", "音乐", "音楽", "음악", "rip", "r.i.p."],
+            "anchor": "Destiny_Child_OST",
+            "url": "https://www.youtube.com/watch?v=g-SaLUaZaZ0&list=PLrLxjs6exsshbySX-zfdeTwx7dzHP-1Ai",
+            "thumbnail": "https://img.youtube.com/vi/PzPv0zAZ-9c/hqdefault.jpg",
+            "dateAdded": "2025-03-19T00:00:00.000Z"
+        }, {
+            "trd_chi": "隨機骰子",
+            "sim_chi": "随机骰子",
+            "eng": "Random Dice",
+            "jap": "ランダム·ダイス",
+            "kor": "랜덤 다이스: 디펜스",
+            "icon": "🎧",
+            "category": "music",
+            "tags": ["music", "ost", "音樂", "音乐", "音楽", "음악"],
+            "anchor": "Random_Dice_OST",
+            "url": "https://www.youtube.com/watch?v=wMjmCdsRhRg&list=PLrLxjs6exsshyGMsSaXLbqkAotPEDowlc",
+            "thumbnail": "https://img.youtube.com/vi/XarqUWfUx-c/hqdefault.jpg",
+            "dateAdded": "2025-03-20T00:00:00.000Z"
+        }, {
 			"trd_chi": "瑪奇",
 			"sim_chi": "玛奇",
 			"eng": "Mabinogi",
@@ -2978,8 +3033,7 @@
 			"url": "https://www.youtube.com/watch?v=sa5mp-cXsiQ&list=PLrLxjs6exsshWlon64GeVkO1Pggtb1mE5",
 			"thumbnail": "https://img.youtube.com/vi/R1kF4qr3BWk/hqdefault.jpg",
 			"dateAdded": "2025-03-25T00:00:00.000Z"
-		  },
-		  {
+		  }, {
 			"trd_chi": "天翼之鍊",
 			"sim_chi": "天翼之链",
 			"eng": "TalesWeaver",
@@ -33919,7 +33973,7 @@
             let showOptions = new Set();
 
             const isSpecial = (currentFilter === 'All' || currentFilter === 'bookmark' || currentFilter ===
-            'bookmark_manager');
+                'bookmark_manager');
             if (isSpecial) {
                 targetGroups.forEach(g => {
                     showGroupLabels.add(g.label);
@@ -34080,7 +34134,6 @@
                     });
                 if (!matchSearch) return false;
 
-                // ===== 修复2: bookmark_manager 匹配 ai / tool / education =====
                 let matchFilter = filter === 'All' ||
                     filter === card.category ||
                     (filter === 'bookmark' && card.tags.includes('bookmark')) ||
@@ -34088,7 +34141,7 @@
                     (filter === 'lgbtq' && card.tags.includes('lgbtq')) ||
                     (filter === 'bookmark_manager' && ['ai', 'tool', 'education'].includes(card.category)) ||
                     (filter.includes('_') && card.category === filter.split('_')[0] && card.tags.includes(filter
-                    .split('_')[1]));
+                        .split('_')[1]));
 
                 if (filter === '18+' || filter === 'lgbtq') {} else {
                     if (card.category === 'news' && !['news', 'news_live', 'news_video', 'news_article', 'news_hk',
@@ -34586,6 +34639,9 @@
         // 摸魚模式核心功能
         // ===================================================================
         function enableStealthMode() {
+            // 修復: 啟用摸魚模式時自動關閉設置對話框，避免遮擋
+            closeStealthDialog();
+
             const overlay = $('stealthOverlay');
             overlay.style.display = 'block';
             const container = $('stealthInterfaceContainer');
@@ -34692,7 +34748,7 @@
 
             let treeHtml = fileTree.map(([icon, name]) =>
                 `<div class="file-tree-item" style="padding:2px 8px;display:flex;gap:4px;font-size:12px;color:#ccc;"><span>${icon}</span><span>${name}</span></div>`
-            ).join('');
+                ).join('');
 
             return `
                 <div class="stealth-mode-interface" style="display:block;">
@@ -35184,7 +35240,7 @@
         window.closeSlideshow = closeSlideshow;
         window.renderAll = renderAll;
 
-        console.log('☕迪遜咖啡廳已載入 | 版本 5.1 (手機版間距縮小·bookmark_manager聚合顯示)');
+        console.log('☕迪遜咖啡廳已載入 | 版本 5.2 (摸魚模式修復)');
     </script>
 </body>
 </html>
