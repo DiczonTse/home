@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Offline Dice</title>
     <style>
-        /* 完整樣式（與先前版本相同，為節省篇幅此處省略，實際使用時保留完整樣式） */
         * {
             margin: 0;
             padding: 0;
@@ -1476,6 +1475,15 @@
     <audio id="shopBgmAudio" style="display:none;" preload="auto"></audio>
     <audio id="rankAudio" style="display:none;" preload="auto"></audio>
     <audio id="deckBuildAudio" style="display:none;" preload="auto"></audio>
+    <!-- ★ 預先載入背景音樂 (preload) -->
+    <link rel="preload" as="audio" href="Offline Dice - Title.mp3">
+    <link rel="preload" as="audio" href="Offline Dice - Dice Rush.mp3">
+    <link rel="preload" as="audio" href="Offline Dice - Shop.mp3">
+    <link rel="preload" as="audio" href="Offline Dice - Rank.mp3">
+    <link rel="preload" as="audio" href="Offline Dice - Deck Build.mp3">
+    <link rel="preload" as="audio" href="Offline Dice - Last Wave Hold.mp3">
+    <link rel="preload" as="audio" href="Offline Dice - Fortress Charge.mp3">
+    <link rel="preload" as="audio" href="Offline Dice - Dice Riot.mp3">
 
     <div class="game-wrapper" id="gameWrapper">
         <!-- 起始覆蓋層 -->
@@ -1503,7 +1511,7 @@
             </div>
             <button class="btn-start" id="startBtn">開始遊戲</button>
             <div class="footer">
-                <span class="version" id="coverVersion">v2.7.7</span>
+                <span class="version" id="coverVersion">v2.7.8</span>
                 <span class="copyright" id="coverCopyright">© 2026 ☕迪遜咖啡廳，版權所有。</span>
             </div>
         </div>
@@ -1614,14 +1622,14 @@
 
     <script>
         // ================================================================
-        // 翻譯 (完整) - 新增 SPIKE 相關
+        // 翻譯 (完整) - ★ 新增每日寶箱相關翻譯
         // ================================================================
         const translations = {
             'zh-TW': {
                 coverTitle: '🎲 離線骰子',
                 coverDesc: '🔥火・⚡雷・🌪️風・☠️毒・❄️冰<br>⭐ 合併最高 7 點 &nbsp;|&nbsp; 💰 費用每次 +10<br>❤️ 僅 3 條命 &nbsp;|&nbsp; 👾各種敵人等你來挑戰<br>🔗 拖曳骰子到同類同點數骰子上合併',
                 startBtn: '開始遊戲',
-                version: 'v2.7.7',
+                version: 'v2.7.8',
                 copyright: '© {year} ☕迪遜咖啡廳，版權所有。',
                 gameTitle: '🎲 Offline Dice',
                 rollBtn: '擲骰',
@@ -1664,12 +1672,19 @@
                 shieldExpiredFloating: '🛡️ 消失',
                 shieldBlock: '🛡️ 敵人被盾牌阻擋！',
                 shieldCooldown: '🛡️ 下次盾牌在 {time}s 後',
-                // ★ SPIKE 翻譯
                 spikePlaced: '🌵 尖刺已放置！持續 {dur}s',
                 spikeExpired: '🌵 尖刺消失了！',
                 spikeExpiredFloating: '🌵 消失',
                 spikeHit: '🌵 尖刺 -{dmg}',
                 spikeNext: '🌵 下次尖刺在 {time}s 後',
+                // ★ 每日寶箱
+                dailyChestName: '每日寶箱',
+                dailyChestDesc: '每22小時可開啟一次，獲得金幣',
+                dailyChestBtn: '開啟',
+                dailyChestReady: '🎁 可以開啟！',
+                dailyChestWait: '⏳ 剩餘 {time}',
+                dailyChestReward: '💰 獲得 {gold} 金幣！',
+                dailyChestClaimed: '✅ 已領取，下次 {time} 後可再開',
                 diceNames: {
                     FIRE: '火',
                     THUNDER: '雷',
@@ -1691,7 +1706,7 @@
                     TAICHI: '太極',
                     BASEBALL: '棒球',
                     DROUGHT_THUNDER: '旱雷',
-                    SPIKE: '尖刺' // ★
+                    SPIKE: '尖刺'
                 },
                 diceDescs: {
                     FIRE: '燃燒・濺射',
@@ -1714,7 +1729,7 @@
                     TAICHI: '陰陽調和',
                     BASEBALL: '超高攻',
                     DROUGHT_THUNDER: '雷擊・連鎖增傷',
-                    SPIKE: '放置尖刺陷阱' // ★
+                    SPIKE: '放置尖刺陷阱'
                 },
                 dicePrices: {
                     FIRE: 0,
@@ -1728,7 +1743,7 @@
                     LOCK: 300,
                     GOLDMINE: 900,
                     LIGHT: 900,
-                    SPIKE: 900, // ★
+                    SPIKE: 900,
                     MYSTERY: 900,
                     BASEBALL: 900,
                     MIMIC: 1200,
@@ -1743,13 +1758,15 @@
                     common: '一般寶箱',
                     rare: '稀有寶箱',
                     epic: '史詩寶箱',
-                    legendary: '傳奇寶箱'
+                    legendary: '傳奇寶箱',
+                    daily: '每日寶箱'
                 },
                 chestDescs: {
                     common: '抽 300 積分骰子',
                     rare: '抽 900 積分骰子',
                     epic: '抽 1200 積分骰子',
-                    legendary: '抽 1500 積分骰子'
+                    legendary: '抽 1500 積分骰子',
+                    daily: '每22小時免費金幣'
                 },
                 bossNames: {
                     mage: '魔術師',
@@ -1890,7 +1907,6 @@
                 detailLight: '光環 · 增加上、下、左、右一格骰子攻速 (+{pct}%)',
                 detailBaseball: '超高攻 (速度增益轉化為攻擊力增益，例如光骰子速度加成)',
                 detailDroughtThunder: '雷擊連鎖 · 對目標造成額外雷擊傷害，目標數量 = 星數，傷害遞增50%',
-                // ★ SPIKE 詳細
                 detailSpike: '放置尖刺陷阱 (每 {interval}s 放置，持續 {duration}s) · 每級+0.75s · 每0.5s造成傷害',
                 detailSpikeDamage: '傷害 {dmg} (1星) ~ {dmgMax} (7星) · 每級+100',
                 bossHackerMark: '💻 黑客標記!',
@@ -1901,7 +1917,7 @@
                 coverTitle: '🎲 离线骰子',
                 coverDesc: '🔥火・⚡雷・🌪️风・☠️毒・❄️冰<br>⭐ 合并最高 7 点 &nbsp;|&nbsp; 💰 费用每次 +10<br>❤️ 仅 3 条命 &nbsp;|&nbsp; 👾各种敌人等你来挑战<br>🔗 拖曳骰子到同类同点数骰子上合并',
                 startBtn: '开始游戏',
-                version: 'v2.7.7',
+                version: 'v2.7.8',
                 copyright: '© {year} ☕迪逊咖啡厅，版权所有。',
                 gameTitle: '🎲 Offline Dice',
                 rollBtn: '掷骰',
@@ -1949,6 +1965,13 @@
                 spikeExpiredFloating: '🌵 消失',
                 spikeHit: '🌵 尖刺 -{dmg}',
                 spikeNext: '🌵 下次尖刺在 {time}s 后',
+                dailyChestName: '每日宝箱',
+                dailyChestDesc: '每22小时可开启一次，获得金币',
+                dailyChestBtn: '开启',
+                dailyChestReady: '🎁 可以开启！',
+                dailyChestWait: '⏳ 剩余 {time}',
+                dailyChestReward: '💰 获得 {gold} 金币！',
+                dailyChestClaimed: '✅ 已领取，下次 {time} 后可再开',
                 diceNames: {
                     FIRE: '火',
                     THUNDER: '雷',
@@ -2022,13 +2045,15 @@
                     common: '普通宝箱',
                     rare: '稀有宝箱',
                     epic: '史诗宝箱',
-                    legendary: '传奇宝箱'
+                    legendary: '传奇宝箱',
+                    daily: '每日宝箱'
                 },
                 chestDescs: {
                     common: '抽 300 积分骰子',
                     rare: '抽 900 积分骰子',
                     epic: '抽 1200 积分骰子',
-                    legendary: '抽 1500 积分骰子'
+                    legendary: '抽 1500 积分骰子',
+                    daily: '每22小时免费金币'
                 },
                 bossNames: {
                     mage: '魔术师',
@@ -2179,7 +2204,7 @@
                 coverTitle: '🎲 Offline Dice',
                 coverDesc: '🔥Fire・⚡Lightning・🌪️Wind・☠️Poison・❄️Ice<br>⭐ Merge up to 7 point on die &nbsp;|&nbsp; 💰 Cost +10 each roll<br>❤️ Only 3 lives &nbsp;|&nbsp; 👾 Various enemies await your challenge<br>🔗 Drag a die onto another of same type and point to merge',
                 startBtn: 'Start Game',
-                version: 'v2.7.7',
+                version: 'v2.7.8',
                 copyright: '© {year} ☕Diczon\'s Cafe, All Rights Reserved.',
                 gameTitle: '🎲 Offline Dice',
                 rollBtn: 'Roll',
@@ -2227,6 +2252,13 @@
                 spikeExpiredFloating: '🌵 Expired',
                 spikeHit: '🌵 Spike -{dmg}',
                 spikeNext: '🌵 Next spike in {time}s',
+                dailyChestName: 'Daily Chest',
+                dailyChestDesc: 'Free gold every 22 hours',
+                dailyChestBtn: 'Open',
+                dailyChestReady: '🎁 Ready to open!',
+                dailyChestWait: '⏳ Wait {time}',
+                dailyChestReward: '💰 Got {gold} gold!',
+                dailyChestClaimed: '✅ Claimed, next in {time}',
                 diceNames: {
                     FIRE: 'Fire',
                     THUNDER: 'Thunder',
@@ -2300,13 +2332,15 @@
                     common: 'Common Chest',
                     rare: 'Rare Chest',
                     epic: 'Epic Chest',
-                    legendary: 'Legendary Chest'
+                    legendary: 'Legendary Chest',
+                    daily: 'Daily Chest'
                 },
                 chestDescs: {
                     common: 'Draw 300-point dice',
                     rare: 'Draw 900-point dice',
                     epic: 'Draw 1200-point dice',
-                    legendary: 'Draw 1500-point dice'
+                    legendary: 'Draw 1500-point dice',
+                    daily: 'Free gold every 22h'
                 },
                 bossNames: {
                     mage: 'Magician',
@@ -2457,7 +2491,7 @@
                 coverTitle: '🎲 オフラインダイス',
                 coverDesc: '🔥火・⚡雷・🌪️風・☠️毒・❄️氷<br>⭐ 最大7つ点まで合体 &nbsp;|&nbsp; 💰 コスト毎回+10<br>❤️ ライフ3つ &nbsp;|&nbsp; 👾 様々な敵が待つ<br>🔗 ドラッグして同種・同点を合体',
                 startBtn: 'ゲーム開始',
-                version: 'v2.7.7',
+                version: 'v2.7.8',
                 copyright: '© {year} ☕ディクソンカフェ，無断転載を禁じます。',
                 gameTitle: '🎲 Offline Dice',
                 rollBtn: 'ダイス',
@@ -2505,6 +2539,13 @@
                 spikeExpiredFloating: '🌵 消滅',
                 spikeHit: '🌵 スパイク -{dmg}',
                 spikeNext: '🌵 次スパイク {time}s 後',
+                dailyChestName: 'デイリーチェスト',
+                dailyChestDesc: '22時間ごとに無料ゴールド',
+                dailyChestBtn: '開ける',
+                dailyChestReady: '🎁 開けられる！',
+                dailyChestWait: '⏳ 残り {time}',
+                dailyChestReward: '💰 {gold} ゴールド獲得！',
+                dailyChestClaimed: '✅ 受取済み、次は {time} 後',
                 diceNames: {
                     FIRE: '火',
                     THUNDER: '雷',
@@ -2578,13 +2619,15 @@
                     common: '一般宝箱',
                     rare: 'レア宝箱',
                     epic: 'エピック宝箱',
-                    legendary: 'レジェンド宝箱'
+                    legendary: 'レジェンド宝箱',
+                    daily: 'デイリーチェスト'
                 },
                 chestDescs: {
                     common: '300ポイントダイスを抽選',
                     rare: '900ポイントダイスを抽選',
                     epic: '1200ポイントダイスを抽選',
-                    legendary: '1500ポイントダイスを抽選'
+                    legendary: '1500ポイントダイスを抽選',
+                    daily: '22時間ごとに無料ゴールド'
                 },
                 bossNames: {
                     mage: '魔術師',
@@ -2735,7 +2778,7 @@
                 coverTitle: '🎲 오프라인 주사위',
                 coverDesc: '🔥불・⚡번개・🌪️바람・☠️독・❄️얼음<br>⭐ 최대 7성 합병 &nbsp;|&nbsp; 💰 비용 매회 +10<br>❤️ 목숨 3개 &nbsp;|&nbsp; 👾 다양한 적과 대결<br>🔗 동일 종류·점수 다이스 합성',
                 startBtn: '게임 시작',
-                version: 'v2.7.7',
+                version: 'v2.7.8',
                 copyright: '© {year} ☕딕슨 카페，판권 소유.',
                 gameTitle: '🎲 Offline Dice',
                 rollBtn: '주사위',
@@ -2783,6 +2826,13 @@
                 spikeExpiredFloating: '🌵 소멸',
                 spikeHit: '🌵 가시 -{dmg}',
                 spikeNext: '🌵 다음 가시 {time}s 후',
+                dailyChestName: '데일리 상자',
+                dailyChestDesc: '22시간마다 무료 골드',
+                dailyChestBtn: '열기',
+                dailyChestReady: '🎁 열 수 있음!',
+                dailyChestWait: '⏳ 남은 시간 {time}',
+                dailyChestReward: '💰 {gold} 골드 획득!',
+                dailyChestClaimed: '✅ 수령 완료, 다음 {time} 후',
                 diceNames: {
                     FIRE: '불',
                     THUNDER: '번개',
@@ -2856,13 +2906,15 @@
                     common: '일반 상자',
                     rare: '희귀 상자',
                     epic: '에픽 상자',
-                    legendary: '전설 상자'
+                    legendary: '전설 상자',
+                    daily: '데일리 상자'
                 },
                 chestDescs: {
                     common: '300 포인트 주사위 뽑기',
                     rare: '900 포인트 주사위 뽑기',
                     epic: '1200 포인트 주사위 뽑기',
-                    legendary: '1500 포인트 주사위 뽑기'
+                    legendary: '1500 포인트 주사위 뽑기',
+                    daily: '22시간마다 무료 골드'
                 },
                 bossNames: {
                     mage: '마법사',
@@ -3105,7 +3157,6 @@
                     intervalPerLevel: -0.857, attackType: 'none', isGoldmine: true }),
                 LIGHT: Object.freeze({ label: '💡', color: '#f9ca24', baseDamage: 0, damagePerStar: 0, baseInterval: 1.0,
                     intervalPerLevel: 0, attackType: 'none', isLight: true }),
-                // ★ SPIKE 骰子定義（放在 LIGHT 後面）
                 SPIKE: Object.freeze({
                     label: '🌵',
                     color: '#2ecc71',
@@ -3169,7 +3220,7 @@
             })
         });
 
-        // ★ CHEST_GROUPS 中 rare 寶箱加入 SPIKE（放在 LIGHT 後面）
+        // ★ CHEST_GROUPS 加入每日寶箱 (daily)
         const CHEST_GROUPS = {
             common: {
                 id: 'common',
@@ -3198,11 +3249,21 @@
                 dice: ['JOKER', 'SHIELD', 'SAPLING', 'TAICHI'],
                 icon: '🎁',
                 emoji: '🎁'
+            },
+            // ★ 每日寶箱
+            daily: {
+                id: 'daily',
+                cost: 0,
+                dice: [],
+                icon: '💰',
+                emoji: '💰',
+                isDaily: true,
+                cooldownHours: 22
             }
         };
 
         // ================================================================
-        // 排行榜系統（與原版相同）
+        // 排行榜系統
         // ================================================================
         function getDefaultLeaderboard() {
             return [
@@ -3265,7 +3326,7 @@
             return Math.min(rank, 10);
         }
 
-        // ========== 保存系統 ==========
+        // ========== 保存系統（加入 dailyChestTimestamp） ==========
         const STORAGE_KEY = 'offlineDiceSaveData';
 
         function getDefaultSaveData() {
@@ -3280,7 +3341,7 @@
                     LOCK: false,
                     GOLDMINE: false,
                     LIGHT: false,
-                    SPIKE: false, // ★
+                    SPIKE: false,
                     MYSTERY: false,
                     BASEBALL: false,
                     MIMIC: false,
@@ -3292,7 +3353,8 @@
                     TAICHI: false
                 },
                 leaderboard: getDefaultLeaderboard(),
-                soundEnabled: true
+                soundEnabled: true,
+                dailyChestTimestamp: 0 // ★ 每日寶箱上次開啟時間戳
             };
         }
         let saveData = null;
@@ -3314,6 +3376,9 @@
                     }
                     if (typeof data.soundEnabled !== 'boolean') {
                         data.soundEnabled = def.soundEnabled;
+                    }
+                    if (typeof data.dailyChestTimestamp !== 'number') {
+                        data.dailyChestTimestamp = 0;
                     }
                     saveData = data;
                 } else saveData = getDefaultSaveData();
@@ -3391,6 +3456,9 @@
                     if (typeof parsed.soundEnabled !== 'boolean') {
                         parsed.soundEnabled = def.soundEnabled;
                     }
+                    if (typeof parsed.dailyChestTimestamp !== 'number') {
+                        parsed.dailyChestTimestamp = 0;
+                    }
                     saveData = parsed;
                     soundEnabled = saveData.soundEnabled;
                     saveData.selectedDice = saveData.selectedDice.filter(d => saveData.ownedDice.includes(d));
@@ -3448,7 +3516,7 @@
         const PATH_PIXELS = PATH.map(p => ({ x: boardX + p.col * CELL_SIZE + CELL_SIZE / 2, y: boardY + p.row * CELL_SIZE +
                     CELL_SIZE / 2 }));
 
-        // ========== 遊戲狀態（新增 spikes 陣列） ==========
+        // ========== 遊戲狀態 ==========
         let game = {
             board: [],
             gold: 100,
@@ -3511,10 +3579,10 @@
             _taichiGlowTimer: 0,
             highlightTarget: null,
             shields: [],
-            spikes: [], // ★ 尖刺陣列
+            spikes: [],
         };
 
-        // ========== 音效系統（與原版相同） ==========
+        // ========== 音效系統 + 預載入 ==========
         const MENU_MUSIC_URL = 'Offline Dice - Title.mp3';
         const GAME_MUSIC_URL = 'Offline Dice - Dice Rush.mp3';
         const SHOP_MUSIC_URL = 'Offline Dice - Shop.mp3';
@@ -3528,6 +3596,29 @@
             { url: 'Offline Dice - Dice Riot.mp3', label: 'BGM 4' },
         ];
         let currentBgmIndex = 0;
+
+        // ★ 預載入所有音頻
+        function preloadAllAudio() {
+            const audioIds = ['bgmAudio', 'shopBgmAudio', 'rankAudio', 'deckBuildAudio'];
+            const urls = [
+                MENU_MUSIC_URL, GAME_MUSIC_URL, SHOP_MUSIC_URL, RANK_MUSIC_URL, DECK_BUILD_URL,
+                'Offline Dice - Last Wave Hold.mp3',
+                'Offline Dice - Fortress Charge.mp3',
+                'Offline Dice - Dice Riot.mp3'
+            ];
+            for (const id of audioIds) {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.preload = 'auto';
+                    el.load();
+                }
+            }
+            // 使用 fetch 預載入（觸發瀏覽器快取）
+            for (const url of urls) {
+                fetch(url).then(r => r.blob()).catch(() => {});
+            }
+            console.log('🎵 音頻預載入已啟動 (離線支援)');
+        }
 
         function initAudio() {
             try {
@@ -3794,6 +3885,7 @@
             const audio = document.getElementById('rankAudio');
             if (audio) {
                 audio.pause();
+                audio.currentTime = 0;
             }
         }
 
@@ -4040,7 +4132,7 @@
         function getEmptyCells() { let cells = []; for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++)
                 if (!isOccupied(c, r)) cells.push({ col: c, row: r }); return cells; }
 
-        // ========== 骰子創建（含 SPIKE 特殊處理 & isfinal 保護） ==========
+        // ========== 骰子創建 ==========
         function createDice(type, star) {
             star = star || 1;
             const def = CONST.ALL_DICE_DEFS[type];
@@ -4096,7 +4188,6 @@
                 const ratio = 1 + (lv - 1) / (CONST.MAX_LEVEL - 1) * ((maxDmg / 60) - 1);
                 dmg = baseDmg * ratio;
             } else if (type === 'SPIKE') {
-                // ★ SPIKE 本身不攻擊，傷害由尖刺造成
                 dmg = 0;
             } else {
                 dmg = (def.baseDamage + def.damagePerStar * (s - 1)) * mult;
@@ -4105,7 +4196,6 @@
 
             let intervalBase = def.baseInterval + (def.intervalPerLevel || 0) * (lv - 1);
 
-            // ★ SPIKE 放置間隔隨星級變化：5s(1星) ~ 4.76s(7星)
             if (type === 'SPIKE') {
                 const baseInt = def.spikeIntervalBase || 5;
                 const perStar = def.spikeIntervalPerStar || -0.04;
@@ -4154,7 +4244,7 @@
                 get isBaseball() { return def.isBaseball || false; },
                 get isDroughtThunder() { return def.isDroughtThunder || false; },
                 get isShield() { return def.isShield || false; },
-                get isSpike() { return def.isSpike || false; }, // ★
+                get isSpike() { return def.isSpike || false; },
                 get burn() { return def.burn || false; },
                 get bossMultiplier() { return def.bossMultiplier || 1; },
                 get gambleMin() { return def.gambleMin || 0; },
@@ -4171,7 +4261,6 @@
                 get shieldDuration() { return def.shieldDuration || 3; },
                 get shieldDurationPerStar() { return def.shieldDurationPerStar || 4 / 6; },
                 get shieldDurationPerLevel() { return def.shieldDurationPerLevel || 0.5; },
-                // ★ SPIKE 屬性
                 get spikeDamageBase() { return def.spikeDamageBase || 110; },
                 get spikeDamagePerStar() { return def.spikeDamagePerStar || 20; },
                 get spikeDamagePerLevel() { return def.spikeDamagePerLevel || 100; },
@@ -4203,10 +4292,8 @@
                 const interval = dice.shieldInterval + dice.shieldIntervalPerStar * (s - 1);
                 dice._shieldPlaceTimer = Math.max(1.0, interval);
             }
-            // ★ SPIKE 骰子：記錄放置計時器
             if (dice.isSpike) {
                 dice._spikePlaceTimer = 0;
-                // 計算尖刺傷害（用於顯示）
                 const spikeDmg = dice.spikeDamageBase + (s - 1) * dice.spikeDamagePerStar + (lv - 1) * dice
                 .spikeDamagePerLevel;
                 dice._spikeDamage = Math.round(spikeDmg);
@@ -4291,7 +4378,7 @@
                 `<div class="dice-icon" style="background:${dice.color};border-color:rgba(255,255,255,0.4);">${dice.label}</div><span style="font-weight:600;font-size:13px;">★${dice.star} ${dice.name}</span>`;
         }
 
-        // ========== 拖曳合併（含 isfinal 保護） ==========
+        // ========== 拖曳合併 ==========
         function getGridPosFromPointer(e) {
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width,
@@ -4926,16 +5013,13 @@
                 for (const spike of game.spikes) {
                     if (!spike.active) continue;
                     spike.timer -= dt;
-                    // 每0.5s造成一次傷害
                     spike.damageTimer -= dt;
                     if (spike.damageTimer <= 0) {
                         spike.damageTimer = 0.5;
-                        // 對範圍內敵人造成傷害
                         for (const e of game.enemies) {
                             if (!e.alive) continue;
                             const d = dist(e, spike);
                             if (d < CELL_SIZE * 0.45) {
-                                // 檢查盾牌
                                 if (e.shieldTimer && e.shieldTimer > 0) {
                                     addFloatingText(e.x, e.y - 20, '🛡️ 免疫', '#2ecc71', 14);
                                     continue;
@@ -5994,7 +6078,7 @@
             return totalBonus;
         }
 
-        // ========== 攻擊（含 SPIKE 放置 & isfinal 保護） ==========
+        // ========== 攻擊（含特殊傷害取最高值 & 鎖骰子續攻） ==========
         function updateAttacks(dt) {
             updateTaichiAbilities(dt);
 
@@ -6051,7 +6135,6 @@
                                 const idx = pathIndices[randInt(0, pathIndices.length - 1)];
                                 const pos = PATH_PIXELS[idx];
 
-                                // 檢查該位置是否已有尖刺
                                 let hasSpikeHere = false;
                                 for (const s of game.spikes) {
                                     if (!s.active) continue;
@@ -6065,10 +6148,8 @@
 
                                 const star = dice.star;
                                 const lv = upgradeLevels[dice.type] || 1;
-                                // 計算持續時間：2s(Lv1) ~ 5s(Lv Max)
                                 const durationBase = dice.spikeDurationBase + dice.spikeDurationPerLevel * (lv - 1);
                                 const duration = Math.max(0.5, durationBase);
-                                // 計算傷害：110(1星) ~ 230(7星) + 每級100
                                 const dmgBase = dice.spikeDamageBase + (star - 1) * dice.spikeDamagePerStar +
                                     (lv - 1) * dice.spikeDamagePerLevel;
                                 const damage = Math.round(dmgBase);
@@ -6108,7 +6189,6 @@
                         }
 
                         if (dice.isShield) {
-                            // 盾牌骰子的攻擊邏輯（與原版相同）
                             let interval = dice.interval;
                             const lightBonus = calculateLightBonus(r, c);
                             if (lightBonus > 0) {
@@ -6182,7 +6262,7 @@
                                 }
                             }
 
-                            // 盾牌放置邏輯（與原版相同）
+                            // 盾牌放置邏輯
                             const star = dice.star;
                             const lv = upgradeLevels[dice.type] || 1;
                             const intervalBase = dice.shieldInterval + dice.shieldIntervalPerStar * (star - 1);
@@ -6559,8 +6639,9 @@
                                 if (!isFinite(target.slowFactor)) target.slowFactor = 0.05;
                             }
 
+                            // ★ LOCK 骰子 - 移除 _lockedByLockDice 檢查，讓鎖骰子可持續攻擊同一目標
                             if (dice.type === 'LOCK' && !isHacked) {
-                                if (target._lockedByLockDice) continue;
+                                // ★ 移除 if (target._lockedByLockDice) continue; 讓鎖骰子可以繼續攻擊
                                 const lv = upgradeLevels[dice.type] || 1;
                                 const star = dice.star;
                                 const baseProb = 0.04 + (star - 1) * (0.18 - 0.04) / 6;
@@ -6624,14 +6705,16 @@
                                 }
                             }
 
+                            // ★ 特殊傷害取最高值（毒）
                             if (!isHacked && !hasShield && dice.poison) {
+                                const poisonBase = dice.poison.damageBase || 0;
+                                const poisonPerStar = dice.poison.damagePerStar || 0;
+                                const tick = dice.poison.tick || 0.5;
+                                const duration = dice.poison.duration || 3;
+                                const dmgPerTick = (poisonBase + poisonPerStar * (dice.star - 1)) *
+                                    getUpgradeMultiplier(dice.type);
+
                                 if (!target.poison) {
-                                    const poisonBase = dice.poison.damageBase || 0;
-                                    const poisonPerStar = dice.poison.damagePerStar || 0;
-                                    const tick = dice.poison.tick || 0.5;
-                                    const duration = dice.poison.duration || 3;
-                                    const dmgPerTick = (poisonBase + poisonPerStar * (dice.star - 1)) *
-                                        getUpgradeMultiplier(dice.type);
                                     target.poison = {
                                         damagePerTick: (typeof dmgPerTick === 'number' && isFinite(dmgPerTick)) ?
                                             dmgPerTick : 0,
@@ -6640,8 +6723,31 @@
                                         timer: duration,
                                     };
                                 } else {
-                                    target.poison.timer = dice.poison.duration || 3;
+                                    // ★ 比較並保留較高的毒傷害
+                                    const existingDmg = target.poison.damagePerTick || 0;
+                                    if (dmgPerTick > existingDmg) {
+                                        target.poison.damagePerTick = dmgPerTick;
+                                        target.poison.tickInterval = tick;
+                                        target.poison.nextTick = tick;
+                                    }
+                                    target.poison.timer = Math.max(target.poison.timer || 0, duration);
                                 }
+                            }
+
+                            // ★ 燃燒傷害也取最高值
+                            if (!isHacked && !hasShield && dice.burn) {
+                                const burnDmg = damage * 0.3;
+                                if (target.burnTimer && target.burnTimer > 0) {
+                                    // 比較現有燃燒傷害，保留較高的
+                                    if (burnDmg > (target.burnDamage || 0)) {
+                                        target.burnDamage = burnDmg;
+                                    }
+                                    target.burnTimer = Math.max(target.burnTimer || 0, 2.0);
+                                } else {
+                                    target.burnTimer = 2.0;
+                                    target.burnDamage = burnDmg;
+                                }
+                                if (!isFinite(target.burnDamage)) target.burnDamage = 0;
                             }
 
                             if (!isHacked && !hasShield && dice.splash > 0) {
@@ -6935,7 +7041,7 @@
             game._taichiGlowTimer = 0;
             game.highlightTarget = null;
             game.shields = [];
-            game.spikes = []; // ★ 重置尖刺
+            game.spikes = [];
             if (game._bossAbilityTimeout) { clearTimeout(game._bossAbilityTimeout);
                 game._bossAbilityTimeout = null; }
             game.activeDiceTypes = [...saveData.selectedDice];
@@ -6961,7 +7067,7 @@
 
         document.getElementById('restartBtn').addEventListener('click', restartGame);
 
-        // ========== 繪製（含尖刺繪製） ==========
+        // ========== 繪製（★ 旱雷骰子不顯示頂部⚡） ==========
         if (!CanvasRenderingContext2D.prototype.roundRect) {
             CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, radii) {
                 const r = typeof radii === 'number' ? radii : (radii || 0);
@@ -7293,23 +7399,8 @@
                 }
             }
 
-            if (dice.isDroughtThunder) {
-                const star = dice.star;
-                const lv = upgradeLevels[dice.type] || 1;
-                const thunderBase = dice.thunderBaseDamage || 50;
-                const thunderPerStar = dice.thunderDamagePerStar || 40 / 6;
-                const thunderPerLevel = dice.thunderDamagePerLevel || 50;
-                let thunderDmg = thunderBase + thunderPerStar * (star - 1) + thunderPerLevel * (lv - 1);
-                thunderDmg = Math.round(thunderDmg * 10) / 10;
-                ctx.fillStyle = 'rgba(139,0,139,0.85)';
-                ctx.font = `bold ${Math.floor(size*0.12)}px sans-serif`;
-                ctx.textAlign = 'right';
-                ctx.textBaseline = 'top';
-                ctx.shadowColor = 'rgba(0,0,0,0.8)';
-                ctx.shadowBlur = 4;
-                ctx.fillText(`⚡×${star} ${thunderDmg}`, x + size - 4, y + 2);
-                ctx.shadowBlur = 0;
-            }
+            // ★ 旱雷骰子 - 移除頂部⚡顯示 (注釋掉)
+            // if (dice.isDroughtThunder) { ... 原本顯示 ⚡×{star} {thunderDmg} ... }
 
             if (dice.isShield && dice._shieldPlaceTimer !== undefined) {
                 const remain = Math.max(0, dice._shieldPlaceTimer);
@@ -7334,7 +7425,6 @@
                 ctx.fillText(`🛡️${Math.ceil(remain)}s`, cx, barY + barH + 1);
             }
 
-            // ★ SPIKE 骰子顯示放置計時器
             if (dice.isSpike && dice._spikePlaceTimer !== undefined) {
                 const remain = Math.max(0, dice._spikePlaceTimer);
                 const barW = dSize * 0.7;
@@ -7356,7 +7446,6 @@
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'top';
                 ctx.fillText(`🌵${Math.ceil(remain)}s`, cx, barY + barH + 1);
-                // 顯示尖刺傷害
                 const spikeDmg = dice._spikeDamage || 110;
                 ctx.fillStyle = 'rgba(255,255,255,0.6)';
                 ctx.font = `bold ${Math.floor(size*0.1)}px sans-serif`;
@@ -7414,7 +7503,7 @@
             return `rgb(${r},${g},${b})`;
         }
 
-        // ========== 主繪製函數（含尖刺繪製） ==========
+        // ========== 主繪製函數 ==========
         function draw() {
             ctx.globalAlpha = 1.0;
             try {
@@ -7569,7 +7658,6 @@
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
                     ctx.fillText(`${spike.timer.toFixed(1)}s`, spike.x, spike.y + CELL_SIZE / 2 - 4);
-                    // 顯示傷害
                     ctx.fillStyle = 'rgba(255,200,100,0.9)';
                     ctx.font = `bold ${CELL_SIZE * 0.12}px sans-serif`;
                     ctx.textAlign = 'center';
@@ -8166,7 +8254,7 @@
             game._taichiGlowTimer = 0;
             game.highlightTarget = null;
             game.shields = [];
-            game.spikes = []; // ★
+            game.spikes = [];
             if (game._bossAbilityTimeout) { clearTimeout(game._bossAbilityTimeout);
                 game._bossAbilityTimeout = null; }
             initBoard();
@@ -8179,10 +8267,29 @@
                 'POISON', 'ICE'
             ]; }
 
-        // ========== 商店 ==========
+        // ========== 商店（含每日寶箱） ==========
         function getChestStatus(chestId) {
             const group = CHEST_GROUPS[chestId];
             if (!group) return null;
+            if (group.isDaily) {
+                // 每日寶箱：檢查冷卻
+                const now = Date.now();
+                const lastOpen = saveData.dailyChestTimestamp || 0;
+                const cooldownMs = group.cooldownHours * 3600 * 1000;
+                const canOpen = (now - lastOpen) >= cooldownMs;
+                const remainMs = Math.max(0, cooldownMs - (now - lastOpen));
+                const remainHours = Math.floor(remainMs / (3600 * 1000));
+                const remainMinutes = Math.floor((remainMs % (3600 * 1000)) / (60 * 1000));
+                return {
+                    isDaily: true,
+                    canOpen: canOpen,
+                    remainMs: remainMs,
+                    remainText: canOpen ? getData().dailyChestReady : `${remainHours}h ${remainMinutes}m`,
+                    ownedCount: 0,
+                    total: 0,
+                    missing: []
+                };
+            }
             const allOwned = group.dice.every(d => saveData.ownedDice.includes(d));
             const missing = group.dice.filter(d => !saveData.ownedDice.includes(d));
             return {
@@ -8198,11 +8305,46 @@
             if (!group) return;
             const data = getData();
             const status = getChestStatus(chestId);
-            if (status.allOwned) return;
+            if (!status) return;
 
             const grid = document.getElementById('shopChestGrid');
             const div = document.createElement('div');
             div.className = 'shop-chest-item';
+
+            if (group.isDaily) {
+                // ★ 每日寶箱渲染
+                const icon = group.icon || '💰';
+                const chestName = data.dailyChestName || '每日寶箱';
+                const chestDesc = data.dailyChestDesc || '每22小時免費金幣';
+                const canOpen = status.canOpen;
+
+                const remainDisplay = status.remainText || '⏳ 冷卻中';
+                const btnText = canOpen ? data.dailyChestBtn : data.dailyChestWait.replace(/\{time\}/g, status.remainText);
+
+                div.innerHTML = `
+                    <span class="chest-icon">${icon}</span>
+                    <div class="chest-name">${chestName}</div>
+                    <div class="chest-cost">🏆 + ?</div>
+                    <div class="chest-remain">${canOpen ? data.dailyChestReady : '⏳ ' + status.remainText}</div>
+                    <div class="chest-dice-list">${data.dailyChestDesc}</div>
+                    <button class="btn-draw" data-chest="daily" ${!canOpen?'disabled':''}>
+                        ${canOpen ? data.dailyChestBtn : data.dailyChestWait.replace(/\{time\}/g, status.remainText)}
+                    </button>
+                `;
+                grid.appendChild(div);
+
+                const btn = div.querySelector('.btn-draw');
+                if (btn && !btn.disabled) {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        openDailyChest();
+                    });
+                }
+                return;
+            }
+
+            // 普通寶箱
+            if (status.allOwned) return;
             const chestName = data.chestNames[chestId] || chestId;
             const chestDesc = data.chestDescs[chestId] || '';
             const icon = group.icon || '📦';
@@ -8238,6 +8380,44 @@
                     e.stopPropagation();
                     drawFromChest(chestId);
                 });
+            }
+        }
+
+        // ★ 開啟每日寶箱
+        function openDailyChest() {
+            const data = getData();
+            const now = Date.now();
+            const lastOpen = saveData.dailyChestTimestamp || 0;
+            const cooldownMs = 22 * 3600 * 1000;
+
+            if ((now - lastOpen) < cooldownMs) {
+                const remainMs = cooldownMs - (now - lastOpen);
+                const remainHours = Math.floor(remainMs / (3600 * 1000));
+                const remainMinutes = Math.floor((remainMs % (3600 * 1000)) / (60 * 1000));
+                showToast(data.dailyChestClaimed.replace(/\{time\}/g, `${remainHours}h ${remainMinutes}m`), 2000);
+                return;
+            }
+
+            // 獲得 60-600 金幣
+            const goldReward = Math.floor(60 + Math.random() * 541);
+            saveData.dailyChestTimestamp = now;
+            saveData.totalScore += goldReward;
+            saveSaveData();
+
+            showToast(data.dailyChestReward.replace(/\{gold\}/g, goldReward), 2500);
+            addFloatingText(W / 2, H / 2 - 20, `💰 +${goldReward}`, '#f7d875', 36);
+
+            updateCoverUI();
+            updateShopUI();
+
+            // 顯示倒計時更新
+            const newStatus = getChestStatus('daily');
+            if (newStatus) {
+                const remainMs = Math.max(0, cooldownMs - (Date.now() - saveData.dailyChestTimestamp));
+                const remainHours = Math.floor(remainMs / (3600 * 1000));
+                const remainMinutes = Math.floor((remainMs % (3600 * 1000)) / (60 * 1000));
+                const remainText = `${remainHours}h ${remainMinutes}m`;
+                showToast(data.dailyChestClaimed.replace(/\{time\}/g, remainText), 1500);
             }
         }
 
@@ -8314,7 +8494,7 @@
             updateShopUI();
         }
 
-        // ========== 骰子詳細（含 SPIKE） ==========
+        // ========== 骰子詳細 ==========
         function showDiceDetail(diceType) {
             const def = CONST.ALL_DICE_DEFS[diceType];
             if (!def) return;
@@ -8408,7 +8588,6 @@
             if (def.isDroughtThunder) {
                 specialParts.push(data.detailDroughtThunder);
             }
-            // ★ SPIKE 詳細
             if (def.isSpike) {
                 const interval = (def.spikeIntervalBase || 5) + (def.spikeIntervalPerStar || -0.04) * 0;
                 const duration = (def.spikeDurationBase || 2) + (def.spikeDurationPerLevel || 0.75) * 0;
@@ -8486,12 +8665,23 @@
             const grid = document.getElementById('shopChestGrid');
             grid.innerHTML = '';
 
+            // ★ 顯示每日寶箱 (放在最前面)
+            drawChest('daily');
+            // 其他寶箱
             for (const chestId of ['common', 'rare', 'epic', 'legendary']) {
                 drawChest(chestId);
             }
 
             updateShopSelection();
             renderOwnedDice();
+
+            // 每日寶箱倒計時自動更新
+            if (document.querySelector('.shop-overlay.visible')) {
+                const dailyStatus = getChestStatus('daily');
+                if (dailyStatus && !dailyStatus.canOpen) {
+                    // 已經在 drawChest 中顯示倒計時
+                }
+            }
         }
 
         function updateShopSelection() {
@@ -8876,6 +9066,9 @@
         soundEnabled = saveData.soundEnabled !== undefined ? saveData.soundEnabled : true;
         updateSoundButtonIcon();
 
+        // ★ 預載入所有音頻 (離線支援)
+        preloadAllAudio();
+
         game.activeDiceTypes = [...saveData.selectedDice];
         initUpgradeLevels();
         initGameState();
@@ -8914,7 +9107,7 @@
         }
 
         requestAnimationFrame(gameLoop);
-        console.log('🎲 Offline Dice v2.7.7 - 新增尖刺骰子 🌵');
+        console.log('🎲 Offline Dice v2.7.8 - 鎖骰續攻 · 音樂預載 · 旱雷去⚡ · 毒傷取高 · 每日寶箱');
     </script>
 </body>
 </html>
