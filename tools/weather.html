@@ -1,197 +1,331 @@
 <!DOCTYPE html>
-<html lang="zh-Hant-HK">
+<html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>實時香港天氣預報 (國際備用源)</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>⛅ 天氣預報</title>
     <style>
+        /* ---------- CSS 變數（主題） ---------- */
         :root {
-            --bg-color: #f0f4f8;
+            --bg-color: #f5f7fa;
+            --text-color: #1e293b;
             --card-bg: #ffffff;
-            --text-main: #333333;
-            --text-sub: #666666;
+            --shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+            --toggle-bg: #e2e8f0;
+            --toggle-dot: #ffffff;
         }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
+
+        /* 深色模式：只改背景色＋必要文字可讀性 */
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --text-color: #e2e8f0;
+            --card-bg: #1e293b;
+            --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            --toggle-bg: #334155;
+            --toggle-dot: #facc15;
+        }
+
+        /* ---------- 全域重置 ---------- */
+        * {
             margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .weather-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            padding: 25px;
-            width: 100%;
-            max-width: 400px;
+            padding: 0;
             box-sizing: border-box;
         }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 15px;
-        }
-        .location {
-            font-size: 1.4rem;
-            font-weight: bold;
-        }
-        .update-time {
-            font-size: 0.8rem;
-            color: var(--text-sub);
-        }
-        .main-info {
+
+        body {
+            padding: 20px;
+            min-height: 100vh;
+            background: var(--bg-color);
+            color: var(--text-color);
+            transition: background 0.4s ease, color 0.3s ease;
+            font-family: "微軟正黑體", "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            margin: 20px 0;
+            justify-content: center;
         }
-        .temp-box {
-            font-size: 3.5rem;
-            font-weight: 300;
+
+        .container {
+            max-width: 1024px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 12px;
+        }
+
+        /* ---------- 標題 ---------- */
+        .title-wrap {
             display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
         }
-        .unit {
-            font-size: 1.5rem;
-            margin-top: 8px;
-            margin-left: 2px;
+
+        .title-wrap h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--text-color);
+            transition: color 0.3s ease;
+            margin: 0;
         }
-        .weather-icon-text {
-            font-size: 4rem;
+
+        .title-wrap h1 span {
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-4px);
+            }
+        }
+
+        /* ---------- 切換開關（Slider） ---------- */
+        .theme-toggle {
+            position: relative;
+            width: 60px;
+            height: 32px;
+            flex-shrink: 0;
+            cursor: pointer;
+            background: var(--toggle-bg);
+            border-radius: 40px;
+            border: none;
+            outline: none;
+            transition: background 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            padding: 0 4px;
+        }
+
+        .theme-toggle .dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--toggle-dot);
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            line-height: 1;
+            color: #1e293b;
+        }
+
+        .theme-toggle .dot .icon {
+            transition: transform 0.3s ease;
+            font-size: 14px;
             line-height: 1;
         }
-        .details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            background: #f7f9fa;
-            padding: 15px;
-            border-radius: 12px;
+
+        /* 深色模式：開關向右滑 */
+        [data-theme="dark"] .theme-toggle .dot {
+            transform: translateX(28px);
         }
-        .detail-item {
-            font-size: 0.9rem;
-            color: var(--text-sub);
+
+        /* ---------- 天氣小工具卡片 ---------- */
+        .weather-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 8px;
+            box-shadow: var(--shadow);
+            transition: background 0.4s ease, box-shadow 0.4s ease;
+            backdrop-filter: blur(2px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
         }
-        .detail-item span {
+
+        .weather-card iframe,
+        .weather-card .weatherwidget-io {
+            border-radius: 14px;
+            overflow: hidden;
             display: block;
-            font-size: 1.1rem;
-            color: var(--text-main);
-            font-weight: 600;
-            margin-top: 4px;
+            width: 100% !important;
         }
-        .loading {
+
+        .footer-note {
+            margin-top: 18px;
             text-align: center;
-            color: var(--text-sub);
-            padding: 40px 0;
+            font-size: 13px;
+            opacity: 0.5;
+            color: var(--text-color);
+            transition: opacity 0.3s ease, color 0.3s ease;
+            letter-spacing: 0.3px;
+        }
+
+        .footer-note a {
+            color: inherit;
+            text-decoration: none;
+            border-bottom: 1px dotted currentColor;
+        }
+
+        .footer-note a:hover {
+            opacity: 0.8;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+            .title-wrap h1 {
+                font-size: 22px;
+            }
+            .theme-toggle {
+                width: 52px;
+                height: 28px;
+            }
+            .theme-toggle .dot {
+                width: 20px;
+                height: 20px;
+                font-size: 12px;
+            }
+            [data-theme="dark"] .theme-toggle .dot {
+                transform: translateX(24px);
+            }
+            .weather-card {
+                padding: 4px;
+                border-radius: 16px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .title-wrap {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .title-wrap h1 {
+                font-size: 20px;
+            }
+        }
+
+        .container {
+            animation: fadeUp 0.6s ease both;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
-<body>
 
-<div class="weather-card" id="weather-card">
-    <div class="loading">正在連線備用氣象數據庫...</div>
+<body>
+    <div class="container">
+        <div class="title-wrap">
+            <h1><span>⛅</span> 天氣預報</h1>
+            <button class="theme-toggle" id="themeToggle" aria-label="切換深色 / 淺色模式" title="切換深色 / 淺色模式" role="switch">
+                <span class="dot">
+                    <span class="icon" id="toggleIcon">🌙</span>
+                </span>
+            </button>
+        </div>
+
+        <div class="weather-card">
+            <a class="weatherwidget-io"
+            href="https://forecast7.com/zh-tw/22d32114d18/kowloon/"
+            data-label_1="九龍"
+            data-label_2="天氣"
+            data-font="微軟正黑體 (Microsoft JhengHei)"
+            data-theme="original">
+        九龍 天氣
+    </a>
 </div>
 
+<div class="footer-note">
+    資料來源 <a href="https://forecast7.com" target="_blank" rel="noopener">WeatherWidget.io</a>
+</div>
+</div>
+
+<!-- WeatherWidget.io 腳本 -->
 <script>
-    // 經緯度定位為香港中心區域 (尖沙咀/中環附近)
-    const backupApiUrl = 'https://open-meteo.com';
-
-    // 國際標準 WMO 天氣代碼轉換為中文描述與表情符號
-    function getWeatherDesc(code) {
-        const mapping = {
-            0: { desc: '天色晴朗', icon: '☀️' },
-            1: { desc: '大體天晴', icon: '🌤️' },
-            2: { desc: '短暫陽光', icon: '⛅' },
-            3: { desc: '多雲密佈', icon: '☁️' },
-            45: { desc: '有霧', icon: '🌫️' },
-            48: { desc: '霧淞現象', icon: '🌫️' },
-            51: { desc: '微毛毛雨', icon: '🌧️' },
-            53: { desc: '毛毛雨', icon: '🌧️' },
-            55: { desc: '密集毛毛雨', icon: '🌧️' },
-            61: { desc: '局部地區有雨', icon: '🌦️' },
-            63: { desc: '有幾陣驟雨', icon: '🌧️' },
-            65: { desc: '大雨', icon: '🌧️' },
-            71: { desc: '有微雪', icon: '❄️' },
-            73: { desc: '有雪', icon: '❄️' },
-            75: { desc: '大雪', icon: '❄️' },
-            80: { desc: '陣雨', icon: '🌦️' },
-            81: { desc: '有大驟雨', icon: '🌧️' },
-            82: { desc: '狂風暴雨', icon: '⛈️' },
-            95: { desc: '局部地區有雷暴', icon: '⛈️' },
-            96: { desc: '雷暴伴隨冰雹', icon: '⛈️' }
-        };
-        return mapping[code] || { desc: '一般天氣', icon: '🌤️' };
-    }
-
-    async function fetchWeather() {
-        try {
-            const response = await fetch(backupApiUrl);
-            if (!response.ok) throw new Error('網絡連線逾時');
-            const data = await response.json();
-            renderWeather(data);
-        } catch (error) {
-            document.getElementById('weather-card').innerHTML = `
-                <div class="loading" style="color: #ff3b30;">
-                    <strong>⚠️ 無法獲取氣象數據</strong><br>
-                    <small style="color: #999; display:block; margin-top:5px;">請檢查你的網絡是否開啟了代理或防火牆限制。</small>
-                </div>
-            `;
+    ! function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (!d.getElementById(id)) {
+            js = d.createElement(s);
+            js.id = id;
+            js.src = 'https://weatherwidget.io/js/widget.min.js';
+            fjs.parentNode.insertBefore(js, fjs);
         }
-    }
-
-    function renderWeather(data) {
-        const current = data.current;
-        const temp = Math.round(current.temperature_2m * 10) / 10;
-        const humidity = current.relative_humidity_2m;
-        const windSpeed = current.wind_speed_10m;
-        const weatherInfo = getWeatherDesc(current.weather_code);
-        
-        // 格式化當前系統時間
-        const now = new Date();
-        const timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-
-        document.getElementById('weather-card').innerHTML = `
-            <div class="header">
-                <div>
-                    <div class="location">香港 (國際源)</div>
-                    <div class="update-time">系統實時 ${timeStr} 更新</div>
-                </div>
-            </div>
-            
-            <div class="main-info">
-                <div class="temp-box">
-                    ${temp}<span class="unit">°C</span>
-                </div>
-                <div class="weather-icon-text">${weatherInfo.icon}</div>
-            </div>
-
-            <div class="details">
-                <div class="detail-item">
-                    相對濕度
-                    <span>${humidity}%</span>
-                </div>
-                <div class="detail-item">
-                    風速
-                    <span>${windSpeed} km/h</span>
-                </div>
-            </div>
-
-            <div style="font-size: 0.9rem; line-height: 1.5; color: var(--text-sub); border-top: 1px solid #eee; padding-top: 15px; margin-top: 15px;">
-                <strong>現時天氣狀況：</strong>${weatherInfo.desc}
-            </div>
-        `;
-    }
-
-    fetchWeather();
-    // 每 5 分鐘自動刷新
-    setInterval(fetchWeather, 300000);
+    }(document, 'script', 'weatherwidget-io-js');
 </script>
 
+<!-- Dark Mode 控制邏輯（修復） -->
+<script>
+    (function() {
+        const toggleBtn = document.getElementById('themeToggle');
+        const iconEl = document.getElementById('toggleIcon');
+        const htmlEl = document.documentElement;
+
+        // ----- 初始化主題 -----
+        const storedTheme = localStorage.getItem('weatherTheme');
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                htmlEl.setAttribute('data-theme', 'dark');
+                iconEl.textContent = '☀️';
+                toggleBtn.setAttribute('aria-checked', 'true');
+            } else {
+                htmlEl.removeAttribute('data-theme');
+                iconEl.textContent = '🌙';
+                toggleBtn.setAttribute('aria-checked', 'false');
+            }
+        }
+
+        if (storedTheme === 'dark') {
+            applyTheme('dark');
+        } else if (storedTheme === 'light') {
+            applyTheme('light');
+        } else {
+            // 無儲存偏好 → 跟隨系統
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+            const systemTheme = prefersDark.matches ? 'dark' : 'light';
+            applyTheme(systemTheme);
+            localStorage.setItem('weatherTheme', systemTheme);
+        }
+
+        // ----- 切換函數 -----
+        function toggleTheme() {
+            const isDark = htmlEl.getAttribute('data-theme') === 'dark';
+            const newTheme = isDark ? 'light' : 'dark';
+            applyTheme(newTheme);
+            localStorage.setItem('weatherTheme', newTheme);
+        }
+
+        // ----- 事件綁定 -----
+        toggleBtn.addEventListener('click', toggleTheme);
+
+        // 鍵盤支援
+        toggleBtn.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleTheme();
+            }
+        });
+
+        // ----- 系統偏好變化（僅當無使用者自訂時跟隨） -----
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+        const handleSystemChange = (e) => {
+            // 只有當 localStorage 沒有被使用者手動覆蓋時才跟隨
+            if (!localStorage.getItem('weatherTheme')) {
+                const newTheme = e.matches ? 'dark' : 'light';
+                applyTheme(newTheme);
+                localStorage.setItem('weatherTheme', newTheme);
+            }
+        };
+        prefersDark.addEventListener('change', handleSystemChange);
+
+    })();
+</script>
 </body>
 </html>
