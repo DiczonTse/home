@@ -32705,34 +32705,78 @@
         // ===================================================================
         // scrollToCard 修正偏移並增加高亮
         // ===================================================================
-        function scrollToCard(anchor) {
-            const el = document.getElementById(anchor);
-            if (!el) return;
+        let _scrollLock = false;  // 全域鎖，防止遞迴
 
-            const header = document.querySelector('header');
-            const search = document.querySelector('.search-container');
-            const headerHeight = header ? header.offsetHeight : 0;
-            const searchHeight = search ? search.offsetHeight : 0;
-            const extraOffset = 12;
-            const offset = headerHeight + searchHeight + extraOffset;
+		function scrollToCard(anchor) {
+			// 避免重複進入（例如 hashchange 又觸發）
+			if (_scrollLock) return;
+			_scrollLock = true;
 
-            const rect = el.getBoundingClientRect();
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            const targetPosition = rect.top + scrollTop - offset;
+			try {
+				let el = document.getElementById(anchor);
 
-            window.scrollTo({ top: Math.max(0, targetPosition), behavior: 'smooth' });
+				// 🔥 如果卡片不在 DOM，自動載入全部
+				if (!el) {
+					const targetCard = cards.find(c => c.anchor === anchor);
+					if (!targetCard) {
+						_scrollLock = false;
+						return;
+					}
 
-            history.replaceState(null, null, '#' + anchor);
+					// 為了確保卡片出現，我們將 currentPage 設為最後一頁（載入全部）
+					// 注意：此處保留當前篩選，因為幻燈片中的卡片一定在 filteredCards 中
+					const totalFiltered = filteredCards.length || cards.length;
+					currentPage = Math.ceil(totalFiltered / CARDS_PER_PAGE);
+					renderAll();  // 同步重新渲染
 
-            el.style.animation = 'none';
-            void el.offsetWidth;
-            el.style.animation = 'highlight 1.5s ease-out';
+					// 重新取得元素
+					el = document.getElementById(anchor);
+					if (!el) {
+						// 若仍找不到（可能被篩選掉了），強制切換至 All
+						currentFilter = 'All';
+						document.getElementById('tagFilter').value = 'All';
+						document.getElementById('megaTitleText').textContent = getText('cafe');
+						renderAll();
+						el = document.getElementById(anchor);
+						if (!el) {
+							_scrollLock = false;
+							return;
+						}
+					}
+				}
 
-            if (window.highlightTimer) clearTimeout(window.highlightTimer);
-            window.highlightTimer = setTimeout(() => {
-                el.style.animation = '';
-            }, 2000);
-        }
+				// 使用 requestAnimationFrame 確保 DOM 完全更新後再滾動
+				requestAnimationFrame(() => {
+					const header = document.querySelector('header');
+					const search = document.querySelector('.search-container');
+					const headerHeight = header ? header.offsetHeight : 0;
+					const searchHeight = search ? search.offsetHeight : 0;
+					const extraOffset = 12;
+					const offset = headerHeight + searchHeight + extraOffset;
+
+					const rect = el.getBoundingClientRect();
+					const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+					const targetPosition = rect.top + scrollTop - offset;
+
+					window.scrollTo({ top: Math.max(0, targetPosition), behavior: 'smooth' });
+					history.replaceState(null, null, '#' + anchor); // 更新 URL（但不觸發 hashchange）
+
+					// 高亮動畫
+					el.style.animation = 'none';
+					void el.offsetWidth;
+					el.style.animation = 'highlight 1.5s ease-out';
+					if (window.highlightTimer) clearTimeout(window.highlightTimer);
+					window.highlightTimer = setTimeout(() => {
+						el.style.animation = '';
+					}, 2000);
+
+					_scrollLock = false;  // 解鎖
+				});
+
+			} catch (e) {
+				_scrollLock = false;
+			}
+		}
 
         function handleClick(url) {
             if (isYouTube(url)) showVideo(url);
@@ -33434,22 +33478,9 @@
         // 23. 初始化
         // ===================================================================
         window.addEventListener('hashchange', () => {
-            const h = location.hash.substring(1);
-            if (h) {
-                const targetCard = cards.find(c => c.anchor === h);
-                if (targetCard) {
-                    const idx = cards.indexOf(targetCard);
-                    const end = currentPage * CARDS_PER_PAGE;
-                    if (idx >= end) {
-                        currentPage = Math.ceil(cards.length / CARDS_PER_PAGE);
-                        renderAll();
-                        setTimeout(() => scrollToCard(h), 300);
-                    } else {
-                        setTimeout(() => scrollToCard(h), 200);
-                    }
-                }
-            }
-        });
+			const h = location.hash.substring(1);
+			if (h) scrollToCard(h);
+		});
 
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js').catch(() => {});
