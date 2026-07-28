@@ -109,20 +109,25 @@
 </div>
 
 <script>
-    // 香港天文台本港地區天氣報告 API 地址
-    const hkoApiUrl = 'https://weather.gov.hk';
+    // 1. 修正天文台數據專用的正確網域 (data.weather.gov.hk)
+    const targetUrl = 'https://weather.gov.hk';
+    
+    // 2. 使用穩定的 corsproxy.io 作為代理，並確保 URL 拼接格式完全正確
+    const hkoApiUrl = 'https://corsproxy.io/?' + encodeURIComponent(targetUrl);
 
     async function fetchWeather() {
         try {
             const response = await fetch(hkoApiUrl);
-            if (!response.ok) throw new Error('網絡連線失敗');
+            if (!response.ok) throw new Error('網絡代理連線失敗');
+            
+            // corsproxy.io 會直接回傳目標網站的原始 JSON，不需要多一層 contents 解析
             const data = await response.json();
             renderWeather(data);
         } catch (error) {
             document.getElementById('weather-card').innerHTML = `
                 <div class="loading" style="color: red;">
                     無法載入天氣數據，請稍後重試。<br>
-                    <small>${error.message}</small>
+                    <small style="color: #999; display:block; margin-top:5px;">錯誤原因: ${error.message}</small>
                 </div>
             `;
         }
@@ -134,15 +139,15 @@
         // 擷取京士柏的相對濕度作為代表
         const hkoHumidity = data.humidity.data[0];
         
-        // 格式化更新時間
-        const updateTimeStr = data.updateTime.substring(11, 16); 
+        // 格式化更新時間 (從第 11 個字元擷取 HH:MM)
+        const updateTimeStr = data.updateTime ? data.updateTime.substring(11, 16) : '--:--'; 
         
-        // 天文台天氣圖標網址優化
+        // 天文台天氣圖標網址
         const iconId = data.icon[0];
         const iconUrl = `https://hko.gov.hk{iconId}.png`;
 
         // 提取紫外線指數 (如有)
-        const uvIndex = data.uvIndex ? data.uvIndex.data[0].value : '無';
+        const uvIndex = (data.uvIndex && data.uvIndex.data && data.uvIndex.data.length > 0) ? data.uvIndex.data[0].value : '無';
 
         const htmlContent = `
             <div class="header">
@@ -172,7 +177,7 @@
 
             <div class="forecast-report">
                 <strong>現時天氣簡報：</strong><br>
-                ${data.weatherDescription[0]}
+                ${data.weatherDescription}
             </div>
         `;
 
@@ -182,7 +187,7 @@
     // 初始加載
     fetchWeather();
     
-    // 每 10 分鐘自動刷新一次 (600,000 毫秒)
+    // 每 10 分鐘自動刷新一次
     setInterval(fetchWeather, 600000);
 </script>
 
