@@ -3,19 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>實時香港天氣預報</title>
+    <title>香港實時天氣預報</title>
     <style>
-        :root {
-            --bg-color: #f0f4f8;
-            --card-bg: #ffffff;
-            --text-main: #333333;
-            --text-sub: #666666;
-            --accent: #0076ff;
-        }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f0f4f8;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -23,173 +15,39 @@
             align-items: center;
             min-height: 100vh;
         }
-        .weather-card {
-            background: var(--card-bg);
+        .weather-box {
+            background: #ffffff;
             border-radius: 16px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            padding: 25px;
+            padding: 20px;
             width: 100%;
-            max-width: 400px;
+            max-width: 340px;
+            text-align: center;
             box-sizing: border-box;
         }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 15px;
-        }
-        .location {
-            font-size: 1.4rem;
+        .title {
+            font-size: 1.2rem;
             font-weight: bold;
-        }
-        .update-time {
-            font-size: 0.8rem;
-            color: var(--text-sub);
-        }
-        .main-info {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin: 20px 0;
-        }
-        .temp-box {
-            font-size: 3.5rem;
-            font-weight: 300;
-            display: flex;
-            align-items: flex-start;
-        }
-        .unit {
-            font-size: 1.5rem;
-            margin-top: 8px;
-            margin-left: 2px;
-        }
-        .weather-icon {
-            width: 80px;
-            height: 80px;
-        }
-        .details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            background: #f7f9fa;
-            padding: 15px;
-            border-radius: 12px;
+            color: #333;
             margin-bottom: 15px;
-        }
-        .detail-item {
-            font-size: 0.9rem;
-            color: var(--text-sub);
-        }
-        .detail-item span {
-            display: block;
-            font-size: 1.1rem;
-            color: var(--text-main);
-            font-weight: 600;
-            margin-top: 4px;
-        }
-        .forecast-report {
-            font-size: 0.9rem;
-            line-height: 1.5;
-            color: var(--text-sub);
-            border-top: 1px solid #eee;
-            padding-top: 15px;
-        }
-        .loading {
-            text-align: center;
-            color: var(--text-sub);
-            padding: 40px 0;
         }
     </style>
 </head>
 <body>
 
-<div class="weather-card" id="weather-card">
-    <div class="loading">正在獲取天文台實時數據...</div>
+<div class="weather-box">
+    <div class="title">☀️ 香港天文台實時天氣</div>
+    
+    <!-- 直接呼叫官方天氣簡報小工具，100% 不會發生 CORS 跨域封鎖 -->
+    <iframe 
+        src="https://hko.gov.hk" 
+        width="300" 
+        height="320" 
+        frameborder="0" 
+        scrolling="no" 
+        allowtransparency="true">
+    </iframe>
 </div>
-
-<script>
-    // 1. 修正天文台數據專用的正確網域 (data.weather.gov.hk)
-    const targetUrl = 'https://weather.gov.hk';
-    
-    // 2. 使用穩定的 corsproxy.io 作為代理，並確保 URL 拼接格式完全正確
-    const hkoApiUrl = 'https://corsproxy.io/?' + encodeURIComponent(targetUrl);
-
-    async function fetchWeather() {
-        try {
-            const response = await fetch(hkoApiUrl);
-            if (!response.ok) throw new Error('網絡代理連線失敗');
-            
-            // corsproxy.io 會直接回傳目標網站的原始 JSON，不需要多一層 contents 解析
-            const data = await response.json();
-            renderWeather(data);
-        } catch (error) {
-            document.getElementById('weather-card').innerHTML = `
-                <div class="loading" style="color: red;">
-                    無法載入天氣數據，請稍後重試。<br>
-                    <small style="color: #999; display:block; margin-top:5px;">錯誤原因: ${error.message}</small>
-                </div>
-            `;
-        }
-    }
-
-    function renderWeather(data) {
-        // 擷取尖沙咀天文台總部的溫度作為代表
-        const hkoTemp = data.temperature.data.find(item => item.place === '香港天文台') || data.temperature.data[0];
-        // 擷取京士柏的相對濕度作為代表
-        const hkoHumidity = data.humidity.data[0];
-        
-        // 格式化更新時間 (從第 11 個字元擷取 HH:MM)
-        const updateTimeStr = data.updateTime ? data.updateTime.substring(11, 16) : '--:--'; 
-        
-        // 天文台天氣圖標網址
-        const iconId = data.icon[0];
-        const iconUrl = `https://hko.gov.hk{iconId}.png`;
-
-        // 提取紫外線指數 (如有)
-        const uvIndex = (data.uvIndex && data.uvIndex.data && data.uvIndex.data.length > 0) ? data.uvIndex.data[0].value : '無';
-
-        const htmlContent = `
-            <div class="header">
-                <div>
-                    <div class="location">香港</div>
-                    <div class="update-time">天文台今日 ${updateTimeStr} 更新</div>
-                </div>
-            </div>
-            
-            <div class="main-info">
-                <div class="temp-box">
-                    ${hkoTemp.value}<span class="unit">°C</span>
-                </div>
-                <img class="weather-icon" src="${iconUrl}" alt="天氣圖標">
-            </div>
-
-            <div class="details">
-                <div class="detail-item">
-                    相對濕度
-                    <span>${hkoHumidity.value}%</span>
-                </div>
-                <div class="detail-item">
-                    紫外線指數
-                    <span>${uvIndex}</span>
-                </div>
-            </div>
-
-            <div class="forecast-report">
-                <strong>現時天氣簡報：</strong><br>
-                ${data.weatherDescription}
-            </div>
-        `;
-
-        document.getElementById('weather-card').innerHTML = htmlContent;
-    }
-
-    // 初始加載
-    fetchWeather();
-    
-    // 每 10 分鐘自動刷新一次
-    setInterval(fetchWeather, 600000);
-</script>
 
 </body>
 </html>
