@@ -3,11 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>香港實時天氣預報</title>
+    <title>實時香港天氣預報</title>
     <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-sub: #666666;
+        }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #f0f4f8;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
             margin: 0;
             padding: 20px;
             display: flex;
@@ -15,39 +22,115 @@
             align-items: center;
             min-height: 100vh;
         }
-        .weather-box {
-            background: #ffffff;
+        .weather-card {
+            background: var(--card-bg);
             border-radius: 16px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            padding: 20px;
+            padding: 25px;
             width: 100%;
-            max-width: 340px;
-            text-align: center;
+            max-width: 400px;
             box-sizing: border-box;
         }
-        .title {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 15px;
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
         }
+        .location { font-size: 1.4rem; font-weight: bold; }
+        .update-time { font-size: 0.8rem; color: var(--text-sub); }
+        .main-info { display: flex; align-items: center; justify-content: space-between; margin: 20px 0; }
+        .temp-box { font-size: 3.5rem; font-weight: 300; display: flex; }
+        .unit { font-size: 1.5rem; margin-top: 8px; margin-left: 2px; }
+        .weather-icon { width: 80px; height: 80px; }
+        .details { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #f7f9fa; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
+        .detail-item { font-size: 0.9rem; color: var(--text-sub); }
+        .detail-item span { display: block; font-size: 1.1rem; color: var(--text-main); font-weight: 600; margin-top: 4px; }
+        .forecast-report { font-size: 0.9rem; line-height: 1.5; color: var(--text-sub); border-top: 1px solid #eee; padding-top: 15px; }
+        .loading { text-align: center; color: var(--text-sub); padding: 40px 0; }
     </style>
 </head>
 <body>
 
-<div class="weather-box">
-    <div class="title">☀️ 香港天文台實時天氣</div>
-    
-    <!-- 直接呼叫官方天氣簡報小工具，100% 不會發生 CORS 跨域封鎖 -->
-    <iframe 
-        src="https://hko.gov.hk" 
-        width="300" 
-        height="320" 
-        frameborder="0" 
-        scrolling="no" 
-        allowtransparency="true">
-    </iframe>
+<div class="weather-card" id="weather-card">
+    <div class="loading">正在連線天文台數據庫...</div>
 </div>
+
+<script>
+    const targetUrl = 'https://weather.gov.hk';
+    
+    // 預設配置多個不同的免費地理反向代理節點
+    const proxies = [
+        'https://allorigins.win', 
+        'https://corsproxy.io?'
+    ];
+
+    async function fetchWeather() {
+        // 嘗試方案 A：使用 allorigins 代理
+        try {
+            const res = await fetch(proxies[0] + encodeURIComponent(targetUrl));
+            if (!res.ok) throw new Error();
+            const proxyData = await res.json();
+            const data = JSON.parse(proxyData.contents);
+            renderWeather(data);
+            return; 
+        } catch (e) {
+            console.log("主代理失靈，正在切換備用節點...");
+        }
+
+        // 嘗試方案 B：使用 corsproxy.io 備用代理
+        try {
+            const res = await fetch(proxies[1] + encodeURIComponent(targetUrl));
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            renderWeather(data);
+        } catch (error) {
+            // 所有公共代理在你的當前網路環境皆被阻斷
+            document.getElementById('weather-card').innerHTML = `
+                <div class="loading" style="color: #ff3b30; text-align:left; padding:10px;">
+                    <strong>⚠️ 天氣數據加載失敗</strong><br>
+                    <p style="font-size:0.85rem; color:#666; line-height:1.4;">
+                        原因：當前瀏覽器或網路環境（如公司防火牆）封鎖了跨域代理連線。<br><br>
+                        <strong>💡 建議解決方法：</strong><br>
+                        請直接改用上方提供的 <strong>【方案一 (Iframe 版本)】</strong> 代碼，該版本不經任何代理，100% 不受防火牆影響。
+                    </p>
+                </div>
+            `;
+        }
+    }
+
+    function renderWeather(data) {
+        const hkoTemp = data.temperature.data.find(item => item.place === '香港天文台') || data.temperature.data[0];
+        const hkoHumidity = data.humidity.data[0];
+        const updateTimeStr = data.updateTime ? data.updateTime.substring(11, 16) : '--:--'; 
+        const iconUrl = `https://hko.gov.hk{data.icon}.png`;
+        const uvIndex = (data.uvIndex && data.uvIndex.data && data.uvIndex.data.length > 0) ? data.uvIndex.data[0].value : '無';
+
+        document.getElementById('weather-card').innerHTML = `
+            <div class="header">
+                <div>
+                    <div class="location">香港</div>
+                    <div class="update-time">天文台 ${updateTimeStr} 更新</div>
+                </div>
+            </div>
+            <div class="main-info">
+                <div class="temp-box">${hkoTemp.value}<span class="unit">°C</span></div>
+                <img class="weather-icon" src="${iconUrl}">
+            </div>
+            <div class="details">
+                <div class="detail-item">相對濕度<span>${hkoHumidity.value}%</span></div>
+                <div class="detail-item">紫外線指數<span>${uvIndex}</span></div>
+            </div>
+            <div class="forecast-report">
+                <strong>現時天氣簡報：</strong><br>${data.weatherDescription}
+            </div>
+        `;
+    }
+
+    fetchWeather();
+    setInterval(fetchWeather, 600000); // 10分鐘自動更新
+</script>
 
 </body>
 </html>
