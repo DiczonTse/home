@@ -1475,7 +1475,6 @@
     <audio id="shopBgmAudio" style="display:none;" preload="auto"></audio>
     <audio id="rankAudio" style="display:none;" preload="auto"></audio>
     <audio id="deckBuildAudio" style="display:none;" preload="auto"></audio>
-    <!-- ★ 預先載入背景音樂 (preload) -->
     <link rel="preload" as="audio" href="Offline Dice - Title.mp3">
     <link rel="preload" as="audio" href="Offline Dice - Dice Rush.mp3">
     <link rel="preload" as="audio" href="Offline Dice - Shop.mp3">
@@ -1573,6 +1572,17 @@
             <button class="draw-btn" id="drawConfirmBtn">🎉 太好了！</button>
         </div>
 
+        <!-- ★ 每日寶箱結果覆蓋層 -->
+        <div class="draw-result-overlay" id="dailyResultOverlay">
+            <div class="draw-icon" id="dailyResultIcon">🎁</div>
+            <div class="draw-title" id="dailyResultTitle">🎉 每日寶箱</div>
+            <div class="draw-sub" id="dailyResultSub">你獲得了</div>
+            <div class="draw-dice-box" style="border-color:#f7d875;background:rgba(245,166,35,0.12);">
+                <span class="dd-label" id="dailyResultAmount" style="font-size:52px;">🏆 0</span>
+            </div>
+            <button class="draw-btn" id="dailyResultConfirmBtn">👍 太好了！</button>
+        </div>
+
         <!-- 排行榜覆蓋層 -->
         <div class="leaderboard-overlay" id="leaderboardOverlay">
             <button class="lb-close" id="lbCloseBtn">✕</button>
@@ -1598,10 +1608,10 @@
             <button id="fishModeBtn">🐟 摸魚</button>
         </div>
 
-        <!-- 音效按鈕 (左下) -->
+        <!-- 音效按鈕 -->
         <button id="soundToggleBtn" title="音效開關">🔊</button>
 
-        <!-- ★ 全屏按鈕 (右下) ★ -->
+        <!-- ★ 全屏按鈕 -->
         <button id="fullscreenBtn" title="全屏顯示">⛶</button>
 
         <div class="controls">
@@ -1622,7 +1632,7 @@
 
     <script>
         // ================================================================
-        // 翻譯 (完整) - ★ 新增每日寶箱相關翻譯
+        // 翻譯 (完整)
         // ================================================================
         const translations = {
             'zh-TW': {
@@ -1677,14 +1687,17 @@
                 spikeExpiredFloating: '🌵 消失',
                 spikeHit: '🌵 尖刺 -{dmg}',
                 spikeNext: '🌵 下次尖刺在 {time}s 後',
-                // ★ 每日寶箱
                 dailyChestName: '每日寶箱',
-                dailyChestDesc: '每22小時可開啟一次，獲得金幣',
+                dailyChestDesc: '每22小時可開啟一次，獲得分數',
                 dailyChestBtn: '開啟',
                 dailyChestReady: '🎁 可以開啟！',
                 dailyChestWait: '⏳ 剩餘 {time}',
-                dailyChestReward: '💰 獲得 {gold} 金幣！',
+                dailyChestReward: '💰 獲得 {gold} 分數！',
                 dailyChestClaimed: '✅ 已領取，下次 {time} 後可再開',
+                dailyResultTitle: '🎉 每日寶箱',
+                dailyResultSub: '你獲得了',
+                dailyResultConfirm: '👍 太好了！',
+                dailyResultAmount: '🏆 +{gold}',
                 diceNames: {
                     FIRE: '火',
                     THUNDER: '雷',
@@ -1966,12 +1979,16 @@
                 spikeHit: '🌵 尖刺 -{dmg}',
                 spikeNext: '🌵 下次尖刺在 {time}s 后',
                 dailyChestName: '每日宝箱',
-                dailyChestDesc: '每22小时可开启一次，获得金币',
+                dailyChestDesc: '每22小时可开启一次，获得分数',
                 dailyChestBtn: '开启',
                 dailyChestReady: '🎁 可以开启！',
                 dailyChestWait: '⏳ 剩余 {time}',
-                dailyChestReward: '💰 获得 {gold} 金币！',
+                dailyChestReward: '💰 获得 {gold} 分数！',
                 dailyChestClaimed: '✅ 已领取，下次 {time} 后可再开',
+                dailyResultTitle: '🎉 每日宝箱',
+                dailyResultSub: '你获得了',
+                dailyResultConfirm: '👍 太好了！',
+                dailyResultAmount: '🏆 +{gold}',
                 diceNames: {
                     FIRE: '火',
                     THUNDER: '雷',
@@ -2253,12 +2270,16 @@
                 spikeHit: '🌵 Spike -{dmg}',
                 spikeNext: '🌵 Next spike in {time}s',
                 dailyChestName: 'Daily Chest',
-                dailyChestDesc: 'Free gold every 22 hours',
+                dailyChestDesc: 'Free points every 22 hours',
                 dailyChestBtn: 'Open',
                 dailyChestReady: '🎁 Ready to open!',
                 dailyChestWait: '⏳ Wait {time}',
-                dailyChestReward: '💰 Got {gold} gold!',
+                dailyChestReward: '💰 Got {gold} points!',
                 dailyChestClaimed: '✅ Claimed, next in {time}',
+                dailyResultTitle: '🎉 Daily Chest',
+                dailyResultSub: 'You got',
+                dailyResultConfirm: '👍 Great!',
+                dailyResultAmount: '🏆 +{gold}',
                 diceNames: {
                     FIRE: 'Fire',
                     THUNDER: 'Thunder',
@@ -2540,12 +2561,16 @@
                 spikeHit: '🌵 スパイク -{dmg}',
                 spikeNext: '🌵 次スパイク {time}s 後',
                 dailyChestName: 'デイリーチェスト',
-                dailyChestDesc: '22時間ごとに無料ゴールド',
+                dailyChestDesc: '22時間ごとに無料点',
                 dailyChestBtn: '開ける',
                 dailyChestReady: '🎁 開けられる！',
                 dailyChestWait: '⏳ 残り {time}',
-                dailyChestReward: '💰 {gold} ゴールド獲得！',
+                dailyChestReward: '💰 {gold} 点獲得！',
                 dailyChestClaimed: '✅ 受取済み、次は {time} 後',
+                dailyResultTitle: '🎉 デイリーチェスト',
+                dailyResultSub: '獲得',
+                dailyResultConfirm: '👍 よかった！',
+                dailyResultAmount: '🏆 +{gold}',
                 diceNames: {
                     FIRE: '火',
                     THUNDER: '雷',
@@ -2827,12 +2852,16 @@
                 spikeHit: '🌵 가시 -{dmg}',
                 spikeNext: '🌵 다음 가시 {time}s 후',
                 dailyChestName: '데일리 상자',
-                dailyChestDesc: '22시간마다 무료 골드',
+                dailyChestDesc: '22시간마다 무료 점',
                 dailyChestBtn: '열기',
                 dailyChestReady: '🎁 열 수 있음!',
                 dailyChestWait: '⏳ 남은 시간 {time}',
-                dailyChestReward: '💰 {gold} 골드 획득!',
+                dailyChestReward: '💰 {gold} 점 획득!',
                 dailyChestClaimed: '✅ 수령 완료, 다음 {time} 후',
+                dailyResultTitle: '🎉 데일리 상자',
+                dailyResultSub: '획득',
+                dailyResultConfirm: '👍 좋아요！',
+                dailyResultAmount: '🏆 +{gold}',
                 diceNames: {
                     FIRE: '불',
                     THUNDER: '번개',
@@ -3131,96 +3160,54 @@
                 { id: 'slime', nameKey: 'slime', emoji: '🟢', color: '#27ae60' },
                 { id: 'balistic', nameKey: 'balistic', emoji: '🐔', color: '#e67e22' }
             ]),
+            // ★ 修改：FIRE 骰子定義，移除 burn，增加火元素傷害屬性
             ALL_DICE_DEFS: Object.freeze({
-                FIRE: Object.freeze({ label: '🔥', color: '#e17055', baseDamage: 20, damagePerStar: 3, baseInterval: 0.8,
-                    intervalPerLevel: -0.01, splash: 0.6, burn: true, attackType: 'front' }),
-                THUNDER: Object.freeze({ label: '⚡', color: '#fdcb6e', baseDamage: 30, damagePerStar: 3, baseInterval: 0.7,
-                    intervalPerLevel: -0.02, chain: { count: 3, range: 2.5, damageFactors: [1.0, 0.7, 0.3] },
-                    attackType: 'front' }),
+                FIRE: Object.freeze({ label: '🔥', color: '#e17055', baseDamage: 20, damagePerStar: 3, baseInterval: 0.8, intervalPerLevel: -0.01,
+					splash: 0.6, burn: false, attackType: 'front', fireDamageBase: 20, fireDamagePerLevel: 20, atkPerLevel: 10 }),
+                THUNDER: Object.freeze({ label: '⚡', color: '#fdcb6e', baseDamage: 30, damagePerStar: 3, baseInterval: 0.7, intervalPerLevel: -0.02,
+					chain: { count: 3, range: 2.5, damageFactors: [1.0, 0.7, 0.3] }, attackType: 'front', atkPerLevel: 10, thunderPerLevel: 20 }),
                 WIND: Object.freeze({ label: '🌪️', color: '#74b9ff', baseDamage: 20, damagePerStar: 3, baseInterval: 0.45,
-                    intervalPerLevel: -0.045, attackType: 'front' }),
-                POISON: Object.freeze({ label: '☠️', color: '#6c5ce7', baseDamage: 20, damagePerStar: 2, baseInterval: 1.3,
-                    intervalPerLevel: 0, poison: { damageBase: 50, damagePerStar: 5, duration: Number
-                            .POSITIVE_INFINITY, tick: 1 }, attackType: 'front' }),
-                ICE: Object.freeze({ label: '❄️', color: '#4fc3f7', baseDamage: 30, damagePerStar: 3, baseInterval: 1.5,
-                    intervalPerLevel: -0.02, slow: { baseRate: 0.05, ratePerStar: 0.02, maxStacks: 3,
-                        stackRate: 0.5 }, attackType: 'front' }),
+                    intervalPerLevel: 0, attackType: 'front' }),
+                POISON: Object.freeze({ label: '☠️', color: '#6c5ce7', baseDamage: 20, damagePerStar: 2, baseInterval: 1.3, intervalPerLevel: 0,
+					poison: { damageBase: 50, damagePerStar: 5, duration: Number .POSITIVE_INFINITY, tick: 1 }, attackType: 'front', atkPerLevel: 10, poisonPerLevel: 25 }),
+                ICE: Object.freeze({ label: '❄️', color: '#4fc3f7', baseDamage: 30, damagePerStar: 3, baseInterval: 1.5, intervalPerLevel: -0.02,
+					slow: { baseRate: 0.05, ratePerStar: 0.02, maxStacks: 3, stackRate: 0.5 }, attackType: 'front', atkPerLevel: 30 }),
                 IRON: Object.freeze({ label: '🔩', color: '#95a5a6', baseDamage: 100, damagePerStar: 10, baseInterval: 1.0,
-                    intervalPerLevel: 0, attackType: 'highestHp', bossMultiplier: 2 }),
+                    intervalPerLevel: 0, attackType: 'highestHp', bossMultiplier: 2, atkPerLevel: 100 }),
                 RANDOM: Object.freeze({ label: '🎲', color: '#a29bfe', baseDamage: 50, damagePerStar: 10, baseInterval: 0.9,
-                    intervalPerLevel: 0, attackType: 'random' }),
+                    intervalPerLevel: 0, attackType: 'random', atkPerLevel: 50 }),
                 GAMBLE: Object.freeze({ label: '🎰', color: '#f1c40f', baseDamage: 7, damagePerStar: 10, baseInterval: 1.0,
                     intervalPerLevel: -0.01, attackType: 'front', gambleMin: 7 }),
                 LOCK: Object.freeze({ label: '🔒', color: '#3498db', baseDamage: 30, damagePerStar: 10, baseInterval: 0.8,
-                    intervalPerLevel: -0.01, attackType: 'front', lockStun: true }),
+                    intervalPerLevel: -0.01, attackType: 'front', lockStun: true, atkPerLevel: 10 }),
                 GOLDMINE: Object.freeze({ label: '⛏️', color: '#f1c40f', baseDamage: 0, damagePerStar: 0, baseInterval: 10,
                     intervalPerLevel: -0.857, attackType: 'none', isGoldmine: true }),
                 LIGHT: Object.freeze({ label: '💡', color: '#f9ca24', baseDamage: 0, damagePerStar: 0, baseInterval: 1.0,
                     intervalPerLevel: 0, attackType: 'none', isLight: true }),
-                SPIKE: Object.freeze({
-                    label: '🌵',
-                    color: '#2ecc71',
-                    baseDamage: 0,
-                    damagePerStar: 0,
-                    baseInterval: 5.0,
-                    intervalPerLevel: 0,
-                    attackType: 'none',
-                    isSpike: true,
-                    spikeDamageBase: 110,
-                    spikeDamagePerStar: 20,
-                    spikeDamagePerLevel: 100,
-                    spikeDurationBase: 2.0,
-                    spikeDurationPerLevel: 0.75,
-                    spikeIntervalBase: 5.0,
-                    spikeIntervalPerStar: -0.04,
-                }),
+                SPIKE: Object.freeze({ label: '🌵', color: '#2ecc71', baseDamage: 0, damagePerStar: 0, baseInterval: 5.0, intervalPerLevel: 0,
+					attackType: 'none', isSpike: true, spikeDamageBase: 110, spikeDamagePerStar: 20, spikeDamagePerLevel: 100,
+                    spikeDurationBase: 2.0, spikeDurationPerLevel: 0.75, spikeIntervalBase: 5.0, spikeIntervalPerStar: -0.04, }),
                 MYSTERY: Object.freeze({ label: '❓', color: '#805500', baseDamage: 30, damagePerStar: 0, baseInterval: 1.0,
                     intervalPerLevel: 0, attackType: 'front', isMystery: true }),
-                MIMIC: Object.freeze({ label: '🤡', color: '#8e44ad', baseDamage: 30, damagePerStar: 50 / 6, baseInterval: 1.5,
-                    intervalPerLevel: 0, attackType: 'front', isMimic: true }),
-                DROUGHT_THUNDER: Object.freeze({
-                    label: '🌩️',
-                    color: '#8B008B',
-                    baseDamage: 20,
-                    damagePerStar: 50 / 6,
-                    baseInterval: 0.8,
-                    intervalPerLevel: 0,
-                    attackType: 'front',
-                    isDroughtThunder: true,
-                    thunderBaseDamage: 50,
-                    thunderDamagePerStar: 40 / 6,
-                    thunderDamagePerLevel: 50,
-                }),
-                VAMPIRE: Object.freeze({ label: '🧛', color: '#8e44ad', baseDamage: 10, damagePerStar: 20 / 6, baseInterval: 1.3,
-                    intervalPerLevel: 0, attackType: 'front', isVampire: true, absorbBaseGold: 1,
-                    absorbGoldPerLevel: 3, absorbBaseInterval: 5, absorbIntervalPerLevel: -0.25 }),
+				BASEBALL: Object.freeze({ label: '💫', color: '#e67e22', baseDamage: 3000, damagePerStar: 20, baseInterval: 4.0,
+                    intervalPerLevel: 0, attackType: 'front', isBaseball: true, atkPerLevel: 80 }),
+                MIMIC: Object.freeze({ label: '🤡', color: '#8e44ad', baseDamage: 30, damagePerStar: 5, baseInterval: 1.5,
+                    intervalPerLevel: 0, attackType: 'front', isMimic: true, atkPerLevel: 10 }),
+                DROUGHT_THUNDER: Object.freeze({ label: '🌩️', color: '#8B008B', baseDamage: 20, damagePerStar: 5, baseInterval: 0.8, intervalPerLevel: 0,
+                    attackType: 'front', isDroughtThunder: true, thunderBaseDamage: 50, thunderDamagePerStar: 4, thunderDamagePerLevel: 50, atkPerLevel: 10 }),
+                VAMPIRE: Object.freeze({ label: '🧛', color: '#8e44ad', baseDamage: 10, damagePerStar: 2, baseInterval: 1.3, intervalPerLevel: 0,
+					attackType: 'front', isVampire: true, absorbBaseGold: 1, absorbGoldPerLevel: 3, absorbBaseInterval: 5, absorbIntervalPerLevel: -0.1, atkPerLevel: 10 }),
                 JOKER: Object.freeze({ label: '🃏', color: '#fd79a8', baseDamage: 40, damagePerStar: 5, baseInterval: 1.5,
-                    intervalPerLevel: 0, attackType: 'front', isJoker: true }),
-                SHIELD: Object.freeze({
-                    label: '🛡️',
-                    color: '#2ecc71',
-                    baseDamage: 20,
-                    damagePerStar: 40 / 6,
-                    baseInterval: 1.0,
-                    intervalPerLevel: 0,
-                    attackType: 'front',
-                    isShield: true,
-                    shieldInterval: 10,
-                    shieldIntervalPerStar: -0.8 / 6,
-                    shieldDuration: 3,
-                    shieldDurationPerStar: 4 / 6,
-                    shieldDurationPerLevel: 0.5,
-                }),
+                    intervalPerLevel: 0, attackType: 'front', isJoker: true, atkPerLevel: 10 }),
+                SHIELD: Object.freeze({ label: '🛡️', color: '#2ecc71', baseDamage: 20, damagePerStar: 5, baseInterval: 1.0, intervalPerLevel: 0, attackType: 'front',
+					isShield: true, shieldInterval: 10, shieldIntervalPerStar: -0.1, shieldDuration: 3, shieldDurationPerStar: 0.5, shieldDurationPerLevel: 0.5, atkPerLevel: 20 }),
                 SAPLING: Object.freeze({ label: '🌱', color: '#55efc4', baseDamage: 10, damagePerStar: 10, baseInterval: 1.5,
-                    intervalPerLevel: 0, attackType: 'front', isSapling: true }),
-                TAICHI: Object.freeze({ label: '☯️', color: '#6c5ce7', baseDamage: 120, damagePerStar: 40, baseInterval: 0.8,
-                    intervalPerLevel: -0.01, attackType: 'front', isTaichi: true }),
-                BASEBALL: Object.freeze({ label: '💫', color: '#e67e22', baseDamage: 3000, damagePerStar: 40, baseInterval: 4.0,
-                    intervalPerLevel: 0, attackType: 'front', isBaseball: true })
+                    intervalPerLevel: 0, attackType: 'front', isSapling: true, atkPerLevel: 10 }),
+                TAICHI: Object.freeze({ label: '☯️', color: '#6c5ce7', baseDamage: 120, damagePerStar: 30, baseInterval: 0.8,
+                    intervalPerLevel: 0, attackType: 'front', isTaichi: true, atkPerLevel: 20, yangPercent: 40, yinPercent: 20 })
             })
         });
 
-        // ★ CHEST_GROUPS 加入每日寶箱 (daily)
         const CHEST_GROUPS = {
             common: {
                 id: 'common',
@@ -3250,7 +3237,6 @@
                 icon: '🎁',
                 emoji: '🎁'
             },
-            // ★ 每日寶箱
             daily: {
                 id: 'daily',
                 cost: 0,
@@ -3326,7 +3312,7 @@
             return Math.min(rank, 10);
         }
 
-        // ========== 保存系統（加入 dailyChestTimestamp） ==========
+        // ========== 保存系統 ==========
         const STORAGE_KEY = 'offlineDiceSaveData';
 
         function getDefaultSaveData() {
@@ -3354,7 +3340,7 @@
                 },
                 leaderboard: getDefaultLeaderboard(),
                 soundEnabled: true,
-                dailyChestTimestamp: 0 // ★ 每日寶箱上次開啟時間戳
+                dailyChestTimestamp: 0
             };
         }
         let saveData = null;
@@ -3582,7 +3568,7 @@
             spikes: [],
         };
 
-        // ========== 音效系統 + 預載入 ==========
+        // ========== 音效系統 ==========
         const MENU_MUSIC_URL = 'Offline Dice - Title.mp3';
         const GAME_MUSIC_URL = 'Offline Dice - Dice Rush.mp3';
         const SHOP_MUSIC_URL = 'Offline Dice - Shop.mp3';
@@ -3597,7 +3583,6 @@
         ];
         let currentBgmIndex = 0;
 
-        // ★ 預載入所有音頻
         function preloadAllAudio() {
             const audioIds = ['bgmAudio', 'shopBgmAudio', 'rankAudio', 'deckBuildAudio'];
             const urls = [
@@ -3613,7 +3598,6 @@
                     el.load();
                 }
             }
-            // 使用 fetch 預載入（觸發瀏覽器快取）
             for (const url of urls) {
                 fetch(url).then(r => r.blob()).catch(() => {});
             }
@@ -4132,7 +4116,7 @@
         function getEmptyCells() { let cells = []; for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++)
                 if (!isOccupied(c, r)) cells.push({ col: c, row: r }); return cells; }
 
-        // ========== 骰子創建 ==========
+        // ========== 骰子創建（★ 修改：火骰子普通傷害+火元素傷害） ==========
         function createDice(type, star) {
             star = star || 1;
             const def = CONST.ALL_DICE_DEFS[type];
@@ -4142,7 +4126,15 @@
             const mult = getUpgradeMultiplier(type);
 
             let dmg = 0;
-            if (type === 'IRON') {
+            let fireDmg = 0;
+
+            if (type === 'FIRE') {
+                const baseNormal = def.baseDamage + def.damagePerStar * (s - 1);
+                dmg = baseNormal * mult + (lv - 1) * (def.atkPerLevel || 0);
+                const fb = def.fireDamageBase || 20;
+                const fp = def.fireDamagePerLevel || 20;
+                fireDmg = fb + (lv - 1) * fp;
+			} else if (type === 'IRON') {
                 const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
                 const star7Dmg = def.baseDamage + def.damagePerStar * (7 - 1);
                 const maxDmg = 640;
@@ -4166,14 +4158,9 @@
                 dmg = baseDmg * ratio;
             } else if (type === 'GOLDMINE' || type === 'LIGHT') {
                 dmg = 0;
-            } else if (type === 'VAMPIRE') {
-                const base = def.baseDamage;
-                const perStar = def.damagePerStar;
-                dmg = base + perStar * (s - 1);
-                dmg = Math.round(dmg * 10) / 10;
             } else if (type === 'TAICHI') {
                 const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
-                dmg = baseDmg * mult;
+                dmg = baseDmg * mult + (lv-1)*def.atkPerLevel;
             } else if (type === 'BASEBALL') {
                 const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
                 const lvBonus = (lv - 1) * 80;
@@ -4190,12 +4177,20 @@
             } else if (type === 'SPIKE') {
                 dmg = 0;
             } else {
-                dmg = (def.baseDamage + def.damagePerStar * (s - 1)) * mult;
+                dmg = (def.baseDamage + def.damagePerStar * (s - 1)) * mult + (lv - 1) * (def.atkPerLevel || 0);
             }
             if (!isFinite(dmg) || dmg < 0) dmg = def.baseDamage || 10;
 
             let intervalBase = def.baseInterval + (def.intervalPerLevel || 0) * (lv - 1);
-
+			
+			if (type === 'WIND') {
+				const starMultiplier = Math.pow(2, s - 1);
+				const levelMultiplier = 1.1 + (lv - 1) * 0.02;
+				const totalMultiplier = starMultiplier * levelMultiplier;
+				intervalBase = def.baseInterval / totalMultiplier;
+				intervalBase = Math.max(0.05, intervalBase);
+			}
+			
             if (type === 'SPIKE') {
                 const baseInt = def.spikeIntervalBase || 5;
                 const perStar = def.spikeIntervalPerStar || -0.04;
@@ -4270,6 +4265,22 @@
                 get spikeIntervalPerStar() { return def.spikeIntervalPerStar || -0.04; },
             };
 
+            // ★ 火元素傷害儲存
+            if (type === 'FIRE') {
+                dice._fireDamage = fireDmg;
+            }
+			if (type === 'THUNDER') {
+				dice._thunderDamage = (lv - 1) * (def.thunderPerLevel || 20);
+			}
+			if (type === 'VAMPIRE') {
+                dice.absorbBaseInterval = def.absorbBaseInterval;
+				dice.absorbIntervalPerLevel = def.absorbIntervalPerLevel;
+				const base = def.baseDamage;
+				const perStar = def.damagePerStar;
+				let dmg = base + perStar * (s - 1) + (lv - 1) * (def.atkPerLevel || 0);
+				dmg = Math.round(dmg * 10) / 10;
+				dice._damage = dmg;
+			}
             if (dice.isMystery) {
                 dice.transformTimer = getMysteryTransformTime(s, lv);
                 dice.transformInterval = dice.transformTimer;
@@ -5009,7 +5020,6 @@
                 }
                 game.shields = game.shields.filter(s => s.active);
 
-                // ★ 尖刺更新
                 for (const spike of game.spikes) {
                     if (!spike.active) continue;
                     spike.timer -= dt;
@@ -5085,6 +5095,7 @@
                             }
                         }
                     }
+                    // ★ 火骰子已移除 burn，但保留相容
                     if (e.burnTimer && e.burnTimer > 0) {
                         e.burnTimer -= dt;
                         const burnDmg = (isFinite(e.burnDamage)) ? e.burnDamage * dt : 0;
@@ -5960,8 +5971,8 @@
             }
 
             const starRatio = (maxStar - 1) / 6;
-            const yinBasePct = 120 + starRatio * (360 - 120);
-            const yangBasePct = 200 + starRatio * (600 - 200);
+            const yinBasePct = 20;
+            const yangBasePct = 40;
             const yinPct = yinBasePct + (maxLevel - 1) * 20;
             const yangPct = yangBasePct + (maxLevel - 1) * 40;
             const yinBuff = yinPct / 100;
@@ -6078,7 +6089,7 @@
             return totalBonus;
         }
 
-        // ========== 攻擊（含特殊傷害取最高值 & 鎖骰子續攻） ==========
+        // ========== 攻擊（★ 修改：火骰子普通傷害+火元素濺射；鎖骰子續攻但只鎖一次） ==========
         function updateAttacks(dt) {
             updateTaichiAbilities(dt);
 
@@ -6090,6 +6101,9 @@
                         if (!dice) continue;
                         if (dice._isFinal === false) continue;
 
+						const def = CONST.ALL_DICE_DEFS[dice.type];
+						if (!def) continue;
+						
                         if (dice.isLight) {
                             continue;
                         }
@@ -6119,7 +6133,7 @@
                                     cloud.y < cellY + CELL_SIZE && cloud.y + cloud.h > cellY;
                             })) continue;
 
-                        // ★ SPIKE 骰子：放置尖刺
+                        // SPIKE
                         if (dice.isSpike) {
                             const interval = dice.interval;
                             dice._spikePlaceTimer = (dice._spikePlaceTimer || 0) - dt;
@@ -6219,6 +6233,7 @@
                                     if (target) {
                                         dice.cooldown = interval;
                                         let damage = dice.damage || 0;
+										if (dice.type === 'THUNDER') { damage += dice._thunderDamage || 0; }
                                         if (typeof damage !== 'number' || !isFinite(damage)) damage = 0;
 
                                         const hasShield = target.shieldTimer && target.shieldTimer > 0;
@@ -6262,7 +6277,6 @@
                                 }
                             }
 
-                            // 盾牌放置邏輯
                             const star = dice.star;
                             const lv = upgradeLevels[dice.type] || 1;
                             const intervalBase = dice.shieldInterval + dice.shieldIntervalPerStar * (star - 1);
@@ -6602,6 +6616,13 @@
                             let damage = dice.damage || 0;
                             if (typeof damage !== 'number' || !isFinite(damage)) damage = 0;
 
+                            // ★ 火骰子專屬：火元素傷害
+                            let fireDamage = 0;
+                            let isFireDice = (dice.type === 'FIRE');
+                            if (isFireDice) {
+                                fireDamage = dice._fireDamage || 0;
+                            }
+
                             if (dice.isBaseball) {
                                 const speedBonus = calculateLightBonus(r, c);
                                 if (speedBonus > 0) {
@@ -6639,32 +6660,35 @@
                                 if (!isFinite(target.slowFactor)) target.slowFactor = 0.05;
                             }
 
-                            // ★ LOCK 骰子 - 移除 _lockedByLockDice 檢查，讓鎖骰子可持續攻擊同一目標
+                            // ★ LOCK 骰子：如果目標已被鎖定，不再觸發新的鎖定效果，但普通攻擊仍繼續
                             if (dice.type === 'LOCK' && !isHacked) {
-                                // ★ 移除 if (target._lockedByLockDice) continue; 讓鎖骰子可以繼續攻擊
-                                const lv = upgradeLevels[dice.type] || 1;
-                                const star = dice.star;
-                                const baseProb = 0.04 + (star - 1) * (0.18 - 0.04) / 6;
-                                const maxProb = 0.26;
-                                const prob = baseProb + (lv - 1) / (CONST.MAX_LEVEL - 1) * (maxProb - 0.18);
-                                const finalProb = (isFinite(prob) && prob > 0) ? Math.min(prob, 0.99) : 0.04;
-                                if (Math.random() < finalProb) {
-                                    const baseDur = 3.5 + (star - 1) * (6.3 - 3.5) / 6;
-                                    const maxDur = 8.3;
-                                    const dur = baseDur + (lv - 1) / (CONST.MAX_LEVEL - 1) * (maxDur - 6.3);
-                                    const finalDur = (isFinite(dur) && dur > 0) ? dur : 3.5;
-                                    target.stunTimer = finalDur;
-                                    target._lockedByLockDice = true;
-                                    const data = getData();
-                                    showToast(data.toastStun.replace(/\{dur\}/g, finalDur.toFixed(1)), 1200);
-                                    addFloatingText(target.x, target.y - 30, `🔒 ${finalDur.toFixed(1)}s`, '#3498db',
-                                    18);
+                                if (!target._lockedByLockDice) {
+                                    const lv = upgradeLevels[dice.type] || 1;
+                                    const star = dice.star;
+                                    const baseProb = 0.04 + (star - 1) * (0.18 - 0.04) / 6;
+                                    const maxProb = 0.26;
+                                    const prob = baseProb + (lv - 1) / (CONST.MAX_LEVEL - 1) * (maxProb - 0.18);
+                                    const finalProb = (isFinite(prob) && prob > 0) ? Math.min(prob, 0.99) : 0.04;
+                                    if (Math.random() < finalProb) {
+                                        const baseDur = 3.5 + (star - 1) * (6.3 - 3.5) / 6;
+                                        const maxDur = 8.3;
+                                        const dur = baseDur + (lv - 1) / (CONST.MAX_LEVEL - 1) * (maxDur - 6.3);
+                                        const finalDur = (isFinite(dur) && dur > 0) ? dur : 3.5;
+                                        target.stunTimer = finalDur;
+                                        target._lockedByLockDice = true;
+                                        const data = getData();
+                                        showToast(data.toastStun.replace(/\{dur\}/g, finalDur.toFixed(1)), 1200);
+                                        addFloatingText(target.x, target.y - 30, `🔒 ${finalDur.toFixed(1)}s`, '#3498db',
+                                            18);
+                                    }
                                 }
+                                // ★ 無論是否觸發鎖定，普通攻擊都會造成傷害（已在上層造成）
                             }
 
                             const hasShield = target.shieldTimer && target.shieldTimer > 0;
                             const targetWasAlive = target.alive && target.hp > 0;
 
+                            // ★ 普通傷害應用
                             if (isHacked) {
                                 const healAmount = damage * 0.5;
                                 target.hp = (target.hp || 0) + healAmount;
@@ -6693,6 +6717,7 @@
                                     showToast(data.baseballKill || '💫 棒球骰子 擊殺！', 1000);
                                 }
 
+                                // ★ 火骰子不再有燃燒 (burn: false)，但保留相容
                                 if (dice.burn) {
                                     target.burnTimer = 2.0;
                                     target.burnDamage = damage * 0.3;
@@ -6705,14 +6730,53 @@
                                 }
                             }
 
-                            // ★ 特殊傷害取最高值（毒）
+                            // ★ 火元素傷害：對目標及附近敵人造成火元素濺射傷害（不燃燒）
+                            if (isFireDice && fireDamage > 0 && !isHacked && !hasShield) {
+                                const splashRange = dice.splash || 0.6;
+                                // 對目標造成火元素傷害
+                                const safeFireDmg = (typeof fireDamage === 'number' && isFinite(fireDamage)) ? fireDamage : 0;
+                                if (safeFireDmg > 0 && target.alive) {
+                                    target.hp = (target.hp || 0) - safeFireDmg;
+                                    if (!isFinite(target.hp)) target.hp = 0;
+                                    target.hitFlash = 0.2;
+                                    addFloatingText(target.x, target.y - 20, `🔥 ${Math.round(safeFireDmg)}`, '#e17055', 18);
+                                    if (target.hp <= 0 && dice.isBaseball) {
+                                        addFloatingText(target.x, target.y - 20, '💥', '#ff6b6b', 36);
+                                        playBossSkillSound();
+                                        const data = getData();
+                                        showToast(data.baseballKill || '💫 棒球骰子 擊殺！', 1000);
+                                    }
+                                }
+                                // 對附近敵人造成火元素濺射傷害（60%）
+                                for (const e of game.enemies) {
+                                    if (e === target || !e.alive) continue;
+                                    if (dist(target, e) < splashRange * CELL_SIZE) {
+                                        const splashFireDmg = safeFireDmg * 0.6;
+                                        const wasAlive = e.alive && e.hp > 0;
+                                        if (splashFireDmg > 0) {
+                                            e.hp = (e.hp || 0) - splashFireDmg;
+                                            if (!isFinite(e.hp)) e.hp = 0;
+                                            e.hitFlash = 0.2;
+                                            addFloatingText(e.x, e.y - 20, `🔥 ${Math.round(splashFireDmg)}`, '#e17055', 16);
+                                            if (e.hp <= 0 && wasAlive && dice.isBaseball) {
+                                                addFloatingText(e.x, e.y - 20, '💥', '#ff6b6b', 36);
+                                                playBossSkillSound();
+                                                const data = getData();
+                                                showToast(data.baseballKill || '💫 棒球骰子 擊殺！', 1000);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            // ★ 毒傷害取最高值（保留原邏輯）
                             if (!isHacked && !hasShield && dice.poison) {
-                                const poisonBase = dice.poison.damageBase || 0;
-                                const poisonPerStar = dice.poison.damagePerStar || 0;
-                                const tick = dice.poison.tick || 0.5;
-                                const duration = dice.poison.duration || 3;
-                                const dmgPerTick = (poisonBase + poisonPerStar * (dice.star - 1)) *
-                                    getUpgradeMultiplier(dice.type);
+                                const lv = upgradeLevels[dice.type] || 1;
+								const poisonBase = (dice.poison.damageBase || 0) + (lv - 1) * (def.poisonPerLevel || 0);
+								const poisonPerStar = dice.poison.damagePerStar || 0;
+								const tick = dice.poison.tick || 0.5;
+								const duration = dice.poison.duration || 3;
+								const dmgPerTick = (poisonBase + poisonPerStar * (dice.star - 1)) * getUpgradeMultiplier(dice.type);
 
                                 if (!target.poison) {
                                     target.poison = {
@@ -6723,7 +6787,6 @@
                                         timer: duration,
                                     };
                                 } else {
-                                    // ★ 比較並保留較高的毒傷害
                                     const existingDmg = target.poison.damagePerTick || 0;
                                     if (dmgPerTick > existingDmg) {
                                         target.poison.damagePerTick = dmgPerTick;
@@ -6734,23 +6797,8 @@
                                 }
                             }
 
-                            // ★ 燃燒傷害也取最高值
-                            if (!isHacked && !hasShield && dice.burn) {
-                                const burnDmg = damage * 0.3;
-                                if (target.burnTimer && target.burnTimer > 0) {
-                                    // 比較現有燃燒傷害，保留較高的
-                                    if (burnDmg > (target.burnDamage || 0)) {
-                                        target.burnDamage = burnDmg;
-                                    }
-                                    target.burnTimer = Math.max(target.burnTimer || 0, 2.0);
-                                } else {
-                                    target.burnTimer = 2.0;
-                                    target.burnDamage = burnDmg;
-                                }
-                                if (!isFinite(target.burnDamage)) target.burnDamage = 0;
-                            }
-
-                            if (!isHacked && !hasShield && dice.splash > 0) {
+                            // ★ 普通濺射（非火骰子使用原邏輯；火骰子已用火元素濺射取代）
+                            if (!isFireDice && !isHacked && !hasShield && dice.splash > 0) {
                                 for (const e of game.enemies) {
                                     if (e === target || !e.alive) continue;
                                     if (dist(target, e) < dice.splash * CELL_SIZE) {
@@ -7067,7 +7115,7 @@
 
         document.getElementById('restartBtn').addEventListener('click', restartGame);
 
-        // ========== 繪製（★ 旱雷骰子不顯示頂部⚡） ==========
+        // ========== 繪製 ==========
         if (!CanvasRenderingContext2D.prototype.roundRect) {
             CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, radii) {
                 const r = typeof radii === 'number' ? radii : (radii || 0);
@@ -7399,9 +7447,6 @@
                 }
             }
 
-            // ★ 旱雷骰子 - 移除頂部⚡顯示 (注釋掉)
-            // if (dice.isDroughtThunder) { ... 原本顯示 ⚡×{star} {thunderDmg} ... }
-
             if (dice.isShield && dice._shieldPlaceTimer !== undefined) {
                 const remain = Math.max(0, dice._shieldPlaceTimer);
                 const barW = dSize * 0.7;
@@ -7630,7 +7675,6 @@
                     }
                 }
 
-                // ★ 繪製尖刺
                 for (const spike of game.spikes) {
                     if (!spike.active) continue;
                     const x = spike.x - CELL_SIZE / 2;
@@ -7665,7 +7709,6 @@
                     ctx.fillText(`⚔${spike.damage}`, spike.x, spike.y - CELL_SIZE / 2 + 4);
                 }
 
-                // 盾牌繪製
                 for (const shield of game.shields) {
                     if (!shield.active) continue;
                     const x = shield.x - CELL_SIZE / 2;
@@ -8267,12 +8310,11 @@
                 'POISON', 'ICE'
             ]; }
 
-        // ========== 商店（含每日寶箱） ==========
+        // ========== 商店 ==========
         function getChestStatus(chestId) {
             const group = CHEST_GROUPS[chestId];
             if (!group) return null;
             if (group.isDaily) {
-                // 每日寶箱：檢查冷卻
                 const now = Date.now();
                 const lastOpen = saveData.dailyChestTimestamp || 0;
                 const cooldownMs = group.cooldownHours * 3600 * 1000;
@@ -8312,7 +8354,6 @@
             div.className = 'shop-chest-item';
 
             if (group.isDaily) {
-                // ★ 每日寶箱渲染
                 const icon = group.icon || '💰';
                 const chestName = data.dailyChestName || '每日寶箱';
                 const chestDesc = data.dailyChestDesc || '每22小時免費金幣';
@@ -8343,7 +8384,6 @@
                 return;
             }
 
-            // 普通寶箱
             if (status.allOwned) return;
             const chestName = data.chestNames[chestId] || chestId;
             const chestDesc = data.chestDescs[chestId] || '';
@@ -8383,7 +8423,32 @@
             }
         }
 
-        // ★ 開啟每日寶箱
+        function showDailyChestResult(goldAmount) {
+            const data = getData();
+            const icon = '🎁';
+            const title = data.dailyResultTitle || '🎉 每日寶箱';
+            const sub = data.dailyResultSub || '你獲得了';
+            const amountText = data.dailyResultAmount.replace(/\{gold\}/g, goldAmount);
+            const confirmText = data.dailyResultConfirm || '👍 太好了！';
+
+            document.getElementById('dailyResultIcon').textContent = icon;
+            document.getElementById('dailyResultTitle').textContent = title;
+            document.getElementById('dailyResultSub').textContent = sub;
+            document.getElementById('dailyResultAmount').textContent = amountText;
+            document.getElementById('dailyResultConfirmBtn').textContent = confirmText;
+
+            document.getElementById('dailyResultOverlay').classList.add('visible');
+
+            document.getElementById('dailyResultConfirmBtn').onclick = function() {
+                document.getElementById('dailyResultOverlay').classList.remove('visible');
+            };
+            document.getElementById('dailyResultOverlay').onclick = function(e) {
+                if (e.target === this) {
+                    this.classList.remove('visible');
+                }
+            };
+        }
+
         function openDailyChest() {
             const data = getData();
             const now = Date.now();
@@ -8398,19 +8463,19 @@
                 return;
             }
 
-            // 獲得 60-600 金幣
             const goldReward = Math.floor(60 + Math.random() * 541);
             saveData.dailyChestTimestamp = now;
             saveData.totalScore += goldReward;
             saveSaveData();
 
-            showToast(data.dailyChestReward.replace(/\{gold\}/g, goldReward), 2500);
+            showDailyChestResult(goldReward);
+
+            showToast(data.dailyChestReward.replace(/\{gold\}/g, goldReward), 1500);
             addFloatingText(W / 2, H / 2 - 20, `💰 +${goldReward}`, '#f7d875', 36);
 
             updateCoverUI();
             updateShopUI();
 
-            // 顯示倒計時更新
             const newStatus = getChestStatus('daily');
             if (newStatus) {
                 const remainMs = Math.max(0, cooldownMs - (Date.now() - saveData.dailyChestTimestamp));
@@ -8601,6 +8666,11 @@
                 specialParts.push(spikeDesc);
             }
 
+            // ★ 火骰子特殊說明：火元素傷害
+            if (diceType === 'FIRE') {
+                specialParts.push('🔥 火元素濺射 (額外火傷) · 不燃燒');
+            }
+
             if (specialParts.length === 0) {
                 specialParts.push(data.detailSpecialNone);
             }
@@ -8665,23 +8735,13 @@
             const grid = document.getElementById('shopChestGrid');
             grid.innerHTML = '';
 
-            // ★ 顯示每日寶箱 (放在最前面)
             drawChest('daily');
-            // 其他寶箱
             for (const chestId of ['common', 'rare', 'epic', 'legendary']) {
                 drawChest(chestId);
             }
 
             updateShopSelection();
             renderOwnedDice();
-
-            // 每日寶箱倒計時自動更新
-            if (document.querySelector('.shop-overlay.visible')) {
-                const dailyStatus = getChestStatus('daily');
-                if (dailyStatus && !dailyStatus.canOpen) {
-                    // 已經在 drawChest 中顯示倒計時
-                }
-            }
         }
 
         function updateShopSelection() {
@@ -8937,6 +8997,14 @@
                         document.getElementById('drawConfirmBtn').textContent = data.drawGreat;
                     }
 
+                    if (document.getElementById('dailyResultOverlay').classList.contains('visible')) {
+                        const amount = document.getElementById('dailyResultAmount').textContent.replace(/[^0-9]/g, '');
+                        document.getElementById('dailyResultTitle').textContent = data.dailyResultTitle;
+                        document.getElementById('dailyResultSub').textContent = data.dailyResultSub;
+                        document.getElementById('dailyResultConfirmBtn').textContent = data.dailyResultConfirm;
+                        document.getElementById('dailyResultAmount').textContent = data.dailyResultAmount.replace(/\{gold\}/g, amount || '0');
+                    }
+
                     updateDicePreview(null);
                     updateUI();
                     updateLeaderboardUI();
@@ -9066,7 +9134,6 @@
         soundEnabled = saveData.soundEnabled !== undefined ? saveData.soundEnabled : true;
         updateSoundButtonIcon();
 
-        // ★ 預載入所有音頻 (離線支援)
         preloadAllAudio();
 
         game.activeDiceTypes = [...saveData.selectedDice];
@@ -9107,7 +9174,7 @@
         }
 
         requestAnimationFrame(gameLoop);
-        console.log('🎲 Offline Dice v2.7.8 - 鎖骰續攻 · 音樂預載 · 旱雷去⚡ · 毒傷取高 · 每日寶箱');
+        console.log('🎲 Offline Dice v2.7.8 - 鎖骰續攻·火骰火傷濺射·毒傷取高·每日寶箱');
     </script>
 </body>
 </html>
