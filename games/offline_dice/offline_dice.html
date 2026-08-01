@@ -748,7 +748,6 @@
             left: 50%;
             transform: translateX(-50%);
         }
-        /* ★ 骰子詳情 - 新版 Grid 佈局 */
         .dice-detail-overlay {
             position: absolute;
             top: 0;
@@ -815,7 +814,6 @@
             font-size: 15px;
             color: #aab8d0;
         }
-        /* ★ 新 Grid 樣式 */
         .dice-detail-overlay .dd-body {
             width: 100%;
             max-width: 380px;
@@ -875,7 +873,6 @@
             font-size: 13px;
             margin-top: 2px;
         }
-        /* Class 升級區塊 */
         .dd-class-section {
             margin-top: 8px;
             padding-top: 8px;
@@ -1754,6 +1751,9 @@
         // ================================================================
         // ★ 翻譯 (新增 critText, elementDamageLabel, critDamageLabel)
         // ================================================================
+		const DEBUG_ATTACK = false;
+		const BOSS_ORDER = ['snake', 'lamb', 'knight', 'mage', 'lion', 'hacker', 'slime', 'magnet', 'balistic'];
+		const DOUBLE_BOSS_START = 47;
         const translations = {
             'zh-TW': {
                 coverTitle: '🎲 離線骰子',
@@ -1794,6 +1794,10 @@
                 meteor: '💥 隕石!',
                 seal: '🔒 封印!',
                 immune: '🛡️ 免疫增加',
+				hackerDodged: '✨ 所有骰子都躲開了黑客！',
+				magnetDodged: '✨ 磁力合併被躲開了！',
+				bossSummonedToast: '👑 {name} 被召喚！',
+				bossSummonedFloating: '👑 {name} 召喚!',
                 baseballKill: '💫 棒球骰子 擊殺！',
                 droughtThunderChain: '🌩️ 雷擊連鎖！ {count} 個目標！',
                 droughtThunderHit: '⚡ 雷擊 -{dmg}',
@@ -2062,6 +2066,7 @@
                 critText: '暴擊!',
                 elementDamageLabel: '元素傷害',
                 critDamageLabel: '暴擊傷害',
+				globalCritDamageLabel: '全體暴擊傷害',
             },
             'zh-CN': {
                 coverTitle: '🎲 离线骰子',
@@ -2102,6 +2107,10 @@
                 meteor: '💥 陨石!',
                 seal: '🔒 封印!',
                 immune: '🛡️ 免疫增加',
+				hackerDodged: '✨ 所有骰子都躲开了黑客！',
+				magnetDodged: '✨ 磁力合并被躲开了！',
+				bossSummonedToast: '👑 {name} 被召唤！',
+				bossSummonedFloating: '👑 {name} 召唤!',
                 baseballKill: '💫 棒球骰子 击杀！',
                 droughtThunderChain: '🌩️ 雷击连锁！ {count} 个目标！',
                 droughtThunderHit: '⚡ 雷击 -{dmg}',
@@ -2370,6 +2379,7 @@
                 critText: '暴击!',
                 elementDamageLabel: '元素伤害',
                 critDamageLabel: '暴击伤害',
+				globalCritDamageLabel: '全体暴击伤害',
             },
             'en': {
                 coverTitle: '🎲 Offline Dice',
@@ -2410,6 +2420,10 @@
                 meteor: '💥 Meteor!',
                 seal: '🔒 Seal!',
                 immune: '🛡️ Immune!',
+				hackerDodged: '✨ All dice dodged the hacker!',
+				magnetDodged: '✨ The magnetic merge was dodged!',
+				bossSummonedToast: '👑 {name} has been summoned!',
+				bossSummonedFloating: '👑 {name} summoned!',
                 baseballKill: '💫 Baseball Die Kill!',
                 droughtThunderChain: '🌩️ Thunder Chain! {count} targets!',
                 droughtThunderHit: '⚡ Thunder -{dmg}',
@@ -2678,6 +2692,7 @@
                 critText: 'CRIT!',
                 elementDamageLabel: 'Element DMG',
                 critDamageLabel: 'Crit DMG',
+				globalCritDamageLabel: 'Global Crit DMG',
             },
             'ja': {
                 coverTitle: '🎲 オフラインダイス',
@@ -2718,6 +2733,10 @@
                 meteor: '💥 隕石!',
                 seal: '🔒 封印!',
                 immune: '🛡️ 免疫増加',
+				hackerDodged: '✨ 全てのダイスがハッカーを回避！',
+				magnetDodged: '✨ 磁力合体が回避された！',
+				bossSummonedToast: '👑 {name} が召喚された！',
+				bossSummonedFloating: '👑 {name} 召喚!',
                 baseballKill: '💫 野球ダイス 撃殺！',
                 droughtThunderChain: '🌩️ 雷連鎖！ {count} 体！',
                 droughtThunderHit: '⚡ 雷 -{dmg}',
@@ -2986,6 +3005,7 @@
                 critText: '会心!',
                 elementDamageLabel: '元素ダメージ',
                 critDamageLabel: '会心ダメージ',
+				globalCritDamageLabel: '全体会心ダメージ',
             },
             'ko': {
                 coverTitle: '🎲 오프라인 주사위',
@@ -3026,6 +3046,10 @@
                 meteor: '💥 운석!',
                 seal: '🔒 봉인!',
                 immune: '🛡️ 면역 증가',
+				hackerDodged: '✨ 모든 주사위가 해커를 피했다!',
+				magnetDodged: '✨ 자기 합병이 피해졌다!',
+				bossSummonedToast: '👑 {name} 이(가) 소환됨!',
+				bossSummonedFloating: '👑 {name} 소환!',
                 baseballKill: '💫 야구 주사위 처치!',
                 droughtThunderChain: '🌩️ 번개 연쇄! {count} 개 대상!',
                 droughtThunderHit: '⚡ 번개 -{dmg}',
@@ -3294,6 +3318,7 @@
                 critText: '치명타!',
                 elementDamageLabel: '원소 피해',
                 critDamageLabel: '치명타 피해',
+				globalCritDamageLabel: '전체 치명타 피해',
             }
         };
 
@@ -3356,7 +3381,7 @@
                 { id: 'hacker', nameKey: 'hacker', emoji: '💻', color: '#2c3e50' },
                 { id: 'slime', nameKey: 'slime', emoji: '🟢', color: '#27ae60' },
                 { id: 'magnet', nameKey: 'magnet', emoji: '🧲', color: '#e74c3c' },
-                { id: 'cloud', nameKey: 'cloud', emoji: '☁️', color: '#ecf0f1' },
+                { id: 'cloud', nameKey: 'cloud', emoji: '🦅', color: '#ecf0f1' },
                 { id: 'balistic', nameKey: 'balistic', emoji: '🐔', color: '#e67e22' }
             ]),
             MINI_BOSS_TYPES: Object.freeze([
@@ -3640,17 +3665,17 @@
         // 排行榜系統
         // ================================================================
         function getDefaultLeaderboard() {
-            return [
-                { name: '迪遜咖啡廳', wave: 32, score: 160, date: '2026-07-15' },
-                { name: 'TenPercent', wave: 28, score: 140, date: '2026-07-14' },
-                { name: 'トニー Gaming HK', wave: 25, score: 125, date: '2026-07-13' },
-                { name: '方丈', wave: 21, score: 105, date: '2026-07-12' },
-                { name: '태극권 사범 지 지에', wave: 18, score: 90, date: '2026-07-11' },
-                { name: '摸魚高手', wave: 15, score: 75, date: '2026-07-10' },
-                { name: '小智', wave: 12, score: 60, date: '2026-07-09' },
-                { name: 'AAA', wave: 8, score: 40, date: '2026-07-08' },
-            ];
-        }
+			return [
+				{ name: '迪遜咖啡廳', wave: 32, score: 185, date: '2026-07-15' },
+				{ name: 'TenPercent', wave: 28, score: 155, date: '2026-07-14' },
+				{ name: 'トニー Gaming HK', wave: 25, score: 140, date: '2026-07-13' },
+				{ name: '方丈', wave: 21, score: 120, date: '2026-07-12' },
+				{ name: '태극권 사범 지 지에', wave: 18, score: 95, date: '2026-07-11' },
+				{ name: '摸魚高手', wave: 15, score: 80, date: '2026-07-10' },
+				{ name: '小智', wave: 12, score: 65, date: '2026-07-09' },
+				{ name: 'AAA', wave: 8, score: 35, date: '2026-07-08' },
+			];
+		}
 
         function getLeaderboard() {
             if (!saveData || !saveData.leaderboard || !Array.isArray(saveData.leaderboard)) {
@@ -3936,8 +3961,11 @@
             isDragging: false,
             floatingTexts: [],
             currentBoss: null,
+			meteor: { active: false, startX: 0, startY: 0, targetX: 0, targetY: 0, progress: 0, duration: 0.8, targetRow: -1, targetCol: -1 },
             bossLockedDice: [],
             bossHackedDice: [],
+			hackTargets: [],
+			magnetTargets: [],
             bossClouds: [],
             _markedDice: [],
             _lastGold: 100,
@@ -4623,6 +4651,10 @@
                 intervalBase = 1.0;
             } else {
                 intervalBase = Math.max(0.15, intervalBase);
+							if (!isFinite(intervalBase) || intervalBase <= 0) {
+				console.warn(`[FIX] createDice 类型 ${type} 的 intervalBase 异常:`, intervalBase, '→ 重置为 0.5');
+				intervalBase = 0.5;
+			}
             }
             if (!isFinite(intervalBase) || intervalBase < 0.15) intervalBase = 0.5;
 
@@ -4752,6 +4784,7 @@
                 newDice._isFinal = true;
                 newDice.cooldown = 0;
                 game.board[row][col] = newDice;
+				game.bossHackedDice = game.bossHackedDice.filter(d => !(d.row === row && d.col === col));
                 game.bossLockedDice = game.bossLockedDice.filter(d => !(d.row === row && d.col === col));
                 const data = getData();
                 const msg = data.toastMysteryTransform
@@ -4802,20 +4835,6 @@
                     `<span class="empty" id="dicePreviewEmpty">${getData().dicePreviewEmpty}</span>`; return; }
             preview.innerHTML =
                 `<div class="dice-icon" style="background:${dice.color};border-color:rgba(255,255,255,0.4);">${dice.label}</div><span style="font-weight:600;font-size:13px;">★${dice.star} ${dice.name}</span>`;
-        }
-
-        // ========== 拖曳合併 ==========
-        function getGridPosFromPointer(e) {
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width,
-                scaleY = canvas.height / rect.height;
-            const mx = (e.clientX - rect.left) * scaleX,
-                my = (e.clientY - rect.top) * scaleY;
-            if (mx < boardX || my < boardY || mx > boardX + BOARD_WIDTH || my > boardY + BOARD_HEIGHT) return null;
-            const col = Math.floor((mx - boardX) / CELL_SIZE),
-                row = Math.floor((my - boardY) / CELL_SIZE);
-            if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return null;
-            return { col, row, x: mx, y: my };
         }
 
         function onPointerDown(e) {
@@ -4871,11 +4890,28 @@
             }
 
             if (dice) {
-                game.highlightTarget = { type: dice.type, star: dice.star };
+                if (dice.isJoker || dice.isMimic || dice.isSapling) {
+                    game.highlightTarget = { star: dice.star, mode: 'universal' };
+                } else {
+                    game.highlightTarget = { type: dice.type, star: dice.star, mode: 'normal' };
+                }
             }
 
             game.isDragging = true;
             game.dragData = { col, row, startX: e.clientX, startY: e.clientY, moved: false, sourceDice: game.board[row][col] };
+        }
+
+        function getGridPosFromPointer(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width,
+                scaleY = canvas.height / rect.height;
+            const mx = (e.clientX - rect.left) * scaleX,
+                my = (e.clientY - rect.top) * scaleY;
+            if (mx < boardX || my < boardY || mx > boardX + BOARD_WIDTH || my > boardY + BOARD_HEIGHT) return null;
+            const col = Math.floor((mx - boardX) / CELL_SIZE),
+                row = Math.floor((my - boardY) / CELL_SIZE);
+            if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return null;
+            return { col, row, x: mx, y: my };
         }
 
         function onPointerMove(e) {
@@ -4898,36 +4934,67 @@
                 game.emoji = game.emojiBackup || '😎';
                 game.emojiOverride = false;
             }
+
+            // ★ 修改: 點擊空白區域 → 取消高亮
             if (pos && !isOccupied(pos.col, pos.row) && !game.isDragging) {
                 game.highlightTarget = null;
             }
 
-            if (!game.isDragging || !game.dragData) {
-                if (!game.gameOver && game.gameStarted && !game.bossAbilityActive) {
-                    const clickPos = getGridPosFromPointer(e);
-                    if (clickPos && isOccupied(clickPos.col, clickPos.row)) {
-                        const dice = game.board[clickPos.row][clickPos.col];
-                        if (dice && dice._isFinal !== false) {
-                            showToast(data.toastDiceInfo.replace(/\{label\}/g, dice.label).replace(/\{name\}/g, dice.name)
-                                .replace(/\{star\}/g, dice.star).replace(/\{damage\}/g, Math.round(dice.damage)));
-                            if (game.bossLockedDice.some(d => d.row === clickPos.row && d.col === clickPos.col) ||
-                                (game.bossClouds && game.bossClouds.some(c => {
-                                    const cellX = boardX + clickPos.col * CELL_SIZE;
-                                    const cellY = boardY + clickPos.row * CELL_SIZE;
-                                    return c.active && c.x < cellX + CELL_SIZE && c.x + c.w > cellX &&
-                                        c.y < cellY + CELL_SIZE && c.y + c.h > cellY;
-                                }))) {
+            // ★ 修改: 點擊骰子時的處理
+            if (!game.isDragging && pos && isOccupied(pos.col, pos.row)) {
+                const dice = game.board[pos.row][pos.col];
+                if (dice && dice._isFinal !== false) {
+                    // 先顯示資訊
+                    showToast(data.toastDiceInfo.replace(/\{label\}/g, dice.label).replace(/\{name\}/g, dice.name)
+                        .replace(/\{star\}/g, dice.star).replace(/\{damage\}/g, Math.round(dice.damage)));
+
+                    // 檢查是否被封印或雲霧覆蓋
+                    if (game.bossLockedDice.some(d => d.row === pos.row && d.col === pos.col) ||
+                        (game.bossClouds && game.bossClouds.some(c => {
+                            const cellX = boardX + pos.col * CELL_SIZE;
+                            const cellY = boardY + pos.row * CELL_SIZE;
+                            return c.active && c.x < cellX + CELL_SIZE && c.x + c.w > cellX &&
+                                c.y < cellY + CELL_SIZE && c.y + c.h > cellY;
+                        }))) {
+                        // 被封印或雲霧中不能操作高亮
+                    } else {
+                        // ★ 檢查當前高亮目標是否與點擊的骰子匹配
+                        const current = game.highlightTarget;
+                        let isSameTarget = false;
+                        if (current) {
+                            if (current.mode === 'universal') {
+                                // 通用模式：比對星級
+                                if (current.star === dice.star) isSameTarget = true;
+                            } else if (current.mode === 'normal') {
+                                // 普通模式：比對類型和星級
+                                if (current.type === dice.type && current.star === dice.star) isSameTarget = true;
+                            }
+                        }
+                        if (isSameTarget) {
+                            // ★ 點擊已高亮的骰子 → 取消高亮
+                            game.highlightTarget = null;
+                        } else {
+                            // ★ 點擊其他骰子 → 切換高亮
+                            if (dice.isJoker || dice.isMimic || dice.isSapling) {
+                                game.highlightTarget = { star: dice.star, mode: 'universal' };
                             } else {
-                                const current = game.highlightTarget;
-                                if (current && current.type === dice.type && current.star === dice.star) {
-                                    game.highlightTarget = null;
-                                } else {
-                                    game.highlightTarget = { type: dice.type, star: dice.star };
-                                }
+                                game.highlightTarget = { type: dice.type, star: dice.star, mode: 'normal' };
                             }
                         }
                     }
                 }
+            }
+
+            // ★ 如果拖拽結束，取消高亮
+            if (!game.isDragging) {
+                // 非拖拽狀態下點擊空白區域已經處理了，但為了安全，再次檢查
+                if (pos && !isOccupied(pos.col, pos.row)) {
+                    game.highlightTarget = null;
+                }
+            }
+
+            // 原有的拖拽合併邏輯 (保持不變)
+            if (!game.isDragging || !game.dragData) {
                 game.isDragging = false;
                 game.dragData = null;
                 return;
@@ -4947,10 +5014,20 @@
                         }))) {
                     } else {
                         const current = game.highlightTarget;
-                        if (current && current.type === dice.type && current.star === dice.star) {
+                        let isSame = false;
+                        if (current) {
+                            if (current.mode === 'universal' && current.star === dice.star) isSame = true;
+                            else if (current.mode === 'normal' && current.type === dice.type && current.star === dice
+                                .star) isSame = true;
+                        }
+                        if (isSame) {
                             game.highlightTarget = null;
                         } else {
-                            game.highlightTarget = { type: dice.type, star: dice.star };
+                            if (dice.isJoker || dice.isMimic || dice.isSapling) {
+                                game.highlightTarget = { star: dice.star, mode: 'universal' };
+                            } else {
+                                game.highlightTarget = { type: dice.type, star: dice.star, mode: 'normal' };
+                            }
                         }
                     }
                 }
@@ -5078,6 +5155,12 @@
                             } else {
                                 if (sourceDice) sourceDice._isFinal = true;
                                 if (targetDice) targetDice._isFinal = true;
+                                for (let rr = 0; rr < ROWS; rr++) {
+                                    for (let cc = 0; cc < COLS; cc++) {
+                                        const d = game.board[rr]?.[cc];
+                                        if (d && d._isFinal === false) d._isFinal = true;
+                                    }
+                                }
                             }
                         }
                     }
@@ -5088,6 +5171,7 @@
             game.isDragging = false;
             game.dragData = null;
         }
+
         canvas.addEventListener('pointerdown', onPointerDown);
         window.addEventListener('pointermove', onPointerMove);
         window.addEventListener('pointerup', onPointerUp);
@@ -5144,6 +5228,7 @@
                             if (dice.isSpike && dice._spikePlaceTimer !== undefined) {
                                 newDice._spikePlaceTimer = dice._spikePlaceTimer || 0;
                             }
+							game.bossHackedDice = game.bossHackedDice.filter(d => !(d.row === r && d.col === c));
                             game.board[r][c] = newDice;
                         }
                     }
@@ -5174,252 +5259,206 @@
         }
 
         function isBossWave(wave) {
-            if (wave >= 5 && wave <= 50 && wave % 5 === 0) return true;
-            if (wave >= 51 && wave % 2 === 1) return true;
-            return false;
-        }
+			if (wave >= 5 && wave <= 45 && wave % 5 === 0) return true;
+			if (wave >= DOUBLE_BOSS_START && wave % 2 === 1) return true;
+			return false;
+		}
 
         function getBossCountForWave(wave) {
-            if (isMiniBossWave(wave)) return 1;
-            if (wave >= 5 && wave <= 50 && wave % 5 === 0) return 1;
-            if (wave >= 51 && wave % 2 === 1) return 2;
-            return 0;
-        }
+			if (wave >= 5 && wave <= 45 && wave % 5 === 0) return 1;
+			if (wave >= DOUBLE_BOSS_START && wave % 2 === 1) return 2;
+			return 0;
+		}
 
         function getEnemiesPerWave(wave) {
-            if (isMiniBossWave(wave)) return 11;
-            if (isBossWave(wave)) return getBossCountForWave(wave);
-            return 10;
-        }
+			if (isMiniBossWave(wave)) return 11;
+			const bossCount = getBossCountForWave(wave);
+			if (bossCount > 0) return bossCount;
+			return 10;
+		}
 
-        function spawnEnemy() {
-            if (game.gameOver || !game.isWaveActive) return;
-            if (game.enemiesSpawned >= game.enemiesPerWave) return;
+		function spawnEnemy() {
+			if (game.gameOver || !game.isWaveActive) return;
+			if (game.enemiesSpawned >= game.enemiesPerWave) return;
 
-            const wave = game.wave;
-            const isMiniBoss = isMiniBossWave(wave);
-            const isBoss = isBossWave(wave);
-            const bossCount = getBossCountForWave(wave);
-            const baseReward = getNormalReward(wave);
+			const wave = game.wave;
+			const isMiniBossWave = (wave >= 3 && wave <= 48 && wave % 5 === 3);
+			const isBossWave = (wave >= 5 && wave % 5 === 0) || (wave >= 51 && wave % 2 === 1);
+			const baseReward = getNormalReward(wave);
+			const spawnIndex = game.enemiesSpawned;
+			if (isBossWave) {
+				const totalBoss = getBossCountForWave(wave);
+				if (game.bossCount < totalBoss) {
+					let bossTypeId;
+					if (wave >= 5 && wave <= 45 && wave % 5 === 0) {
+						const index = (wave / 5) - 1; // 5->0, 10->1, ...
+						bossTypeId = BOSS_ORDER[index];
+					} 
+					else if (wave >= DOUBLE_BOSS_START && wave % 2 === 1) {
+						const available = CONST.BOSS_TYPES.map(b => b.id);
+						const idx1 = randInt(0, available.length - 1);
+						let idx2 = randInt(0, available.length - 1);
+						while (available.length > 1 && idx2 === idx1) {
+							idx2 = randInt(0, available.length - 1);
+						}
+						if (game.bossCount === 0) bossTypeId = available[idx1];
+						else bossTypeId = available[idx2];
+					} else {
+						bossTypeId = CONST.BOSS_TYPES[randInt(0, CONST.BOSS_TYPES.length - 1)].id;
+					}
 
-            if (isMiniBoss) {
-                if (game.enemiesSpawned === 0 && game.bossCount < 1) {
-                    const avail = CONST.MINI_BOSS_TYPES;
-                    const randIdx = randInt(0, avail.length - 1);
-                    const mbType = avail[randIdx];
+					const prevWaveLastHp = wave > 1 ? getEnemyHp(wave - 1, 9) : 100;
+					const waveFactor = wave * 10;
+					const hpMultiplier = 5 + 1.5 * (wave - 5);
+					const bossHp = (prevWaveLastHp + waveFactor) * hpMultiplier;
+					const finalHp = Math.max(100, Math.round(bossHp));
+					const bossReward = baseReward * 10;
+					const bossEntity = {
+						pathIndex: 0,
+						x: PATH_PIXELS[0].x,
+						y: PATH_PIXELS[0].y,
+						hp: finalHp,
+						maxHp: finalHp,
+						speed: 0.6,
+						reward: bossReward,
+						type: 'boss',
+						size: 1.8,
+						isBoss: true,
+						alive: true,
+						bossType: bossTypeId,
+						abilityPhase: 0,
+						slowStacks: 0,
+						slowFactor: 0,
+						slowTimer: 0,
+						burnTimer: 0,
+						burnDamage: 0,
+						poison: null,
+						stunTimer: 0,
+						_lockedByLockDice: false,
+						isBalistic: bossTypeId === 'balistic',
+						miniBossCounter: 0,
+						skillTimer: 0,
+						skillCooldown: 8,
+						skillPhase: 0,
+						shieldTimer: 0,
+						cloudTimer: 0,
+						dashTimer: 0,
+						sealTimer: 0,
+						_enemyId: ++game._enemyIdCounter,
+					};
+					switch (bossTypeId) {
+						case 'snake': bossEntity.skillCooldown = 2; bossEntity.snakeFirstTrigger = true; break;
+						case 'lamb': bossEntity.skillCooldown = 2; bossEntity.lambFirstTrigger = true; break;
+						case 'knight': bossEntity.skillCooldown = 10; bossEntity.knightFirstTrigger = true; break;
+						case 'mage': bossEntity.skillCooldown = 5; bossEntity.mageFirstTrigger = true; bossEntity.mageSkillPhase = 0; break;
+						case 'lion': bossEntity.skillCooldown = 5;  bossEntity.lionFirstTrigger = true; break;
+						case 'hacker': bossEntity.skillCooldown = 10; bossEntity.hackerFirstTrigger = true; break;
+						case 'balistic': bossEntity.skillCooldown = 15; bossEntity.balisticFirstTrigger = true; break;
+						case 'slime': bossEntity.slimeLevel = 0; bossEntity.skillCooldown = 8; break;
+						case 'magnet': bossEntity.skillCooldown = 8; bossEntity.magnetFirstTrigger = true; bossEntity.magnetPhase = 'mark'; bossEntity.magnetMarkTarget = null; bossEntity.magnetMarkTimer = 0; break;
+						case 'cloud': bossEntity.skillCooldown = 10; bossEntity.cloudFirstTrigger = true; break;
+						default: bossEntity.skillCooldown = 8;
+					}
+					bossEntity.skillTimer = 0;
 
-                    const baseHp = getEnemyHp(wave, 0);
-                    let hpMultiplier = 3 + 1.0 * (wave - 5);
-                    let hp = baseHp * hpMultiplier;
-                    let speed = 0.6;
-                    let reward = baseReward * 2;
-
-                    if (mbType.id === 'tank') {
-                        speed = 0.5;
-                        hp = baseHp * 5;
-                        reward = baseReward * 2;
-                    }
-
-                    const finalHp = Math.max(80, Math.round(hp));
-
-                    const bossEntity = {
-                        pathIndex: 0,
-                        x: PATH_PIXELS[0].x,
-                        y: PATH_PIXELS[0].y,
-                        hp: finalHp,
-                        maxHp: finalHp,
-                        speed: speed,
-                        reward: reward,
-                        type: 'miniBoss',
-                        size: 1.5,
-                        isBoss: false,
-                        alive: true,
-                        isMiniBoss: true,
-                        miniBossType: mbType.id,
-                        bossType: null,
-                        slowStacks: 0,
-                        slowFactor: 0,
-                        slowTimer: 0,
-                        burnTimer: 0,
-                        burnDamage: 0,
-                        poison: null,
-                        stunTimer: 0,
-                        _lockedByLockDice: false,
-                        shieldTimer: 0,
-                        _enemyId: ++game._enemyIdCounter,
-                    };
-                    game.bossCount++;
-                    game.currentBoss = bossEntity;
-                    game.enemies.push(bossEntity);
-                    game.enemiesSpawned++;
-                    const mbName = getBossName(mbType.id);
-                    showToast(getData().toastMiniBossSpawn.replace(/\{name\}/g, mbName), 1500);
-                    return;
-                }
-
-                if (game.enemiesSpawned >= 1 && game.enemiesSpawned < 11) {
-                    const idx = game.enemiesSpawned - 1;
-                    let hp = getEnemyHp(wave, idx);
-                    let speed = 1.0;
-                    let reward = baseReward;
-                    let size = 1,
-                        type = 'normal';
-                    const rnd = Math.random();
-                    if (rnd < 0.12 && wave > 3) {
-                        type = 'fast';
-                        hp = Math.floor(hp / 2);
-                        speed = 2.0;
-                        reward = baseReward;
-                        size = 0.8;
-                    }
-                    const enemy = {
-                        pathIndex: 0,
-                        x: PATH_PIXELS[0].x,
-                        y: PATH_PIXELS[0].y,
-                        hp: hp,
-                        maxHp: hp,
-                        speed: speed,
-                        reward: reward,
-                        type: type,
-                        size: size,
-                        slowTimer: 0,
-                        slowFactor: 0,
-                        hitFlash: 0,
-                        alive: true,
-                        isBoss: false,
-                        poison: null,
-                        burnTimer: 0,
-                        burnDamage: 0,
-                        slowStacks: 0,
-                        stunTimer: 0,
-                        _lockedByLockDice: false,
-                        _enemyId: ++game._enemyIdCounter,
-                    };
-                    game.enemies.push(enemy);
-                    game.enemiesSpawned++;
-                    return;
-                }
-                return;
-            }
-
-            if (isBoss && game.bossCount < bossCount) {
-                const bossIdx = game.bossCount;
-                game.bossCount++;
-                const randIdx = randInt(0, CONST.BOSS_TYPES.length - 1);
-                const bossTypeId = CONST.BOSS_TYPES[randIdx].id;
-
-                const prevWaveLastHp = wave > 1 ? getEnemyHp(wave - 1, 9) : 100;
-                const waveFactor = wave * 10;
-                const hpMultiplier = 5 + 1.5 * (wave - 5);
-                const bossHp = (prevWaveLastHp + waveFactor) * hpMultiplier;
-                const finalHp = Math.max(100, Math.round(bossHp));
-                const bossReward = baseReward * 10;
-
-                const bossEntity = {
-                    pathIndex: 0,
-                    x: PATH_PIXELS[0].x,
-                    y: PATH_PIXELS[0].y,
-                    hp: finalHp,
-                    maxHp: finalHp,
-                    speed: 0.6,
-                    reward: bossReward,
-                    type: 'boss',
-                    size: 1.8,
-                    isBoss: true,
-                    alive: true,
-                    bossType: bossTypeId,
-                    abilityPhase: 0,
-                    slowStacks: 0,
-                    slowFactor: 0,
-                    slowTimer: 0,
-                    burnTimer: 0,
-                    burnDamage: 0,
-                    poison: null,
-                    stunTimer: 0,
-                    _lockedByLockDice: false,
-                    isBalistic: bossTypeId === 'balistic',
-                    miniBossCounter: 0,
-                    skillTimer: 0,
-                    skillCooldown: 8,
-                    skillPhase: 0,
-                    shieldTimer: 0,
-                    cloudTimer: 0,
-                    dashTimer: 0,
-                    sealTimer: 0,
-                    _enemyId: ++game._enemyIdCounter,
-                };
-                switch (bossTypeId) {
-                    case 'hacker':
-                        bossEntity.skillCooldown = 2;
-                        break;
-                    case 'magnet':
-                        bossEntity.skillCooldown = 2;
-                        break;
-                    case 'balistic':
-                        bossEntity.skillCooldown = 2;
-                        break;
-                    case 'cloud':
-                        bossEntity.skillCooldown = 3;
-                        break;
-                    default:
-                        bossEntity.skillCooldown = 8;
-                }
-                bossEntity.skillTimer = 0;
-
-                const bossName = getBossName(bossTypeId);
-                showToast(getData().bossAppear.replace(/\{name\}/g, bossName), 2000);
-                game.currentBoss = bossEntity;
-                game.enemies.push(bossEntity);
-                game.enemiesSpawned++;
-                game.bossAbilityActive = false;
-                if (game._bossAbilityTimeout) { clearTimeout(game._bossAbilityTimeout);
-                    game._bossAbilityTimeout = null; }
-                return;
-            }
-
-            const idx = game.enemiesSpawned;
-            let hp = getEnemyHp(wave, idx);
-            let speed = 1.0;
-            let reward = baseReward;
-            let size = 1,
-                type = 'normal';
-            const rnd = Math.random();
-            if (rnd < 0.12 && wave > 3) {
-                type = 'fast';
-                hp = Math.floor(hp / 2);
-                speed = 2.0;
-                reward = baseReward;
-                size = 0.8;
-            } else {
-                speed = 1.0;
-            }
-
-            const enemy = {
-                pathIndex: 0,
-                x: PATH_PIXELS[0].x,
-                y: PATH_PIXELS[0].y,
-                hp: hp,
-                maxHp: hp,
-                speed: speed,
-                reward: reward,
-                type: type,
-                size: size,
-                slowTimer: 0,
-                slowFactor: 0,
-                hitFlash: 0,
-                alive: true,
-                isBoss: false,
-                poison: null,
-                burnTimer: 0,
-                burnDamage: 0,
-                slowStacks: 0,
-                stunTimer: 0,
-                _lockedByLockDice: false,
-                _enemyId: ++game._enemyIdCounter,
-            };
-            game.enemies.push(enemy);
-            game.enemiesSpawned++;
-        }
+					const bossName = getBossName(bossTypeId);
+					showToast(getData().bossAppear.replace(/\{name\}/g, bossName), 2000);
+					game.currentBoss = bossEntity;
+					game.enemies.push(bossEntity);
+					game.bossCount++;
+					game.enemiesSpawned++;
+					if (game.bossCount >= totalBoss) {
+						game.enemiesSpawned = game.enemiesPerWave;
+					}
+					return;
+				} else {
+					game.enemiesSpawned = game.enemiesPerWave;
+					return;
+				}
+			}
+			if (isMiniBossWave) {
+				if (spawnIndex === 0 && game.bossCount < 1) {
+					game.bossCount++;
+					const mbType = 'tank';
+					const baseHp = getEnemyHp(wave, 0);
+					let hpMultiplier = 3 + 1.0 * (wave - 5);
+					let hp = baseHp * hpMultiplier;
+					let speed = 0.5;
+					let reward = baseReward * 2;
+					const finalHp = Math.max(80, Math.round(hp));
+					const bossEntity = {
+						pathIndex: 0,
+						x: PATH_PIXELS[0].x,
+						y: PATH_PIXELS[0].y,
+						hp: finalHp,
+						maxHp: finalHp,
+						speed: speed,
+						reward: reward,
+						type: 'miniBoss',
+						size: 1.5,
+						isBoss: false,
+						alive: true,
+						isMiniBoss: true,
+						miniBossType: mbType,
+						bossType: null,
+						slowStacks: 0,
+						slowFactor: 0,
+						slowTimer: 0,
+						burnTimer: 0,
+						burnDamage: 0,
+						poison: null,
+						stunTimer: 0,
+						_lockedByLockDice: false,
+						shieldTimer: 0,
+						_enemyId: ++game._enemyIdCounter,
+					};
+					game.currentBoss = bossEntity;
+					game.enemies.push(bossEntity);
+					game.enemiesSpawned++;
+					const mbName = getBossName(mbType);
+					showToast(getData().toastMiniBossSpawn.replace(/\{name\}/g, mbName), 1500);
+					return;
+				}
+			}
+			const idx = game.enemiesSpawned;
+			let hp = getEnemyHp(wave, idx);
+			let speed = 1.0;
+			let reward = baseReward;
+			let size = 1, type = 'normal';
+			const rnd = Math.random();
+			if (rnd < 0.12 && wave > 3) {
+				type = 'fast';
+				hp = Math.floor(hp / 2);
+				speed = 2.0;
+				reward = baseReward;
+				size = 0.8;
+			}
+			const enemy = {
+				pathIndex: 0,
+				x: PATH_PIXELS[0].x,
+				y: PATH_PIXELS[0].y,
+				hp: hp,
+				maxHp: hp,
+				speed: speed,
+				reward: reward,
+				type: type,
+				size: size,
+				slowTimer: 0,
+				slowFactor: 0,
+				hitFlash: 0,
+				alive: true,
+				isBoss: false,
+				poison: null,
+				burnTimer: 0,
+				burnDamage: 0,
+				slowStacks: 0,
+				stunTimer: 0,
+				_lockedByLockDice: false,
+				_enemyId: ++game._enemyIdCounter,
+			};
+			game.enemies.push(enemy);
+			game.enemiesSpawned++;
+		}
 
         // ========== 更新敵人 & Boss 技能 ==========
         function updateEnemies(dt) {
@@ -5563,21 +5602,25 @@
                     }
 
                     let speedMul = 1;
-                    if (e.slowTimer > 0) {
-                        e.slowTimer -= dt;
-                        const factor = (isFinite(e.slowFactor)) ? e.slowFactor : 0;
-                        speedMul = 1 - factor * 0.5;
-                        if (!isFinite(speedMul) || speedMul < 0.1) speedMul = 0.1;
-                    }
-                    if (e.slowStacks > 0) {
-                        const stackFactor = Math.min(e.slowStacks, 3) * 0.15;
-                        speedMul *= (1 - stackFactor);
-                        if (!isFinite(speedMul) || speedMul < 0.1) speedMul = 0.1;
-                    }
-
                     if (e.isBoss && e.bossType === 'lion' && e.dashTimer && e.dashTimer > 0) {
-                        speedMul = 3.0;
-                    }
+						speedMul = 1.0;
+					} else {
+						if (e.slowTimer > 0) {
+							e.slowTimer -= dt;
+							const factor = (isFinite(e.slowFactor)) ? e.slowFactor : 0;
+							speedMul = 1 - factor * 0.5;
+							if (!isFinite(speedMul) || speedMul < 0.1) speedMul = 0.1;
+						}
+						if (e.slowStacks > 0) {
+							const stackFactor = Math.min(e.slowStacks, 3) * 0.15;
+							speedMul *= (1 - stackFactor);
+							if (!isFinite(speedMul) || speedMul < 0.1) speedMul = 0.1;
+						}
+					}
+					// 冲刺加速
+					if (e.isBoss && e.bossType === 'lion' && e.dashTimer && e.dashTimer > 0) {
+						speedMul *= 3.0;
+					}
 
                     const targetIdx = Math.min(e.pathIndex + 1, PATH_PIXELS.length - 1);
                     const target = PATH_PIXELS[targetIdx];
@@ -5640,8 +5683,6 @@
                         game.emoji = '😍';
                     }
                     game.bossLockedDice = [];
-                    game.bossHackedDice = [];
-                    game.bossClouds = [];
                     game.bossAbilityActive = false;
                     game.bossCount = 0;
                     game.enemiesKilledThisWave = 0;
@@ -5758,83 +5799,161 @@
             boss.skillTimer += dt;
 
             switch (boss.bossType) {
-                case 'knight':
-                    if (boss.skillTimer >= boss.skillCooldown) {
-                        boss.skillTimer = 0;
-                        triggerKnightAbility(boss);
-                    }
-                    break;
-                case 'lion':
-                    if (boss.skillTimer >= boss.skillCooldown) {
-                        if (boss.skillPhase === 0) {
-                            boss.skillPhase = 1;
-                            triggerLionRoar(boss);
-                            boss.skillCooldown = 5;
-                            boss.skillTimer = 0;
-                        } else {
-                            triggerLionDashV2(boss);
-                            boss.skillTimer = 0;
-                        }
-                    }
-                    break;
-                case 'mage':
-                    if (boss.skillPhase === 0 && boss.skillTimer >= 3) {
-                        boss.skillPhase = 1;
-                        triggerMageMeteor(boss);
-                        boss.skillTimer = 0;
-                    } else if (boss.skillPhase === 1 && boss.skillTimer >= 8) {
-                        boss.skillPhase = 2;
-                        triggerMageCleanse(boss);
-                        boss.skillTimer = 0;
-                    } else if (boss.skillPhase === 2 && boss.skillTimer >= 8) {
-                        boss.skillPhase = 0;
-                        triggerMageHeal(boss);
-                        boss.skillTimer = 0;
-                    }
-                    break;
-                case 'hacker':
-                    if (boss.skillTimer >= boss.skillCooldown) {
-                        boss.skillTimer = 0;
-                        triggerHackerAbility(boss);
-                        boss.skillCooldown = 8;
-                    }
-                    break;
-                case 'magnet':
-                    if (boss.skillTimer >= boss.skillCooldown) {
-                        boss.skillTimer = 0;
-                        triggerMagnetAbility(boss);
-                        boss.skillCooldown = 8;
-                    }
-                    break;
-                case 'balistic':
-                    if (boss.skillTimer >= boss.skillCooldown) {
-                        boss.skillTimer = 0;
-                        triggerBalisticAbility(boss);
-                        boss.skillCooldown = 10;
-                    }
-                    break;
-                case 'lamb':
-                    if (boss.skillTimer >= boss.skillCooldown) {
-                        boss.skillTimer = 0;
-                        triggerLambAbility(boss);
-                    }
-                    break;
-                case 'snake':
-                    if (boss.skillTimer >= boss.skillCooldown) {
-                        boss.skillTimer = 0;
-                        triggerSnakeAbility(boss);
-                    }
-                    break;
-                case 'cloud':
-                    if (boss.skillTimer >= boss.skillCooldown) {
-                        boss.skillTimer = 0;
-                        triggerCloudAbility(boss);
-                        boss.skillCooldown = 8;
-                    }
-                    break;
-                default:
-                    break;
-            }
+				case 'snake':
+					if (boss.snakeFirstTrigger) {
+						if (boss.skillTimer >= 2) {
+							boss.snakeFirstTrigger = false;
+							boss.skillTimer = 0;
+							boss.skillCooldown = 10;
+							triggerSnakeAbility(boss);
+						}
+					} else if (boss.skillTimer >= boss.skillCooldown) {
+						boss.skillTimer = 0;
+						triggerSnakeAbility(boss);
+					}
+					break;
+
+				case 'lamb':
+					if (boss.lambFirstTrigger) {
+						if (boss.skillTimer >= 2) {
+							boss.lambFirstTrigger = false;
+							boss.skillTimer = 0;
+							boss.skillCooldown = 7;
+							triggerLambAbility(boss);
+						}
+					} else if (boss.skillTimer >= boss.skillCooldown) {
+						boss.skillTimer = 0;
+						triggerLambAbility(boss);
+					}
+					break;
+
+				case 'knight':
+					if (boss.knightFirstTrigger) {
+						if (boss.skillTimer >= 2) {
+							boss.knightFirstTrigger = false;
+							boss.skillTimer = 0;
+							boss.skillCooldown = 10;
+							triggerKnightAbility(boss);
+						}
+					} else if (boss.skillTimer >= boss.skillCooldown) {
+						boss.skillTimer = 0;
+						triggerKnightAbility(boss);
+					}
+					break;
+
+				case 'mage':
+					if (boss.mageFirstTrigger) {
+						if (boss.skillTimer >= 2) {
+							boss.mageFirstTrigger = false;
+							boss.skillTimer = 0;
+							boss.mageSkillPhase = 0;
+							boss.skillCooldown = 5;
+							triggerMageMeteor(boss);
+							boss.mageSkillPhase = 1;
+						}
+					} else if (boss.skillTimer >= boss.skillCooldown) {
+						boss.skillTimer = 0;
+						switch (boss.mageSkillPhase) {
+							case 0: triggerMageMeteor(boss); boss.mageSkillPhase = 1; boss.skillCooldown = 7; boss.skillTimer = 0; break;
+							case 1: triggerMageCleanse(boss); boss.mageSkillPhase = 2; boss.skillCooldown = 5; boss.skillTimer = 0; break;
+							case 2: triggerMageHeal(boss); boss.mageSkillPhase = 0; boss.skillCooldown = 5; boss.skillTimer = 0; break;
+							default: boss.mageSkillPhase = 0;
+						}
+					}
+					break;
+
+				case 'lion':
+					if (boss.lionFirstTrigger) {
+						if (boss.skillTimer >= 2) {
+							boss.lionFirstTrigger = false;
+							boss.skillTimer = 0;
+							boss.skillCooldown = 5;
+							triggerLionRoar(boss);
+						}
+					} else if (boss.skillTimer >= boss.skillCooldown) {
+						boss.skillTimer = 0;
+						triggerLionDashV2(boss);
+					}
+					break;
+
+				case 'hacker':
+					if (boss.hackerFirstTrigger) {
+						if (boss.skillTimer >= 2) {
+							boss.hackerFirstTrigger = false;
+							boss.skillTimer = 0;
+							boss.skillCooldown = 10;
+							triggerHackerAbility(boss);
+						}
+					} else if (boss.skillTimer >= boss.skillCooldown) {
+						boss.skillTimer = 0;
+						triggerHackerAbility(boss);
+					}
+					break;
+
+				case 'balistic':
+					if (boss.balisticFirstTrigger) {
+						if (boss.skillTimer >= 2) {
+							boss.balisticFirstTrigger = false;
+							boss.skillTimer = 0;
+							boss.skillCooldown = 15;
+							triggerBalisticAbility(boss);
+						}
+					} else if (boss.skillTimer >= boss.skillCooldown) {
+						boss.skillTimer = 0;
+						triggerBalisticAbility(boss);
+					}
+					break;
+
+				case 'slime':
+					if (boss.skillTimer >= boss.skillCooldown) {
+						boss.skillTimer = 0;
+					}
+					break;
+
+				case 'magnet':
+					if (boss.magnetFirstTrigger) {
+						if (boss.skillTimer >= 2) {
+							boss.magnetFirstTrigger = false;
+							boss.skillTimer = 0;
+							boss.magnetPhase = 'mark';
+							boss.magnetMarkTimer = 0;
+							boss.skillCooldown = 8;
+							performMagnetMark(boss);
+						}
+					} else {
+						if (boss.magnetPhase === 'mark') {
+							boss.magnetMarkTimer += dt;
+							if (boss.magnetMarkTimer >= 3) {
+								performMagnetMerge(boss);
+								boss.magnetMarkTimer = 0;
+								boss.magnetPhase = 'idle';
+								boss.skillTimer = 0;
+							}
+						} else if (boss.magnetPhase === 'idle') {
+							boss.skillTimer += dt;
+							if (boss.skillTimer >= boss.skillCooldown) {
+								boss.skillTimer = 0;
+								boss.magnetPhase = 'mark';
+								boss.magnetMarkTimer = 0;
+								performMagnetMark(boss);
+							}
+						}
+					}
+					break;
+
+				case 'cloud':
+					if (boss.cloudFirstTrigger) {
+						if (boss.skillTimer >= 2) {
+							boss.cloudFirstTrigger = false;
+							boss.skillTimer = 0;
+							triggerCloudAbility(boss);
+						}
+					} else if (boss.skillTimer >= boss.skillCooldown) {
+						boss.skillTimer = 0;
+						triggerCloudAbility(boss);
+					}
+					break;
+			}
 
             if (boss.shieldTimer && boss.shieldTimer > 0) {
                 boss.shieldTimer -= dt;
@@ -5849,20 +5968,27 @@
             const activeTypes = getActiveDiceKeys();
             if (activeTypes.length === 0) return;
             for (let r = 0; r < ROWS; r++) {
-                for (let c = 0; c < COLS; c++) {
-                    if (isPathCell(c, r)) continue;
-                    const dice = game.board[r][c];
-                    if (dice && dice._isFinal !== false) {
-                        const newType = activeTypes[randInt(0, activeTypes.length - 1)];
-                        const newDice = createDice(newType, dice.star);
-                        if (newDice) {
-                            newDice._isFinal = true;
-                            newDice.cooldown = dice.cooldown || 0;
-                            game.board[r][c] = newDice;
-                        }
-                    }
-                }
-            }
+				for (let c = 0; c < COLS; c++) {
+					if (isPathCell(c, r)) continue;
+					const dice = game.board[r][c];
+					if (!dice || dice._isFinal === false) continue;
+					const newType = activeTypes[randInt(0, activeTypes.length - 1)];
+					const newDice = createDice(newType, dice.star);
+					if (newDice) {
+						newDice._isFinal = true;
+						newDice.cooldown = dice.cooldown || 0;
+						if (dice.isMystery && dice.transformTimer !== undefined) {
+							newDice.transformTimer = dice.transformTimer;
+							newDice.transformInterval = dice.transformInterval;
+						}
+						if (dice.isGoldmine && dice.goldAmount !== undefined) {
+							newDice.goldAmount = dice.goldAmount;
+						}
+						game.bossHackedDice = game.bossHackedDice.filter(d => !(d.row === r && d.col === c));
+						game.board[r][c] = newDice;
+					}
+				}
+			}
             addFloatingText(boss.x, boss.y - 40, data.transform, '#3498db', 24);
             playHitSound();
         }
@@ -5886,6 +6012,7 @@
                 const { row, col, dice } = shuffled[i];
                 if (dice.star === 1) {
                     game.board[row][col] = null;
+					game.bossHackedDice = game.bossHackedDice.filter(d => !(d.row === row && d.col === col));
                     count++;
                     addFloatingText(boardX + col * CELL_SIZE + CELL_SIZE / 2, boardY + row * CELL_SIZE + CELL_SIZE / 2,
                         '💨', '#ff6b6b', 20);
@@ -5895,9 +6022,10 @@
                         newDice._isFinal = true;
                         newDice.cooldown = dice.cooldown || 0;
                         game.board[row][col] = newDice;
+						game.bossHackedDice = game.bossHackedDice.filter(d => !(d.row === row && d.col === col));
                         count++;
                         addFloatingText(boardX + col * CELL_SIZE + CELL_SIZE / 2, boardY + row * CELL_SIZE + CELL_SIZE / 2,
-                            '⬇️', '#e67e22', 18);
+                            '🔻', '#e67e22', 18);
                     }
                 }
             }
@@ -5919,38 +6047,57 @@
         }
 
         function triggerMageMeteor(boss) {
-            const data = getData();
-            showToast(data.bossWarningMage, 2000);
-            showToast(data.meteor, 800);
-            playShootSound();
-            let diceCells = [];
-            for (let r = 0; r < ROWS; r++) {
-                for (let c = 0; c < COLS; c++) {
-                    if (isPathCell(c, r)) continue;
-                    if (game.board[r][c] && game.board[r][c]._isFinal !== false) diceCells.push({ row: r, col: c });
-                }
-            }
-            if (diceCells.length === 0) return;
-            const pick = diceCells[randInt(0, diceCells.length - 1)];
-            if (pick) {
-                game._markedDice = [{ row: pick.row, col: pick.col, timer: 2.0 }];
-                setTimeout(() => {
-                    if (game.board[pick.row] && game.board[pick.row][pick.col]) {
-                        game.board[pick.row][pick.col] = null;
-                        addFloatingText(boardX + pick.col * CELL_SIZE + CELL_SIZE / 2,
-                            boardY + pick.row * CELL_SIZE + CELL_SIZE / 2,
-                            data.meteor, '#ff6b6b', 26);
-                        showToast(data.bossMeteorDestroy);
-                        playHitSound();
-                    } else {
-                        showToast(data.bossMeteorDodge);
-                    }
-                    game._markedDice = [];
-                }, 2000);
-            }
-            boss.skillPhase = 1;
-            boss.skillTimer = 0;
-        }
+			const data = getData();
+			showToast(data.bossWarningMage, 2000);
+			playShootSound();
+			let diceCells = [];
+			for (let r = 0; r < ROWS; r++) {
+				for (let c = 0; c < COLS; c++) {
+					if (isPathCell(c, r)) continue;
+					if (game.board[r][c] && game.board[r][c]._isFinal !== false) diceCells.push({ row: r, col: c });
+				}
+			}
+			if (diceCells.length === 0) return;
+			const pick = diceCells[randInt(0, diceCells.length - 1)];
+			if (pick) {
+				const targetX = boardX + pick.col * CELL_SIZE + CELL_SIZE / 2;
+				const targetY = boardY + pick.row * CELL_SIZE + CELL_SIZE / 2;
+				const angle = -Math.PI / 4;
+				const distance = 800;
+				const startX = targetX + Math.cos(angle) * distance;
+				const startY = targetY + Math.sin(angle) * distance;
+				
+				game._markedDice = [{ row: pick.row, col: pick.col, timer: 2.5 }];
+				
+				game.meteor = {
+					active: true,
+					startX: startX,
+					startY: startY,
+					targetX: targetX,
+					targetY: targetY,
+					progress: 0,
+					duration: 2.0,
+					targetRow: pick.row,
+					targetCol: pick.col,
+				};
+				
+				setTimeout(() => {
+					game._markedDice = [];
+					const dice = game.board[pick.row]?.[pick.col];
+					if (dice && dice._isFinal !== false) {
+						game.board[pick.row][pick.col] = null;
+						addFloatingText(targetX, targetY - 20, data.meteor, '#ff6b6b', 26);
+						showToast(data.bossMeteorDestroy);
+						playHitSound();
+					} else {
+						showToast(data.bossMeteorDodge);
+					}
+					game.meteor.active = false;
+				},  2000);
+			}
+			boss.skillPhase = 1;
+			boss.skillTimer = 0;
+		}
 
         function triggerMageCleanse(boss) {
             const data = getData();
@@ -5981,159 +6128,367 @@
         }
 
         function triggerHackerAbility(boss) {
-            const data = getData();
-            showToast(data.bossWarningHacker, 1500);
-            playShootSound();
-            let diceCells = [];
-            for (let r = 0; r < ROWS; r++) {
-                for (let c = 0; c < COLS; c++) {
-                    if (isPathCell(c, r)) continue;
-                    if (game.board[r][c] && game.board[r][c]._isFinal !== false) diceCells.push({ row: r, col: c });
-                }
-            }
-            let hacked = [];
-            for (let i = 0; i < Math.min(2, diceCells.length); i++) {
-                const pick = diceCells.splice(randInt(0, diceCells.length - 1), 1)[0];
-                if (pick) hacked.push(pick);
-            }
-            game.bossHackedDice = game.bossHackedDice.concat(hacked);
-            addFloatingText(boss.x, boss.y - 30, data.bossHackerMark, '#2c3e50', 22);
-            showToast(data.bossHackerHacked.replace(/\{count\}/g, hacked.length));
-            if (hacked.length > 0) playHitSound();
-            boss.skillTimer = 0;
-        }
+			const data = getData();
+			showToast(data.bossWarningHacker, 1500);
+			playShootSound();
+			let diceCells = [];
+			for (let r = 0; r < ROWS; r++) {
+				for (let c = 0; c < COLS; c++) {
+					if (isPathCell(c, r)) continue;
+					if (game.board[r][c] && game.board[r][c]._isFinal !== false) diceCells.push({ row: r, col: c });
+				}
+			}
+			let hacked = [];
+			for (let i = 0; i < Math.min(2, diceCells.length); i++) {
+				const pick = diceCells.splice(randInt(0, diceCells.length - 1), 1)[0];
+				if (pick) hacked.push(pick);
+			}
+			if (hacked.length === 0) return;
 
-        function triggerMagnetAbility(boss) {
-            const data = getData();
-            showToast(data.bossWarningMagnet, 1500);
-            playShootSound();
+			game.hackTargets = hacked;
+			
+			setTimeout(() => {
+				const stillThere = hacked.filter(h => {
+					const dice = game.board[h.row]?.[h.col];
+					return dice && dice._isFinal !== false;
+				});
+				if (stillThere.length > 0) {
+					game.bossHackedDice = game.bossHackedDice.concat(stillThere);
+					addFloatingText(boss.x, boss.y - 30, data.bossHackerMark, '#2c3e50', 22);
+					showToast(data.bossHackerHacked.replace(/\{count\}/g, stillThere.length));
+					if (stillThere.length > 0) playHitSound();
+				} else {
+					showToast(getData().hackerDodged);
+				}
+				game.hackTargets = [];
+			}, 2000);
+			boss.skillTimer = 0;
+		}
 
-            let diceList = [];
-            for (let r = 0; r < ROWS; r++) {
-                for (let c = 0; c < COLS; c++) {
-                    if (isPathCell(c, r)) continue;
-                    if (!game.board[r] || !game.board[r][c]) continue;
-                    if (game.board[r][c]._isFinal === false) continue;
-                    if (game.bossLockedDice.some(d => d.row === r && d.col === c)) continue;
-                    if (game.bossClouds && game.bossClouds.some(cloud => {
-                            const cellX = boardX + c * CELL_SIZE;
-                            const cellY = boardY + r * CELL_SIZE;
-                            return cloud.active && cloud.x < cellX + CELL_SIZE && cloud.x + cloud.w > cellX &&
-                                cloud.y < cellY + CELL_SIZE && cloud.y + cloud.h > cellY;
-                        })) continue;
-                    const dice = game.board[r][c];
-                    diceList.push({ row: r, col: c, type: dice.type, star: dice.star, dice: dice });
-                }
-            }
+		function triggerMagnetAbility(boss) {
+			const data = getData();
+			showToast(data.bossWarningMagnet, 1500);
+			playShootSound();
 
-            if (diceList.length < 2) {
-                showToast(data.bossMagnetNoDice);
-                return;
-            }
+			let diceList = [];
+			for (let r = 0; r < ROWS; r++) {
+				for (let c = 0; c < COLS; c++) {
+					if (isPathCell(c, r)) continue;
+					if (!game.board[r] || !game.board[r][c]) continue;
+					if (game.board[r][c]._isFinal === false) continue;
+					if (game.bossLockedDice.some(d => d.row === r && d.col === c)) continue;
+					if (game.bossClouds && game.bossClouds.some(cloud => {
+							const cellX = boardX + c * CELL_SIZE;
+							const cellY = boardY + r * CELL_SIZE;
+							return cloud.active && cloud.x < cellX + CELL_SIZE && cloud.x + cloud.w > cellX &&
+								cloud.y < cellY + CELL_SIZE && cloud.y + cloud.h > cellY;
+						})) continue;
+					const dice = game.board[r][c];
+					diceList.push({ row: r, col: c, type: dice.type, star: dice.star, dice: dice });
+				}
+			}
 
-            const groups = {};
-            for (const item of diceList) {
-                const key = `${item.type}_${item.star}`;
-                if (!groups[key]) groups[key] = [];
-                groups[key].push(item);
-            }
+			if (diceList.length < 2) {
+				showToast(data.bossMagnetNoDice);
+				return;
+			}
 
-            const validGroups = Object.values(groups).filter(arr => arr.length >= 2);
-            if (validGroups.length === 0) {
-                showToast(data.bossMagnetNoMatch);
-                return;
-            }
+			const groups = {};
+			for (const item of diceList) {
+				const key = `${item.type}_${item.star}`;
+				if (!groups[key]) groups[key] = [];
+				groups[key].push(item);
+			}
 
-            const chosenGroup = validGroups[randInt(0, validGroups.length - 1)];
-            const index1 = randInt(0, chosenGroup.length - 1);
-            let index2;
-            do {
-                index2 = randInt(0, chosenGroup.length - 1);
-            } while (index2 === index1);
-            const pick1 = chosenGroup[index1];
-            const pick2 = chosenGroup[index2];
+			const validGroups = Object.values(groups).filter(arr => arr.length >= 2);
+			if (validGroups.length === 0) {
+				showToast(data.bossMagnetNoMatch);
+				return;
+			}
 
-            const dice1 = pick1.dice;
-            const dice2 = pick2.dice;
-            if (dice1.star >= game.maxStar) {
-                showToast('⭐ 已達最高星，無法合併');
-                return;
-            }
-            const newStar = dice1.star + 1;
-            const newDice = createDice(dice1.type, newStar);
-            if (newDice) {
-                newDice._isFinal = true;
-                newDice.cooldown = dice1.cooldown || 0;
-                game.board[pick1.row][pick1.col] = newDice;
-                game.board[pick2.row][pick2.col] = null;
-                game.bossHackedDice = game.bossHackedDice.filter(d => !(d.row === pick1.row && d.col === pick1.col) &&
-                    !(d.row === pick2.row && d.col === pick2.col));
-                game.bossLockedDice = game.bossLockedDice.filter(d => !(d.row === pick1.row && d.col === pick1.col) &&
-                    !(d.row === pick2.row && d.col === pick2.col));
-                addFloatingText(
-                    boardX + pick1.col * CELL_SIZE + CELL_SIZE / 2,
-                    boardY + pick1.row * CELL_SIZE + CELL_SIZE / 2,
-                    `🧲 ★${newStar}`,
-                    '#e74c3c', 24
-                );
-                const name = getDiceName(dice1.type);
-                showToast(data.bossMagnetForce.replace(/\{star\}/g, newStar).replace(/\{name\}/g, name));
-                playHitSound();
-            } else {
-                showToast('❌ 合併失敗');
-            }
-            boss.skillTimer = 0;
-        }
+			const chosenGroup = validGroups[randInt(0, validGroups.length - 1)];
+			const index1 = randInt(0, chosenGroup.length - 1);
+			let index2;
+			do {
+				index2 = randInt(0, chosenGroup.length - 1);
+			} while (index2 === index1);
+			const pick1 = chosenGroup[index1];
+			const pick2 = chosenGroup[index2];
+
+			game.magnetTargets = [pick1, pick2];
+
+			setTimeout(() => {
+				const d1 = game.board[pick1.row]?.[pick1.col];
+				const d2 = game.board[pick2.row]?.[pick2.col];
+				if (!d1 || !d2 || d1._isFinal === false || d2._isFinal === false ||
+					d1.type !== pick1.type || d1.star !== pick1.star ||
+					d2.type !== pick2.type || d2.star !== pick2.star) {
+					showToast(getData().magnetDodged);
+					game.magnetTargets = [];
+					return;
+				}
+
+				if (d1.star >= game.maxStar) {
+					showToast('⭐ 已達最高星，無法合併');
+					game.magnetTargets = [];
+					return;
+				}
+				const newStar = d1.star + 1;
+				const newDice = createDice(d1.type, newStar);
+				if (newDice) {
+					newDice._isFinal = true;
+					newDice.cooldown = d1.cooldown || 0;
+					game.board[pick1.row][pick1.col] = newDice;
+					game.board[pick2.row][pick2.col] = null;
+					game.bossHackedDice = game.bossHackedDice.filter(d => !(d.row === pick1.row && d.col === pick1.col) &&
+						!(d.row === pick2.row && d.col === pick2.col));
+					game.bossLockedDice = game.bossLockedDice.filter(d => !(d.row === pick1.row && d.col === pick1.col) &&
+						!(d.row === pick2.row && d.col === pick2.col));
+					addFloatingText(
+						boardX + pick1.col * CELL_SIZE + CELL_SIZE / 2,
+						boardY + pick1.row * CELL_SIZE + CELL_SIZE / 2,
+						`🧲 ★${newStar}`,
+						'#e74c3c', 24
+					);
+					const name = getDiceName(d1.type);
+					showToast(data.bossMagnetForce.replace(/\{star\}/g, newStar).replace(/\{name\}/g, name));
+					playHitSound();
+				}
+				game.magnetTargets = [];
+			}, 1500);
+			boss.skillTimer = 0;
+		}
+		function performMagnetMark(boss) {
+			const data = getData();
+			let candidates = [];
+			for (let r = 0; r < ROWS; r++) {
+				for (let c = 0; c < COLS; c++) {
+					if (isPathCell(c, r)) continue;
+					const dice = game.board[r]?.[c];
+					if (!dice || dice._isFinal === false) continue;
+					if (game.bossLockedDice.some(d => d.row === r && d.col === c)) continue;
+					if (game.bossClouds && game.bossClouds.some(cloud => {
+							const cellX = boardX + c * CELL_SIZE;
+							const cellY = boardY + r * CELL_SIZE;
+							return cloud.active && cloud.x < cellX + CELL_SIZE && cloud.x + cloud.w > cellX &&
+								cloud.y < cellY + CELL_SIZE && cloud.y + cloud.h > cellY;
+						})) continue;
+					// 排除已被标记的
+					if (boss.magnetMarkTarget && boss.magnetMarkTarget.row === r && boss.magnetMarkTarget.col === c) continue;
+					candidates.push({ row: r, col: c, dice: dice });
+				}
+			}
+			if (candidates.length === 0) {
+				// 没有可用骰子，转为空闲
+				boss.magnetPhase = 'idle';
+				return;
+			}
+
+			// 优先选择有可合并伙伴的骰子
+			let preferred = [];
+			for (const cand of candidates) {
+				const d = cand.dice;
+				const sameTypeStar = [];
+				for (let r = 0; r < ROWS; r++) {
+					for (let c = 0; c < COLS; c++) {
+						if (isPathCell(c, r)) continue;
+						const other = game.board[r]?.[c];
+						if (!other || other._isFinal === false) continue;
+						if (other.type === d.type && other.star === d.star && !(r === cand.row && c === cand.col)) {
+							if (!game.bossLockedDice.some(dd => dd.row === r && dd.col === c)) {
+								sameTypeStar.push({ row: r, col: c });
+							}
+						}
+					}
+				}
+				if (sameTypeStar.length > 0) {
+					preferred.push(cand);
+				}
+			}
+
+			let chosen;
+			if (preferred.length > 0) {
+				chosen = preferred[randInt(0, preferred.length - 1)];
+			} else {
+				chosen = candidates[randInt(0, candidates.length - 1)];
+			}
+
+			// 标记该骰子
+			boss.magnetMarkTarget = { row: chosen.row, col: chosen.col };
+			addFloatingText(
+				boardX + chosen.col * CELL_SIZE + CELL_SIZE / 2,
+				boardY + chosen.row * CELL_SIZE + CELL_SIZE / 2,
+				'🧲 重力標記!',
+				'#e74c3c', 24
+			);
+			showToast(`🧲 已標記 ${chosen.dice.label}★${chosen.dice.star}，3秒後合併！`, 1200);
+			boss.magnetMarkTimer = 0;
+			boss.magnetPhase = 'mark';
+		}
+
+		function performMagnetMerge(boss) {
+			const data = getData();
+			if (!boss.magnetMarkTarget) {
+				boss.magnetPhase = 'idle';
+				return;
+			}
+			const { row, col } = boss.magnetMarkTarget;
+			const dice = game.board[row]?.[col];
+			if (!dice || dice._isFinal === false) {
+				// 骰子已消失，取消合并
+				boss.magnetPhase = 'idle';
+				return;
+			}
+			// 检查是否被锁定或云覆盖
+			if (game.bossLockedDice.some(d => d.row === row && d.col === col)) {
+				showToast('🧲 骰子被封印，無法合併');
+				boss.magnetPhase = 'idle';
+				return;
+			}
+			if (game.bossClouds && game.bossClouds.some(c => {
+					const cellX = boardX + col * CELL_SIZE;
+					const cellY = boardY + row * CELL_SIZE;
+					return c.active && c.x < cellX + CELL_SIZE && c.x + c.w > cellX &&
+						c.y < cellY + CELL_SIZE && c.y + c.h > cellY;
+				})) {
+				showToast('🧲 骰子在雲霧中，無法合併');
+				boss.magnetPhase = 'idle';
+				return;
+			}
+
+			// 寻找可合并的伙伴（同类同星，未锁定）
+			let partners = [];
+			for (let r = 0; r < ROWS; r++) {
+				for (let c = 0; c < COLS; c++) {
+					if (isPathCell(c, r)) continue;
+					if (r === row && c === col) continue;
+					const other = game.board[r]?.[c];
+					if (!other || other._isFinal === false) continue;
+					if (other.type === dice.type && other.star === dice.star) {
+						if (!game.bossLockedDice.some(d => d.row === r && d.col === c)) {
+							partners.push({ row: r, col: c });
+						}
+					}
+				}
+			}
+
+			if (partners.length > 0 && dice.star < game.maxStar) {
+				// 选择一个伙伴进行合并
+				const partner = partners[randInt(0, partners.length - 1)];
+				const newStar = dice.star + 1;
+				// 随机选择牌组中的骰子类型
+				const activeTypes = getActiveDiceKeys();
+				if (activeTypes.length === 0) {
+					boss.magnetPhase = 'idle';
+					return;
+				}
+				const newType = activeTypes[randInt(0, activeTypes.length - 1)];
+				const newDice = createDice(newType, newStar);
+				if (newDice) {
+					newDice._isFinal = true;
+					newDice.cooldown = dice.cooldown || 0;
+					game.board[row][col] = newDice;
+					game.board[partner.row][partner.col] = null;
+					game.bossHackedDice = game.bossHackedDice.filter(d => !(d.row === row && d.col === col) &&
+						!(d.row === partner.row && d.col === partner.col));
+					game.bossLockedDice = game.bossLockedDice.filter(d => !(d.row === row && d.col === col) &&
+						!(d.row === partner.row && d.col === partner.col));
+					addFloatingText(
+						boardX + col * CELL_SIZE + CELL_SIZE / 2,
+						boardY + row * CELL_SIZE + CELL_SIZE / 2,
+						`🧲 ★${newStar} ${newDice.label}`,
+						'#e74c3c', 24
+					);
+					const name = getDiceName(newType);
+					showToast(data.bossMagnetForce.replace(/\{star\}/g, newStar).replace(/\{name\}/g, name));
+					playHitSound();
+				}
+			} else {
+				// 无法合并，清除标记
+				showToast('🧲 沒有可合併的夥伴，取消合併');
+				addFloatingText(
+					boardX + col * CELL_SIZE + CELL_SIZE / 2,
+					boardY + row * CELL_SIZE + CELL_SIZE / 2,
+					'❌ 無法合併',
+					'#ff6b6b', 20
+				);
+			}
+			// 清除标记
+			boss.magnetMarkTarget = null;
+			boss.magnetPhase = 'idle';
+		}
 
         function triggerBalisticAbility(boss) {
-            const data = getData();
-            showToast(data.bossWarningBalistic, 1500);
-            playShootSound();
-            const availMini = CONST.MINI_BOSS_TYPES;
-            const randIdx = randInt(0, availMini.length - 1);
-            const mbType = availMini[randIdx];
-            const baseReward = getNormalReward(game.wave);
-            const baseHp = getEnemyHp(game.wave, 0);
-            let hpMultiplier = 3 + 1.0 * (game.wave - 5);
-            let hp = baseHp * hpMultiplier;
-            let speed = 0.6;
-            if (mbType.id === 'tank') {
-                speed = 0.5;
-                hp = baseHp * 5;
-            }
-            const finalMbHp = Math.max(50, Math.round(hp));
-            const mb = {
-                pathIndex: boss.pathIndex,
-                x: boss.x,
-                y: boss.y,
-                hp: finalMbHp,
-                maxHp: finalMbHp,
-                speed: speed,
-                reward: baseReward * 2,
-                type: 'miniBoss',
-                size: 1.3,
-                isBoss: false,
-                alive: true,
-                bossType: null,
-                isMiniBoss: true,
-                miniBossType: mbType.id,
-                slowStacks: 0,
-                slowFactor: 0,
-                slowTimer: 0,
-                burnTimer: 0,
-                burnDamage: 0,
-                poison: null,
-                stunTimer: 0,
-                hitFlash: 0,
-                _lockedByLockDice: false,
-                _enemyId: ++game._enemyIdCounter,
-            };
-            game.enemies.push(mb);
-            game.miniBossSpawned++;
-            const mbName = getBossName(mbType.id);
-            showToast(data.toastMiniBossSpawn.replace(/\{name\}/g, mbName), 1500);
-            boss.skillTimer = 0;
-        }
+			const data = getData();
+			showToast(data.bossWarningBalistic, 1500);
+			playShootSound();
+
+			const allBossTypes = CONST.BOSS_TYPES.map(b => b.id);
+			const available = allBossTypes.filter(id => id !== boss.bossType);
+			if (available.length === 0) return;
+
+			const chosenType = available[randInt(0, available.length - 1)];
+			const bossDef = CONST.BOSS_TYPES.find(b => b.id === chosenType);
+			if (!bossDef) return;
+
+			const hp = Math.max(100, boss.hp * 0.5);
+			const speed = 0.6;
+			const reward = Math.floor((boss.reward || 100) * 0.5);
+
+			const summonedBoss = {
+				pathIndex: boss.pathIndex,
+				x: boss.x,
+				y: boss.y,
+				hp: hp,
+				maxHp: hp,
+				speed: speed,
+				reward: reward,
+				type: 'boss',
+				size: 1.8,
+				isBoss: true,
+				alive: true,
+				bossType: chosenType,
+				abilityPhase: 0,
+				slowStacks: 0,
+				slowFactor: 0,
+				slowTimer: 0,
+				burnTimer: 0,
+				burnDamage: 0,
+				poison: null,
+				stunTimer: 0,
+				_lockedByLockDice: false,
+				skillTimer: 0,
+				skillCooldown: 8,
+				skillPhase: 0,
+				shieldTimer: 0,
+				cloudTimer: 0,
+				dashTimer: 0,
+				sealTimer: 0,
+				_enemyId: ++game._enemyIdCounter,
+				isSummoned: true
+			};
+
+			switch (chosenType) {
+				case 'hacker': summonedBoss.skillCooldown = 10; summonedBoss.hackerFirstTrigger = true; break;
+				case 'magnet': summonedBoss.skillCooldown = 2; break;
+				case 'balistic': summonedBoss.skillCooldown = 15; summonedBoss.balisticFirstTrigger = true; break;
+				case 'cloud': summonedBoss.skillCooldown = 3; break;
+				case 'snake': summonedBoss.skillCooldown = 10; summonedBoss.snakeFirstTrigger = true; break;
+				case 'lamb': summonedBoss.skillCooldown = 7; summonedBoss.lambFirstTrigger = true; break;
+				case 'knight': summonedBoss.skillCooldown = 10; summonedBoss.knightFirstTrigger = true; break;
+				case 'mage': summonedBoss.skillCooldown = 5; summonedBoss.mageFirstTrigger = true; summonedBoss.mageSkillPhase = 0; break;
+				case 'lion': summonedBoss.skillCooldown = 5; summonedBoss.lionFirstTrigger = true; summonedBoss.skillPhase = 0; break;
+				default: summonedBoss.skillCooldown = 8;
+			}
+			if (chosenType === 'slime') summonedBoss.slimeLevel = 0;
+
+			game.enemies.push(summonedBoss);
+			const name = getBossName(chosenType);
+			showToast(getData().bossSummonedToast.replace(/\{name\}/g, name), 1500);
+			addFloatingText(boss.x, boss.y - 40, getData().bossSummonedFloating.replace(/\{name\}/g, name), '#ff6b6b', 24);
+			playHitSound();
+			boss.skillTimer = 0;
+		}
 
         function triggerLambAbility(boss) {
             const data = getData();
@@ -6221,27 +6576,34 @@
             boss.skillTimer = 0;
         }
 
-        function triggerCloudAbility(boss) {
-            const data = getData();
-            showToast(data.bossWarningCloud, 1200);
-            playShootSound();
-            const col = randInt(0, COLS - 2);
-            const row = randInt(0, ROWS - 2);
-            const cloud = {
-                x: boardX + col * CELL_SIZE,
-                y: boardY + row * CELL_SIZE,
-                w: CELL_SIZE * 2,
-                h: CELL_SIZE * 2,
-                timer: 6.0,
-                active: true,
-            };
-            if (!game.bossClouds) game.bossClouds = [];
-            game.bossClouds.push(cloud);
-            addFloatingText(cloud.x + cloud.w / 2, cloud.y + cloud.h / 2, data.bossCloud, '#ecf0f1', 28);
-            playHitSound();
-            boss.skillTimer = 0;
-        }
-
+		function triggerCloudAbility(boss) {
+			const data = getData();
+			showToast(data.bossWarningCloud, 1200);
+			playShootSound();
+			
+			// ★ 直接使用 boss 当前的路径索引
+			const pathIndex = boss.pathIndex;
+			// 安全保护
+			if (pathIndex < 0 || pathIndex >= PATH.length) {
+				boss.skillTimer = 0;
+				return;
+			}
+			const pathCell = PATH[pathIndex];
+			const cloud = {
+				x: boardX + pathCell.col * CELL_SIZE,
+				y: boardY + pathCell.row * CELL_SIZE,
+				w: CELL_SIZE,
+				h: CELL_SIZE,
+				timer: 100,
+				active: true,
+				pathIndex: pathIndex,
+			};
+			if (!game.bossClouds) game.bossClouds = [];
+			game.bossClouds.push(cloud);
+			addFloatingText(cloud.x + cloud.w / 2, cloud.y + cloud.h / 2, data.bossCloud, '#ecf0f1', 28);
+			playHitSound();
+			boss.skillTimer = 0;
+		}
         function handleBossDeath(boss) {
             const data = getData();
             if (boss.bossType === 'slime' || boss.isMiniBoss && boss.miniBossType === 'slime') {
@@ -6515,18 +6877,31 @@
             }
             return totalBonus;
         }
-
+		function getDamageReductionForEnemy(enemy) {
+			if (!enemy || !game.bossClouds) return 1.0;
+			for (const cloud of game.bossClouds) {
+				if (!cloud.active) continue;
+				const range = CELL_SIZE * 1.5;
+				if (Math.abs(enemy.x - cloud.x) < range && Math.abs(enemy.y - cloud.y) < range) {
+					return 0.5;
+				}
+			}
+			return 1.0;
+		}
         // ========== 攻擊（★ 暴擊系統 + 火骰子火元素濺射 + 翻譯） ==========
         function updateAttacks(dt) {
 			updateTaichiAbilities(dt);
 			const globalCritBonus = getGlobalCritBonus();
 			const totalCritRate = 0.05;
 			const critDamageMultiplier = 1.0 + globalCritBonus / 100;
+			let safeDmg = 0;
+			let safeChainDmg = 0;   // 如果有连锁伤害也一并声明
+			let splashDmg = 0;
 
 			try {
 				const data = getData();
 				const board = game.board;
-                for (let r = 0; r < ROWS; r++) {
+				for (let r = 0; r < ROWS; r++) {
                     for (let c = 0; c < COLS; c++) {
                         const dice = board[r]?.[c];
                         if (!dice) continue;
@@ -6863,14 +7238,31 @@
 
                         try {
                             let interval = dice.interval;
-                            const lightBonus = calculateLightBonus(r, c);
-                            if (lightBonus > 0) {
-                                interval = interval / (1 + lightBonus);
-                            }
-                            if (dice._intervalOverride !== undefined) {
-                                interval = dice._intervalOverride;
-                            }
-                            interval = Math.max(0.15, interval);
+                            if (typeof interval !== 'number' || !isFinite(interval) || interval <= 0) {
+								console.warn(`[FIX] 骰子 (${r},${c}) 类型 ${dice.type} 的 interval 无效:`, interval, '→ 重置为 0.5');
+								interval = 0.5;
+							}
+
+							const lightBonus = calculateLightBonus(r, c);
+							if (lightBonus > 0) {
+								interval = interval / (1 + lightBonus);
+							}
+							if (dice._intervalOverride !== undefined) {
+								interval = dice._intervalOverride;
+							}
+							interval = Math.max(0.15, interval);
+							// ★ 确保 interval 始终是有效数字
+							if (!isFinite(interval) || interval <= 0) interval = 0.5;
+
+							// ★ 处理 cooldown 异常
+							if (typeof dice.cooldown !== 'number' || !isFinite(dice.cooldown)) {
+								dice.cooldown = 0;
+							}
+							dice.cooldown = dice.cooldown - dt;
+							if (DEBUG_ATTACK && dice.type === 'FIRE' && Math.random() < 0.01) {
+								console.log(`[DEBUG] 骰子 (${r},${c}) 类型 ${dice.type} | cooldown: ${dice.cooldown.toFixed(3)} | interval: ${interval.toFixed(3)} | 敌人数量: ${game.enemies.filter(e=>e.alive).length}`);
+							}
+							if (dice.cooldown > 0) continue;
 
                             if (dice.isDroughtThunder) {
                                 dice.cooldown = (dice.cooldown || 0) - dt;
@@ -6921,8 +7313,8 @@
                                     addFloatingText(target.x, target.y - 20, data.immuneBlock || '🛡️ 免疫',
                                         '#2ecc71', 18);
                                 } else {
-                                    const safeDmg = (typeof totalDmg === 'number' && isFinite(totalDmg)) ? totalDmg : 0;
-                                    target.hp = (target.hp || 0) - safeDmg;
+                                    safeDmg = (typeof totalDmg === 'number' && isFinite(totalDmg)) ? totalDmg : 0;
+									target.hp = (target.hp || 0) - safeDmg;
                                     if (!isFinite(target.hp)) target.hp = 0;
                                     target.hitFlash = 0.2;
                                     addFloatingText(target.x, target.y - 20, `-${Math.round(safeDmg)}`, '#ffd93d', 18);
@@ -7124,18 +7516,19 @@
                                 addFloatingText(target.x, target.y - 20, data.immuneBlock || '🛡️ 免疫', '#2ecc71',
                                 18);
                             } else {
-                                let dmgReduction = 1;
-                                if (game.bossCloud) {
-                                    const distToCloud = dist(target, { x: game.bossCloud.x, y: game.bossCloud.y });
-                                    if (distToCloud < game.bossCloud.radius) dmgReduction = 0.5;
-                                }
-                                const safeDmg = (typeof finalDamage === 'number' && isFinite(finalDamage)) ? finalDamage : 0;
-                                target.hp = (target.hp || 0) - safeDmg;
-                                if (!isFinite(target.hp)) target.hp = 0;
-                                target.hitFlash = 0.2;
-                                const critLabel = isCrit ? data.critText + ' ' : '';
-                                addFloatingText(target.x, target.y - 20, `${critLabel}-${Math.round(safeDmg)}`, isCrit ?
-                                    '#ff6b6b' : '#ffd93d', isCrit ? 20 : 18);
+								let dmgReduction = 1;
+								if (game.bossClouds && game.bossClouds.some(cloud => {
+									const dx = target.x - cloud.x;
+									const dy = target.y - cloud.y;
+									return cloud.active && dx >= 0 && dx <= cloud.w && dy >= 0 && dy <= cloud.h;
+								})) {
+									dmgReduction = 0.5;
+								}
+								safeDmg = (typeof finalDamage === 'number' && isFinite(finalDamage)) ? finalDamage : 0;
+								const finalDmg = safeDmg * dmgReduction;
+								target.hp -= finalDmg;
+								const critLabel = isCrit ? data.critText + ' ' : '';
+								addFloatingText(target.x, target.y - 20, `${critLabel}-${Math.round(finalDmg)}`, isCrit ? '#ff6b6b' : '#ffd93d', isCrit ? 20 : 18);
                                 if (isCrit) {
                                     addFloatingText(target.x, target.y - 34, data.critText, '#ff6b6b', 14);
                                 }
@@ -7375,17 +7768,19 @@
             game.wave++;
             game.enemiesSpawned = 0;
             game.enemiesKilledThisWave = 0;
-
-            game.enemiesPerWave = getEnemiesPerWave(game.wave);
-
+			if (isBossWave(game.wave)) {
+				game.enemiesPerWave = getBossCountForWave(game.wave);  // 1 或 2
+			} else if (isMiniBossWave(game.wave)) {
+				game.enemiesPerWave = 11;
+			} else {
+				game.enemiesPerWave = (game.wave <= 5) ? 8 : 10;
+			}
             game.bossCount = 0;
             game.miniBossSpawned = 0;
             game.isWaveActive = true;
             game.spawnTimer = 0;
             game.spawnInterval = Math.max(0.35, 0.9 - game.wave * 0.02);
             game.bossLockedDice = [];
-            game.bossHackedDice = [];
-            game.bossClouds = [];
             game.bossAbilityActive = false;
             if (game._bossAbilityTimeout) { clearTimeout(game._bossAbilityTimeout);
                 game._bossAbilityTimeout = null; }
@@ -7524,7 +7919,10 @@
             game.spawnTimer = 0;
             game.screenFlash = 0;
             game.currentBoss = null;
-            game.bossLockedDice = [];
+			game.meteor = { active: false, startX: 0, startY: 0, targetX: 0, targetY: 0, progress: 0, duration: 0.8, targetRow: -1, targetCol: -1 };
+            game.hackTargets = [];
+			game.magnetTargets = [];
+			game.bossLockedDice = [];
             game.bossHackedDice = [];
             game.bossClouds = [];
             game._markedDice = [];
@@ -7719,6 +8117,9 @@
             ctx.fillText('⚡', x + size - 4, y + size - 4);
         }
 
+        // ================================================================
+        // ★★ 修改3: drawDice - 高亮渲染邏輯 (統一柔和樣式) ★★
+        // ================================================================
         function drawDice(ctx, x, y, size, dice, row, col) {
             if (!dice || !dice.type) return;
             if (dice._isFinal === false) return;
@@ -7992,6 +8393,75 @@
                 ctx.arc(cx, cy, dSize / 2 - 2, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(ratio, 1));
                 ctx.fill();
             }
+
+            // ★★★ 高亮繪製 (統一柔和樣式) ★★★
+            if (game.highlightTarget) {
+                let shouldHighlight = false;
+                const target = game.highlightTarget;
+                if (target.mode === 'normal') {
+                    if (dice.type === target.type && dice.star === target.star) {
+                        shouldHighlight = true;
+                    }
+                } else if (target.mode === 'universal') {
+                    // 通用模式：同星級且星級<7 (樹苗/小丑/擬態)
+                    if (dice.star === target.star && dice.star < 7) {
+                        shouldHighlight = true;
+                    }
+                }
+                if (shouldHighlight && dice._isFinal !== false) {
+                    // ★ 柔和高亮樣式 (降低亮度)
+                    const pulse = 0.5 + 0.5 * Math.sin(game.lastTime * 0.003 + row + col);
+                    const glowSize = CELL_SIZE + 4 * pulse;
+                    const offset = (CELL_SIZE - glowSize) / 2;
+
+                    // 柔和的發光邊框
+                    ctx.shadowColor = `rgba(255, 215, 0, ${0.25 * pulse})`;
+                    ctx.shadowBlur = 12 + 6 * pulse;
+                    ctx.strokeStyle = `rgba(255, 215, 0, ${0.35 + 0.2 * pulse})`;
+                    ctx.lineWidth = 2 + 1.2 * pulse;
+                    ctx.beginPath();
+                    ctx.roundRect(x + offset - 1, y + offset - 1, glowSize + 2, glowSize + 2, 6);
+                    ctx.stroke();
+
+                    // 淡淡的底色填充
+                    ctx.shadowColor = `rgba(255, 215, 0, ${0.08 * pulse})`;
+                    ctx.shadowBlur = 15 + 8 * pulse;
+                    ctx.fillStyle = `rgba(255, 215, 0, ${0.04 + 0.03 * pulse})`;
+                    ctx.beginPath();
+                    ctx.roundRect(x + offset, y + offset, glowSize, glowSize, 6);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+
+                    // 四個角落的小光點 (柔和)
+                    const dotSize = 3 + 1.5 * pulse;
+                    const dotPos = 6;
+                    const corners = [
+                        [x + dotPos, y + dotPos],
+                        [x + CELL_SIZE - dotPos, y + dotPos],
+                        [x + dotPos, y + CELL_SIZE - dotPos],
+                        [x + CELL_SIZE - dotPos, y + CELL_SIZE - dotPos]
+                    ];
+                    for (const [cx2, cy2] of corners) {
+                        ctx.fillStyle = `rgba(255, 215, 0, ${0.3 + 0.15 * pulse})`;
+                        ctx.shadowColor = 'rgba(255, 215, 0, 0.2)';
+                        ctx.shadowBlur = 6;
+                        ctx.beginPath();
+                        ctx.arc(cx2, cy2, dotSize, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    ctx.shadowBlur = 0;
+
+                    // 星級標示 (低調)
+                    ctx.fillStyle = `rgba(255, 215, 0, ${0.4 + 0.2 * pulse})`;
+                    ctx.font = `bold ${10 + 2 * pulse}px sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'top';
+                    ctx.shadowColor = 'rgba(0,0,0,0.4)';
+                    ctx.shadowBlur = 4;
+                    ctx.fillText(`✦ ★${dice.star}`, x + CELL_SIZE / 2, y + CELL_SIZE + 2);
+                    ctx.shadowBlur = 0;
+                }
+            }
         }
 
         function lightenColor(hex, amt) {
@@ -8020,7 +8490,7 @@
             return `rgb(${r},${g},${b})`;
         }
 
-        // ========== 主繪製函數 ==========
+        // ========== 主繪製函數 (與原版相同，僅調用修改後的 drawDice) ==========
         function draw() {
             ctx.globalAlpha = 1.0;
             try {
@@ -8219,6 +8689,49 @@
                             if (dice && dice._isFinal !== false) {
                                 drawDice(ctx, x, y, CELL_SIZE, dice, r, c);
                             }
+                            if (game.hackTargets) {
+                                for (const h of game.hackTargets) {
+                                    const x = boardX + h.col * CELL_SIZE;
+                                    const y = boardY + h.row * CELL_SIZE;
+                                    const pulse = 0.5 + 0.5 * Math.sin(Date.now() * 0.006);
+                                    ctx.strokeStyle = `rgba(255,0,0,${0.5 + 0.5 * pulse})`;
+                                    ctx.lineWidth = 4 * (0.5 + 0.5 * pulse);
+                                    ctx.shadowColor = `rgba(255,0,0,${0.3 * pulse})`;
+                                    ctx.shadowBlur = 20;
+                                    ctx.strokeRect(x + 2, y + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+                                    ctx.shadowBlur = 0;
+                                    ctx.fillStyle = `rgba(255,0,0,${0.1 * pulse})`;
+                                    ctx.fillRect(x + 2, y + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+                                }
+                            }
+                            if (game.currentBoss && game.currentBoss.magnetMarkTarget) {
+									const { row, col } = game.currentBoss.magnetMarkTarget;
+									const x = boardX + col * CELL_SIZE;
+									const y = boardY + row * CELL_SIZE;
+									const pulse = 0.5 + 0.5 * Math.sin(Date.now() * 0.005);
+									ctx.strokeStyle = `rgba(255, 215, 0, ${0.6 + 0.4 * pulse})`;
+									ctx.lineWidth = 4 * (0.5 + 0.5 * pulse);
+									ctx.shadowColor = `rgba(255, 215, 0, ${0.3 * pulse})`;
+									ctx.shadowBlur = 25;
+									ctx.strokeRect(x + 2, y + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+									ctx.shadowBlur = 0;
+								}
+							if (game.magnetTargets && game.magnetTargets.length === 2) {
+                                for (const m of game.magnetTargets) {
+                                    const x = boardX + m.col * CELL_SIZE;
+                                    const y = boardY + m.row * CELL_SIZE;
+                                    const pulse = 0.5 + 0.5 * Math.sin(Date.now() * 0.005);
+                                    ctx.strokeStyle = `rgba(255,215,0,${0.6 + 0.4 * pulse})`;
+                                    ctx.lineWidth = 4 * (0.5 + 0.5 * pulse);
+                                    ctx.shadowColor = `rgba(255,215,0,${0.3 * pulse})`;
+                                    ctx.shadowBlur = 25;
+                                    ctx.strokeRect(x + 2, y + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+                                    ctx.strokeRect(x + 6, y + 6, CELL_SIZE - 12, CELL_SIZE - 12);
+                                    ctx.fillStyle = `rgba(255,215,0,${0.2 * pulse})`;
+                                    ctx.fillRect(x + 4, y + 4, CELL_SIZE - 8, CELL_SIZE - 8);
+									ctx.shadowBlur = 0;
+                                }
+                            }
                             if (game._markedDice && game._markedDice.some(d => d.row === r && d.col === c)) {
                                 ctx.fillStyle = 'rgba(255,0,0,0.4)';
                                 ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
@@ -8279,57 +8792,6 @@
                                     ctx.textBaseline = 'bottom';
                                     ctx.fillText('➡️', x + 4, y + CELL_SIZE - 2);
                                 }
-                            }
-
-                            if (game.highlightTarget && dice && dice._isFinal !== false &&
-                                game.highlightTarget.type === dice.type &&
-                                game.highlightTarget.star === dice.star) {
-                                const pulse = 0.6 + 0.4 * Math.sin(game.lastTime * 0.003);
-                                const glowSize = CELL_SIZE + 6 * pulse;
-                                const offset = (CELL_SIZE - glowSize) / 2;
-
-                                ctx.shadowColor = `rgba(255,215,0,${0.5*pulse})`;
-                                ctx.shadowBlur = 20 + 10 * pulse;
-                                ctx.strokeStyle = `rgba(255,215,0,${0.5+0.3*pulse})`;
-                                ctx.lineWidth = 3 + 2 * pulse;
-                                ctx.beginPath();
-                                ctx.roundRect(x + offset - 2, y + offset - 2, glowSize + 4, glowSize + 4, 6);
-                                ctx.stroke();
-
-                                ctx.shadowColor = `rgba(255,215,0,${0.2*pulse})`;
-                                ctx.shadowBlur = 30 + 15 * pulse;
-                                ctx.fillStyle = `rgba(255,215,0,${0.08+0.06*pulse})`;
-                                ctx.beginPath();
-                                ctx.roundRect(x + offset, y + offset, glowSize, glowSize, 6);
-                                ctx.fill();
-
-                                ctx.shadowBlur = 0;
-                                const dotSize = 6 + 2 * pulse;
-                                const dotPos = 8;
-                                const corners = [
-                                    [x + dotPos, y + dotPos],
-                                    [x + CELL_SIZE - dotPos, y + dotPos],
-                                    [x + dotPos, y + CELL_SIZE - dotPos],
-                                    [x + CELL_SIZE - dotPos, y + CELL_SIZE - dotPos]
-                                ];
-                                for (const [cx2, cy2] of corners) {
-                                    ctx.fillStyle = `rgba(255,215,0,${0.6+0.3*pulse})`;
-                                    ctx.shadowColor = 'rgba(255,215,0,0.5)';
-                                    ctx.shadowBlur = 12;
-                                    ctx.beginPath();
-                                    ctx.arc(cx2, cy2, dotSize, 0, Math.PI * 2);
-                                    ctx.fill();
-                                }
-                                ctx.shadowBlur = 0;
-
-                                ctx.fillStyle = `rgba(255,215,0,${0.7+0.3*pulse})`;
-                                ctx.font = `bold ${14+2*pulse}px sans-serif`;
-                                ctx.textAlign = 'center';
-                                ctx.textBaseline = 'top';
-                                ctx.shadowColor = 'rgba(0,0,0,0.6)';
-                                ctx.shadowBlur = 6;
-                                ctx.fillText(`✦ ★${dice.star}`, x + CELL_SIZE / 2, y + CELL_SIZE + 4);
-                                ctx.shadowBlur = 0;
                             }
                         } catch (e) {}
                     }
@@ -8542,6 +9004,68 @@
                     } catch (e) {}
                 }
 
+                if (game.meteor && game.meteor.active) {
+                    const meteor = game.meteor;
+                    const progress = Math.min(1, meteor.progress);
+                    const x = meteor.startX + (meteor.targetX - meteor.startX) * progress;
+                    const y = meteor.startY + (meteor.targetY - meteor.startY) * progress;
+
+                    const size = 28 + 18 * (1 - progress);
+                    const grad = ctx.createRadialGradient(x - size * 0.2, y - size * 0.2, 2, x, y, size);
+                    grad.addColorStop(0, '#fff8e0');
+                    grad.addColorStop(0.2, '#ff8800');
+                    grad.addColorStop(0.7, '#ff3300');
+                    grad.addColorStop(1, 'rgba(200,50,0,0)');
+                    ctx.shadowColor = '#ff4400';
+                    ctx.shadowBlur = 50 + 20 * (1 - progress);
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.arc(x, y, size, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    for (let i = 0; i < 6; i++) {
+                        const trailProgress = progress - (i + 1) * 0.045;
+                        if (trailProgress > 0) {
+                            const tx = meteor.startX + (meteor.targetX - meteor.startX) * trailProgress;
+                            const ty = meteor.startY + (meteor.targetY - meteor.startY) * trailProgress;
+                            const tSize = size * (0.65 - i * 0.08);
+                            const alpha = 0.45 - i * 0.07;
+                            ctx.globalAlpha = Math.max(0, alpha);
+                            ctx.fillStyle = `rgba(255,120,0,${Math.max(0, alpha)})`;
+                            ctx.shadowBlur = 20;
+                            ctx.beginPath();
+                            ctx.arc(tx, ty, tSize, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+                    ctx.globalAlpha = 1;
+                    ctx.shadowBlur = 0;
+
+                    if (progress < 0.95) {
+                        const pulse = 0.6 + 0.4 * Math.sin(Date.now() * 0.005 + progress * 10);
+                        ctx.strokeStyle = `rgba(255,50,0,${0.3 * (1 - progress)})`;
+                        ctx.lineWidth = 3 * pulse;
+                        ctx.shadowColor = 'rgba(255,0,0,0.5)';
+                        ctx.shadowBlur = 20;
+                        const ringX = meteor.targetX;
+                        const ringY = meteor.targetY;
+                        const ringSize = CELL_SIZE * 0.5 * pulse;
+                        ctx.beginPath();
+                        ctx.arc(ringX, ringY, ringSize, 0, Math.PI * 2);
+                        ctx.stroke();
+                        ctx.shadowBlur = 0;
+                        ctx.strokeStyle = `rgba(255,0,0,${0.4 * (1 - progress)})`;
+                        ctx.lineWidth = 2;
+                        const crossSize = CELL_SIZE * 0.25 * pulse;
+                        ctx.beginPath();
+                        ctx.moveTo(ringX - crossSize, ringY - crossSize);
+                        ctx.lineTo(ringX + crossSize, ringY + crossSize);
+                        ctx.moveTo(ringX + crossSize, ringY - crossSize);
+                        ctx.lineTo(ringX - crossSize, ringY + crossSize);
+                        ctx.stroke();
+                    }
+                }
+
                 for (const p of game.projectiles) {
                     if (!p.alive) continue;
                     const size = p.isCrit ? 8 : 5;
@@ -8723,6 +9247,30 @@
             }
         }
 
+        // ========== 計算光骰子加成 (輔助) ==========
+        function calculateLightBonus(row, col) {
+            let totalBonus = 0;
+            const neighbors = [
+                { dr: -1, dc: 0 }, { dr: 1, dc: 0 },
+                { dr: 0, dc: -1 }, { dr: 0, dc: 1 }
+            ];
+            for (const n of neighbors) {
+                const nr = row + n.dr,
+                    nc = col + n.dc;
+                if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) continue;
+                const neighbor = game.board[nr]?.[nc];
+                if (!neighbor || !neighbor.isLight) continue;
+                if (neighbor._isFinal === false) continue;
+                const lv = upgradeLevels[neighbor.type] || 1;
+                const star = neighbor.star;
+                const baseBonus = 0.06 + (star - 1) * 0.006;
+                const levelBonus = (lv - 1) * 0.01;
+                const bonus = baseBonus + levelBonus;
+                totalBonus += bonus;
+            }
+            return totalBonus;
+        }
+
         // ========== 初始化 ==========
         function initGameState() {
             game.activeDiceTypes = [...saveData.selectedDice];
@@ -8743,6 +9291,8 @@
             game.enemiesKilledThisWave = 0;
             game.spawnTimer = 0;
             game.currentBoss = null;
+            game.hackTargets = [];
+            game.magnetTargets = [];
             game.bossLockedDice = [];
             game.bossHackedDice = [];
             game.bossClouds = [];
@@ -8782,7 +9332,7 @@
                 'POISON', 'ICE'
             ]; }
 
-        // ========== 商店 ==========
+        // ========== 商店 (與原版相同) ==========
         function getChestStatus(chestId) {
             const group = CHEST_GROUPS[chestId];
             if (!group) return null;
@@ -9031,7 +9581,7 @@
             updateShopUI();
         }
 
-        // ========== ★ 骰子詳細 + Class 升級按鈕 (新版：火骰子顯示實際數值) ==========
+        // ========== ★ 骰子詳細 + Class 升級按鈕 ==========
         function showDiceDetail(diceType) {
             const def = CONST.ALL_DICE_DEFS[diceType];
             if (!def) return;
@@ -9039,12 +9589,12 @@
             const name = getDiceName(diceType);
             const desc = getDiceDesc(diceType);
             const perStar = def.damagePerStar;
+            const globalCritBonus = getGlobalCritBonus();
 
             document.getElementById('ddIcon').textContent = def.label;
             document.getElementById('ddName').textContent = name;
             document.getElementById('ddDesc').textContent = desc;
 
-            // ★ 計算火骰子實際數值 (含 Class + 等級加成)
             let baseDmgDisplay = def.baseDamage;
             let elementDmgDisplay = '-';
             let critDmgDisplay = '-';
@@ -9058,15 +9608,12 @@
                 const burnBonus = getClassBenefit(cls, 'burn');
                 const critBonus = getClassBenefit(cls, 'critDmg');
 
-                // 基礎傷害 (1星) = def.baseDamage * mult + (lv-1) * def.atkPerLevel + atkBonus
                 const baseDmg = def.baseDamage * mult + (lv - 1) * (def.atkPerLevel || 0) + atkBonus;
                 baseDmgDisplay = Math.round(baseDmg * 10) / 10;
 
-                // 元素傷害 = def.fireDamageBase + (lv-1) * def.fireDamagePerLevel + burnBonus
                 const elementDmg = (def.fireDamageBase || 0) + (lv - 1) * (def.fireDamagePerLevel || 0) + burnBonus;
                 elementDmgDisplay = Math.round(elementDmg * 10) / 10;
 
-                // 暴擊傷害 = 基礎 2.0 + critBonus/100 (顯示為 +X%)
                 const critDmg = 2.0 + critBonus / 100;
                 critDmgDisplay = `+${critBonus}%`;
             }
@@ -9077,7 +9624,6 @@
             const perLevel = def.intervalPerLevel || 0;
             document.getElementById('ddPerLevel').textContent = perLevel < 0 ? `${perLevel.toFixed(2)}s` : `${perLevel.toFixed(2)}s`;
 
-            // ★ 元素傷害 & 暴擊傷害 顯示控制
             const elemItem = document.getElementById('ddElementDmgItem');
             const critItem = document.getElementById('ddCritDmgItem');
             const elemLabel = document.getElementById('ddElementDmgLabel');
@@ -9194,7 +9740,6 @@
             document.getElementById('ddConfirmBtn').textContent = data.detailClose;
             document.getElementById('ddFooter').textContent = data.detailFooter;
 
-            // ★ Class 升級區塊 (僅火骰子)
             const section = document.getElementById('ddClassSection');
             if (diceType === 'FIRE') {
                 const currentClass = getDiceClass('FIRE') || 1;
@@ -9220,10 +9765,14 @@
                         </div>
                         ${!isMax ? `
                         <div class="dd-class-row">
-							<span class="dd-class-label">${data.classCost}</span>
-							<span class="dd-class-value" style="color:${canAfford ? '#2ecc71' : '#ff6b6b'}">🏆${nextCost}</span>
-						</div>
+                            <span class="dd-class-label">${data.classCost}</span>
+                            <span class="dd-class-value" style="color:${canAfford ? '#2ecc71' : '#ff6b6b'}">🏆${nextCost}</span>
+                        </div>
                         ` : ''}
+                        <div class="dd-class-row">
+                            <span class="dd-class-label">${data.globalCritDamageLabel || '全體暴擊傷害'}</span>
+                            <span class="dd-class-value" style="color:#ff6b6b;">+${globalCritBonus}%</span>
+                        </div>
                         <button class="dd-class-btn" id="ddClassUpgradeBtn" ${isMax || !canAfford ? 'disabled' : ''}>
                             ${isMax ? data.classMax : `${data.classUpgrade}`}
                         </button>
@@ -9722,6 +10271,10 @@
                     updateWaveSpawning(dt);
                     updateEnemies(dt);
                     updateAttacks(dt);
+                    if (game.meteor && game.meteor.active) {
+                        game.meteor.progress += dt / game.meteor.duration;
+                        if (game.meteor.progress >= 1) game.meteor.progress = 1;
+                    }
                     updateProjectiles(dt);
                     updateFloatingTexts(dt);
                     if (game.screenFlash > 0) game.screenFlash -= dt;
@@ -9740,7 +10293,7 @@
         }
 
         requestAnimationFrame(gameLoop);
-        console.log('🎲 Offline Dice v2.7.8 - 暴擊系統·火骰Class升級·免疫翻譯');
+        console.log('🎲 Offline Dice v2.7.8 - 暴擊系統·火骰Class升級·高亮優化');
     </script>
 </body>
 </html>
