@@ -748,6 +748,7 @@
             left: 50%;
             transform: translateX(-50%);
         }
+        /* ★ 骰子詳情 - 新版 Grid 佈局 */
         .dice-detail-overlay {
             position: absolute;
             top: 0;
@@ -814,6 +815,7 @@
             font-size: 15px;
             color: #aab8d0;
         }
+        /* ★ 新 Grid 樣式 */
         .dice-detail-overlay .dd-body {
             width: 100%;
             max-width: 380px;
@@ -823,42 +825,57 @@
             margin: 6px 0 10px 0;
             border: 1px solid rgba(60, 80, 120, 0.3);
         }
-        .dice-detail-overlay .dd-body .dd-row {
+        .dice-detail-overlay .dd-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2px 16px;
+        }
+        .dice-detail-overlay .dd-item {
             display: flex;
             justify-content: space-between;
-            padding: 4px 0;
+            padding: 6px 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             font-size: 14px;
+            align-items: center;
         }
-        .dice-detail-overlay .dd-body .dd-row:last-child {
+        .dice-detail-overlay .dd-item:nth-last-child(-n+2) {
             border-bottom: none;
         }
-        .dice-detail-overlay .dd-body .dd-row .dd-label {
+        .dice-detail-overlay .dd-item .dd-label {
             color: #8a9fc0;
+            font-size: 13px;
         }
-        .dice-detail-overlay .dd-body .dd-row .dd-value {
+        .dice-detail-overlay .dd-item .dd-value {
             color: #e8edf5;
             font-weight: 600;
+            font-size: 13px;
+            text-align: right;
         }
-        .dice-detail-overlay .dd-body .dd-row .dd-value.highlight {
+        .dice-detail-overlay .dd-item .dd-value.highlight {
             color: #f7d875;
         }
-        .dice-detail-overlay .dd-body .dd-special {
+        .dice-detail-overlay .dd-item .dd-value.fire {
+            color: #e17055;
+        }
+        .dice-detail-overlay .dd-item .dd-value.crit {
+            color: #ff6b6b;
+        }
+        .dice-detail-overlay .dd-special {
             margin-top: 6px;
             padding-top: 6px;
             border-top: 1px solid rgba(255, 215, 0, 0.15);
         }
-        .dice-detail-overlay .dd-body .dd-special .dd-special-label {
+        .dice-detail-overlay .dd-special .dd-special-label {
             color: #f7d875;
             font-size: 13px;
             font-weight: 600;
         }
-        .dice-detail-overlay .dd-body .dd-special .dd-special-text {
+        .dice-detail-overlay .dd-special .dd-special-text {
             color: #c8d0e0;
             font-size: 13px;
             margin-top: 2px;
         }
-        /* ★ Class 升級區塊 */
+        /* Class 升級區塊 */
         .dd-class-section {
             margin-top: 8px;
             padding-top: 8px;
@@ -1526,8 +1543,18 @@
             .dice-detail-overlay .dd-title .dd-name {
                 font-size: 20px;
             }
-            .dice-detail-overlay .dd-body .dd-row {
+            .dice-detail-overlay .dd-grid {
+                gap: 1px 8px;
+            }
+            .dice-detail-overlay .dd-item {
                 font-size: 12px;
+                padding: 4px 0;
+            }
+            .dice-detail-overlay .dd-item .dd-label {
+                font-size: 11px;
+            }
+            .dice-detail-overlay .dd-item .dd-value {
+                font-size: 11px;
             }
             .dd-class-section .dd-class-btn {
                 font-size: 13px;
@@ -1599,7 +1626,7 @@
             <button class="shop-confirm-btn" id="shopConfirmBtn">✅ 確認</button>
         </div>
 
-        <!-- 骰子詳細數值彈窗 -->
+        <!-- ★ 骰子詳細數值彈窗 (新版 Grid 佈局) -->
         <div class="dice-detail-overlay" id="diceDetailOverlay">
             <button class="dd-close" id="ddCloseBtn">✕</button>
             <div class="dd-header">
@@ -1610,15 +1637,40 @@
                 </div>
             </div>
             <div class="dd-body" id="ddBody">
-                <div class="dd-row"><span class="dd-label" id="ddBaseDmgLabel">基礎傷害</span><span class="dd-value" id="ddBaseDmg">20</span></div>
-                <div class="dd-row"><span class="dd-label" id="ddPerStarLabel">每星傷害</span><span class="dd-value" id="ddPerStar">+3</span></div>
-                <div class="dd-row"><span class="dd-label" id="ddBaseIntervalLabel">基礎攻速</span><span class="dd-value" id="ddBaseInterval">0.80s</span></div>
-                <div class="dd-row"><span class="dd-label" id="ddPerLevelLabel">每級攻速</span><span class="dd-value" id="ddPerLevel">-0.01s</span></div>
+                <!-- ★ 新版 2 列 Grid -->
+                <div class="dd-grid">
+                    <div class="dd-item">
+                        <span class="dd-label" id="ddBaseDmgLabel">基礎傷害</span>
+                        <span class="dd-value" id="ddBaseDmg">20</span>
+                    </div>
+                    <div class="dd-item">
+                        <span class="dd-label" id="ddPerStarLabel">每星傷害</span>
+                        <span class="dd-value" id="ddPerStar">+3</span>
+                    </div>
+                    <div class="dd-item">
+                        <span class="dd-label" id="ddBaseIntervalLabel">基礎攻速</span>
+                        <span class="dd-value" id="ddBaseInterval">0.80s</span>
+                    </div>
+                    <div class="dd-item">
+                        <span class="dd-label" id="ddPerLevelLabel">每級攻速</span>
+                        <span class="dd-value" id="ddPerLevel">-0.01s</span>
+                    </div>
+                    <!-- ★ 新增：元素傷害 (火骰子專屬) -->
+                    <div class="dd-item" id="ddElementDmgItem" style="display:none;">
+                        <span class="dd-label" id="ddElementDmgLabel">元素傷害</span>
+                        <span class="dd-value fire" id="ddElementDmg">+0</span>
+                    </div>
+                    <!-- ★ 新增：暴擊傷害 (火骰子專屬) -->
+                    <div class="dd-item" id="ddCritDmgItem" style="display:none;">
+                        <span class="dd-label" id="ddCritDmgLabel">暴擊傷害</span>
+                        <span class="dd-value crit" id="ddCritDmg">+0%</span>
+                    </div>
+                </div>
                 <div class="dd-special">
                     <div class="dd-special-label" id="ddSpecialLabel">⚡ 特殊能力</div>
                     <div class="dd-special-text" id="ddSpecialText">濺射 (60%範圍傷害) · 燃燒 (持續2秒)</div>
                 </div>
-                <!-- ★ Class 升級區塊 (由 JS 動態產生) -->
+                <!-- Class 升級區塊 (由 JS 動態產生) -->
                 <div class="dd-class-section" id="ddClassSection"></div>
             </div>
             <button class="dd-btn" id="ddConfirmBtn">👍 知道了</button>
@@ -1640,7 +1692,7 @@
             <button class="draw-btn" id="drawConfirmBtn">🎉 太好了！</button>
         </div>
 
-        <!-- ★ 每日寶箱結果覆蓋層 -->
+        <!-- 每日寶箱結果覆蓋層 -->
         <div class="draw-result-overlay" id="dailyResultOverlay">
             <div class="draw-icon" id="dailyResultIcon">🎁</div>
             <div class="draw-title" id="dailyResultTitle">🎉 每日寶箱</div>
@@ -1679,7 +1731,7 @@
         <!-- 音效按鈕 -->
         <button id="soundToggleBtn" title="音效開關">🔊</button>
 
-        <!-- ★ 全屏按鈕 -->
+        <!-- 全屏按鈕 -->
         <button id="fullscreenBtn" title="全屏顯示">⛶</button>
 
         <div class="controls">
@@ -1700,7 +1752,7 @@
 
     <script>
         // ================================================================
-        // 翻譯 (完整) — ★ 新增 immuneBlock
+        // ★ 翻譯 (新增 critText, elementDamageLabel, critDamageLabel)
         // ================================================================
         const translations = {
             'zh-TW': {
@@ -1812,6 +1864,7 @@
                     DROUGHT_THUNDER: '雷擊・連鎖增傷',
                     SPIKE: '放置尖刺陷阱'
                 },
+				fireSpecialDesc: '🔥 火元素濺射 (額外火傷) · 不燃燒',
                 dicePrices: {
                     FIRE: 0,
                     THUNDER: 0,
@@ -1993,9 +2046,7 @@
                 bossHackerMark: '💻 黑客標記!',
                 bossHackerHacked: '💻 {count} 顆骰子被黑客改造，合成可解除',
                 bossShield: '🛡️ 護盾!',
-                /* ★ 新增：免疫翻譯 */
                 immuneBlock: '🛡️ 免疫',
-                /* ★ Class 升級相關 */
                 classTitle: '⭐ Class 升級',
                 classLabel: 'Class',
                 classCost: '費用',
@@ -2008,6 +2059,9 @@
                 classUpgradeSuccess: '⬆ {name} 升級至 Class {class}！',
                 classUpgradeSound: '🎵 升級音效！',
                 classOnlyFire: '🔥 僅火骰子可Class升級',
+                critText: '暴擊!',
+                elementDamageLabel: '元素傷害',
+                critDamageLabel: '暴擊傷害',
             },
             'zh-CN': {
                 coverTitle: '🎲 离线骰子',
@@ -2118,6 +2172,7 @@
                     DROUGHT_THUNDER: '雷击・连锁增伤',
                     SPIKE: '放置尖刺陷阱'
                 },
+				fireSpecialDesc: '🔥 火元素溅射 (额外火伤) · 不燃烧',
                 dicePrices: {
                     FIRE: 0,
                     THUNDER: 0,
@@ -2312,6 +2367,9 @@
                 classUpgradeSuccess: '⬆ {name} 升级至 Class {class}！',
                 classUpgradeSound: '🎵 升级音效！',
                 classOnlyFire: '🔥 仅火骰子可Class升级',
+                critText: '暴击!',
+                elementDamageLabel: '元素伤害',
+                critDamageLabel: '暴击伤害',
             },
             'en': {
                 coverTitle: '🎲 Offline Dice',
@@ -2422,6 +2480,7 @@
                     DROUGHT_THUNDER: 'Thunder・Chain Boost',
                     SPIKE: 'Place spike trap'
                 },
+				fireSpecialDesc: '🔥 Fire Element Splash (bonus fire damage) · No Burn',
                 dicePrices: {
                     FIRE: 0,
                     THUNDER: 0,
@@ -2616,6 +2675,9 @@
                 classUpgradeSuccess: '⬆ {name} upgraded to Class {class}!',
                 classUpgradeSound: '🎵 Upgrade sound!',
                 classOnlyFire: '🔥 Only Fire dice can Class upgrade',
+                critText: 'CRIT!',
+                elementDamageLabel: 'Element DMG',
+                critDamageLabel: 'Crit DMG',
             },
             'ja': {
                 coverTitle: '🎲 オフラインダイス',
@@ -2726,6 +2788,7 @@
                     DROUGHT_THUNDER: '雷撃・連鎖増傷',
                     SPIKE: 'スパイクトラップ設置'
                 },
+				fireSpecialDesc: '🔥 火元素範囲攻撃（追加火ダメージ）・燃焼なし',
                 dicePrices: {
                     FIRE: 0,
                     THUNDER: 0,
@@ -2920,6 +2983,9 @@
                 classUpgradeSuccess: '⬆ {name} が Class {class} にアップ！',
                 classUpgradeSound: '🎵 アップグレード音！',
                 classOnlyFire: '🔥 火ダイスのみClassアップグレード可能',
+                critText: '会心!',
+                elementDamageLabel: '元素ダメージ',
+                critDamageLabel: '会心ダメージ',
             },
             'ko': {
                 coverTitle: '🎲 오프라인 주사위',
@@ -3030,6 +3096,7 @@
                     DROUGHT_THUNDER: '번개・연쇄 증폭',
                     SPIKE: '가시 함정 설치'
                 },
+				fireSpecialDesc: '🔥 불 원소 범위 공격 (추가 화염 피해) · 연소 없음',
                 dicePrices: {
                     FIRE: 0,
                     THUNDER: 0,
@@ -3224,6 +3291,9 @@
                 classUpgradeSuccess: '⬆ {name} 이(가) Class {class} (으)로 업그레이드!',
                 classUpgradeSound: '🎵 업그레이드 사운드!',
                 classOnlyFire: '🔥 불 주사위만 Class 업그레이드 가능',
+                critText: '치명타!',
+                elementDamageLabel: '원소 피해',
+                critDamageLabel: '치명타 피해',
             }
         };
 
@@ -3443,15 +3513,18 @@
             }
         }
 
-        // 儲存各骰子的Class等級 (僅火骰子使用)
         let diceClassData = {};
 
         function initDiceClassData() {
             diceClassData = {};
-            // 預設火骰子Class 1
             diceClassData['FIRE'] = 1;
-            // 其他骰子不啟用Class
         }
+		
+		function getGlobalCritBonus() {
+			const cls = getDiceClass('FIRE');
+			if (cls === null) return 0;
+			return getClassBenefit(cls, 'critDmg');
+		}
 
         function getDiceClass(type) {
             if (type !== 'FIRE') return null;
@@ -3468,76 +3541,75 @@
             }
         }
 
-        function upgradeDiceClass(type) {
-            if (type !== 'FIRE') {
-                showToast(getData().classOnlyFire, 1500);
-                return false;
-            }
-            const current = getDiceClass(type) || 1;
-            if (current >= CLASS_MAX) {
-                showToast(getData().classUpgradeMax, 1500);
-                return false;
-            }
-            const cost = getClassUpgradeCost(current);
-            if (cost === null) {
-                showToast(getData().classUpgradeMax, 1500);
-                return false;
-            }
-            if (game.gold < cost) {
-                const msg = getData().classUpgradeFail.replace(/\{cost\}/g, cost);
-                showToast(msg, 1500);
-                return false;
-            }
-            // 扣除金幣
-            game.gold -= cost;
-            // 升級
-            const newClass = current + 1;
-            setDiceClass(type, newClass);
+		function upgradeDiceClass(type) {
+			if (type !== 'FIRE') {
+				showToast(getData().classOnlyFire, 1500);
+				return false;
+			}
+			const current = getDiceClass(type) || 1;
+			if (current >= CLASS_MAX) {
+				showToast(getData().classUpgradeMax, 1500);
+				return false;
+			}
+			const cost = getClassUpgradeCost(current);
+			if (cost === null) {
+				showToast(getData().classUpgradeMax, 1500);
+				return false;
+			}
+			// ★ 改為檢查累積積分 (saveData.totalScore)
+			if (saveData.totalScore < cost) {
+				showToast('❌ 積分不足！升級需要 🏆' + cost, 1500);
+				return false;
+			}
+			// ★ 扣除累積積分
+			saveData.totalScore -= cost;
+			saveSaveData();   // 立即儲存
 
-            // ★ 更新棋盤上所有火骰子 (isFinal保護)
-            for (let r = 0; r < ROWS; r++) {
-                for (let c = 0; c < COLS; c++) {
-                    const dice = game.board[r]?.[c];
-                    if (dice && dice.type === 'FIRE' && dice._isFinal !== false) {
-                        const newDice = createDice('FIRE', dice.star);
-                        if (newDice) {
-                            newDice._isFinal = true;
-                            newDice.cooldown = dice.cooldown || 0;
-                            game.board[r][c] = newDice;
-                        }
-                    }
-                }
-            }
+			const newClass = current + 1;
+			setDiceClass(type, newClass);
 
-            // 音效
-            playClassUpgradeSound();
+			// 更新棋盤上的火骰子...
+			for (let r = 0; r < ROWS; r++) {
+				for (let c = 0; c < COLS; c++) {
+					const dice = game.board[r]?.[c];
+					if (dice && dice.type === 'FIRE' && dice._isFinal !== false) {
+						const newDice = createDice('FIRE', dice.star);
+						if (newDice) {
+							newDice._isFinal = true;
+							newDice.cooldown = dice.cooldown || 0;
+							game.board[r][c] = newDice;
+						}
+					}
+				}
+			}
 
-            const data = getData();
-            const name = getDiceName(type);
-            showToast(data.classUpgradeSuccess.replace(/\{name\}/g, name).replace(/\{class\}/g, newClass), 2000);
-            addFloatingText(W / 2, upgradeY + UPGRADE_HEIGHT / 2, `⬆ ${name} Class ${newClass}`, '#f7d875', 28);
-            updateUI();
-            updateDicePreview();
-            // 重新整理骰子詳情 (如果開啟)
-            const detailOverlay = document.getElementById('diceDetailOverlay');
-            if (detailOverlay.classList.contains('visible')) {
-                const currentType = document.getElementById('ddName').textContent;
-                for (let key in getData().diceNames) {
-                    if (getData().diceNames[key] === currentType) {
-                        showDiceDetail(key);
-                        break;
-                    }
-                }
-            }
-            return true;
-        }
+			playClassUpgradeSound();
+
+			const data = getData();
+			const name = getDiceName(type);
+			showToast(data.classUpgradeSuccess.replace(/\{name\}/g, name).replace(/\{class\}/g, newClass), 2000);
+			addFloatingText(W / 2, upgradeY + UPGRADE_HEIGHT / 2, `⬆ ${name} Class ${newClass}`, '#f7d875', 28);
+			updateUI();
+			updateDicePreview();
+			// 刷新詳情視窗
+			const detailOverlay = document.getElementById('diceDetailOverlay');
+			if (detailOverlay.classList.contains('visible')) {
+				const currentType = document.getElementById('ddName').textContent;
+				for (let key in getData().diceNames) {
+					if (getData().diceNames[key] === currentType) {
+						showDiceDetail(key);
+						break;
+					}
+				}
+			}
+			return true;
+		}
 
         function playClassUpgradeSound() {
             if (!soundEnabled) return;
             try {
                 if (!initAudio()) return;
                 const ctx = game.soundCtx;
-                // 歡快上升音效
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
                 osc.connect(gain);
@@ -3549,7 +3621,6 @@
                 gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
                 osc.start(ctx.currentTime);
                 osc.stop(ctx.currentTime + 0.15);
-                // 第二層和聲
                 const osc2 = ctx.createOscillator();
                 const g2 = ctx.createGain();
                 osc2.type = 'sine';
@@ -3658,7 +3729,6 @@
                 leaderboard: getDefaultLeaderboard(),
                 soundEnabled: true,
                 dailyChestTimestamp: 0,
-                /* ★ Class 資料 */
                 diceClass: { FIRE: 1 }
             };
         }
@@ -3685,7 +3755,6 @@
                     if (typeof data.dailyChestTimestamp !== 'number') {
                         data.dailyChestTimestamp = 0;
                     }
-                    /* ★ Class 資料初始化 */
                     if (!data.diceClass || typeof data.diceClass !== 'object') {
                         data.diceClass = { FIRE: 1 };
                     }
@@ -3712,7 +3781,6 @@
                 }
             }
             soundEnabled = saveData.soundEnabled !== undefined ? saveData.soundEnabled : true;
-            /* ★ 同步 diceClassData */
             if (saveData.diceClass) {
                 diceClassData = { ...saveData.diceClass };
             } else {
@@ -3725,7 +3793,6 @@
         function saveSaveData() {
             if (saveData) {
                 saveData.soundEnabled = soundEnabled;
-                /* ★ 儲存 Class 資料 */
                 saveData.diceClass = { ...diceClassData };
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
             }
@@ -3947,7 +4014,6 @@
             for (const url of urls) {
                 fetch(url).then(r => r.blob()).catch(() => {});
             }
-            console.log('🎵 音頻預載入已啟動 (離線支援)');
         }
 
         function initAudio() {
@@ -4092,10 +4158,9 @@
             audio.play()
                 .then(() => { bgmLoadFailed = false; })
                 .catch(err => {
-                    console.warn('🎵 背景音樂播放失敗:', err.message);
                     if (err.name === 'NotAllowedError') {
                         const resumeAudio = () => {
-                            audio.play().catch(e => console.warn('🎵 重試播放仍失敗:', e.message));
+                            audio.play().catch(e => {});
                             document.removeEventListener('click', resumeAudio);
                             document.removeEventListener('touchstart', resumeAudio);
                         };
@@ -4119,7 +4184,6 @@
             }
 
             audio.onerror = function(e) {
-                console.warn('🎵 背景音樂加載錯誤:', audio.error ? audio.error.message : '未知');
                 bgmLoadFailed = true;
             };
         }
@@ -4151,11 +4215,9 @@
             audio.play()
                 .then(() => { shopBgmLoadFailed = false; })
                 .catch(err => {
-                    console.warn('🎵 商店音樂播放失敗:', err.message);
                     shopBgmLoadFailed = true;
                 });
             audio.onerror = function(e) {
-                console.warn('🎵 商店音樂加載錯誤:', audio.error ? audio.error.message : '未知');
                 shopBgmLoadFailed = true;
             };
         }
@@ -4268,9 +4330,7 @@
                         document.addEventListener('touchstart', resume, { once: true });
                     }
                 });
-            audio.onerror = function(e) {
-                console.warn('🎵 Deck Build 音樂加載錯誤:', audio.error ? audio.error.message : '未知');
-            };
+            audio.onerror = function(e) {};
         }
 
         function stopDeckBuildBgm() {
@@ -4355,24 +4415,17 @@
 
             if (!isFullscreen) {
                 if (el.requestFullscreen) {
-                    el.requestFullscreen().catch(err => {
-                        console.warn('全屏請求失敗:', err);
-                        showToast('⚠️ 無法進入全屏模式', 1500);
-                    });
+                    el.requestFullscreen().catch(err => {});
                 } else if (el.webkitRequestFullscreen) {
                     el.webkitRequestFullscreen();
                 } else if (el.mozRequestFullScreen) {
                     el.mozRequestFullScreen();
                 } else if (el.msRequestFullscreen) {
                     el.msRequestFullscreen();
-                } else {
-                    showToast('⚠️ 瀏覽器不支援全屏功能', 1500);
                 }
             } else {
                 if (document.exitFullscreen) {
-                    document.exitFullscreen().catch(err => {
-                        console.warn('退出全屏失敗:', err);
-                    });
+                    document.exitFullscreen().catch(err => {});
                 } else if (document.webkitExitFullscreen) {
                     document.webkitExitFullscreen();
                 } else if (document.mozCancelFullScreen) {
@@ -4462,222 +4515,217 @@
         function getEmptyCells() { let cells = []; for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++)
                 if (!isOccupied(c, r)) cells.push({ col: c, row: r }); return cells; }
 
-        // ========== 骰子創建（★ 修改：火骰子普通傷害+火元素傷害 + Class加成） ==========
-		function createDice(type, star) {
-			star = star || 1;
-			const def = CONST.ALL_DICE_DEFS[type];
-			if (!def) return null;
-			const s = clamp(star, 1, game.maxStar);
-			const lv = upgradeLevels[type] || 1;
-			const mult = getUpgradeMultiplier(type);
+        // ========== 骰子創建 ==========
+        function createDice(type, star) {
+            star = star || 1;
+            const def = CONST.ALL_DICE_DEFS[type];
+            if (!def) return null;
+            const s = clamp(star, 1, game.maxStar);
+            const lv = upgradeLevels[type] || 1;
+            const mult = getUpgradeMultiplier(type);
 
-			// 预先计算各类数值
-			let dmg = 0;
-			let fireDmg = 0;
-			let classCritBonus = 0;
-			let classSpeedBonus = 0;
+            let dmg = 0;
+            let fireDmg = 0;
+            let classCritBonus = 0;
+            let classSpeedBonus = 0;
 
-			if (type === 'FIRE') {
-				const cls = getDiceClass('FIRE') || 1;
-				const atkBonus = getClassBenefit(cls, 'atk');
-				const burnBonus = getClassBenefit(cls, 'burn');
-				classSpeedBonus = getClassBenefit(cls, 'speed');
-				classCritBonus = getClassBenefit(cls, 'critDmg');
+            if (type === 'FIRE') {
+                const cls = getDiceClass('FIRE') || 1;
+                const atkBonus = getClassBenefit(cls, 'atk');
+                const burnBonus = getClassBenefit(cls, 'burn');
+                classSpeedBonus = getClassBenefit(cls, 'speed');
+                classCritBonus = getClassBenefit(cls, 'critDmg');
 
-				const baseNormal = def.baseDamage + def.damagePerStar * (s - 1);
-				dmg = baseNormal * mult + (lv - 1) * (def.atkPerLevel || 0) + atkBonus;
+                const baseNormal = def.baseDamage + def.damagePerStar * (s - 1);
+                dmg = baseNormal * mult + (lv - 1) * (def.atkPerLevel || 0) + atkBonus;
 
-				const fb = def.fireDamageBase || 20;
-				const fp = def.fireDamagePerLevel || 20;
-				fireDmg = fb + (lv - 1) * fp + burnBonus;
-			} else if (type === 'IRON') {
-				const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
-				const star7Dmg = def.baseDamage + def.damagePerStar * (7 - 1);
-				const maxDmg = 640;
-				const ratio = 1 + (lv - 1) / (CONST.MAX_LEVEL - 1) * ((maxDmg / star7Dmg) - 1);
-				dmg = baseDmg * ratio;
-			} else if (type === 'GAMBLE') {
-				const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
-				const star7Dmg = def.baseDamage + def.damagePerStar * (7 - 1);
-				const maxDmg = 455;
-				const ratio = 1 + (lv - 1) / (CONST.MAX_LEVEL - 1) * ((maxDmg / star7Dmg) - 1);
-				dmg = baseDmg * ratio;
-			} else if (type === 'LOCK') {
-				dmg = def.baseDamage + (lv - 1) * (70 - def.baseDamage) / (CONST.MAX_LEVEL - 1);
-			} else if (type === 'MYSTERY') {
-				dmg = def.baseDamage * mult;
-			} else if (type === 'MIMIC') {
-				const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
-				const star7Dmg = def.baseDamage + def.damagePerStar * 6;
-				const maxLvDmg = 120;
-				const ratio = 1 + (lv - 1) / (CONST.MAX_LEVEL - 1) * ((maxLvDmg / star7Dmg) - 1);
-				dmg = baseDmg * ratio;
-			} else if (type === 'GOLDMINE' || type === 'LIGHT') {
-				dmg = 0;
-			} else if (type === 'TAICHI') {
-				const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
-				dmg = baseDmg * mult + (lv - 1) * def.atkPerLevel;
-			} else if (type === 'BASEBALL') {
-				const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
-				const lvBonus = (lv - 1) * 80;
-				dmg = baseDmg + lvBonus;
-			} else if (type === 'DROUGHT_THUNDER') {
-				const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
-				const lvBonus = (lv - 1) * 0;
-				dmg = baseDmg + lvBonus;
-			} else if (type === 'SHIELD') {
-				const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
-				const maxDmg = 60;
-				const ratio = 1 + (lv - 1) / (CONST.MAX_LEVEL - 1) * ((maxDmg / 60) - 1);
-				dmg = baseDmg * ratio;
-			} else if (type === 'SPIKE') {
-				dmg = 0;
-			} else {
-				dmg = (def.baseDamage + def.damagePerStar * (s - 1)) * mult + (lv - 1) * (def.atkPerLevel || 0);
-			}
-			if (!isFinite(dmg) || dmg < 0) dmg = def.baseDamage || 10;
+                const fb = def.fireDamageBase || 20;
+                const fp = def.fireDamagePerLevel || 20;
+                fireDmg = fb + (lv - 1) * fp + burnBonus;
+            } else if (type === 'IRON') {
+                const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
+                const star7Dmg = def.baseDamage + def.damagePerStar * (7 - 1);
+                const maxDmg = 640;
+                const ratio = 1 + (lv - 1) / (CONST.MAX_LEVEL - 1) * ((maxDmg / star7Dmg) - 1);
+                dmg = baseDmg * ratio;
+            } else if (type === 'GAMBLE') {
+                const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
+                const star7Dmg = def.baseDamage + def.damagePerStar * (7 - 1);
+                const maxDmg = 455;
+                const ratio = 1 + (lv - 1) / (CONST.MAX_LEVEL - 1) * ((maxDmg / star7Dmg) - 1);
+                dmg = baseDmg * ratio;
+            } else if (type === 'LOCK') {
+                dmg = def.baseDamage + (lv - 1) * (70 - def.baseDamage) / (CONST.MAX_LEVEL - 1);
+            } else if (type === 'MYSTERY') {
+                dmg = def.baseDamage * mult;
+            } else if (type === 'MIMIC') {
+                const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
+                const star7Dmg = def.baseDamage + def.damagePerStar * 6;
+                const maxLvDmg = 120;
+                const ratio = 1 + (lv - 1) / (CONST.MAX_LEVEL - 1) * ((maxLvDmg / star7Dmg) - 1);
+                dmg = baseDmg * ratio;
+            } else if (type === 'GOLDMINE' || type === 'LIGHT') {
+                dmg = 0;
+            } else if (type === 'TAICHI') {
+                const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
+                dmg = baseDmg * mult + (lv - 1) * def.atkPerLevel;
+            } else if (type === 'BASEBALL') {
+                const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
+                const lvBonus = (lv - 1) * 80;
+                dmg = baseDmg + lvBonus;
+            } else if (type === 'DROUGHT_THUNDER') {
+                const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
+                const lvBonus = (lv - 1) * 0;
+                dmg = baseDmg + lvBonus;
+            } else if (type === 'SHIELD') {
+                const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
+                const maxDmg = 60;
+                const ratio = 1 + (lv - 1) / (CONST.MAX_LEVEL - 1) * ((maxDmg / 60) - 1);
+                dmg = baseDmg * ratio;
+            } else if (type === 'SPIKE') {
+                dmg = 0;
+            } else {
+                dmg = (def.baseDamage + def.damagePerStar * (s - 1)) * mult + (lv - 1) * (def.atkPerLevel || 0);
+            }
+            if (!isFinite(dmg) || dmg < 0) dmg = def.baseDamage || 10;
 
-			// 计算攻速（包括火骰子的Class攻速修正）
-			let intervalBase = def.baseInterval + (def.intervalPerLevel || 0) * (lv - 1);
+            let intervalBase = def.baseInterval + (def.intervalPerLevel || 0) * (lv - 1);
 
-			if (type === 'WIND') {
-				dmg = (def.baseDamage + def.damagePerStar * (s - 1)) + (lv - 1) * 15;
-				const levelSpeedMult = 1 + (lv - 1) * 0.1;
-				const starSpeedMult = 1.1 + (s - 1) * 0.02;
-				const totalSpeedMult = levelSpeedMult * starSpeedMult;
-				intervalBase = def.baseInterval / totalSpeedMult;
-			}
+            if (type === 'WIND') {
+                dmg = (def.baseDamage + def.damagePerStar * (s - 1)) + (lv - 1) * 15;
+                const levelSpeedMult = 1 + (lv - 1) * 0.1;
+                const starSpeedMult = 1.1 + (s - 1) * 0.02;
+                const totalSpeedMult = levelSpeedMult * starSpeedMult;
+                intervalBase = def.baseInterval / totalSpeedMult;
+            }
 
-			if (type === 'FIRE') {
-				const cls = getDiceClass('FIRE') || 1;
-				const speedBonus = getClassBenefit(cls, 'speed');
-				intervalBase = intervalBase + speedBonus;
-			}
+            if (type === 'FIRE') {
+                const cls = getDiceClass('FIRE') || 1;
+                const speedBonus = getClassBenefit(cls, 'speed');
+                intervalBase = intervalBase + speedBonus;
+            }
 
-			if (type === 'SPIKE') {
-				const baseInt = def.spikeIntervalBase || 5;
-				const perStar = def.spikeIntervalPerStar || -0.04;
-				intervalBase = baseInt + (s - 1) * perStar;
-				intervalBase = Math.max(1.0, intervalBase);
-			} else if (type === 'GOLDMINE') {
-				const baseInterval = 10;
-				const minInterval = 4;
-				intervalBase = baseInterval - (s - 1) * (baseInterval - minInterval) / (7 - 1);
-				intervalBase = Math.max(minInterval, intervalBase);
-			} else if (type === 'VAMPIRE') {
-				intervalBase = 1.3;
-			} else if (type === 'LIGHT') {
-				intervalBase = 1.0;
-			} else if (type === 'SHIELD') {
-				intervalBase = 1.0;
-			} else {
-				intervalBase = Math.max(0.15, intervalBase);
-			}
-			if (!isFinite(intervalBase) || intervalBase < 0.15) intervalBase = 0.5;
+            if (type === 'SPIKE') {
+                const baseInt = def.spikeIntervalBase || 5;
+                const perStar = def.spikeIntervalPerStar || -0.04;
+                intervalBase = baseInt + (s - 1) * perStar;
+                intervalBase = Math.max(1.0, intervalBase);
+            } else if (type === 'GOLDMINE') {
+                const baseInterval = 10;
+                const minInterval = 4;
+                intervalBase = baseInterval - (s - 1) * (baseInterval - minInterval) / (7 - 1);
+                intervalBase = Math.max(minInterval, intervalBase);
+            } else if (type === 'VAMPIRE') {
+                intervalBase = 1.3;
+            } else if (type === 'LIGHT') {
+                intervalBase = 1.0;
+            } else if (type === 'SHIELD') {
+                intervalBase = 1.0;
+            } else {
+                intervalBase = Math.max(0.15, intervalBase);
+            }
+            if (!isFinite(intervalBase) || intervalBase < 0.15) intervalBase = 0.5;
 
-			// ★ 构建 dice 对象（先创建再赋值）
-			const dice = {
-				type,
-				star: s,
-				cooldown: 0,
-				_damage: dmg,
-				_isFinal: true,
-				// 以下属性使用 getter 以确保动态读取
-				get damage() { return this._damage; },
-				get interval() { return intervalBase; },
-				get label() { return def.label; },
-				get color() { return def.color; },
-				get name() { return getDiceName(type); },
-				get splash() { return def.splash || 0; },
-				get slow() { return def.slow || 0; },
-				get poison() { return def.poison || 0; },
-				get chain() { return def.chain || 0; },
-				get attackType() { return def.attackType || 'front'; },
-				get isJoker() { return def.isJoker || false; },
-				get isSapling() { return def.isSapling || false; },
-				get isMystery() { return def.isMystery || false; },
-				get isMimic() { return def.isMimic || false; },
-				get isGoldmine() { return def.isGoldmine || false; },
-				get isVampire() { return def.isVampire || false; },
-				get isTaichi() { return def.isTaichi || false; },
-				get isLight() { return def.isLight || false; },
-				get isBaseball() { return def.isBaseball || false; },
-				get isDroughtThunder() { return def.isDroughtThunder || false; },
-				get isShield() { return def.isShield || false; },
-				get isSpike() { return def.isSpike || false; },
-				get burn() { return def.burn || false; },
-				get bossMultiplier() { return def.bossMultiplier || 1; },
-				get gambleMin() { return def.gambleMin || 0; },
-				get lockStun() { return def.lockStun || false; },
-				get absorbBaseGold() { return def.absorbBaseGold || 1; },
-				get absorbGoldPerLevel() { return def.absorbGoldPerLevel || 3; },
-				get absorbBaseInterval() { return def.absorbBaseInterval || 5; },
-				get absorbIntervalPerLevel() { return def.absorbIntervalPerLevel || -0.25; },
-				get thunderBaseDamage() { return def.thunderBaseDamage || 50; },
-				get thunderDamagePerStar() { return def.thunderDamagePerStar || 40 / 6; },
-				get thunderDamagePerLevel() { return def.thunderDamagePerLevel || 50; },
-				get shieldInterval() { return def.shieldInterval || 10; },
-				get shieldIntervalPerStar() { return def.shieldIntervalPerStar || -0.8 / 6; },
-				get shieldDuration() { return def.shieldDuration || 3; },
-				get shieldDurationPerStar() { return def.shieldDurationPerStar || 4 / 6; },
-				get shieldDurationPerLevel() { return def.shieldDurationPerLevel || 0.5; },
-				get spikeDamageBase() { return def.spikeDamageBase || 110; },
-				get spikeDamagePerStar() { return def.spikeDamagePerStar || 20; },
-				get spikeDamagePerLevel() { return def.spikeDamagePerLevel || 100; },
-				get spikeDurationBase() { return def.spikeDurationBase || 2.0; },
-				get spikeDurationPerLevel() { return def.spikeDurationPerLevel || 0.75; },
-				get spikeIntervalBase() { return def.spikeIntervalBase || 5.0; },
-				get spikeIntervalPerStar() { return def.spikeIntervalPerStar || -0.04; },
-			};
+            const dice = {
+                type,
+                star: s,
+                cooldown: 0,
+                _damage: dmg,
+                _isFinal: true,
+                get damage() { return this._damage; },
+                get interval() { return intervalBase; },
+                get label() { return def.label; },
+                get color() { return def.color; },
+                get name() { return getDiceName(type); },
+                get splash() { return def.splash || 0; },
+                get slow() { return def.slow || 0; },
+                get poison() { return def.poison || 0; },
+                get chain() { return def.chain || 0; },
+                get attackType() { return def.attackType || 'front'; },
+                get isJoker() { return def.isJoker || false; },
+                get isSapling() { return def.isSapling || false; },
+                get isMystery() { return def.isMystery || false; },
+                get isMimic() { return def.isMimic || false; },
+                get isGoldmine() { return def.isGoldmine || false; },
+                get isVampire() { return def.isVampire || false; },
+                get isTaichi() { return def.isTaichi || false; },
+                get isLight() { return def.isLight || false; },
+                get isBaseball() { return def.isBaseball || false; },
+                get isDroughtThunder() { return def.isDroughtThunder || false; },
+                get isShield() { return def.isShield || false; },
+                get isSpike() { return def.isSpike || false; },
+                get burn() { return def.burn || false; },
+                get bossMultiplier() { return def.bossMultiplier || 1; },
+                get gambleMin() { return def.gambleMin || 0; },
+                get lockStun() { return def.lockStun || false; },
+                get absorbBaseGold() { return def.absorbBaseGold || 1; },
+                get absorbGoldPerLevel() { return def.absorbGoldPerLevel || 3; },
+                get absorbBaseInterval() { return def.absorbBaseInterval || 5; },
+                get absorbIntervalPerLevel() { return def.absorbIntervalPerLevel || -0.25; },
+                get thunderBaseDamage() { return def.thunderBaseDamage || 50; },
+                get thunderDamagePerStar() { return def.thunderDamagePerStar || 40 / 6; },
+                get thunderDamagePerLevel() { return def.thunderDamagePerLevel || 50; },
+                get shieldInterval() { return def.shieldInterval || 10; },
+                get shieldIntervalPerStar() { return def.shieldIntervalPerStar || -0.8 / 6; },
+                get shieldDuration() { return def.shieldDuration || 3; },
+                get shieldDurationPerStar() { return def.shieldDurationPerStar || 4 / 6; },
+                get shieldDurationPerLevel() { return def.shieldDurationPerLevel || 0.5; },
+                get spikeDamageBase() { return def.spikeDamageBase || 110; },
+                get spikeDamagePerStar() { return def.spikeDamagePerStar || 20; },
+                get spikeDamagePerLevel() { return def.spikeDamagePerLevel || 100; },
+                get spikeDurationBase() { return def.spikeDurationBase || 2.0; },
+                get spikeDurationPerLevel() { return def.spikeDurationPerLevel || 0.75; },
+                get spikeIntervalBase() { return def.spikeIntervalBase || 5.0; },
+                get spikeIntervalPerStar() { return def.spikeIntervalPerStar || -0.04; },
+            };
 
-			// ★ 为特定类型添加额外属性
-			if (type === 'FIRE') {
-				dice._fireDamage = fireDmg;
-				dice._classCritBonus = classCritBonus;
-				dice._classSpeedBonus = classSpeedBonus;
-			}
-			if (type === 'THUNDER') {
-				dice._thunderDamage = (lv - 1) * (def.thunderPerLevel || 20);
-			}
-			if (type === 'VAMPIRE') {
-				dice.absorbBaseInterval = def.absorbBaseInterval;
-				dice.absorbIntervalPerLevel = def.absorbIntervalPerLevel;
-				const base = def.baseDamage;
-				const perStar = def.damagePerStar;
-				let dmg2 = base + perStar * (s - 1) + (lv - 1) * (def.atkPerLevel || 0);
-				dmg2 = Math.round(dmg2 * 10) / 10;
-				dice._damage = dmg2;
-			}
-			if (dice.isMystery) {
-				dice.transformTimer = getMysteryTransformTime(s, lv);
-				dice.transformInterval = dice.transformTimer;
-			}
-			if (dice.isGoldmine) {
-				const baseGold = 3;
-				const maxGold = 23;
-				dice.goldAmount = Math.round(baseGold + (s - 1) * (maxGold - baseGold) / (7 - 1));
-				dice.cooldown = intervalBase;
-			}
-			if (dice.isVampire) {
-				const absorbInterval = def.absorbBaseInterval + def.absorbIntervalPerLevel * (lv - 1);
-				dice.absorbCooldown = Math.max(1.5, absorbInterval);
-				dice._absorbTimer = 0;
-			}
-			if (dice.isDroughtThunder) {
-				dice._thunderCooldown = 0;
-			}
-			if (dice.isShield) {
-				const interval = dice.shieldInterval + dice.shieldIntervalPerStar * (s - 1);
-				dice._shieldPlaceTimer = Math.max(1.0, interval);
-			}
-			if (dice.isSpike) {
-				dice._spikePlaceTimer = 0;
-				const spikeDmg = dice.spikeDamageBase + (s - 1) * dice.spikeDamagePerStar + (lv - 1) * dice.spikeDamagePerLevel;
-				dice._spikeDamage = Math.round(spikeDmg);
-			}
+            if (type === 'FIRE') {
+                dice._fireDamage = fireDmg;
+                dice._classCritBonus = classCritBonus;
+                dice._classSpeedBonus = classSpeedBonus;
+            }
+            if (type === 'THUNDER') {
+                dice._thunderDamage = (lv - 1) * (def.thunderPerLevel || 20);
+            }
+            if (type === 'VAMPIRE') {
+                dice.absorbBaseInterval = def.absorbBaseInterval;
+                dice.absorbIntervalPerLevel = def.absorbIntervalPerLevel;
+                const base = def.baseDamage;
+                const perStar = def.damagePerStar;
+                let dmg2 = base + perStar * (s - 1) + (lv - 1) * (def.atkPerLevel || 0);
+                dmg2 = Math.round(dmg2 * 10) / 10;
+                dice._damage = dmg2;
+            }
+            if (dice.isMystery) {
+                dice.transformTimer = getMysteryTransformTime(s, lv);
+                dice.transformInterval = dice.transformTimer;
+            }
+            if (dice.isGoldmine) {
+                const baseGold = 3;
+                const maxGold = 23;
+                dice.goldAmount = Math.round(baseGold + (s - 1) * (maxGold - baseGold) / (7 - 1));
+                dice.cooldown = intervalBase;
+            }
+            if (dice.isVampire) {
+                const absorbInterval = def.absorbBaseInterval + def.absorbIntervalPerLevel * (lv - 1);
+                dice.absorbCooldown = Math.max(1.5, absorbInterval);
+                dice._absorbTimer = 0;
+            }
+            if (dice.isDroughtThunder) {
+                dice._thunderCooldown = 0;
+            }
+            if (dice.isShield) {
+                const interval = dice.shieldInterval + dice.shieldIntervalPerStar * (s - 1);
+                dice._shieldPlaceTimer = Math.max(1.0, interval);
+            }
+            if (dice.isSpike) {
+                dice._spikePlaceTimer = 0;
+                const spikeDmg = dice.spikeDamageBase + (s - 1) * dice.spikeDamagePerStar + (lv - 1) * dice.spikeDamagePerLevel;
+                dice._spikeDamage = Math.round(spikeDmg);
+            }
 
-			return dice;
-		}
+            return dice;
+        }
 
         function randomDiceType() { const keys = getActiveDiceKeys(); return keys.length ? keys[randInt(0, keys.length - 1)] :
                 'FIRE'; }
@@ -5388,7 +5436,6 @@
                 game.enemyReachedTwoThirds = anyAtTwoThirds;
                 updateEmoji();
 
-                // 盾牌更新
                 const data = getData();
                 for (const shield of game.shields) {
                     if (!shield.active) continue;
@@ -5615,7 +5662,6 @@
                     }
                 }
             } catch (e) {
-                console.warn('updateEnemies error:', e);
                 game.bossAbilityActive = false;
                 if (game._bossAbilityTimeout) { clearTimeout(game._bossAbilityTimeout);
                     game._bossAbilityTimeout = null; }
@@ -6470,12 +6516,16 @@
             return totalBonus;
         }
 
-        // ========== 攻擊（★ 暴擊系統 + 火骰子火元素濺射） ==========
+        // ========== 攻擊（★ 暴擊系統 + 火骰子火元素濺射 + 翻譯） ==========
         function updateAttacks(dt) {
-            updateTaichiAbilities(dt);
+			updateTaichiAbilities(dt);
+			const globalCritBonus = getGlobalCritBonus();
+			const totalCritRate = 0.05;
+			const critDamageMultiplier = 1.0 + globalCritBonus / 100;
 
-            try {
-                const board = game.board;
+			try {
+				const data = getData();
+				const board = game.board;
                 for (let r = 0; r < ROWS; r++) {
                     for (let c = 0; c < COLS; c++) {
                         const dice = board[r]?.[c];
@@ -6500,7 +6550,7 @@
                                     `💰 +${goldAmount}`,
                                     '#f7d875', 18
                                 );
-                                showToast(getData().goldMineEarn.replace(/\{gold\}/g, goldAmount), 800);
+                                showToast(data.goldMineEarn.replace(/\{gold\}/g, goldAmount), 800);
                                 dice.cooldown = dice.interval;
                             }
                             continue;
@@ -6514,7 +6564,6 @@
                                     cloud.y < cellY + CELL_SIZE && cloud.y + cloud.h > cellY;
                             })) continue;
 
-                        // SPIKE
                         if (dice.isSpike) {
                             const interval = dice.interval;
                             dice._spikePlaceTimer = (dice._spikePlaceTimer || 0) - dt;
@@ -6562,7 +6611,6 @@
                                 };
                                 game.spikes.push(spike);
 
-                                const data = getData();
                                 showToast(data.spikePlaced.replace(/\{dur\}/g, duration.toFixed(1)), 1200);
                                 addFloatingText(pos.x, pos.y - 20, `🌵 ${duration.toFixed(1)}s`, '#2ecc71', 20);
                                 playShootSound();
@@ -6628,7 +6676,7 @@
                                             addFloatingText(target.x, target.y - 20, `+${Math.round(healAmount)}`,
                                                 '#2ecc71', 18);
                                         } else if (hasShield) {
-                                            addFloatingText(target.x, target.y - 20, getData().immuneBlock || '🛡️ 免疫',
+                                            addFloatingText(target.x, target.y - 20, data.immuneBlock || '🛡️ 免疫',
                                                 '#2ecc71', 18);
                                         } else {
                                             const safeDmg = (typeof damage === 'number' && isFinite(damage)) ? damage :
@@ -6703,7 +6751,6 @@
                                 };
                                 game.shields.push(shield);
 
-                                const data = getData();
                                 showToast(data.shieldPlaced.replace(/\{dur\}/g, duration.toFixed(1)), 1200);
                                 addFloatingText(pos.x, pos.y - 20, `🛡️ ${duration.toFixed(1)}s`, '#2ecc71', 20);
                                 playShootSound();
@@ -6727,8 +6774,6 @@
                                         break;
                                     }
                                 }
-
-                                const data = getData();
 
                                 if (allMarked) {
                                     let target = null;
@@ -6808,7 +6853,6 @@
                                         e._vampireTotalAbsorbed += gold;
                                         e._vampireAbsorbCount = (e._vampireAbsorbCount || 0) + 1;
                                         game.gold += gold;
-                                        const data = getData();
                                         showToast(data.vampireAbsorb.replace(/\{gold\}/g, gold), 600);
                                         addFloatingText(e.x, e.y - 30, `🧛 +$${gold}`, '#8e44ad', 18);
                                     }
@@ -6874,11 +6918,10 @@
                                     addFloatingText(target.x, target.y - 20, `+${Math.round(healAmount)}`, '#2ecc71',
                                         18);
                                 } else if (target.shieldTimer && target.shieldTimer > 0) {
-                                    addFloatingText(target.x, target.y - 20, getData().immuneBlock || '🛡️ 免疫',
+                                    addFloatingText(target.x, target.y - 20, data.immuneBlock || '🛡️ 免疫',
                                         '#2ecc71', 18);
                                 } else {
                                     const safeDmg = (typeof totalDmg === 'number' && isFinite(totalDmg)) ? totalDmg : 0;
-                                    const wasAlive = target.alive && target.hp > 0;
                                     target.hp = (target.hp || 0) - safeDmg;
                                     if (!isFinite(target.hp)) target.hp = 0;
                                     target.hitFlash = 0.2;
@@ -6889,8 +6932,6 @@
                                 if (chainCount > 1) {
                                     let hitList = [target];
                                     let currentFactor = 1.0;
-                                    const data = getData();
-
                                     for (let i = 0; i < chainCount - 1; i++) {
                                         let nextTarget = null;
                                         let maxPathIdx = -1;
@@ -6908,7 +6949,6 @@
                                         const safeChainDmg = (typeof chainDmg === 'number' && isFinite(chainDmg)) ?
                                             chainDmg : 0;
 
-                                        const wasAlive2 = nextTarget.alive && nextTarget.hp > 0;
                                         if (isHacked) {
                                             const healAmt = safeChainDmg * 0.5;
                                             nextTarget.hp = (nextTarget.hp || 0) + healAmt;
@@ -6917,7 +6957,7 @@
                                             addFloatingText(nextTarget.x, nextTarget.y - 20,
                                                 `+${Math.round(healAmt)}`, '#2ecc71', 16);
                                         } else if (nextTarget.shieldTimer && nextTarget.shieldTimer > 0) {
-                                            addFloatingText(nextTarget.x, nextTarget.y - 20, getData().immuneBlock ||
+                                            addFloatingText(nextTarget.x, nextTarget.y - 20, data.immuneBlock ||
                                                 '🛡️ 免疫', '#2ecc71', 16);
                                         } else {
                                             nextTarget.hp = (nextTarget.hp || 0) - safeChainDmg;
@@ -6999,22 +7039,13 @@
                             let damage = dice.damage || 0;
                             if (typeof damage !== 'number' || !isFinite(damage)) damage = 0;
 
-                            // ★ 火骰子專屬：火元素傷害
                             let fireDamage = 0;
                             let isFireDice = (dice.type === 'FIRE');
                             if (isFireDice) {
                                 fireDamage = dice._fireDamage || 0;
                             }
 
-                            // ★ 暴擊系統
-                            const baseCritRate = 0.05; // 5%
-                            let critBonus = 0;
-                            if (dice.type === 'FIRE') {
-                                critBonus = dice._classCritBonus || 0;
-                            }
-                            const totalCritRate = Math.min(baseCritRate + critBonus / 100, 1.0);
                             const isCrit = Math.random() < totalCritRate;
-                            let critDamageMultiplier = 2.0 + critBonus / 100; // 基礎200% + 暴擊傷害加成
 
                             if (dice.isBaseball) {
                                 const speedBonus = calculateLightBonus(r, c);
@@ -7068,7 +7099,6 @@
                                         const finalDur = (isFinite(dur) && dur > 0) ? dur : 3.5;
                                         target.stunTimer = finalDur;
                                         target._lockedByLockDice = true;
-                                        const data = getData();
                                         showToast(data.toastStun.replace(/\{dur\}/g, finalDur.toFixed(1)), 1200);
                                         addFloatingText(target.x, target.y - 30, `🔒 ${finalDur.toFixed(1)}s`, '#3498db',
                                             18);
@@ -7079,7 +7109,6 @@
                             const hasShield = target.shieldTimer && target.shieldTimer > 0;
                             const targetWasAlive = target.alive && target.hp > 0;
 
-                            // ★ 普通傷害應用（含暴擊）
                             let finalDamage = damage;
                             if (isCrit && !isHacked && !hasShield) {
                                 finalDamage = damage * critDamageMultiplier;
@@ -7092,7 +7121,7 @@
                                 target.hitFlash = 0.2;
                                 addFloatingText(target.x, target.y - 20, `+${Math.round(healAmount)}`, '#2ecc71', 18);
                             } else if (hasShield) {
-                                addFloatingText(target.x, target.y - 20, getData().immuneBlock || '🛡️ 免疫', '#2ecc71',
+                                addFloatingText(target.x, target.y - 20, data.immuneBlock || '🛡️ 免疫', '#2ecc71',
                                 18);
                             } else {
                                 let dmgReduction = 1;
@@ -7104,17 +7133,16 @@
                                 target.hp = (target.hp || 0) - safeDmg;
                                 if (!isFinite(target.hp)) target.hp = 0;
                                 target.hitFlash = 0.2;
-                                const critLabel = isCrit ? '💥 ' : '';
+                                const critLabel = isCrit ? data.critText + ' ' : '';
                                 addFloatingText(target.x, target.y - 20, `${critLabel}-${Math.round(safeDmg)}`, isCrit ?
                                     '#ff6b6b' : '#ffd93d', isCrit ? 20 : 18);
                                 if (isCrit) {
-                                    addFloatingText(target.x, target.y - 34, '⚡ 暴擊!', '#ff6b6b', 14);
+                                    addFloatingText(target.x, target.y - 34, data.critText, '#ff6b6b', 14);
                                 }
 
                                 if (target.hp <= 0 && targetWasAlive && dice.isBaseball) {
                                     addFloatingText(target.x, target.y - 20, '💥', '#ff6b6b', 48);
                                     playBossSkillSound();
-                                    const data = getData();
                                     showToast(data.baseballKill || '💫 棒球骰子 擊殺！', 1000);
                                 }
 
@@ -7130,34 +7158,31 @@
                                 }
                             }
 
-                            // ★ 火元素傷害（不含暴擊，獨立計算）
+                            // ★ 火元素傷害（使用翻譯）
                             if (isFireDice && fireDamage > 0 && !isHacked && !hasShield) {
                                 const splashRange = dice.splash || 0.6;
                                 const safeFireDmg = (typeof fireDamage === 'number' && isFinite(fireDamage)) ? fireDamage : 0;
                                 if (safeFireDmg > 0 && target.alive) {
-                                    const fireCrit = Math.random() < 0.05 ? true : false;
-                                    let fireFinal = safeFireDmg;
-                                    if (fireCrit) {
-                                        const critBonusLocal = dice._classCritBonus || 0;
-                                        fireFinal = safeFireDmg * (2.0 + critBonusLocal / 100);
-                                    }
+                                    const fireCrit = Math.random() < totalCritRate;
+									let fireFinal = safeFireDmg;
+									if (fireCrit) {
+										fireFinal = safeFireDmg * critDamageMultiplier;
+									}
                                     target.hp = (target.hp || 0) - fireFinal;
                                     if (!isFinite(target.hp)) target.hp = 0;
                                     target.hitFlash = 0.2;
-                                    const critLabel = fireCrit ? '💥 ' : '';
+                                    const critLabel = fireCrit ? data.critText + ' ' : '';
                                     addFloatingText(target.x, target.y - 20, `🔥 ${critLabel}${Math.round(fireFinal)}`,
                                         '#e17055', fireCrit ? 20 : 18);
                                     if (fireCrit) {
-                                        addFloatingText(target.x, target.y - 34, '⚡ 暴擊!', '#ff6b6b', 14);
+                                        addFloatingText(target.x, target.y - 34, data.critText, '#ff6b6b', 14);
                                     }
                                     if (target.hp <= 0 && dice.isBaseball) {
                                         addFloatingText(target.x, target.y - 20, '💥', '#ff6b6b', 36);
                                         playBossSkillSound();
-                                        const data = getData();
                                         showToast(data.baseballKill || '💫 棒球骰子 擊殺！', 1000);
                                     }
                                 }
-                                // 對附近敵人造成火元素濺射傷害（60%）
                                 for (const e of game.enemies) {
                                     if (e === target || !e.alive) continue;
                                     if (dist(target, e) < splashRange * CELL_SIZE) {
@@ -7172,16 +7197,15 @@
                                             e.hp = (e.hp || 0) - splashFireDmg;
                                             if (!isFinite(e.hp)) e.hp = 0;
                                             e.hitFlash = 0.2;
-                                            const critLabel = splashCrit ? '💥 ' : '';
+                                            const critLabel = splashCrit ? data.critText + ' ' : '';
                                             addFloatingText(e.x, e.y - 20, `🔥 ${critLabel}${Math.round(splashFireDmg)}`,
                                                 '#e17055', splashCrit ? 18 : 16);
                                             if (splashCrit) {
-                                                addFloatingText(e.x, e.y - 34, '⚡ 暴擊!', '#ff6b6b', 12);
+                                                addFloatingText(e.x, e.y - 34, data.critText, '#ff6b6b', 12);
                                             }
                                             if (e.hp <= 0 && wasAlive && dice.isBaseball) {
                                                 addFloatingText(e.x, e.y - 20, '💥', '#ff6b6b', 36);
                                                 playBossSkillSound();
-                                                const data = getData();
                                                 showToast(data.baseballKill || '💫 棒球骰子 擊殺！', 1000);
                                             }
                                         }
@@ -7189,7 +7213,6 @@
                                 }
                             }
 
-                            // ★ 毒傷害取最高值（保留原邏輯）
                             if (!isHacked && !hasShield && dice.poison) {
                                 const lv = upgradeLevels[dice.type] || 1;
                                 const poisonBase = (dice.poison.damageBase || 0) + (lv - 1) * (def.poisonPerLevel || 0);
@@ -7218,33 +7241,30 @@
                                 }
                             }
 
-                            // ★ 普通濺射（非火骰子使用原邏輯；火骰子已用火元素濺射取代）
                             if (!isFireDice && !isHacked && !hasShield && dice.splash > 0) {
                                 for (const e of game.enemies) {
                                     if (e === target || !e.alive) continue;
                                     if (dist(target, e) < dice.splash * CELL_SIZE) {
                                         let splashDmg = damage * 0.5;
-                                        const splashCrit = Math.random() < 0.05 ? true : false;
-                                        if (splashCrit) {
-                                            const critBonusLocal = dice._classCritBonus || 0;
-                                            splashDmg = splashDmg * (2.0 + critBonusLocal / 100);
-                                        }
+										const splashCrit = Math.random() < totalCritRate;
+										if (splashCrit) {
+											splashDmg = splashDmg * critDamageMultiplier;
+										}
                                         const safeSplash = (typeof splashDmg === 'number' && isFinite(splashDmg)) ?
                                             splashDmg : 0;
                                         const wasAlive = e.alive && e.hp > 0;
                                         e.hp = (e.hp || 0) - safeSplash;
                                         if (!isFinite(e.hp)) e.hp = 0;
                                         e.hitFlash = 0.15;
-                                        const critLabel = splashCrit ? '💥 ' : '';
+                                        const critLabel = splashCrit ? data.critText + ' ' : '';
                                         addFloatingText(e.x, e.y - 20, `${critLabel}-${Math.round(safeSplash)}`, isCrit ?
                                             '#ff6b6b' : '#ff9f43', splashCrit ? 18 : 16);
                                         if (splashCrit) {
-                                            addFloatingText(e.x, e.y - 34, '⚡ 暴擊!', '#ff6b6b', 12);
+                                            addFloatingText(e.x, e.y - 34, data.critText, '#ff6b6b', 12);
                                         }
                                         if (e.hp <= 0 && wasAlive && dice.isBaseball) {
                                             addFloatingText(e.x, e.y - 20, '💥', '#ff6b6b', 36);
                                             playBossSkillSound();
-                                            const data = getData();
                                             showToast(data.baseballKill || '💫 棒球骰子 擊殺！', 1000);
                                         }
                                     }
@@ -7268,27 +7288,25 @@
                                     }
                                     if (!nextTarget) break;
                                     let chainDmg = damage * factors[i];
-                                    const chainCrit = Math.random() < 0.05 ? true : false;
-                                    if (chainCrit) {
-                                        const critBonusLocal = dice._classCritBonus || 0;
-                                        chainDmg = chainDmg * (2.0 + critBonusLocal / 100);
-                                    }
+									const chainCrit = Math.random() < totalCritRate;
+									if (chainCrit) {
+										chainDmg = chainDmg * critDamageMultiplier;
+									}
                                     const safeChainDmg = (typeof chainDmg === 'number' && isFinite(chainDmg)) ?
                                         chainDmg : 0;
                                     const wasAlive = nextTarget.alive && nextTarget.hp > 0;
                                     nextTarget.hp = (nextTarget.hp || 0) - safeChainDmg;
                                     if (!isFinite(nextTarget.hp)) nextTarget.hp = 0;
                                     nextTarget.hitFlash = 0.2;
-                                    const critLabel = chainCrit ? '💥 ' : '';
+                                    const critLabel = chainCrit ? data.critText + ' ' : '';
                                     addFloatingText(nextTarget.x, nextTarget.y - 20, `${critLabel}-${Math.round(safeChainDmg)}`,
                                         chainCrit ? '#ff6b6b' : '#fdcb6e', chainCrit ? 18 : 16);
                                     if (chainCrit) {
-                                        addFloatingText(nextTarget.x, nextTarget.y - 34, '⚡ 暴擊!', '#ff6b6b', 12);
+                                        addFloatingText(nextTarget.x, nextTarget.y - 34, data.critText, '#ff6b6b', 12);
                                     }
                                     if (nextTarget.hp <= 0 && wasAlive && dice.isBaseball) {
                                         addFloatingText(nextTarget.x, nextTarget.y - 20, '💥', '#ff6b6b', 36);
                                         playBossSkillSound();
-                                        const data = getData();
                                         showToast(data.baseballKill || '💫 棒球骰子 擊殺！', 1000);
                                     }
                                     hitList.push(nextTarget);
@@ -7941,7 +7959,6 @@
                 ctx.fillText(`⚔${spikeDmg}`, cx, y + size - 2);
             }
 
-            // ★ 顯示 Class 等級（僅火骰子）
             if (dice.type === 'FIRE') {
                 const cls = getDiceClass('FIRE') || 1;
                 ctx.fillStyle = 'rgba(255,215,0,0.9)';
@@ -9014,7 +9031,7 @@
             updateShopUI();
         }
 
-        // ========== ★ 骰子詳細 + Class 升級按鈕 ==========
+        // ========== ★ 骰子詳細 + Class 升級按鈕 (新版：火骰子顯示實際數值) ==========
         function showDiceDetail(diceType) {
             const def = CONST.ALL_DICE_DEFS[diceType];
             if (!def) return;
@@ -9027,15 +9044,58 @@
             document.getElementById('ddName').textContent = name;
             document.getElementById('ddDesc').textContent = desc;
 
-            document.getElementById('ddBaseDmgLabel').textContent = data.detailBaseDmg;
-            document.getElementById('ddBaseDmg').textContent = def.baseDamage;
-            document.getElementById('ddPerStarLabel').textContent = data.detailPerStar;
+            // ★ 計算火骰子實際數值 (含 Class + 等級加成)
+            let baseDmgDisplay = def.baseDamage;
+            let elementDmgDisplay = '-';
+            let critDmgDisplay = '-';
+            let isFire = (diceType === 'FIRE');
+
+            if (isFire) {
+                const cls = getDiceClass('FIRE') || 1;
+                const lv = upgradeLevels['FIRE'] || 1;
+                const mult = getUpgradeMultiplier('FIRE');
+                const atkBonus = getClassBenefit(cls, 'atk');
+                const burnBonus = getClassBenefit(cls, 'burn');
+                const critBonus = getClassBenefit(cls, 'critDmg');
+
+                // 基礎傷害 (1星) = def.baseDamage * mult + (lv-1) * def.atkPerLevel + atkBonus
+                const baseDmg = def.baseDamage * mult + (lv - 1) * (def.atkPerLevel || 0) + atkBonus;
+                baseDmgDisplay = Math.round(baseDmg * 10) / 10;
+
+                // 元素傷害 = def.fireDamageBase + (lv-1) * def.fireDamagePerLevel + burnBonus
+                const elementDmg = (def.fireDamageBase || 0) + (lv - 1) * (def.fireDamagePerLevel || 0) + burnBonus;
+                elementDmgDisplay = Math.round(elementDmg * 10) / 10;
+
+                // 暴擊傷害 = 基礎 2.0 + critBonus/100 (顯示為 +X%)
+                const critDmg = 2.0 + critBonus / 100;
+                critDmgDisplay = `+${critBonus}%`;
+            }
+
+            document.getElementById('ddBaseDmg').textContent = baseDmgDisplay;
             document.getElementById('ddPerStar').textContent = `+${Number.isInteger(perStar) ? perStar : perStar.toFixed(1)}`;
-            document.getElementById('ddBaseIntervalLabel').textContent = data.detailBaseInterval;
             document.getElementById('ddBaseInterval').textContent = `${def.baseInterval.toFixed(2)}s`;
-            document.getElementById('ddPerLevelLabel').textContent = data.detailPerLevel;
             const perLevel = def.intervalPerLevel || 0;
             document.getElementById('ddPerLevel').textContent = perLevel < 0 ? `${perLevel.toFixed(2)}s` : `${perLevel.toFixed(2)}s`;
+
+            // ★ 元素傷害 & 暴擊傷害 顯示控制
+            const elemItem = document.getElementById('ddElementDmgItem');
+            const critItem = document.getElementById('ddCritDmgItem');
+            const elemLabel = document.getElementById('ddElementDmgLabel');
+            const critLabel = document.getElementById('ddCritDmgLabel');
+            const elemValue = document.getElementById('ddElementDmg');
+            const critValue = document.getElementById('ddCritDmg');
+
+            if (isFire) {
+                elemItem.style.display = 'flex';
+                critItem.style.display = 'flex';
+                elemLabel.textContent = data.elementDamageLabel || '元素傷害';
+                critLabel.textContent = data.critDamageLabel || '暴擊傷害';
+                elemValue.textContent = elementDmgDisplay;
+                critValue.textContent = critDmgDisplay;
+            } else {
+                elemItem.style.display = 'none';
+                critItem.style.display = 'none';
+            }
 
             let specialParts = [];
 
@@ -9122,7 +9182,7 @@
             }
 
             if (diceType === 'FIRE') {
-                specialParts.push('🔥 火元素濺射 (額外火傷) · 不燃燒');
+                specialParts.push(data.fireSpecialDesc);
             }
 
             if (specialParts.length === 0) {
@@ -9140,7 +9200,7 @@
                 const currentClass = getDiceClass('FIRE') || 1;
                 const isMax = currentClass >= CLASS_MAX;
                 const nextCost = isMax ? null : getClassUpgradeCost(currentClass);
-                const canAfford = nextCost !== null && game.gold >= nextCost;
+                const canAfford = nextCost !== null && saveData.totalScore >= nextCost;
 
                 const atkBonus = getClassBenefit(currentClass, 'atk');
                 const burnBonus = getClassBenefit(currentClass, 'burn');
@@ -9160,13 +9220,12 @@
                         </div>
                         ${!isMax ? `
                         <div class="dd-class-row">
-                            <span class="dd-class-label">${data.classCost}</span>
-                            <span class="dd-class-value" style="color:${canAfford ? '#2ecc71' : '#ff6b6b'}">$${nextCost}</span>
-                        </div>
+							<span class="dd-class-label">${data.classCost}</span>
+							<span class="dd-class-value" style="color:${canAfford ? '#2ecc71' : '#ff6b6b'}">🏆${nextCost}</span>
+						</div>
                         ` : ''}
-                        <div class="dd-class-benefit">${benefitText}</div>
                         <button class="dd-class-btn" id="ddClassUpgradeBtn" ${isMax || !canAfford ? 'disabled' : ''}>
-                            ${isMax ? data.classMax : `${data.classUpgrade} ($${nextCost})`}
+                            ${isMax ? data.classMax : `${data.classUpgrade}`}
                         </button>
                     </div>
                 `;
@@ -9176,7 +9235,6 @@
                         e.stopPropagation();
                         const success = upgradeDiceClass('FIRE');
                         if (success) {
-                            // 更新顯示
                             showDiceDetail('FIRE');
                         }
                     });
@@ -9521,7 +9579,6 @@
                     renderOwnedDice();
                     updateSoundButtonIcon();
 
-                    console.log('✅ 語言已切換至：', currentLang);
                     showToast('🌐 Language changed', 1000);
                     if (game.gameStarted) draw();
                 });
