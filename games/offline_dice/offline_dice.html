@@ -7867,20 +7867,23 @@
                                 }
                             }
 
-                            game.projectiles.push({
-                                x: pos.x,
-                                y: pos.y,
-                                target: target,
-                                speed: 400,
-                                life: 0.6,
-                                color: isHacked ? '#2ecc71' : dice.color,
-                                damage: damage,
-                                isCrit: isCrit,
-                                type: dice.type,
-                                alive: true,
-                                x: pos.x,
-                                y: pos.y,
-                            });
+                            // ★ FIX 1: 棒球骰子不顯示射子彈動畫
+                            if (!dice.isBaseball) {
+                                game.projectiles.push({
+                                    x: pos.x,
+                                    y: pos.y,
+                                    target: target,
+                                    speed: 400,
+                                    life: 0.6,
+                                    color: isHacked ? '#2ecc71' : dice.color,
+                                    damage: damage,
+                                    isCrit: isCrit,
+                                    type: dice.type,
+                                    alive: true,
+                                    x: pos.x,
+                                    y: pos.y,
+                                });
+                            }
 
                             playShootSound();
 
@@ -8383,6 +8386,9 @@
                 ctx.fillText(`🩸${Math.ceil(remain)}s`, cx, barY + barH + 1);
             }
 
+            // ================================================================
+            // ★★ 太極骰子：當被標記時，和諧狀態符號移到右下角並縮小 ★★
+            // ================================================================
             if (dice.isTaichi) {
                 let status = '';
                 let glowColor = '';
@@ -8390,6 +8396,11 @@
                 const hasYin = dice._yinActive || false;
                 const hasYang = dice._yangActive || false;
                 const hasHarmony = dice._harmonyActive || false;
+
+                // 檢測是否被標記 (鎖定 或 黑客)
+                const isLocked = game.bossLockedDice && game.bossLockedDice.some(d => d.row === row && d.col === col);
+                const isHacked = game.bossHackedDice && game.bossHackedDice.some(d => d.row === row && d.col === col);
+                const isMarked = isLocked || isHacked;
 
                 if (hasHarmony) {
                     status = '☯️';
@@ -8406,48 +8417,100 @@
                 }
 
                 if (status) {
-                    const glowSize = dSize / 2 + 12 + 6 * Math.sin(game._taichiGlowTimer * 2);
-                    ctx.shadowColor = glowColor + '0.8)';
-                    ctx.shadowBlur = 30 + 15 * Math.sin(game._taichiGlowTimer * 2.5);
-                    ctx.strokeStyle = glowColor + (0.4 + 0.3 * pulse) + ')';
-                    ctx.lineWidth = 3 + 2 * pulse;
-                    ctx.beginPath();
-                    ctx.arc(cx, cy, glowSize, 0, Math.PI * 2);
-                    ctx.stroke();
-                    ctx.shadowBlur = 0;
+                    // ★ 被標記時，和諧狀態符號縮小並移到右下角
+                    const isHarmony = hasHarmony;
+                    const fontSize = isMarked ? (isHarmony ? size * 0.24 : size * 0.26) : size * 0.35;
+                    const offsetX = isMarked ? -size * 0.2 : 0;
+                    const offsetY = isMarked ? -size * 0.2 : 0;
+                    const posX = cx + offsetX;
+                    const posY = (isMarked ? y + size * 0.65 : y + size - 2);
 
-                    ctx.fillStyle = 'rgba(255,255,255,0.95)';
-                    ctx.font = `bold ${Math.floor(size*0.22)}px sans-serif`;
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'bottom';
-                    ctx.shadowColor = 'rgba(0,0,0,0.8)';
-                    ctx.shadowBlur = 8;
-                    ctx.fillText(status, cx, y + size - 2);
-                    ctx.shadowBlur = 0;
+                    if (isMarked && isHarmony) {
+                        // 若被標記且為和諧狀態，不繪製大型光環，只繪製小符號在右下角
+                        ctx.fillStyle = 'rgba(255,215,0,0.9)';
+                        ctx.font = `bold ${fontSize}px sans-serif`;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'bottom';
+                        ctx.shadowColor = 'rgba(0,0,0,0.6)';
+                        ctx.shadowBlur = 4;
+                        ctx.fillText(status, posX, posY + 4);
+                        ctx.shadowBlur = 0;
 
-                    if (hasHarmony) {
-                        for (let i = 0; i < 8; i++) {
-                            const angle = (i / 8) * Math.PI * 2 + game._taichiGlowTimer * 1.2;
-                            const dist = dSize / 2 + 8 + 6 * Math.sin(game._taichiGlowTimer * 1.8 + i);
-                            const px = cx + Math.cos(angle) * dist;
-                            const py = cy + Math.sin(angle) * dist;
-                            ctx.fillStyle = `rgba(255,215,0,${0.3+0.2*Math.sin(game._taichiGlowTimer*2+i)})`;
-                            ctx.beginPath();
-                            ctx.arc(px, py, 4 + 2 * Math.sin(game._taichiGlowTimer * 1.5 + i), 0, Math.PI * 2);
-                            ctx.fill();
+                        // 小光暈
+                        ctx.shadowColor = glowColor + '0.4)';
+                        ctx.shadowBlur = 12;
+                        ctx.strokeStyle = glowColor + '0.3)';
+                        ctx.lineWidth = 1.5;
+                        const smallRadius = size * 0.28;
+                        ctx.beginPath();
+                        ctx.arc(posX, posY - 2, smallRadius, 0, Math.PI * 2);
+                        ctx.stroke();
+                        ctx.shadowBlur = 0;
+
+                        // 用小型文字標示 "和諧"
+                        ctx.fillStyle = 'rgba(255,215,0,0.6)';
+                        ctx.font = `${Math.floor(size*0.09)}px sans-serif`;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'top';
+                        ctx.fillText('和諧', posX, posY + 4);
+                    } else if (isMarked) {
+                        // 被標記但非和諧狀態（陰或陽），縮小顯示
+                        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+                        ctx.font = `bold ${fontSize}px sans-serif`;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'bottom';
+                        ctx.shadowColor = 'rgba(0,0,0,0.6)';
+                        ctx.shadowBlur = 4;
+                        ctx.fillText(status, posX, posY + 4);
+                        ctx.shadowBlur = 0;
+                    } else {
+                        // 未被標記，正常顯示
+                        const glowSize = dSize / 2 + 12 + 6 * Math.sin(game._taichiGlowTimer * 2);
+                        ctx.shadowColor = glowColor + '0.8)';
+                        ctx.shadowBlur = 30 + 15 * Math.sin(game._taichiGlowTimer * 2.5);
+                        ctx.strokeStyle = glowColor + (0.4 + 0.3 * pulse) + ')';
+                        ctx.lineWidth = 3 + 2 * pulse;
+                        ctx.beginPath();
+                        ctx.arc(cx, cy, glowSize, 0, Math.PI * 2);
+                        ctx.stroke();
+                        ctx.shadowBlur = 0;
+
+                        ctx.fillStyle = 'rgba(255,255,255,0.95)';
+                        ctx.font = `bold ${fontSize}px sans-serif`;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'bottom';
+                        ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                        ctx.shadowBlur = 8;
+                        ctx.fillText(status, cx, y + size - 2);
+                        ctx.shadowBlur = 0;
+
+                        if (hasHarmony) {
+                            for (let i = 0; i < 8; i++) {
+                                const angle = (i / 8) * Math.PI * 2 + game._taichiGlowTimer * 1.2;
+                                const dist = dSize / 2 + 8 + 6 * Math.sin(game._taichiGlowTimer * 1.8 + i);
+                                const px = cx + Math.cos(angle) * dist;
+                                const py = cy + Math.sin(angle) * dist;
+                                ctx.fillStyle = `rgba(255,215,0,${0.3+0.2*Math.sin(game._taichiGlowTimer*2+i)})`;
+                                ctx.beginPath();
+                                ctx.arc(px, py, 4 + 2 * Math.sin(game._taichiGlowTimer * 1.5 + i), 0, Math.PI * 2);
+                                ctx.fill();
+                            }
                         }
                     }
                 }
 
                 if (status) {
-                    ctx.fillStyle = 'rgba(255,215,0,0.9)';
-                    ctx.font = `bold ${Math.floor(size*0.3)}px sans-serif`;
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'bottom';
-                    ctx.shadowColor = 'rgba(0,0,0,0.6)';
-                    ctx.shadowBlur = 4;
-                    ctx.fillText(status, cx, y + size - 4);
-                    ctx.shadowBlur = 0;
+                    // 額外狀態文字（僅在未被標記時顯示完整，被標記時已在上面處理）
+                    if (!isMarked) {
+                        ctx.fillStyle = 'rgba(255,215,0,0.9)';
+                        ctx.font = `bold ${Math.floor(size*0.3)}px sans-serif`;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'bottom';
+                        ctx.shadowColor = 'rgba(0,0,0,0.6)';
+                        ctx.shadowBlur = 4;
+                        ctx.fillText(status, cx, y + size - 4);
+                        ctx.shadowBlur = 0;
+                    }
                 }
             }
 
