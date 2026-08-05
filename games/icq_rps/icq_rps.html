@@ -1,1 +1,1885 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>🌼 ICQ 包剪揼 · 重猜版</title>
+    <style>
+        /* ===== 全域 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+        :root {
+            --bg-dark: #1a2a1a;
+            --bg-board: #0f2a1a;
+            --green-dark: #2d5a3d;
+            --green-mid: #3a7a52;
+            --green-light: #5cb883;
+            --gold: #ffd966;
+            --text-light: #f5ffe0;
+            --shadow-heavy: 0 20px 30px rgba(0, 0, 0, 0.8);
+            --radius-lg: 40px;
+            --radius-md: 24px;
+            --radius-sm: 10px;
+            /* 棋盤顏色 */
+            --checker-cyan: #6bc9a0;
+            --checker-pinkgreen: #c8e6c8;
+            /* 玩家棋子藍色 */
+            --player-blue: #3a7abd;
+            --player-blue-light: #5a9add;
+            --player-blue-dark: #2a5a8d;
+        }
+        body {
+            background: var(--bg-dark);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'PingFang HK', Arial, sans-serif;
+            padding: 12px;
+        }
+        .game-container {
+            background: var(--green-dark);
+            border-radius: var(--radius-lg);
+            padding: 20px 22px 18px;
+            box-shadow: var(--shadow-heavy), inset 0 0 0 3px var(--green-light);
+            border: 1px solid #7ed9a3;
+            max-width: 840px;
+            width: 100%;
+            position: relative;
+        }
 
+        /* ===== 頂欄 ===== */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 6px 10px;
+        }
+        .game-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-light);
+            text-shadow: 0 2px 8px rgba(0, 40, 0, 0.7);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .game-title .icon {
+            font-size: 28px;
+        }
+        .game-title .sub {
+            font-size: 13px;
+            font-weight: 400;
+            color: #bbebcc;
+            opacity: 0.85;
+            margin-left: 2px;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 0 12px;
+            border-radius: 30px;
+            line-height: 1.8;
+        }
+        .trophy-area {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 0, 0, 0.35);
+            padding: 4px 16px 4px 12px;
+            border-radius: 40px;
+            border: 1px solid #ffd96688;
+            font-weight: 600;
+            color: #ffd966;
+            font-size: 18px;
+        }
+        .trophy-area .num {
+            font-size: 22px;
+            min-width: 32px;
+            text-align: center;
+            color: #fff3b0;
+        }
+        .turn-indicator {
+            background: #1f4d30;
+            padding: 4px 16px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #d4f5dc;
+            border: 1px solid var(--green-light);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+        .turn-indicator .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #88dd88;
+            box-shadow: 0 0 12px #88ff88;
+            transition: 0.25s;
+            flex-shrink: 0;
+        }
+        .turn-indicator .dot.computer {
+            background: #ff8866;
+            box-shadow: 0 0 12px #ff8866;
+        }
+        .turn-indicator .dot.idle {
+            background: #aaa;
+            box-shadow: none;
+        }
+
+        /* ===== 棋盤 ===== */
+        .board-wrapper {
+            background: var(--bg-board);
+            border-radius: var(--radius-md);
+            padding: 10px;
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.7), 0 8px 20px rgba(0, 0, 0, 0.6);
+            border: 2px solid #4d8f66;
+            margin-bottom: 8px;
+            position: relative;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            aspect-ratio: 7 / 6;
+            min-height: 300px;
+            padding: 5px;
+            box-shadow: inset 0 0 20px rgba(0, 20, 0, 0.5);
+            border-radius: 16px;
+            position: relative;
+            background: var(--bg-board);
+        }
+        .cell {
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: default;
+            transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+            box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.2), inset 0 0 10px rgba(0, 30, 0, 0.2);
+            aspect-ratio: 1 / 1;
+            min-height: 44px;
+            border: 1px solid #3a7a52;
+            position: relative;
+        }
+        /* 青綠 / 粉綠 相間 */
+        .cell.cyan {
+            background: var(--checker-cyan);
+        }
+        .cell.pinkgreen {
+            background: var(--checker-pinkgreen);
+        }
+        .cell.empty {
+            box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.2);
+            border-color: #2a5a3a;
+        }
+        .cell.highlight {
+            box-shadow: 0 0 20px #66dd88, inset 0 0 12px #88ff88;
+            cursor: pointer;
+            transform: scale(1.03);
+            z-index: 2;
+        }
+        .cell.targetable {
+            box-shadow: 0 0 28px #88dd88, inset 0 0 16px #88ff88;
+            cursor: pointer;
+            transform: scale(1.06);
+            z-index: 3;
+            border-color: #88ff88;
+        }
+        .cell .piece {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            border-radius: var(--radius-sm);
+            font-size: 22px;
+            font-weight: 700;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+            transition: 0.15s;
+            position: relative;
+            border: 2px solid transparent;
+            will-change: transform, opacity;
+        }
+        /* 玩家棋子：藍色 */
+        .cell .piece.player {
+            color: #fff;
+            background: radial-gradient(circle at 35% 30%, var(--player-blue-light), var(--player-blue-dark));
+            border-color: #7ab8e6;
+            box-shadow: 0 0 16px rgba(60, 130, 220, 0.3), inset 0 0 24px rgba(100, 180, 255, 0.08);
+        }
+        /* 電腦棋子：原有暖色 */
+        .cell .piece.computer {
+            color: #ffd5b0;
+            background: radial-gradient(circle at 35% 30%, #d07050, #8a3a22);
+            border-color: #ff9a7a;
+            box-shadow: 0 0 16px rgba(255, 120, 80, 0.25), inset 0 0 24px rgba(255, 120, 80, 0.08);
+        }
+        .cell .piece.exposed {
+            border-color: #ff4444 !important;
+            box-shadow: 0 0 24px #ff4444, inset 0 0 20px rgba(255, 68, 68, 0.2);
+        }
+        /* 🚩 君主標記 */
+        .cell .piece.flag {
+            border-color: #ffdd88 !important;
+            box-shadow: 0 0 28px #ffdd88, inset 0 0 24px rgba(255, 220, 100, 0.2);
+        }
+        .cell .piece.trap {
+            border-color: #ffaa44 !important;
+            box-shadow: 0 0 20px #ffaa44, inset 0 0 20px rgba(255, 170, 68, 0.2);
+        }
+        /* 棋子主體：🧍‍♂️ */
+        .piece .body {
+            font-size: 34px;
+            line-height: 1;
+            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
+            position: relative;
+            z-index: 1;
+        }
+        /* 右下角武器符號 */
+        .piece .weapon {
+            position: absolute;
+            bottom: 0px;
+            right: 2px;
+            font-size: 16px;
+            line-height: 1;
+            filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.6));
+            z-index: 2;
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 50%;
+            padding: 1px 3px;
+            min-width: 22px;
+            text-align: center;
+        }
+        /* 左下角 👁 (被對方看到) */
+        .piece .eye {
+            position: absolute;
+            bottom: 0px;
+            left: 2px;
+            font-size: 16px;
+            line-height: 1;
+            filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.6));
+            z-index: 2;
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 50%;
+            padding: 1px 3px;
+            min-width: 22px;
+            text-align: center;
+        }
+        .piece .hidden-body {
+            font-size: 34px;
+            opacity: 0.6;
+            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
+        }
+        .piece.selected {
+            animation: pulse-glow 0.8s ease-in-out infinite alternate;
+            border-color: #ffff88 !important;
+            box-shadow: 0 0 40px #ffff88, inset 0 0 30px rgba(255, 255, 120, 0.2) !important;
+            z-index: 5;
+        }
+        @keyframes pulse-glow {
+            0% {
+                box-shadow: 0 0 20px #ffff88, inset 0 0 20px rgba(255, 255, 120, 0.10);
+            }
+            100% {
+                box-shadow: 0 0 50px #ffffaa, inset 0 0 40px rgba(255, 255, 120, 0.25);
+            }
+        }
+
+        /* 戰鬥動畫 */
+        @keyframes fly-in {
+            0% {
+                transform: scale(1.8) translate(0, 0);
+                opacity: 0.3;
+            }
+            60% {
+                transform: scale(1.1) translate(6px, -12px);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1) translate(0, 0);
+                opacity: 1;
+            }
+        }
+        @keyframes fly-out {
+            0% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0.1) rotate(80deg) translate(120px, -120px);
+                opacity: 0;
+            }
+        }
+        .cell .piece.attacking {
+            animation: fly-in 0.45s ease-out forwards;
+            z-index: 10;
+        }
+        .cell .piece.defeated {
+            animation: fly-out 0.45s ease-in forwards;
+            z-index: 10;
+        }
+
+        /* ===== 底部 ===== */
+        .game-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 4px 0;
+            color: #d0f0d8;
+            flex-wrap: wrap;
+            gap: 6px 12px;
+        }
+        .score-area {
+            display: flex;
+            gap: 18px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .score-area span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .score-area .num {
+            font-weight: 700;
+            font-size: 19px;
+            color: var(--text-light);
+            min-width: 18px;
+        }
+        .score-area .num.player-score {
+            color: #88ddff;
+        }
+        .score-area .num.computer-score {
+            color: #ffaa88;
+        }
+        .btn-group {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            background: #1f4d30;
+            border: 1px solid var(--green-light);
+            color: #e0ffe8;
+            padding: 5px 16px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 3px 0 #0f2a18;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+        .btn:hover {
+            background: #2a6a40;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 0 #0f2a18;
+        }
+        .btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #0f2a18;
+        }
+        .btn-primary {
+            background: #3a8a5a;
+            border-color: #7ed9a3;
+            box-shadow: 0 3px 0 #1a4a2a;
+        }
+        .btn-primary:hover {
+            background: #4aaa6a;
+        }
+        .btn-gold {
+            background: #8a7a3a;
+            border-color: #ffd966;
+            color: #fff3c0;
+            box-shadow: 0 3px 0 #4a3a1a;
+        }
+        .btn-gold:hover {
+            background: #aa9a4a;
+        }
+        .copyright {
+            font-size: 11px;
+            color: #7a9a82;
+            text-align: center;
+            padding-top: 6px;
+            border-top: 1px solid #3a5a42;
+            margin-top: 6px;
+            letter-spacing: 0.3px;
+            width: 100%;
+        }
+
+        /* ===== 覆蓋層（標題／結束／重猜） ===== */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 20, 0, 0.82);
+            backdrop-filter: blur(6px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fade-in 0.3s;
+        }
+        .overlay.active {
+            display: flex;
+        }
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .modal {
+            background: #1f4d30;
+            border-radius: var(--radius-lg);
+            padding: 28px 30px 32px;
+            max-width: 440px;
+            width: 92%;
+            text-align: center;
+            border: 2px solid #7ed9a3;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
+            position: relative;
+            overflow: hidden;
+        }
+        .modal .big-icon {
+            font-size: 68px;
+            margin-bottom: 2px;
+        }
+        .modal .title {
+            font-size: 30px;
+            font-weight: 800;
+            color: var(--text-light);
+        }
+        .modal .sub {
+            font-size: 16px;
+            color: #c0e8cc;
+            margin-bottom: 12px;
+        }
+        .modal .btn-big {
+            background: #3a8a5a;
+            border: none;
+            color: #fff;
+            padding: 10px 40px;
+            border-radius: 40px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 0 #1a4a2a;
+            margin: 4px 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .modal .btn-big:hover {
+            background: #4aaa6a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #1a4a2a;
+        }
+        .modal .btn-big:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #1a4a2a;
+        }
+        .modal .btn-big.gold {
+            background: #8a7a3a;
+            box-shadow: 0 4px 0 #4a3a1a;
+        }
+        .modal .btn-big.gold:hover {
+            background: #aa9a4a;
+        }
+        .modal .btn-big.muted {
+            background: #4a4a4a;
+            box-shadow: 0 4px 0 #2a2a2a;
+        }
+        .modal .btn-big.muted:hover {
+            background: #5a5a5a;
+        }
+        .title-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .title-buttons .row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .title-buttons .btn-big {
+            min-width: 120px;
+            justify-content: center;
+        }
+        .title-buttons .btn-big.small {
+            min-width: 90px;
+            font-size: 15px;
+            padding: 8px 20px;
+        }
+        .music-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 6px 0 4px;
+            font-size: 15px;
+            color: #d0f0d8;
+        }
+        .music-toggle .btn-icon {
+            background: none;
+            border: 2px solid var(--green-light);
+            border-radius: 40px;
+            padding: 6px 18px;
+            font-size: 22px;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #d0f0d8;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        .music-toggle .btn-icon:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+        }
+        .music-toggle .btn-icon.off {
+            opacity: 0.4;
+            border-color: #666;
+        }
+        .music-toggle .label {
+            font-weight: 500;
+        }
+
+        /* ===== 重猜彈窗 (特殊) ===== */
+        .rematch-modal .choices {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin: 16px 0;
+            flex-wrap: wrap;
+        }
+        .rematch-modal .choice-btn {
+            font-size: 48px;
+            padding: 12px 24px;
+            border-radius: 20px;
+            border: 3px solid #7ed9a3;
+            background: rgba(255, 255, 255, 0.08);
+            cursor: pointer;
+            transition: 0.2s;
+            min-width: 80px;
+            color: #fff;
+            box-shadow: 0 4px 0 #1a4a2a;
+        }
+        .rematch-modal .choice-btn:hover {
+            transform: scale(1.08) translateY(-4px);
+            background: rgba(255, 255, 255, 0.18);
+            border-color: #ffd966;
+            box-shadow: 0 8px 0 #1a4a2a;
+        }
+        .rematch-modal .choice-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #1a4a2a;
+        }
+        .rematch-modal .result-display {
+            font-size: 24px;
+            color: #ffd966;
+            margin: 8px 0;
+            font-weight: 600;
+        }
+
+        /* ===== Toast ===== */
+        .toast-msg {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 20, 0, 0.85);
+            color: #e0ffe8;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-size: 15px;
+            font-weight: 600;
+            border: 1px solid #5cb883;
+            z-index: 2000;
+            backdrop-filter: blur(4px);
+            transition: opacity 0.4s;
+            max-width: 90%;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        /* ===== 響應式 ===== */
+        @media (max-width: 640px) {
+            .game-container {
+                padding: 12px 12px 14px;
+            }
+            .game-title {
+                font-size: 18px;
+            }
+            .game-title .sub {
+                font-size: 11px;
+                padding: 0 8px;
+            }
+            .trophy-area {
+                font-size: 15px;
+                padding: 2px 10px 2px 8px;
+            }
+            .trophy-area .num {
+                font-size: 18px;
+                min-width: 24px;
+            }
+            .turn-indicator {
+                font-size: 11px;
+                padding: 2px 10px;
+            }
+            .board-wrapper {
+                padding: 6px;
+            }
+            .board {
+                gap: 3px;
+                padding: 3px;
+                min-height: 200px;
+            }
+            .cell {
+                min-height: 32px;
+                border-radius: 6px;
+            }
+            .piece .body {
+                font-size: 26px !important;
+            }
+            .piece .hidden-body {
+                font-size: 26px !important;
+            }
+            .piece .weapon {
+                font-size: 12px !important;
+                min-width: 16px !important;
+                padding: 0 2px !important;
+                bottom: -1px !important;
+                right: 0px !important;
+            }
+            .piece .eye {
+                font-size: 12px !important;
+                min-width: 16px !important;
+                padding: 0 2px !important;
+                bottom: -1px !important;
+                left: 0px !important;
+            }
+            .score-area {
+                font-size: 12px;
+                gap: 10px;
+            }
+            .score-area .num {
+                font-size: 16px;
+            }
+            .btn {
+                font-size: 11px;
+                padding: 4px 12px;
+            }
+            .modal {
+                padding: 20px 18px 24px;
+            }
+            .modal .title {
+                font-size: 24px;
+            }
+            .title-buttons .btn-big {
+                min-width: 80px;
+                font-size: 14px;
+                padding: 8px 14px;
+            }
+            .title-buttons .btn-big.small {
+                min-width: 70px;
+                font-size: 13px;
+                padding: 6px 12px;
+            }
+            .copyright {
+                font-size: 10px;
+            }
+            .rematch-modal .choice-btn {
+                font-size: 36px;
+                padding: 8px 16px;
+                min-width: 60px;
+            }
+        }
+        @media (max-width: 420px) {
+            .cell {
+                min-height: 26px;
+            }
+            .piece .body {
+                font-size: 20px !important;
+            }
+            .piece .hidden-body {
+                font-size: 20px !important;
+            }
+            .piece .weapon {
+                font-size: 10px !important;
+                min-width: 14px !important;
+            }
+            .piece .eye {
+                font-size: 10px !important;
+                min-width: 14px !important;
+            }
+            .game-title {
+                font-size: 15px;
+            }
+            .trophy-area {
+                font-size: 13px;
+            }
+            .trophy-area .num {
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <!-- 頂欄 -->
+        <div class="game-header">
+            <div class="game-title">
+                <span class="icon">🌼</span> ICQ 包剪揼
+                <span class="sub" id="trophyDisplay">🏆 <span id="trophyCount">0</span></span>
+            </div>
+            <div class="turn-indicator" id="turnIndicator">
+                <span class="dot" id="turnDot"></span>
+                <span id="turnText">等待開始</span>
+            </div>
+        </div>
+
+        <!-- 棋盤 -->
+        <div class="board-wrapper">
+            <div class="board" id="board"></div>
+        </div>
+
+        <!-- 底部 -->
+        <div class="game-footer">
+            <div class="score-area">
+                <span>🧑 <span class="num player-score" id="playerScore">0</span></span>
+                <span>🤖 <span class="num computer-score" id="computerScore">0</span></span>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" id="btnStartReset">🎮 開始</button>
+            </div>
+            <div class="copyright" id="copyright"></div>
+        </div>
+    </div>
+
+    <!-- ===== 標題畫面 ===== -->
+    <div class="overlay active" id="titleOverlay">
+        <div class="modal">
+            <div class="big-icon">🌼</div>
+            <div class="title">ICQ 包剪揼</div>
+            <div class="sub">棋手・陷阱 · 重猜對決</div>
+            <div class="music-toggle">
+                <span class="label">🎵 音樂</span>
+                <button class="btn-icon" id="musicToggleBtn">🔊</button>
+                <span class="label" id="musicToggleLabel">播放中</span>
+            </div>
+            <div class="title-buttons">
+                <div class="row">
+                    <button class="btn-big" id="btnTitleStart">🚀 開始</button>
+                </div>
+                <div class="row">
+                    <button class="btn-big small gold" id="btnTitleSave">💾 儲存</button>
+                    <button class="btn-big small" id="btnTitleLoad">📁 載入</button>
+                </div>
+            </div>
+            <div style="margin-top:10px; font-size:12px; color:#7a9a82;">
+                儲存／載入：獎盃數 + 音樂設定 (.txt)
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 遊戲結束畫面 ===== -->
+    <div class="overlay" id="gameoverOverlay">
+        <div class="modal">
+            <div class="big-icon" id="gameoverIcon">🏆</div>
+            <div class="title" id="gameoverTitle">你贏了！</div>
+            <div class="sub" id="gameoverSub">完美擊敗對手！</div>
+            <button class="btn-big gold" id="gameoverConfirm">🏠 回到標題</button>
+            <div id="gameoverTrophy" style="margin-top:10px; font-size:20px; color:#ffd966; font-weight:700;"></div>
+        </div>
+    </div>
+
+    <!-- ===== 重猜彈窗 (同武器) ===== -->
+    <div class="overlay" id="rematchOverlay">
+        <div class="modal rematch-modal">
+            <div class="big-icon">⚔️</div>
+            <div class="title" style="font-size:26px;">平手！重新選擇！</div>
+            <div class="sub" id="rematchSub">請選擇你的武器</div>
+            <div class="choices" id="rematchChoices">
+                <button class="choice-btn" data-choice="rock">🗻</button>
+                <button class="choice-btn" data-choice="scissors">✂️</button>
+                <button class="choice-btn" data-choice="paper">📄</button>
+            </div>
+            <div class="result-display" id="rematchResult"></div>
+            <div style="margin-top:8px; font-size:14px; color:#aacfaa;" id="rematchAttempt">第 1 次重猜</div>
+        </div>
+    </div>
+
+    <!-- ===== 背景音樂 ===== -->
+    <audio id="bgMusic" loop style="display:none;"></audio>
+
+    <script>
+        // ================================================================
+        //  🌼 ICQ 包剪揼 · 重猜版
+        //  視覺：青綠/粉綠棋盤 · 玩家藍色棋子 · 🧍‍♂️主體
+        //       右下角武器符號 · 左下角👁 · 🚩君主
+        //  機制：同武器彈窗重猜，直到分出勝負
+        // ================================================================
+
+        (function() {
+            'use strict';
+
+            // ---- 常數 ----
+            const ROWS = 6,
+                COLS = 7;
+            const TYPES = ['rock', 'scissors', 'paper'];
+            const EMOJI = { rock: '🗻', scissors: '✂️', paper: '📄', king: '🚩', trap: '⚠️' };
+            const BEATS = { rock: 'scissors', scissors: 'paper', paper: 'rock' };
+            const BEAT_BY = { rock: 'paper', scissors: 'rock', paper: 'scissors' };
+
+            // ---- DOM ----
+            const boardEl = document.getElementById('board');
+            const turnDot = document.getElementById('turnDot');
+            const turnText = document.getElementById('turnText');
+            const playerScoreEl = document.getElementById('playerScore');
+            const computerScoreEl = document.getElementById('computerScore');
+            const trophyCountEl = document.getElementById('trophyCount');
+            const btnStartReset = document.getElementById('btnStartReset');
+            const btnTitleStart = document.getElementById('btnTitleStart');
+            const btnTitleSave = document.getElementById('btnTitleSave');
+            const btnTitleLoad = document.getElementById('btnTitleLoad');
+            const btnMusicToggle = document.getElementById('musicToggleBtn');
+            const musicToggleLabel = document.getElementById('musicToggleLabel');
+            const titleOverlay = document.getElementById('titleOverlay');
+            const gameoverOverlay = document.getElementById('gameoverOverlay');
+            const gameoverIcon = document.getElementById('gameoverIcon');
+            const gameoverTitle = document.getElementById('gameoverTitle');
+            const gameoverSub = document.getElementById('gameoverSub');
+            const gameoverConfirm = document.getElementById('gameoverConfirm');
+            const gameoverTrophy = document.getElementById('gameoverTrophy');
+            const copyrightEl = document.getElementById('copyright');
+            const bgAudio = document.getElementById('bgMusic');
+            const rematchOverlay = document.getElementById('rematchOverlay');
+            const rematchSub = document.getElementById('rematchSub');
+            const rematchResult = document.getElementById('rematchResult');
+            const rematchAttempt = document.getElementById('rematchAttempt');
+            const rematchChoices = document.getElementById('rematchChoices');
+
+            // ---- 遊戲狀態 ----
+            let board = [];
+            let allPieces = [];
+            let playerPieces = [];
+            let computerPieces = [];
+            let selectedPos = null;
+            let currentTurn = 'player';
+            let gameOver = false;
+            let isProcessing = false;
+            let gameStarted = false;
+            let animating = false;
+
+            // ---- 獎盃 ----
+            let trophyCount = 0;
+            const TROPHY_KEY = 'icq_trophy_count';
+            const SETTINGS_KEY = 'icq_game_settings';
+
+            // ---- 音樂 ----
+            let audioCtx = null;
+            let isMusicOn = true;
+            let rematchResolve = null; // Promise resolve for rematch
+
+            // ---- 初始化獎盃 ----
+            function loadTrophy() {
+                const saved = localStorage.getItem(TROPHY_KEY);
+                trophyCount = saved ? parseInt(saved, 10) || 0 : 0;
+                updateTrophyDisplay();
+            }
+
+            function saveTrophy() {
+                localStorage.setItem(TROPHY_KEY, String(trophyCount));
+            }
+
+            function updateTrophyDisplay() {
+                trophyCountEl.textContent = trophyCount;
+            }
+
+            function addTrophy(amount) {
+                trophyCount += amount;
+                saveTrophy();
+                updateTrophyDisplay();
+            }
+
+            // ---- 儲存／載入 .txt ----
+            function saveSettings() {
+                const data = {
+                    trophy: trophyCount,
+                    musicOn: isMusicOn,
+                    version: '2.0.0',
+                    timestamp: new Date().toISOString()
+                };
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `icq_save_${new Date().toISOString().slice(0,10)}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast('💾 已儲存 (.txt)');
+            }
+
+            function loadSettings() {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.txt,.json';
+                input.onchange = function(e) {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = function(ev) {
+                        try {
+                            const data = JSON.parse(ev.target.result);
+                            if (data.trophy !== undefined) {
+                                trophyCount = data.trophy;
+                                saveTrophy();
+                                updateTrophyDisplay();
+                            }
+                            if (data.musicOn !== undefined) {
+                                isMusicOn = data.musicOn;
+                                updateMusicUI();
+                                if (gameStarted) {
+                                    if (isMusicOn) startBackgroundMusic();
+                                    else stopBackgroundMusic();
+                                }
+                            }
+                            showToast('📁 設定已載入 (.txt)');
+                        } catch (err) {
+                            showToast('❌ 載入失敗');
+                            console.warn(err);
+                        }
+                    };
+                    reader.readAsText(file);
+                };
+                input.click();
+            }
+
+            function showToast(msg) {
+                const old = document.querySelector('.toast-msg');
+                if (old) old.remove();
+                const div = document.createElement('div');
+                div.className = 'toast-msg';
+                div.textContent = msg;
+                document.body.appendChild(div);
+                setTimeout(() => { div.style.opacity = '0';
+                    setTimeout(() => div.remove(), 500); }, 1800);
+            }
+
+            // ---- 音樂 ----
+            function updateMusicUI() {
+                if (isMusicOn) {
+                    btnMusicToggle.textContent = '🔊';
+                    btnMusicToggle.className = 'btn-icon';
+                    musicToggleLabel.textContent = '播放中';
+                } else {
+                    btnMusicToggle.textContent = '🔇';
+                    btnMusicToggle.className = 'btn-icon off';
+                    musicToggleLabel.textContent = '靜音';
+                }
+            }
+
+            function initAudio() {
+                if (!audioCtx) {
+                    audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                return audioCtx;
+            }
+
+            function startBackgroundMusic() {
+                if (!isMusicOn) return;
+                try {
+                    if (!bgAudio.src || bgAudio.src.indexOf('icq_rps.mp3') === -1) {
+                        bgAudio.src = 'icq_rps.mp3';
+                        bgAudio.load();
+                    }
+                    if (bgAudio.paused) {
+                        bgAudio.play().catch(() => {});
+                    }
+                } catch (e) {}
+            }
+
+            function stopBackgroundMusic() {
+                try { if (!bgAudio.paused) bgAudio.pause(); } catch (e) {}
+            }
+
+            function playSound(type) {
+                if (!isMusicOn) return;
+                try {
+                    const ctx = initAudio();
+                    const now = ctx.currentTime;
+                    switch (type) {
+                        case 'wind': {
+                            const buf = ctx.createBuffer(1, ctx.sampleRate * 0.3, ctx.sampleRate);
+                            const d = buf.getChannelData(0);
+                            for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / d.length *
+                            4);
+                            const s = ctx.createBufferSource();
+                            s.buffer = buf;
+                            const f = ctx.createBiquadFilter();
+                            f.type = 'lowpass';
+                            f.frequency.value = 600 + Math.random() * 400;
+                            const g = ctx.createGain();
+                            g.gain.value = 1.0;
+                            s.connect(f);
+                            f.connect(g);
+                            g.connect(ctx.destination);
+                            s.start(now);
+                            s.stop(now + 0.35);
+                            break;
+                        }
+                        case 'levelDown': {
+                            const o = ctx.createOscillator();
+                            const g = ctx.createGain();
+                            o.type = 'sawtooth';
+                            o.frequency.setValueAtTime(600, now);
+                            o.frequency.exponentialRampToValueAtTime(150, now + 0.35);
+                            g.gain.setValueAtTime(0.15, now);
+                            g.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                            o.connect(g);
+                            g.connect(ctx.destination);
+                            o.start(now);
+                            o.stop(now + 0.38);
+                            break;
+                        }
+                        case 'levelUp': {
+                            const o = ctx.createOscillator();
+                            const g = ctx.createGain();
+                            o.type = 'sine';
+                            o.frequency.setValueAtTime(300, now);
+                            o.frequency.exponentialRampToValueAtTime(800, now + 0.4);
+                            g.gain.setValueAtTime(0.18, now);
+                            g.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                            o.connect(g);
+                            g.connect(ctx.destination);
+                            o.start(now);
+                            o.stop(now + 0.42);
+                            const o2 = ctx.createOscillator();
+                            const g2 = ctx.createGain();
+                            o2.type = 'sine';
+                            o2.frequency.setValueAtTime(400, now);
+                            o2.frequency.exponentialRampToValueAtTime(1000, now + 0.35);
+                            g2.gain.setValueAtTime(0.08, now);
+                            g2.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                            o2.connect(g2);
+                            g2.connect(ctx.destination);
+                            o2.start(now);
+                            o2.stop(now + 0.38);
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                } catch (e) {}
+            }
+
+            // ---- 工具 ----
+            function isInBounds(r, c) { return r >= 0 && r < ROWS && c >= 0 && c < COLS; }
+
+            function getAdjacent(r, c) {
+                const dirs = [
+                    [-1, 0],
+                    [1, 0],
+                    [0, -1],
+                    [0, 1]
+                ];
+                const res = [];
+                for (const d of dirs) {
+                    const nr = r + d[0],
+                        nc = c + d[1];
+                    if (isInBounds(nr, nc)) res.push({ r: nr, c: nc });
+                }
+                return res;
+            }
+
+            function getPieces(owner) { return owner === 'player' ? playerPieces : computerPieces; }
+
+            function removePiece(r, c) {
+                const piece = board[r][c];
+                if (!piece) return null;
+                board[r][c] = null;
+                const list = piece.owner === 'player' ? playerPieces : computerPieces;
+                const idx = list.indexOf(piece);
+                if (idx !== -1) list.splice(idx, 1);
+                const allIdx = allPieces.indexOf(piece);
+                if (allIdx !== -1) allPieces.splice(allIdx, 1);
+                return piece;
+            }
+
+            function movePiece(fromR, fromC, toR, toC) {
+                const piece = board[fromR][fromC];
+                if (!piece) return null;
+                board[fromR][fromC] = null;
+                piece.row = toR;
+                piece.col = toC;
+                board[toR][toC] = piece;
+                return piece;
+            }
+
+            function getValidMoves(r, c) {
+                const piece = board[r][c];
+                if (!piece) return [];
+                if (piece.type === 'trap') return [];
+                const adj = getAdjacent(r, c);
+                const result = [];
+                for (const pos of adj) {
+                    const target = board[pos.r][pos.c];
+                    if (!target) {
+                        result.push({ r: pos.r, c: pos.c, action: 'move' });
+                    } else if (target.owner !== piece.owner) {
+                        result.push({ r: pos.r, c: pos.c, action: 'battle' });
+                    }
+                }
+                return result;
+            }
+
+            // ---- 戰鬥解析 (不含平局處理) ----
+            function resolveBattleBasic(attacker, defender) {
+                if (attacker.type === 'king' && defender.type === 'king') return { result: 'win', winner: 'attacker' };
+                if (attacker.type === 'king' && defender.type === 'trap') return { result: 'disarm', winner: 'attacker' };
+                if (defender.type === 'trap') return { result: 'trap', winner: 'defender' };
+                if (defender.type === 'king') return { result: 'king', winner: 'attacker' };
+                const aType = attacker.type,
+                    dType = defender.type;
+                if (aType === dType) return { result: 'draw', winner: null };
+                if (BEATS[aType] === dType) return { result: 'win', winner: 'attacker' };
+                return { result: 'lose', winner: 'defender' };
+            }
+
+            // ---- 重猜彈窗 (Promise) ----
+            function showRematch(attempt) {
+                return new Promise((resolve) => {
+                    rematchOverlay.classList.add('active');
+                    rematchResult.textContent = '';
+                    rematchAttempt.textContent = `第 ${attempt} 次重猜`;
+                    rematchSub.textContent = '請選擇你的武器';
+
+                    // 移除舊監聽
+                    const btns = rematchChoices.querySelectorAll('.choice-btn');
+                    btns.forEach(b => {
+                        b.onclick = null;
+                    });
+
+                    const handler = (e) => {
+                        const choice = e.currentTarget.dataset.choice;
+                        // 玩家選擇
+                        const playerChoice = choice;
+                        // AI 隨機
+                        const aiChoice = TYPES[Math.floor(Math.random() * TYPES.length)];
+                        rematchResult.textContent = `你：${EMOJI[playerChoice]}  vs  🤖：${EMOJI[aiChoice]}`;
+                        rematchSub.textContent = '比較中...';
+
+                        if (playerChoice === aiChoice) {
+                            // 還是一樣，繼續
+                            rematchSub.textContent = '又平手！再選一次！';
+                            setTimeout(() => {
+                                // 遞迴呼叫
+                                showRematch(attempt + 1).then(resolve);
+                            }, 600);
+                            // 移除監聽，避免重複
+                            btns.forEach(b => { b.onclick = null; });
+                            return;
+                        }
+
+                        // 分出勝負
+                        const winner = BEATS[playerChoice] === aiChoice ? 'player' : 'computer';
+                        rematchSub.textContent = winner === 'player' ? '🎉 你贏了！' : '🤖 電腦贏了！';
+                        rematchResult.textContent += `  → ${winner === 'player' ? '✅ 你勝出！' : '❌ 電腦勝出！'}`;
+                        // 禁用按鈕
+                        btns.forEach(b => { b.disabled = true; });
+
+                        setTimeout(() => {
+                            rematchOverlay.classList.remove('active');
+                            btns.forEach(b => { b.disabled = false; });
+                            resolve({ winner, playerChoice, aiChoice });
+                        }, 800);
+                    };
+
+                    btns.forEach(b => {
+                        b.onclick = handler;
+                    });
+                });
+            }
+
+            // ---- 戰鬥完整流程 (含重猜) ----
+            async function resolveBattleWithRematch(attacker, defender) {
+                let battle = resolveBattleBasic(attacker, defender);
+                let attempt = 1;
+                while (battle.result === 'draw') {
+                    // 彈窗讓玩家重猜
+                    const result = await showRematch(attempt);
+                    // 更新攻擊者與防禦者的武器
+                    attacker.type = result.playerChoice;
+                    defender.type = result.aiChoice;
+                    // 重新計算
+                    battle = resolveBattleBasic(attacker, defender);
+                    attempt++;
+                }
+                return battle;
+            }
+
+            // ---- 執行戰鬥 (含動畫 + 重猜) ----
+            async function executeBattleWithAnimation(attacker, defender, callback) {
+                if (animating) return;
+                animating = true;
+
+                // 揭示雙方
+                attacker.revealed = true;
+                defender.revealed = true;
+                if (defender.owner === 'player') defender.exposed = true;
+                if (attacker.owner === 'player') attacker.exposed = true;
+
+                const fromR = attacker.row,
+                    fromC = attacker.col;
+                const toR = defender.row,
+                    toC = defender.col;
+
+                // 保存原始類型 (用於顯示)
+                const origAttackerType = attacker.type;
+                const origDefenderType = defender.type;
+
+                // 執行戰鬥解析 (可能包含重猜)
+                const battle = await resolveBattleWithRematch(attacker, defender);
+
+                let attackerWins = false,
+                    defenderWins = false,
+                    bothDie = false,
+                    disarm = false;
+
+                const result = battle.result;
+                if (result === 'win') attackerWins = true;
+                else if (result === 'lose') defenderWins = true;
+                else if (result === 'draw') bothDie = true;
+                else if (result === 'trap') defenderWins = true;
+                else if (result === 'king') attackerWins = true;
+                else if (result === 'disarm') disarm = true;
+
+                // 執行結果
+                if (attackerWins) {
+                    removePiece(toR, toC);
+                    movePiece(fromR, fromC, toR, toC);
+                } else if (defenderWins) {
+                    removePiece(fromR, fromC);
+                } else if (bothDie) {
+                    removePiece(fromR, fromC);
+                    removePiece(toR, toC);
+                } else if (disarm) {
+                    removePiece(toR, toC);
+                    movePiece(fromR, fromC, toR, toC);
+                }
+
+                if (attackerWins || result === 'king') playSound('levelUp');
+                else if (defenderWins || result === 'trap' || bothDie) playSound('levelDown');
+
+                renderBoard();
+
+                // 動畫
+                const cells = boardEl.querySelectorAll('.cell');
+                let winnerCell = null;
+                if (attackerWins || disarm || result === 'king') {
+                    for (const cell of cells) {
+                        const r = parseInt(cell.dataset.r);
+                        const c = parseInt(cell.dataset.c);
+                        if (r === toR && c === toC) { winnerCell = cell; break; }
+                    }
+                }
+                if (winnerCell) {
+                    const piece = winnerCell.querySelector('.piece');
+                    if (piece) {
+                        piece.classList.add('attacking');
+                        setTimeout(() => {
+                            piece.classList.remove('attacking');
+                            animating = false;
+                            callback(battle);
+                        }, 500);
+                        return;
+                    }
+                }
+                animating = false;
+                callback(battle);
+            }
+
+            // ---- 玩家移動 ----
+            async function playerMove(fromR, fromC, toR, toC) {
+                if (isProcessing || gameOver || !gameStarted || currentTurn !== 'player' || animating) return false;
+                const piece = board[fromR][fromC];
+                if (!piece || piece.owner !== 'player' || piece.type === 'trap') return false;
+                const moves = getValidMoves(fromR, fromC);
+                const target = moves.find(m => m.r === toR && m.c === toC);
+                if (!target) return false;
+
+                isProcessing = true;
+                selectedPos = null;
+
+                if (target.action === 'move') {
+                    movePiece(fromR, fromC, toR, toC);
+                    playSound('wind');
+                    afterPlayerAction();
+                    return true;
+                } else {
+                    const defender = board[toR][toC];
+                    await executeBattleWithAnimation(piece, defender, (battle) => {
+                        if (battle.result === 'king' || battle.result === 'win') {
+                            // 檢查遊戲結束
+                            if (checkGameOver()) { isProcessing = false; return; }
+                        }
+                        afterPlayerAction();
+                    });
+                    return true;
+                }
+            }
+
+            function afterPlayerAction() {
+                updateUI();
+                if (checkGameOver()) { isProcessing = false; return; }
+                currentTurn = 'computer';
+                updateTurnUI();
+                isProcessing = false;
+                setTimeout(() => computerTurn(), 400);
+            }
+
+            // ---- 電腦 AI ----
+            async function computerTurn() {
+                if (gameOver || !gameStarted || currentTurn !== 'computer' || animating) return;
+                if (isProcessing) return;
+                isProcessing = true;
+
+                const pieces = getPieces('computer');
+                if (pieces.length === 0) { isProcessing = false;
+                    checkGameOver(); return; }
+
+                let moves = [];
+                for (const p of pieces) {
+                    if (p.type === 'trap') continue;
+                    const valid = getValidMoves(p.row, p.col);
+                    for (const m of valid) {
+                        moves.push({
+                            piece: p,
+                            fromR: p.row,
+                            fromC: p.col,
+                            toR: m.r,
+                            toC: m.c,
+                            action: m.action,
+                            target: board[m.r][m.c]
+                        });
+                    }
+                }
+                if (moves.length === 0) {
+                    isProcessing = false;
+                    if (checkGameOver()) return;
+                    currentTurn = 'player';
+                    updateTurnUI();
+                    isProcessing = false;
+                    return;
+                }
+
+                const knownPlayer = playerPieces.filter(p => p.revealed === true);
+                let bestMoves = [];
+                if (knownPlayer.length > 0) {
+                    for (const known of knownPlayer) {
+                        const counterType = BEAT_BY[known.type];
+                        const candidates = moves.filter(m => m.piece.type === counterType);
+                        const direct = candidates.filter(m => m.action === 'battle' && m.target === known);
+                        if (direct.length > 0) bestMoves = bestMoves.concat(direct);
+                        else {
+                            const near = candidates.filter(m => {
+                                const adj = getAdjacent(known.row, known.col);
+                                return adj.some(pos => pos.r === m.toR && pos.c === m.toC);
+                            });
+                            if (near.length > 0) bestMoves = bestMoves.concat(near);
+                        }
+                    }
+                    if (bestMoves.length > 0) {
+                        const direct = bestMoves.filter(m => m.action === 'battle' && m.target && m.target.owner ===
+                            'player');
+                        if (direct.length > 0) bestMoves = direct;
+                        else {
+                            const near = bestMoves.filter(m => m.action === 'move');
+                            if (near.length > 0) bestMoves = near;
+                        }
+                    }
+                }
+                if (bestMoves.length === 0) bestMoves = moves;
+
+                const pick = bestMoves[Math.floor(Math.random() * bestMoves.length)];
+
+                if (pick.action === 'move') {
+                    movePiece(pick.fromR, pick.fromC, pick.toR, pick.toC);
+                    playSound('wind');
+                    afterComputerAction();
+                } else {
+                    const defender = board[pick.toR][pick.toC];
+                    await executeBattleWithAnimation(pick.piece, defender, (battle) => {
+                        if (battle.result === 'king' || battle.result === 'win') {
+                            if (checkGameOver()) { isProcessing = false; return; }
+                        }
+                        afterComputerAction();
+                    });
+                }
+            }
+
+            function afterComputerAction() {
+                updateUI();
+                if (checkGameOver()) { isProcessing = false; return; }
+                currentTurn = 'player';
+                updateTurnUI();
+                isProcessing = false;
+            }
+
+            // ---- 檢查遊戲結束 ----
+            function checkGameOver() {
+                if (!gameStarted) return false;
+                const pKing = playerPieces.find(p => p.type === 'king');
+                const cKing = computerPieces.find(p => p.type === 'king');
+                if (!pKing) {
+                    gameOver = true;
+                    showGameOver('🤖', '電腦 獲勝！', '你的君主被擊敗了！', false);
+                    updateUI();
+                    updateTurnUI();
+                    updateButtons();
+                    return true;
+                }
+                if (!cKing) {
+                    gameOver = true;
+                    showGameOver('🏆', '你贏了！', '擊敗了對方的君主！', true);
+                    updateUI();
+                    updateTurnUI();
+                    updateButtons();
+                    return true;
+                }
+                if (playerPieces.length === 0) {
+                    gameOver = true;
+                    showGameOver('🤖', '電腦 獲勝！', '你的所有棋子被消滅！', false);
+                    updateUI();
+                    updateTurnUI();
+                    updateButtons();
+                    return true;
+                }
+                if (computerPieces.length === 0) {
+                    gameOver = true;
+                    showGameOver('🏆', '你贏了！', '消滅了所有電腦棋子！', true);
+                    updateUI();
+                    updateTurnUI();
+                    updateButtons();
+                    return true;
+                }
+                return false;
+            }
+
+            function showGameOver(icon, title, sub, playerWon) {
+                gameoverIcon.textContent = icon;
+                gameoverTitle.textContent = title;
+                gameoverSub.textContent = sub;
+                if (playerWon) {
+                    addTrophy(50);
+                    gameoverTrophy.textContent = '🏆 獲得 50 個獎盃！';
+                    playSound('levelUp');
+                } else {
+                    gameoverTrophy.textContent = '';
+                    playSound('levelDown');
+                }
+                gameoverConfirm.textContent = '🏠 回到標題';
+                gameoverOverlay.classList.add('active');
+            }
+
+            // ---- UI 渲染 ----
+            function updateUI() {
+                renderBoard();
+                playerScoreEl.textContent = playerPieces.length;
+                computerScoreEl.textContent = computerPieces.length;
+                updateTrophyDisplay();
+                updateButtons();
+            }
+
+            function renderBoard() {
+                boardEl.innerHTML = '';
+                for (let r = 0; r < ROWS; r++) {
+                    for (let c = 0; c < COLS; c++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'cell';
+                        cell.dataset.r = r;
+                        cell.dataset.c = c;
+
+                        // 青綠 / 粉綠 相間
+                        const isCyan = (r + c) % 2 === 0;
+                        cell.classList.add(isCyan ? 'cyan' : 'pinkgreen');
+
+                        const piece = board[r][c];
+                        if (piece) {
+                            const div = document.createElement('div');
+                            div.className = `piece ${piece.owner}`;
+
+                            // 特殊標記
+                            if (piece.owner === 'player' && piece.exposed) div.classList.add('exposed');
+
+                            // 主體：🧍‍♂️
+                            const bodySpan = document.createElement('span');
+                            bodySpan.className = 'body';
+                            bodySpan.textContent = '🧍‍♂️';
+                            div.appendChild(bodySpan);
+
+                            // 右下角武器符號 (僅當可見)
+                            const isVisible = (piece.owner === 'player' || piece.revealed);
+                            if (isVisible) {
+                                if (piece.type === 'trap') div.classList.add('trap');
+								if (piece.type === 'king') div.classList.add('flag');
+								const weaponSpan = document.createElement('span');
+                                weaponSpan.className = 'weapon';
+                                weaponSpan.textContent = EMOJI[piece.type] || '❓';
+                                div.appendChild(weaponSpan);
+                            }
+
+                            // 左下角 👁 (仅当棋子被攻击过)
+							if (piece.owner === 'player' && piece.exposed) {
+								const eyeSpan = document.createElement('span');
+								eyeSpan.className = 'eye';
+								eyeSpan.textContent = '👁';
+								div.appendChild(eyeSpan);
+							}
+
+                            if (selectedPos && selectedPos.r === r && selectedPos.c === c) {
+                                div.classList.add('selected');
+                            }
+                            cell.appendChild(div);
+                            cell.addEventListener('click', () => onCellClick(r, c));
+                        } else {
+                            cell.classList.add('empty');
+                            cell.addEventListener('click', () => onCellClick(r, c));
+                        }
+
+                        if (selectedPos && !gameOver && gameStarted && currentTurn === 'player') {
+                            const moves = getValidMoves(selectedPos.r, selectedPos.c);
+                            const isTarget = moves.some(m => m.r === r && m.c === c);
+                            if (isTarget) cell.classList.add('targetable');
+                        }
+
+                        boardEl.appendChild(cell);
+                    }
+                }
+            }
+
+            function onCellClick(r, c) {
+                if (!gameStarted || gameOver || isProcessing || currentTurn !== 'player' || animating) return;
+                const piece = board[r][c];
+
+                if (piece && piece.owner === 'player' && piece.type !== 'trap') {
+                    if (selectedPos && selectedPos.r === r && selectedPos.c === c) {
+                        selectedPos = null;
+                        renderBoard();
+                        return;
+                    }
+                    const moves = getValidMoves(r, c);
+                    if (moves.length === 0) return;
+                    selectedPos = { r, c };
+                    renderBoard();
+                    return;
+                }
+
+                if (selectedPos) {
+                    const fromR = selectedPos.r,
+                        fromC = selectedPos.c;
+                    const fromPiece = board[fromR][fromC];
+                    if (!fromPiece || fromPiece.owner !== 'player') {
+                        selectedPos = null;
+                        renderBoard();
+                        return;
+                    }
+                    const moves = getValidMoves(fromR, fromC);
+                    const target = moves.find(m => m.r === r && m.c === c);
+                    if (target) {
+                        playerMove(fromR, fromC, r, c);
+                        selectedPos = null;
+                        return;
+                    } else {
+                        selectedPos = null;
+                        renderBoard();
+                        return;
+                    }
+                }
+            }
+
+            function updateTurnUI() {
+                if (!gameStarted) {
+                    turnDot.className = 'dot idle';
+                    turnText.textContent = '等待開始';
+                    return;
+                }
+                if (gameOver) {
+                    turnDot.className = 'dot idle';
+                    turnText.textContent = '已結束';
+                    return;
+                }
+                if (currentTurn === 'player') {
+                    turnDot.className = 'dot';
+                    turnText.textContent = '你的回合';
+                } else {
+                    turnDot.className = 'dot computer';
+                    turnText.textContent = '電腦思考中...';
+                }
+            }
+
+            function updateButtons() {
+                if (!gameStarted) {
+                    btnStartReset.textContent = '🎮 開始';
+                    btnStartReset.className = 'btn btn-primary';
+                    return;
+                }
+                if (gameOver) {
+                    btnStartReset.textContent = '🏠 回到標題';
+                    btnStartReset.className = 'btn btn-gold';
+                } else {
+                    btnStartReset.textContent = '🔄 重開';
+                    btnStartReset.className = 'btn btn-primary';
+                }
+            }
+
+            // ---- 生成與擺放 ----
+            function generatePieces(owner) {
+                const pieces = [];
+                for (const type of TYPES) {
+                    for (let i = 0; i < 4; i++) pieces.push({ type, owner, revealed: false, exposed: false });
+                }
+                pieces.push({ type: 'king', owner, revealed: false, exposed: false });
+                pieces.push({ type: 'trap', owner, revealed: false, exposed: false });
+                return pieces;
+            }
+
+            function shuffleArray(arr) {
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+                return arr;
+            }
+
+            function placePiecesRandomly() {
+                board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
+                allPieces = [];
+                playerPieces = [];
+                computerPieces = [];
+
+                const playerList = generatePieces('player');
+                const computerList = generatePieces('computer');
+                shuffleArray(playerList);
+                shuffleArray(computerList);
+
+                const playerCells = [];
+                for (let r = 4; r < ROWS; r++) {
+                    for (let c = 0; c < COLS; c++) playerCells.push({ r, c });
+                }
+                shuffleArray(playerCells);
+
+                const computerCells = [];
+                for (let r = 0; r < 2; r++) {
+                    for (let c = 0; c < COLS; c++) computerCells.push({ r, c });
+                }
+                shuffleArray(computerCells);
+
+                for (let i = 0; i < playerList.length; i++) {
+                    const pos = playerCells[i];
+                    const piece = playerList[i];
+                    piece.row = pos.r;
+                    piece.col = pos.c;
+                    board[pos.r][pos.c] = piece;
+                    playerPieces.push(piece);
+                    allPieces.push(piece);
+                    piece.revealed = true;
+                    piece.exposed = false;
+                }
+                for (let i = 0; i < computerList.length; i++) {
+                    const pos = computerCells[i];
+                    const piece = computerList[i];
+                    piece.row = pos.r;
+                    piece.col = pos.c;
+                    board[pos.r][pos.c] = piece;
+                    computerPieces.push(piece);
+                    allPieces.push(piece);
+                    piece.revealed = false;
+                    piece.exposed = false;
+                }
+
+                selectedPos = null;
+                gameOver = false;
+                isProcessing = false;
+                currentTurn = 'player';
+                animating = false;
+                gameoverOverlay.classList.remove('active');
+                rematchOverlay.classList.remove('active');
+                updateUI();
+                updateTurnUI();
+                updateButtons();
+            }
+
+            // ---- 開始 / 重啟 / 回到標題 ----
+            function startGame() {
+                initAudio();
+                gameStarted = true;
+                placePiecesRandomly();
+                titleOverlay.classList.remove('active');
+                if (isMusicOn) startBackgroundMusic();
+                else stopBackgroundMusic();
+                updateUI();
+                updateTurnUI();
+                updateButtons();
+            }
+
+            function resetGame() {
+                if (!gameStarted) return;
+                if (confirm('確定要重開遊戲嗎？進度將會遺失。')) {
+                    placePiecesRandomly();
+                    gameStarted = true;
+                    gameoverOverlay.classList.remove('active');
+                    rematchOverlay.classList.remove('active');
+                    if (isMusicOn) startBackgroundMusic();
+                    updateUI();
+                    updateTurnUI();
+                    updateButtons();
+                }
+            }
+
+            function goToTitle() {
+                gameoverOverlay.classList.remove('active');
+                rematchOverlay.classList.remove('active');
+                titleOverlay.classList.add('active');
+                gameStarted = false;
+                gameOver = false;
+                board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
+                playerPieces = [];
+                computerPieces = [];
+                allPieces = [];
+                selectedPos = null;
+                isProcessing = false;
+                currentTurn = 'player';
+                animating = false;
+                stopBackgroundMusic();
+                updateUI();
+                updateTurnUI();
+                updateButtons();
+                btnStartReset.textContent = '🎮 開始';
+                btnStartReset.className = 'btn btn-primary';
+            }
+
+            function initGame() {
+                gameStarted = false;
+                board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
+                playerPieces = [];
+                computerPieces = [];
+                allPieces = [];
+                selectedPos = null;
+                gameOver = false;
+                isProcessing = false;
+                currentTurn = 'player';
+                animating = false;
+                btnStartReset.textContent = '🎮 開始';
+                btnStartReset.className = 'btn btn-primary';
+                updateUI();
+                updateTurnUI();
+                updateButtons();
+                gameoverOverlay.classList.remove('active');
+                rematchOverlay.classList.remove('active');
+                titleOverlay.classList.add('active');
+                stopBackgroundMusic();
+                updateMusicUI();
+            }
+
+            // ---- 事件綁定 ----
+            btnStartReset.addEventListener('click', () => {
+                if (!gameStarted) {
+                    titleOverlay.classList.add('active');
+                } else if (gameOver) {
+                    goToTitle();
+                } else {
+                    resetGame();
+                }
+            });
+
+            btnTitleStart.addEventListener('click', startGame);
+            btnTitleSave.addEventListener('click', saveSettings);
+            btnTitleLoad.addEventListener('click', () => {
+                loadSettings();
+                if (gameStarted) {
+                    if (isMusicOn) startBackgroundMusic();
+                    else stopBackgroundMusic();
+                }
+                updateUI();
+                updateButtons();
+            });
+
+            btnMusicToggle.addEventListener('click', () => {
+                isMusicOn = !isMusicOn;
+                updateMusicUI();
+                if (gameStarted) {
+                    if (isMusicOn) startBackgroundMusic();
+                    else stopBackgroundMusic();
+                }
+            });
+
+            gameoverConfirm.addEventListener('click', goToTitle);
+
+            // ---- 版權 ----
+            function setCopyright() {
+                const year = new Date().getFullYear();
+                copyrightEl.textContent = `v2.0.0 © ${year} ☕迪遜咖啡廳，版權所有。`;
+            }
+
+            // ---- 初始化 ----
+            loadTrophy();
+            setCopyright();
+            updateMusicUI();
+            initGame();
+
+            document.addEventListener('click', () => {
+                if (!audioCtx) { try { initAudio(); } catch (e) {} }
+                if (isMusicOn && gameStarted && bgAudio.paused) startBackgroundMusic();
+            }, { once: false });
+
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden && isMusicOn && gameStarted && bgAudio.paused) startBackgroundMusic();
+            });
+
+            console.log('🌼 ICQ 包剪揼 · 重猜版 已載入');
+            console.log(`🏆 當前獎盃: ${trophyCount}`);
+
+            window.__game = {
+                addTrophy,
+                trophyCount: () => trophyCount,
+                isMusicOn: () => isMusicOn,
+                toggleMusic: () => { isMusicOn = !isMusicOn;
+                    updateMusicUI(); },
+                saveSettings,
+                loadSettings,
+                goToTitle,
+                startGame,
+                resetGame
+            };
+
+        })();
+    </script>
+</body>
+</html>
