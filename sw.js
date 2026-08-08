@@ -12,6 +12,7 @@ const urlsToCache = [
     '/manifest.json',
     '/history.html',
     '/games/offline_dice/offline_dice.html',
+	'/games/icq_rps/icq_rps.html',
     '/games/block_legend/block_legend.html',
     '/games/tic_tac_toe/tic_tac_toe.html',
     '/icons/favicon.ico',
