@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>🌼 ICQ 包剪揼 · 重猜版</title>
+    <title>🌼 ICQ 包剪揼．紅藍對決</title>
     <style>
         /* ===== 全域 ===== */
         * {
@@ -24,13 +24,14 @@
             --radius-lg: 40px;
             --radius-md: 24px;
             --radius-sm: 10px;
-            /* 棋盤顏色 */
-            --checker-cyan: #6bc9a0;
-            --checker-pinkgreen: #c8e6c8;
-            /* 玩家棋子藍色 */
-            --player-blue: #3a7abd;
-            --player-blue-light: #5a9add;
-            --player-blue-dark: #2a5a8d;
+            --checker-cyan: rgba(107, 201, 160, 0.55);
+            --checker-pinkgreen: rgba(200, 230, 200, 0.50);
+            --player-blue: rgba(58, 122, 189, 0.80);
+            --player-blue-light: rgba(90, 154, 221, 0.75);
+            --player-blue-dark: rgba(42, 90, 141, 0.85);
+            --computer-red: rgba(200, 80, 50, 0.80);
+            --computer-red-light: rgba(220, 120, 80, 0.75);
+            --computer-red-dark: rgba(150, 50, 30, 0.85);
         }
         body {
             background: var(--bg-dark);
@@ -40,6 +41,7 @@
             align-items: center;
             font-family: 'Segoe UI', 'PingFang HK', Arial, sans-serif;
             padding: 12px;
+            position: relative;
         }
         .game-container {
             background: var(--green-dark);
@@ -132,6 +134,10 @@
             background: #aaa;
             box-shadow: none;
         }
+        .turn-indicator .dot.selecting {
+            background: #ffdd44;
+            box-shadow: 0 0 12px #ffdd44;
+        }
 
         /* ===== 棋盤 ===== */
         .board-wrapper {
@@ -170,7 +176,6 @@
             border: 1px solid #3a7a52;
             position: relative;
         }
-        /* 青綠 / 粉綠 相間 */
         .cell.cyan {
             background: var(--checker-cyan);
         }
@@ -207,37 +212,47 @@
             text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
             transition: 0.15s;
             position: relative;
-            border: 2px solid transparent;
+            border: 2px solid rgba(255, 255, 255, 0.15);
             will-change: transform, opacity;
+            background: rgba(60, 60, 60, 0.30);
+            backdrop-filter: blur(2px);
         }
-        /* 玩家棋子：藍色 */
-        .cell .piece.player {
+        .cell .piece.player-blue {
             color: #fff;
-            background: radial-gradient(circle at 35% 30%, var(--player-blue-light), var(--player-blue-dark));
-            border-color: #7ab8e6;
-            box-shadow: 0 0 16px rgba(60, 130, 220, 0.3), inset 0 0 24px rgba(100, 180, 255, 0.08);
+            background: radial-gradient(circle at 35% 30%, rgba(90, 154, 221, 0.70), rgba(42, 90, 141, 0.80));
+            border-color: rgba(122, 184, 230, 0.60);
+            box-shadow: 0 0 16px rgba(60, 130, 220, 0.20), inset 0 0 24px rgba(100, 180, 255, 0.06);
         }
-        /* 電腦棋子：原有暖色 */
-        .cell .piece.computer {
+        .cell .piece.player-red {
+            color: #fff5e0;
+            background: radial-gradient(circle at 35% 30%, rgba(220, 120, 80, 0.70), rgba(150, 50, 30, 0.80));
+            border-color: rgba(255, 150, 120, 0.60);
+            box-shadow: 0 0 16px rgba(255, 100, 60, 0.20), inset 0 0 24px rgba(255, 120, 80, 0.06);
+        }
+        .cell .piece.computer-blue {
+            color: #d0ecff;
+            background: radial-gradient(circle at 35% 30%, rgba(70, 140, 210, 0.60), rgba(30, 70, 130, 0.70));
+            border-color: rgba(100, 180, 255, 0.50);
+            box-shadow: 0 0 16px rgba(60, 130, 220, 0.15), inset 0 0 24px rgba(100, 180, 255, 0.05);
+        }
+        .cell .piece.computer-red {
             color: #ffd5b0;
-            background: radial-gradient(circle at 35% 30%, #d07050, #8a3a22);
-            border-color: #ff9a7a;
-            box-shadow: 0 0 16px rgba(255, 120, 80, 0.25), inset 0 0 24px rgba(255, 120, 80, 0.08);
+            background: radial-gradient(circle at 35% 30%, rgba(200, 100, 70, 0.60), rgba(130, 40, 20, 0.70));
+            border-color: rgba(255, 150, 120, 0.50);
+            box-shadow: 0 0 16px rgba(255, 120, 80, 0.15), inset 0 0 24px rgba(255, 120, 80, 0.05);
         }
         .cell .piece.exposed {
             border-color: #ff4444 !important;
-            box-shadow: 0 0 24px #ff4444, inset 0 0 20px rgba(255, 68, 68, 0.2);
+            box-shadow: 0 0 24px #ff4444, inset 0 0 20px rgba(255, 68, 68, 0.15);
         }
-        /* 🚩 君主標記 */
         .cell .piece.flag {
             border-color: #ffdd88 !important;
-            box-shadow: 0 0 28px #ffdd88, inset 0 0 24px rgba(255, 220, 100, 0.2);
+            box-shadow: 0 0 28px #ffdd88, inset 0 0 24px rgba(255, 220, 100, 0.15);
         }
         .cell .piece.trap {
             border-color: #ffaa44 !important;
-            box-shadow: 0 0 20px #ffaa44, inset 0 0 20px rgba(255, 170, 68, 0.2);
+            box-shadow: 0 0 20px #ffaa44, inset 0 0 20px rgba(255, 170, 68, 0.15);
         }
-        /* 棋子主體：🧍‍♂️ */
         .piece .body {
             font-size: 34px;
             line-height: 1;
@@ -245,7 +260,6 @@
             position: relative;
             z-index: 1;
         }
-        /* 右下角武器符號 */
         .piece .weapon {
             position: absolute;
             bottom: 0px;
@@ -260,7 +274,6 @@
             min-width: 22px;
             text-align: center;
         }
-        /* 左下角 👁 (被對方看到) */
         .piece .eye {
             position: absolute;
             bottom: 0px;
@@ -283,19 +296,17 @@
         .piece.selected {
             animation: pulse-glow 0.8s ease-in-out infinite alternate;
             border-color: #ffff88 !important;
-            box-shadow: 0 0 40px #ffff88, inset 0 0 30px rgba(255, 255, 120, 0.2) !important;
+            box-shadow: 0 0 40px #ffff88, inset 0 0 30px rgba(255, 255, 120, 0.15) !important;
             z-index: 5;
         }
         @keyframes pulse-glow {
             0% {
-                box-shadow: 0 0 20px #ffff88, inset 0 0 20px rgba(255, 255, 120, 0.10);
+                box-shadow: 0 0 20px #ffff88, inset 0 0 20px rgba(255, 255, 120, 0.08);
             }
             100% {
-                box-shadow: 0 0 50px #ffffaa, inset 0 0 40px rgba(255, 255, 120, 0.25);
+                box-shadow: 0 0 50px #ffffaa, inset 0 0 40px rgba(255, 255, 120, 0.20);
             }
         }
-
-        /* 戰鬥動畫 */
         @keyframes fly-in {
             0% {
                 transform: scale(1.8) translate(0, 0);
@@ -327,6 +338,30 @@
         .cell .piece.defeated {
             animation: fly-out 0.45s ease-in forwards;
             z-index: 10;
+        }
+        .cell .piece.selectable {
+            cursor: pointer;
+            border-color: #88ddff !important;
+            box-shadow: 0 0 20px rgba(100, 200, 255, 0.30);
+        }
+        .cell .piece.selectable:hover {
+            transform: scale(1.06);
+        }
+        .cell .piece.trap-select {
+            border-color: #ffaa44 !important;
+            box-shadow: 0 0 30px #ffaa44, inset 0 0 20px rgba(255, 170, 68, 0.20);
+        }
+        .cell .piece.king-select {
+            border-color: #ffdd88 !important;
+            box-shadow: 0 0 30px #ffdd88, inset 0 0 20px rgba(255, 220, 100, 0.20);
+        }
+        .cell .piece.chosen-trap {
+            border-color: #ff8800 !important;
+            box-shadow: 0 0 40px #ff8800, inset 0 0 30px rgba(255, 136, 0, 0.25);
+        }
+        .cell .piece.chosen-king {
+            border-color: #ffdd44 !important;
+            box-shadow: 0 0 40px #ffdd44, inset 0 0 30px rgba(255, 220, 68, 0.25);
         }
 
         /* ===== 底部 ===== */
@@ -409,6 +444,29 @@
         .btn-gold:hover {
             background: #aa9a4a;
         }
+        .btn-red {
+            background: #7a3a2a;
+            border-color: #ff8866;
+            color: #ffe0d0;
+            box-shadow: 0 3px 0 #4a1a0a;
+        }
+        .btn-red:hover {
+            background: #9a4a3a;
+        }
+        .btn-blue {
+            background: #2a4a7a;
+            border-color: #6688ff;
+            color: #d0e0ff;
+            box-shadow: 0 3px 0 #0a1a4a;
+        }
+        .btn-blue:hover {
+            background: #3a5a9a;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
         .copyright {
             font-size: 11px;
             color: #7a9a82;
@@ -420,7 +478,7 @@
             width: 100%;
         }
 
-        /* ===== 覆蓋層（標題／結束／重猜） ===== */
+        /* ===== 覆蓋層 ===== */
         .overlay {
             position: fixed;
             top: 0;
@@ -452,7 +510,7 @@
             background: #1f4d30;
             border-radius: var(--radius-lg);
             padding: 28px 30px 32px;
-            max-width: 440px;
+            max-width: 480px;
             width: 92%;
             text-align: center;
             border: 2px solid #7ed9a3;
@@ -506,12 +564,33 @@
         .modal .btn-big.gold:hover {
             background: #aa9a4a;
         }
+        .modal .btn-big.red {
+            background: #8a3a2a;
+            box-shadow: 0 4px 0 #4a1a0a;
+            border: 1px solid #ff8866;
+        }
+        .modal .btn-big.red:hover {
+            background: #aa4a3a;
+        }
+        .modal .btn-big.blue {
+            background: #2a4a8a;
+            box-shadow: 0 4px 0 #0a1a5a;
+            border: 1px solid #6688ff;
+        }
+        .modal .btn-big.blue:hover {
+            background: #3a5aaa;
+        }
         .modal .btn-big.muted {
             background: #4a4a4a;
             box-shadow: 0 4px 0 #2a2a2a;
         }
         .modal .btn-big.muted:hover {
             background: #5a5a5a;
+        }
+        .modal .btn-big.small {
+            padding: 6px 20px;
+            font-size: 14px;
+            min-width: 80px;
         }
         .title-buttons {
             display: flex;
@@ -528,11 +607,6 @@
         .title-buttons .btn-big {
             min-width: 120px;
             justify-content: center;
-        }
-        .title-buttons .btn-big.small {
-            min-width: 90px;
-            font-size: 15px;
-            padding: 8px 20px;
         }
         .music-toggle {
             display: flex;
@@ -565,8 +639,115 @@
         .music-toggle .label {
             font-weight: 500;
         }
+        .title-footer-trophy {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #ffd966;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 4px 16px;
+            border-radius: 30px;
+            display: inline-block;
+        }
+        .color-preview {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+			align-items: center;
+            margin: 10px 0;
+        }
+        .color-preview .preview-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 16px;
+            border-radius: 16px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: 0.2s;
+            background: rgba(0, 0, 0, 0.20);
+        }
+        .color-preview .preview-item:hover {
+            transform: scale(1.04);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .color-preview .preview-item.selected {
+            border-color: #ffd966;
+            background: rgba(255, 215, 0, 0.12);
+        }
+        .color-preview .preview-piece {
+            font-size: 42px;
+            line-height: 1.2;
+            padding: 4px 8px;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+        }
+        .color-preview .preview-piece.blue {
+            background: radial-gradient(circle at 35% 30%, rgba(90, 154, 221, 0.70), rgba(42, 90, 141, 0.80));
+            border-color: rgba(122, 184, 230, 0.60);
+        }
+        .color-preview .preview-piece.red {
+            background: radial-gradient(circle at 35% 30%, rgba(220, 120, 80, 0.70), rgba(150, 50, 30, 0.80));
+            border-color: rgba(255, 150, 120, 0.60);
+        }
+        .color-preview .preview-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #d0f0d8;
+        }
+        .color-preview .preview-desc {
+            font-size: 12px;
+            color: #aacfaa;
+        }
+		
+		/* VS 分隔樣式 */
+		.vs-divider {
+			font-size: 32px;
+			font-weight: 900;
+			color: #ffd966;
+			text-shadow: 0 0 24px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.2);
+			letter-spacing: 3px;
+			padding: 0 6px;
+			user-select: none;
+			flex-shrink: 0;
+			line-height: 1.2;
+		}
 
-        /* ===== 重猜彈窗 (特殊) ===== */
+        /* ===== 選擇棋子階段 (覆蓋層內) ===== */
+        .select-phase {
+            margin: 10px 0 6px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 16px;
+            border: 1px solid #4d8f66;
+        }
+        .select-phase .select-status {
+            font-size: 16px;
+            color: #d0f0d8;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .select-phase .select-status .highlight-trap {
+            color: #ffaa44;
+        }
+        .select-phase .select-status .highlight-king {
+            color: #ffdd88;
+        }
+        .select-phase .select-hint {
+            font-size: 14px;
+            color: #aacfaa;
+            margin-bottom: 8px;
+        }
+        .select-phase .select-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* ===== 重猜彈窗 ===== */
         .rematch-modal .choices {
             display: flex;
             gap: 16px;
@@ -622,6 +803,44 @@
             max-width: 90%;
             text-align: center;
             pointer-events: none;
+        }
+
+        /* ===== 全屏按鈕 ===== */
+        .fullscreen-btn {
+            position: fixed;
+            left: 18px;
+            bottom: 18px;
+            z-index: 999;
+            background: rgba(30, 60, 40, 0.75);
+            backdrop-filter: blur(6px);
+            border: 2px solid #7ed9a3;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            font-size: 22px;
+            color: #d4f5dc;
+            cursor: pointer;
+            transition: 0.25s;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            user-select: none;
+            touch-action: manipulation;
+        }
+        .fullscreen-btn:hover {
+            background: rgba(50, 100, 70, 0.85);
+            transform: scale(1.08);
+            border-color: #ffd966;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
+        }
+        .fullscreen-btn:active {
+            transform: scale(0.92);
+        }
+        .fullscreen-btn .fs-icon {
+            font-size: 24px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
         }
 
         /* ===== 響應式 ===== */
@@ -715,6 +934,32 @@
                 padding: 8px 16px;
                 min-width: 60px;
             }
+            .fullscreen-btn {
+                left: 12px;
+                bottom: 12px;
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+            .fullscreen-btn .fs-icon {
+                font-size: 20px;
+            }
+            .title-footer-trophy {
+                font-size: 12px;
+                padding: 3px 12px;
+            }
+            .color-preview .preview-piece {
+                font-size: 32px;
+            }
+            .color-preview .preview-label {
+                font-size: 12px;
+            }
+            .select-phase .select-status {
+                font-size: 14px;
+            }
+            .select-phase .select-hint {
+                font-size: 12px;
+            }
         }
         @media (max-width: 420px) {
             .cell {
@@ -743,6 +988,28 @@
             .trophy-area .num {
                 font-size: 15px;
             }
+            .fullscreen-btn {
+                left: 10px;
+                bottom: 10px;
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
+            }
+            .fullscreen-btn .fs-icon {
+                font-size: 17px;
+            }
+        }
+        :fullscreen .fullscreen-btn {
+            background: rgba(20, 50, 30, 0.85);
+            border-color: #ffd966;
+        }
+        :-webkit-full-screen .fullscreen-btn {
+            background: rgba(20, 50, 30, 0.85);
+            border-color: #ffd966;
+        }
+        :-moz-full-screen .fullscreen-btn {
+            background: rgba(20, 50, 30, 0.85);
+            border-color: #ffd966;
         }
     </style>
 </head>
@@ -769,11 +1036,12 @@
         <!-- 底部 -->
         <div class="game-footer">
             <div class="score-area">
-                <span>🧑 <span class="num player-score" id="playerScore">0</span></span>
-                <span>🤖 <span class="num computer-score" id="computerScore">0</span></span>
+                <span id="playerLabel">🔵 藍方/🔴 紅方<span class="num player-score" id="playerScore">0</span></span>
+                <span id="computerLabel">🔴 紅方/🔵 藍方<span class="num computer-score" id="computerScore">0</span></span>
             </div>
             <div class="btn-group">
                 <button class="btn btn-primary" id="btnStartReset">🎮 開始</button>
+                <button class="btn btn-gold" id="btnReroll" style="display:none;">🎲 重抽</button>
             </div>
             <div class="copyright" id="copyright"></div>
         </div>
@@ -784,7 +1052,20 @@
         <div class="modal">
             <div class="big-icon">🌼</div>
             <div class="title">ICQ 包剪揼</div>
-            <div class="sub">棋手・陷阱 · 重猜對決</div>
+            <div class="sub">選擇你的陣營</div>
+            <div class="color-preview" id="colorSelect">
+                <div class="preview-item" data-color="blue" id="previewBlue">
+                    <div class="preview-piece blue">🧍‍♂️</div>
+                    <div class="preview-label">🔵 藍方</div>
+                    <div class="preview-desc">先走</div>
+                </div>
+				<div class="vs-divider">VS</div>
+                <div class="preview-item" data-color="red" id="previewRed">
+                    <div class="preview-piece red">🧍‍♂️</div>
+                    <div class="preview-label">🔴 紅方</div>
+                    <div class="preview-desc">後走</div>
+                </div>
+            </div>
             <div class="music-toggle">
                 <span class="label">🎵 音樂</span>
                 <button class="btn-icon" id="musicToggleBtn">🔊</button>
@@ -799,8 +1080,8 @@
                     <button class="btn-big small" id="btnTitleLoad">📁 載入</button>
                 </div>
             </div>
-            <div style="margin-top:10px; font-size:12px; color:#7a9a82;">
-                儲存／載入：獎盃數 + 音樂設定 (.txt)
+            <div style="margin-top:14px; display:flex; justify-content:center;">
+                <span class="title-footer-trophy" id="titleTrophyFooter">🏆 0</span>
             </div>
         </div>
     </div>
@@ -816,7 +1097,7 @@
         </div>
     </div>
 
-    <!-- ===== 重猜彈窗 (同武器) ===== -->
+    <!-- ===== 重猜彈窗 ===== -->
     <div class="overlay" id="rematchOverlay">
         <div class="modal rematch-modal">
             <div class="big-icon">⚔️</div>
@@ -835,12 +1116,15 @@
     <!-- ===== 背景音樂 ===== -->
     <audio id="bgMusic" loop style="display:none;"></audio>
 
+    <!-- ===== 全屏按鈕 ===== -->
+    <button class="fullscreen-btn" id="fullscreenBtn" aria-label="切換全螢幕">
+        <span class="fs-icon" id="fsIcon">⛶</span>
+    </button>
+
     <script>
         // ================================================================
-        //  🌼 ICQ 包剪揼 · 重猜版
-        //  視覺：青綠/粉綠棋盤 · 玩家藍色棋子 · 🧍‍♂️主體
-        //       右下角武器符號 · 左下角👁 · 🚩君主
-        //  機制：同武器彈窗重猜，直到分出勝負
+        //  🌼 ICQ 包剪揼 · 紅藍對決版
+        //  功能：選紅藍方、選陷阱&棋手、重抽12子、半透明棋子
         // ================================================================
 
         (function() {
@@ -861,7 +1145,9 @@
             const playerScoreEl = document.getElementById('playerScore');
             const computerScoreEl = document.getElementById('computerScore');
             const trophyCountEl = document.getElementById('trophyCount');
+            const titleTrophyFooter = document.getElementById('titleTrophyFooter');
             const btnStartReset = document.getElementById('btnStartReset');
+            const btnReroll = document.getElementById('btnReroll');
             const btnTitleStart = document.getElementById('btnTitleStart');
             const btnTitleSave = document.getElementById('btnTitleSave');
             const btnTitleLoad = document.getElementById('btnTitleLoad');
@@ -881,6 +1167,12 @@
             const rematchResult = document.getElementById('rematchResult');
             const rematchAttempt = document.getElementById('rematchAttempt');
             const rematchChoices = document.getElementById('rematchChoices');
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+            const fsIcon = document.getElementById('fsIcon');
+            const playerLabel = document.getElementById('playerLabel');
+            const computerLabel = document.getElementById('computerLabel');
+            const previewBlue = document.getElementById('previewBlue');
+            const previewRed = document.getElementById('previewRed');
 
             // ---- 遊戲狀態 ----
             let board = [];
@@ -893,6 +1185,12 @@
             let isProcessing = false;
             let gameStarted = false;
             let animating = false;
+            let playerColor = 'blue'; // 'blue' | 'red'
+            let gamePhase = 'TITLE'; // TITLE | SELECT | PLAYING | GAMEOVER
+            let selectPhase = 'trap'; // 'trap' | 'king' | 'done'
+            let trapPos = null;
+            let kingPos = null;
+            let normalPieces = []; // 12隻普通棋子的引用 (不含陷阱和棋手)
 
             // ---- 獎盃 ----
             let trophyCount = 0;
@@ -902,7 +1200,10 @@
             // ---- 音樂 ----
             let audioCtx = null;
             let isMusicOn = true;
-            let rematchResolve = null; // Promise resolve for rematch
+            let rematchResolve = null;
+
+            // ---- 全屏 ----
+            let isFullscreen = false;
 
             // ---- 初始化獎盃 ----
             function loadTrophy() {
@@ -917,6 +1218,9 @@
 
             function updateTrophyDisplay() {
                 trophyCountEl.textContent = trophyCount;
+                if (titleTrophyFooter) {
+                    titleTrophyFooter.textContent = `🏆 ${trophyCount}`;
+                }
             }
 
             function addTrophy(amount) {
@@ -925,12 +1229,11 @@
                 updateTrophyDisplay();
             }
 
-            // ---- 儲存／載入 .txt ----
+            // ---- 儲存／載入 ----
             function saveSettings() {
                 const data = {
                     trophy: trophyCount,
                     musicOn: isMusicOn,
-                    version: '2.0.0',
                     timestamp: new Date().toISOString()
                 };
                 const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'text/plain;charset=utf-8' });
@@ -1099,6 +1402,35 @@
                 } catch (e) {}
             }
 
+            // ---- 全屏 ----
+            function toggleFullscreen() {
+                if (!document.fullscreenElement && !document.webkitFullscreenElement &&
+                    !document.mozFullScreenElement && !document.msFullscreenElement) {
+                    const el = document.documentElement;
+                    if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+                    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+                    else if (el.mozRequestFullScreen) el.mozRequestFullScreen();
+                    else if (el.msRequestFullscreen) el.msRequestFullscreen();
+                } else {
+                    if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+                    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+                    else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+                    else if (document.msExitFullscreen) document.msExitFullscreen();
+                }
+            }
+
+            function updateFullscreenIcon() {
+                const isFS = !!(document.fullscreenElement || document.webkitFullscreenElement ||
+                    document.mozFullScreenElement || document.msFullscreenElement);
+                fsIcon.textContent = '⛶';
+                fullscreenBtn.style.borderColor = isFS ? '#ffd966' : '#7ed9a3';
+            }
+
+            document.addEventListener('fullscreenchange', updateFullscreenIcon);
+            document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
+            document.addEventListener('mozfullscreenchange', updateFullscreenIcon);
+            document.addEventListener('MSFullscreenChange', updateFullscreenIcon);
+
             // ---- 工具 ----
             function isInBounds(r, c) { return r >= 0 && r < ROWS && c >= 0 && c < COLS; }
 
@@ -1159,7 +1491,7 @@
                 return result;
             }
 
-            // ---- 戰鬥解析 (不含平局處理) ----
+            // ---- 戰鬥解析 ----
             function resolveBattleBasic(attacker, defender) {
                 if (attacker.type === 'king' && defender.type === 'king') return { result: 'win', winner: 'attacker' };
                 if (attacker.type === 'king' && defender.type === 'trap') return { result: 'disarm', winner: 'attacker' };
@@ -1172,7 +1504,7 @@
                 return { result: 'lose', winner: 'defender' };
             }
 
-            // ---- 重猜彈窗 (Promise) ----
+            // ---- 重猜彈窗 ----
             function showRematch(attempt) {
                 return new Promise((resolve) => {
                     rematchOverlay.classList.add('active');
@@ -1180,38 +1512,31 @@
                     rematchAttempt.textContent = `第 ${attempt} 次重猜`;
                     rematchSub.textContent = '請選擇你的武器';
 
-                    // 移除舊監聽
                     const btns = rematchChoices.querySelectorAll('.choice-btn');
                     btns.forEach(b => {
                         b.onclick = null;
+                        b.disabled = false;
                     });
 
                     const handler = (e) => {
                         const choice = e.currentTarget.dataset.choice;
-                        // 玩家選擇
                         const playerChoice = choice;
-                        // AI 隨機
                         const aiChoice = TYPES[Math.floor(Math.random() * TYPES.length)];
                         rematchResult.textContent = `你：${EMOJI[playerChoice]}  vs  🤖：${EMOJI[aiChoice]}`;
                         rematchSub.textContent = '比較中...';
 
                         if (playerChoice === aiChoice) {
-                            // 還是一樣，繼續
                             rematchSub.textContent = '又平手！再選一次！';
+                            btns.forEach(b => { b.onclick = null; });
                             setTimeout(() => {
-                                // 遞迴呼叫
                                 showRematch(attempt + 1).then(resolve);
                             }, 600);
-                            // 移除監聽，避免重複
-                            btns.forEach(b => { b.onclick = null; });
                             return;
                         }
 
-                        // 分出勝負
                         const winner = BEATS[playerChoice] === aiChoice ? 'player' : 'computer';
                         rematchSub.textContent = winner === 'player' ? '🎉 你贏了！' : '🤖 電腦贏了！';
                         rematchResult.textContent += `  → ${winner === 'player' ? '✅ 你勝出！' : '❌ 電腦勝出！'}`;
-                        // 禁用按鈕
                         btns.forEach(b => { b.disabled = true; });
 
                         setTimeout(() => {
@@ -1227,29 +1552,30 @@
                 });
             }
 
-            // ---- 戰鬥完整流程 (含重猜) ----
+            // ---- 戰鬥完整流程 ----
             async function resolveBattleWithRematch(attacker, defender) {
                 let battle = resolveBattleBasic(attacker, defender);
                 let attempt = 1;
                 while (battle.result === 'draw') {
-                    // 彈窗讓玩家重猜
                     const result = await showRematch(attempt);
-                    // 更新攻擊者與防禦者的武器
-                    attacker.type = result.playerChoice;
-                    defender.type = result.aiChoice;
-                    // 重新計算
+                    if (attacker.owner === 'player') {
+                        attacker.type = result.playerChoice;
+                        defender.type = result.aiChoice;
+                    } else {
+                        attacker.type = result.aiChoice;
+                        defender.type = result.playerChoice;
+                    }
                     battle = resolveBattleBasic(attacker, defender);
                     attempt++;
                 }
                 return battle;
             }
 
-            // ---- 執行戰鬥 (含動畫 + 重猜) ----
+            // ---- 執行戰鬥 ----
             async function executeBattleWithAnimation(attacker, defender, callback) {
                 if (animating) return;
                 animating = true;
 
-                // 揭示雙方
                 attacker.revealed = true;
                 defender.revealed = true;
                 if (defender.owner === 'player') defender.exposed = true;
@@ -1260,11 +1586,6 @@
                 const toR = defender.row,
                     toC = defender.col;
 
-                // 保存原始類型 (用於顯示)
-                const origAttackerType = attacker.type;
-                const origDefenderType = defender.type;
-
-                // 執行戰鬥解析 (可能包含重猜)
                 const battle = await resolveBattleWithRematch(attacker, defender);
 
                 let attackerWins = false,
@@ -1280,7 +1601,6 @@
                 else if (result === 'king') attackerWins = true;
                 else if (result === 'disarm') disarm = true;
 
-                // 執行結果
                 if (attackerWins) {
                     removePiece(toR, toC);
                     movePiece(fromR, fromC, toR, toC);
@@ -1299,7 +1619,6 @@
 
                 renderBoard();
 
-                // 動畫
                 const cells = boardEl.querySelectorAll('.cell');
                 let winnerCell = null;
                 if (attackerWins || disarm || result === 'king') {
@@ -1346,7 +1665,6 @@
                     const defender = board[toR][toC];
                     await executeBattleWithAnimation(piece, defender, (battle) => {
                         if (battle.result === 'king' || battle.result === 'win') {
-                            // 檢查遊戲結束
                             if (checkGameOver()) { isProcessing = false; return; }
                         }
                         afterPlayerAction();
@@ -1506,7 +1824,21 @@
                 }
                 gameoverConfirm.textContent = '🏠 回到標題';
                 gameoverOverlay.classList.add('active');
+                gamePhase = 'GAMEOVER';
             }
+
+            // ---- 棋子顏色類名 ----
+            function getPieceClass(owner, color) {
+                if (owner === 'player') {
+                    return color === 'blue' ? 'player-blue' : 'player-red';
+                } else {
+                    return color === 'blue' ? 'computer-blue' : 'computer-red';
+                }
+            }
+
+            function getPlayerColor() { return playerColor; }
+
+            function getComputerColor() { return playerColor === 'blue' ? 'red' : 'blue'; }
 
             // ---- UI 渲染 ----
             function updateUI() {
@@ -1515,6 +1847,18 @@
                 computerScoreEl.textContent = computerPieces.length;
                 updateTrophyDisplay();
                 updateButtons();
+                updateLabels();
+            }
+
+            function updateLabels() {
+                const pColor = playerColor === 'blue' ? '🔵 藍方' : '🔴 紅方';
+                const cColor = playerColor === 'blue' ? '🔴 紅方' : '🔵 藍方';
+                playerLabel.innerHTML = `${pColor} <span class="num player-score" id="playerScore">${playerPieces.length}</span>`;
+                computerLabel.innerHTML =
+                    `${cColor} <span class="num computer-score" id="computerScore">${computerPieces.length}</span>`;
+                // 重新获取引用
+                document.getElementById('playerScore').textContent = playerPieces.length;
+                document.getElementById('computerScore').textContent = computerPieces.length;
             }
 
             function renderBoard() {
@@ -1526,54 +1870,72 @@
                         cell.dataset.r = r;
                         cell.dataset.c = c;
 
-                        // 青綠 / 粉綠 相間
                         const isCyan = (r + c) % 2 === 0;
                         cell.classList.add(isCyan ? 'cyan' : 'pinkgreen');
 
                         const piece = board[r][c];
                         if (piece) {
                             const div = document.createElement('div');
-                            div.className = `piece ${piece.owner}`;
+                            const pClass = getPieceClass(piece.owner, piece.color);
+                            div.className = `piece ${pClass}`;
 
-                            // 特殊標記
                             if (piece.owner === 'player' && piece.exposed) div.classList.add('exposed');
 
-                            // 主體：🧍‍♂️
                             const bodySpan = document.createElement('span');
                             bodySpan.className = 'body';
                             bodySpan.textContent = '🧍‍♂️';
                             div.appendChild(bodySpan);
 
-                            // 右下角武器符號 (僅當可見)
+                            // 判斷是否可見
                             const isVisible = (piece.owner === 'player' || piece.revealed);
+
                             if (isVisible) {
                                 if (piece.type === 'trap') div.classList.add('trap');
-								if (piece.type === 'king') div.classList.add('flag');
-								const weaponSpan = document.createElement('span');
+                                if (piece.type === 'king') div.classList.add('flag');
+                                const weaponSpan = document.createElement('span');
                                 weaponSpan.className = 'weapon';
                                 weaponSpan.textContent = EMOJI[piece.type] || '❓';
                                 div.appendChild(weaponSpan);
                             }
 
-                            // 左下角 👁 (仅当棋子被攻击过)
-							if (piece.owner === 'player' && piece.exposed) {
-								const eyeSpan = document.createElement('span');
-								eyeSpan.className = 'eye';
-								eyeSpan.textContent = '👁';
-								div.appendChild(eyeSpan);
-							}
+                            if (piece.owner === 'player' && piece.exposed) {
+                                const eyeSpan = document.createElement('span');
+                                eyeSpan.className = 'eye';
+                                eyeSpan.textContent = '👁';
+                                div.appendChild(eyeSpan);
+                            }
+
+                            // 選擇階段特殊標記
+                            if (gamePhase === 'SELECT') {
+                                if (trapPos && trapPos.r === r && trapPos.c === c) {
+                                    div.classList.add('chosen-trap');
+                                }
+                                if (kingPos && kingPos.r === r && kingPos.c === c) {
+                                    div.classList.add('chosen-king');
+                                }
+                                if (piece.owner === 'player' && !trapPos && !kingPos) {
+                                    div.classList.add('selectable');
+                                }
+                                if (piece.owner === 'player' && trapPos && !kingPos && !(trapPos.r === r && trapPos.c ===
+                                        c)) {
+                                    div.classList.add('selectable');
+                                }
+                            }
 
                             if (selectedPos && selectedPos.r === r && selectedPos.c === c) {
                                 div.classList.add('selected');
                             }
                             cell.appendChild(div);
+
+                            // 點擊事件
                             cell.addEventListener('click', () => onCellClick(r, c));
                         } else {
                             cell.classList.add('empty');
                             cell.addEventListener('click', () => onCellClick(r, c));
                         }
 
-                        if (selectedPos && !gameOver && gameStarted && currentTurn === 'player') {
+                        // 目標高亮
+                        if (selectedPos && !gameOver && gameStarted && currentTurn === 'player' && gamePhase === 'PLAYING') {
                             const moves = getValidMoves(selectedPos.r, selectedPos.c);
                             const isTarget = moves.some(m => m.r === r && m.c === c);
                             if (isTarget) cell.classList.add('targetable');
@@ -1584,8 +1946,17 @@
                 }
             }
 
+            // ---- 點擊處理 ----
             function onCellClick(r, c) {
-                if (!gameStarted || gameOver || isProcessing || currentTurn !== 'player' || animating) return;
+                // 選擇階段
+                if (gamePhase === 'SELECT') {
+                    handleSelectClick(r, c);
+                    return;
+                }
+
+                // 遊戲階段
+                if (!gameStarted || gameOver || isProcessing || currentTurn !== 'player' || animating || gamePhase !==
+                    'PLAYING') return;
                 const piece = board[r][c];
 
                 if (piece && piece.owner === 'player' && piece.type !== 'trap') {
@@ -1624,8 +1995,225 @@
                 }
             }
 
+            // ---- 選擇階段點擊處理 ----
+            function handleSelectClick(r, c) {
+                const piece = board[r][c];
+                if (!piece || piece.owner !== 'player') return;
+                if (trapPos && trapPos.r === r && trapPos.c === c) return;
+                if (kingPos && kingPos.r === r && kingPos.c === c) return;
+
+                if (selectPhase === 'trap') {
+                    // 選陷阱
+                    trapPos = { r, c };
+                    piece.type = 'trap';
+                    piece.revealed = true;
+                    selectPhase = 'king';
+                    renderBoard();
+                    updateSelectStatus();
+                    playSound('wind');
+                    showToast('⚠️ 已選陷阱，請選棋手');
+                } else if (selectPhase === 'king') {
+                    // 選棋手
+                    if (trapPos && trapPos.r === r && trapPos.c === c) return;
+                    kingPos = { r, c };
+                    piece.type = 'king';
+                    piece.revealed = true;
+                    selectPhase = 'done';
+                    renderBoard();
+                    updateSelectStatus();
+                    playSound('levelUp');
+                    showToast('🚩 已選棋手！準備分配棋子...');
+                    // 自動分配剩餘12隻
+                    assignNormalPieces();
+                    renderBoard();
+                    updateSelectStatus();
+                    showToast('✅ 已分配包剪揼，可重抽或開始遊戲');
+                    btnReroll.style.display = 'inline-flex';
+                }
+            }
+
+            // ---- 分配12隻普通棋子 ----
+            function assignNormalPieces() {
+                // 收集所有玩家棋子中不是陷阱和棋手的
+                normalPieces = [];
+                const playerCells = [];
+                for (let r = 4; r < ROWS; r++) {
+                    for (let c = 0; c < COLS; c++) {
+                        const p = board[r][c];
+                        if (p && p.owner === 'player') {
+                            const isTrap = trapPos && trapPos.r === r && trapPos.c === c;
+                            const isKing = kingPos && kingPos.r === r && kingPos.c === c;
+                            if (!isTrap && !isKing) {
+                                normalPieces.push(p);
+                                playerCells.push({ r, c });
+                            }
+                        }
+                    }
+                }
+
+                // 分配類型：4包、4剪、4揼
+                const types = [];
+                for (let i = 0; i < 4; i++) types.push('rock');
+                for (let i = 0; i < 4; i++) types.push('scissors');
+                for (let i = 0; i < 4; i++) types.push('paper');
+                shuffleArray(types);
+
+                for (let i = 0; i < normalPieces.length && i < types.length; i++) {
+                    normalPieces[i].type = types[i];
+                    normalPieces[i].revealed = true;
+                }
+                // 更新位置引用
+                normalPieces = normalPieces.filter(p => p !== undefined);
+            }
+
+            // ---- 重抽12隻 ----
+            function rerollNormalPieces() {
+                if (gamePhase === 'SELECT') {
+                    // 重新分配類型
+                    const types = [];
+                    for (let i = 0; i < 4; i++) types.push('rock');
+                    for (let i = 0; i < 4; i++) types.push('scissors');
+                    for (let i = 0; i < 4; i++) types.push('paper');
+                    shuffleArray(types);
+
+                    // 確保normalPieces是正確的12隻
+                    normalPieces = [];
+                    for (let r = 4; r < ROWS; r++) {
+                        for (let c = 0; c < COLS; c++) {
+                            const p = board[r][c];
+                            if (p && p.owner === 'player') {
+                                const isTrap = trapPos && trapPos.r === r && trapPos.c === c;
+                                const isKing = kingPos && kingPos.r === r && kingPos.c === c;
+                                if (!isTrap && !isKing) {
+                                    normalPieces.push(p);
+                                }
+                            }
+                        }
+                    }
+
+                    for (let i = 0; i < normalPieces.length && i < types.length; i++) {
+                        normalPieces[i].type = types[i];
+                        normalPieces[i].revealed = true;
+                    }
+                    renderBoard();
+                    showToast('🎲 已重抽！');
+                    playSound('wind');
+                } else if (gamePhase === 'PLAYING') {
+                    // 遊戲中重抽：只重排存活的普通棋子
+                    const aliveNormals = [];
+                    const positions = [];
+                    for (let r = 0; r < ROWS; r++) {
+                        for (let c = 0; c < COLS; c++) {
+                            const p = board[r][c];
+                            if (p && p.owner === 'player') {
+                                const isTrap = p.type === 'trap';
+                                const isKing = p.type === 'king';
+                                if (!isTrap && !isKing) {
+                                    aliveNormals.push(p);
+                                    positions.push({ r, c });
+                                }
+                            }
+                        }
+                    }
+                    if (aliveNormals.length === 0) {
+                        showToast('❌ 沒有普通棋子可重抽');
+                        return;
+                    }
+                    const types = [];
+                    const count = aliveNormals.length;
+                    const rockCount = Math.min(4, Math.floor(count / 3) + (count % 3 > 0 ? 1 : 0));
+                    const scissorsCount = Math.min(4, Math.floor(count / 3) + (count % 3 > 1 ? 1 : 0));
+                    const paperCount = count - rockCount - scissorsCount;
+                    for (let i = 0; i < rockCount; i++) types.push('rock');
+                    for (let i = 0; i < scissorsCount; i++) types.push('scissors');
+                    for (let i = 0; i < paperCount; i++) types.push('paper');
+                    shuffleArray(types);
+                    for (let i = 0; i < aliveNormals.length && i < types.length; i++) {
+                        aliveNormals[i].type = types[i];
+                        aliveNormals[i].revealed = true;
+                        // 如果是玩家的棋子且已暴露，保持暴露
+                    }
+                    renderBoard();
+                    showToast(`🎲 已重抽 ${aliveNormals.length} 隻棋子！`);
+                    playSound('wind');
+                }
+            }
+
+            // ---- 更新選擇狀態 ----
+            function updateSelectStatus() {
+                const status = document.querySelector('.select-status');
+                if (status) {
+                    if (selectPhase === 'trap') {
+                        status.innerHTML = '👆 點選一隻棋子當 <span class="highlight-trap">⚠️ 陷阱</span>';
+                    } else if (selectPhase === 'king') {
+                        status.innerHTML = '👆 點選一隻棋子當 <span class="highlight-king">🚩 棋手</span>';
+                    } else if (selectPhase === 'done') {
+                        const trapEmoji = trapPos ? '⚠️' : '❌';
+                        const kingEmoji = kingPos ? '🚩' : '❌';
+                        status.innerHTML =
+                            `✅ 已選 ${trapEmoji} 陷阱 和 ${kingEmoji} 棋手 ｜ 12隻棋子已分配包剪揼`;
+                    }
+                }
+            }
+
+            // ---- 開始遊戲 (從選擇階段) ----
+            function startGameFromSelect() {
+                if (selectPhase !== 'done') {
+                    showToast('❌ 請先選好陷阱和棋手！');
+                    return;
+                }
+                // 確定先後手
+                const playerFirst = playerColor === 'blue';
+                currentTurn = playerFirst ? 'player' : 'computer';
+                gameStarted = true;
+                gamePhase = 'PLAYING';
+                gameOver = false;
+                isProcessing = false;
+                selectedPos = null;
+
+                // 電腦棋子生成 (在SELECT階段已經生成，但需要設置顏色)
+                // 電腦棋子已經在initBoard中生成
+
+                // 隱藏電腦棋子
+                for (const p of computerPieces) {
+                    p.revealed = false;
+                }
+                // 玩家棋子全部可見
+                for (const p of playerPieces) {
+                    p.revealed = true;
+                }
+
+                // 移除選擇階段的UI
+                const selectPhaseEl = document.querySelector('.select-phase');
+                if (selectPhaseEl) selectPhaseEl.remove();
+                btnReroll.style.display = 'none';
+
+                titleOverlay.classList.remove('active');
+                gameoverOverlay.classList.remove('active');
+
+                updateUI();
+                updateTurnUI();
+                updateButtons();
+                updateLabels();
+
+                if (isMusicOn) startBackgroundMusic();
+
+                // 如果是電腦先走
+                if (currentTurn === 'computer') {
+                    setTimeout(() => computerTurn(), 600);
+                }
+
+                showToast('🎮 遊戲開始！');
+            }
+
+            // ---- 更新Turn UI ----
             function updateTurnUI() {
-                if (!gameStarted) {
+                if (!gameStarted || gamePhase !== 'PLAYING') {
+                    if (gamePhase === 'SELECT') {
+                        turnDot.className = 'dot selecting';
+                        turnText.textContent = '選擇陷阱與棋手';
+                        return;
+                    }
                     turnDot.className = 'dot idle';
                     turnText.textContent = '等待開始';
                     return;
@@ -1644,64 +2232,96 @@
                 }
             }
 
+            // ---- 更新按鈕 ----
             function updateButtons() {
-                if (!gameStarted) {
+                if (gamePhase === 'TITLE') {
                     btnStartReset.textContent = '🎮 開始';
                     btnStartReset.className = 'btn btn-primary';
+                    btnReroll.style.display = 'none';
                     return;
                 }
-                if (gameOver) {
+                if (gamePhase === 'SELECT') {
+                    btnStartReset.textContent = '▶️ 開始遊戲';
+                    btnStartReset.className = 'btn btn-gold';
+                    btnReroll.style.display = selectPhase === 'done' ? 'inline-flex' : 'none';
+                    return;
+                }
+                if (gamePhase === 'PLAYING') {
+                    if (gameOver) {
+                        btnStartReset.textContent = '🏠 回到標題';
+                        btnStartReset.className = 'btn btn-gold';
+                        btnReroll.style.display = 'none';
+                    } else {
+                        btnStartReset.textContent = '🔄 重開';
+                        btnStartReset.className = 'btn btn-primary';
+                        btnReroll.style.display = 'inline-flex';
+                    }
+                    btnReroll.style.display = 'none';
+					return;
+                }
+                if (gamePhase === 'GAMEOVER') {
                     btnStartReset.textContent = '🏠 回到標題';
                     btnStartReset.className = 'btn btn-gold';
-                } else {
-                    btnStartReset.textContent = '🔄 重開';
-                    btnStartReset.className = 'btn btn-primary';
+                    btnReroll.style.display = 'none';
+                    return;
                 }
             }
 
-            // ---- 生成與擺放 ----
-            function generatePieces(owner) {
-                const pieces = [];
-                for (const type of TYPES) {
-                    for (let i = 0; i < 4; i++) pieces.push({ type, owner, revealed: false, exposed: false });
-                }
-                pieces.push({ type: 'king', owner, revealed: false, exposed: false });
-                pieces.push({ type: 'trap', owner, revealed: false, exposed: false });
-                return pieces;
-            }
-
-            function shuffleArray(arr) {
-                for (let i = arr.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [arr[i], arr[j]] = [arr[j], arr[i]];
-                }
-                return arr;
-            }
-
-            function placePiecesRandomly() {
+            // ---- 初始化棋盤 (選棋子階段) ----
+            function initBoardForSelect() {
                 board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
                 allPieces = [];
                 playerPieces = [];
                 computerPieces = [];
+                trapPos = null;
+                kingPos = null;
+                normalPieces = [];
+                selectPhase = 'trap';
 
-                const playerList = generatePieces('player');
-                const computerList = generatePieces('computer');
+                // 生成玩家棋子 (14隻，全部顯示為"?"，但實際上是普通棋子)
+                const playerList = [];
+                for (let i = 0; i < 14; i++) {
+                    playerList.push({
+                        type: 'unknown',
+                        owner: 'player',
+                        color: playerColor,
+                        revealed: true,
+                        exposed: false,
+                        row: -1,
+                        col: -1
+                    });
+                }
                 shuffleArray(playerList);
+
+                // 電腦棋子 (14隻，隨機分配包剪揼+陷阱+棋手)
+                const computerList = [];
+                const compTypes = [];
+                for (let i = 0; i < 4; i++) compTypes.push('rock');
+                for (let i = 0; i < 4; i++) compTypes.push('scissors');
+                for (let i = 0; i < 4; i++) compTypes.push('paper');
+                compTypes.push('king');
+                compTypes.push('trap');
+                shuffleArray(compTypes);
+                for (let i = 0; i < 14; i++) {
+                    computerList.push({
+                        type: compTypes[i] || 'rock',
+                        owner: 'computer',
+                        color: getComputerColor(),
+                        revealed: false,
+                        exposed: false,
+                        row: -1,
+                        col: -1
+                    });
+                }
                 shuffleArray(computerList);
 
+                // 放置玩家棋子 (下方2行)
                 const playerCells = [];
                 for (let r = 4; r < ROWS; r++) {
                     for (let c = 0; c < COLS; c++) playerCells.push({ r, c });
                 }
                 shuffleArray(playerCells);
-
-                const computerCells = [];
-                for (let r = 0; r < 2; r++) {
-                    for (let c = 0; c < COLS; c++) computerCells.push({ r, c });
-                }
-                shuffleArray(computerCells);
-
-                for (let i = 0; i < playerList.length; i++) {
+                for (let i = 0; i < playerList.length && i < playerCells.length; i++) {
                     const pos = playerCells[i];
                     const piece = playerList[i];
                     piece.row = pos.r;
@@ -1709,10 +2329,15 @@
                     board[pos.r][pos.c] = piece;
                     playerPieces.push(piece);
                     allPieces.push(piece);
-                    piece.revealed = true;
-                    piece.exposed = false;
                 }
-                for (let i = 0; i < computerList.length; i++) {
+
+                // 放置電腦棋子 (上方2行)
+                const computerCells = [];
+                for (let r = 0; r < 2; r++) {
+                    for (let c = 0; c < COLS; c++) computerCells.push({ r, c });
+                }
+                shuffleArray(computerCells);
+                for (let i = 0; i < computerList.length && i < computerCells.length; i++) {
                     const pos = computerCells[i];
                     const piece = computerList[i];
                     piece.row = pos.r;
@@ -1720,72 +2345,146 @@
                     board[pos.r][pos.c] = piece;
                     computerPieces.push(piece);
                     allPieces.push(piece);
-                    piece.revealed = false;
-                    piece.exposed = false;
                 }
 
                 selectedPos = null;
                 gameOver = false;
                 isProcessing = false;
-                currentTurn = 'player';
                 animating = false;
+                gameStarted = false;
+                gamePhase = 'SELECT';
                 gameoverOverlay.classList.remove('active');
                 rematchOverlay.classList.remove('active');
+
+                // 添加選擇階段UI
+                addSelectPhaseUI();
+
+                renderBoard();
+                updateSelectStatus();
+                updateTurnUI();
+                updateButtons();
+                updateLabels();
+            }
+
+            // ---- 添加選擇階段UI ----
+            function addSelectPhaseUI() {
+                // 移除舊的
+                const old = document.querySelector('.select-phase');
+                if (old) old.remove();
+
+                const div = document.createElement('div');
+                div.className = 'select-phase';
+                div.innerHTML = `
+                    <div class="select-status">👆 點選一隻棋子當 <span class="highlight-trap">⚠️ 陷阱</span></div>
+                    <div class="select-hint">先選陷阱（⚠️），再選棋手（🚩）</div>
+                    <div class="select-buttons">
+                        <button class="btn btn-primary" id="selectStartBtn">▶️ 開始遊戲</button>
+                        <button class="btn btn-gold" id="selectRerollBtn" style="display:none;">🎲 重抽</button>
+                    </div>
+                `;
+                // 插入到棋盤下方
+                const boardWrapper = document.querySelector('.board-wrapper');
+                boardWrapper.parentNode.insertBefore(div, boardWrapper.nextSibling);
+
+                document.getElementById('selectStartBtn').addEventListener('click', startGameFromSelect);
+                document.getElementById('selectRerollBtn').addEventListener('click', () => {
+                    rerollNormalPieces();
+                });
+
+                // 監聽選擇狀態變化
+                const observer = new MutationObserver(() => {
+                    const rerollBtn = document.getElementById('selectRerollBtn');
+                    if (rerollBtn) {
+                        rerollBtn.style.display = selectPhase === 'done' ? 'inline-flex' : 'none';
+                    }
+                    const startBtn = document.getElementById('selectStartBtn');
+                    if (startBtn) {
+                        startBtn.disabled = selectPhase !== 'done';
+                        startBtn.style.opacity = selectPhase === 'done' ? '1' : '0.5';
+                    }
+                });
+                observer.observe(document.querySelector('.select-phase'), { childList: true, subtree: true });
+
+                // 保存observer以便清理
+                window._selectObserver = observer;
+            }
+
+            // ---- 回到標題 ----
+            function goToTitle() {
+                gameoverOverlay.classList.remove('active');
+                rematchOverlay.classList.remove('active');
+                titleOverlay.classList.add('active');
+                gamePhase = 'TITLE';
+                gameStarted = false;
+                gameOver = false;
+                board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
+                playerPieces = [];
+                computerPieces = [];
+                allPieces = [];
+                selectedPos = null;
+                isProcessing = false;
+                currentTurn = 'player';
+                animating = false;
+                trapPos = null;
+                kingPos = null;
+                normalPieces = [];
+                selectPhase = 'trap';
+                stopBackgroundMusic();
                 updateUI();
                 updateTurnUI();
                 updateButtons();
+                btnStartReset.textContent = '🎮 開始';
+                btnStartReset.className = 'btn btn-primary';
+                btnReroll.style.display = 'none';
+                updateTrophyDisplay();
+                // 移除選擇階段UI
+                const selectPhaseEl = document.querySelector('.select-phase');
+                if (selectPhaseEl) selectPhaseEl.remove();
+                if (window._selectObserver) {
+                    window._selectObserver.disconnect();
+                    window._selectObserver = null;
+                }
+                updateLabels();
             }
 
-            // ---- 開始 / 重啟 / 回到標題 ----
+            // ---- 開始 / 重啟 ----
             function startGame() {
                 initAudio();
-                gameStarted = true;
-                placePiecesRandomly();
+                // 從標題進入選擇階段
                 titleOverlay.classList.remove('active');
+                gamePhase = 'SELECT';
+                initBoardForSelect();
                 if (isMusicOn) startBackgroundMusic();
                 else stopBackgroundMusic();
                 updateUI();
                 updateTurnUI();
                 updateButtons();
+                updateLabels();
+                showToast('👆 請選擇陷阱和棋手');
             }
 
             function resetGame() {
-                if (!gameStarted) return;
+                if (!gameStarted && gamePhase !== 'PLAYING') return;
                 if (confirm('確定要重開遊戲嗎？進度將會遺失。')) {
-                    placePiecesRandomly();
-                    gameStarted = true;
-                    gameoverOverlay.classList.remove('active');
-                    rematchOverlay.classList.remove('active');
-                    if (isMusicOn) startBackgroundMusic();
-                    updateUI();
-                    updateTurnUI();
-                    updateButtons();
+                    goToTitle();
+                    // 重新進入選擇階段
+                    setTimeout(() => {
+                        titleOverlay.classList.remove('active');
+                        gamePhase = 'SELECT';
+                        initBoardForSelect();
+                        if (isMusicOn) startBackgroundMusic();
+                        updateUI();
+                        updateTurnUI();
+                        updateButtons();
+                        updateLabels();
+                        showToast('🔄 已重開，請選擇陷阱和棋手');
+                    }, 100);
                 }
             }
 
-            function goToTitle() {
-                gameoverOverlay.classList.remove('active');
-                rematchOverlay.classList.remove('active');
-                titleOverlay.classList.add('active');
-                gameStarted = false;
-                gameOver = false;
-                board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
-                playerPieces = [];
-                computerPieces = [];
-                allPieces = [];
-                selectedPos = null;
-                isProcessing = false;
-                currentTurn = 'player';
-                animating = false;
-                stopBackgroundMusic();
-                updateUI();
-                updateTurnUI();
-                updateButtons();
-                btnStartReset.textContent = '🎮 開始';
-                btnStartReset.className = 'btn btn-primary';
-            }
-
-            function initGame() {
+            // ---- 初始化標題 ----
+            function initTitle() {
+                gamePhase = 'TITLE';
                 gameStarted = false;
                 board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
                 playerPieces = [];
@@ -1796,30 +2495,56 @@
                 isProcessing = false;
                 currentTurn = 'player';
                 animating = false;
+                trapPos = null;
+                kingPos = null;
+                normalPieces = [];
+                selectPhase = 'trap';
                 btnStartReset.textContent = '🎮 開始';
                 btnStartReset.className = 'btn btn-primary';
+                btnReroll.style.display = 'none';
                 updateUI();
                 updateTurnUI();
                 updateButtons();
-                gameoverOverlay.classList.remove('active');
-                rematchOverlay.classList.remove('active');
                 titleOverlay.classList.add('active');
                 stopBackgroundMusic();
                 updateMusicUI();
+                updateTrophyDisplay();
+                updateLabels();
+                // 默認選擇藍方
+                playerColor = 'blue';
+                previewBlue.classList.add('selected');
+                previewRed.classList.remove('selected');
             }
 
             // ---- 事件綁定 ----
             btnStartReset.addEventListener('click', () => {
-                if (!gameStarted) {
+                if (gamePhase === 'TITLE') {
                     titleOverlay.classList.add('active');
-                } else if (gameOver) {
+                } else if (gamePhase === 'SELECT') {
+                    startGameFromSelect();
+                } else if (gamePhase === 'PLAYING' && gameOver) {
+                    goToTitle();
+                } else if (gamePhase === 'PLAYING') {
+                    resetGame();
+                } else if (gamePhase === 'GAMEOVER') {
                     goToTitle();
                 } else {
-                    resetGame();
+                    goToTitle();
                 }
             });
 
-            btnTitleStart.addEventListener('click', startGame);
+            btnReroll.addEventListener('click', () => {
+                rerollNormalPieces();
+            });
+
+            btnTitleStart.addEventListener('click', () => {
+                if (playerColor) {
+                    startGame();
+                } else {
+                    showToast('請先選擇紅方或藍方');
+                }
+            });
+
             btnTitleSave.addEventListener('click', saveSettings);
             btnTitleLoad.addEventListener('click', () => {
                 loadSettings();
@@ -1829,12 +2554,13 @@
                 }
                 updateUI();
                 updateButtons();
+                updateTrophyDisplay();
             });
 
             btnMusicToggle.addEventListener('click', () => {
                 isMusicOn = !isMusicOn;
                 updateMusicUI();
-                if (gameStarted) {
+                if (gameStarted || gamePhase === 'SELECT') {
                     if (isMusicOn) startBackgroundMusic();
                     else stopBackgroundMusic();
                 }
@@ -1842,29 +2568,58 @@
 
             gameoverConfirm.addEventListener('click', goToTitle);
 
+            // ---- 紅藍選擇 ----
+            previewBlue.addEventListener('click', () => {
+                playerColor = 'blue';
+                previewBlue.classList.add('selected');
+                previewRed.classList.remove('selected');
+                showToast('🔵 已選藍方，先走');
+            });
+            previewRed.addEventListener('click', () => {
+                playerColor = 'red';
+                previewRed.classList.add('selected');
+                previewBlue.classList.remove('selected');
+                showToast('🔴 已選紅方，後走');
+            });
+
+            // ---- 全屏按鈕 ----
+            fullscreenBtn.addEventListener('click', toggleFullscreen);
+            updateFullscreenIcon();
+
             // ---- 版權 ----
             function setCopyright() {
                 const year = new Date().getFullYear();
-                copyrightEl.textContent = `v2.0.0 © ${year} ☕迪遜咖啡廳，版權所有。`;
+                copyrightEl.textContent = `v2.1.0 © ${year} ☕迪遜咖啡廳，版權所有。`;
+            }
+
+            // ---- 洗牌 ----
+            function shuffleArray(arr) {
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+                return arr;
             }
 
             // ---- 初始化 ----
             loadTrophy();
             setCopyright();
             updateMusicUI();
-            initGame();
+            initTitle();
 
             document.addEventListener('click', () => {
                 if (!audioCtx) { try { initAudio(); } catch (e) {} }
-                if (isMusicOn && gameStarted && bgAudio.paused) startBackgroundMusic();
+                if (isMusicOn && (gameStarted || gamePhase === 'SELECT') && bgAudio.paused) startBackgroundMusic();
             }, { once: false });
 
             document.addEventListener('visibilitychange', () => {
-                if (!document.hidden && isMusicOn && gameStarted && bgAudio.paused) startBackgroundMusic();
+                if (!document.hidden && isMusicOn && (gameStarted || gamePhase === 'SELECT') && bgAudio.paused)
+                    startBackgroundMusic();
             });
 
-            console.log('🌼 ICQ 包剪揼 · 重猜版 已載入');
+            console.log('🌼 ICQ 包剪揼 · 紅藍對決版 (v2.1.0) 已載入');
             console.log(`🏆 當前獎盃: ${trophyCount}`);
+            console.log(`🎨 當前選色: ${playerColor}`);
 
             window.__game = {
                 addTrophy,
@@ -1876,7 +2631,10 @@
                 loadSettings,
                 goToTitle,
                 startGame,
-                resetGame
+                resetGame,
+                toggleFullscreen,
+                reroll: rerollNormalPieces,
+                getState: () => ({ phase: gamePhase, color: playerColor })
             };
 
         })();
