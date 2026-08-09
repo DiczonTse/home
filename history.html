@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💡迪遜網頁版本更新 v3.1</title>
+    <title>💡迪遜網頁版本更新 v3.2 - 多標籤支援</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
     <style>
@@ -381,27 +381,18 @@
             z-index: 1;
             transition: background var(--transition), border-color var(--transition);
         }
-        .timeline-item.red::before {
-            border-color: #e74c3c;
-        }
-        .timeline-item.green::before {
-            border-color: #2ecc71;
-        }
-        .timeline-item.orange::before {
-            border-color: #e67e22;
-        }
-        .timeline-item.purple::before {
-            border-color: #9b59b6;
-        }
-        .timeline-item.teal::before {
-            border-color: #1abc9c;
-        }
-        .timeline-item.pink::before {
-            border-color: #e91e63;
-        }
-        .timeline-item.gold::before {
-            border-color: #f39c12;
-        }
+
+        /* 颜色根据第一个标签决定 */
+        .timeline-item[data-primary-tag="launch"]::before { border-color: #2ecc71; }
+        .timeline-item[data-primary-tag="design"]::before { border-color: #e67e22; }
+        .timeline-item[data-primary-tag="feature"]::before { border-color: #9b59b6; }
+        .timeline-item[data-primary-tag="growth", "cafe"]::before { border-color: #e74c3c; }
+        .timeline-item[data-primary-tag="dice"]::before { border-color: #1abc9c; }
+        .timeline-item[data-primary-tag="cafe"]::before { border-color: #e91e63; }
+        .timeline-item[data-primary-tag="game"]::before { border-color: #f39c12; }
+        .timeline-item[data-primary-tag="tool"]::before { border-color: #1abc9c; }
+        .timeline-item[data-primary-tag="info"]::before { border-color: #9b59b6; }
+        .timeline-item[data-primary-tag=""]::before { border-color: #3498db; }
 
         .timeline-content {
             background: var(--bg-card);
@@ -443,16 +434,43 @@
             align-items: center;
             margin-top: 4px;
         }
-        .timeline-content .milestone-tag {
+        /* ---- 多标签显示 ---- */
+        .timeline-content .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 6px;
+        }
+        .timeline-content .tag-item {
             display: inline-block;
             background: var(--tag-bg);
             color: var(--tag-color);
-            padding: 2px 12px;
+            padding: 1px 12px;
             border-radius: 40px;
             font-size: 0.72rem;
             font-weight: 600;
             transition: background var(--transition), color var(--transition);
+            cursor: default;
         }
+        .timeline-content .tag-item i {
+            margin-right: 3px;
+            font-size: 0.6rem;
+        }
+        /* ---- 里程碑 ---- */
+        .timeline-content .milestone-tag {
+            display: inline-block;
+            background: var(--tag-bg);
+            color: #e67e22;
+            padding: 1px 12px;
+            border-radius: 40px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            border: 1px solid #e67e2244;
+            transition: background var(--transition), color var(--transition);
+        }
+        .timeline-content .milestone-tag i {
+            margin-right: 3px;
+        }
+
         .timeline-content .actions {
             display: flex;
             gap: 6px;
@@ -493,9 +511,13 @@
         .compact .timeline-content .date {
             font-size: 0.72rem;
         }
+        .compact .timeline-content .tag-item {
+            font-size: 0.62rem;
+            padding: 0 10px;
+        }
         .compact .timeline-content .milestone-tag {
             font-size: 0.62rem;
-            padding: 1px 10px;
+            padding: 0 10px;
         }
         .compact .timeline-item::before {
             width: 14px;
@@ -530,7 +552,7 @@
         .modal {
             background: var(--bg-card);
             border-radius: var(--radius);
-            max-width: 600px;
+            max-width: 640px;
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
@@ -601,6 +623,43 @@
             flex: 1;
             min-width: 120px;
         }
+
+        /* ---- 多标签复选框 ---- */
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 14px;
+            padding: 8px 12px;
+            background: var(--input-bg);
+            border-radius: 8px;
+            border: 2px solid var(--input-border);
+            transition: border var(--transition), background var(--transition);
+        }
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: color var(--transition);
+            user-select: none;
+        }
+        .checkbox-group label:hover {
+            color: var(--text-primary);
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--btn-primary);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .checkbox-group label.checked {
+            color: var(--btn-primary);
+        }
+
         .modal .modal-actions {
             display: flex;
             gap: 12px;
@@ -676,6 +735,13 @@
             .modal {
                 padding: 20px 16px;
             }
+            .checkbox-group {
+                gap: 6px 10px;
+                padding: 6px 10px;
+            }
+            .checkbox-group label {
+                font-size: 0.75rem;
+            }
             .compact .timeline-container {
                 padding-left: 22px;
             }
@@ -731,6 +797,9 @@
                 padding: 3px 8px;
                 font-size: 0.65rem;
             }
+            .checkbox-group label {
+                font-size: 0.7rem;
+            }
         }
 
         /* ===== Scrollbar ===== */
@@ -753,1413 +822,1580 @@
 </head>
 <body>
 
-    <div class="container">
+<div class="container">
 
-        <!-- ===== HEADER ===== -->
-        <header>
-            <div class="header-left">
-                <h1><a href="index.html">💡迪遜網頁版本更新</a></h1>
-                <div class="sub">📌 輕鬆管理 · 一覽無遺 · 深色護眼</div>
-            </div>
-            <div class="header-actions">
-                <button class="btn btn-primary" id="btnAddUpdate">
-                    <i class="fas fa-plus-circle"></i> 新增更新
-                </button>
-                <button class="btn btn-outline btn-sm" id="btnExportTxt" title="匯出所有更新資料為TXT檔 (JSON格式)">
-                    <i class="fas fa-file-export"></i> 匯出TXT
-                </button>
-                <button class="btn btn-outline-danger btn-sm" id="btnClearData" title="清除所有瀏覽器儲存的更新紀錄，恢復為初始狀態">
-                    <i class="fas fa-trash"></i> 清除紀錄
-                </button>
-                <div class="theme-toggle" id="themeToggle" title="切換深色/淺色模式">
-                    <i class="fas fa-moon" id="themeIcon"></i>
-                    <span class="toggle-track"></span>
-                    <i class="fas fa-sun" id="themeIcon2"></i>
-                </div>
-            </div>
-        </header>
-
-        <!-- ===== STATS ===== -->
-        <div class="stats-bar" id="statsBar">
-            <span class="stat"><i class="fas fa-list"></i> 總更新：<strong id="totalCount">0</strong></span>
-            <span class="stat"><i class="fas fa-tags"></i> 分類：<strong id="categoryCount">0</strong></span>
-            <span class="stat"><i class="fas fa-calendar-alt"></i> 最新：<strong id="latestDate">—</strong></span>
-            <span class="stat" style="margin-left:auto;font-size:0.75rem;color:var(--text-muted);">
-                <i class="fas fa-database"></i> 數據儲存於本地瀏覽器
-            </span>
+    <!-- ===== HEADER ===== -->
+    <header>
+        <div class="header-left">
+            <h1><a href="index.html">💡迪遜網頁版本更新</a></h1>
+            <div class="sub">📌 多標籤管理 · 一覽無遺 · 深色護眼</div>
         </div>
-
-        <!-- ===== CONTROLS ===== -->
-        <div class="controls-top">
-            <div class="filter-group" id="filterGroup">
-                <button class="filter-btn active" data-filter="all">📋 全部 <span class="badge" id="badgeAll">0</span></button>
-                <button class="filter-btn" data-filter="launch">🚀 網站發佈 <span class="badge" id="badgeLaunch">0</span></button>
-                <button class="filter-btn" data-filter="design">🎨 設計更新 <span class="badge" id="badgeDesign">0</span></button>
-                <button class="filter-btn" data-filter="feature">⚡ 新增功能 <span class="badge" id="badgeFeature">0</span></button>
-                <button class="filter-btn" data-filter="growth">📈 成長指標 <span class="badge" id="badgeGrowth">0</span></button>
-                <button class="filter-btn" data-filter="dice">🎲 離線骰子 <span class="badge" id="badgeDice">0</span></button>
-                <button class="filter-btn" data-filter="cafe">☕ 迪遜咖啡廳 <span class="badge" id="badgeCafe">0</span></button>
-                <button class="filter-btn" data-filter="game">🎮 遊戲 <span class="badge" id="badgeGame">0</span></button>
-                <button class="filter-btn" data-filter="tool">🔧 工具 <span class="badge" id="badgeTool">0</span></button>
-                <button class="filter-btn" data-filter="info">📰 資訊 <span class="badge" id="badgeInfo">0</span></button>
-            </div>
-            <div class="controls-right">
-                <div class="view-toggle">
-                    <button class="active" data-view="normal" title="標準顯示"><i class="fas fa-align-left"></i></button>
-                    <button data-view="compact" title="緊湊顯示（一次看更多）"><i class="fas fa-compress-alt"></i></button>
-                </div>
-                <button class="btn btn-outline btn-sm" id="btnSortToggle" title="切換排序">
-                    <i class="fas fa-sort-amount-down"></i> <span id="sortLabel">最新優先</span>
-                </button>
+        <div class="header-actions">
+            <button class="btn btn-primary" id="btnAddUpdate">
+                <i class="fas fa-plus-circle"></i> 新增更新
+            </button>
+            <button class="btn btn-outline btn-sm" id="btnExportTxt" title="匯出所有更新資料為TXT檔 (壓縮格式)">
+                <i class="fas fa-file-export"></i> 匯出TXT
+            </button>
+            <button class="btn btn-outline-danger btn-sm" id="btnClearData" title="清除所有瀏覽器儲存的更新紀錄，恢復為初始狀態">
+                <i class="fas fa-trash"></i> 清除紀錄
+            </button>
+            <div class="theme-toggle" id="themeToggle" title="切換深色/淺色模式">
+                <i class="fas fa-moon" id="themeIcon"></i>
+                <span class="toggle-track"></span>
+                <i class="fas fa-sun" id="themeIcon2"></i>
             </div>
         </div>
+    </header>
 
-        <!-- ===== TIMELINE ===== -->
-        <div class="timeline-container" id="timelineContainer"></div>
-
-        <!-- ===== FOOTER ===== -->
-        <footer>
-            <p>💡迪遜網頁版本更新 v3.1 &copy; 2026 | 數據儲存於 localStorage | <i class="fas fa-sync-alt"></i> 即時管理</p>
-            <p style="margin-top:4px;font-size:0.75rem;">
-                <i class="fas fa-file-export"></i> 匯出TXT備份 · 
-                <i class="fas fa-trash"></i> 清除紀錄可重置為初始數據
-            </p>
-        </footer>
-
-        <!-- ===== MODAL ===== -->
-        <div class="modal-overlay" id="modalOverlay">
-            <div class="modal">
-                <h2 id="modalTitle">📝 新增更新</h2>
-                <p class="sub" id="modalSub">填寫以下資料，新增一筆更新紀錄</p>
-                <form id="updateForm">
-                    <input type="hidden" id="editIndex" value="-1">
-                    <div class="form-group">
-                        <label for="inputDate">📅 日期</label>
-                        <input type="text" id="inputDate" placeholder="例如：2026年7月27日" value="2026年7月27日">
-                    </div>
-                    <div class="form-group">
-                        <label for="inputTitle">📌 標題</label>
-                        <input type="text" id="inputTitle" placeholder="例如：新增《離線骰子》遊戲" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="inputDesc">📝 描述</label>
-                        <textarea id="inputDesc" placeholder="詳細描述這次更新…" rows="3"></textarea>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="inputCategory">🏷️ 分類</label>
-                            <select id="inputCategory">
-                                <option value="launch">🚀 網站發佈</option>
-                                <option value="design">🎨 設計更新</option>
-                                <option value="feature">⚡ 新增功能</option>
-                                <option value="growth">📈 成長指標</option>
-                                <option value="dice">🎲 離線骰子</option>
-                                <option value="cafe">☕ 迪遜咖啡廳</option>
-                                <option value="game">🎮 遊戲</option>
-                                <option value="tool">🔧 工具</option>
-                                <option value="info">📰 資訊</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="inputMilestone">🏁 里程碑標籤</label>
-                            <input type="text" id="inputMilestone" placeholder="例如：網站發布" value="新增功能">
-                        </div>
-                    </div>
-                    <div class="modal-actions">
-                        <button type="button" class="btn" id="modalCancel">取消</button>
-                        <button type="submit" class="btn btn-primary" id="modalSubmit">💾 儲存更新</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
+    <!-- ===== STATS ===== -->
+    <div class="stats-bar" id="statsBar">
+        <span class="stat"><i class="fas fa-list"></i> 總更新：<strong id="totalCount">0</strong></span>
+        <span class="stat"><i class="fas fa-tags"></i> 標籤種類：<strong id="tagCount">0</strong></span>
+        <span class="stat"><i class="fas fa-calendar-alt"></i> 最新：<strong id="latestDate">—</strong></span>
+        <span class="stat" style="margin-left:auto;font-size:0.75rem;color:var(--text-muted);">
+            <i class="fas fa-database"></i> 數據儲存於本地瀏覽器
+        </span>
     </div>
 
-    <script>
-        // ============================================================
-        //  DEFAULT DATA (可被匯出的TXT完全取代)
-        // ============================================================
-        const DEFAULT_DATA = [{
+    <!-- ===== CONTROLS ===== -->
+    <div class="controls-top">
+        <div class="filter-group" id="filterGroup">
+            <button class="filter-btn active" data-filter="all">📋 全部 <span class="badge" id="badgeAll">0</span></button>
+            <button class="filter-btn" data-filter="launch">🚀 網站發佈 <span class="badge" id="badgeLaunch">0</span></button>
+            <button class="filter-btn" data-filter="design">🎨 設計更新 <span class="badge" id="badgeDesign">0</span></button>
+            <button class="filter-btn" data-filter="feature">⚡ 新增功能 <span class="badge" id="badgeFeature">0</span></button>
+            <button class="filter-btn" data-filter="growth", "cafe">📈 成長指標 <span class="badge" id="badgeGrowth">0</span></button>
+            <button class="filter-btn" data-filter="cafe">☕ 迪遜咖啡廳 <span class="badge" id="badgeCafe">0</span></button>
+			<button class="filter-btn" data-filter="tool">🔧 工具 <span class="badge" id="badgeTool">0</span></button>
+            <button class="filter-btn" data-filter="game">🎮 遊戲 <span class="badge" id="badgeGame">0</span></button>
+			<button class="filter-btn" data-filter="dice">🎲 離線骰子 <span class="badge" id="badgeDice">0</span></button>
+        </div>
+        <div class="controls-right">
+            <div class="view-toggle">
+                <button class="active" data-view="normal" title="標準顯示"><i class="fas fa-align-left"></i></button>
+                <button data-view="compact" title="緊湊顯示（一次看更多）"><i class="fas fa-compress-alt"></i></button>
+            </div>
+            <button class="btn btn-outline btn-sm" id="btnSortToggle" title="切換排序">
+                <i class="fas fa-sort-amount-down"></i> <span id="sortLabel">最新優先</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== TIMELINE ===== -->
+    <div class="timeline-container" id="timelineContainer"></div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer>
+        <p>💡迪遜網頁版本更新 v3.2 &copy; 2026 | 數據儲存於 localStorage | <i class="fas fa-sync-alt"></i> 即時管理 · 支援多標籤</p>
+        <p style="margin-top:4px;font-size:0.75rem;">
+            <i class="fas fa-file-export"></i> 匯出TXT備份 ·
+            <i class="fas fa-trash"></i> 清除紀錄可重置為初始數據
+        </p>
+    </footer>
+
+    <!-- ===== MODAL ===== -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h2 id="modalTitle">📝 新增更新</h2>
+            <p class="sub" id="modalSub">填寫以下資料，新增一筆更新紀錄（可選多個標籤）</p>
+            <form id="updateForm">
+                <input type="hidden" id="editIndex" value="-1">
+                <div class="form-group">
+                    <label for="inputDate">📅 日期</label>
+                    <input type="text" id="inputDate" placeholder="例如：2026年7月27日" value="2026年7月27日">
+                </div>
+                <div class="form-group">
+                    <label for="inputTitle">📌 標題</label>
+                    <input type="text" id="inputTitle" placeholder="例如：新增《離線骰子》遊戲" required>
+                </div>
+                <div class="form-group">
+                    <label for="inputDesc">📝 描述</label>
+                    <textarea id="inputDesc" placeholder="詳細描述這次更新…" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>🏷️ 標籤（可複選）</label>
+                    <div class="checkbox-group" id="tagCheckboxGroup">
+                        <!-- 由 JavaScript 動態產生 -->
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputMilestone">🏁 里程碑標籤（單一特殊標記）</label>
+                    <input type="text" id="inputMilestone" placeholder="例如：網站發布" value="新增功能">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn" id="modalCancel">取消</button>
+                    <button type="submit" class="btn btn-primary" id="modalSubmit">💾 儲存更新</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ============================================================
+    //  標籤定義（與過濾按鈕對應）
+    // ============================================================
+    const TAG_DEFS = [
+        { id: 'launch', icon: '🚀', label: '網站發佈' },
+        { id: 'design', icon: '🎨', label: '設計更新' },
+        { id: 'feature', icon: '⚡', label: '新增功能' },
+        { id: 'growth', icon: '📈', label: '成長指標' },
+        { id: 'cafe', icon: '☕', label: '迪遜咖啡廳' },
+        { id: 'tool', icon: '🔧', label: '工具' },
+		{ id: 'game', icon: '🎮', label: '遊戲' },
+        { id: 'dice', icon: '🎲', label: '離線骰子' },
+        { id: 'info', icon: '📰', label: '資訊' }
+    ];
+    const TAG_ICON_MAP = Object.fromEntries(TAG_DEFS.map(t => [t.id, t.icon]));
+    const TAG_LABEL_MAP = Object.fromEntries(TAG_DEFS.map(t => [t.id, t.label]));
+
+    // ============================================================
+    //  預設數據（使用 tags 陣列）
+    // ============================================================
+    const DEFAULT_DATA = [{
             "date": "2017年1月16日",
             "title": "建立首個《迪遜之家》網頁。",
             "description": "為了儲存我喜歡的網頁書籤而建造出來。",
-            "category": "launch",
+            "tags": ["launch"],
             "milestone": "網站發布"
         }, {
             "date": "2018年1月16日",
             "title": "建立首個《Facebook 遊戲入口網站》網頁。",
             "description": "為了儲存我喜歡的 Facebook 遊戲網頁書籤而建造出來。",
-            "category": "launch",
+            "tags": ["launch", "game"],
             "milestone": "網站發布"
         }, {
             "date": "2018年7月14日",
             "title": "建立首個《Flash 遊戲入口網站》網頁。",
             "description": "為了儲存我喜歡的 Flash 遊戲網頁書籤而建造出來。",
-            "category": "launch",
+            "tags": ["launch"],
             "milestone": "網站發布"
         }, {
             "date": "2018年7月15日",
             "title": "建立首個《線上遊戲入口網站》網頁。",
             "description": "為了儲存我喜歡的線上遊戲網頁書籤而建造出來。",
-            "category": "launch",
+            "tags": ["launch"],
             "milestone": "網站發布"
         }, {
             "date": "2018年7月16日",
             "title": "建立首個《網上遊戲入口網站》網頁。",
             "description": "為了儲存我喜歡的網上遊戲網頁書籤而建造出來。",
-            "category": "launch",
+            "tags": ["launch"],
             "milestone": "網站發布"
         }, {
             "date": "2018年7月17日",
             "title": "建立首個《單機遊戲入口網站》網頁。",
             "description": "為了儲存我喜歡的單機遊戲網頁書籤而建造出來。",
-            "category": "launch",
+            "tags": ["launch"],
             "milestone": "網站發布"
         }, {
             "date": "2018年12月16日",
             "title": "建立首個《小遊戲網站》網頁。",
             "description": "為了能在我的網頁直接玩《友和YOHO Flash 小遊戲》而建造出來。",
-            "category": "launch",
+            "tags": ["launch"],
             "milestone": "網站發布"
         }, {
             "date": "2019年1月16日",
             "title": "建立首個《天外 Online 遊戲介紹》網頁。",
             "description": "介紹《天外 Online》，還有少許心得分享。",
-            "category": "launch",
+            "tags": ["launch"],
             "milestone": "網站發布"
         }, {
             "date": "2020年1月16日",
             "title": "建立首個《YouTube 播放列表集合網站》網頁。",
             "description": "為了能在我的網頁直接播放我建立的大量 YouTube 播放列表而製作出來。",
-            "category": "launch",
+            "tags": ["launch"],
             "milestone": "網站發布"
         }, {
             "date": "2020年2月16日",
             "title": "重新設計多個現有網頁",
             "description": "全面的視覺改造，採用更專業的設計，改進導航結構。",
-            "category": "design",
+            "tags": ["design"],
             "milestone": "設計更新"
         }, {
             "date": "2020年3月15日",
             "title": "重新設計《迪遜之家》網頁。",
             "description": "整合舊《迪遜之家》及《YouTube 播放列表集合網站》網頁，重新設計《迪遜之家》網頁。",
-            "category": "design",
+            "tags": ["design"],
             "milestone": "設計更新"
         }, {
             "date": "2020年3月16日",
             "title": "建立《迪遜之家》網頁。",
             "description": "內部結構變更為顯示 YouTube 播放列表。",
-            "category": "launch",
+            "tags": ["launch"],
             "milestone": "網站發布"
         }, {
             "date": "2020年3月17日",
             "title": "增加行動裝置響應式佈局。",
             "description": "增加行動裝置響應式佈局以方便大眾使用。",
-            "category": "design",
+            "tags": ["design"],
             "milestone": "手機端優化"
         }, {
             "date": "2020年3月18日",
             "title": "更新《Facebook 遊戲工具 Beta》網頁標題連結。",
             "description": "更新《Facebook 遊戲工具 Beta》網頁標題連結以維持網頁正常運作。",
-            "category": "design",
+            "tags": ["design"],
             "milestone": "設計更新"
         }, {
             "date": "2020年3月19日",
             "title": "移除過期網頁。",
             "description": "移除舊《迪遜之家》、《Flash 遊戲入口網站》、《線上遊戲入口網站》、《網上遊戲入口網站》、《單機遊戲入口網站》、《小遊戲入口網站》、《天外 Online 遊戲介紹》以及《YouTube 播放列表集合網站》網頁。",
-            "category": "design",
+            "tags": ["design"],
             "milestone": "設計更新"
         }, {
             "date": "2020年3月20日",
             "title": "主網頁新增功能及 2 位合作網路紅人。",
             "description": "改進主網頁外觀，新增紀錄置頂顯示，添置瀏覽人數顯示，增加 2 位合作網路紅人到首頁。",
-            "category": "feature",
+            "tags": ["feature"],
             "milestone": "新增功能"
         }, {
             "date": "2020年3月21日",
             "title": "改良網站設計。",
             "description": "網站變為 1 行顯示 3 個播放列表。",
-            "category": "design",
+            "tags": ["design"],
             "milestone": "設計更新"
         }, {
             "date": "2020年3月22日",
             "title": "網站首頁改變用途。",
             "description": "網站首頁改造為資訊分享熱點並每日更新文章。",
-            "category": "feature",
+            "tags": ["feature"],
             "milestone": "新增功能"
         }, {
             "date": "2020年3月23日",
             "title": "建立首個《遊戲預告片》網頁。",
             "description": "建立《遊戲預告片》，《迪遜之家》升級介面。",
-            "category": "launch",
+            "tags": ["launch"],
             "milestone": "網站發布"
         }, {
             "date": "2020年3月24日",
             "title": "更新每日文章與網頁內容。",
             "description": "《迪遜之家》及《遊戲預告片》每日更新文章與網頁內容。",
-            "category": "feature",
+            "tags": ["feature"],
             "milestone": "新增功能"
         }, {
             "date": "2020年3月25日",
             "title": "優化首頁介面。",
             "description": "移除原首頁，將《迪遜之家》定為新首頁。",
-            "category": "design",
+            "tags": ["design"],
             "milestone": "設計更新"
         }, {
             "date": "2020年3月26日",
             "title": "新增《瀏覽人數計數器》到《迪遜之家》。",
             "description": "瀏覽人數顯示更變為使用第三方網上《瀏覽人數計數器》。",
-            "category": "feature",
+            "tags": ["feature"],
             "milestone": "新增功能"
         }, {
             "date": "2020年3月27日",
             "title": "優化《迪遜之家》網頁載入速度。",
             "description": "遷移《瀏覽人數計數器》到側欄並改良《瀏覽人數計數器》設計。",
-            "category": "feature",
+            "tags": ["feature"],
             "milestone": "新增功能"
         }, {
             "date": "2020年3月28日",
             "title": "《迪遜之家》側欄新增訊息提示數字顯示。",
             "description": "《迪遜之家》側欄新增訊息提示數字顯示以提示用戶有何更新及有多少更新。",
-            "category": "feature",
+            "tags": ["feature"],
             "milestone": "新增功能"
         }, {
             "date": "2020年4月1日",
             "title": "總訪問量突破 100！",
             "description": "達到總數 100 個瀏覽訪客的里程碑。",
-            "category": "growth",
+            "tags": ["growth", "cafe"],
             "milestone": "成長指標"
         }, {
             "date": "2020年4月5日",
             "title": "優化《迪遜之家》標題設計。",
             "description": "《迪遜之家》標題變更為藝術字。",
-            "category": "design",
+            "tags": ["design"],
             "milestone": "設計更新"
         }, {
             "date": "2020年4月6日",
             "title": "增設分享網址時所顯示的縮圖。",
             "description": "增設在 Whatsapp 及 Facebook 分享《迪遜之家》網址時所顯示的縮圖。",
-            "category": "feature",
+            "tags": ["feature"],
             "milestone": "新增功能"
         }, {
             "date": "2020年4月7日",
             "title": "優化《迪遜之家》側欄介面設計。",
             "description": "《迪遜之家》側欄以分類顯示內容篩選選擇。",
-            "category": "design",
+            "tags": ["design"],
             "milestone": "設計更新"
         }, {
             "date": "2020年4月8日",
             "title": "增設《計算機小工具》。",
             "description": "《迪遜之家》側欄增設自製的《計算機小工具》。",
-            "category": "feature",
+            "tags": ["feature"],
             "milestone": "新增功能"
         }, {
             "date": "2020年4月9日",
             "title": "優化《迪遜之家》播放列表顯示方式。",
             "description": "優化《迪遜之家》播放列表顯示方式，增加播放列表主題縮圖，側欄之《計算機小工具》及《網站前行足跡》整合為同頁顯示。",
-            "category": "design",
+            "tags": ["design"],
             "milestone": "設計更新"
         }, {
             "date": "2020年4月10日",
             "title": "優化《迪遜之家》及《遊戲預告片》網站介面。",
             "description": "優化《迪遜之家》及《遊戲預告片》網站介面，增加《資料載入中……》動畫顯示及新增《影片》分類。",
-            "category": "feature",
+            "tags": ["feature"],
             "milestone": "新增功能"
         }, {
             "date": "2020年4月12日",
             "title": "優化《迪遜之家》播放列表及增加背景漸變色。",
             "description": "縮短《迪遜之家》播放列表距離以讓用戶可一次過看到更多播放列表，增加漸變背景顏色。",
-            "category": "design",
+            "tags": ["design"],
             "milestone": "設計更新"
         }, {
             "date": "2020年5月1日",
             "title": "總訪問量突破 200！",
             "description": "達到總數 200 個瀏覽訪客的里程碑，實施 Google Analytics 進行詳細流量分析。",
-            "category": "growth",
+            "tags": ["growth", "cafe"],
             "milestone": "成長指標"
         }, {
             "date": "2020年5月12日",
             "title": "《迪遜之家》及《遊戲預告片》網頁優化。",
             "description": "《迪遜之家》及《遊戲預告片》播放列表改變載入模式為顯示縮圖，載入時間由 30 秒縮短為 3 秒以內。",
-            "category": "design",
+            "tags": ["design"],
             "milestone": "設計更新"
         }, {
             "date": "2020年5月18日",
             "title": "《迪遜之家》及《遊戲預告片》網頁優化。",
             "description": "《迪遜之家》及《遊戲預告片》選單顯示由側欄顯示更新為頂置顯示及預設隱藏。",
-            "category": "design",
+            "tags": ["design"],
             "milestone": "設計更新"
         }, {
             "date": "2020年5月19日",
             "title": "建立《迪遜咖啡廳》網頁。",
             "description": "功能為顯示 YouTube 音樂播放列表。",
-            "category": "cafe",
+            "tags": ["launch", "cafe"],
             "milestone": "網站發布"
-        }, {
-            "date": "2020年6月1日",
-            "title": "總訪問量突破 300！",
-            "description": "達到總數 300 個瀏覽訪客的里程碑。",
-            "category": "growth",
-            "milestone": "成長指標"
-        }, {
-            "date": "2020年7月1日",
-            "title": "總訪問量突破 400！",
-            "description": "達到總數 400 個瀏覽訪客的里程碑。",
-            "category": "growth",
-            "milestone": "成長指標"
         }, {
             "date": "2020年7月15日",
             "title": "更新《迪遜咖啡廳》網頁介面。",
             "description": "《迪遜咖啡廳》選單顯示由預設隱藏頂置顯示更改為側欄顯示。",
-            "category": "cafe",
+            "tags": ["design", "cafe"],
             "milestone": "設計更新"
         }, {
             "date": "2020年8月1日",
             "title": "總訪問量突破 500！",
             "description": "達到總數 500 個瀏覽訪客的里程碑。",
-            "category": "growth",
+            "tags": ["growth", "cafe"],
             "milestone": "成長指標"
         }, {
             "date": "2020年8月9日",
             "title": "更新《迪遜之家》網頁介面。",
             "description": "《迪遜之家》設計風格跟隨《迪遜咖啡廳》。",
-            "category": "design",
+            "tags": ["design"],
             "milestone": "設計更新"
         }, {
             "date": "2020年8月10日",
             "title": "《迪遜之家》功能移植。",
             "description": "《迪遜之家》所有舊主頁功能完成移植到新主頁。",
-            "category": "design",
+            "tags": ["design"],
             "milestone": "設計更新"
         }, {
             "date": "2020年8月11日",
             "title": "美化《迪遜之家》介面。",
             "description": "《迪遜之家》電腦版網站變為 1 行顯示 6 個播放列表，手機版網站變為 1 行顯示 1 個播放列表，增加《瀏覽人數計數器》到所有頁面。",
-            "category": "design",
+            "tags": ["design"],
             "milestone": "設計更新"
         }, {
             "date": "2020年8月12日",
             "title": "更新《遊戲預告片》網頁介面。",
             "description": "《遊戲預告片》設計風格跟隨《迪遜咖啡廳》。",
-            "category": "design",
+            "tags": ["design"],
             "milestone": "設計更新"
         }, {
             "date": "2020年8月13日",
             "title": "《迪遜咖啡廳》及《遊戲預告片》網頁錯誤修正。",
             "description": "《迪遜咖啡廳》及《遊戲預告片》網頁錯誤修正以維持網頁正常運作。",
-            "category": "cafe",
+            "tags": ["design", "cafe"],
             "milestone": "設計更新"
         }, {
             "date": "2020年8月16日",
             "title": "《迪遜咖啡廳》及《遊戲預告片》網頁介面增加互通連結。",
             "description": "《迪遜咖啡廳》及《遊戲預告片》網頁介面增加互通連結以方便網頁互相移動。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
-        }, {
-            "date": "2020年9月1日",
-            "title": "總訪問量突破 600！",
-            "description": "達到總數 600 個瀏覽訪客的里程碑。",
-            "category": "growth",
-            "milestone": "成長指標"
         }, {
             "date": "2020年9月17日",
             "title": "《迪遜咖啡廳》及《遊戲預告片》網頁與《迪遜之家》結合。",
             "description": "《迪遜咖啡廳》及《遊戲預告片》網頁與《迪遜之家》結合，成為《迪遜之家💎》。",
-            "category": "cafe",
+            "tags": ["design", "cafe"],
             "milestone": "設計更新"
         }, {
             "date": "2020年9月24日",
             "title": "《迪遜之家💎》網頁優化。",
             "description": "《迪遜之家💎》網頁加速顯示，修正介面錯誤以提升使用體驗。",
-            "category": "design",
+            "tags": ["design"],
             "milestone": "設計更新"
-        }, {
-            "date": "2020年10月1日",
-            "title": "總訪問量突破 700！",
-            "description": "達到總數 700 個瀏覽訪客的里程碑。",
-            "category": "growth",
-            "milestone": "成長指標"
         }, {
             "date": "2020年10月9日",
             "title": "修復《迪遜之家💎》更新訊息功能。",
             "description": "修復《迪遜之家》更新訊息功能未能關閉之問題。",
-            "category": "feature",
+            "tags": ["feature"],
             "milestone": "新增功能"
-        }, {
-            "date": "2020年11月1日",
-            "title": "總訪問量突破 800！",
-            "description": "達到總數 800 個瀏覽訪客的里程碑。",
-            "category": "growth",
-            "milestone": "成長指標"
-        }, {
-            "date": "2020年12月1日",
-            "title": "總訪問量突破 900！",
-            "description": "達到總數 900 個瀏覽訪客的里程碑。",
-            "category": "growth",
-            "milestone": "成長指標"
         }, {
             "date": "2021年1月10日",
             "title": "總訪問量突破 1,000！",
             "description": "達到總數 1,000 個瀏覽訪客的重要里程碑，網站在同類網頁開發領域的多個競爭性關鍵字中排名第一！",
-            "category": "growth",
+            "tags": ["growth", "cafe"],
             "milestone": "流量里程碑"
         }, {
             "date": "2021年5月1日",
             "title": "總訪問量突破 1,500！",
             "description": "達到總數 1,500 個瀏覽訪客的里程碑。",
-            "category": "growth",
+            "tags": ["growth", "cafe"],
             "milestone": "成長指標"
         }, {
             "date": "2021年6月20日",
             "title": "修復《迪遜之家💎》播放列表壞連結。",
             "description": "修復《迪遜之家》播放列表壞圖及壞連結。",
-            "category": "design",
+            "tags": ["design"],
             "milestone": "設計更新"
         }, {
             "date": "2021年7月31日",
             "title": "《迪遜之家💎》音樂播放列表連結增加所屬遊戲分類。",
             "description": "《迪遜之家》音樂播放列表連結增加所屬遊戲分類。",
-            "category": "feature",
+            "tags": ["feature"],
             "milestone": "新增功能"
         }, {
             "date": "2021年8月1日",
             "title": "總訪問量突破 2,000！",
             "description": "達到總數 2,000 個瀏覽訪客的重要里程碑，網站在同類網頁開發領域的多個競爭性關鍵字中排名第一！",
-            "category": "growth",
+            "tags": ["growth", "cafe"],
             "milestone": "流量里程碑"
         }, {
             "date": "2021年8月23日",
             "title": "《迪遜之家💎》音樂新增《西班牙語歌》分類。",
             "description": "《迪遜之家》音樂播放列表新增《西班牙語歌》分類。",
-            "category": "feature",
+            "tags": ["feature"],
             "milestone": "新增功能"
         }, {
             "date": "2021年9月4日",
             "title": "《迪遜之家💎》增加《歌曲搜尋器》。",
             "description": "《迪遜之家》網頁頂端增加《歌曲搜尋器》，於搜尋器輸入關鍵詞即可篩選到網站內相關播放列表。",
-            "category": "feature",
+            "tags": ["feature"],
             "milestone": "新增功能"
         }, {
             "date": "2021年9月5日",
             "title": "《迪遜之家💎》更名為《☕️迪遜咖啡廳》。",
             "description": "因為希望突出網站是用來放鬆的地方，所以決定將《迪遜之家💎》更名為《☕️迪遜咖啡廳》。",
-            "category": "cafe",
+            "tags": ["design", "cafe"],
             "milestone": "設計更新"
         }, {
             "date": "2021年9月24日",
             "title": "《☕️迪遜咖啡廳》播放列表新增錨點。",
             "description": "《☕️迪遜咖啡廳》播放列表新增錨點以方便收藏播放列表到網頁書籤或我的最愛。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2021年10月4日",
             "title": "《☕️迪遜咖啡廳》音樂新增《藏語歌》分類。",
             "description": "《☕️迪遜咖啡廳》音樂播放列表新增《藏語歌》分類。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2021年10月16日",
             "title": "《☕️迪遜咖啡廳》新增《👒影片網誌》分類。",
             "description": "《☕️迪遜咖啡廳》播放列表新增《👒影片網誌》分類。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2021年10月24日",
             "title": "《☕️迪遜咖啡廳》標題更新為藝術字。",
             "description": "《☕️迪遜咖啡廳》標題由普通文字更新為藝術字。",
-            "category": "cafe",
+            "tags": ["design", "cafe"],
             "milestone": "設計更新"
         }, {
             "date": "2021年10月25日",
             "title": "《☕️迪遜咖啡廳》新增《✨》新播放列表提示功能。",
             "description": "《☕️迪遜咖啡廳》新增《✨》新播放列表提示符號到新增的播放列表以取締數字訊息通知。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
-        }, {
-            "date": "2021年12月1日",
-            "title": "總訪問量突破 2,500！",
-            "description": "達到總數 2,500 個瀏覽訪客的里程碑。",
-            "category": "growth",
-            "milestone": "成長指標"
         }, {
             "date": "2021年12月26日",
             "title": "《☕️迪遜咖啡廳》取消《✨》新播放列表提示功能。",
             "description": "《☕️迪遜咖啡廳》取消《✨》新播放列表提示符號，改為於訊息欄顯示。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2021年12月29日",
             "title": "《☕️迪遜咖啡廳》新增《🎬追劇》分類。",
             "description": "《☕️迪遜咖啡廳》播放列表新增《🎬追劇》分類。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2021年12月30日",
             "title": "《☕️迪遜咖啡廳》新增《🧠資訊》分類。",
             "description": "《☕️迪遜咖啡廳》播放列表新增《🧠資訊》分類。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2022年2月1日",
             "title": "建立《迪遜影院🎥》網頁。",
             "description": "功能為顯示 YouTube 預告片播放列表。",
-            "category": "launch",
+            "tags": ["launch"],
             "milestone": "網站發布"
         }, {
             "date": "2022年3月13日",
             "title": "《☕️迪遜咖啡廳》新增實驗性《用戶登入》介面。",
             "description": "《☕️迪遜咖啡廳》新增實驗性《用戶登入》介面以希望讓用戶看到更個人化的介面。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2022年3月14日",
             "title": "《迪遜影院🎥》更名為《遊戲預告片🎮》。",
             "description": "《迪遜影院🎥》更名為《遊戲預告片🎮》以表達網頁更準確的目的。",
-            "category": "design",
+            "tags": ["design"],
             "milestone": "設計更新"
         }, {
             "date": "2022年7月1日",
             "title": "總訪問量突破 3,000！",
-            "description": "達到總數 3,000 個瀏覽訪客的重要里程碑，網站在同類網頁開發領域的多個競爭性關鍵字中排名第一！",
-            "category": "growth",
-            "milestone": "流量里程碑"
+            "description": "達到總數 3,300 個瀏覽訪客的里程碑。",
+            "tags": ["growth", "cafe"],
+            "milestone": "成長指標"
         }, {
             "date": "2022年8月01日",
             "title": "《☕️迪遜咖啡廳》大幅增強《🔍搜尋》功能及建立資料庫。",
             "description": "《☕️迪遜咖啡廳》的《歌曲搜尋器》更名為《🔍搜尋》並大幅增強功能，建立資料庫，簡化後台程式結構，重新載入部分播放列表以作測試。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2022年8月11日",
             "title": "《遊戲預告片🎮》網頁改良介面設計",
             "description": "《遊戲預告片🎮》網頁改良頂欄介面設計，轉為側欄顯示及新增《🔍搜尋》功能。",
-            "category": "design",
+            "tags": ["design"],
             "milestone": "設計更新"
         }, {
             "date": "2022年8月13日",
             "title": "《☕️迪遜咖啡廳》側欄新增《🎮即時遊戲》選項。",
             "description": "《☕️迪遜咖啡廳》側欄新增《🎮即時遊戲》選項，免安裝即可遊玩，電腦、手機均適用。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2022年8月16日",
             "title": "《☕️迪遜咖啡廳》側欄新增《👾獲得限時免費遊戲》選項。",
             "description": "《☕️迪遜咖啡廳》側欄新增《👾獲得限時免費遊戲》選項以供用戶撿取限時免費遊戲。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2022年8月17日",
             "title": "《☕️迪遜咖啡廳》新增浮動工具列《☰》(左上)及浮動快速到頂鍵《▲》(右下)。",
             "description": "《☕️迪遜咖啡廳》新增浮動工具列《☰》(左上)及浮動快速到頂鍵《▲》(右下)，打開浮動工具列《☰》後為全頁疊加層選單，取代了側欄選單﹔按下快速到頂鍵《▲》後則可立即回到網頁頂部。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2022年8月18日",
             "title": "《☕️迪遜咖啡廳》改良浮動工具列《☰》設計。",
             "description": "《☕️迪遜咖啡廳》改良浮動工具列《☰》設計，新增開啟與關閉《全頁疊加層選單》功能。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2022年8月22日",
             "title": "《☕️迪遜咖啡廳》改良浮動工具列《☰》位置。",
             "description": "《☕️迪遜咖啡廳》改良浮動工具列《☰》位置，另網頁新增《🎮遊戲角落》分類。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2022年10月31日",
             "title": "《☕️迪遜咖啡廳》改良浮動工具列《☰》中選項的顯示方式。",
             "description": "《☕️迪遜咖啡廳》整理及改良浮動工具列《☰》中選項的顯示方式並增加下拉選單。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
-        }, {
-            "date": "2022年12月1日",
-            "title": "總訪問量突破 3,500！",
-            "description": "達到總數 3,500 個瀏覽訪客的里程碑。",
-            "category": "growth",
-            "milestone": "成長指標"
         }, {
             "date": "2022年12月4日",
             "title": "《☕️迪遜咖啡廳》浮動工具列《☰》增加《即時時鐘》及《香港天氣預告》。",
             "description": "《☕️迪遜咖啡廳》再次整理及改良浮動工具列《☰》中選項的顯示方式並增加《即時時鐘》及《香港天氣預告》。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2022年12月25日",
             "title": "《☕️迪遜咖啡廳》增加篩選鍵以方便用戶選台。",
             "description": "《☕️迪遜咖啡廳》網頁當眼處增加《💯全部》、《🎧音樂》、《🎤歌曲》、及《🎮遊戲》篩選鍵以方便用戶選台。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2022年12月26日",
             "title": "《☕️迪遜咖啡廳》新增《🤳影片網誌》分類。",
             "description": "《☕️迪遜咖啡廳》新增《🤳影片網誌》分類，浮動工具列《☰》增加《🤳影片網誌》篩選欄。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2022年12月27日",
             "title": "《☕️迪遜咖啡廳》新增更多分類。",
             "description": "《☕️迪遜咖啡廳》新增《🎬戲劇》、《🎨番劇》及《🎥預告片》分類，更新浮動工具列《☰》篩選欄。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2022年12月28日",
             "title": "《☕️迪遜咖啡廳》再次增加篩選鍵以方便用戶選台。",
             "description": "《☕️迪遜咖啡廳》網頁當眼處增加《🎬戲劇》、《🎨番劇》、《🎥預告片》、及《🤳網誌》篩選鍵以方便用戶選台。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2022年12月29日",
             "title": "建立《🧠迪遜資訊台》網頁。",
             "description": "功能為顯示 YouTube 資訊片播放列表。",
-            "category": "info",
+            "tags": ["launch"],
             "milestone": "網站發布"
         }, {
             "date": "2022年12月30日",
             "title": "《☕️迪遜咖啡廳》增強《🔍搜尋》功能。",
             "description": "《☕️迪遜咖啡廳》增強《🔍搜尋》功能，現可搜尋「音樂/歌曲/即時遊戲/番劇/戲劇/預告片/影片網誌/資訊/新聞」等等。",
-            "category": "cafe",
+            "tags": ["design", "cafe"],
             "milestone": "設計更新"
         }, {
             "date": "2023年1月29日",
             "title": "《🧠迪遜資訊台》新增分類篩選鍵。",
-            "description": "🧠迪遜資訊台》新增分類篩選鍵以跟上《☕️迪遜咖啡廳》設計。",
-            "category": "info",
+            "description": "《🧠迪遜資訊台》新增分類篩選鍵以跟上《☕️迪遜咖啡廳》設計。",
+            "tags": ["launch"],
             "milestone": "新增功能"
-        }, {
-            "date": "2023年2月1日",
-            "title": "總訪問量突破 4,000！",
-            "description": "達到總數 4,000 個瀏覽訪客的重要里程碑，網站在同類網頁開發領域的多個競爭性關鍵字中排名第一！",
-            "category": "growth",
-            "milestone": "流量里程碑"
         }, {
             "date": "2023年2月4日",
             "title": "《☕️迪遜咖啡廳》增加《攻略》篩選鍵。",
             "description": "《☕️迪遜咖啡廳》增加《攻略》篩選鍵，優化篩選鍵顯示。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2023年2月5日",
             "title": "《☕️迪遜咖啡廳》浮動工具列《☰》新增《影片》語言類別篩選。",
             "description": "《☕️迪遜咖啡廳》左上浮動工具列《☰》新增《影片語言類別篩選︰廣東話、普通話、英語、日語》。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2023年2月14日",
             "title": "《☕️迪遜咖啡廳》更新《🧮迪遜計算機》。",
             "description": "《☕️迪遜咖啡廳》更新《🧮迪遜計算機》設計以方便手機用戶使用。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2023年2月15日",
             "title": "《☕️迪遜咖啡廳》增加《加載中……》顯示。",
             "description": "《☕️迪遜咖啡廳》增加《加載中……》顯示以讓用家耐心等待網頁載入。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2023年2月18日",
             "title": "《☕️迪遜咖啡廳》網頁載入方式優化。",
             "description": "《☕️迪遜咖啡廳》網頁載入方式已優化，網頁加載一次後不用重新加載。",
-            "category": "cafe",
+            "tags": ["design", "cafe"],
             "milestone": "設計更新"
         }, {
             "date": "2023年2月19日",
             "title": "《☕️迪遜咖啡廳》的《攻略》篩選鍵更名為《玩法》篩選鍵。",
             "description": "《☕️迪遜咖啡廳》的《攻略》篩選鍵更名為《玩法》篩選鍵以彰顯分類真正目的。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2023年2月20日",
             "title": "《☕️迪遜咖啡廳》左上浮動工具列《☰》新增《🔨迪遜工具》。",
             "description": "《☕️迪遜咖啡廳》左上浮動工具列《☰》新增《🔨迪遜工具》，放置本人制作的工具。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2023年2月21日",
             "title": "《☕️迪遜咖啡廳》網頁解決篩選後顯示空格問題。",
             "description": "《☕️迪遜咖啡廳》網頁解決篩選後顯示空格問題，現在篩選後都會填滿空間顯示篩選結果。",
-            "category": "cafe",
+            "tags": ["design", "cafe"],
             "milestone": "設計更新"
-        }, {
-            "date": "2023年3月1日",
-            "title": "總訪問量突破 4,500！",
-            "description": "達到總數 4,500 個瀏覽訪客的里程碑。",
-            "category": "growth",
-            "milestone": "成長指標"
         }, {
             "date": "2023年3月11日",
             "title": "《☕️迪遜咖啡廳》優化播放列表預覽圖顯示比例。",
             "description": "《☕️迪遜咖啡廳》優化播放列表預覽圖顯示比例以減少網頁加載時間。",
-            "category": "cafe",
+            "tags": ["design", "cafe"],
             "milestone": "設計更新"
         }, {
             "date": "2023年3月12日",
             "title": "《☕️迪遜咖啡廳》修復搜尋器問題。",
             "description": "《☕️迪遜咖啡廳》修復搜尋器搜尋到不相關內容的問題。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2023年4月1日",
             "title": "《☕️迪遜咖啡廳》優化左上浮動工具列《☰》分類顯示。",
             "description": "《☕️迪遜咖啡廳》優化左上浮動工具列《☰》分類顯示，內容歸納為《️☕️迪遜咖啡廳》，《️💠Windows》，《️🛍️Android》，《️🍎Mac》，《️🐧Linux》，《🗃篩選器》六大類。",
-            "category": "cafe",
+            "tags": ["design", "cafe"],
             "milestone": "設計更新"
         }, {
             "date": "2023年4月2日",
             "title": "優化《☕️迪遜咖啡廳》分類篩選鍵。",
             "description": "優化《☕️迪遜咖啡廳》分類篩選鍵，增加下拉選單。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2023年4月3日",
             "title": "浮動工具列《☰》結構更新。",
             "description": "《☕️迪遜咖啡廳》左上浮動工具列《☰》裡面的《️☕️迪遜咖啡廳》選項中，將《💡更新》分拆為《🏗結構更新》及《💡內容更新》。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2023年4月7日",
             "title": "《🎮即玩遊戲》改以《🎮》標示。",
             "description": "《☕️迪遜咖啡廳》所有《🎮即玩遊戲》去除《📱💻👤👥》標示，改為以《🎮》標示。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2023年5月1日",
             "title": "總訪問量突破 5,000！",
             "description": "達到總數 5,000 個瀏覽訪客的重要里程碑，網站在同類網頁開發領域的多個競爭性關鍵字中排名第一！",
-            "category": "growth",
+            "tags": ["growth", "cafe"],
             "milestone": "流量里程碑"
-        }, {
-            "date": "2023年6月1日",
-            "title": "總訪問量突破 5,500！",
-            "description": "達到總數 5,500 個瀏覽訪客的里程碑。",
-            "category": "growth",
-            "milestone": "成長指標"
-        }, {
-            "date": "2023年7月1日",
-            "title": "總訪問量突破 6,000！",
-            "description": "達到總數 6,000 個瀏覽訪客的重要里程碑，網站在同類網頁開發領域的多個競爭性關鍵字中排名第一！",
-            "category": "growth",
-            "milestone": "流量里程碑"
-        }, {
-            "date": "2023年8月1日",
-            "title": "總訪問量突破 6,500！",
-            "description": "達到總數 6,500 個瀏覽訪客的里程碑。",
-            "category": "growth",
-            "milestone": "成長指標"
         }, {
             "date": "2023年8月30日",
             "title": "《☕️迪遜咖啡廳》新增《👻 恐怖類》分類篩選鍵。",
             "description": "《☕️迪遜咖啡廳》新增《👻 恐怖類》分類篩選鍵，部份分類篩選鍵問題修復。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
-        }, {
-            "date": "2023年9月1日",
-            "title": "總訪問量突破 7,000！",
-            "description": "達到總數 7,000 個瀏覽訪客的重要里程碑，網站在同類網頁開發領域的多個競爭性關鍵字中排名第一！",
-            "category": "growth",
-            "milestone": "流量里程碑"
-        }, {
-            "date": "2023年10月1日",
-            "title": "總訪問量突破 7,500！",
-            "description": "達到總數 7,500 個瀏覽訪客的里程碑。",
-            "category": "growth",
-            "milestone": "成長指標"
         }, {
             "date": "2023年10月25日",
             "title": "《☕迪遜咖啡廳》已更名為《🏡迪遜之家》。",
             "description": "鑑於有用戶投訴《☕迪遜咖啡廳》名字有誤導成份，《☕迪遜咖啡廳》已更名為《🏡迪遜之家》，另《📡迪遜頻道》分類已分拆為︰《🏡迪遜之家》、《🏰迪遜基地》、《🎮迪遜遊戲廳》、《☕迪遜咖啡廳》、《🎤迪遜演唱會》、《🎥迪遜預告片》、《🎨迪遜動畫室》、《🎬迪遜影院》、《🧠迪遜資訊台》及《📰迪遜新聞台》。",
-            "category": "cafe",
+            "tags": ["launch", "cafe"],
             "milestone": "網站發布"
-        }, {
-            "date": "2023年11月1日",
-            "title": "總訪問量突破 8,000！",
-            "description": "達到總數 8,000 個瀏覽訪客的重要里程碑，網站在同類網頁開發領域的多個競爭性關鍵字中排名第一！",
-            "category": "growth",
-            "milestone": "流量里程碑"
-        }, {
-            "date": "2023年12月1日",
-            "title": "總訪問量突破 8,500！",
-            "description": "達到總數 8,500 個瀏覽訪客的里程碑。",
-            "category": "growth",
-            "milestone": "成長指標"
-        }, {
-            "date": "2024年1月1日",
-            "title": "總訪問量突破 9,000！",
-            "description": "達到總數 9,000 個瀏覽訪客的重要里程碑，網站在同類網頁開發領域的多個競爭性關鍵字中排名第一！",
-            "category": "growth",
-            "milestone": "流量里程碑"
-        }, {
-            "date": "2024年2月1日",
-            "title": "總訪問量突破 9,500！",
-            "description": "達到總數 9,500 個瀏覽訪客的里程碑。",
-            "category": "growth",
-            "milestone": "成長指標"
         }, {
             "date": "2024年3月1日",
             "title": "總訪問量突破 10,000！",
             "description": "達到總數 10,000 個瀏覽訪客的重要里程碑，網站在同類網頁開發領域的多個競爭性關鍵字中排名第一！",
-            "category": "growth",
+            "tags": ["growth", "cafe"],
             "milestone": "流量里程碑"
-        }, {
-            "date": "2024年6月1日",
-            "title": "總訪問量突破 11,000！",
-            "description": "達到總數 11,000 個瀏覽訪客的里程碑。",
-            "category": "growth",
-            "milestone": "成長指標"
-        }, {
-            "date": "2024年9月1日",
-            "title": "總訪問量突破 12,000！",
-            "description": "達到總數 12,000 個瀏覽訪客的里程碑。",
-            "category": "growth",
-            "milestone": "成長指標"
         }, {
             "date": "2024年11月16日",
             "title": "建立《🎯迪遜攻略》網頁。",
             "description": "建立《🎯迪遜攻略》網頁，增加《🎯迪遜攻略》篩選按鈕，《📡迪遜頻道》分類增加《🎯迪遜攻略》選項。",
-            "category": "launch",
+            "tags": ["launch"],
             "milestone": "網站發布"
-        }, {
-            "date": "2024年12月1日",
-            "title": "總訪問量突破 13,000！",
-            "description": "達到總數 13,000 個瀏覽訪客的里程碑。",
-            "category": "growth",
-            "milestone": "成長指標"
-        }, {
-            "date": "2025年3月1日",
-            "title": "總訪問量突破 14,000！",
-            "description": "達到總數 14,000 個瀏覽訪客的里程碑。",
-            "category": "growth",
-            "milestone": "成長指標"
         }, {
             "date": "2025年3月6日",
             "title": "《🏡迪遜之家》更名為《☕迪遜咖啡廳》。",
             "description": "鑑於投訴的用戶已離去，以及網頁太多以難以兼顧，最重要的是已找到解決播放列表太多以致載入速度太慢的方法，故移除《🏰迪遜基地》、《🎮迪遜遊戲廳》、《🎯迪遜攻略》、《☕迪遜咖啡廳》、《🎤迪遜演唱會》、《🎥迪遜預告片》、《🎨迪遜動畫室》、《🎬迪遜影院》及《🧠迪遜資訊台》網頁，《🏡迪遜之家》更名為《☕迪遜咖啡廳》，《📡迪遜頻道》分類移除《🏰迪遜基地》、《🎮迪遜遊戲廳》、《🎯迪遜攻略》、《🎤迪遜演唱會》、《🎥迪遜預告片》、《🎨迪遜動畫室》、《🎬迪遜影院》及《🧠迪遜資訊台》。",
-            "category": "cafe",
+            "tags": ["launch", "cafe"],
             "milestone": "網站發布"
         }, {
             "date": "2025年3月22日",
             "title": "建立《網頁書籤工具》網頁。",
             "description": "建立《網頁書籤工具》網頁，目的為讓用戶自定書籤以供自用。",
-            "category": "tool",
+            "tags": ["tool"],
             "milestone": "網站發布"
         }, {
             "date": "2025年3月23日",
             "title": "優化《☕迪遜咖啡廳》網頁排版。",
             "description": "引用《網頁書籤工具》自定書籤設計優化《☕迪遜咖啡廳》網頁排版。",
-            "category": "cafe",
+            "tags": ["design", "cafe"],
             "milestone": "設計更新"
         }, {
             "date": "2025年3月26日",
             "title": "《網頁書籤工具》新增「➕建立書籤」功能。",
             "description": "《網頁書籤工具》新增「➕建立書籤」及「💾儲存/📂載入書籤」功能。",
-            "category": "tool",
+            "tags": ["tool"],
             "milestone": "新增功能"
         }, {
             "date": "2025年3月27日",
             "title": "《網頁書籤工具》新增「🗃️書籤分類」功能。",
             "description": "《網頁書籤工具》新增「🤏書籤拖放」、「🔍書籤搜尋」及「🗃️書籤分類」功能。",
-            "category": "tool",
+            "tags": ["tool"],
             "milestone": "新增功能"
         }, {
             "date": "2025年3月28日",
             "title": "多語言支援",
             "description": "《網頁書籤工具》新增「🌐多語言數據儲存」及「🌐多語言選擇」功能，支援廣東話、普通話、日語、韓語以及英語。這顯著擴大了我們在國際市場的覆蓋範圍。",
-            "category": "tool",
+            "tags": ["tool"],
             "milestone": "國際發布"
         }, {
             "date": "2025年3月29日",
             "title": "深色模式與無障礙訪問",
             "description": "主要重新設計專注於無障礙合規性 (WCAG 2.1 AA) 並引入「🌙深色模式」及「☀️淺色模式」切換，《網頁書籤工具》更名為《🔰網頁書籤管理工具》，改良「🤏書籤拖放」功能，「💡版本更新」系統，「✨書籤時間戳」紀錄及「✨書籤幻燈片」功能，提高了所有訪客的可讀性和使用者體驗。",
-            "category": "design",
+            "tags": ["design"],
             "milestone": "無障礙優化"
         }, {
             "date": "2025年3月30日",
             "title": "推出新版《☕迪遜咖啡廳》，《🔰網頁書籤管理工具》新增大量小工具。",
             "description": "《🔰網頁書籤管理工具》新增「▶️YouTube 播放列表偵測」功能及「模態框」功能，改良「模態框關閉」功能，新增「🕓時鐘」、「🧮計算機」、「⛅天氣預報」及「📎二維碼生成器」小工具，優化「🗃️書籤分類」功能，新增「↑回到頁首/↓去到頁尾」功能，優化「🔰新增/儲存/載入書籤 Add/Save/Load Cards」功能及優化介面，推出新版《☕迪遜咖啡廳》，開始 A/B 測試優化轉換率，《🔰網頁書籤管理工具》移除「✨書籤幻燈片」功能。",
-            "category": "cafe",
+            "tags": ["launch", "cafe"],
             "milestone": "網站發布"
         }, {
             "date": "2025年4月1日",
             "title": "《☕迪遜咖啡廳》新增「📡頻道」功能。",
             "description": "《☕迪遜咖啡廳》新增「📡頻道」功能，解決《☕迪遜咖啡廳》及《🔰網頁書籤管理工具》功能失靈問題，《☕迪遜咖啡廳》及《🔰網頁書籤管理工具》介面優化。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年4月2日",
             "title": "《☕迪遜咖啡廳》及《🔰網頁書籤管理工具》新增全部《🗃️篩選》選項。",
             "description": "《☕迪遜咖啡廳》及《🔰網頁書籤管理工具》新增全部《🗃️篩選》選項，新增《❓網站使用指南》功能，優化《🧮計算機》小工具介面。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年4月3日",
             "title": "《☕迪遜咖啡廳》及《🔰網頁書籤管理工具》新增《⏲️計時器》及《⏱️秒錶》小工具。",
             "description": "《☕迪遜咖啡廳》及《🔰網頁書籤管理工具》新增《⏲️計時器》、《⏱️秒錶》、《🕒指針時鐘》及《⛅天氣預報》小工具，《🗃️篩選》選項增加《📽️電影》、《📖漫畫》、《📗小說》以及《📚教學》。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年4月6日",
             "title": "《🗃️篩選》選項增加《☠️R.I.P.》及大量《🎮即時遊戲》分類。",
             "description": "《☕迪遜咖啡廳》及《🔰網頁書籤管理工具》的《🗃️篩選》選項增加《☠️R.I.P.》及大量《🎮即時遊戲》分類。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年4月10日",
             "title": "《🔍搜尋列》及《🔰新增書籤欄》更新提示詞。",
             "description": "《🔍搜尋列》及《🔰新增書籤欄》更新提示詞，《🗃️篩選》選項增加《👨男》及《👩女》分類，《↑回到頁首》/《↓去到頁尾》圖示變更為《🔺》和《🔻》，《🗃️篩選》選項增加《🔞成人》及《🌈多元》分類，《☕迪遜咖啡廳》的《📰新聞》、《🔞成人》、《🌈多元》內容預設隱藏。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年4月17日",
             "title": "《🗃️篩選》的《🎮即時遊戲》選項增加分類。",
             "description": "《🗃️篩選》的《🎮即時遊戲》選項增加《↳ 需登入》及《↳ 免登入》分類。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年4月21日",
             "title": "《🗃️篩選》的《🧠資訊》選項增加分類。",
             "description": "《🗃️篩選》的《🧠資訊》選項增加《📰文章資訊》及《📺影片資訊》分類。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年5月3日",
             "title": "《🗃️篩選》增加《⭐我的最愛》分類。",
             "description": "《🗃️篩選》增加《⭐我的最愛》分類，《🗃️篩選》的《🎮即時遊戲》選項增加《👉橫向捲軸》及《👆縱向捲軸》分類，《⚙️小工具》更名為《⚙️工具》，增加選項《🎮小遊戲》，《🕹️遊戲紀錄》的《↳ JC288》更名為《↳ JC Gameplay》。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年5月18日",
             "title": "《🗃️篩選》的《🎮即時遊戲》選項增加分類。",
             "description": "《🗃️篩選》的《🎮即時遊戲》選項增加《🚪遊戲入口》分類。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年5月22日",
             "title": "《☕迪遜咖啡廳》增加《👍推介》功能。",
             "description": "《☕迪遜咖啡廳》增加《👍推介》功能，《✨最近》及《👍推介》增加關閉按鈕，優化《⚙️工具》的《🧮計算機》。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年6月1日",
             "title": "總訪問量突破 15,000！",
-            "description": "達到總數 15,000 個瀏覽訪客的重要里程碑，網站在同類網頁開發領域的多個競爭性關鍵字中排名第一！",
-            "category": "growth",
-            "milestone": "流量里程碑"
+            "description": "達到總數 15,000 個瀏覽訪客的里程碑。",
+            "tags": ["growth", "cafe"],
+            "milestone": "成長指標"
         }, {
             "date": "2025年6月9日",
             "title": "《☕迪遜咖啡廳》及《🔰網頁書籤管理工具》新增《🔰顯示所有》按鈕。",
             "description": "《☕迪遜咖啡廳》及《🔰網頁書籤管理工具》新增《🔰顯示所有》按鈕，更新《❓網站使用指南》。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年6月10日",
             "title": "解決書籤長標題顯示問題。",
             "description": "《☕迪遜咖啡廳》及《🔰網頁書籤管理工具》解決書籤長標題顯示問題，修復書籤黑邊問題。",
-            "category": "cafe",
+            "tags": ["design", "cafe"],
             "milestone": "設計更新"
         }, {
             "date": "2025年6月11日",
             "title": "《☕迪遜咖啡廳》更新《✨最近》及《👍推介》書籤顯示方式。",
             "description": "《☕迪遜咖啡廳》更新《✨最近》及《👍推介》書籤顯示方式為可直接打開。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年6月12日",
             "title": "《☕迪遜咖啡廳》及《🔰網頁書籤管理工具》更新主要書籤顯示方式。",
             "description": "《☕迪遜咖啡廳》更新《👍推介》顯示方式為標題與預覽圖分別顯示，《☕迪遜咖啡廳》及《🔰網頁書籤管理工具》更新主要書籤顯示方式為標題與預覽圖分別顯示。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年6月22日",
             "title": "《☕迪遜咖啡廳》新增主題顯示。",
             "description": "《☕迪遜咖啡廳》新增《🗃️篩選》主題顯示。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年7月15日",
             "title": "《☕迪遜咖啡廳》的《✨最近》及《👍推介》不顯示🙈敏感內容。",
             "description": "《☕迪遜咖啡廳》的《✨最近》及《👍推介》不顯示🙈敏感內容，《👍推介》顯示🌐相關語言內容。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年8月2日",
             "title": "修復網址#錨點顯示功能。",
             "description": "《☕迪遜咖啡廳》及《🔰網頁書籤管理工具》修復網址#錨點顯示功能。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
-        }, {
-            "date": "2025年9月1日",
-            "title": "總訪問量突破 16,000！",
-            "description": "達到總數 16,000 個瀏覽訪客的里程碑。",
-            "category": "growth",
-            "milestone": "成長指標"
         }, {
             "date": "2025年9月24日",
             "title": "《🗃️篩選》的《🎮即時遊戲》選項增加分類。",
             "description": "《🗃️篩選》的《🎮即時遊戲》選項增加《📱Flash Player》及《📱J2ME》分類。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年10月12日",
             "title": "《🗃️篩選》的《📽️電影》選項增加分類。",
             "description": "《🗃️篩選》的《📽️電影》選項增加《↳ 泰米爾語電影》分類。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年10月18日",
             "title": "《🗃️篩選》的《📚教學》選項增加分類。",
             "description": "《🗃️篩選》的《📚教學》選項增加《↳ 毋需登入》及《↳ 需登入》分類。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年10月19日",
             "title": "《⚙️工具》增加《📥YouTube 預覽圖下載》功能。",
             "description": "《⚙️工具》增加《📥YouTube 預覽圖下載》功能，貼上網址後便可下載 YouTube 影片預覽圖。",
-            "category": "tool",
+            "tags": ["tool", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年10月20日",
             "title": "《▶YouTube 影片》打開後能自動播放。",
             "description": "現在《▶YouTube 影片》打開後就能自動播放了。",
-            "category": "feature",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年10月21日",
             "title": "《▶YouTube 影片》手機版網頁修復問題。",
             "description": "《▶YouTube 影片》手機版網頁已修復長期播放後網頁崩潰問題。",
-            "category": "feature",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年10月22日",
             "title": "《☕迪遜咖啡廳》新增《🔒敏感內容設置》開關。",
             "description": "《☕迪遜咖啡廳》新增《🔒敏感內容設置》開關，現在控制顯示內容更方便。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年10月31日",
             "title": "解決新版網頁 Youtube 嵌入播放列表問題。",
             "description": "解決新版網頁 Youtube 嵌入播放列表播放完廣告後忘記自己是播放列表的問題。",
-            "category": "feature",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年11月5日",
             "title": "手機優先設計",
             "description": "採用手機優先方法進行全面重新設計，提高頁面載入速度，增加漸進式 Web 應用 (PWA) 功能。 PageSpeed 最佳做法評分從 39 提高到 96。",
-            "category": "design",
+            "tags": ["design", "cafe"],
             "milestone": "手機最佳化"
         }, {
             "date": "2025年11月13日",
             "title": "《☕迪遜咖啡廳》的《📡頻道》下拉選單增加《🎮小遊戲》↳《📝每日任務》。",
             "description": "《☕迪遜咖啡廳》的《📡頻道》下拉選單增加《🎮小遊戲》↳《📝每日任務》，移除《⚙️小工具》裡面的《🎮小遊戲》。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年11月14日",
             "title": "《☕迪遜咖啡廳》增加《🐟摸魚模式》。",
             "description": "《☕迪遜咖啡廳》增加《🐟摸魚模式》，懂的都懂。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年11月15日",
             "title": "《☕迪遜咖啡廳》修復部分《🧠資訊》及《📰新聞》連結。",
             "description": "《☕迪遜咖啡廳》修復部分《🧠資訊》及《📰新聞》連結，現在能邊聽新聞邊睡了。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年11月19日",
             "title": "《🗃️篩選》的《📖漫畫》選項增加分類。",
             "description": "《🗃️篩選》的《📖漫畫》選項增加《↳ 動態漫畫》分類。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
-        }, {
-            "date": "2025年12月1日",
-            "title": "總訪問量突破 17,000！",
-            "description": "達到總數 17,000 個瀏覽訪客的里程碑。",
-            "category": "growth",
-            "milestone": "成長指標"
         }, {
             "date": "2025年12月2日",
             "title": "建立《👪中文親戚稱呼計算機》網站。",
             "description": "《☕迪遜咖啡廳》的《📡頻道》下拉選單增加《⚙️工具》↳《👪中文親戚稱呼計算機》，可計算最多四重關係，《☕迪遜咖啡廳》新增案例研究部分展示以往工作成果。",
-            "category": "tool",
+            "tags": ["tool", "cafe"],
             "milestone": "網站發布"
         }, {
             "date": "2025年12月3日",
             "title": "建立《💡迪遜網頁版本更新》網站。",
             "description": "全部網頁《💡版本更新》歸納為《💡迪遜網頁版本更新》，以倒序時間軸視圖顯示更新並作出分類。",
-            "category": "tool",
+            "tags": ["launch", "tool"],
             "milestone": "網站發布"
         }, {
             "date": "2025年12月3日",
             "title": "《☕迪遜咖啡廳》增加《👁️訪問次數統計器》。",
             "description": "《☕迪遜咖啡廳》增加《👁️訪問次數統計器》以計算訪問人數。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年12月5日",
             "title": "《🗃️篩選》的《🔨工具》選項增加分類。",
             "description": "《🗃️篩選》的《🔨工具》增加《↳ 迪遜小工具》分類。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年12月8日",
             "title": "《🗃️篩選》的《🎮即時遊戲》選項增加分類。",
             "description": "《🗃️篩選》的《🎮即時遊戲》選項增加《📱DOS》分類。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2025年12月11日",
             "title": "建立《🔗書籤》網站。",
             "description": "《☕迪遜咖啡廳》的《📡頻道》下拉選單增加《⚙️工具》↳《🔗書籤》，集合由開始到現在的書籤並定期進行更新。",
-            "category": "tool",
+            "tags": ["launch", "tool"],
             "milestone": "網站發布"
         }, {
             "date": "2025年12月29日",
             "title": "解決《👁️敏感內容設置》問題。",
             "description": "解決《👁️敏感內容設置》進入網頁時忘記設定問題。",
-            "category": "cafe",
+            "tags": ["design", "cafe"],
             "milestone": "設計更新"
-        }, {
-            "date": "2026年1月1日",
-            "title": "總訪問量突破 18,000！",
-            "description": "達到總數 18,000 個瀏覽訪客的里程碑。",
-            "category": "growth",
-            "milestone": "成長指標"
         }, {
             "date": "2026年1月3日",
             "title": "《🗃️篩選》的《🎮即時遊戲》選項增加分類。",
             "description": "《🗃️篩選》的《🎮即時遊戲》選項增加《📱Game Gear》、《🎮Sega Saturn》及《🎮Mega Drive》分類。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
-        }, {
-            "date": "2026年2月1日",
-            "title": "總訪問量突破 19,000！",
-            "description": "達到總數 19,000 個瀏覽訪客的里程碑。",
-            "category": "growth",
-            "milestone": "成長指標"
         }, {
             "date": "2026年2月4日",
             "title": "更新《👪中文親戚稱呼計算機》資料庫。",
             "description": "《👪中文親戚稱呼計算機》資料庫增加《外高祖母》及《外玄孫女》計算方法。",
-            "category": "tool",
+            "tags": ["tool"],
             "milestone": "設計更新"
         }, {
             "date": "2026年2月5日",
             "title": "《🗃️篩選》的《🔨工具》選項增加分類。",
             "description": "《🗃️篩選》的《🔨工具》選項增加《↳ 政府工具》分類。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2026年2月21日",
             "title": "《🗃️篩選》的《🧠資訊》選項增加分類。",
             "description": "《🗃️篩選》的《🧠資訊》選項增加《🎙️直播資訊》分類。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2026年2月22日",
             "title": "《🗃️篩選》的《📰新聞》選項增加分類。",
             "description": "《🗃️篩選》的《📰新聞》選項增加《🎙️直播新聞》、《📺影片新聞》及《📰文章新聞》分類。",
-            "category": "cafe",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2026年3月8日",
             "title": "《🗃️篩選》的《🎮即時遊戲》選項增加分類。",
             "description": "《🗃️篩選》的《🎮即時遊戲》選項增加《🎮PC Engine》、《🧜角色扮演》、《🍞生存》、《🐶育成》及《🧩益智》分類。",
-            "category": "game",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2026年3月28日",
             "title": "《🗃️篩選》的《🎮即時遊戲》選項增加分類。",
             "description": "《🗃️篩選》的《🎮即時遊戲》選項增加《🏃無盡跑酷》、《♟️戰棋》、《🃏卡牌》、《🔮彈珠台》、《😴放置》及《🔐密室逃脫》分類。",
-            "category": "game",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2026年3月29日",
             "title": "解決 YouTube 播放列表消失問題。",
             "description": "《▶️ 內嵌式 Youtbue 播放列表》選項增加《▶️ 在 YouTube 中打開》按鈕以解決 YouTube 播放列表消失問題。",
-            "category": "feature",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2026年4月1日",
             "title": "總訪問量突破 20,000！",
             "description": "達到總數 20,000 個瀏覽訪客的重要里程碑，網站在同類網頁開發領域的多個競爭性關鍵字中排名第一！",
-            "category": "growth",
+            "tags": ["growth", "cafe"],
             "milestone": "流量里程碑"
-        }, {
-            "date": "2026年5月2日",
-            "title": "總訪問量突破 21,000！",
-            "description": "達到總數 21,000 個瀏覽訪客的里程碑。",
-            "category": "growth",
-            "milestone": "成長指標"
-        }, {
-            "date": "2026年6月1日",
-            "title": "總訪問量突破 22,000！",
-            "description": "達到總數 22,000 個瀏覽訪客的里程碑。",
-            "category": "growth",
-            "milestone": "成長指標"
         }, {
             "date": "2026年7月2日",
             "title": "總訪問量突破 23,000！",
             "description": "達到總數 23,000 個瀏覽訪客的里程碑。",
-            "category": "growth",
+            "tags": ["growth", "cafe"],
             "milestone": "成長指標"
         }, {
             "date": "2026年7月10日",
             "title": "《❓網站使用指南》內容更新。",
             "description": "《❓網站使用指南》新增網頁介紹。",
-            "category": "feature",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2026年7月11日",
             "title": "主網頁模組化。",
             "description": "主網頁模組化以方便後續更新。",
-            "category": "feature",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2026年7月12日",
             "title": "《🐟模魚模式》升級。",
             "description": "《🐟模魚模式》升級，介面更真實！",
-            "category": "feature",
+            "tags": ["feature", "cafe"],
             "milestone": "新增功能"
         }, {
             "date": "2026年7月13日",
             "title": "《📎二維碼生成器》升級。",
             "description": "《⚙️工具》更新《📎二維碼生成器》介面，增加「即時生成」及「自動分割二維碼」功能。",
-            "category": "tool",
+            "tags": ["feature", "cafe", "tool"],
             "milestone": "新增功能"
         }, {
             "date": "2026年7月14日",
             "title": "建立《🧮計算機》網站。",
             "description": "進入《⚙️工具》↳《🧮計算機》可使用精確計算機。",
-            "category": "tool",
+            "tags": ["launch", "tool"],
             "milestone": "網站發布"
         }, {
             "date": "2026年7月15日",
             "title": "《🧮計算機》網站升級。",
             "description": "《🧮計算機》增加「觸感震動」功能。",
-            "category": "tool",
-            "milestone": "新增功能"
+            "tags": ["design", "tool"],
+            "milestone": "設計更新"
         }, {
             "date": "2026年7月16日",
             "title": "新增《🎲離線骰子》遊戲。",
             "description": "進入《📡頻道》->《🎮小遊戲》以遊玩《🎲離線骰子》。",
-            "category": "dice",
+            "tags": ["launch", "game", "dice"],
             "milestone": "網站發布"
         }, {
             "date": "2026年7月17日",
             "title": "新增《⛏️ 方塊傳說》遊戲。",
             "description": "進入《📡頻道》->《🎮小遊戲》以遊玩《⛏️ 方塊傳說》。",
-            "category": "game",
+            "tags": ["launch", "game"],
             "milestone": "網站發布"
         }, {
             "date": "2026年7月18日",
-            "title": "新增《⭕❌ 井字棋》遊戲。",
-            "description": "進入《📡頻道》->《🎮小遊戲》以遊玩《⭕❌ 井字棋》。",
-            "category": "game",
+            "title": "新增《⭕❌井字棋》遊戲。",
+            "description": "進入《📡頻道》->《🎮小遊戲》以遊玩《⭕❌井字棋》。",
+            "tags": ["launch", "game"],
             "milestone": "網站發布"
+        }, {
+            "date": "2026年7月19日",
+            "title": "《🎲離線骰子》遊戲更新。",
+            "description": "《🎲離線骰子》遊戲增加《🔩鐵骰子》。",
+            "tags": ["feature", "game"],
+            "milestone": "新增功能"
+        }, {
+            "date": "2026年7月20日",
+            "title": "《🎲離線骰子》遊戲更新。",
+            "description": "《🎲離線骰子》遊戲增加《🎲壞骰子》。",
+            "tags": ["feature", "game", "dice"],
+            "milestone": "新增功能"
+        }, {
+            "date": "2026年7月21日",
+            "title": "《🎲離線骰子》遊戲更新。",
+            "description": "《🎲離線骰子》遊戲增加《🎰賭骰子》。",
+            "tags": ["feature", "game", "dice"],
+            "milestone": "新增功能"
+        }, {
+            "date": "2026年7月22日",
+            "title": "《🎲離線骰子》遊戲更新。",
+            "description": "《🎲離線骰子》遊戲增加《🔒鎖骰子》。",
+            "tags": ["feature", "game", "dice"],
+            "milestone": "新增功能"
+        }, {
+            "date": "2026年7月23日",
+            "title": "《🎲離線骰子》遊戲更新。",
+            "description": "《🎲離線骰子》遊戲增加《⛏️金礦骰子》。",
+            "tags": ["feature", "game", "dice"],
+            "milestone": "新增功能"
+        }, {
+            "date": "2026年7月24日",
+            "title": "《🎲離線骰子》遊戲更新。",
+            "description": "《🎲離線骰子》遊戲增加《💡光骰子》。",
+            "tags": ["feature", "game", "dice"],
+            "milestone": "新增功能"
+        }, {
+            "date": "2026年7月25日",
+            "title": "《🎲離線骰子》遊戲更新。",
+            "description": "《🎲離線骰子》遊戲增加《🌵尖刺骰子》。",
+            "tags": ["feature", "game", "dice"],
+            "milestone": "新增功能"
+        }, {
+            "date": "2026年7月26日",
+            "title": "《🎲離線骰子》遊戲更新。",
+            "description": "《🎲離線骰子》遊戲增加《❓隨機骰子》。",
+            "tags": ["feature", "game", "dice"],
+            "milestone": "新增功能"
+        }, {
+            "date": "2026年7月27日",
+            "title": "《🎲離線骰子》遊戲更新。",
+            "description": "《🎲離線骰子》遊戲增加《💫棒球骰子》。",
+            "tags": ["feature", "game", "dice"],
+            "milestone": "新增功能"
+        }, {
+            "date": "2026年7月28日",
+            "title": "《🎲離線骰子》遊戲更新。",
+            "description": "《🎲離線骰子》遊戲增加《🤡擬態骰子》。",
+            "tags": ["feature", "game", "dice"],
+            "milestone": "新增功能"
+        }, {
+            "date": "2026年7月29日",
+            "title": "《🎲離線骰子》遊戲更新。",
+            "description": "《🎲離線骰子》遊戲增加《🌩️旱雷骰子》。",
+            "tags": ["feature", "game", "dice"],
+            "milestone": "新增功能"
+        }, {
+            "date": "2026年7月30日",
+            "title": "《🎲離線骰子》遊戲更新。",
+            "description": "《🎲離線骰子》遊戲增加《🧛中介骰子》。",
+            "tags": ["feature", "game", "dice"],
+            "milestone": "新增功能"
+        }, {
+            "date": "2026年7月31日",
+            "title": "《🎲離線骰子》遊戲更新。",
+            "description": "《🎲離線骰子》遊戲增加《🃏小丑骰子》。",
+            "tags": ["feature", "game", "dice"],
+            "milestone": "新增功能"
+        }, {
+            "date": "2026年8月1日",
+            "title": "《🎲離線骰子》遊戲更新。",
+            "description": "《🎲離線骰子》遊戲增加《🛡️盾骰子》。",
+            "tags": ["feature", "game", "dice"],
+            "milestone": "新增功能"
+        }, {
+            "date": "2026年8月2日",
+            "title": "《🎲離線骰子》遊戲更新。",
+            "description": "《🎲離線骰子》遊戲增加《🌱樹苖骰子》。",
+            "tags": ["feature", "game", "dice"],
+            "milestone": "新增功能"
+        }, {
+            "date": "2026年8月3日",
+            "title": "《🎲離線骰子》遊戲更新。",
+            "description": "《🎲離線骰子》遊戲增加《☯️太極骰子》。",
+            "tags": ["feature", "game", "dice"],
+            "milestone": "新增功能"
+        }, {
+            "date": "2026年8月4日",
+            "title": "《🎲離線骰子》遊戲更新。",
+            "description": "《🎲離線骰子》遊戲增加抽獎功能。",
+            "tags": ["feature", "game", "dice"],
+            "milestone": "新增功能"
+        }, {
+            "date": "2026年8月5日",
+            "title": "《🎲離線骰子》遊戲更新。",
+            "description": "《🎲離線骰子》遊戲增加每日獎勵功能。",
+            "tags": ["feature", "game", "dice"],
+            "milestone": "新增功能"
+        }, {
+            "date": "2026年8月6日",
+            "title": "《🎲離線骰子》遊戲更新。",
+            "description": "《🎲離線骰子》遊戲增加《🔥火骰子》升級功能。",
+            "tags": ["feature", "game", "dice"],
+            "milestone": "新增功能"
+        }, {
+            "date": "2026年8月7日",
+            "title": "《🎲離線骰子》遊戲更新。",
+            "description": "《🎲離線骰子》遊戲增加《⚡雷骰子》升級功能。",
+            "tags": ["feature", "game", "dice"],
+            "milestone": "新增功能"
+        }, {
+            "date": "2026年8月8日",
+            "title": "《🎲離線骰子》遊戲更新。",
+            "description": "《🎲離線骰子》遊戲增加《🌪️風骰子》升級功能。",
+            "tags": ["feature", "game", "dice"],
+            "milestone": "新增功能"
+        }, {
+            "date": "2026年8月9日",
+            "title": "《🎲離線骰子》遊戲更新。",
+            "description": "《🎲離線骰子》遊戲增加《☠️毒骰子》升級功能。",
+            "tags": ["feature", "game", "dice"],
+            "milestone": "新增功能"
+        }, {
+            "date": "2026年8月10日",
+            "title": "《🎲離線骰子》遊戲更新。",
+            "description": "《🎲離線骰子》遊戲增加《❄️冰骰子》升級功能。",
+            "tags": ["feature", "game", "dice"],
+            "milestone": "新增功能"
+        }, {
+            "date": "2026年8月11日",
+            "title": "《🧮計算機》網站升級。",
+            "description": "《🧮計算機》解決二進制小數點問題。",
+            "tags": ["design", "tool"],
+            "milestone": "設計更新"
+        }, {
+            "date": "2026年8月12日",
+            "title": "新增《🌼 ICQ 包剪揼》遊戲。",
+            "description": "進入《📡頻道》->《🎮小遊戲》以遊玩《🌼 ICQ 包剪揼》。",
+            "tags": ["launch", "game"],
+            "milestone": "網站發布"
+        }, {
+            "date": "2026年8月13日",
+            "title": "《💡迪遜網頁版本更新》網站升級。",
+            "description": "《💡迪遜網頁版本更新》增加多書籤標記功能、護眼模式及資料更新功能。",
+            "tags": ["design", "tool"],
+            "milestone": "設計更新"
+        }, {
+            "date": "2026年8月14日",
+            "title": "《⛅天氣預報》網站升級。",
+            "description": "《⛅天氣預報》新增護眼模式。",
+            "tags": ["feature", "tool", "cafe"],
+            "milestone": "新增功能"
+        }, {
+            "date": "2026年8月15日",
+            "title": "《☕迪遜咖啡廳》網站更新。",
+            "description": "《☕迪遜咖啡廳》實現全網頁多語言顯示。",
+            "tags": ["feature", "tool", "cafe"],
+            "milestone": "新增功能"
+        }, {
+            "date": "2026年8月16日",
+            "title": "《🐟摸魚模式》升級。",
+            "description": "《☕迪遜咖啡廳》的《🐟摸魚模式》介面更真實。",
+            "tags": ["design", "tool", "cafe"],
+            "milestone": "設計更新"
+        }, {
+            "date": "2026年8月17日",
+            "title": "《📝每日任務》網站升級。",
+            "description": "《⚙️工具》增加《📝每日任務》功能，《📝每日任務》網頁新增搬遷任務功能及護眼模式。",
+            "tags": ["feature", "tool", "cafe"],
+            "milestone": "新增功能"
+        }, {
+            "date": "2026年8月18日",
+            "title": "《🎲離線骰子》遊戲更新。",
+            "description": "《🎲離線骰子》遊戲增加音效及音樂。",
+            "tags": ["feature", "game", "dice"],
+            "milestone": "新增功能"
+        }, {
+            "date": "2026年8月19日",
+            "title": "《⭕❌井字棋》遊戲更新。",
+            "description": "《⭕❌井字棋》遊戲增加音效及音樂。",
+            "tags": ["feature", "game", "tic_tac_toe"],
+            "milestone": "新增功能"
         }];
 
-        // ============================================================
-        //  STORE
-        // ============================================================
-        const STORAGE_KEY = 'dison_updates_data';
+    // ============================================================
+    //  STORE
+    // ============================================================
+    const STORAGE_KEY = 'diczon_updates_data_v32';
 
-        function loadData() {
-            try {
-                const raw = localStorage.getItem(STORAGE_KEY);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+	function parseDateToNumber(dateStr) {
+		const match = dateStr.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
+		if (match) {
+			const y = parseInt(match[1]);
+			const m = String(parseInt(match[2])).padStart(2, '0');
+			const d = String(parseInt(match[3])).padStart(2, '0');
+			return parseInt(`${y}${m}${d}`);
+		}
+		return 0;
+	}
+
+    function loadData() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    // 資料遷移：若舊格式只有 category，轉為 tags 陣列
+                    const migrated = parsed.map(item => {
+                        if (item.category && !item.tags) {
+                            return { ...item, tags: [item.category], category: undefined };
+                        }
+                        if (!item.tags || !Array.isArray(item.tags)) {
+                            return { ...item, tags: [] };
+                        }
+                        return { ...item };
+                    });
+                    return migrated;
                 }
-            } catch (_) { /* ignore */ }
-            // 首次使用，保存默認數據
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_DATA));
-            return [...DEFAULT_DATA];
-        }
+            }
+        } catch (_) { /* ignore */ }
 
-        function saveData(data) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        }
+        // 首次使用，保存預設數據
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_DATA));
+        return DEFAULT_DATA.map(item => ({ ...item }));
+    }
 
-        // ============================================================
-        //  STATE
-        // ============================================================
-        let updates = loadData();
-        let currentFilter = 'all';
-        let isReversed = true;
-        let isCompact = false;
+    function saveData(data) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
 
-        // ============================================================
-        //  DOM REFS
-        // ============================================================
-        const container = document.getElementById('timelineContainer');
-        const filterBtns = document.querySelectorAll('.filter-btn');
-        const viewBtns = document.querySelectorAll('.view-toggle button');
-        const sortBtn = document.getElementById('btnSortToggle');
-        const sortLabel = document.getElementById('sortLabel');
-        const modalOverlay = document.getElementById('modalOverlay');
-        const modalTitle = document.getElementById('modalTitle');
-        const modalSub = document.getElementById('modalSub');
-        const editIndexInput = document.getElementById('editIndex');
-        const form = document.getElementById('updateForm');
-        const btnAdd = document.getElementById('btnAddUpdate');
-        const btnCancel = document.getElementById('modalCancel');
-        const btnSubmit = document.getElementById('modalSubmit');
-        const themeToggle = document.getElementById('themeToggle');
-        const btnExport = document.getElementById('btnExportTxt');
-        const btnClear = document.getElementById('btnClearData');
+    // ============================================================
+    //  STATE
+    // ============================================================
+    let updates = loadData();
+    let currentFilter = 'all';
+    let isReversed = true;
+    let isCompact = false;
 
-        // stats
-        const totalCount = document.getElementById('totalCount');
-        const categoryCount = document.getElementById('categoryCount');
-        const latestDate = document.getElementById('latestDate');
+    // ============================================================
+    //  DOM REFS
+    // ============================================================
+    const container = document.getElementById('timelineContainer');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const viewBtns = document.querySelectorAll('.view-toggle button');
+    const sortBtn = document.getElementById('btnSortToggle');
+    const sortLabel = document.getElementById('sortLabel');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalSub = document.getElementById('modalSub');
+    const editIndexInput = document.getElementById('editIndex');
+    const form = document.getElementById('updateForm');
+    const btnAdd = document.getElementById('btnAddUpdate');
+    const btnCancel = document.getElementById('modalCancel');
+    const btnSubmit = document.getElementById('modalSubmit');
+    const themeToggle = document.getElementById('themeToggle');
+    const btnExport = document.getElementById('btnExportTxt');
+    const btnClear = document.getElementById('btnClearData');
+    const tagCheckboxGroup = document.getElementById('tagCheckboxGroup');
 
-        // badges
-        const badgeIds = {
-            all: 'badgeAll',
-            launch: 'badgeLaunch',
-            design: 'badgeDesign',
-            feature: 'badgeFeature',
-            growth: 'badgeGrowth',
-            dice: 'badgeDice',
-            cafe: 'badgeCafe',
-            game: 'badgeGame',
-            tool: 'badgeTool',
-            info: 'badgeInfo'
-        };
+    // stats
+    const totalCount = document.getElementById('totalCount');
+    const tagCount = document.getElementById('tagCount');
+    const latestDate = document.getElementById('latestDate');
 
-        // ============================================================
-        //  RENDER
-        // ============================================================
-        function render() {
-            let filtered = updates;
-            if (currentFilter !== 'all') {
-                filtered = updates.filter(item => item.category === currentFilter);
+    // badges
+    const badgeIds = {
+        all: 'badgeAll',
+        launch: 'badgeLaunch',
+        design: 'badgeDesign',
+        feature: 'badgeFeature',
+        growth: 'badgeGrowth',
+        dice: 'badgeDice',
+        cafe: 'badgeCafe',
+        game: 'badgeGame',
+        tool: 'badgeTool',
+        info: 'badgeInfo'
+    };
+
+    // ============================================================
+    //  產生標籤複選框
+    // ============================================================
+    function renderTagCheckboxes(selectedTags = []) {
+        tagCheckboxGroup.innerHTML = '';
+        TAG_DEFS.forEach(tag => {
+            const label = document.createElement('label');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = tag.id;
+            checkbox.checked = selectedTags.includes(tag.id);
+            checkbox.dataset.tagId = tag.id;
+
+            const span = document.createElement('span');
+            span.textContent = `${tag.icon} ${tag.label}`;
+
+            label.appendChild(checkbox);
+            label.appendChild(span);
+            tagCheckboxGroup.appendChild(label);
+
+            // 點擊 label 時切換 checked 樣式
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    label.classList.add('checked');
+                } else {
+                    label.classList.remove('checked');
+                }
+            });
+            // 初始化樣式
+            if (checkbox.checked) label.classList.add('checked');
+        });
+    }
+
+    // 取得目前表單中選取的標籤
+    function getSelectedTags() {
+        const checkboxes = tagCheckboxGroup.querySelectorAll('input[type="checkbox"]:checked');
+        return Array.from(checkboxes).map(cb => cb.value);
+    }
+
+    // 設定表單中選取的標籤
+    function setSelectedTags(tags) {
+        const checkboxes = tagCheckboxGroup.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(cb => {
+            cb.checked = tags.includes(cb.value);
+            const label = cb.closest('label');
+            if (label) {
+                if (cb.checked) label.classList.add('checked');
+                else label.classList.remove('checked');
+            }
+        });
+    }
+
+    // ============================================================
+    //  格式化壓縮匯出
+    // ============================================================
+    function formatCompact(data, indent = 2) {
+        const space = ' '.repeat(indent);
+
+        function stringify(value, depth) {
+            const currentIndent = space.repeat(depth);
+            const nextIndent = space.repeat(depth + 1);
+
+            if (value === null) return 'null';
+            if (typeof value === 'boolean') return value ? 'true' : 'false';
+            if (typeof value === 'number') return String(value);
+            if (typeof value === 'string') return JSON.stringify(value);
+
+            if (Array.isArray(value)) {
+                if (value.length === 0) return '[]';
+                const items = value.map(item => stringify(item, depth + 1));
+                const isSimple = value.every(item => typeof item !== 'object' || item === null);
+                if (isSimple) {
+                    return '[' + items.join(', ') + ']';
+                } else {
+                    return '[\n' + items.join(', ') + '\n' + currentIndent + ']';
+                }
             }
 
-            const sorted = isReversed ? [...filtered].reverse() : [...filtered];
+            if (typeof value === 'object') {
+                const keys = Object.keys(value);
+                if (keys.length === 0) return '{}';
+                const pairs = keys.map(key => {
+                    const valStr = stringify(value[key], depth + 1);
+                    return `${nextIndent}"${key}": ${valStr}`;
+                });
+                return '{\n' + pairs.join(',\n') + '\n' + currentIndent + '}';
+            }
 
-            container.innerHTML = '';
-            if (sorted.length === 0) {
-                container.innerHTML =
-                    `<div style="padding:40px;text-align:center;color:var(--text-muted);background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow);">
+            return String(value);
+        }
+
+        return stringify(data, 0);
+    }
+
+    // ============================================================
+    //  RENDER
+    // ============================================================
+    function render() {
+        let filtered = updates;
+        if (currentFilter !== 'all') {
+            // 篩選：包含該標籤的資料
+            filtered = updates.filter(item => item.tags && item.tags.includes(currentFilter));
+        }
+
+        const sorted = [...filtered].sort((a, b) => {
+			const da = parseDateToNumber(a.date);
+			const db = parseDateToNumber(b.date);
+			return isReversed ? db - da : da - db;
+		});
+
+        container.innerHTML = '';
+        if (sorted.length === 0) {
+            container.innerHTML =
+                `<div style="padding:40px;text-align:center;color:var(--text-muted);background:var(--bg-card);border-radius:var(--radius);box-shadow:var(--shadow);">
                         <i class="fas fa-inbox" style="font-size:2rem;display:block;margin-bottom:12px;"></i>
                         目前沒有更新紀錄，點擊「新增更新」來添加第一筆！
                     </div>`;
-            } else {
-                sorted.forEach((item) => {
-                    const realIndex = updates.indexOf(item);
-                    const div = document.createElement('div');
-                    div.className = `timeline-item visible ${getColorClass(item.category)}`;
-                    div.dataset.category = item.category;
-                    div.innerHTML = `
+        } else {
+            sorted.forEach((item) => {
+                const realIndex = updates.indexOf(item);
+                const primaryTag = (item.tags && item.tags.length > 0) ? item.tags[0] : '';
+                const div = document.createElement('div');
+                div.className = `timeline-item visible`;
+                div.dataset.primaryTag = primaryTag;
+                div.dataset.category = primaryTag;
+
+                // 建立標籤 HTML
+                let tagsHtml = '';
+                if (item.tags && item.tags.length > 0) {
+                    const tagItems = item.tags.map(tid => {
+                        const icon = TAG_ICON_MAP[tid] || '🏷️';
+                        const label = TAG_LABEL_MAP[tid] || tid;
+                        return `<span class="tag-item"><i class="fas fa-tag"></i>${icon} ${label}</span>`;
+                    }).join('');
+                    tagsHtml = `<div class="tag-list">${tagItems}</div>`;
+                }
+
+                // 里程碑
+                let milestoneHtml = '';
+                if (item.milestone) {
+                    milestoneHtml =
+                        `<span class="milestone-tag"><i class="fas fa-flag"></i> ${item.milestone}</span>`;
+                }
+
+                div.innerHTML = `
                         <div class="timeline-content">
                             <div class="date"><i class="fas fa-calendar-alt"></i> ${item.date}</div>
                             <div class="title">${item.title}</div>
                             <div class="desc">${item.description}</div>
                             <div class="meta">
-                                <span class="milestone-tag"><i class="fas fa-flag"></i> ${item.milestone || '里程碑'}</span>
-                                <span class="milestone-tag" style="background:var(--input-bg);color:var(--text-muted);">
-                                    <i class="fas fa-tag"></i> ${getCategoryLabel(item.category)}
-                                </span>
+                                ${tagsHtml}
+                                ${milestoneHtml}
                                 <div class="actions">
                                     <button class="btn-icon" data-action="edit" data-index="${realIndex}" title="編輯"><i class="fas fa-edit"></i></button>
                                     <button class="btn-icon danger" data-action="delete" data-index="${realIndex}" title="刪除"><i class="fas fa-trash-alt"></i></button>
@@ -2167,279 +2403,262 @@
                             </div>
                         </div>
                     `;
-                    container.appendChild(div);
+                container.appendChild(div);
+            });
+        }
+
+        updateStats();
+        updateBadges();
+
+        container.querySelectorAll('[data-action="edit"]').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const idx = parseInt(this.dataset.index);
+                openEditModal(idx);
+            });
+        });
+        container.querySelectorAll('[data-action="delete"]').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const idx = parseInt(this.dataset.index);
+                if (confirm(`確定要刪除「${updates[idx].title}」嗎？`)) {
+                    updates.splice(idx, 1);
+                    saveData(updates);
+                    render();
+                }
+            });
+        });
+
+        if (isCompact) {
+            container.closest('.container')?.classList.add('compact');
+        } else {
+            container.closest('.container')?.classList.remove('compact');
+        }
+    }
+
+    function updateStats() {
+        totalCount.textContent = updates.length;
+        // 計算所有出現過的標籤種類
+        const allTags = new Set();
+        updates.forEach(item => {
+            if (item.tags) item.tags.forEach(t => allTags.add(t));
+        });
+        tagCount.textContent = allTags.size;
+        if (updates.length > 0) {
+			const sorted = [...updates].sort((a, b) => parseDateToNumber(a.date) - parseDateToNumber(b.date));
+			latestDate.textContent = sorted[sorted.length - 1].date || '—';
+		} else {
+            latestDate.textContent = '—';
+        }
+    }
+
+    function updateBadges() {
+        const counts = {};
+        updates.forEach(item => {
+            if (item.tags) {
+                item.tags.forEach(t => {
+                    counts[t] = (counts[t] || 0) + 1;
                 });
             }
-
-            updateStats();
-            updateBadges();
-
-            container.querySelectorAll('[data-action="edit"]').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const idx = parseInt(this.dataset.index);
-                    openEditModal(idx);
-                });
-            });
-            container.querySelectorAll('[data-action="delete"]').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const idx = parseInt(this.dataset.index);
-                    if (confirm(`確定要刪除「${updates[idx].title}」嗎？`)) {
-                        updates.splice(idx, 1);
-                        saveData(updates);
-                        render();
-                    }
-                });
-            });
-
-            if (isCompact) {
-                container.closest('.container')?.classList.add('compact');
-            } else {
-                container.closest('.container')?.classList.remove('compact');
-            }
-        }
-
-        function getColorClass(category) {
-            const map = {
-                launch: 'green',
-                design: 'orange',
-                feature: 'purple',
-                growth: 'red',
-                dice: 'teal',
-                cafe: 'pink',
-                game: 'gold',
-                tool: 'teal',
-                info: 'purple'
-            };
-            return map[category] || 'green';
-        }
-
-        function getCategoryLabel(category) {
-            const map = {
-                launch: '🚀 網站發佈',
-                design: '🎨 設計更新',
-                feature: '⚡ 新增功能',
-                growth: '📈 成長指標',
-                dice: '🎲 離線骰子',
-                cafe: '☕ 迪遜咖啡廳',
-                game: '🎮 遊戲',
-                tool: '🔧 工具',
-                info: '📰 資訊'
-            };
-            return map[category] || category;
-        }
-
-        function updateStats() {
-            totalCount.textContent = updates.length;
-            const cats = new Set(updates.map(item => item.category));
-            categoryCount.textContent = cats.size;
-            if (updates.length > 0) {
-                const sorted = [...updates].sort((a, b) => a.date.localeCompare(b.date));
-                latestDate.textContent = sorted[sorted.length - 1].date || '—';
-            } else {
-                latestDate.textContent = '—';
-            }
-        }
-
-        function updateBadges() {
-            const counts = {};
-            updates.forEach(item => {
-                counts[item.category] = (counts[item.category] || 0) + 1;
-            });
-            counts.all = updates.length;
-            for (const [key, id] of Object.entries(badgeIds)) {
-                const el = document.getElementById(id);
-                if (el) el.textContent = counts[key] || 0;
-            }
-        }
-
-        // ============================================================
-        //  FILTER
-        // ============================================================
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                filterBtns.forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                currentFilter = this.dataset.filter;
-                render();
-            });
         });
-
-        // ============================================================
-        //  VIEW
-        // ============================================================
-        viewBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                viewBtns.forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                isCompact = this.dataset.view === 'compact';
-                render();
-            });
-        });
-
-        // ============================================================
-        //  SORT
-        // ============================================================
-        sortBtn.addEventListener('click', function() {
-            isReversed = !isReversed;
-            sortLabel.textContent = isReversed ? '最新優先' : '最早優先';
-            this.querySelector('i').className = isReversed ? 'fas fa-sort-amount-down' : 'fas fa-sort-amount-up';
-            render();
-        });
-
-        // ============================================================
-        //  MODAL
-        // ============================================================
-        function openModal(title, sub, data, index) {
-            modalTitle.textContent = title;
-            modalSub.textContent = sub;
-            editIndexInput.value = index !== undefined ? index : -1;
-            if (data) {
-                document.getElementById('inputDate').value = data.date || '';
-                document.getElementById('inputTitle').value = data.title || '';
-                document.getElementById('inputDesc').value = data.description || '';
-                document.getElementById('inputCategory').value = data.category || 'launch';
-                document.getElementById('inputMilestone').value = data.milestone || '';
-                btnSubmit.textContent = '💾 更新';
-            } else {
-                document.getElementById('inputDate').value = new Date().toLocaleDateString('zh-CN', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-                document.getElementById('inputTitle').value = '';
-                document.getElementById('inputDesc').value = '';
-                document.getElementById('inputCategory').value = 'feature';
-                document.getElementById('inputMilestone').value = '新增功能';
-                btnSubmit.textContent = '💾 儲存更新';
-            }
-            modalOverlay.classList.add('open');
+        counts.all = updates.length;
+        for (const [key, id] of Object.entries(badgeIds)) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = counts[key] || 0;
         }
+    }
 
-        function closeModal() {
-            modalOverlay.classList.remove('open');
-        }
-
-        function openEditModal(index) {
-            const item = updates[index];
-            if (!item) return;
-            openModal('✏️ 編輯更新', '修改這筆更新紀錄', item, index);
-        }
-
-        btnAdd.addEventListener('click', function() {
-            openModal('📝 新增更新', '填寫以下資料，新增一筆更新紀錄', null);
-        });
-
-        btnCancel.addEventListener('click', closeModal);
-        modalOverlay.addEventListener('click', function(e) {
-            if (e.target === this) closeModal();
-        });
-
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const date = document.getElementById('inputDate').value.trim();
-            const title = document.getElementById('inputTitle').value.trim();
-            const description = document.getElementById('inputDesc').value.trim();
-            const category = document.getElementById('inputCategory').value;
-            const milestone = document.getElementById('inputMilestone').value.trim() || '里程碑';
-            const index = parseInt(editIndexInput.value);
-
-            if (!title) { alert('請輸入標題'); return; }
-            if (!date) { alert('請輸入日期'); return; }
-
-            const newItem = { date, title, description, category, milestone };
-
-            if (index >= 0 && index < updates.length) {
-                updates[index] = newItem;
-            } else {
-                updates.push(newItem);
-            }
-
-            saveData(updates);
-            closeModal();
-            render();
-        });
-
-        // ============================================================
-        //  EXPORT TXT
-        // ============================================================
-        btnExport.addEventListener('click', function() {
-            if (updates.length === 0) {
-                alert('目前沒有任何更新紀錄可匯出。');
-                return;
-            }
-            const jsonStr = JSON.stringify(updates, null, 2);
-            const blob = new Blob([jsonStr], { type: 'text/plain;charset=utf-8' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            const now = new Date();
-            const dateStr =
-                `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
-            link.download = `dison_updates_${dateStr}.txt`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(link.href);
-        });
-
-        // ============================================================
-        //  CLEAR DATA (重置為初始數據)
-        // ============================================================
-        btnClear.addEventListener('click', function() {
-            if (updates.length === 0) {
-                alert('目前已經是空狀態，無需清除。');
-                return;
-            }
-            const confirmMsg =
-                '⚠️ 確定要清除所有瀏覽器儲存的更新紀錄嗎？\n\n此操作將會：\n• 刪除所有您透過「新增更新」加入的紀錄\n• 恢復為初始預設數據\n• 此操作無法復原！\n\n確定繼續？';
-            if (!confirm(confirmMsg)) return;
-
-            // 重置為 DEFAULT_DATA 的深拷貝
-            updates = DEFAULT_DATA.map(item => ({ ...item }));
-            saveData(updates);
-            // 重置過濾器為「全部」
-            currentFilter = 'all';
+    // ============================================================
+    //  FILTER
+    // ============================================================
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
             filterBtns.forEach(b => b.classList.remove('active'));
-            document.querySelector('.filter-btn[data-filter="all"]')?.classList.add('active');
+            this.classList.add('active');
+            currentFilter = this.dataset.filter;
             render();
-            alert('✅ 已清除所有自訂紀錄，恢復為初始數據。');
         });
+    });
 
-        // ============================================================
-        //  THEME
-        // ============================================================
-        function getPreferredTheme() {
-            const stored = localStorage.getItem('dison_theme');
-            if (stored === 'dark' || stored === 'light') return stored;
-            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        }
-
-        function setTheme(theme) {
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('dison_theme', theme);
-        }
-
-        themeToggle.addEventListener('click', function() {
-            const current = document.documentElement.getAttribute('data-theme') || 'light';
-            setTheme(current === 'dark' ? 'light' : 'dark');
+    // ============================================================
+    //  VIEW
+    // ============================================================
+    viewBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            viewBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            isCompact = this.dataset.view === 'compact';
+            render();
         });
+    });
 
-        setTheme(getPreferredTheme());
-
-        // ============================================================
-        //  INIT
-        // ============================================================
+    // ============================================================
+    //  SORT
+    // ============================================================
+    sortBtn.addEventListener('click', function() {
+        isReversed = !isReversed;
+        sortLabel.textContent = isReversed ? '最新優先' : '最早優先';
+        this.querySelector('i').className = isReversed ? 'fas fa-sort-amount-down' : 'fas fa-sort-amount-up';
         render();
+    });
 
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') closeModal();
-        });
+    // ============================================================
+    //  MODAL
+    // ============================================================
+    function openModal(title, sub, data, index) {
+        modalTitle.textContent = title;
+        modalSub.textContent = sub;
+        editIndexInput.value = index !== undefined ? index : -1;
 
-        console.log('💡 迪遜網頁版本更新 v3.1 載入完成！');
-        console.log(`📦 共有 ${updates.length} 筆更新紀錄 (含預設數據)`);
-        console.log('🏷️ 分類:', [...new Set(updates.map(i => i.category))].join(', '));
-        console.log('💡 提示: 點擊「匯出TXT」可備份所有數據，點擊「清除紀錄」可重置為初始狀態。');
-    </script>
+        // 先渲染複選框
+        renderTagCheckboxes(data && data.tags ? data.tags : []);
+
+        if (data) {
+            document.getElementById('inputDate').value = data.date || '';
+            document.getElementById('inputTitle').value = data.title || '';
+            document.getElementById('inputDesc').value = data.description || '';
+            document.getElementById('inputMilestone').value = data.milestone || '';
+            if (data.tags) setSelectedTags(data.tags);
+            btnSubmit.textContent = '💾 更新';
+        } else {
+            document.getElementById('inputDate').value = new Date().toLocaleDateString('zh-CN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            document.getElementById('inputTitle').value = '';
+            document.getElementById('inputDesc').value = '';
+            document.getElementById('inputMilestone').value = '新增功能';
+            setSelectedTags([]);
+            btnSubmit.textContent = '💾 儲存更新';
+        }
+        modalOverlay.classList.add('open');
+    }
+
+    function closeModal() {
+        modalOverlay.classList.remove('open');
+    }
+
+    function openEditModal(index) {
+        const item = updates[index];
+        if (!item) return;
+        openModal('✏️ 編輯更新', '修改這筆更新紀錄（可調整多個標籤）', item, index);
+    }
+
+    btnAdd.addEventListener('click', function() {
+        openModal('📝 新增更新', '填寫以下資料，新增一筆更新紀錄（可選多個標籤）', null);
+    });
+
+    btnCancel.addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const date = document.getElementById('inputDate').value.trim();
+        const title = document.getElementById('inputTitle').value.trim();
+        const description = document.getElementById('inputDesc').value.trim();
+        const milestone = document.getElementById('inputMilestone').value.trim() || '里程碑';
+        const tags = getSelectedTags();
+        const index = parseInt(editIndexInput.value);
+
+        if (!title) { alert('請輸入標題'); return; }
+        if (!date) { alert('請輸入日期'); return; }
+        if (tags.length === 0) { alert('請至少選擇一個標籤'); return; }
+
+        const newItem = { date, title, description, tags, milestone };
+
+        if (index >= 0 && index < updates.length) {
+            updates[index] = newItem;
+        } else {
+            updates.push(newItem);
+        }
+
+        saveData(updates);
+        closeModal();
+        render();
+    });
+
+    // ============================================================
+    //  EXPORT TXT
+    // ============================================================
+    btnExport.addEventListener('click', function() {
+        if (updates.length === 0) {
+            alert('目前沒有任何更新紀錄可匯出。');
+            return;
+        }
+        const result = formatCompact(updates, 2);
+        const blob = new Blob([result], { type: 'text/plain;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        const now = new Date();
+        const dateStr =
+            `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+        link.download = `diczon_updates_${dateStr}.txt`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+    });
+
+    // ============================================================
+    //  CLEAR DATA
+    // ============================================================
+    btnClear.addEventListener('click', function() {
+        if (updates.length === 0) {
+            alert('目前已經是空狀態，無需清除。');
+            return;
+        }
+        const confirmMsg =
+            '⚠️ 確定要清除所有瀏覽器儲存的更新紀錄嗎？\n\n此操作將會：\n• 刪除所有您透過「新增更新」加入的紀錄\n• 恢復為初始預設數據\n• 此操作無法復原！\n\n確定繼續？';
+        if (!confirm(confirmMsg)) return;
+
+        updates = DEFAULT_DATA.map(item => ({ ...item }));
+        saveData(updates);
+        currentFilter = 'all';
+        filterBtns.forEach(b => b.classList.remove('active'));
+        document.querySelector('.filter-btn[data-filter="all"]')?.classList.add('active');
+        render();
+        alert('✅ 已清除所有自訂紀錄，恢復為初始數據。');
+    });
+
+    // ============================================================
+    //  THEME
+    // ============================================================
+    function getPreferredTheme() {
+        const stored = localStorage.getItem('diczon_theme');
+        if (stored === 'dark' || stored === 'light') return stored;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    function setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('diczon_theme', theme);
+    }
+
+    themeToggle.addEventListener('click', function() {
+        const current = document.documentElement.getAttribute('data-theme') || 'light';
+        setTheme(current === 'dark' ? 'light' : 'dark');
+    });
+
+    setTheme(getPreferredTheme());
+
+    // ============================================================
+    //  INIT
+    // ============================================================
+    render();
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeModal();
+    });
+
+    console.log('💡 迪遜網頁版本更新 v3.2 載入完成！（支援多標籤）');
+    console.log(`📦 共有 ${updates.length} 筆更新紀錄`);
+    const allTags = new Set();
+    updates.forEach(item => { if (item.tags) item.tags.forEach(t => allTags.add(t)); });
+    console.log('🏷️ 標籤種類:', [...allTags].join(', '));
+    console.log('💡 每筆資料可選擇多個標籤，點擊過濾按鈕可篩選。');
+</script>
 </body>
 </html>
