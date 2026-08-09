@@ -11,7 +11,6 @@
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: 'Segoe UI', 'PingFang TC', 'Microsoft YaHei', Arial, sans-serif;
             min-height: 100vh;
@@ -20,8 +19,8 @@
             align-items: center;
             background: linear-gradient(135deg, #0c0e1a 0%, #1a1a2e 50%, #16213e 100%);
             padding: 20px;
+            position: relative;
         }
-
         .game-wrapper {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(20px);
@@ -33,13 +32,11 @@
             box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
             position: relative;
         }
-
         /* ===== 主選單 flex 排列 ===== */
         #menuScreen {
             display: flex;
             flex-direction: column;
         }
-
         .menu-title {
             text-align: center;
             margin-bottom: 15px;
@@ -56,7 +53,6 @@
             text-shadow: 0 0 10px rgba(255, 107, 107, 0.3), 0 0 20px rgba(247, 151, 30, 0.2), 0 0 40px rgba(255, 215, 0, 0.15), 0 0 80px rgba(78, 205, 196, 0.1), 0 8px 30px rgba(0, 0, 0, 0.5);
             -webkit-text-fill-color: transparent;
         }
-
         .menu-title::before {
             content: '⭕❌ 井字棋';
             position: absolute;
@@ -75,24 +71,17 @@
             z-index: -1;
             transform: scale(1.02);
         }
-
         @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
         }
-
-        .menu-title .circle {
-            color: #ffd700;
-            text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
-            -webkit-text-fill-color: #ffd700;
-        }
-        .menu-title .cross {
-            color: #ff6b6b;
-            text-shadow: 0 0 20px rgba(255, 107, 107, 0.6);
-            -webkit-text-fill-color: #ff6b6b;
-        }
-
         .title-underline {
             width: 120px;
             height: 3px;
@@ -102,10 +91,16 @@
             animation: underlinePulse 2s ease-in-out infinite;
         }
         @keyframes underlinePulse {
-            0%, 100% { width: 120px; opacity: 0.6; }
-            50% { width: 200px; opacity: 1; }
+            0%,
+            100% {
+                width: 120px;
+                opacity: 0.6;
+            }
+            50% {
+                width: 200px;
+                opacity: 1;
+            }
         }
-
         .menu-sub {
             text-align: center;
             color: rgba(255, 255, 255, 0.35);
@@ -113,7 +108,6 @@
             margin-bottom: 25px;
             letter-spacing: 2px;
         }
-
         /* 預覽棋盤 */
         .preview-container {
             display: flex;
@@ -125,7 +119,6 @@
         .preview-container.hidden {
             display: none;
         }
-
         .preview-board {
             display: grid;
             grid-template-columns: repeat(3, 50px);
@@ -148,13 +141,20 @@
             transition: all 0.3s;
             border: 1px solid rgba(255, 255, 255, 0.04);
         }
-        .preview-cell.X { color: #ff6b6b; text-shadow: 0 0 20px rgba(255, 107, 107, 0.3); }
-        .preview-cell.O { color: #4ecdc4; text-shadow: 0 0 20px rgba(78, 205, 196, 0.3); }
-        .preview-cell.empty { opacity: 0.2; }
-
+        .preview-cell.X {
+            color: #ff6b6b;
+            text-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
+        }
+        .preview-cell.O {
+            color: #4ecdc4;
+            text-shadow: 0 0 20px rgba(78, 205, 196, 0.3);
+        }
+        .preview-cell.empty {
+            opacity: 0.2;
+        }
         .lang-container {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
         .lang-select {
             padding: 6px 16px;
@@ -167,10 +167,132 @@
             outline: none;
             transition: all 0.3s;
         }
-        .lang-select:hover { background: rgba(255, 255, 255, 0.15); }
-        .lang-select option { background: #1a1a2e; color: #fff; }
+        .lang-select:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .lang-select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
 
-        /* ===== 設定區（內含開始遊戲與返回按鈕） ===== */
+        /* ===== 工具列（音符＋獎盃＋儲存載入） ===== */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 12px 20px;
+            margin-bottom: 18px;
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .toolbar .btn-icon {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+        .toolbar .btn-icon:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.05);
+        }
+        .toolbar .btn-icon.active {
+            background: rgba(78, 205, 196, 0.25);
+            border-color: #4ecdc4;
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.2);
+        }
+        .toolbar .btn-icon.muted {
+            opacity: 0.4;
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+        .toolbar .trophy-display {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: rgba(255, 215, 0, 0.9);
+            font-size: 18px;
+            font-weight: 700;
+            padding: 4px 14px 4px 10px;
+            background: rgba(255, 215, 0, 0.08);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            white-space: nowrap;
+        }
+        .toolbar .trophy-display span {
+            font-size: 22px;
+        }
+        .toolbar .btn-save-load {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.75);
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 500;
+        }
+        .toolbar .btn-save-load:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+        }
+        .toolbar .btn-save-load.save {
+            border-color: rgba(78, 205, 196, 0.25);
+            color: #4ecdc4;
+        }
+        .toolbar .btn-save-load.save:hover {
+            background: rgba(78, 205, 196, 0.15);
+        }
+        .toolbar .btn-save-load.load {
+            border-color: rgba(247, 151, 30, 0.25);
+            color: #f7971e;
+        }
+        .toolbar .btn-save-load.load:hover {
+            background: rgba(247, 151, 30, 0.15);
+        }
+        .toolbar .sep {
+            width: 1px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.08);
+            flex-shrink: 0;
+        }
+        @media (max-width: 600px) {
+            .toolbar {
+                gap: 8px 12px;
+                padding: 8px 12px;
+                border-radius: 30px;
+            }
+            .toolbar .btn-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 17px;
+            }
+            .toolbar .trophy-display {
+                font-size: 15px;
+                padding: 2px 10px 2px 8px;
+            }
+            .toolbar .btn-save-load {
+                font-size: 12px;
+                padding: 4px 12px;
+            }
+        }
+
+        /* ===== 設定區 ===== */
         #settingsArea {
             display: none;
             margin-top: 0;
@@ -182,28 +304,35 @@
             animation: fadeSlideDown 0.4s ease;
         }
         @keyframes fadeSlideDown {
-            from { opacity: 0; transform: translateY(-15px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-
         .menu-settings {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
         }
-
         .menu-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
             color: rgba(255, 255, 255, 0.8);
-            font-size: 16px;
+            font-size: 15px;
             padding: 8px 16px;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 30px;
             border: 1px solid rgba(255, 255, 255, 0.06);
         }
-        .menu-row label { flex: 1; }
+        .menu-row label {
+            flex: 1;
+            font-weight: 500;
+        }
         .menu-row select {
             flex: 2;
             padding: 6px 12px;
@@ -216,10 +345,13 @@
             outline: none;
             transition: all 0.3s;
         }
-        .menu-row select:hover { background: rgba(255, 255, 255, 0.15); }
-        .menu-row select option { background: #1a1a2e; color: #fff; }
-
-        /* 開始遊戲與返回按鈕 */
+        .menu-row select:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .menu-row select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
         .btn-start-game {
             width: 100%;
             padding: 14px;
@@ -233,13 +365,12 @@
             transition: all 0.3s;
             letter-spacing: 2px;
             box-shadow: 0 4px 20px rgba(78, 205, 196, 0.3);
-            margin-bottom: 10px; /* 與返回按鈕間距 */
+            margin-bottom: 10px;
         }
         .btn-start-game:hover {
             transform: scale(1.02);
             box-shadow: 0 6px 30px rgba(78, 205, 196, 0.5);
         }
-
         .btn-enter {
             width: 100%;
             padding: 14px;
@@ -261,8 +392,6 @@
             transform: scale(1.02);
             box-shadow: 0 6px 30px rgba(247, 151, 30, 0.5);
         }
-
-        /* 外部進入遊戲按鈕（初始狀態） */
         #btnEnterGameOuter {
             display: block;
             width: 100%;
@@ -287,11 +416,13 @@
             display: none;
         }
 
-        /* 遊戲畫面 */
-        #gameScreen { display: none !important; }
-        #gameScreen.active { display: block !important; }
-
-        /* 棋盤、狀態列等（維持原樣） */
+        /* ===== 遊戲畫面 ===== */
+        #gameScreen {
+            display: none !important;
+        }
+        #gameScreen.active {
+            display: block !important;
+        }
         .board-container {
             position: relative;
             margin: 0 auto 20px;
@@ -328,23 +459,44 @@
             background: rgba(255, 255, 255, 0.12);
             transform: scale(1.03);
         }
-        .cell.taken { cursor: default; }
-        .cell.X { color: #ff6b6b; text-shadow: 0 0 30px rgba(255, 107, 107, 0.3); }
-        .cell.O { color: #4ecdc4; text-shadow: 0 0 30px rgba(78, 205, 196, 0.3); }
-
+        .cell.taken {
+            cursor: default;
+        }
+        .cell.X {
+            color: #ff6b6b;
+            text-shadow: 0 0 30px rgba(255, 107, 107, 0.3);
+        }
+        .cell.O {
+            color: #4ecdc4;
+            text-shadow: 0 0 30px rgba(78, 205, 196, 0.3);
+        }
         @keyframes blinkPulse {
-            0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0); }
-            50% { opacity: 0.25; transform: scale(0.9); box-shadow: 0 0 40px rgba(255, 215, 0, 0.5); background: rgba(255, 215, 0, 0.15); }
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0);
+            }
+            50% {
+                opacity: 0.25;
+                transform: scale(0.9);
+                box-shadow: 0 0 40px rgba(255, 215, 0, 0.5);
+                background: rgba(255, 215, 0, 0.15);
+            }
         }
         .cell.blink {
             animation: blinkPulse 0.7s ease-in-out infinite;
             z-index: 5;
             border-color: rgba(255, 215, 0, 0.3);
         }
-
         @keyframes winGlow {
-            0%, 100% { box-shadow: 0 0 20px rgba(46, 213, 115, 0.3); }
-            50% { box-shadow: 0 0 60px rgba(46, 213, 115, 0.6); }
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(46, 213, 115, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 60px rgba(46, 213, 115, 0.6);
+            }
         }
         .cell.win {
             background: rgba(46, 213, 115, 0.2) !important;
@@ -352,7 +504,6 @@
             animation: winGlow 1s ease-in-out infinite;
             transform: scale(1.05);
         }
-
         .status-bar {
             display: flex;
             justify-content: space-between;
@@ -383,9 +534,14 @@
             text-align: center;
             font-weight: 700;
         }
-        .turn-indicator.turn-X { background: rgba(255, 107, 107, 0.25); color: #ff6b6b; }
-        .turn-indicator.turn-O { background: rgba(78, 205, 196, 0.25); color: #4ecdc4; }
-
+        .turn-indicator.turn-X {
+            background: rgba(255, 107, 107, 0.25);
+            color: #ff6b6b;
+        }
+        .turn-indicator.turn-O {
+            background: rgba(78, 205, 196, 0.25);
+            color: #4ecdc4;
+        }
         .status-info {
             color: rgba(255, 255, 255, 0.4);
             font-size: 14px;
@@ -401,7 +557,6 @@
             background: rgba(255, 255, 255, 0.06);
             color: rgba(255, 255, 255, 0.6);
         }
-
         .btn-reset {
             padding: 10px 30px;
             border-radius: 30px;
@@ -419,7 +574,6 @@
             background: rgba(255, 255, 255, 0.15);
             transform: translateY(-2px);
         }
-
         .overlay {
             position: absolute;
             inset: 0;
@@ -430,19 +584,47 @@
             justify-content: center;
             align-items: center;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
             z-index: 20;
+            padding: 20px;
         }
-        .overlay.show { display: flex; animation: fadeIn 0.5s ease; }
+        .overlay.show {
+            display: flex;
+            animation: fadeIn 0.5s ease;
+        }
         @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
-        .overlay .result-icon { font-size: 64px; }
-        .overlay .result-text { color: #fff; font-size: 28px; font-weight: 700; }
-        .overlay .result-sub { color: rgba(255, 255, 255, 0.5); font-size: 16px; }
+        .overlay .result-icon {
+            font-size: 64px;
+        }
+        .overlay .result-text {
+            color: #fff;
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+        }
+        .overlay .result-sub {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 16px;
+            text-align: center;
+        }
+        .overlay .result-trophy {
+            color: #ffd700;
+            font-size: 22px;
+            font-weight: 700;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+            margin-top: -4px;
+        }
         .overlay .btn-play-again {
-            margin-top: 10px;
+            margin-top: 6px;
             padding: 12px 40px;
             border-radius: 30px;
             border: none;
@@ -457,7 +639,6 @@
             transform: scale(1.05);
             box-shadow: 0 5px 25px rgba(247, 151, 30, 0.4);
         }
-
         .footer {
             margin-top: 25px;
             text-align: center;
@@ -468,927 +649,1503 @@
             padding-top: 18px;
         }
 
+        /* ===== 浮動全螢幕按鈕（右下角） ===== */
+        .float-fullscreen {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 999;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 22px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        .float-fullscreen:hover {
+            background: rgba(255, 255, 255, 0.18);
+            transform: scale(1.08);
+            color: #fff;
+        }
+        .float-fullscreen.is-full {
+            background: rgba(78, 205, 196, 0.2);
+            border-color: rgba(78, 205, 196, 0.3);
+            color: #4ecdc4;
+        }
         @media (max-width: 600px) {
-            .game-wrapper { padding: 20px; border-radius: 24px; }
-            .menu-title { font-size: 32px; }
-            .menu-row { flex-direction: column; align-items: stretch; gap: 5px; }
-            .menu-row select { flex: 1; }
-            .cell { font-size: 36px; }
-            .board { gap: 6px; padding: 8px; }
-            .status-text { font-size: 15px; }
-            .status-info { font-size: 12px; }
-            .preview-board { grid-template-columns: repeat(3, 40px); gap: 4px; padding: 6px; }
-            .preview-cell { width: 40px; height: 40px; font-size: 20px; }
+            .float-fullscreen {
+                bottom: 16px;
+                right: 16px;
+                width: 44px;
+                height: 44px;
+                font-size: 18px;
+            }
+        }
+
+        /* ===== 響應式 ===== */
+        @media (max-width: 600px) {
+            .game-wrapper {
+                padding: 20px;
+                border-radius: 24px;
+            }
+            .menu-title {
+                font-size: 32px;
+            }
+            .menu-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 5px;
+            }
+            .menu-row select {
+                flex: 1;
+            }
+            .cell {
+                font-size: 36px;
+            }
+            .board {
+                gap: 6px;
+                padding: 8px;
+            }
+            .status-text {
+                font-size: 15px;
+            }
+            .status-info {
+                font-size: 12px;
+            }
+            .preview-board {
+                grid-template-columns: repeat(3, 40px);
+                gap: 4px;
+                padding: 6px;
+            }
+            .preview-cell {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
         }
         @media (max-width: 400px) {
-            .cell { font-size: 28px; }
-            .board { gap: 4px; padding: 6px; }
-            .menu-title { font-size: 26px; }
-            .preview-board { grid-template-columns: repeat(3, 32px); gap: 3px; padding: 4px; }
-            .preview-cell { width: 32px; height: 32px; font-size: 16px; }
+            .cell {
+                font-size: 28px;
+            }
+            .board {
+                gap: 4px;
+                padding: 6px;
+            }
+            .menu-title {
+                font-size: 26px;
+            }
+            .preview-board {
+                grid-template-columns: repeat(3, 32px);
+                gap: 3px;
+                padding: 4px;
+            }
+            .preview-cell {
+                width: 32px;
+                height: 32px;
+                font-size: 16px;
+            }
+        }
+
+        /* ===== 隱藏檔案輸入 ===== */
+        #fileInput {
+            display: none;
         }
     </style>
 </head>
 <body>
 
-<div class="game-wrapper">
-    <!-- 主選單 -->
-    <div id="menuScreen">
-        <div class="menu-title" id="menuTitle">⭕❌ 井字棋</div>
-        <div class="title-underline"></div>
-        <div class="menu-sub" id="menuSub">✦ 選擇語言，然後進入遊戲 ✦</div>
+    <!-- ===== 浮動全螢幕按鈕 ===== -->
+    <button class="float-fullscreen" id="floatFullscreen" title="全螢幕">⛶</button>
 
-        <!-- 動態預覽棋盤 -->
-        <div class="preview-container" id="previewContainer">
-            <div class="preview-board" id="previewBoard">
-                <div class="preview-cell empty" data-pindex="0"></div>
-                <div class="preview-cell empty" data-pindex="1"></div>
-                <div class="preview-cell empty" data-pindex="2"></div>
-                <div class="preview-cell empty" data-pindex="3"></div>
-                <div class="preview-cell empty" data-pindex="4"></div>
-                <div class="preview-cell empty" data-pindex="5"></div>
-                <div class="preview-cell empty" data-pindex="6"></div>
-                <div class="preview-cell empty" data-pindex="7"></div>
-                <div class="preview-cell empty" data-pindex="8"></div>
-            </div>
-        </div>
+    <!-- ===== 隱藏檔案輸入 ===== -->
+    <input type="file" id="fileInput" accept=".txt">
 
-        <!-- 語言選擇 -->
-        <div class="lang-container">
-            <select class="lang-select" id="langSelect">
-                <option value="zh-TW">繁體中文</option>
-                <option value="zh-CN">简体中文</option>
-                <option value="en">English</option>
-                <option value="ja">日本語</option>
-                <option value="ko">한국어</option>
-            </select>
-        </div>
+    <div class="game-wrapper">
+        <!-- ===== 主選單 ===== -->
+        <div id="menuScreen">
+            <div class="menu-title" id="menuTitle">⭕❌ 井字棋</div>
+            <div class="title-underline"></div>
+            <div class="menu-sub" id="menuSub">✦ 選擇語言，然後進入遊戲 ✦</div>
 
-        <!-- 外部進入遊戲按鈕（初始顯示） -->
-        <button id="btnEnterGameOuter">▶ 進入遊戲</button>
-
-        <!-- 設定區（內含開始遊戲與返回按鈕） -->
-        <div id="settingsArea">
-            <div class="menu-settings">
-                <div class="menu-row">
-                    <label id="lblMode">模式</label>
-                    <select id="modeSelect">
-                        <option value="classic" selected>傳統</option>
-                        <option value="infinite">無限</option>
-                    </select>
-                </div>
-                <div class="menu-row">
-                    <label id="lblGameType">對戰</label>
-                    <select id="gameTypeSelect">
-                        <option value="pvp">👥 玩家 vs 玩家</option>
-                        <option value="pvc" selected>🤖 玩家 vs AI</option>
-                    </select>
-                </div>
-                <div class="menu-row" id="difficultyRow">
-                    <label id="lblDifficulty">AI 難度</label>
-                    <select id="difficultySelect">
-                        <option value="easy">簡單</option>
-                        <option value="medium">中等</option>
-                        <option value="hard" selected>困難</option>
-                    </select>
-                </div>
-                <div class="menu-row" id="firstMoveRow">
-                    <label id="lblFirstMove">先手</label>
-                    <select id="firstMoveSelect">
-                        <option value="player">👤 玩家 (X)</option>
-                        <option value="ai">🤖 AI (X)</option>
-                    </select>
+            <!-- 預覽棋盤 -->
+            <div class="preview-container" id="previewContainer">
+                <div class="preview-board" id="previewBoard">
+                    <div class="preview-cell empty" data-pindex="0"></div>
+                    <div class="preview-cell empty" data-pindex="1"></div>
+                    <div class="preview-cell empty" data-pindex="2"></div>
+                    <div class="preview-cell empty" data-pindex="3"></div>
+                    <div class="preview-cell empty" data-pindex="4"></div>
+                    <div class="preview-cell empty" data-pindex="5"></div>
+                    <div class="preview-cell empty" data-pindex="6"></div>
+                    <div class="preview-cell empty" data-pindex="7"></div>
+                    <div class="preview-cell empty" data-pindex="8"></div>
                 </div>
             </div>
 
-            <!-- 開始遊戲（上） -->
-            <button class="btn-start-game" id="btnStartGame">⚔️ 開始遊戲</button>
-            <!-- 返回按鈕（下） -->
-            <button class="btn-enter" id="btnEnterGame">🔙 返回</button>
+            <!-- 語言選擇 -->
+            <div class="lang-container">
+                <select class="lang-select" id="langSelect">
+                    <option value="zh-TW">繁體中文</option>
+                    <option value="zh-CN">简体中文</option>
+                    <option value="en">English</option>
+                    <option value="ja">日本語</option>
+                    <option value="ko">한국어</option>
+                </select>
+            </div>
+
+            <!-- ===== 工具列（音符＋獎盃＋儲存載入） ===== -->
+            <div class="toolbar" id="toolbar">
+                <button class="btn-icon active" id="btnSoundToggle" title="切換音效與音樂">🔊</button>
+                <div class="sep"></div>
+                <div class="trophy-display" id="trophyDisplay">
+                    <span>🏆</span>
+                    <span id="trophyCount">0</span>
+                </div>
+                <div class="sep"></div>
+                <button class="btn-save-load save" id="btnSave">💾 儲存</button>
+                <button class="btn-save-load load" id="btnLoad">📁 載入</button>
+            </div>
+
+            <!-- 外部進入遊戲按鈕 -->
+            <button id="btnEnterGameOuter">▶ 進入遊戲</button>
+
+            <!-- 設定區 -->
+            <div id="settingsArea">
+                <div class="menu-settings">
+                    <div class="menu-row">
+                        <label id="lblMode">模式</label>
+                        <select id="modeSelect">
+                            <option value="classic" selected>傳統</option>
+                            <option value="infinite">無限</option>
+                        </select>
+                    </div>
+                    <div class="menu-row">
+                        <label id="lblGameType">對戰</label>
+                        <select id="gameTypeSelect">
+                            <option value="pvp">👥 玩家 vs 玩家</option>
+                            <option value="pvc" selected>🤖 玩家 vs AI</option>
+                        </select>
+                    </div>
+                    <div class="menu-row" id="difficultyRow">
+                        <label id="lblDifficulty">AI 難度</label>
+                        <select id="difficultySelect">
+                            <option value="easy">簡單</option>
+                            <option value="medium">中等</option>
+                            <option value="hard" selected>困難</option>
+                        </select>
+                    </div>
+                    <div class="menu-row" id="firstMoveRow">
+                        <label id="lblFirstMove">先手</label>
+                        <select id="firstMoveSelect">
+                            <option value="player">👤 玩家 (X)</option>
+                            <option value="ai">🤖 AI (X)</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn-start-game" id="btnStartGame">⚔️ 開始遊戲</button>
+                <button class="btn-enter" id="btnEnterGame">🔙 返回</button>
+            </div>
+
+            <div class="footer" id="footerCopyright">v1.0 © 2026 ☕迪遜咖啡廳，版權所有。</div>
         </div>
 
-        <div class="footer" id="footerCopyright">v1.0 © 2025 ☕迪遜咖啡廳，版權所有。</div>
+        <!-- ===== 遊戲畫面 ===== -->
+        <div id="gameScreen">
+            <div class="board-container">
+                <div class="board" id="board">
+                    <div class="cell" data-index="0"></div>
+                    <div class="cell" data-index="1"></div>
+                    <div class="cell" data-index="2"></div>
+                    <div class="cell" data-index="3"></div>
+                    <div class="cell" data-index="4"></div>
+                    <div class="cell" data-index="5"></div>
+                    <div class="cell" data-index="6"></div>
+                    <div class="cell" data-index="7"></div>
+                    <div class="cell" data-index="8"></div>
+                </div>
+                <div class="overlay" id="overlay">
+                    <div class="result-icon" id="resultIcon">🎉</div>
+                    <div class="result-text" id="resultText">X 獲勝！</div>
+                    <div class="result-sub" id="resultSub">點擊下方繼續</div>
+                    <div class="result-trophy" id="resultTrophy" style="display:none;">🏆 +1</div>
+                    <button class="btn-play-again" id="btnPlayAgain">🔄 再玩一局</button>
+                </div>
+            </div>
+            <div class="status-bar">
+                <div class="status-text" id="statusText">
+                    <span class="turn-indicator turn-X" id="turnIndicator">X</span>
+                    <span id="statusMessage">X 的回合</span>
+                </div>
+                <div class="status-info">
+                    <span class="badge" id="modeBadge">🎯 傳統</span>
+                    <span class="badge" id="stepBadge">第 1 步</span>
+                    <span class="badge" id="countBadge">● 0</span>
+                </div>
+            </div>
+            <button class="btn-reset" id="btnReset">🔙 返回選單</button>
+        </div>
     </div>
 
-    <!-- 遊戲畫面 -->
-    <div id="gameScreen">
-        <div class="board-container">
-            <div class="board" id="board">
-                <div class="cell" data-index="0"></div>
-                <div class="cell" data-index="1"></div>
-                <div class="cell" data-index="2"></div>
-                <div class="cell" data-index="3"></div>
-                <div class="cell" data-index="4"></div>
-                <div class="cell" data-index="5"></div>
-                <div class="cell" data-index="6"></div>
-                <div class="cell" data-index="7"></div>
-                <div class="cell" data-index="8"></div>
-            </div>
-            <div class="overlay" id="overlay">
-                <div class="result-icon" id="resultIcon">🎉</div>
-                <div class="result-text" id="resultText">X 獲勝！</div>
-                <div class="result-sub" id="resultSub">點擊下方繼續</div>
-                <button class="btn-play-again" id="btnPlayAgain">🔄 再玩一局</button>
-            </div>
-        </div>
-        <div class="status-bar">
-            <div class="status-text" id="statusText">
-                <span class="turn-indicator turn-X" id="turnIndicator">X</span>
-                <span id="statusMessage">X 的回合</span>
-            </div>
-            <div class="status-info">
-                <span class="badge" id="modeBadge">🎯 傳統</span>
-                <span class="badge" id="stepBadge">第 1 步</span>
-                <span class="badge" id="countBadge">● 0</span>
-            </div>
-        </div>
-        <button class="btn-reset" id="btnReset">🔙 返回選單</button>
-    </div>
-</div>
+    <script>
+        // ============================================================
+        //  🎵 音頻管理器（使用外部 MP3 檔案）
+        // ============================================================
+        class AudioManager {
+            constructor() {
+                this.enabled = true;
+                this.homeAudio = new Audio('Tic Tac Toe - Endless Grid.mp3');
+                this.gameAudio = new Audio('Tic Tac Toe - Endless Turn.mp3');
+                this.homeAudio.loop = true;
+                this.gameAudio.loop = true;
+                this.initialized = false;
 
-<script>
-    // ============================================================
-    //  🌍 語言包
-    // ============================================================
-    const LANG = {
-        'zh-TW': {
-            title: '⭕❌ 井字棋',
-            menuSub: '✦ 選擇語言，然後進入遊戲 ✦',
-            mode: '模式',
-            classic: '傳統',
-            infinite: '無限',
-            gameType: '對戰',
-            pvp: '👥 玩家 vs 玩家',
-            pvc: '🤖 玩家 vs AI',
-            difficulty: 'AI 難度',
-            easy: '簡單',
-            medium: '中等',
-            hard: '困難',
-            firstMove: '先手',
-            firstPlayer: '👤 玩家 (X)',
-            firstAI: '🤖 AI (X)',
-            enter: '▶ 進入遊戲',
-            back: '🔙 返回',
-            start: '⚔️ 開始遊戲',
-            reset: '🔙 返回選單',
-            playAgain: '🔄 再玩一局',
-            turn: '的回合',
-            yourTurn: '你的回合',
-            aiTurn: 'AI 思考中...',
-            youWin: '🎉 你贏了！',
-            youLose: '😢 你輸了...',
-            aiWin: '🤖 AI 獲勝！',
-            aiLose: '😢 AI 輸了...',
-            draw: '🤝 平手！',
-            step: '第 {n} 步',
-            count: '● {n}',
-            you: '你',
-            ai: 'AI',
-            modeClassic: '🎯 傳統',
-            modeInfinite: '♾️ 無限',
-            resultSub: '點擊下方繼續',
-            classicRule: '9 格滿盤',
-            infiniteRule: '6 格循環',
-            player1: '玩家1',
-            player2: '玩家2',
-            copyright: 'v1.0 © {year} ☕迪遜咖啡廳，版權所有。'
-        },
-        'zh-CN': {
-            title: '⭕❌ 井字棋',
-            menuSub: '✦ 选择语言，然后进入游戏 ✦',
-            mode: '模式',
-            classic: '传统',
-            infinite: '无限',
-            gameType: '对战',
-            pvp: '👥 玩家 vs 玩家',
-            pvc: '🤖 玩家 vs AI',
-            difficulty: 'AI 难度',
-            easy: '简单',
-            medium: '中等',
-            hard: '困难',
-            firstMove: '先手',
-            firstPlayer: '👤 玩家 (X)',
-            firstAI: '🤖 AI (X)',
-            enter: '▶ 进入游戏',
-            back: '🔙 返回',
-            start: '⚔️ 开始游戏',
-            reset: '🔙 返回选单',
-            playAgain: '🔄 再玩一局',
-            turn: '的回合',
-            yourTurn: '你的回合',
-            aiTurn: 'AI 思考中...',
-            youWin: '🎉 你赢了！',
-            youLose: '😢 你输了...',
-            aiWin: '🤖 AI 获胜！',
-            aiLose: '😢 AI 输了...',
-            draw: '🤝 平手！',
-            step: '第 {n} 步',
-            count: '● {n}',
-            you: '你',
-            ai: 'AI',
-            modeClassic: '🎯 传统',
-            modeInfinite: '♾️ 无限',
-            resultSub: '点击下方继续',
-            classicRule: '9 格满盘',
-            infiniteRule: '6 格循环',
-            player1: '玩家1',
-            player2: '玩家2',
-            copyright: 'v1.0 © {year} ☕迪逊咖啡厅，版权所有。'
-        },
-        'en': {
-            title: '⭕❌ Tic Tac Toe',
-            menuSub: '✦ Select language, then enter game ✦',
-            mode: 'Mode',
-            classic: 'Classic',
-            infinite: 'Infinite',
-            gameType: 'Match',
-            pvp: '👥 Player vs Player',
-            pvc: '🤖 Player vs AI',
-            difficulty: 'AI Difficulty',
-            easy: 'Easy',
-            medium: 'Medium',
-            hard: 'Hard',
-            firstMove: 'First Move',
-            firstPlayer: '👤 Player (X)',
-            firstAI: '🤖 AI (X)',
-            enter: '▶ Enter Game',
-            back: '🔙 Back',
-            start: '⚔️ Start Game',
-            reset: '🔙 Back to Menu',
-            playAgain: '🔄 Play Again',
-            turn: "'s turn",
-            yourTurn: "Your turn",
-            aiTurn: "AI thinking...",
-            youWin: '🎉 You Win!',
-            youLose: '😢 You Lose...',
-            aiWin: '🤖 AI Wins!',
-            aiLose: '😢 AI Loses...',
-            draw: '🤝 Draw!',
-            step: 'Step {n}',
-            count: '● {n}',
-            you: 'You',
-            ai: 'AI',
-            modeClassic: '🎯 Classic',
-            modeInfinite: '♾️ Infinite',
-            resultSub: 'Click below to continue',
-            classicRule: '9 Grid Full',
-            infiniteRule: '6 Grid Cycle',
-            player1: 'Player 1',
-            player2: 'Player 2',
-            copyright: 'v1.0 © {year} ☕Diczon\'s Cafe, All Rights Reserved.'
-        },
-        'ja': {
-            title: '⭕❌ 三目並べ',
-            menuSub: '✦ 言語を選択し、ゲームに入る ✦',
-            mode: 'モード',
-            classic: 'クラシック',
-            infinite: '無限',
-            gameType: '対戦',
-            pvp: '👥 対人戦',
-            pvc: '🤖 VS AI',
-            difficulty: 'AI 難易度',
-            easy: 'かんたん',
-            medium: '普通',
-            hard: '難しい',
-            firstMove: '先手',
-            firstPlayer: '👤 プレイヤー (X)',
-            firstAI: '🤖 AI (X)',
-            enter: '▶ ゲームに入る',
-            back: '🔙 戻る',
-            start: '⚔️ 開始',
-            reset: '🔙 メニューへ',
-            playAgain: '🔄 もう一度',
-            turn: 'の番',
-            yourTurn: 'あなたの番',
-            aiTurn: 'AI 思考中...',
-            youWin: '🎉 あなたの勝利！',
-            youLose: '😢 あなたの敗北...',
-            aiWin: '🤖 AI の勝利！',
-            aiLose: '😢 AI の敗北...',
-            draw: '🤝 引き分け！',
-            step: '{n} 手目',
-            count: '● {n}',
-            you: 'あなた',
-            ai: 'AI',
-            modeClassic: '🎯 クラシック',
-            modeInfinite: '♾️ 無限',
-            resultSub: '続けるにはクリック',
-            classicRule: '9 マス',
-            infiniteRule: '6 マス循環',
-            player1: 'プレイヤー1',
-            player2: 'プレイヤー2',
-            copyright: 'v1.0 © {year} ☕ディクソンカフェ，無断転載を禁じます。'
-        },
-        'ko': {
-            title: '⭕❌ 틱택토',
-            menuSub: '✦ 언어를 선택하고 게임에 입장하세요 ✦',
-            mode: '모드',
-            classic: '클래식',
-            infinite: '무한',
-            gameType: '대전',
-            pvp: '👥 PvP',
-            pvc: '🤖 PvAI',
-            difficulty: 'AI 난이도',
-            easy: '쉬움',
-            medium: '보통',
-            hard: '어려움',
-            firstMove: '선공',
-            firstPlayer: '👤 플레이어 (X)',
-            firstAI: '🤖 AI (X)',
-            enter: '▶ 게임 입장',
-            back: '🔙 뒤로',
-            start: '⚔️ 시작',
-            reset: '🔙 메뉴로',
-            playAgain: '🔄 한 판 더',
-            turn: '의 차례',
-            yourTurn: '당신의 차례',
-            aiTurn: 'AI 생각 중...',
-            youWin: '🎉 당신 승리!',
-            youLose: '😢 당신 패배...',
-            aiWin: '🤖 AI 승리!',
-            aiLose: '😢 AI 패배...',
-            draw: '🤝 무승부!',
-            step: '{n}번째 수',
-            count: '● {n}',
-            you: '당신',
-            ai: 'AI',
-            modeClassic: '🎯 클래식',
-            modeInfinite: '♾️ 무한',
-            resultSub: '계속하려면 클릭',
-            classicRule: '9칸 풀보드',
-            infiniteRule: '6칸 순환',
-            player1: '플레이어1',
-            player2: '플레이어2',
-            copyright: 'v1.0 © {year} ☕딕슨 카페，판권 소유.'
-        }
-    };
+                // 從 localStorage 讀取聲音狀態
+                const saved = localStorage.getItem('ttt_sound_enabled');
+                if (saved !== null) {
+                    this.enabled = saved === 'true';
+                }
 
-    // ============================================================
-    //  🎮 遊戲狀態
-    // ============================================================
-    let state = {
-        board: ['', '', '', '', '', '', '', '', ''],
-        currentPlayer: 'X',
-        gameActive: false,
-        gameMode: 'classic',
-        gameType: 'pvc',
-        difficulty: 'hard',
-        firstMove: 'player',
-        moveHistory: [],
-        moveCount: 0,
-        lang: 'zh-TW',
-        winner: null,
-        isOver: false,
-        isProcessing: false,
-        playerSymbol: 'X',
-        aiSymbol: 'O'
-    };
+                // 預先載入音檔
+                this.homeAudio.load();
+                this.gameAudio.load();
 
-    // ============================================================
-    //  DOM 參考
-    // ============================================================
-    const menuScreen = document.getElementById('menuScreen');
-    const gameScreen = document.getElementById('gameScreen');
-    const menuTitle = document.getElementById('menuTitle');
-    const menuSub = document.getElementById('menuSub');
-    const previewContainer = document.getElementById('previewContainer');
-    const settingsArea = document.getElementById('settingsArea');
-    const btnEnterGameOuter = document.getElementById('btnEnterGameOuter');
-    const btnEnterGame = document.getElementById('btnEnterGame');   // 內部返回按鈕
-    const btnStartGame = document.getElementById('btnStartGame');
-    const btnReset = document.getElementById('btnReset');
-    const btnPlayAgain = document.getElementById('btnPlayAgain');
-    const langSelect = document.getElementById('langSelect');
-    const modeSelect = document.getElementById('modeSelect');
-    const gameTypeSelect = document.getElementById('gameTypeSelect');
-    const difficultySelect = document.getElementById('difficultySelect');
-    const firstMoveSelect = document.getElementById('firstMoveSelect');
-    const lblMode = document.getElementById('lblMode');
-    const lblGameType = document.getElementById('lblGameType');
-    const lblDifficulty = document.getElementById('lblDifficulty');
-    const lblFirstMove = document.getElementById('lblFirstMove');
-    const difficultyRow = document.getElementById('difficultyRow');
-    const firstMoveRow = document.getElementById('firstMoveRow');
-    const footerCopyright = document.getElementById('footerCopyright');
-
-    const cells = document.querySelectorAll('.cell');
-    const overlay = document.getElementById('overlay');
-    const resultIcon = document.getElementById('resultIcon');
-    const resultText = document.getElementById('resultText');
-    const resultSub = document.getElementById('resultSub');
-    const statusMessage = document.getElementById('statusMessage');
-    const turnIndicator = document.getElementById('turnIndicator');
-    const modeBadge = document.getElementById('modeBadge');
-    const stepBadge = document.getElementById('stepBadge');
-    const countBadge = document.getElementById('countBadge');
-    const previewCells = document.querySelectorAll('.preview-cell');
-
-    const WIN_COMBOS = [
-        [0, 1, 2], [3, 4, 5], [6, 7, 8],
-        [0, 3, 6], [1, 4, 7], [2, 5, 8],
-        [0, 4, 8], [2, 4, 6]
-    ];
-
-    // ============================================================
-    //  🌐 語言函數
-    // ============================================================
-    function t(key, params = {}) {
-        const dict = LANG[state.lang] || LANG['zh-TW'];
-        let text = dict[key] || key;
-        for (const [k, v] of Object.entries(params)) {
-            text = text.replace(`{${k}}`, v);
-        }
-        return text;
-    }
-
-    function updateLanguage() {
-        menuTitle.textContent = t('title');
-        menuSub.textContent = t('menuSub');
-        lblMode.textContent = t('mode');
-        lblGameType.textContent = t('gameType');
-        lblDifficulty.textContent = t('difficulty');
-        lblFirstMove.textContent = t('firstMove');
-        modeSelect.options[0].text = t('classic');
-        modeSelect.options[1].text = t('infinite');
-        gameTypeSelect.options[0].text = t('pvp');
-        gameTypeSelect.options[1].text = t('pvc');
-        difficultySelect.options[0].text = t('easy');
-        difficultySelect.options[1].text = t('medium');
-        difficultySelect.options[2].text = t('hard');
-        firstMoveSelect.options[0].text = t('firstPlayer');
-        firstMoveSelect.options[1].text = t('firstAI');
-        btnStartGame.textContent = t('start');
-        btnReset.textContent = t('reset');
-        btnPlayAgain.textContent = t('playAgain');
-
-        // 外部按鈕文字
-        btnEnterGameOuter.textContent = t('enter');
-        // 內部返回按鈕文字
-        btnEnterGame.textContent = t('back');
-
-        const year = new Date().getFullYear();
-        footerCopyright.textContent = t('copyright', { year: year });
-
-        updateUI();
-    }
-
-    // ============================================================
-    //  🖥️ UI 更新
-    // ============================================================
-    function updateUI() {
-        const mode = state.gameMode;
-        const modeName = mode === 'classic' ? t('modeClassic') : t('modeInfinite');
-        const rule = mode === 'classic' ? t('classicRule') : t('infiniteRule');
-        modeBadge.textContent = `${modeName} · ${rule}`;
-
-        if (state.gameActive && !state.isOver) {
-            let playerName = '';
-            if (state.gameType === 'pvp') {
-                playerName = state.currentPlayer === 'X' ? t('player1') : t('player2');
-            } else {
-                playerName = state.currentPlayer === state.playerSymbol ? t('you') : t('ai');
-            }
-            const turnText = (state.gameType === 'pvc' && state.currentPlayer === state.aiSymbol) ?
-                t('aiTurn') :
-                `${playerName}${t('turn')}`;
-            statusMessage.textContent = turnText;
-            turnIndicator.textContent = state.currentPlayer;
-            turnIndicator.className = `turn-indicator turn-${state.currentPlayer}`;
-            stepBadge.textContent = t('step', { n: state.moveCount + 1 });
-            const totalPieces = state.board.filter(c => c !== '').length;
-            countBadge.textContent = t('count', { n: totalPieces });
-            countBadge.style.display = 'inline';
-        } else if (state.isOver) {
-            // 保持結果顯示
-        } else {
-            statusMessage.textContent = t('start');
-            turnIndicator.textContent = '▶';
-            turnIndicator.className = 'turn-indicator';
-            stepBadge.textContent = '--';
-            countBadge.style.display = 'none';
-        }
-
-        const isAI = gameTypeSelect.value === 'pvc';
-        difficultyRow.style.display = isAI ? 'flex' : 'none';
-        firstMoveRow.style.display = isAI ? 'flex' : 'none';
-    }
-
-    // ============================================================
-    //  🎯 遊戲邏輯
-    // ============================================================
-    function startGame() {
-        state.gameMode = modeSelect.value;
-        state.gameType = gameTypeSelect.value;
-        state.difficulty = difficultySelect.value;
-        state.firstMove = firstMoveSelect.value;
-
-        if (state.gameType === 'pvc') {
-            if (state.firstMove === 'player') {
-                state.playerSymbol = 'X';
-                state.aiSymbol = 'O';
-            } else {
-                state.playerSymbol = 'O';
-                state.aiSymbol = 'X';
-            }
-        } else {
-            state.playerSymbol = 'X';
-            state.aiSymbol = 'O';
-        }
-
-        state.board = ['', '', '', '', '', '', '', '', ''];
-        state.currentPlayer = 'X';
-        state.gameActive = true;
-        state.isOver = false;
-        state.moveHistory = [];
-        state.moveCount = 0;
-        state.winner = null;
-        state.isProcessing = false;
-
-        cells.forEach(cell => {
-            cell.textContent = '';
-            cell.className = 'cell';
-        });
-        overlay.classList.remove('show');
-
-        // 切換畫面
-        menuScreen.style.display = 'none';
-        gameScreen.classList.add('active');
-
-        // 停止預覽動畫
-        if (previewInterval) {
-            clearInterval(previewInterval);
-            previewInterval = null;
-        }
-
-        updateUI();
-
-        if (state.gameType === 'pvc' && state.firstMove === 'ai' && state.currentPlayer === 'X') {
-            state.isProcessing = true;
-            setTimeout(() => {
-                aiMove();
-            }, 400);
-        }
-    }
-
-    function endGame(winner) {
-        state.gameActive = false;
-        state.isOver = true;
-        state.winner = winner;
-
-        let resultMsg = '';
-        let icon = '';
-
-        if (winner === 'draw') {
-            icon = '🤝';
-            resultMsg = t('draw');
-        } else if (state.gameType === 'pvp') {
-            const pName = winner === 'X' ? t('player1') : t('player2');
-            icon = '🎉';
-            resultMsg = `${pName} ${t('win')}`;
-        } else {
-            if (winner === state.playerSymbol) {
-                icon = '🎉';
-                resultMsg = t('youWin');
-            } else if (winner === state.aiSymbol) {
-                icon = '😢';
-                resultMsg = t('youLose');
-            }
-        }
-
-        resultIcon.textContent = icon;
-        resultText.textContent = resultMsg;
-        resultSub.textContent = t('resultSub');
-
-        if (winner !== 'draw') {
-            highlightWin(winner);
-        }
-
-        overlay.classList.add('show');
-        updateUI();
-    }
-
-    function highlightWin(player) {
-        for (const combo of WIN_COMBOS) {
-            if (combo.every(idx => state.board[idx] === player)) {
-                combo.forEach(idx => {
-                    cells[idx].classList.add('win');
+                // 錯誤處理
+                this.homeAudio.addEventListener('error', (e) => {
+                    console.warn('首頁音樂載入失敗:', e);
+                });
+                this.gameAudio.addEventListener('error', (e) => {
+                    console.warn('遊戲音樂載入失敗:', e);
                 });
             }
-        }
-    }
 
-    function checkWinner(player) {
-        return WIN_COMBOS.some(combo => combo.every(idx => state.board[idx] === player));
-    }
-
-    function isBoardFull() {
-        return state.board.every(cell => cell !== '');
-    }
-
-    // ============================================================
-    //  🔄 核心移動邏輯
-    // ============================================================
-    function doMove(index, player, fromAI = false) {
-        if (state.board[index] !== '' || !state.gameActive || state.isOver) return false;
-
-        state.board[index] = player;
-        state.moveHistory.push({ index, player });
-        state.moveCount++;
-
-        const cell = cells[index];
-        cell.textContent = player;
-        cell.classList.add('taken', player);
-
-        if (state.gameMode === 'infinite') {
-            if (state.moveHistory.length === 7) {
-                const oldest = state.moveHistory.shift();
-                state.board[oldest.index] = '';
-                const oldCell = cells[oldest.index];
-                oldCell.textContent = '';
-                oldCell.className = 'cell';
-                oldCell.classList.remove('blink');
+            // 喚醒（用戶手勢調用）
+            wake() {
+                this.initialized = true;
+                // 如果啟用，播放當前情境的音樂
+                if (this.enabled) {
+                    const menuVisible = document.getElementById('menuScreen').style.display !== 'none';
+                    const gameActive = document.getElementById('gameScreen').classList.contains('active');
+                    if (menuVisible && !gameActive) {
+                        this.playHomeMusic();
+                    } else if (gameActive) {
+                        this.playGameMusic();
+                    }
+                }
             }
-            if (state.moveHistory.length === 6) {
-                const first = state.moveHistory[0];
-                cells[first.index].classList.add('blink');
+
+            // ---- 背景音樂控制 ----
+            playHomeMusic() {
+                if (!this.enabled) return;
+                if (this.homeAudio.paused) {
+                    this.homeAudio.play().catch(e => console.warn('播放首頁音樂失敗:', e));
+                }
+            }
+
+            playGameMusic() {
+                if (!this.enabled) return;
+                if (this.gameAudio.paused) {
+                    this.gameAudio.play().catch(e => console.warn('播放遊戲音樂失敗:', e));
+                }
+            }
+
+            stopMusic() {
+                if (!this.homeAudio.paused) {
+                    this.homeAudio.pause();
+                    this.homeAudio.currentTime = 0;
+                }
+                if (!this.gameAudio.paused) {
+                    this.gameAudio.pause();
+                    this.gameAudio.currentTime = 0;
+                }
+            }
+
+            // ---- 情境切換 ----
+            switchToHome() {
+                this.stopMusic();
+                if (this.enabled) {
+                    this.playHomeMusic();
+                }
+            }
+
+            switchToGame() {
+                this.stopMusic();
+                if (this.enabled) {
+                    this.playGameMusic();
+                }
+            }
+
+            // ---- 音效（使用 Web Audio API，保持原有邏輯） ----
+            _ensureCtx() {
+                try {
+                    if (!this.ctx) {
+                        this.ctx = new(window.AudioContext || window.webkitAudioContext)();
+                    }
+                    if (this.ctx.state === 'suspended') {
+                        this.ctx.resume();
+                    }
+                    return this.ctx;
+                } catch (e) {
+                    console.warn('Web Audio API 不支援');
+                    return null;
+                }
+            }
+
+            _noteToFreq(note) {
+                const notes = {
+                    'C4': 261.63,
+                    'C#4': 277.18,
+                    'D4': 293.66,
+                    'D#4': 311.13,
+                    'E4': 329.63,
+                    'F4': 349.23,
+                    'F#4': 369.99,
+                    'G4': 392.00,
+                    'G#4': 415.30,
+                    'A4': 440.00,
+                    'A#4': 466.16,
+                    'B4': 493.88,
+                    'C5': 523.25,
+                    'C#5': 554.37,
+                    'D5': 587.33,
+                    'D#5': 622.25,
+                    'E5': 659.25,
+                    'F5': 698.46,
+                    'F#5': 739.99,
+                    'G5': 783.99,
+                    'G#5': 830.61,
+                    'A5': 880.00,
+                    'A#5': 932.33,
+                    'B5': 987.77,
+                    'C6': 1046.50
+                };
+                return notes[note] || 440;
+            }
+
+            _playTone(freq, duration, type = 'sine', volume = 0.3, delay = 0) {
+                const ctx = this._ensureCtx();
+                if (!ctx) return;
+                try {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+                    gain.gain.setValueAtTime(volume, ctx.currentTime + delay);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + duration);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(ctx.currentTime + delay);
+                    osc.stop(ctx.currentTime + delay + duration);
+                } catch (e) { /* 忽略音效錯誤 */ }
+            }
+
+            _playMelody(notes, durations, type = 'sine', volume = 0.25, delay = 0) {
+                const ctx = this._ensureCtx();
+                if (!ctx) return;
+                let t = delay;
+                notes.forEach((note, i) => {
+                    const freq = this._noteToFreq(note);
+                    const dur = durations[i] || 0.2;
+                    this._playTone(freq, dur, type, volume, t);
+                    t += dur + 0.04;
+                });
+            }
+
+            playPlaceSound() {
+                if (!this.enabled) return;
+                const ctx = this._ensureCtx();
+                if (!ctx) return;
+                try {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(800, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.06);
+                    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.08);
+                } catch (e) { /* 忽略 */ }
+            }
+
+            playWinSound() {
+                if (!this.enabled) return;
+                this._playMelody(
+                    ['C5', 'E5', 'G5', 'C6', 'E6', 'G6'],
+                    [0.12, 0.12, 0.12, 0.18, 0.18, 0.25],
+                    'sine', 0.2, 0
+                );
+            }
+
+            playLoseSound() {
+                if (!this.enabled) return;
+                this._playMelody(
+                    ['G5', 'E5', 'C5', 'G4', 'E4', 'C4'],
+                    [0.12, 0.12, 0.12, 0.18, 0.18, 0.25],
+                    'sine', 0.2, 0
+                );
+            }
+
+            playDrawSound() {
+                if (!this.enabled) return;
+                this._playMelody(
+                    ['E5', 'G5', 'E5', 'G5', 'E5', 'G5'],
+                    [0.1, 0.1, 0.1, 0.1, 0.1, 0.15],
+                    'sine', 0.12, 0
+                );
+            }
+
+            // ---- 開關聲音 ----
+            toggleEnabled() {
+                this.enabled = !this.enabled;
+                localStorage.setItem('ttt_sound_enabled', String(this.enabled));
+                if (!this.enabled) {
+                    this.stopMusic();
+                } else {
+                    // 根據當前頁面恢復音樂
+                    const menuVisible = document.getElementById('menuScreen').style.display !== 'none';
+                    const gameActive = document.getElementById('gameScreen').classList.contains('active');
+                    if (menuVisible && !gameActive) {
+                        this.playHomeMusic();
+                    } else if (gameActive) {
+                        this.playGameMusic();
+                    }
+                }
+                return this.enabled;
             }
         }
 
-        if (checkWinner(player)) {
-            endGame(player);
-            return true;
+        // ============================================================
+        //  🌍 語言包（新增 save / load）
+        // ============================================================
+        const LANG = {
+            'zh-TW': {
+                title: '⭕❌ 井字棋',
+                menuSub: '✦ 選擇語言，然後進入遊戲 ✦',
+                mode: '模式',
+                classic: '傳統',
+                infinite: '無限',
+                gameType: '對戰',
+                pvp: '👥 玩家 vs 玩家',
+                pvc: '🤖 玩家 vs AI',
+                difficulty: 'AI 難度',
+                easy: '簡單',
+                medium: '中等',
+                hard: '困難',
+                firstMove: '先手',
+                firstPlayer: '👤 玩家 (X)',
+                firstAI: '🤖 AI (X)',
+                enter: '▶ 進入遊戲',
+                back: '🔙 返回',
+                start: '⚔️ 開始遊戲',
+                reset: '🔙 返回選單',
+                playAgain: '🔄 再玩一局',
+                turn: '的回合',
+                yourTurn: '你的回合',
+                aiTurn: 'AI 思考中...',
+                youWin: '🎉 你贏了！',
+                youLose: '😢 你輸了...',
+                aiWin: '🤖 AI 獲勝！',
+                aiLose: '😢 AI 輸了...',
+                draw: '🤝 平手！',
+                step: '第 {n} 步',
+                count: '● {n}',
+                you: '你',
+                ai: 'AI',
+                modeClassic: '🎯 傳統',
+                modeInfinite: '♾️ 無限',
+                resultSub: '點擊下方繼續',
+                classicRule: '9 格滿盤',
+                infiniteRule: '6 格循環',
+                player1: '玩家1',
+                player2: '玩家2',
+                copyright: 'v1.0 © {year} ☕迪遜咖啡廳，版權所有。',
+                trophyEarned: '🏆 +1 獎盃！',
+                win: '獲勝！',
+                save: '💾 儲存',
+                load: '📁 載入'
+            },
+            'zh-CN': {
+                title: '⭕❌ 井字棋',
+                menuSub: '✦ 选择语言，然后进入游戏 ✦',
+                mode: '模式',
+                classic: '传统',
+                infinite: '无限',
+                gameType: '对战',
+                pvp: '👥 玩家 vs 玩家',
+                pvc: '🤖 玩家 vs AI',
+                difficulty: 'AI 难度',
+                easy: '简单',
+                medium: '中等',
+                hard: '困难',
+                firstMove: '先手',
+                firstPlayer: '👤 玩家 (X)',
+                firstAI: '🤖 AI (X)',
+                enter: '▶ 进入游戏',
+                back: '🔙 返回',
+                start: '⚔️ 开始游戏',
+                reset: '🔙 返回选单',
+                playAgain: '🔄 再玩一局',
+                turn: '的回合',
+                yourTurn: '你的回合',
+                aiTurn: 'AI 思考中...',
+                youWin: '🎉 你赢了！',
+                youLose: '😢 你输了...',
+                aiWin: '🤖 AI 获胜！',
+                aiLose: '😢 AI 输了...',
+                draw: '🤝 平手！',
+                step: '第 {n} 步',
+                count: '● {n}',
+                you: '你',
+                ai: 'AI',
+                modeClassic: '🎯 传统',
+                modeInfinite: '♾️ 无限',
+                resultSub: '点击下方继续',
+                classicRule: '9 格满盘',
+                infiniteRule: '6 格循环',
+                player1: '玩家1',
+                player2: '玩家2',
+                copyright: 'v1.0 © {year} ☕迪逊咖啡厅，版权所有。',
+                trophyEarned: '🏆 +1 奖杯！',
+                win: '获胜！',
+                save: '💾 储存',
+                load: '📁 载入'
+            },
+            'en': {
+                title: '⭕❌ Tic Tac Toe',
+                menuSub: '✦ Select language, then enter game ✦',
+                mode: 'Mode',
+                classic: 'Classic',
+                infinite: 'Infinite',
+                gameType: 'Match',
+                pvp: '👥 Player vs Player',
+                pvc: '🤖 Player vs AI',
+                difficulty: 'AI Difficulty',
+                easy: 'Easy',
+                medium: 'Medium',
+                hard: 'Hard',
+                firstMove: 'First Move',
+                firstPlayer: '👤 Player (X)',
+                firstAI: '🤖 AI (X)',
+                enter: '▶ Enter Game',
+                back: '🔙 Back',
+                start: '⚔️ Start Game',
+                reset: '🔙 Back to Menu',
+                playAgain: '🔄 Play Again',
+                turn: "'s turn",
+                yourTurn: "Your turn",
+                aiTurn: "AI thinking...",
+                youWin: '🎉 You Win!',
+                youLose: '😢 You Lose...',
+                aiWin: '🤖 AI Wins!',
+                aiLose: '😢 AI Loses...',
+                draw: '🤝 Draw!',
+                step: 'Step {n}',
+                count: '● {n}',
+                you: 'You',
+                ai: 'AI',
+                modeClassic: '🎯 Classic',
+                modeInfinite: '♾️ Infinite',
+                resultSub: 'Click below to continue',
+                classicRule: '9 Grid Full',
+                infiniteRule: '6 Grid Cycle',
+                player1: 'Player 1',
+                player2: 'Player 2',
+                copyright: 'v1.0 © {year} ☕Diczon\'s Cafe, All Rights Reserved.',
+                trophyEarned: '🏆 +1 Trophy!',
+                win: 'Wins!',
+                save: '💾 Save',
+                load: '📁 Load'
+            },
+            'ja': {
+                title: '⭕❌ 三目並べ',
+                menuSub: '✦ 言語を選択し、ゲームに入る ✦',
+                mode: 'モード',
+                classic: 'クラシック',
+                infinite: '無限',
+                gameType: '対戦',
+                pvp: '👥 対人戦',
+                pvc: '🤖 VS AI',
+                difficulty: 'AI 難易度',
+                easy: 'かんたん',
+                medium: '普通',
+                hard: '難しい',
+                firstMove: '先手',
+                firstPlayer: '👤 プレイヤー (X)',
+                firstAI: '🤖 AI (X)',
+                enter: '▶ ゲームに入る',
+                back: '🔙 戻る',
+                start: '⚔️ 開始',
+                reset: '🔙 メニューへ',
+                playAgain: '🔄 もう一度',
+                turn: 'の番',
+                yourTurn: 'あなたの番',
+                aiTurn: 'AI 思考中...',
+                youWin: '🎉 あなたの勝利！',
+                youLose: '😢 あなたの敗北...',
+                aiWin: '🤖 AI の勝利！',
+                aiLose: '😢 AI の敗北...',
+                draw: '🤝 引き分け！',
+                step: '{n} 手目',
+                count: '● {n}',
+                you: 'あなた',
+                ai: 'AI',
+                modeClassic: '🎯 クラシック',
+                modeInfinite: '♾️ 無限',
+                resultSub: '続けるにはクリック',
+                classicRule: '9 マス',
+                infiniteRule: '6 マス循環',
+                player1: 'プレイヤー1',
+                player2: 'プレイヤー2',
+                copyright: 'v1.0 © {year} ☕ディクソンカフェ，無断転載を禁じます。',
+                trophyEarned: '🏆 +1 トロフィー！',
+                win: '勝利！',
+                save: '💾 保存',
+                load: '📁 読み込み'
+            },
+            'ko': {
+                title: '⭕❌ 틱택토',
+                menuSub: '✦ 언어를 선택하고 게임에 입장하세요 ✦',
+                mode: '모드',
+                classic: '클래식',
+                infinite: '무한',
+                gameType: '대전',
+                pvp: '👥 PvP',
+                pvc: '🤖 PvAI',
+                difficulty: 'AI 난이도',
+                easy: '쉬움',
+                medium: '보통',
+                hard: '어려움',
+                firstMove: '선공',
+                firstPlayer: '👤 플레이어 (X)',
+                firstAI: '🤖 AI (X)',
+                enter: '▶ 게임 입장',
+                back: '🔙 뒤로',
+                start: '⚔️ 시작',
+                reset: '🔙 메뉴로',
+                playAgain: '🔄 한 판 더',
+                turn: '의 차례',
+                yourTurn: '당신의 차례',
+                aiTurn: 'AI 생각 중...',
+                youWin: '🎉 당신 승리!',
+                youLose: '😢 당신 패배...',
+                aiWin: '🤖 AI 승리!',
+                aiLose: '😢 AI 패배...',
+                draw: '🤝 무승부!',
+                step: '{n}번째 수',
+                count: '● {n}',
+                you: '당신',
+                ai: 'AI',
+                modeClassic: '🎯 클래식',
+                modeInfinite: '♾️ 무한',
+                resultSub: '계속하려면 클릭',
+                classicRule: '9칸 풀보드',
+                infiniteRule: '6칸 순환',
+                player1: '플레이어1',
+                player2: '플레이어2',
+                copyright: 'v1.0 © {year} ☕딕슨 카페，판권 소유.',
+                trophyEarned: '🏆 +1 트로피!',
+                win: '승리!',
+                save: '💾 저장',
+                load: '📁 불러오기'
+            }
+        };
+
+        // ============================================================
+        //  🎮 遊戲狀態
+        // ============================================================
+        let state = {
+            board: ['', '', '', '', '', '', '', '', ''],
+            currentPlayer: 'X',
+            gameActive: false,
+            gameMode: 'classic',
+            gameType: 'pvc',
+            difficulty: 'hard',
+            firstMove: 'player',
+            moveHistory: [],
+            moveCount: 0,
+            lang: 'zh-TW',
+            winner: null,
+            isOver: false,
+            isProcessing: false,
+            playerSymbol: 'X',
+            aiSymbol: 'O',
+            trophies: 0,
+            _trophyAwarded: false
+        };
+
+        // ============================================================
+        //  DOM 參考
+        // ============================================================
+        const menuScreen = document.getElementById('menuScreen');
+        const gameScreen = document.getElementById('gameScreen');
+        const menuTitle = document.getElementById('menuTitle');
+        const menuSub = document.getElementById('menuSub');
+        const previewContainer = document.getElementById('previewContainer');
+        const settingsArea = document.getElementById('settingsArea');
+        const btnEnterGameOuter = document.getElementById('btnEnterGameOuter');
+        const btnEnterGame = document.getElementById('btnEnterGame');
+        const btnStartGame = document.getElementById('btnStartGame');
+        const btnReset = document.getElementById('btnReset');
+        const btnPlayAgain = document.getElementById('btnPlayAgain');
+        const langSelect = document.getElementById('langSelect');
+        const modeSelect = document.getElementById('modeSelect');
+        const gameTypeSelect = document.getElementById('gameTypeSelect');
+        const difficultySelect = document.getElementById('difficultySelect');
+        const firstMoveSelect = document.getElementById('firstMoveSelect');
+        const lblMode = document.getElementById('lblMode');
+        const lblGameType = document.getElementById('lblGameType');
+        const lblDifficulty = document.getElementById('lblDifficulty');
+        const lblFirstMove = document.getElementById('lblFirstMove');
+        const difficultyRow = document.getElementById('difficultyRow');
+        const firstMoveRow = document.getElementById('firstMoveRow');
+        const footerCopyright = document.getElementById('footerCopyright');
+        const cells = document.querySelectorAll('.cell');
+        const overlay = document.getElementById('overlay');
+        const resultIcon = document.getElementById('resultIcon');
+        const resultText = document.getElementById('resultText');
+        const resultSub = document.getElementById('resultSub');
+        const resultTrophy = document.getElementById('resultTrophy');
+        const statusMessage = document.getElementById('statusMessage');
+        const turnIndicator = document.getElementById('turnIndicator');
+        const modeBadge = document.getElementById('modeBadge');
+        const stepBadge = document.getElementById('stepBadge');
+        const countBadge = document.getElementById('countBadge');
+        const previewCells = document.querySelectorAll('.preview-cell');
+        const trophyCount = document.getElementById('trophyCount');
+        const btnSoundToggle = document.getElementById('btnSoundToggle');
+        const btnSave = document.getElementById('btnSave');
+        const btnLoad = document.getElementById('btnLoad');
+        const fileInput = document.getElementById('fileInput');
+        const floatFullscreen = document.getElementById('floatFullscreen');
+
+        const WIN_COMBOS = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6]
+        ];
+
+        // ============================================================
+        //  🎵 音頻實例
+        // ============================================================
+        const audio = new AudioManager();
+
+        // ============================================================
+        //  🏆 獎盃系統
+        // ============================================================
+        function loadTrophies() {
+            const saved = localStorage.getItem('ttt_trophies');
+            if (saved !== null) {
+                const val = parseInt(saved, 10);
+                state.trophies = isNaN(val) ? 0 : val;
+            } else {
+                state.trophies = 0;
+            }
+            updateTrophyDisplay();
         }
 
-        if (state.gameMode === 'classic' && isBoardFull()) {
-            endGame('draw');
-            return true;
+        function saveTrophies() {
+            localStorage.setItem('ttt_trophies', String(state.trophies));
+            updateTrophyDisplay();
         }
 
-        state.currentPlayer = state.currentPlayer === 'X' ? 'O' : 'X';
-        updateUI();
+        function addTrophy() {
+            state.trophies += 1;
+            saveTrophies();
+            updateTrophyDisplay();
+        }
 
-        if (state.gameActive && state.gameType === 'pvc' && !state.isOver && !fromAI) {
-            const nextIsAI = (state.currentPlayer === state.aiSymbol);
-            if (nextIsAI) {
+        function updateTrophyDisplay() {
+            trophyCount.textContent = state.trophies;
+        }
+
+        // ============================================================
+        //  🌐 語言函數
+        // ============================================================
+        function t(key, params = {}) {
+            const dict = LANG[state.lang] || LANG['zh-TW'];
+            let text = dict[key] || key;
+            for (const [k, v] of Object.entries(params)) {
+                text = text.replace(`{${k}}`, v);
+            }
+            return text;
+        }
+
+        function updateLanguage() {
+            menuTitle.textContent = t('title');
+            menuSub.textContent = t('menuSub');
+            lblMode.textContent = t('mode');
+            lblGameType.textContent = t('gameType');
+            lblDifficulty.textContent = t('difficulty');
+            lblFirstMove.textContent = t('firstMove');
+            modeSelect.options[0].text = t('classic');
+            modeSelect.options[1].text = t('infinite');
+            gameTypeSelect.options[0].text = t('pvp');
+            gameTypeSelect.options[1].text = t('pvc');
+            difficultySelect.options[0].text = t('easy');
+            difficultySelect.options[1].text = t('medium');
+            difficultySelect.options[2].text = t('hard');
+            firstMoveSelect.options[0].text = t('firstPlayer');
+            firstMoveSelect.options[1].text = t('firstAI');
+            btnStartGame.textContent = t('start');
+            btnReset.textContent = t('reset');
+            btnPlayAgain.textContent = t('playAgain');
+            btnEnterGameOuter.textContent = t('enter');
+            btnEnterGame.textContent = t('back');
+            // 儲存與載入按鈕翻譯
+            btnSave.textContent = t('save');
+            btnLoad.textContent = t('load');
+            const year = new Date().getFullYear();
+            footerCopyright.textContent = t('copyright', { year: year });
+            updateUI();
+        }
+
+        // ============================================================
+        //  🖥️ UI 更新
+        // ============================================================
+        function updateUI() {
+            const mode = state.gameMode;
+            const modeName = mode === 'classic' ? t('modeClassic') : t('modeInfinite');
+            const rule = mode === 'classic' ? t('classicRule') : t('infiniteRule');
+            modeBadge.textContent = `${modeName} · ${rule}`;
+
+            if (state.gameActive && !state.isOver) {
+                let playerName = '';
+                if (state.gameType === 'pvp') {
+                    playerName = state.currentPlayer === 'X' ? t('player1') : t('player2');
+                } else {
+                    playerName = state.currentPlayer === state.playerSymbol ? t('you') : t('ai');
+                }
+                const turnText = (state.gameType === 'pvc' && state.currentPlayer === state.aiSymbol) ?
+                    t('aiTurn') :
+                    `${playerName}${t('turn')}`;
+                statusMessage.textContent = turnText;
+                turnIndicator.textContent = state.currentPlayer;
+                turnIndicator.className = `turn-indicator turn-${state.currentPlayer}`;
+                stepBadge.textContent = t('step', { n: state.moveCount + 1 });
+                const totalPieces = state.board.filter(c => c !== '').length;
+                countBadge.textContent = t('count', { n: totalPieces });
+                countBadge.style.display = 'inline';
+            } else if (state.isOver) {
+                // 保持結果顯示
+            } else {
+                statusMessage.textContent = '▶ ' + t('start');
+                turnIndicator.textContent = '▶';
+                turnIndicator.className = 'turn-indicator';
+                stepBadge.textContent = '--';
+                countBadge.style.display = 'none';
+            }
+
+            const isAI = gameTypeSelect.value === 'pvc';
+            difficultyRow.style.display = isAI ? 'flex' : 'none';
+            firstMoveRow.style.display = isAI ? 'flex' : 'none';
+        }
+
+        // ============================================================
+        //  🎯 遊戲邏輯
+        // ============================================================
+        function startGame() {
+            state.gameMode = modeSelect.value;
+            state.gameType = gameTypeSelect.value;
+            state.difficulty = difficultySelect.value;
+            state.firstMove = firstMoveSelect.value;
+
+            if (state.gameType === 'pvc') {
+                if (state.firstMove === 'player') {
+                    state.playerSymbol = 'X';
+                    state.aiSymbol = 'O';
+                } else {
+                    state.playerSymbol = 'O';
+                    state.aiSymbol = 'X';
+                }
+            } else {
+                state.playerSymbol = 'X';
+                state.aiSymbol = 'O';
+            }
+
+            state.board = ['', '', '', '', '', '', '', '', ''];
+            state.currentPlayer = 'X';
+            state.gameActive = true;
+            state.isOver = false;
+            state.moveHistory = [];
+            state.moveCount = 0;
+            state.winner = null;
+            state.isProcessing = false;
+            state._trophyAwarded = false;
+
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.className = 'cell';
+            });
+            overlay.classList.remove('show');
+            resultTrophy.style.display = 'none';
+
+            menuScreen.style.display = 'none';
+            gameScreen.classList.add('active');
+
+            if (previewInterval) {
+                clearInterval(previewInterval);
+                previewInterval = null;
+            }
+
+            // 切換音樂
+            audio.switchToGame();
+
+            updateUI();
+
+            if (state.gameType === 'pvc' && state.firstMove === 'ai' && state.currentPlayer === 'X') {
                 state.isProcessing = true;
                 setTimeout(() => {
                     aiMove();
-                }, 300 + Math.random() * 200);
+                }, 400);
             }
         }
 
-        return true;
-    }
+        function endGame(winner) {
+            state.gameActive = false;
+            state.isOver = true;
+            state.winner = winner;
 
-    // ============================================================
-    //  🤖 AI 邏輯
-    // ============================================================
-    function aiMove() {
-        state.isProcessing = false;
+            let resultMsg = '';
+            let icon = '';
+            let showTrophy = false;
 
-        if (!state.gameActive || state.isOver || state.currentPlayer !== state.aiSymbol) {
-            return;
-        }
-
-        const empty = state.board.map((v, i) => v === '' ? i : null).filter(v => v !== null);
-        if (empty.length === 0) return;
-
-        let moveIndex = null;
-        switch (state.difficulty) {
-            case 'easy': moveIndex = easyAI(empty); break;
-            case 'medium': moveIndex = mediumAI(empty); break;
-            case 'hard': moveIndex = hardAI(empty); break;
-            default: moveIndex = easyAI(empty);
-        }
-
-        if (moveIndex !== null && state.gameActive && !state.isOver) {
-            doMove(moveIndex, state.aiSymbol, true);
-        }
-    }
-
-    function easyAI(empty) {
-        return empty[Math.floor(Math.random() * empty.length)];
-    }
-
-    function mediumAI(empty) {
-        for (const idx of empty) {
-            state.board[idx] = state.playerSymbol;
-            if (checkWinner(state.playerSymbol)) {
-                state.board[idx] = '';
-                return idx;
+            if (winner === 'draw') {
+                icon = '🤝';
+                resultMsg = t('draw');
+                audio.playDrawSound();
+            } else if (state.gameType === 'pvp') {
+                const pName = winner === 'X' ? t('player1') : t('player2');
+                icon = '🎉';
+                resultMsg = `${pName} ${t('win')}`;
+                audio.playWinSound();
+            } else {
+                if (winner === state.playerSymbol) {
+                    icon = '🎉';
+                    resultMsg = t('youWin');
+                    audio.playWinSound();
+                    if (!state._trophyAwarded) {
+                        state._trophyAwarded = true;
+                        addTrophy();
+                        showTrophy = true;
+                    }
+                } else if (winner === state.aiSymbol) {
+                    icon = '😢';
+                    resultMsg = t('youLose');
+                    audio.playLoseSound();
+                }
             }
-            state.board[idx] = '';
-        }
-        return easyAI(empty);
-    }
 
-    function hardAI(empty) {
-        for (const idx of empty) {
-            state.board[idx] = state.aiSymbol;
-            if (checkWinner(state.aiSymbol)) {
-                state.board[idx] = '';
-                return idx;
+            resultIcon.textContent = icon;
+            resultText.textContent = resultMsg;
+            resultSub.textContent = t('resultSub');
+
+            if (showTrophy) {
+                resultTrophy.textContent = t('trophyEarned');
+                resultTrophy.style.display = 'block';
+            } else {
+                resultTrophy.style.display = 'none';
             }
-            state.board[idx] = '';
-        }
-        for (const idx of empty) {
-            state.board[idx] = state.playerSymbol;
-            if (checkWinner(state.playerSymbol)) {
-                state.board[idx] = '';
-                return idx;
+
+            if (winner !== 'draw') {
+                highlightWin(winner);
             }
-            state.board[idx] = '';
+
+            overlay.classList.add('show');
+            updateUI();
         }
 
-        let bestScore = -Infinity;
-        let bestMove = empty[0];
-        for (const idx of empty) {
-            state.board[idx] = state.aiSymbol;
-            const score = minimax(state.board, 0, false, state.playerSymbol);
-            state.board[idx] = '';
-            if (score > bestScore) {
-                bestScore = score;
-                bestMove = idx;
+        function highlightWin(player) {
+            for (const combo of WIN_COMBOS) {
+                if (combo.every(idx => state.board[idx] === player)) {
+                    combo.forEach(idx => {
+                        cells[idx].classList.add('win');
+                    });
+                }
             }
         }
-        return bestMove;
-    }
 
-    function minimax(board, depth, isMaximizing, player) {
-        if (depth >= 3) return 0;
-        if (checkWinner(state.aiSymbol)) return 10 - depth;
-        if (checkWinner(state.playerSymbol)) return -10 + depth;
+        function checkWinner(player) {
+            return WIN_COMBOS.some(combo => combo.every(idx => state.board[idx] === player));
+        }
 
-        const empty = board.map((v, i) => v === '' ? i : null).filter(v => v !== null);
-        if (empty.length === 0) return 0;
+        function isBoardFull() {
+            return state.board.every(cell => cell !== '');
+        }
 
-        if (isMaximizing) {
-            let maxEval = -Infinity;
+        // ============================================================
+        //  🔄 核心移動邏輯
+        // ============================================================
+        function doMove(index, player, fromAI = false) {
+            if (state.board[index] !== '' || !state.gameActive || state.isOver) return false;
+
+            state.board[index] = player;
+            state.moveHistory.push({ index, player });
+            state.moveCount++;
+
+            const cell = cells[index];
+            cell.textContent = player;
+            cell.classList.add('taken', player);
+
+            audio.playPlaceSound();
+
+            if (state.gameMode === 'infinite') {
+                if (state.moveHistory.length === 7) {
+                    const oldest = state.moveHistory.shift();
+                    state.board[oldest.index] = '';
+                    const oldCell = cells[oldest.index];
+                    oldCell.textContent = '';
+                    oldCell.className = 'cell';
+                    oldCell.classList.remove('blink');
+                }
+                if (state.moveHistory.length === 6) {
+                    const first = state.moveHistory[0];
+                    cells[first.index].classList.add('blink');
+                }
+            }
+
+            if (checkWinner(player)) {
+                endGame(player);
+                return true;
+            }
+
+            if (state.gameMode === 'classic' && isBoardFull()) {
+                endGame('draw');
+                return true;
+            }
+
+            state.currentPlayer = state.currentPlayer === 'X' ? 'O' : 'X';
+            updateUI();
+
+            if (state.gameActive && state.gameType === 'pvc' && !state.isOver && !fromAI) {
+                const nextIsAI = (state.currentPlayer === state.aiSymbol);
+                if (nextIsAI) {
+                    state.isProcessing = true;
+                    setTimeout(() => {
+                        aiMove();
+                    }, 300 + Math.random() * 200);
+                }
+            }
+
+            return true;
+        }
+
+        // ============================================================
+        //  🤖 AI 邏輯
+        // ============================================================
+        function aiMove() {
+            state.isProcessing = false;
+
+            if (!state.gameActive || state.isOver || state.currentPlayer !== state.aiSymbol) {
+                return;
+            }
+
+            const empty = state.board.map((v, i) => v === '' ? i : null).filter(v => v !== null);
+            if (empty.length === 0) return;
+
+            let moveIndex = null;
+            switch (state.difficulty) {
+                case 'easy':
+                    moveIndex = easyAI(empty);
+                    break;
+                case 'medium':
+                    moveIndex = mediumAI(empty);
+                    break;
+                case 'hard':
+                    moveIndex = hardAI(empty);
+                    break;
+                default:
+                    moveIndex = easyAI(empty);
+            }
+
+            if (moveIndex !== null && state.gameActive && !state.isOver) {
+                doMove(moveIndex, state.aiSymbol, true);
+            }
+        }
+
+        function easyAI(empty) {
+            return empty[Math.floor(Math.random() * empty.length)];
+        }
+
+        function mediumAI(empty) {
             for (const idx of empty) {
-                board[idx] = state.aiSymbol;
-                const evalResult = minimax(board, depth + 1, false, state.playerSymbol);
-                board[idx] = '';
-                maxEval = Math.max(maxEval, evalResult);
+                state.board[idx] = state.playerSymbol;
+                if (checkWinner(state.playerSymbol)) {
+                    state.board[idx] = '';
+                    return idx;
+                }
+                state.board[idx] = '';
             }
-            return maxEval;
-        } else {
-            let minEval = Infinity;
+            return easyAI(empty);
+        }
+
+        function hardAI(empty) {
             for (const idx of empty) {
-                board[idx] = state.playerSymbol;
-                const evalResult = minimax(board, depth + 1, true, state.aiSymbol);
-                board[idx] = '';
-                minEval = Math.min(minEval, evalResult);
+                state.board[idx] = state.aiSymbol;
+                if (checkWinner(state.aiSymbol)) {
+                    state.board[idx] = '';
+                    return idx;
+                }
+                state.board[idx] = '';
             }
-            return minEval;
-        }
-    }
+            for (const idx of empty) {
+                state.board[idx] = state.playerSymbol;
+                if (checkWinner(state.playerSymbol)) {
+                    state.board[idx] = '';
+                    return idx;
+                }
+                state.board[idx] = '';
+            }
 
-    // ============================================================
-    //  🎬 預覽棋盤動畫
-    // ============================================================
-    let previewInterval = null;
-
-    function startPreviewAnimation() {
-        if (previewInterval) {
-            clearInterval(previewInterval);
-            previewInterval = null;
+            let bestScore = -Infinity;
+            let bestMove = empty[0];
+            for (const idx of empty) {
+                state.board[idx] = state.aiSymbol;
+                const score = minimax(state.board, 0, false, state.playerSymbol);
+                state.board[idx] = '';
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestMove = idx;
+                }
+            }
+            return bestMove;
         }
-        updatePreviewCells();
-        previewInterval = setInterval(() => {
+
+        function minimax(board, depth, isMaximizing, player) {
+            if (depth >= 4) return 0;
+            if (checkWinner(state.aiSymbol)) return 10 - depth;
+            if (checkWinner(state.playerSymbol)) return -10 + depth;
+
+            const empty = board.map((v, i) => v === '' ? i : null).filter(v => v !== null);
+            if (empty.length === 0) return 0;
+
+            if (isMaximizing) {
+                let maxEval = -Infinity;
+                for (const idx of empty) {
+                    board[idx] = state.aiSymbol;
+                    const evalResult = minimax(board, depth + 1, false, state.playerSymbol);
+                    board[idx] = '';
+                    maxEval = Math.max(maxEval, evalResult);
+                }
+                return maxEval;
+            } else {
+                let minEval = Infinity;
+                for (const idx of empty) {
+                    board[idx] = state.playerSymbol;
+                    const evalResult = minimax(board, depth + 1, true, state.aiSymbol);
+                    board[idx] = '';
+                    minEval = Math.min(minEval, evalResult);
+                }
+                return minEval;
+            }
+        }
+
+        // ============================================================
+        //  🎬 預覽棋盤動畫
+        // ============================================================
+        let previewInterval = null;
+
+        function startPreviewAnimation() {
+            if (previewInterval) {
+                clearInterval(previewInterval);
+                previewInterval = null;
+            }
             updatePreviewCells();
-        }, 1500);
-    }
-
-    function updatePreviewCells() {
-        const numToShow = 3 + Math.floor(Math.random() * 3);
-        const indices = [];
-        while (indices.length < numToShow) {
-            const idx = Math.floor(Math.random() * 9);
-            if (!indices.includes(idx)) {
-                indices.push(idx);
-            }
+            previewInterval = setInterval(() => {
+                updatePreviewCells();
+            }, 1500);
         }
 
-        previewCells.forEach((cell, i) => {
-            if (indices.includes(i)) {
-                const symbol = Math.random() < 0.5 ? 'X' : 'O';
-                cell.textContent = symbol;
-                cell.className = `preview-cell ${symbol}`;
-            } else {
+        function updatePreviewCells() {
+            const numToShow = 3 + Math.floor(Math.random() * 3);
+            const indices = [];
+            while (indices.length < numToShow) {
+                const idx = Math.floor(Math.random() * 9);
+                if (!indices.includes(idx)) {
+                    indices.push(idx);
+                }
+            }
+            previewCells.forEach((cell, i) => {
+                if (indices.includes(i)) {
+                    const symbol = Math.random() < 0.5 ? 'X' : 'O';
+                    cell.textContent = symbol;
+                    cell.className = `preview-cell ${symbol}`;
+                } else {
+                    cell.textContent = '';
+                    cell.className = 'preview-cell empty';
+                }
+            });
+        }
+
+        // ============================================================
+        //  🖱️ 事件綁定
+        // ============================================================
+        cells.forEach(cell => {
+            cell.addEventListener('click', function() {
+                const index = parseInt(this.dataset.index);
+                if (!state.gameActive || state.isOver || state.isProcessing) return;
+                if (state.board[index] !== '') return;
+
+                let isPlayerTurn = false;
+                if (state.gameType === 'pvp') {
+                    isPlayerTurn = (state.currentPlayer === 'X' || state.currentPlayer === 'O');
+                } else {
+                    isPlayerTurn = (state.currentPlayer === state.playerSymbol);
+                }
+                if (!isPlayerTurn) return;
+
+                doMove(index, state.currentPlayer);
+            });
+        });
+
+        // 外部「進入遊戲」按鈕
+        btnEnterGameOuter.addEventListener('click', function() {
+            btnEnterGameOuter.classList.add('hidden');
+            settingsArea.classList.add('visible');
+            previewContainer.classList.add('hidden');
+            if (previewInterval) {
+                clearInterval(previewInterval);
+                previewInterval = null;
+            }
+            btnEnterGame.textContent = t('back');
+            // 保持音樂播放（首頁音樂繼續）
+        });
+
+        // 內部「返回」按鈕
+        btnEnterGame.addEventListener('click', function() {
+            settingsArea.classList.remove('visible');
+            btnEnterGameOuter.classList.remove('hidden');
+            previewContainer.classList.remove('hidden');
+            if (!previewInterval) {
+                startPreviewAnimation();
+            }
+            btnEnterGameOuter.textContent = t('enter');
+            // 切回首頁音樂
+            audio.switchToHome();
+        });
+
+        btnStartGame.addEventListener('click', startGame);
+
+        btnReset.addEventListener('click', function() {
+            state.gameActive = false;
+            state.isOver = false;
+            menuScreen.style.display = 'block';
+            gameScreen.classList.remove('active');
+            cells.forEach(cell => {
                 cell.textContent = '';
-                cell.className = 'preview-cell empty';
+                cell.className = 'cell';
+            });
+            overlay.classList.remove('show');
+            resultTrophy.style.display = 'none';
+            updateUI();
+            settingsArea.classList.remove('visible');
+            btnEnterGameOuter.classList.remove('hidden');
+            previewContainer.classList.remove('hidden');
+            btnEnterGameOuter.textContent = t('enter');
+            if (!previewInterval) {
+                startPreviewAnimation();
             }
+            audio.switchToHome();
         });
-    }
 
-    // ============================================================
-    //  🖱️ 事件綁定
-    // ============================================================
-    cells.forEach(cell => {
-        cell.addEventListener('click', function() {
-            const index = parseInt(this.dataset.index);
-            if (!state.gameActive || state.isOver || state.isProcessing) return;
-            if (state.board[index] !== '') return;
+        btnPlayAgain.addEventListener('click', startGame);
 
-            let isPlayerTurn = false;
-            if (state.gameType === 'pvp') {
-                isPlayerTurn = (state.currentPlayer === 'X' || state.currentPlayer === 'O');
+        langSelect.addEventListener('change', function() {
+            state.lang = this.value;
+            updateLanguage();
+            if (settingsArea.classList.contains('visible')) {
+                btnEnterGame.textContent = t('back');
+                btnEnterGameOuter.classList.add('hidden');
             } else {
-                isPlayerTurn = (state.currentPlayer === state.playerSymbol);
+                btnEnterGameOuter.classList.remove('hidden');
+                btnEnterGameOuter.textContent = t('enter');
             }
-            if (!isPlayerTurn) return;
-
-            doMove(index, state.currentPlayer);
         });
-    });
 
-    // 外部「進入遊戲」按鈕
-    btnEnterGameOuter.addEventListener('click', function() {
-        // 隱藏外部按鈕，顯示設定區
-        btnEnterGameOuter.classList.add('hidden');
-        settingsArea.classList.add('visible');
-        previewContainer.classList.add('hidden');
-        if (previewInterval) {
-            clearInterval(previewInterval);
-            previewInterval = null;
+        gameTypeSelect.addEventListener('change', function() {
+            updateUI();
+        });
+
+        // ============================================================
+        //  🔊 音符按鈕（切換聲音）
+        // ============================================================
+        btnSoundToggle.addEventListener('click', function() {
+            const enabled = audio.toggleEnabled();
+            this.textContent = enabled ? '🔊' : '🔇';
+            this.classList.toggle('active', enabled);
+            this.classList.toggle('muted', !enabled);
+            this.title = enabled ? '關閉音效與音樂' : '開啟音效與音樂';
+        });
+
+        function updateSoundButton() {
+            const enabled = audio.enabled;
+            btnSoundToggle.textContent = enabled ? '🔊' : '🔇';
+            btnSoundToggle.classList.toggle('active', enabled);
+            btnSoundToggle.classList.toggle('muted', !enabled);
+            btnSoundToggle.title = enabled ? '關閉音效與音樂' : '開啟音效與音樂';
         }
-        // 更新語言（確保按鈕文字）
-        btnEnterGame.textContent = t('back');
-    });
+        updateSoundButton();
 
-    // 內部「返回」按鈕
-    btnEnterGame.addEventListener('click', function() {
-        // 隱藏設定區，顯示外部按鈕
-        settingsArea.classList.remove('visible');
-        btnEnterGameOuter.classList.remove('hidden');
-        previewContainer.classList.remove('hidden');
-        if (!previewInterval) {
-            startPreviewAnimation();
-        }
-        btnEnterGameOuter.textContent = t('enter');
-    });
+        // ============================================================
+        //  🏆 獎盃儲存／載入 (txt) 含 "Tic Tac Toe" 標識及聲音狀態
+        // ============================================================
+        btnSave.addEventListener('click', function() {
+            // 格式：第一行標識，第二行獎盃數，第三行聲音狀態 (1/0)
+            const data = `Tic Tac Toe\n${state.trophies}\n${audio.enabled ? '1' : '0'}`;
+            const blob = new Blob([data], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `TicTacToe_Trophies_${new Date().toISOString().slice(0,10)}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
 
-    btnStartGame.addEventListener('click', startGame);
+        btnLoad.addEventListener('click', function() {
+            fileInput.click();
+        });
 
-    btnReset.addEventListener('click', function() {
-        state.gameActive = false;
-        state.isOver = false;
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                try {
+                    const content = ev.target.result.trim();
+                    const lines = content.split('\n').map(s => s.trim());
+                    let trophies = -1;
+                    let soundEnabled = null;
+
+                    // 嘗試解析三行格式
+                    if (lines.length >= 3 && lines[0] === 'Tic Tac Toe') {
+                        trophies = parseInt(lines[1], 10);
+                        const soundVal = lines[2];
+                        if (soundVal === '1' || soundVal === '0') {
+                            soundEnabled = soundVal === '1';
+                        }
+                    } else if (lines.length >= 2 && lines[0] === 'Tic Tac Toe') {
+                        // 舊版兩行格式（無聲音狀態）
+                        trophies = parseInt(lines[1], 10);
+                    } else {
+                        // 相容純數字
+                        trophies = parseInt(content, 10);
+                    }
+
+                    if (!isNaN(trophies) && trophies >= 0) {
+                        state.trophies = trophies;
+                        saveTrophies();
+                        updateTrophyDisplay();
+
+                        // 如果載入了聲音狀態，則套用
+                        if (soundEnabled !== null && audio.enabled !== soundEnabled) {
+                            audio.enabled = soundEnabled;
+                            localStorage.setItem('ttt_sound_enabled', String(soundEnabled));
+                            updateSoundButton();
+                            // 根據新狀態播放或停止音樂
+                            if (soundEnabled) {
+                                const menuVisible = document.getElementById('menuScreen').style.display !== 'none';
+                                const gameActive = document.getElementById('gameScreen').classList.contains('active');
+                                if (menuVisible && !gameActive) {
+                                    audio.playHomeMusic();
+                                } else if (gameActive) {
+                                    audio.playGameMusic();
+                                }
+                            } else {
+                                audio.stopMusic();
+                            }
+                        }
+
+                        let msg = `✅ 成功載入獎盃數：${state.trophies}`;
+                        if (soundEnabled !== null) {
+                            msg += `，聲音狀態：${soundEnabled ? '開啟' : '關閉'}`;
+                        }
+                        alert(msg);
+                    } else {
+                        alert('❌ 檔案格式錯誤，請確認檔案內容為數字或包含 "Tic Tac Toe" 標識。');
+                    }
+                } catch (err) {
+                    alert('❌ 讀取檔案失敗：' + err.message);
+                }
+            };
+            reader.readAsText(file);
+            fileInput.value = '';
+        });
+
+        // ============================================================
+        //  ⛶ 全螢幕按鈕
+        // ============================================================
+        floatFullscreen.addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.warn('全螢幕請求失敗:', err);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().catch(err => {
+                        console.warn('退出全螢幕失敗:', err);
+                    });
+                }
+            }
+        });
+
+        document.addEventListener('fullscreenchange', function() {
+            const isFull = !!document.fullscreenElement;
+            floatFullscreen.classList.toggle('is-full', isFull);
+            floatFullscreen.textContent = isFull ? '⛶' : '⛶';
+            floatFullscreen.title = isFull ? '退出全螢幕' : '全螢幕';
+        });
+
+        // ============================================================
+        //  🚀 初始化
+        // ============================================================
+        state.lang = langSelect.value;
+        loadTrophies();
+        updateLanguage();
         menuScreen.style.display = 'block';
         gameScreen.classList.remove('active');
-        cells.forEach(cell => {
-            cell.textContent = '';
-            cell.className = 'cell';
-        });
-        overlay.classList.remove('show');
-        updateUI();
-        // 恢復主選單狀態（設定區隱藏，外部按鈕顯示）
         settingsArea.classList.remove('visible');
         btnEnterGameOuter.classList.remove('hidden');
-        previewContainer.classList.remove('hidden');
         btnEnterGameOuter.textContent = t('enter');
-        if (!previewInterval) {
-            startPreviewAnimation();
-        }
-    });
-
-    btnPlayAgain.addEventListener('click', startGame);
-
-    langSelect.addEventListener('change', function() {
-        state.lang = this.value;
-        updateLanguage();
-        // 保持按鈕狀態
-        if (settingsArea.classList.contains('visible')) {
-            btnEnterGame.textContent = t('back');
-            btnEnterGameOuter.classList.add('hidden');
-        } else {
-            btnEnterGameOuter.classList.remove('hidden');
-            btnEnterGameOuter.textContent = t('enter');
-        }
-    });
-
-    gameTypeSelect.addEventListener('change', function() {
+        previewContainer.classList.remove('hidden');
         updateUI();
-    });
+        statusMessage.textContent = '▶ 點擊「開始遊戲」';
+        turnIndicator.textContent = '▶';
+        turnIndicator.className = 'turn-indicator';
+        stepBadge.textContent = '--';
+        countBadge.style.display = 'none';
 
-    // ============================================================
-    //  🚀 初始化
-    // ============================================================
-    state.lang = langSelect.value;
-    updateLanguage();
-    menuScreen.style.display = 'block';
-    gameScreen.classList.remove('active');
-    settingsArea.classList.remove('visible');
-    btnEnterGameOuter.classList.remove('hidden');
-    btnEnterGameOuter.textContent = t('enter');
-    previewContainer.classList.remove('hidden');
-    updateUI();
-    statusMessage.textContent = '▶ 點擊「開始遊戲」';
-    turnIndicator.textContent = '▶';
-    turnIndicator.className = 'turn-indicator';
-    stepBadge.textContent = '--';
-    countBadge.style.display = 'none';
+        startPreviewAnimation();
 
-    startPreviewAnimation();
-</script>
+        document.addEventListener('click', function wakeAudio() {
+            audio.wake();
+            document.removeEventListener('click', wakeAudio);
+        }, { once: true });
+
+        document.addEventListener('touchstart', function wakeAudioTouch() {
+            audio.wake();
+            document.removeEventListener('touchstart', wakeAudioTouch);
+        }, { once: true });
+
+        console.log('🎮 井字棋已載入！');
+        console.log('🏆 獎盃數:', state.trophies);
+        console.log('🔊 聲音狀態:', audio.enabled ? '開啟' : '關閉');
+        console.log('🎵 使用外部音樂：Tic Tac Toe - Endless Grid.mp3 / Endless Turn.mp3');
+    </script>
 </body>
 </html>
