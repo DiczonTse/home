@@ -167,14 +167,17 @@
             transform: rotate(-10deg);
             font-size: 70px;
         }
+        /* ★ 修改1：首頁背景改為 offline_dice.jpg + 半透明遮罩 */
         .start-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(ellipse at center, #1a2645 0%, #0b0e1a 100%);
-            backdrop-filter: blur(8px);
+            background:
+                linear-gradient(rgba(11, 14, 26, 0.55), rgba(11, 14, 26, 0.80)),
+                url('offline_dice.jpg') center/cover no-repeat;
+            backdrop-filter: blur(4px);
             border-radius: 28px;
             display: flex;
             flex-direction: column;
@@ -213,12 +216,13 @@
         }
         .start-overlay .sub-desc {
             font-size: 13px;
-            color: #aab8d0;
+            color: #e8edf5;
             margin: 4px 0 10px 0;
             line-height: 1.6;
             position: relative;
             z-index: 2;
             max-width: 380px;
+            text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
         }
         .lang-group {
             display: flex;
@@ -334,17 +338,18 @@
             z-index: 2;
             margin-top: 4px;
             font-size: 10px;
-            color: #5a6a8a;
+            color: #c8d0e0;
             display: flex;
             flex-direction: column;
             gap: 1px;
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
         }
         .start-overlay .footer .version {
             font-weight: 600;
-            color: #7a8aaa;
+            color: #e8edf5;
         }
         .start-overlay .footer .copyright {
-            opacity: 0.6;
+            opacity: 0.7;
         }
         .start-overlay .footer .score-display {
             color: #f7d875;
@@ -925,14 +930,9 @@
             font-size: 12px;
             opacity: 0.8;
         }
+        /* ★ 修改3b：移除每Class加成描述，保留其他內容 */
         .dd-class-section .dd-class-benefit {
-            font-size: 12px;
-            color: #aab8d0;
-            text-align: center;
-            margin-top: 2px;
-        }
-        .dd-class-section .dd-class-benefit .highlight {
-            color: #f7d875;
+            display: none;
         }
         .dice-detail-overlay .dd-footer {
             font-size: 12px;
@@ -1571,17 +1571,14 @@
     <link rel="preload" as="audio" href="Offline Dice - Rank.mp3">
     <link rel="preload" as="audio" href="Offline Dice - Deck Build.mp3">
     <link rel="preload" as="audio" href="Offline Dice - Last Wave Hold.mp3">
-	<link rel="preload" as="audio" href="Offline Dice - Dice Showdown.mp3">
+    <link rel="preload" as="audio" href="Offline Dice - Dice Showdown.mp3">
     <link rel="preload" as="audio" href="Offline Dice - Fortress Charge.mp3">
     <link rel="preload" as="audio" href="Offline Dice - Dice Riot.mp3">
 
     <div class="game-wrapper" id="gameWrapper">
-        <!-- 起始覆蓋層 -->
+        <!-- 起始覆蓋層 (背景已透過 CSS 改為 offline_dice.jpg) -->
         <div class="start-overlay" id="startOverlay">
-            <div class="deco-dice">🎲</div>
-            <div class="deco-dice">🎲</div>
-            <div class="deco-dice">🎲</div>
-            <div class="deco-dice">🎲</div>
+
             <h1 id="coverTitle">🎲 離線骰子</h1>
             <div class="sub-desc" id="coverDesc"></div>
             <div class="lang-group" id="langGroup">
@@ -1635,7 +1632,6 @@
                 </div>
             </div>
             <div class="dd-body" id="ddBody">
-                <!-- ★ 新版 2 列 Grid -->
                 <div class="dd-grid">
                     <div class="dd-item">
                         <span class="dd-label" id="ddBaseDmgLabel">基礎傷害</span>
@@ -1653,12 +1649,10 @@
                         <span class="dd-label" id="ddPerLevelLabel">每級攻速</span>
                         <span class="dd-value" id="ddPerLevel">-0.01s</span>
                     </div>
-                    <!-- ★ 新增：元素傷害 (火骰子專屬) -->
                     <div class="dd-item" id="ddElementDmgItem" style="display:none;">
                         <span class="dd-label" id="ddElementDmgLabel">元素傷害</span>
                         <span class="dd-value fire" id="ddElementDmg">+0</span>
                     </div>
-                    <!-- ★ 新增：暴擊傷害 (火骰子專屬) -->
                     <div class="dd-item" id="ddCritDmgItem" style="display:none;">
                         <span class="dd-label" id="ddCritDmgLabel">暴擊傷害</span>
                         <span class="dd-value crit" id="ddCritDmg">+0%</span>
@@ -1750,7 +1744,7 @@
 
     <script>
         // ================================================================
-        // ★ 翻譯 (新增 critText, elementDamageLabel, critDamageLabel)
+        // ★ 翻譯 (新增 poisonDamageLabel, freezeEffectLabel)
         // ================================================================
         const DEBUG_ATTACK = false;
         const BOSS_ORDER = ['snake', 'lamb', 'knight', 'mage', 'lion', 'hacker', 'slime', 'magnet', 'balistic'];
@@ -2069,7 +2063,9 @@
                 elementDamageLabel: '元素傷害',
                 critDamageLabel: '暴擊傷害',
                 globalCritDamageLabel: '全體暴擊傷害',
-                // ★ 新增 WIND / POISON / ICE Class 加成描述
+                // ★ 新增：毒伤害加成 / 冰冻效果加成 翻譯
+                poisonDamageLabel: '毒傷害加成',
+                freezeEffectLabel: '冰凍效果加成',
                 classBenefitWind: '每Class: 攻擊+3 攻速+2% 暴擊傷害+3% (至Class15) · Class16起僅暴擊傷害+3%',
                 classBenefitPoison: '每Class: 攻擊+2 毒傷害+5 暴擊傷害+3% (至Class15) · Class16起僅暴擊傷害+3%',
                 classBenefitIce: '每Class: 攻擊+3 攻速-0.02 冰凍效果+0.5% 暴擊傷害+3% (至Class15) · Class16起僅暴擊傷害+3%',
@@ -2389,6 +2385,8 @@
                 elementDamageLabel: '元素伤害',
                 critDamageLabel: '暴击伤害',
                 globalCritDamageLabel: '全体暴击伤害',
+                poisonDamageLabel: '毒伤害加成',
+                freezeEffectLabel: '冰冻效果加成',
                 classBenefitWind: '每Class: 攻击+3 攻速+2% 暴击伤害+3% (至Class15) · Class16起仅暴击伤害+3%',
                 classBenefitPoison: '每Class: 攻击+2 毒伤害+5 暴击伤害+3% (至Class15) · Class16起仅暴击伤害+3%',
                 classBenefitIce: '每Class: 攻击+3 攻速-0.02 冰冻效果+0.5% 暴击伤害+3% (至Class15) · Class16起仅暴击伤害+3%',
@@ -2708,6 +2706,8 @@
                 elementDamageLabel: 'Element DMG',
                 critDamageLabel: 'Crit DMG',
                 globalCritDamageLabel: 'Global Crit DMG',
+                poisonDamageLabel: 'Poison DMG Bonus',
+                freezeEffectLabel: 'Freeze Effect Bonus',
                 classBenefitWind: 'Per Class: ATK+3 Speed+2% CritDMG+3% (to Class15) · Class16+ only CritDMG+3%',
                 classBenefitPoison: 'Per Class: ATK+2 Poison+5 CritDMG+3% (to Class15) · Class16+ only CritDMG+3%',
                 classBenefitIce: 'Per Class: ATK+3 Speed-0.02 Freeze+0.5% CritDMG+3% (to Class15) · Class16+ only CritDMG+3%',
@@ -3027,6 +3027,8 @@
                 elementDamageLabel: '元素ダメージ',
                 critDamageLabel: '会心ダメージ',
                 globalCritDamageLabel: '全体会心ダメージ',
+                poisonDamageLabel: '毒ダメージボーナス',
+                freezeEffectLabel: '凍結効果ボーナス',
                 classBenefitWind: '毎Class: 攻撃+3 速度+2% 会心ダメ+3% (Class15まで) · Class16以降は会心ダメ+3%のみ',
                 classBenefitPoison: '毎Class: 攻撃+2 毒+5 会心ダメ+3% (Class15まで) · Class16以降は会心ダメ+3%のみ',
                 classBenefitIce: '毎Class: 攻撃+3 速度-0.02 凍結+0.5% 会心ダメ+3% (Class15まで) · Class16以降は会心ダメ+3%のみ',
@@ -3346,6 +3348,8 @@
                 elementDamageLabel: '원소 피해',
                 critDamageLabel: '치명타 피해',
                 globalCritDamageLabel: '전체 치명타 피해',
+                poisonDamageLabel: '독 피해 보너스',
+                freezeEffectLabel: '빙결 효과 보너스',
                 classBenefitWind: '매 Class: 공격+3 속도+2% 치명타피해+3% (Class15까지) · Class16부터는 치명타피해+3%만',
                 classBenefitPoison: '매 Class: 공격+2 독+5 치명타피해+3% (Class15까지) · Class16부터는 치명타피해+3%만',
                 classBenefitIce: '매 Class: 공격+3 속도-0.02 빙결+0.5% 치명타피해+3% (Class15까지) · Class16부터는 치명타피해+3%만',
@@ -3552,7 +3556,6 @@
             return CLASS_COSTS[next] || null;
         }
 
-        // ★ 核心：根據骰子類型與 Class 等級計算屬性加成
         function getClassBenefit(type, classLevel, stat, baseInterval) {
             if (classLevel < 1) classLevel = 1;
             if (classLevel > CLASS_MAX) classLevel = CLASS_MAX;
@@ -3580,7 +3583,6 @@
                 case 'speed':
                     if (isBeyond15) return 0;
                     if (type === 'WIND') {
-                        // 攻击速度 +2% 每Class → 转换为间隔减少（基于基础间隔）
                         const base = (typeof baseInterval === 'number' && isFinite(baseInterval) && baseInterval > 0) ?
                             baseInterval : 0.45;
                         return -(capped - 1) * 0.02 * base;
@@ -3608,7 +3610,6 @@
             };
         }
 
-        // ★ 全局暴擊傷害加成 (所有支援 Class 的骰子)
         function getGlobalCritBonus() {
             let total = 0;
             const types = ['FIRE', 'THUNDER', 'WIND', 'POISON', 'ICE'];
@@ -3662,7 +3663,6 @@
             const newClass = current + 1;
             setDiceClass(type, newClass);
 
-            // 更新棋盤上所有同類型骰子
             for (let r = 0; r < ROWS; r++) {
                 for (let c = 0; c < COLS; c++) {
                     const dice = game.board[r]?.[c];
@@ -3691,11 +3691,9 @@
                             if (dice.isSpike && dice._spikePlaceTimer !== undefined) {
                                 newDice._spikePlaceTimer = dice._spikePlaceTimer || 0;
                             }
-                            // ★ 複製 POISON 的毒相關屬性
                             if (dice.isPoison && dice._poisonBonus !== undefined) {
                                 newDice._poisonBonus = dice._poisonBonus;
                             }
-                            // ★ 複製 ICE 的冰凍相關屬性
                             if (dice.isIce && dice._freezeBonus !== undefined) {
                                 newDice._freezeBonus = dice._freezeBonus;
                             }
@@ -3713,7 +3711,6 @@
             addFloatingText(W / 2, upgradeY + UPGRADE_HEIGHT / 2, `⬆ ${name} Class ${newClass}`, '#f7d875', 28);
             updateUI();
             updateDicePreview();
-            // 刷新詳情視窗
             const detailOverlay = document.getElementById('diceDetailOverlay');
             if (detailOverlay.classList.contains('visible')) {
                 const currentType = document.getElementById('ddName').textContent;
@@ -4125,7 +4122,7 @@
         const BGM_LIST = [
             { url: 'Offline Dice - Dice Rush.mp3', label: 'BGM 1' },
             { url: 'Offline Dice - Last Wave Hold.mp3', label: 'BGM 2' },
-			{ url: 'Offline Dice - Dice Showdown.mp3', label: 'BGM 3' },
+            { url: 'Offline Dice - Dice Showdown.mp3', label: 'BGM 3' },
             { url: 'Offline Dice - Fortress Charge.mp3', label: 'BGM 4' },
             { url: 'Offline Dice - Dice Riot.mp3', label: 'BGM 5' },
         ];
@@ -4648,7 +4645,7 @@
         function getEmptyCells() { let cells = []; for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++)
                 if (!isOccupied(c, r)) cells.push({ col: c, row: r }); return cells; }
 
-        // ========== 骰子創建 (★ 支援 FIRE + THUNDER + WIND + POISON + ICE Class 加成) ==========
+        // ========== 骰子創建 ==========
         function createDice(type, star) {
             star = star || 1;
             const def = CONST.ALL_DICE_DEFS[type];
@@ -4662,7 +4659,6 @@
             let classCritBonus = 0;
             let classSpeedBonus = 0;
 
-            // ★ FIRE
             if (type === 'FIRE') {
                 const cls = getDiceClass('FIRE') || 1;
                 const atkBonus = getClassBenefit('FIRE', cls, 'atk');
@@ -4677,7 +4673,6 @@
                 const fp = def.fireDamagePerLevel || 20;
                 elementDmg = fb + (lv - 1) * fp + elementBonus;
 
-                // ★ THUNDER
             } else if (type === 'THUNDER') {
                 const cls = getDiceClass('THUNDER') || 1;
                 const atkBonus = getClassBenefit('THUNDER', cls, 'atk');
@@ -4691,7 +4686,6 @@
                 const tb = def.thunderPerLevel || 20;
                 elementDmg = (lv - 1) * tb + elementBonus;
 
-                // ★ WIND
             } else if (type === 'WIND') {
                 const cls = getDiceClass('WIND') || 1;
                 const atkBonus = getClassBenefit('WIND', cls, 'atk');
@@ -4701,7 +4695,6 @@
                 const baseNormal = def.baseDamage + def.damagePerStar * (s - 1);
                 dmg = baseNormal + (lv - 1) * (def.atkPerLevel || 0) + atkBonus;
 
-                // ★ POISON
             } else if (type === 'POISON') {
                 const cls = getDiceClass('POISON') || 1;
                 const atkBonus = getClassBenefit('POISON', cls, 'atk');
@@ -4711,7 +4704,6 @@
                 const baseNormal = def.baseDamage + def.damagePerStar * (s - 1);
                 dmg = baseNormal + (lv - 1) * (def.atkPerLevel || 0) + atkBonus;
 
-                // ★ ICE
             } else if (type === 'ICE') {
                 const cls = getDiceClass('ICE') || 1;
                 const atkBonus = getClassBenefit('ICE', cls, 'atk');
@@ -4722,7 +4714,6 @@
                 const baseNormal = def.baseDamage + def.damagePerStar * (s - 1);
                 dmg = baseNormal + (lv - 1) * (def.atkPerLevel || 0) + atkBonus;
 
-                // ★ IRON
             } else if (type === 'IRON') {
                 const baseDmg = def.baseDamage + def.damagePerStar * (s - 1);
                 const star7Dmg = def.baseDamage + def.damagePerStar * (7 - 1);
@@ -4772,20 +4763,17 @@
 
             let intervalBase = def.baseInterval + (def.intervalPerLevel || 0) * (lv - 1);
 
-            // ★ WIND 特殊攻速計算（先算基礎，再套 Class 加成）
             if (type === 'WIND') {
                 dmg = (def.baseDamage + def.damagePerStar * (s - 1)) + (lv - 1) * 15;
                 const levelSpeedMult = 1 + (lv - 1) * 0.1;
                 const starSpeedMult = 1.1 + (s - 1) * 0.02;
                 const totalSpeedMult = levelSpeedMult * starSpeedMult;
                 intervalBase = def.baseInterval / totalSpeedMult;
-                // ★ 套用 Class 攻速加成（百分比方式）
                 const cls = getDiceClass('WIND') || 1;
                 const speedBonus = getClassBenefit('WIND', cls, 'speed', intervalBase);
                 intervalBase = intervalBase + speedBonus;
             }
 
-            // ★ FIRE / THUNDER / ICE Class 攻速加成（絕對值）
             if (type === 'FIRE' || type === 'THUNDER' || type === 'ICE') {
                 const cls = getDiceClass(type) || 1;
                 const speedBonus = getClassBenefit(type, cls, 'speed');
@@ -4885,11 +4873,9 @@
             if (type === 'WIND') {
                 dice._classCritBonus = classCritBonus;
                 dice._classSpeedBonus = classSpeedBonus;
-                // WIND 的 _damage 已经包含了 atkBonus，无需额外存储
             }
             if (type === 'POISON') {
                 dice._classCritBonus = classCritBonus;
-                // 存储毒伤害加成，用于显示
                 const cls = getDiceClass('POISON') || 1;
                 const poisonBonus = getClassBenefit('POISON', cls, 'poison');
                 dice._poisonBonus = poisonBonus;
@@ -4900,7 +4886,6 @@
                 const cls = getDiceClass('ICE') || 1;
                 const freezeBonus = getClassBenefit('ICE', cls, 'freeze');
                 dice._freezeBonus = freezeBonus;
-                // 應用冰凍效果加成到 slow.baseRate
                 if (dice.slow && typeof dice.slow === 'object') {
                     const originalBase = def.slow.baseRate || 0.05;
                     dice.slow = {
@@ -7886,7 +7871,6 @@
 
                             if (!isHacked && !hasShield && dice.poison) {
                                 const lv = upgradeLevels[dice.type] || 1;
-                                // ★ POISON Class 毒伤害加成
                                 let poisonBonus = 0;
                                 if (dice.type === 'POISON') {
                                     const cls = getDiceClass('POISON') || 1;
@@ -8014,7 +7998,6 @@
                                 }
                             }
 
-                            // ★ FIX 1: 棒球骰子不顯示射子彈動畫
                             if (!dice.isBaseball) {
                                 game.projectiles.push({
                                     x: pos.x,
@@ -8544,7 +8527,6 @@
                 const hasYang = dice._yangActive || false;
                 const hasHarmony = dice._harmonyActive || false;
 
-                // 檢測是否被標記 (鎖定 或 黑客)
                 const isLocked = game.bossLockedDice && game.bossLockedDice.some(d => d.row === row && d.col === col);
                 const isHacked = game.bossHackedDice && game.bossHackedDice.some(d => d.row === row && d.col === col);
                 const isMarked = isLocked || isHacked;
@@ -8564,7 +8546,6 @@
                 }
 
                 if (status) {
-                    // ★ 被標記時，和諧狀態符號縮小並移到右下角
                     const isHarmony = hasHarmony;
                     const fontSize = isMarked ? (isHarmony ? size * 0.24 : size * 0.26) : size * 0.35;
                     const offsetX = isMarked ? -size * 0.2 : 0;
@@ -8573,7 +8554,6 @@
                     const posY = (isMarked ? y + size * 0.65 : y + size - 2);
 
                     if (isMarked && isHarmony) {
-                        // 若被標記且為和諧狀態，不繪製大型光環，只繪製小符號在右下角
                         ctx.fillStyle = 'rgba(255,215,0,0.9)';
                         ctx.font = `bold ${fontSize}px sans-serif`;
                         ctx.textAlign = 'center';
@@ -8583,7 +8563,6 @@
                         ctx.fillText(status, posX, posY + 4);
                         ctx.shadowBlur = 0;
 
-                        // 小光暈
                         ctx.shadowColor = glowColor + '0.4)';
                         ctx.shadowBlur = 12;
                         ctx.strokeStyle = glowColor + '0.3)';
@@ -8594,14 +8573,12 @@
                         ctx.stroke();
                         ctx.shadowBlur = 0;
 
-                        // 用小型文字標示 "和諧"
                         ctx.fillStyle = 'rgba(255,215,0,0.6)';
                         ctx.font = `${Math.floor(size*0.09)}px sans-serif`;
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'top';
                         ctx.fillText('和諧', posX, posY + 4);
                     } else if (isMarked) {
-                        // 被標記但非和諧狀態（陰或陽），縮小顯示
                         ctx.fillStyle = 'rgba(255,255,255,0.9)';
                         ctx.font = `bold ${fontSize}px sans-serif`;
                         ctx.textAlign = 'center';
@@ -8611,7 +8588,6 @@
                         ctx.fillText(status, posX, posY + 4);
                         ctx.shadowBlur = 0;
                     } else {
-                        // 未被標記，正常顯示
                         const glowSize = dSize / 2 + 12 + 6 * Math.sin(game._taichiGlowTimer * 2);
                         ctx.shadowColor = glowColor + '0.8)';
                         ctx.shadowBlur = 30 + 15 * Math.sin(game._taichiGlowTimer * 2.5);
@@ -8647,7 +8623,6 @@
                 }
 
                 if (status) {
-                    // 額外狀態文字（僅在未被標記時顯示完整，被標記時已在上面處理）
                     if (!isMarked) {
                         ctx.fillStyle = 'rgba(255,215,0,0.9)';
                         ctx.font = `bold ${Math.floor(size*0.3)}px sans-serif`;
@@ -9980,7 +9955,6 @@
                 const mult = getUpgradeMultiplier('FIRE');
                 const atkBonus = getClassBenefit('FIRE', cls, 'atk');
                 const elementBonus = getClassBenefit('FIRE', cls, 'element');
-                const critBonus = getClassBenefit('FIRE', cls, 'critDmg');
 
                 const baseDmg = def.baseDamage * mult + (lv - 1) * (def.atkPerLevel || 0) + atkBonus;
                 baseDmgDisplay = Math.round(baseDmg * 10) / 10;
@@ -9988,14 +9962,14 @@
                 const elementDmg = (def.fireDamageBase || 0) + (lv - 1) * (def.fireDamagePerLevel || 0) + elementBonus;
                 elementDmgDisplay = Math.round(elementDmg * 10) / 10;
 
-                critDmgDisplay = `+${critBonus}%`;
+                // ★ 暴擊傷害顯示全體暴擊
+                critDmgDisplay = `+${globalCritBonus}%`;
             } else if (isThunder) {
                 const cls = getDiceClass('THUNDER') || 1;
                 const lv = upgradeLevels['THUNDER'] || 1;
                 const mult = getUpgradeMultiplier('THUNDER');
                 const atkBonus = getClassBenefit('THUNDER', cls, 'atk');
                 const elementBonus = getClassBenefit('THUNDER', cls, 'element');
-                const critBonus = getClassBenefit('THUNDER', cls, 'critDmg');
 
                 const baseDmg = def.baseDamage * mult + (lv - 1) * (def.atkPerLevel || 0) + atkBonus;
                 baseDmgDisplay = Math.round(baseDmg * 10) / 10;
@@ -10003,40 +9977,37 @@
                 const elementDmg = (lv - 1) * (def.thunderPerLevel || 20) + elementBonus;
                 elementDmgDisplay = Math.round(elementDmg * 10) / 10;
 
-                critDmgDisplay = `+${critBonus}%`;
+                critDmgDisplay = `+${globalCritBonus}%`;
             } else if (isWind) {
                 const cls = getDiceClass('WIND') || 1;
                 const lv = upgradeLevels['WIND'] || 1;
                 const atkBonus = getClassBenefit('WIND', cls, 'atk');
-                const critBonus = getClassBenefit('WIND', cls, 'critDmg');
 
                 const baseDmg = def.baseDamage + (lv - 1) * (def.atkPerLevel || 0) + atkBonus;
                 baseDmgDisplay = Math.round(baseDmg * 10) / 10;
-                critDmgDisplay = `+${critBonus}%`;
+                critDmgDisplay = `+${globalCritBonus}%`;
                 elementDmgDisplay = '-';
             } else if (isPoison) {
                 const cls = getDiceClass('POISON') || 1;
                 const lv = upgradeLevels['POISON'] || 1;
                 const atkBonus = getClassBenefit('POISON', cls, 'atk');
                 const poisonBonus = getClassBenefit('POISON', cls, 'poison');
-                const critBonus = getClassBenefit('POISON', cls, 'critDmg');
 
                 const baseDmg = def.baseDamage + (lv - 1) * (def.atkPerLevel || 0) + atkBonus;
                 baseDmgDisplay = Math.round(baseDmg * 10) / 10;
-                critDmgDisplay = `+${critBonus}%`;
-                elementDmgDisplay = `毒+${poisonBonus}`;
+                critDmgDisplay = `+${globalCritBonus}%`;
+                elementDmgDisplay = `+${poisonBonus}`;
             } else if (isIce) {
                 const cls = getDiceClass('ICE') || 1;
                 const lv = upgradeLevels['ICE'] || 1;
                 const atkBonus = getClassBenefit('ICE', cls, 'atk');
                 const speedBonus = getClassBenefit('ICE', cls, 'speed');
                 const freezeBonus = getClassBenefit('ICE', cls, 'freeze');
-                const critBonus = getClassBenefit('ICE', cls, 'critDmg');
 
                 const baseDmg = def.baseDamage + (lv - 1) * (def.atkPerLevel || 0) + atkBonus;
                 baseDmgDisplay = Math.round(baseDmg * 10) / 10;
-                critDmgDisplay = `+${critBonus}%`;
-                elementDmgDisplay = `冰凍+${(freezeBonus*100).toFixed(1)}%`;
+                critDmgDisplay = `+${globalCritBonus}%`;
+                elementDmgDisplay = `+${(freezeBonus*100).toFixed(1)}%`;
             }
 
             document.getElementById('ddBaseDmg').textContent = baseDmgDisplay;
@@ -10052,7 +10023,7 @@
             const elemValue = document.getElementById('ddElementDmg');
             const critValue = document.getElementById('ddCritDmg');
 
-            // ★ 顯示元素傷害 / 毒傷害 / 冰凍效果
+            // ★ 顯示元素傷害 / 毒傷害 / 冰凍效果 (使用翻譯)
             if (isFire || isThunder) {
                 elemItem.style.display = 'flex';
                 critItem.style.display = 'flex';
@@ -10063,14 +10034,14 @@
             } else if (isPoison) {
                 elemItem.style.display = 'flex';
                 critItem.style.display = 'flex';
-                elemLabel.textContent = '毒傷害加成';
+                elemLabel.textContent = data.poisonDamageLabel || '毒傷害加成';
                 critLabel.textContent = data.critDamageLabel;
                 elemValue.textContent = elementDmgDisplay;
                 critValue.textContent = critDmgDisplay;
             } else if (isIce) {
                 elemItem.style.display = 'flex';
                 critItem.style.display = 'flex';
-                elemLabel.textContent = '冰凍效果加成';
+                elemLabel.textContent = data.freezeEffectLabel || '冰凍效果加成';
                 critLabel.textContent = data.critDamageLabel;
                 elemValue.textContent = elementDmgDisplay;
                 critValue.textContent = critDmgDisplay;
@@ -10179,7 +10150,7 @@
             document.getElementById('ddConfirmBtn').textContent = data.detailClose;
             document.getElementById('ddFooter').textContent = data.detailFooter;
 
-            // ★ Class 升級區塊
+            // ★ Class 升級區塊 (★ 修改3a：移除每Class加成描述，即 benefitText 不顯示)
             const section = document.getElementById('ddClassSection');
             const isClassable = (diceType === 'FIRE' || diceType === 'THUNDER' ||
                 diceType === 'WIND' || diceType === 'POISON' || diceType === 'ICE');
@@ -10190,20 +10161,12 @@
                 const nextCost = isMax ? null : getClassUpgradeCost(currentClass);
                 const canAfford = nextCost !== null && saveData.totalScore >= nextCost;
 
-                // ★ 根據骰子類型顯示不同的 Class 加成描述
-                let benefitText = '';
-                if (diceType === 'FIRE') benefitText = data.classBenefitFire || data.classBenefit;
-                else if (diceType === 'THUNDER') benefitText = data.classBenefitThunder || data.classBenefit;
-                else if (diceType === 'WIND') benefitText = data.classBenefitWind;
-                else if (diceType === 'POISON') benefitText = data.classBenefitPoison;
-                else if (diceType === 'ICE') benefitText = data.classBenefitIce;
-                else benefitText = data.classBenefit;
-
                 const label = diceType === 'FIRE' ? '🔥' :
                     diceType === 'THUNDER' ? '⚡' :
                     diceType === 'WIND' ? '🌪️' :
                     diceType === 'POISON' ? '☠️' : '❄️';
 
+                // ★ 移除 benefitText 行，只保留 Class 等級、費用、全體暴擊、升級按鈕
                 section.innerHTML = `
                     <div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:8px;padding-top:8px;border-top:2px solid rgba(245,166,35,0.2);">
                         <div class="dd-class-row">
@@ -10220,7 +10183,6 @@
                             <span class="dd-class-label">${data.globalCritDamageLabel}</span>
                             <span class="dd-class-value" style="color:#ff6b6b;">+${globalCritBonus}%</span>
                         </div>
-                        <div style="font-size:11px;color:#8a9fc0;text-align:center;margin:2px 0;">${benefitText}</div>
                         <button class="dd-class-btn" id="ddClassUpgradeBtn" ${isMax || !canAfford ? 'disabled' : ''}>
                             ${isMax ? data.classMax : `${label} ${data.classUpgrade}`}
                         </button>
