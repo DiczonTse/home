@@ -339,6 +339,11 @@
             animation: fly-out 0.45s ease-in forwards;
             z-index: 10;
         }
+        /* 移動跳躍專用 (與 attacking 共用 fly-in) */
+        .cell .piece.moving {
+            animation: fly-in 0.45s ease-out forwards;
+            z-index: 10;
+        }
         .cell .piece.selectable {
             cursor: pointer;
             border-color: #88ddff !important;
@@ -506,6 +511,31 @@
                 transform: scale(1);
             }
         }
+
+        /* ===== 標題畫面 - 封面背景 ===== */
+        #titleOverlay {
+            background: url('ICQ_RPS.jpg') center/cover no-repeat;
+            backdrop-filter: none;
+            /* 不模糊背景圖片本身 */;
+        }
+        #titleOverlay .modal {
+            background: rgba(10, 30, 15, 0.78);
+            backdrop-filter: blur(6px);
+            border: 2px solid rgba(126, 217, 163, 0.6);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9), inset 0 0 60px rgba(0, 60, 30, 0.15);
+        }
+        #titleOverlay .modal .big-icon {
+            filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.3));
+        }
+        #titleOverlay .modal .title {
+            color: #f5ffe0;
+            text-shadow: 0 0 30px rgba(0, 80, 40, 0.6);
+        }
+        #titleOverlay .modal .sub {
+            color: #d4f5dc;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
         .modal {
             background: #1f4d30;
             border-radius: var(--radius-lg);
@@ -654,7 +684,7 @@
             display: flex;
             gap: 20px;
             justify-content: center;
-			align-items: center;
+            align-items: center;
             margin: 10px 0;
         }
         .color-preview .preview-item {
@@ -701,19 +731,19 @@
             font-size: 12px;
             color: #aacfaa;
         }
-		
-		/* VS 分隔樣式 */
-		.vs-divider {
-			font-size: 32px;
-			font-weight: 900;
-			color: #ffd966;
-			text-shadow: 0 0 24px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.2);
-			letter-spacing: 3px;
-			padding: 0 6px;
-			user-select: none;
-			flex-shrink: 0;
-			line-height: 1.2;
-		}
+
+        /* VS 分隔樣式 */
+        .vs-divider {
+            font-size: 32px;
+            font-weight: 900;
+            color: #ffd966;
+            text-shadow: 0 0 24px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.2);
+            letter-spacing: 3px;
+            padding: 0 6px;
+            user-select: none;
+            flex-shrink: 0;
+            line-height: 1.2;
+        }
 
         /* ===== 選擇棋子階段 (覆蓋層內) ===== */
         .select-phase {
@@ -960,6 +990,9 @@
             .select-phase .select-hint {
                 font-size: 12px;
             }
+            #titleOverlay .modal {
+                background: rgba(10, 30, 15, 0.85);
+            }
         }
         @media (max-width: 420px) {
             .cell {
@@ -1059,7 +1092,7 @@
                     <div class="preview-label">🔵 藍方</div>
                     <div class="preview-desc">先走</div>
                 </div>
-				<div class="vs-divider">VS</div>
+                <div class="vs-divider">VS</div>
                 <div class="preview-item" data-color="red" id="previewRed">
                     <div class="preview-piece red">🧍‍♂️</div>
                     <div class="preview-label">🔴 紅方</div>
@@ -1123,8 +1156,8 @@
 
     <script>
         // ================================================================
-        //  🌼 ICQ 包剪揼 · 紅藍對決版
-        //  功能：選紅藍方、選陷阱&棋手、重抽12子、半透明棋子
+        //  🌼 ICQ 包剪揼 · 紅藍對決版 (v2.2.0)
+        //  修改：封面背景 + 雙音樂切換 + 移動跳躍
         // ================================================================
 
         (function() {
@@ -1190,17 +1223,23 @@
             let selectPhase = 'trap'; // 'trap' | 'king' | 'done'
             let trapPos = null;
             let kingPos = null;
-            let normalPieces = []; // 12隻普通棋子的引用 (不含陷阱和棋手)
+            let normalPieces = [];
 
             // ---- 獎盃 ----
             let trophyCount = 0;
             const TROPHY_KEY = 'icq_trophy_count';
             const SETTINGS_KEY = 'icq_game_settings';
 
-            // ---- 音樂 ----
-            let audioCtx = null;
+            // ---- 音樂管理 (v2.2) ----
             let isMusicOn = true;
-            let rematchResolve = null;
+            let audioCtx = null;
+            let currentMusicPhase = 'TITLE'; // 'TITLE' | 'SELECT' | 'PLAYING'
+            const MUSIC_FORMATION = 'ICQ RPS - Formation.mp3';
+            const MUSIC_FIGHT = 'ICQ RPS - Fight.mp3';
+
+            // ---- 移動動畫標記 ----
+            let moveAnimTarget = null; // { r, c }
+            let moveAnimTriggered = false;
 
             // ---- 全屏 ----
             let isFullscreen = false;
@@ -1267,7 +1306,7 @@
                             if (data.musicOn !== undefined) {
                                 isMusicOn = data.musicOn;
                                 updateMusicUI();
-                                if (gameStarted) {
+                                if (gameStarted || gamePhase === 'SELECT' || gamePhase === 'PLAYING') {
                                     if (isMusicOn) startBackgroundMusic();
                                     else stopBackgroundMusic();
                                 }
@@ -1294,7 +1333,7 @@
                     setTimeout(() => div.remove(), 500); }, 1800);
             }
 
-            // ---- 音樂 ----
+            // ---- 音樂核心 (v2.2) ----
             function updateMusicUI() {
                 if (isMusicOn) {
                     btnMusicToggle.textContent = '🔊';
@@ -1315,11 +1354,35 @@
                 return audioCtx;
             }
 
+            /** 根據當前階段設定音樂 */
+            function setMusicPhase(phase) {
+                currentMusicPhase = phase;
+                if (!isMusicOn) return;
+                const targetSrc = (phase === 'PLAYING') ? MUSIC_FIGHT : MUSIC_FORMATION;
+                try {
+                    // 如果當前 src 不是目標，切換
+                    const currentSrc = bgAudio.src || '';
+                    if (currentSrc.indexOf(targetSrc) === -1) {
+                        bgAudio.src = targetSrc;
+                        bgAudio.load();
+                        bgAudio.play().catch(() => {});
+                    } else {
+                        if (bgAudio.paused) {
+                            bgAudio.play().catch(() => {});
+                        }
+                    }
+                } catch (e) {
+                    // 靜默處理
+                }
+            }
+
             function startBackgroundMusic() {
                 if (!isMusicOn) return;
                 try {
-                    if (!bgAudio.src || bgAudio.src.indexOf('ICQ RPS - Fight.mp3') === -1) {
-                        bgAudio.src = 'ICQ RPS - Fight.mp3';
+                    const targetSrc = (currentMusicPhase === 'PLAYING') ? MUSIC_FIGHT : MUSIC_FORMATION;
+                    const currentSrc = bgAudio.src || '';
+                    if (currentSrc.indexOf(targetSrc) === -1) {
+                        bgAudio.src = targetSrc;
                         bgAudio.load();
                     }
                     if (bgAudio.paused) {
@@ -1644,6 +1707,36 @@
                 callback(battle);
             }
 
+            // ---- 移動動畫輔助 (v2.2) ----
+            function triggerMoveAnimation(r, c) {
+                moveAnimTarget = { r, c };
+                moveAnimTriggered = false;
+                // 在渲染後由 renderBoard 或外部觸發
+            }
+
+            function playMoveAnimationOnBoard() {
+                if (!moveAnimTarget || moveAnimTriggered) return;
+                moveAnimTriggered = true;
+                const { r, c } = moveAnimTarget;
+                setTimeout(() => {
+                    const cells = boardEl.querySelectorAll('.cell');
+                    for (const cell of cells) {
+                        if (parseInt(cell.dataset.r) === r && parseInt(cell.dataset.c) === c) {
+                            const piece = cell.querySelector('.piece');
+                            if (piece) {
+                                piece.classList.add('moving');
+                                setTimeout(() => {
+                                    piece.classList.remove('moving');
+                                    moveAnimTarget = null;
+                                    moveAnimTriggered = false;
+                                }, 500);
+                            }
+                            break;
+                        }
+                    }
+                }, 40);
+            }
+
             // ---- 玩家移動 ----
             async function playerMove(fromR, fromC, toR, toC) {
                 if (isProcessing || gameOver || !gameStarted || currentTurn !== 'player' || animating) return false;
@@ -1659,6 +1752,8 @@
                 if (target.action === 'move') {
                     movePiece(fromR, fromC, toR, toC);
                     playSound('wind');
+                    // 設定移動動畫
+                    triggerMoveAnimation(toR, toC);
                     afterPlayerAction();
                     return true;
                 } else {
@@ -1675,6 +1770,8 @@
 
             function afterPlayerAction() {
                 updateUI();
+                // 播放移動動畫
+                playMoveAnimationOnBoard();
                 if (checkGameOver()) { isProcessing = false; return; }
                 currentTurn = 'computer';
                 updateTurnUI();
@@ -1750,6 +1847,7 @@
                 if (pick.action === 'move') {
                     movePiece(pick.fromR, pick.fromC, pick.toR, pick.toC);
                     playSound('wind');
+                    triggerMoveAnimation(pick.toR, pick.toC);
                     afterComputerAction();
                 } else {
                     const defender = board[pick.toR][pick.toC];
@@ -1764,6 +1862,7 @@
 
             function afterComputerAction() {
                 updateUI();
+                playMoveAnimationOnBoard();
                 if (checkGameOver()) { isProcessing = false; return; }
                 currentTurn = 'player';
                 updateTurnUI();
@@ -1825,6 +1924,8 @@
                 gameoverConfirm.textContent = '🏠 回到標題';
                 gameoverOverlay.classList.add('active');
                 gamePhase = 'GAMEOVER';
+                // 切換音樂到 Formation
+                setMusicPhase('TITLE');
             }
 
             // ---- 棋子顏色類名 ----
@@ -1856,7 +1957,6 @@
                 playerLabel.innerHTML = `${pColor} <span class="num player-score" id="playerScore">${playerPieces.length}</span>`;
                 computerLabel.innerHTML =
                     `${cColor} <span class="num computer-score" id="computerScore">${computerPieces.length}</span>`;
-                // 重新获取引用
                 document.getElementById('playerScore').textContent = playerPieces.length;
                 document.getElementById('computerScore').textContent = computerPieces.length;
             }
@@ -1886,7 +1986,6 @@
                             bodySpan.textContent = '🧍‍♂️';
                             div.appendChild(bodySpan);
 
-                            // 判斷是否可見
                             const isVisible = (piece.owner === 'player' || piece.revealed);
 
                             if (isVisible) {
@@ -1927,14 +2026,12 @@
                             }
                             cell.appendChild(div);
 
-                            // 點擊事件
                             cell.addEventListener('click', () => onCellClick(r, c));
                         } else {
                             cell.classList.add('empty');
                             cell.addEventListener('click', () => onCellClick(r, c));
                         }
 
-                        // 目標高亮
                         if (selectedPos && !gameOver && gameStarted && currentTurn === 'player' && gamePhase === 'PLAYING') {
                             const moves = getValidMoves(selectedPos.r, selectedPos.c);
                             const isTarget = moves.some(m => m.r === r && m.c === c);
@@ -1948,13 +2045,11 @@
 
             // ---- 點擊處理 ----
             function onCellClick(r, c) {
-                // 選擇階段
                 if (gamePhase === 'SELECT') {
                     handleSelectClick(r, c);
                     return;
                 }
 
-                // 遊戲階段
                 if (!gameStarted || gameOver || isProcessing || currentTurn !== 'player' || animating || gamePhase !==
                     'PLAYING') return;
                 const piece = board[r][c];
@@ -2003,7 +2098,6 @@
                 if (kingPos && kingPos.r === r && kingPos.c === c) return;
 
                 if (selectPhase === 'trap') {
-                    // 選陷阱
                     trapPos = { r, c };
                     piece.type = 'trap';
                     piece.revealed = true;
@@ -2013,7 +2107,6 @@
                     playSound('wind');
                     showToast('⚠️ 已選陷阱，請選棋手');
                 } else if (selectPhase === 'king') {
-                    // 選棋手
                     if (trapPos && trapPos.r === r && trapPos.c === c) return;
                     kingPos = { r, c };
                     piece.type = 'king';
@@ -2023,7 +2116,6 @@
                     updateSelectStatus();
                     playSound('levelUp');
                     showToast('🚩 已選棋手！準備分配棋子...');
-                    // 自動分配剩餘12隻
                     assignNormalPieces();
                     renderBoard();
                     updateSelectStatus();
@@ -2034,7 +2126,6 @@
 
             // ---- 分配12隻普通棋子 ----
             function assignNormalPieces() {
-                // 收集所有玩家棋子中不是陷阱和棋手的
                 normalPieces = [];
                 const playerCells = [];
                 for (let r = 4; r < ROWS; r++) {
@@ -2051,7 +2142,6 @@
                     }
                 }
 
-                // 分配類型：4包、4剪、4揼
                 const types = [];
                 for (let i = 0; i < 4; i++) types.push('rock');
                 for (let i = 0; i < 4; i++) types.push('scissors');
@@ -2062,21 +2152,18 @@
                     normalPieces[i].type = types[i];
                     normalPieces[i].revealed = true;
                 }
-                // 更新位置引用
                 normalPieces = normalPieces.filter(p => p !== undefined);
             }
 
             // ---- 重抽12隻 ----
             function rerollNormalPieces() {
                 if (gamePhase === 'SELECT') {
-                    // 重新分配類型
                     const types = [];
                     for (let i = 0; i < 4; i++) types.push('rock');
                     for (let i = 0; i < 4; i++) types.push('scissors');
                     for (let i = 0; i < 4; i++) types.push('paper');
                     shuffleArray(types);
 
-                    // 確保normalPieces是正確的12隻
                     normalPieces = [];
                     for (let r = 4; r < ROWS; r++) {
                         for (let c = 0; c < COLS; c++) {
@@ -2099,7 +2186,6 @@
                     showToast('🎲 已重抽！');
                     playSound('wind');
                 } else if (gamePhase === 'PLAYING') {
-                    // 遊戲中重抽：只重排存活的普通棋子
                     const aliveNormals = [];
                     const positions = [];
                     for (let r = 0; r < ROWS; r++) {
@@ -2131,7 +2217,6 @@
                     for (let i = 0; i < aliveNormals.length && i < types.length; i++) {
                         aliveNormals[i].type = types[i];
                         aliveNormals[i].revealed = true;
-                        // 如果是玩家的棋子且已暴露，保持暴露
                     }
                     renderBoard();
                     showToast(`🎲 已重抽 ${aliveNormals.length} 隻棋子！`);
@@ -2162,7 +2247,6 @@
                     showToast('❌ 請先選好陷阱和棋手！');
                     return;
                 }
-                // 確定先後手
                 const playerFirst = playerColor === 'blue';
                 currentTurn = playerFirst ? 'player' : 'computer';
                 gameStarted = true;
@@ -2171,19 +2255,13 @@
                 isProcessing = false;
                 selectedPos = null;
 
-                // 電腦棋子生成 (在SELECT階段已經生成，但需要設置顏色)
-                // 電腦棋子已經在initBoard中生成
-
-                // 隱藏電腦棋子
                 for (const p of computerPieces) {
                     p.revealed = false;
                 }
-                // 玩家棋子全部可見
                 for (const p of playerPieces) {
                     p.revealed = true;
                 }
 
-                // 移除選擇階段的UI
                 const selectPhaseEl = document.querySelector('.select-phase');
                 if (selectPhaseEl) selectPhaseEl.remove();
                 btnReroll.style.display = 'none';
@@ -2191,14 +2269,14 @@
                 titleOverlay.classList.remove('active');
                 gameoverOverlay.classList.remove('active');
 
+                // 切換音樂到 Fight
+                setMusicPhase('PLAYING');
+
                 updateUI();
                 updateTurnUI();
                 updateButtons();
                 updateLabels();
 
-                if (isMusicOn) startBackgroundMusic();
-
-                // 如果是電腦先走
                 if (currentTurn === 'computer') {
                     setTimeout(() => computerTurn(), 600);
                 }
@@ -2254,10 +2332,10 @@
                     } else {
                         btnStartReset.textContent = '🔄 重開';
                         btnStartReset.className = 'btn btn-primary';
-                        btnReroll.style.display = 'inline-flex';
+                        btnReroll.style.display = 'none';
                     }
                     btnReroll.style.display = 'none';
-					return;
+                    return;
                 }
                 if (gamePhase === 'GAMEOVER') {
                     btnStartReset.textContent = '🏠 回到標題';
@@ -2278,7 +2356,6 @@
                 normalPieces = [];
                 selectPhase = 'trap';
 
-                // 生成玩家棋子 (14隻，全部顯示為"?"，但實際上是普通棋子)
                 const playerList = [];
                 for (let i = 0; i < 14; i++) {
                     playerList.push({
@@ -2293,7 +2370,6 @@
                 }
                 shuffleArray(playerList);
 
-                // 電腦棋子 (14隻，隨機分配包剪揼+陷阱+棋手)
                 const computerList = [];
                 const compTypes = [];
                 for (let i = 0; i < 4; i++) compTypes.push('rock');
@@ -2315,7 +2391,6 @@
                 }
                 shuffleArray(computerList);
 
-                // 放置玩家棋子 (下方2行)
                 const playerCells = [];
                 for (let r = 4; r < ROWS; r++) {
                     for (let c = 0; c < COLS; c++) playerCells.push({ r, c });
@@ -2331,7 +2406,6 @@
                     allPieces.push(piece);
                 }
 
-                // 放置電腦棋子 (上方2行)
                 const computerCells = [];
                 for (let r = 0; r < 2; r++) {
                     for (let c = 0; c < COLS; c++) computerCells.push({ r, c });
@@ -2356,7 +2430,9 @@
                 gameoverOverlay.classList.remove('active');
                 rematchOverlay.classList.remove('active');
 
-                // 添加選擇階段UI
+                // 切換音樂到 Formation
+                setMusicPhase('SELECT');
+
                 addSelectPhaseUI();
 
                 renderBoard();
@@ -2368,7 +2444,6 @@
 
             // ---- 添加選擇階段UI ----
             function addSelectPhaseUI() {
-                // 移除舊的
                 const old = document.querySelector('.select-phase');
                 if (old) old.remove();
 
@@ -2382,7 +2457,6 @@
                         <button class="btn btn-gold" id="selectRerollBtn" style="display:none;">🎲 重抽</button>
                     </div>
                 `;
-                // 插入到棋盤下方
                 const boardWrapper = document.querySelector('.board-wrapper');
                 boardWrapper.parentNode.insertBefore(div, boardWrapper.nextSibling);
 
@@ -2391,7 +2465,6 @@
                     rerollNormalPieces();
                 });
 
-                // 監聽選擇狀態變化
                 const observer = new MutationObserver(() => {
                     const rerollBtn = document.getElementById('selectRerollBtn');
                     if (rerollBtn) {
@@ -2405,7 +2478,6 @@
                 });
                 observer.observe(document.querySelector('.select-phase'), { childList: true, subtree: true });
 
-                // 保存observer以便清理
                 window._selectObserver = observer;
             }
 
@@ -2429,7 +2501,8 @@
                 kingPos = null;
                 normalPieces = [];
                 selectPhase = 'trap';
-                stopBackgroundMusic();
+                // 切換音樂到 Formation
+                setMusicPhase('TITLE');
                 updateUI();
                 updateTurnUI();
                 updateButtons();
@@ -2437,7 +2510,6 @@
                 btnStartReset.className = 'btn btn-primary';
                 btnReroll.style.display = 'none';
                 updateTrophyDisplay();
-                // 移除選擇階段UI
                 const selectPhaseEl = document.querySelector('.select-phase');
                 if (selectPhaseEl) selectPhaseEl.remove();
                 if (window._selectObserver) {
@@ -2450,7 +2522,6 @@
             // ---- 開始 / 重啟 ----
             function startGame() {
                 initAudio();
-                // 從標題進入選擇階段
                 titleOverlay.classList.remove('active');
                 gamePhase = 'SELECT';
                 initBoardForSelect();
@@ -2467,7 +2538,6 @@
                 if (!gameStarted && gamePhase !== 'PLAYING') return;
                 if (confirm('確定要重開遊戲嗎？進度將會遺失。')) {
                     goToTitle();
-                    // 重新進入選擇階段
                     setTimeout(() => {
                         titleOverlay.classList.remove('active');
                         gamePhase = 'SELECT';
@@ -2506,11 +2576,13 @@
                 updateTurnUI();
                 updateButtons();
                 titleOverlay.classList.add('active');
-                stopBackgroundMusic();
+                // 設定音樂為 Formation (標題)
+                setMusicPhase('TITLE');
+                if (isMusicOn) startBackgroundMusic();
+                else stopBackgroundMusic();
                 updateMusicUI();
                 updateTrophyDisplay();
                 updateLabels();
-                // 默認選擇藍方
                 playerColor = 'blue';
                 previewBlue.classList.add('selected');
                 previewRed.classList.remove('selected');
@@ -2548,7 +2620,7 @@
             btnTitleSave.addEventListener('click', saveSettings);
             btnTitleLoad.addEventListener('click', () => {
                 loadSettings();
-                if (gameStarted) {
+                if (gameStarted || gamePhase === 'SELECT' || gamePhase === 'PLAYING') {
                     if (isMusicOn) startBackgroundMusic();
                     else stopBackgroundMusic();
                 }
@@ -2560,15 +2632,20 @@
             btnMusicToggle.addEventListener('click', () => {
                 isMusicOn = !isMusicOn;
                 updateMusicUI();
-                if (gameStarted || gamePhase === 'SELECT') {
-                    if (isMusicOn) startBackgroundMusic();
-                    else stopBackgroundMusic();
+                if (gameStarted || gamePhase === 'SELECT' || gamePhase === 'PLAYING' || gamePhase === 'TITLE') {
+                    if (isMusicOn) {
+                        startBackgroundMusic();
+                        // 確保階段正確
+                        if (gamePhase === 'PLAYING') setMusicPhase('PLAYING');
+                        else setMusicPhase('TITLE');
+                    } else {
+                        stopBackgroundMusic();
+                    }
                 }
             });
 
             gameoverConfirm.addEventListener('click', goToTitle);
 
-            // ---- 紅藍選擇 ----
             previewBlue.addEventListener('click', () => {
                 playerColor = 'blue';
                 previewBlue.classList.add('selected');
@@ -2582,14 +2659,13 @@
                 showToast('🔴 已選紅方，後走');
             });
 
-            // ---- 全屏按鈕 ----
             fullscreenBtn.addEventListener('click', toggleFullscreen);
             updateFullscreenIcon();
 
             // ---- 版權 ----
             function setCopyright() {
                 const year = new Date().getFullYear();
-                copyrightEl.textContent = `v2.1.0 © ${year} ☕迪遜咖啡廳，版權所有。`;
+                copyrightEl.textContent = `v2.2.0 © ${year} ☕迪遜咖啡廳，版權所有。`;
             }
 
             // ---- 洗牌 ----
@@ -2609,17 +2685,19 @@
 
             document.addEventListener('click', () => {
                 if (!audioCtx) { try { initAudio(); } catch (e) {} }
-                if (isMusicOn && (gameStarted || gamePhase === 'SELECT') && bgAudio.paused) startBackgroundMusic();
+                if (isMusicOn && (gameStarted || gamePhase === 'SELECT' || gamePhase === 'PLAYING' || gamePhase ===
+                        'TITLE') && bgAudio.paused) startBackgroundMusic();
             }, { once: false });
 
             document.addEventListener('visibilitychange', () => {
-                if (!document.hidden && isMusicOn && (gameStarted || gamePhase === 'SELECT') && bgAudio.paused)
-                    startBackgroundMusic();
+                if (!document.hidden && isMusicOn && (gameStarted || gamePhase === 'SELECT' || gamePhase ===
+                        'PLAYING' || gamePhase === 'TITLE') && bgAudio.paused) startBackgroundMusic();
             });
 
-            console.log('🌼 ICQ 包剪揼 · 紅藍對決版 (v2.1.0) 已載入');
+            console.log('🌼 ICQ 包剪揼 · 紅藍對決版 (v2.2.0) 已載入');
             console.log(`🏆 當前獎盃: ${trophyCount}`);
             console.log(`🎨 當前選色: ${playerColor}`);
+            console.log(`🎵 音樂階段: ${currentMusicPhase}`);
 
             window.__game = {
                 addTrophy,
@@ -2634,7 +2712,7 @@
                 resetGame,
                 toggleFullscreen,
                 reroll: rerollNormalPieces,
-                getState: () => ({ phase: gamePhase, color: playerColor })
+                getState: () => ({ phase: gamePhase, color: playerColor, musicPhase: currentMusicPhase })
             };
 
         })();
