@@ -307,13 +307,15 @@
                 box-shadow: 0 0 50px #ffffaa, inset 0 0 40px rgba(255, 255, 120, 0.20);
             }
         }
+
+        /* ===== fly-in 動畫 ===== */
         @keyframes fly-in {
             0% {
-                transform: scale(1.8) translate(0, 0);
-                opacity: 0.3;
+                transform: scale(2.0) translate(0, -30px);
+                opacity: 0;
             }
-            60% {
-                transform: scale(1.1) translate(6px, -12px);
+            50% {
+                transform: scale(1.15) translate(8px, -10px);
                 opacity: 1;
             }
             100% {
@@ -331,17 +333,18 @@
                 opacity: 0;
             }
         }
+        .cell .piece.moving {
+            animation: fly-in 0.45s ease-out forwards;
+            z-index: 10;
+            opacity: 0;
+        }
         .cell .piece.attacking {
             animation: fly-in 0.45s ease-out forwards;
             z-index: 10;
+            opacity: 0;
         }
         .cell .piece.defeated {
             animation: fly-out 0.45s ease-in forwards;
-            z-index: 10;
-        }
-        /* 移動跳躍專用 (與 attacking 共用 fly-in) */
-        .cell .piece.moving {
-            animation: fly-in 0.45s ease-out forwards;
             z-index: 10;
         }
         .cell .piece.selectable {
@@ -512,17 +515,56 @@
             }
         }
 
-        /* ===== 標題畫面 - 封面背景 ===== */
+        /* ===== 標題畫面 - 封面背景 + 磨砂層優化 ===== */
         #titleOverlay {
-            background: url('ICQ_RPS.jpg') center/cover no-repeat;
             backdrop-filter: none;
-            /* 不模糊背景圖片本身 */;
+            background: rgba(0, 20, 0, 0.70);
         }
         #titleOverlay .modal {
             background: rgba(10, 30, 15, 0.78);
             backdrop-filter: blur(6px);
             border: 2px solid rgba(126, 217, 163, 0.6);
             box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9), inset 0 0 60px rgba(0, 60, 30, 0.15);
+            position: relative;
+            overflow: hidden;
+            padding: 0;
+        }
+        /* 背景圖片滾動層 */
+        #titleOverlay .modal .bg-scroll-wrap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+        }
+        #titleOverlay .modal .bg-scroll-wrap img {
+            width: 100%;
+            height: auto;
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            will-change: transform;
+            transition: none;
+        }
+        /* 內容層 - 降低背景不透明度與模糊，讓圖片更清晰 */
+        #titleOverlay .modal .modal-content {
+            position: relative;
+            z-index: 1;
+            padding: 28px 30px 32px;
+            background: rgba(10, 30, 15, 0.25);
+            /* 更透明 */
+            backdrop-filter: blur(0px);
+            /* 更輕微模糊 */
+            border-radius: var(--radius-lg);
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         #titleOverlay .modal .big-icon {
             filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.3));
@@ -539,7 +581,6 @@
         .modal {
             background: #1f4d30;
             border-radius: var(--radius-lg);
-            padding: 28px 30px 32px;
             max-width: 480px;
             width: 92%;
             text-align: center;
@@ -547,6 +588,18 @@
             box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
             position: relative;
             overflow: hidden;
+            padding: 0;
+        }
+        .modal .modal-content {
+            padding: 28px 30px 32px;
+            position: relative;
+            z-index: 1;
+            border-radius: var(--radius-lg);
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         .modal .big-icon {
             font-size: 68px;
@@ -745,7 +798,7 @@
             line-height: 1.2;
         }
 
-        /* ===== 選擇棋子階段 (覆蓋層內) ===== */
+        /* ===== 選擇棋子階段 ===== */
         .select-phase {
             margin: 10px 0 6px;
             padding: 12px;
@@ -835,12 +888,13 @@
             pointer-events: none;
         }
 
-        /* ===== 全屏按鈕 ===== */
+        /* ===== 全屏按鈕 (右下) ===== */
         .fullscreen-btn {
             position: fixed;
-            left: 18px;
+            right: 18px;
             bottom: 18px;
-            z-index: 999;
+            left: auto;
+            z-index: 1001;
             background: rgba(30, 60, 40, 0.75);
             backdrop-filter: blur(6px);
             border: 2px solid #7ed9a3;
@@ -940,7 +994,7 @@
                 font-size: 11px;
                 padding: 4px 12px;
             }
-            .modal {
+            .modal .modal-content {
                 padding: 20px 18px 24px;
             }
             .modal .title {
@@ -965,7 +1019,7 @@
                 min-width: 60px;
             }
             .fullscreen-btn {
-                left: 12px;
+                right: 12px;
                 bottom: 12px;
                 width: 40px;
                 height: 40px;
@@ -990,8 +1044,12 @@
             .select-phase .select-hint {
                 font-size: 12px;
             }
-            #titleOverlay .modal {
-                background: rgba(10, 30, 15, 0.85);
+            #titleOverlay .modal .modal-content {
+                padding: 16px 14px 20px;
+            }
+            #titleOverlay .modal .bg-scroll-wrap img {
+                width: 100%;
+                height: auto;
             }
         }
         @media (max-width: 420px) {
@@ -1022,7 +1080,7 @@
                 font-size: 15px;
             }
             .fullscreen-btn {
-                left: 10px;
+                right: 10px;
                 bottom: 10px;
                 width: 36px;
                 height: 36px;
@@ -1083,38 +1141,45 @@
     <!-- ===== 標題畫面 ===== -->
     <div class="overlay active" id="titleOverlay">
         <div class="modal">
-            <div class="big-icon">🌼</div>
-            <div class="title">ICQ 包剪揼</div>
-            <div class="sub">選擇你的陣營</div>
-            <div class="color-preview" id="colorSelect">
-                <div class="preview-item" data-color="blue" id="previewBlue">
-                    <div class="preview-piece blue">🧍‍♂️</div>
-                    <div class="preview-label">🔵 藍方</div>
-                    <div class="preview-desc">先走</div>
-                </div>
-                <div class="vs-divider">VS</div>
-                <div class="preview-item" data-color="red" id="previewRed">
-                    <div class="preview-piece red">🧍‍♂️</div>
-                    <div class="preview-label">🔴 紅方</div>
-                    <div class="preview-desc">後走</div>
-                </div>
+            <!-- 背景圖片滾動層 -->
+            <div class="bg-scroll-wrap" id="bgScrollWrap">
+                <img src="icq_rps.jpg" id="bgScrollImg" alt="封面背景" />
             </div>
-            <div class="music-toggle">
-                <span class="label">🎵 音樂</span>
-                <button class="btn-icon" id="musicToggleBtn">🔊</button>
-                <span class="label" id="musicToggleLabel">播放中</span>
-            </div>
-            <div class="title-buttons">
-                <div class="row">
-                    <button class="btn-big" id="btnTitleStart">🚀 開始</button>
+            <!-- 內容層 (磨砂效果已調淡) -->
+            <div class="modal-content">
+                <div class="big-icon">🌼</div>
+                <div class="title">ICQ 包剪揼</div>
+                <div class="sub">選擇你的陣營</div>
+                <div class="color-preview" id="colorSelect">
+                    <div class="preview-item" data-color="blue" id="previewBlue">
+                        <div class="preview-piece blue">🧍‍♂️</div>
+                        <div class="preview-label">🔵 藍方</div>
+                        <div class="preview-desc">先走</div>
+                    </div>
+                    <div class="vs-divider">VS</div>
+                    <div class="preview-item" data-color="red" id="previewRed">
+                        <div class="preview-piece red">🧍‍♂️</div>
+                        <div class="preview-label">🔴 紅方</div>
+                        <div class="preview-desc">後走</div>
+                    </div>
                 </div>
-                <div class="row">
-                    <button class="btn-big small gold" id="btnTitleSave">💾 儲存</button>
-                    <button class="btn-big small" id="btnTitleLoad">📁 載入</button>
+                <div class="music-toggle">
+                    <span class="label">🎵 音樂</span>
+                    <button class="btn-icon" id="musicToggleBtn">🔊</button>
+                    <span class="label" id="musicToggleLabel">播放中</span>
                 </div>
-            </div>
-            <div style="margin-top:14px; display:flex; justify-content:center;">
-                <span class="title-footer-trophy" id="titleTrophyFooter">🏆 0</span>
+                <div class="title-buttons">
+                    <div class="row">
+                        <button class="btn-big" id="btnTitleStart">🚀 開始</button>
+                    </div>
+                    <div class="row">
+                        <button class="btn-big small gold" id="btnTitleSave">💾 儲存</button>
+                        <button class="btn-big small" id="btnTitleLoad">📁 載入</button>
+                    </div>
+                </div>
+                <div style="margin-top:14px; display:flex; justify-content:center;">
+                    <span class="title-footer-trophy" id="titleTrophyFooter">🏆 0</span>
+                </div>
             </div>
         </div>
     </div>
@@ -1122,27 +1187,31 @@
     <!-- ===== 遊戲結束畫面 ===== -->
     <div class="overlay" id="gameoverOverlay">
         <div class="modal">
-            <div class="big-icon" id="gameoverIcon">🏆</div>
-            <div class="title" id="gameoverTitle">你贏了！</div>
-            <div class="sub" id="gameoverSub">完美擊敗對手！</div>
-            <button class="btn-big gold" id="gameoverConfirm">🏠 回到標題</button>
-            <div id="gameoverTrophy" style="margin-top:10px; font-size:20px; color:#ffd966; font-weight:700;"></div>
+            <div class="modal-content">
+                <div class="big-icon" id="gameoverIcon">🏆</div>
+                <div class="title" id="gameoverTitle">你贏了！</div>
+                <div class="sub" id="gameoverSub">完美擊敗對手！</div>
+                <button class="btn-big gold" id="gameoverConfirm">🏠 回到標題</button>
+                <div id="gameoverTrophy" style="margin-top:10px; font-size:20px; color:#ffd966; font-weight:700;"></div>
+            </div>
         </div>
     </div>
 
     <!-- ===== 重猜彈窗 ===== -->
     <div class="overlay" id="rematchOverlay">
         <div class="modal rematch-modal">
-            <div class="big-icon">⚔️</div>
-            <div class="title" style="font-size:26px;">平手！重新選擇！</div>
-            <div class="sub" id="rematchSub">請選擇你的武器</div>
-            <div class="choices" id="rematchChoices">
-                <button class="choice-btn" data-choice="rock">🗻</button>
-                <button class="choice-btn" data-choice="scissors">✂️</button>
-                <button class="choice-btn" data-choice="paper">📄</button>
+            <div class="modal-content">
+                <div class="big-icon">⚔️</div>
+                <div class="title" style="font-size:26px;">平手！重新選擇！</div>
+                <div class="sub" id="rematchSub">請選擇你的武器</div>
+                <div class="choices" id="rematchChoices">
+                    <button class="choice-btn" data-choice="rock">🗻</button>
+                    <button class="choice-btn" data-choice="scissors">✂️</button>
+                    <button class="choice-btn" data-choice="paper">📄</button>
+                </div>
+                <div class="result-display" id="rematchResult"></div>
+                <div style="margin-top:8px; font-size:14px; color:#aacfaa;" id="rematchAttempt">第 1 次重猜</div>
             </div>
-            <div class="result-display" id="rematchResult"></div>
-            <div style="margin-top:8px; font-size:14px; color:#aacfaa;" id="rematchAttempt">第 1 次重猜</div>
         </div>
     </div>
 
@@ -1156,8 +1225,8 @@
 
     <script>
         // ================================================================
-        //  🌼 ICQ 包剪揼 · 紅藍對決版 (v2.2.0)
-        //  修改：封面背景 + 雙音樂切換 + 移動跳躍
+        //  🌼 ICQ 包剪揼 · 紅藍對決版 (v2.3.1)
+        //  修復：音樂不中斷｜封面磨砂調淡
         // ================================================================
 
         (function() {
@@ -1206,6 +1275,8 @@
             const computerLabel = document.getElementById('computerLabel');
             const previewBlue = document.getElementById('previewBlue');
             const previewRed = document.getElementById('previewRed');
+            const bgScrollImg = document.getElementById('bgScrollImg');
+            const bgScrollWrap = document.getElementById('bgScrollWrap');
 
             // ---- 遊戲狀態 ----
             let board = [];
@@ -1218,9 +1289,9 @@
             let isProcessing = false;
             let gameStarted = false;
             let animating = false;
-            let playerColor = 'blue'; // 'blue' | 'red'
-            let gamePhase = 'TITLE'; // TITLE | SELECT | PLAYING | GAMEOVER
-            let selectPhase = 'trap'; // 'trap' | 'king' | 'done'
+            let playerColor = 'blue';
+            let gamePhase = 'TITLE';
+            let selectPhase = 'trap';
             let trapPos = null;
             let kingPos = null;
             let normalPieces = [];
@@ -1230,16 +1301,20 @@
             const TROPHY_KEY = 'icq_trophy_count';
             const SETTINGS_KEY = 'icq_game_settings';
 
-            // ---- 音樂管理 (v2.2) ----
+            // ---- 音樂管理 (修改：不中斷) ----
             let isMusicOn = true;
             let audioCtx = null;
-            let currentMusicPhase = 'TITLE'; // 'TITLE' | 'SELECT' | 'PLAYING'
+            let currentMusicPhase = 'TITLE';
             const MUSIC_FORMATION = 'ICQ RPS - Formation.mp3';
             const MUSIC_FIGHT = 'ICQ RPS - Fight.mp3';
 
-            // ---- 移動動畫標記 ----
-            let moveAnimTarget = null; // { r, c }
-            let moveAnimTriggered = false;
+            // ---- 移動動畫 ----
+            let _moveTarget = null;
+            let _moveAnimPending = false;
+
+            // ---- 封面滾動 ----
+            let scrollAnimId = null;
+            let scrollPaused = false;
 
             // ---- 全屏 ----
             let isFullscreen = false;
@@ -1333,7 +1408,7 @@
                     setTimeout(() => div.remove(), 500); }, 1800);
             }
 
-            // ---- 音樂核心 (v2.2) ----
+            // ---- 音樂核心 (確保不中斷) ----
             function updateMusicUI() {
                 if (isMusicOn) {
                     btnMusicToggle.textContent = '🔊';
@@ -1354,26 +1429,27 @@
                 return audioCtx;
             }
 
-            /** 根據當前階段設定音樂 */
+            /** 設定音樂階段，若目標相同且正在播放則不做任何事（不中斷） */
             function setMusicPhase(phase) {
+                const oldPhase = currentMusicPhase;
                 currentMusicPhase = phase;
                 if (!isMusicOn) return;
                 const targetSrc = (phase === 'PLAYING') ? MUSIC_FIGHT : MUSIC_FORMATION;
                 try {
-                    // 如果當前 src 不是目標，切換
                     const currentSrc = bgAudio.src || '';
-                    if (currentSrc.indexOf(targetSrc) === -1) {
-                        bgAudio.src = targetSrc;
-                        bgAudio.load();
-                        bgAudio.play().catch(() => {});
-                    } else {
+                    // 如果目標與當前相同
+                    if (currentSrc.indexOf(targetSrc) !== -1) {
+                        // 若已暫停則恢復播放，否則不做任何事
                         if (bgAudio.paused) {
                             bgAudio.play().catch(() => {});
                         }
+                        return;
                     }
-                } catch (e) {
-                    // 靜默處理
-                }
+                    // 目標不同，切換
+                    bgAudio.src = targetSrc;
+                    bgAudio.load();
+                    bgAudio.play().catch(() => {});
+                } catch (e) {}
             }
 
             function startBackgroundMusic() {
@@ -1494,6 +1570,73 @@
             document.addEventListener('mozfullscreenchange', updateFullscreenIcon);
             document.addEventListener('MSFullscreenChange', updateFullscreenIcon);
 
+            // ---- 封面背景滾動 ----
+            function startBgScroll() {
+                if (!bgScrollImg.complete) {
+                    bgScrollImg.onload = function() {
+                        doBgScroll();
+                    };
+                    return;
+                }
+                doBgScroll();
+            }
+
+            function doBgScroll() {
+                const wrap = bgScrollWrap;
+                const img = bgScrollImg;
+                const wrapRect = wrap.getBoundingClientRect();
+                const imgRect = img.getBoundingClientRect();
+                const imgH = imgRect.height;
+                const wrapH = wrapRect.height;
+                if (imgH <= wrapH) return;
+                const maxOffset = -(imgH - wrapH);
+                let currentOffset = 0;
+                let direction = 1;
+                let paused = false;
+                let pauseTimer = null;
+
+                function animateScroll() {
+                    if (paused) return;
+                    const speed = 0.5;
+                    currentOffset += direction * speed;
+                    if (direction === 1 && currentOffset >= 0) {
+                        currentOffset = 0;
+                        direction = -1;
+                        paused = true;
+                        if (pauseTimer) clearTimeout(pauseTimer);
+                        pauseTimer = setTimeout(() => { paused = false;
+                            pauseTimer = null; }, 2000);
+                    } else if (direction === -1 && currentOffset <= maxOffset) {
+                        currentOffset = maxOffset;
+                        direction = 1;
+                        paused = true;
+                        if (pauseTimer) clearTimeout(pauseTimer);
+                        pauseTimer = setTimeout(() => { paused = false;
+                            pauseTimer = null; }, 2000);
+                    }
+                    img.style.transform = `translateY(${currentOffset}px)`;
+                    scrollAnimId = requestAnimationFrame(animateScroll);
+                }
+
+                img.style.transform = 'translateY(0px)';
+                currentOffset = 0;
+                direction = 1;
+                paused = true;
+                if (pauseTimer) clearTimeout(pauseTimer);
+                pauseTimer = setTimeout(() => {
+                    paused = false;
+                    pauseTimer = null;
+                    scrollAnimId = requestAnimationFrame(animateScroll);
+                }, 2000);
+            }
+
+            function stopBgScroll() {
+                if (scrollAnimId) {
+                    cancelAnimationFrame(scrollAnimId);
+                    scrollAnimId = null;
+                }
+            }
+
             // ---- 工具 ----
             function isInBounds(r, c) { return r >= 0 && r < ROWS && c >= 0 && c < COLS; }
 
@@ -1534,6 +1677,7 @@
                 piece.row = toR;
                 piece.col = toC;
                 board[toR][toC] = piece;
+                _moveTarget = { r: toR, c: toC };
                 return piece;
             }
 
@@ -1681,6 +1825,10 @@
                 else if (defenderWins || result === 'trap' || bothDie) playSound('levelDown');
 
                 renderBoard();
+                if (_moveTarget) {
+                    _moveAnimPending = true;
+                    playMoveAnimationOnBoard();
+                }
 
                 const cells = boardEl.querySelectorAll('.cell');
                 let winnerCell = null;
@@ -1707,34 +1855,41 @@
                 callback(battle);
             }
 
-            // ---- 移動動畫輔助 (v2.2) ----
-            function triggerMoveAnimation(r, c) {
-                moveAnimTarget = { r, c };
-                moveAnimTriggered = false;
-                // 在渲染後由 renderBoard 或外部觸發
-            }
-
+            // ---- 移動動畫 ----
             function playMoveAnimationOnBoard() {
-                if (!moveAnimTarget || moveAnimTriggered) return;
-                moveAnimTriggered = true;
-                const { r, c } = moveAnimTarget;
-                setTimeout(() => {
+                if (!_moveTarget || _moveAnimPending === false) return;
+                _moveAnimPending = false;
+                const { r, c } = _moveTarget;
+                requestAnimationFrame(() => {
                     const cells = boardEl.querySelectorAll('.cell');
                     for (const cell of cells) {
                         if (parseInt(cell.dataset.r) === r && parseInt(cell.dataset.c) === c) {
                             const piece = cell.querySelector('.piece');
                             if (piece) {
+                                piece.style.opacity = '0';
                                 piece.classList.add('moving');
-                                setTimeout(() => {
+                                void piece.offsetWidth;
+                                piece.style.opacity = '';
+                                const onAnimEnd = () => {
                                     piece.classList.remove('moving');
-                                    moveAnimTarget = null;
-                                    moveAnimTriggered = false;
-                                }, 500);
+                                    piece.removeEventListener('animationend', onAnimEnd);
+                                    _moveTarget = null;
+                                };
+                                piece.addEventListener('animationend', onAnimEnd);
+                                setTimeout(() => {
+                                    if (_moveTarget) {
+                                        piece.classList.remove('moving');
+                                        piece.style.opacity = '';
+                                        _moveTarget = null;
+                                    }
+                                }, 2000);
+                            } else {
+                                _moveTarget = null;
                             }
                             break;
                         }
                     }
-                }, 40);
+                });
             }
 
             // ---- 玩家移動 ----
@@ -1752,8 +1907,7 @@
                 if (target.action === 'move') {
                     movePiece(fromR, fromC, toR, toC);
                     playSound('wind');
-                    // 設定移動動畫
-                    triggerMoveAnimation(toR, toC);
+                    _moveAnimPending = true;
                     afterPlayerAction();
                     return true;
                 } else {
@@ -1770,8 +1924,9 @@
 
             function afterPlayerAction() {
                 updateUI();
-                // 播放移動動畫
-                playMoveAnimationOnBoard();
+                if (_moveAnimPending) {
+                    playMoveAnimationOnBoard();
+                }
                 if (checkGameOver()) { isProcessing = false; return; }
                 currentTurn = 'computer';
                 updateTurnUI();
@@ -1847,7 +2002,7 @@
                 if (pick.action === 'move') {
                     movePiece(pick.fromR, pick.fromC, pick.toR, pick.toC);
                     playSound('wind');
-                    triggerMoveAnimation(pick.toR, pick.toC);
+                    _moveAnimPending = true;
                     afterComputerAction();
                 } else {
                     const defender = board[pick.toR][pick.toC];
@@ -1862,7 +2017,9 @@
 
             function afterComputerAction() {
                 updateUI();
-                playMoveAnimationOnBoard();
+                if (_moveAnimPending) {
+                    playMoveAnimationOnBoard();
+                }
                 if (checkGameOver()) { isProcessing = false; return; }
                 currentTurn = 'player';
                 updateTurnUI();
@@ -1924,11 +2081,10 @@
                 gameoverConfirm.textContent = '🏠 回到標題';
                 gameoverOverlay.classList.add('active');
                 gamePhase = 'GAMEOVER';
-                // 切換音樂到 Formation
                 setMusicPhase('TITLE');
             }
 
-            // ---- 棋子顏色類名 ----
+            // ---- 棋子顏色 ----
             function getPieceClass(owner, color) {
                 if (owner === 'player') {
                     return color === 'blue' ? 'player-blue' : 'player-red';
@@ -1941,7 +2097,7 @@
 
             function getComputerColor() { return playerColor === 'blue' ? 'red' : 'blue'; }
 
-            // ---- UI 渲染 ----
+            // ---- UI ----
             function updateUI() {
                 renderBoard();
                 playerScoreEl.textContent = playerPieces.length;
@@ -2004,7 +2160,6 @@
                                 div.appendChild(eyeSpan);
                             }
 
-                            // 選擇階段特殊標記
                             if (gamePhase === 'SELECT') {
                                 if (trapPos && trapPos.r === r && trapPos.c === c) {
                                     div.classList.add('chosen-trap');
@@ -2024,6 +2179,12 @@
                             if (selectedPos && selectedPos.r === r && selectedPos.c === c) {
                                 div.classList.add('selected');
                             }
+
+                            if (_moveTarget && _moveTarget.r === r && _moveTarget.c === c) {
+                                div.style.opacity = '0';
+                                div.dataset.moveTarget = '1';
+                            }
+
                             cell.appendChild(div);
 
                             cell.addEventListener('click', () => onCellClick(r, c));
@@ -2041,9 +2202,12 @@
                         boardEl.appendChild(cell);
                     }
                 }
+                if (_moveTarget && _moveAnimPending) {
+                    playMoveAnimationOnBoard();
+                }
             }
 
-            // ---- 點擊處理 ----
+            // ---- 點擊 ----
             function onCellClick(r, c) {
                 if (gamePhase === 'SELECT') {
                     handleSelectClick(r, c);
@@ -2090,7 +2254,7 @@
                 }
             }
 
-            // ---- 選擇階段點擊處理 ----
+            // ---- 選擇階段 ----
             function handleSelectClick(r, c) {
                 const piece = board[r][c];
                 if (!piece || piece.owner !== 'player') return;
@@ -2124,7 +2288,6 @@
                 }
             }
 
-            // ---- 分配12隻普通棋子 ----
             function assignNormalPieces() {
                 normalPieces = [];
                 const playerCells = [];
@@ -2155,7 +2318,6 @@
                 normalPieces = normalPieces.filter(p => p !== undefined);
             }
 
-            // ---- 重抽12隻 ----
             function rerollNormalPieces() {
                 if (gamePhase === 'SELECT') {
                     const types = [];
@@ -2224,7 +2386,6 @@
                 }
             }
 
-            // ---- 更新選擇狀態 ----
             function updateSelectStatus() {
                 const status = document.querySelector('.select-status');
                 if (status) {
@@ -2241,7 +2402,7 @@
                 }
             }
 
-            // ---- 開始遊戲 (從選擇階段) ----
+            // ---- 開始遊戲 ----
             function startGameFromSelect() {
                 if (selectPhase !== 'done') {
                     showToast('❌ 請先選好陷阱和棋手！');
@@ -2269,7 +2430,6 @@
                 titleOverlay.classList.remove('active');
                 gameoverOverlay.classList.remove('active');
 
-                // 切換音樂到 Fight
                 setMusicPhase('PLAYING');
 
                 updateUI();
@@ -2284,7 +2444,7 @@
                 showToast('🎮 遊戲開始！');
             }
 
-            // ---- 更新Turn UI ----
+            // ---- 更新Turn ----
             function updateTurnUI() {
                 if (!gameStarted || gamePhase !== 'PLAYING') {
                     if (gamePhase === 'SELECT') {
@@ -2345,7 +2505,7 @@
                 }
             }
 
-            // ---- 初始化棋盤 (選棋子階段) ----
+            // ---- 初始化棋盤 ----
             function initBoardForSelect() {
                 board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
                 allPieces = [];
@@ -2355,6 +2515,8 @@
                 kingPos = null;
                 normalPieces = [];
                 selectPhase = 'trap';
+                _moveTarget = null;
+                _moveAnimPending = false;
 
                 const playerList = [];
                 for (let i = 0; i < 14; i++) {
@@ -2430,7 +2592,6 @@
                 gameoverOverlay.classList.remove('active');
                 rematchOverlay.classList.remove('active');
 
-                // 切換音樂到 Formation
                 setMusicPhase('SELECT');
 
                 addSelectPhaseUI();
@@ -2442,7 +2603,7 @@
                 updateLabels();
             }
 
-            // ---- 添加選擇階段UI ----
+            // ---- 添加選擇UI ----
             function addSelectPhaseUI() {
                 const old = document.querySelector('.select-phase');
                 if (old) old.remove();
@@ -2501,7 +2662,8 @@
                 kingPos = null;
                 normalPieces = [];
                 selectPhase = 'trap';
-                // 切換音樂到 Formation
+                _moveTarget = null;
+                _moveAnimPending = false;
                 setMusicPhase('TITLE');
                 updateUI();
                 updateTurnUI();
@@ -2517,9 +2679,11 @@
                     window._selectObserver = null;
                 }
                 updateLabels();
+                stopBgScroll();
+                setTimeout(startBgScroll, 100);
             }
 
-            // ---- 開始 / 重啟 ----
+            // ---- 開始遊戲（從標題） ----
             function startGame() {
                 initAudio();
                 titleOverlay.classList.remove('active');
@@ -2537,6 +2701,7 @@
             function resetGame() {
                 if (!gameStarted && gamePhase !== 'PLAYING') return;
                 if (confirm('確定要重開遊戲嗎？進度將會遺失。')) {
+                    stopBackgroundMusic();
                     goToTitle();
                     setTimeout(() => {
                         titleOverlay.classList.remove('active');
@@ -2569,6 +2734,8 @@
                 kingPos = null;
                 normalPieces = [];
                 selectPhase = 'trap';
+                _moveTarget = null;
+                _moveAnimPending = false;
                 btnStartReset.textContent = '🎮 開始';
                 btnStartReset.className = 'btn btn-primary';
                 btnReroll.style.display = 'none';
@@ -2576,7 +2743,6 @@
                 updateTurnUI();
                 updateButtons();
                 titleOverlay.classList.add('active');
-                // 設定音樂為 Formation (標題)
                 setMusicPhase('TITLE');
                 if (isMusicOn) startBackgroundMusic();
                 else stopBackgroundMusic();
@@ -2586,6 +2752,7 @@
                 playerColor = 'blue';
                 previewBlue.classList.add('selected');
                 previewRed.classList.remove('selected');
+                setTimeout(startBgScroll, 300);
             }
 
             // ---- 事件綁定 ----
@@ -2635,7 +2802,6 @@
                 if (gameStarted || gamePhase === 'SELECT' || gamePhase === 'PLAYING' || gamePhase === 'TITLE') {
                     if (isMusicOn) {
                         startBackgroundMusic();
-                        // 確保階段正確
                         if (gamePhase === 'PLAYING') setMusicPhase('PLAYING');
                         else setMusicPhase('TITLE');
                     } else {
@@ -2665,7 +2831,7 @@
             // ---- 版權 ----
             function setCopyright() {
                 const year = new Date().getFullYear();
-                copyrightEl.textContent = `v2.2.0 © ${year} ☕迪遜咖啡廳，版權所有。`;
+                copyrightEl.textContent = `v2.3.1 © ${year} ☕迪遜咖啡廳，版權所有。`;
             }
 
             // ---- 洗牌 ----
@@ -2694,7 +2860,7 @@
                         'PLAYING' || gamePhase === 'TITLE') && bgAudio.paused) startBackgroundMusic();
             });
 
-            console.log('🌼 ICQ 包剪揼 · 紅藍對決版 (v2.2.0) 已載入');
+            console.log('🌼 ICQ 包剪揼 · 紅藍對決版 (v2.3.1) 已載入');
             console.log(`🏆 當前獎盃: ${trophyCount}`);
             console.log(`🎨 當前選色: ${playerColor}`);
             console.log(`🎵 音樂階段: ${currentMusicPhase}`);
