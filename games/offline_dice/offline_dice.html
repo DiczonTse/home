@@ -4,10 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>🎲 離線骰子</title>
-	<!--Open Graph Meta Tags for Social Sharing-->
+    <!--Open Graph Meta Tags for Social Sharing-->
     <meta property="og:title" content="🎲 離線骰子 | Offline Dice">
     <meta property="og:description" content="骰子塔防遊戲。">
-    <meta property="og:image" content="offline_dice_tittle.jpg">
+    <meta property="og:image" content="offline_dice_thumbnail.jpg">
     <meta property="og:url" content="https://diczontse.github.io/home/games/offline_dice/offline_dice.html">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="網頁書籤管理工具">
@@ -16,7 +16,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="🎲 離線骰子 | Offline Dice">
     <meta property="twitter:description" content="骰子塔防遊戲。">
-    <meta name="twitter:image" content="offline_dice_tittle.jpg">
+    <meta name="twitter:image" content="offline_dice_thumbnail.jpg">
     <!--Whatsapp Preview Image-->
     <meta property="og:title" content="🎲 離線骰子" />
     <meta property="og:type" content="website" />
@@ -24,7 +24,7 @@
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="300" />
     <meta property="og:image:height" content="300" />
-    <meta property="og:image" content="offline_dice_tittle.jpg" />
+    <meta property="og:image" content="offline_dice_thumbnail.jpg" />
     <!--/Whatsapp Preview Image-->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="🎲 離線骰子">
@@ -192,17 +192,13 @@
             transform: rotate(-10deg);
             font-size: 70px;
         }
-        /* ★ 修改1：首頁背景改為 offline_dice.jpg + 半透明遮罩 */
+        /* ★ 修改1：首頁背景改為 offline_dice.jpg + 半透明遮罩（已拆分為圖片層+漸變層，由JS控制滾動） */
         .start-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background:
-                linear-gradient(rgba(11, 14, 26, 0.55), rgba(11, 14, 26, 0.80)),
-                url('offline_dice.jpg') center/cover no-repeat;
-            backdrop-filter: blur(4px);
             border-radius: 28px;
             display: flex;
             flex-direction: column;
@@ -213,7 +209,39 @@
             text-align: center;
             transition: opacity 0.5s ease;
             overflow-y: auto;
+            /* 背景圖片和漸變由內部元素控制，此處留空 */
+            background: none !important;
         }
+        /* 圖片背景層（滾動動畫） */
+        .start-overlay .bg-scroll-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('offline_dice.jpg') 50% 0% / cover no-repeat;
+            z-index: 0;
+            pointer-events: none;
+            will-change: background-position;
+            transition: background-position 0.05s linear;
+        }
+        /* 漸變遮罩層 */
+        .start-overlay .gradient-mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(11, 14, 26, 0.55), rgba(11, 14, 26, 0.80));
+            z-index: 1;
+            pointer-events: none;
+        }
+        /* 所有內容在 z-index:2 之上 */
+        .start-overlay>*:not(.bg-scroll-layer):not(.gradient-mask) {
+            position: relative;
+            z-index: 2;
+        }
+
         .start-overlay.hidden {
             opacity: 0;
             pointer-events: none;
@@ -778,6 +806,7 @@
             left: 50%;
             transform: translateX(-50%);
         }
+        /* ★ 修改2：骰子能力值介面改為資訊超出顯示範圍時可以上下滾動 */
         .dice-detail-overlay {
             position: absolute;
             top: 0;
@@ -790,10 +819,14 @@
             display: none;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
+            /* 改為 flex-start，讓內容從頂部開始排列，配合滾動 */
             z-index: 150;
             padding: 24px 20px;
             animation: fadeInPop 0.3s ease-out;
+            overflow-y: auto;
+            /* 整個彈窗可滾動 */
+            max-height: 100%;
         }
         .dice-detail-overlay.visible {
             display: flex;
@@ -809,15 +842,19 @@
             }
         }
         .dice-detail-overlay .dd-close {
-            position: absolute;
-            top: 12px;
-            right: 16px;
+            position: sticky;
+            /* 改為 sticky，關閉按鈕在滾動時保持在頂部 */
+            top: 0;
+            align-self: flex-end;
             font-size: 28px;
             color: #8a9fc0;
             cursor: pointer;
             background: none;
             border: none;
             transition: color 0.2s;
+            z-index: 10;
+            flex-shrink: 0;
+            margin-bottom: 6px;
         }
         .dice-detail-overlay .dd-close:hover {
             color: #fff;
@@ -827,6 +864,9 @@
             align-items: center;
             gap: 14px;
             margin-bottom: 6px;
+            flex-shrink: 0;
+            width: 100%;
+            justify-content: center;
         }
         .dice-detail-overlay .dd-icon {
             font-size: 56px;
@@ -852,6 +892,8 @@
             padding: 14px 18px;
             margin: 6px 0 10px 0;
             border: 1px solid rgba(60, 80, 120, 0.3);
+            flex-shrink: 0;
+            /* 不壓縮，讓內容自然撐開 */
         }
         .dice-detail-overlay .dd-grid {
             display: grid;
@@ -955,7 +997,6 @@
             font-size: 12px;
             opacity: 0.8;
         }
-        /* ★ 修改3b：移除每Class加成描述，保留其他內容 */
         .dd-class-section .dd-class-benefit {
             display: none;
         }
@@ -964,6 +1005,7 @@
             color: #5a6a8a;
             text-align: center;
             margin-top: 2px;
+            flex-shrink: 0;
         }
         .dice-detail-overlay .dd-btn {
             background: linear-gradient(145deg, #f5a623, #d4891b);
@@ -976,6 +1018,7 @@
             cursor: pointer;
             transition: transform 0.15s;
             margin-top: 4px;
+            flex-shrink: 0;
         }
         .dice-detail-overlay .dd-btn:active {
             transform: scale(0.94);
@@ -1601,8 +1644,13 @@
     <link rel="preload" as="audio" href="Offline Dice - Dice Riot.mp3">
 
     <div class="game-wrapper" id="gameWrapper">
-        <!-- 起始覆蓋層 (背景已透過 CSS 改為 offline_dice.jpg) -->
+        <!-- 起始覆蓋層 (背景圖片由內部 bg-scroll-layer 控制滾動) -->
         <div class="start-overlay" id="startOverlay">
+            <!-- ★ 修改3：背景圖片層（JS控制background-position實現滾動） -->
+            <div class="bg-scroll-layer" id="bgScrollLayer"></div>
+            <!-- 漸變遮罩層 -->
+            <div class="gradient-mask"></div>
+
             <h1 id="coverTitle">🎲 離線骰子</h1>
             <div class="sub-desc" id="coverDesc"></div>
             <div class="lang-group" id="langGroup">
@@ -1645,7 +1693,7 @@
             <button class="shop-confirm-btn" id="shopConfirmBtn">✅ 確認</button>
         </div>
 
-        <!-- ★ 骰子詳細數值彈窗 (新版 Grid 佈局) -->
+        <!-- ★ 骰子詳細數值彈窗 (新版 Grid 佈局 + 可滾動) -->
         <div class="dice-detail-overlay" id="diceDetailOverlay">
             <button class="dd-close" id="ddCloseBtn">✕</button>
             <div class="dd-header">
@@ -2087,7 +2135,6 @@
                 elementDamageLabel: '元素傷害',
                 critDamageLabel: '暴擊傷害',
                 globalCritDamageLabel: '全體暴擊傷害',
-                // ★ 新增：毒伤害加成 / 冰冻效果加成 翻譯
                 poisonDamageLabel: '毒傷害加成',
                 freezeEffectLabel: '冰凍效果加成',
                 classBenefitWind: '每Class: 攻擊+3 攻速+2% 暴擊傷害+3% (至Class15) · Class16起僅暴擊傷害+3%',
@@ -3661,6 +3708,7 @@
             }
         }
 
+        // ★ 修改1：升級Class時即時更新商店獎盃數 (在函數內調用 updateShopUI)
         function upgradeDiceClass(type) {
             if (type !== 'FIRE' && type !== 'THUNDER' && type !== 'WIND' && type !== 'POISON' && type !== 'ICE') {
                 showToast(getData().classOnlyFireThunder, 1500);
@@ -3735,6 +3783,9 @@
             addFloatingText(W / 2, upgradeY + UPGRADE_HEIGHT / 2, `⬆ ${name} Class ${newClass}`, '#f7d875', 28);
             updateUI();
             updateDicePreview();
+            // ★ 修改1：升級後更新商店UI，獎盃數即時刷新
+            updateShopUI();
+
             const detailOverlay = document.getElementById('diceDetailOverlay');
             if (detailOverlay.classList.contains('visible')) {
                 const currentType = document.getElementById('ddName').textContent;
@@ -9986,7 +10037,6 @@
                 const elementDmg = (def.fireDamageBase || 0) + (lv - 1) * (def.fireDamagePerLevel || 0) + elementBonus;
                 elementDmgDisplay = Math.round(elementDmg * 10) / 10;
 
-                // ★ 暴擊傷害顯示全體暴擊
                 critDmgDisplay = `+${globalCritBonus}%`;
             } else if (isThunder) {
                 const cls = getDiceClass('THUNDER') || 1;
@@ -10413,6 +10463,68 @@
             }
         }
 
+        // ========== ★ 修改3：封面背景滾動動畫 (JS控制) ==========
+        let bgScrollState = 'pause-top'; // 'pause-top' | 'scroll-down' | 'pause-bottom' | 'scroll-up'
+        let bgScrollTimeInState = 0;
+        let bgScrollProgress = 0;
+        const BG_PAUSE_DURATION = 2.0;
+        const BG_SCROLL_DURATION = 4.0;
+
+        function updateBackgroundScroll(deltaTime) {
+            const bg = document.getElementById('bgScrollLayer');
+            if (!bg) return;
+
+            bgScrollTimeInState += deltaTime;
+
+            switch (bgScrollState) {
+                case 'pause-top':
+                    if (bgScrollTimeInState >= BG_PAUSE_DURATION) {
+                        bgScrollState = 'scroll-down';
+                        bgScrollTimeInState = 0;
+                        bgScrollProgress = 0;
+                    }
+                    break;
+                case 'scroll-down':
+                    bgScrollProgress = Math.min(1, bgScrollTimeInState / BG_SCROLL_DURATION);
+                    const yDown = bgScrollProgress * 100;
+                    bg.style.backgroundPosition = `50% ${yDown}%`;
+                    if (bgScrollProgress >= 1) {
+                        bgScrollState = 'pause-bottom';
+                        bgScrollTimeInState = 0;
+                    }
+                    break;
+                case 'pause-bottom':
+                    if (bgScrollTimeInState >= BG_PAUSE_DURATION) {
+                        bgScrollState = 'scroll-up';
+                        bgScrollTimeInState = 0;
+                        bgScrollProgress = 1;
+                    }
+                    break;
+                case 'scroll-up':
+                    bgScrollProgress = Math.max(0, 1 - bgScrollTimeInState / BG_SCROLL_DURATION);
+                    const yUp = bgScrollProgress * 100;
+                    bg.style.backgroundPosition = `50% ${yUp}%`;
+                    if (bgScrollProgress <= 0) {
+                        bgScrollState = 'pause-top';
+                        bgScrollTimeInState = 0;
+                    }
+                    break;
+            }
+        }
+
+        // 獨立背景滾動動畫循環 (使用 requestAnimationFrame)
+        let bgLastTime = 0;
+
+        function bgScrollLoop(time) {
+            const dt = Math.min(0.05, (time - bgLastTime) / 1000);
+            bgLastTime = time;
+            const overlay = document.getElementById('startOverlay');
+            if (overlay && !overlay.classList.contains('hidden')) {
+                updateBackgroundScroll(dt);
+            }
+            requestAnimationFrame(bgScrollLoop);
+        }
+
         // ========== 綁定事件 ==========
         function bindEvents() {
             document.getElementById('startBtn').addEventListener('click', function() {
@@ -10697,6 +10809,9 @@
         if (soundEnabled) playBgMusic('menu');
         updateSoundButtonIcon();
 
+        // ★ 啟動背景滾動動畫
+        requestAnimationFrame(bgScrollLoop);
+
         function gameLoop(time) {
             const dt = Math.min(0.05, (time - game.lastTime) / 1000);
             game.lastTime = time;
@@ -10727,7 +10842,7 @@
         }
 
         requestAnimationFrame(gameLoop);
-        console.log('🎲 Offline Dice v2.8.0 - 風/毒/冰 Class 升級系統 + 全局暴擊整合');
+        console.log('🎲 Offline Dice v2.8.0 - 風/毒/冰 Class 升級系統 + 全局暴擊整合 + 封面背景滾動');
     </script>
 </body>
 </html>
