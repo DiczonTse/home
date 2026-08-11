@@ -188,6 +188,13 @@
             border-radius: 40px;
             border: 1px solid rgba(255, 255, 255, 0.06);
         }
+        .toolbar-left,
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
         .toolbar .btn-icon {
             background: rgba(255, 255, 255, 0.07);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -246,6 +253,7 @@
             align-items: center;
             gap: 4px;
             font-weight: 500;
+            white-space: nowrap;
         }
         .toolbar .btn-save-load:hover {
             background: rgba(255, 255, 255, 0.12);
@@ -271,11 +279,25 @@
             background: rgba(255, 255, 255, 0.08);
             flex-shrink: 0;
         }
+
+        /* ===== 手機版工具列：儲存+載入換行 ===== */
         @media (max-width: 600px) {
             .toolbar {
                 gap: 8px 12px;
                 padding: 8px 12px;
                 border-radius: 30px;
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            .toolbar-left,
+            .toolbar-right {
+                gap: 8px;
+            }
+            /* 強制右側（儲存+載入）換行至下一行，並佔滿寬度 */
+            .toolbar-right {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
             }
             .toolbar .btn-icon {
                 width: 36px;
@@ -289,6 +311,18 @@
             .toolbar .btn-save-load {
                 font-size: 12px;
                 padding: 4px 12px;
+            }
+            .toolbar .sep {
+                height: 24px;
+            }
+        }
+        @media (max-width: 400px) {
+            .toolbar-right {
+                gap: 6px;
+            }
+            .toolbar .btn-save-load {
+                font-size: 11px;
+                padding: 3px 10px;
             }
         }
 
@@ -803,15 +837,20 @@
 
             <!-- ===== 工具列（音符＋獎盃＋儲存載入） ===== -->
             <div class="toolbar" id="toolbar">
-                <button class="btn-icon active" id="btnSoundToggle" title="切換音效與音樂">🔊</button>
-                <div class="sep"></div>
-                <div class="trophy-display" id="trophyDisplay">
-                    <span>🏆</span>
-                    <span id="trophyCount">0</span>
+                <!-- 左側：音符 + 獎盃 -->
+                <div class="toolbar-left">
+                    <button class="btn-icon active" id="btnSoundToggle" title="切換音效與音樂">🔊</button>
+                    <div class="sep"></div>
+                    <div class="trophy-display" id="trophyDisplay">
+                        <span>🏆</span>
+                        <span id="trophyCount">0</span>
+                    </div>
                 </div>
-                <div class="sep"></div>
-                <button class="btn-save-load save" id="btnSave">💾 儲存</button>
-                <button class="btn-save-load load" id="btnLoad">📁 載入</button>
+                <!-- 右側：儲存 + 載入（手機版換行至下一行） -->
+                <div class="toolbar-right">
+                    <button class="btn-save-load save" id="btnSave">💾 儲存</button>
+                    <button class="btn-save-load load" id="btnLoad">📁 載入</button>
+                </div>
             </div>
 
             <!-- 外部進入遊戲按鈕 -->
@@ -2132,6 +2171,16 @@
 
         startPreviewAnimation();
 
+        // ---- 🔥 自動播放音樂（如聲音已開啟） ----
+        // 頁面載入後立即嘗試播放首頁音樂
+        if (audio.enabled) {
+            // 延遲一點確保 DOM 完全就緒
+            setTimeout(() => {
+                audio.wake();
+            }, 300);
+        }
+
+        // 用戶手勢喚醒（保留原有機制，作為瀏覽器自動播放策略的備案）
         document.addEventListener('click', function wakeAudio() {
             audio.wake();
             document.removeEventListener('click', wakeAudio);
@@ -2146,6 +2195,7 @@
         console.log('🏆 獎盃數:', state.trophies);
         console.log('🔊 聲音狀態:', audio.enabled ? '開啟' : '關閉');
         console.log('🎵 使用外部音樂：Tic Tac Toe - Endless Grid.mp3 / Endless Turn.mp3');
+        console.log('🎵 自動播放:', audio.enabled ? '已嘗試啟動' : '已關閉（用戶可手動開啟）');
     </script>
 </body>
 </html>
