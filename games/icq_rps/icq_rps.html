@@ -529,7 +529,7 @@
             overflow: hidden;
             padding: 0;
         }
-        /* 背景圖片滾動層 */
+        /* 背景圖片滾動層 (改用背景圖 + background-position) */
         #titleOverlay .modal .bg-scroll-wrap {
             position: absolute;
             top: 0;
@@ -539,15 +539,15 @@
             overflow: hidden;
             pointer-events: none;
             z-index: 0;
+            background-color: #1a2a1a; /* 備用底色 */
         }
-        #titleOverlay .modal .bg-scroll-wrap img {
+        #titleOverlay .modal .bg-scroll-wrap #bgScrollLayer {
             width: 100%;
-            height: auto;
-            display: block;
-            position: absolute;
-            top: 0;
-            left: 0;
-            will-change: transform;
+            height: 100%;
+            background-image: url('icq_rps.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: 50% 0%;
             transition: none;
         }
         /* 內容層 - 降低背景不透明度與模糊，讓圖片更清晰 */
@@ -556,9 +556,7 @@
             z-index: 1;
             padding: 28px 30px 32px;
             background: rgba(10, 30, 15, 0.25);
-            /* 更透明 */
             backdrop-filter: blur(0px);
-            /* 更輕微模糊 */
             border-radius: var(--radius-lg);
             min-height: 100%;
             display: flex;
@@ -1047,10 +1045,6 @@
             #titleOverlay .modal .modal-content {
                 padding: 16px 14px 20px;
             }
-            #titleOverlay .modal .bg-scroll-wrap img {
-                width: 100%;
-                height: auto;
-            }
         }
         @media (max-width: 420px) {
             .cell {
@@ -1141,11 +1135,11 @@
     <!-- ===== 標題畫面 ===== -->
     <div class="overlay active" id="titleOverlay">
         <div class="modal">
-            <!-- 背景圖片滾動層 -->
+            <!-- 背景圖片滾動層 (改用背景圖方式) -->
             <div class="bg-scroll-wrap" id="bgScrollWrap">
-                <img src="icq_rps.jpg" id="bgScrollImg" alt="封面背景" />
+                <div id="bgScrollLayer"></div>
             </div>
-            <!-- 內容層 (磨砂效果已調淡) -->
+            <!-- 內容層 -->
             <div class="modal-content">
                 <div class="big-icon">🌼</div>
                 <div class="title">ICQ 包剪揼</div>
@@ -1225,8 +1219,8 @@
 
     <script>
         // ================================================================
-        //  🌼 ICQ 包剪揼 · 紅藍對決版 (v2.3.1)
-        //  修復：音樂不中斷｜封面磨砂調淡
+        //  🌼 ICQ 包剪揼 · 紅藍對決版 (v2.3.3)
+        //  修復：背景圖自動滾動（使用 background-position 控制）
         // ================================================================
 
         (function() {
@@ -1275,8 +1269,7 @@
             const computerLabel = document.getElementById('computerLabel');
             const previewBlue = document.getElementById('previewBlue');
             const previewRed = document.getElementById('previewRed');
-            const bgScrollImg = document.getElementById('bgScrollImg');
-            const bgScrollWrap = document.getElementById('bgScrollWrap');
+            const bgScrollLayer = document.getElementById('bgScrollLayer');
 
             // ---- 遊戲狀態 ----
             let board = [];
@@ -1301,114 +1294,65 @@
             const TROPHY_KEY = 'icq_trophy_count';
             const SETTINGS_KEY = 'icq_game_settings';
 
-            // ---- 音樂管理 (修改：不中斷) ----
+            // ---- 音樂管理 ----
             let isMusicOn = true;
             let audioCtx = null;
             let currentMusicPhase = 'TITLE';
             const MUSIC_FORMATION = 'ICQ RPS - Formation.mp3';
             const MUSIC_FIGHT = 'ICQ RPS - Fight.mp3';
 
-            // ---- 移動動畫 ----
-            let _moveTarget = null;
-            let _moveAnimPending = false;
-
-            // ---- 封面滾動 ----
-            let scrollAnimId = null;
-            let scrollPaused = false;
-
-            // ---- 全屏 ----
-            let isFullscreen = false;
-
-            // ---- 初始化獎盃 ----
-            function loadTrophy() {
-                const saved = localStorage.getItem(TROPHY_KEY);
-                trophyCount = saved ? parseInt(saved, 10) || 0 : 0;
-                updateTrophyDisplay();
+            function getFileNameFromSrc(src) {
+                if (!src) return '';
+                try {
+                    const parts = src.split('/');
+                    const fileName = parts[parts.length - 1].split('?')[0];
+                    return decodeURIComponent(fileName);
+                } catch (_) { return src; }
             }
 
-            function saveTrophy() {
-                localStorage.setItem(TROPHY_KEY, String(trophyCount));
-            }
+            function setMusicPhase(phase) {
+                const targetSrc = (phase === 'PLAYING') ? MUSIC_FIGHT : MUSIC_FORMATION;
+                const currentSrc = bgAudio.src || '';
+                const currentFileName = getFileNameFromSrc(currentSrc);
+                const targetFileName = targetSrc;
 
-            function updateTrophyDisplay() {
-                trophyCountEl.textContent = trophyCount;
-                if (titleTrophyFooter) {
-                    titleTrophyFooter.textContent = `🏆 ${trophyCount}`;
+                if (currentFileName === targetFileName) {
+                    currentMusicPhase = phase;
+                    if (isMusicOn && bgAudio.paused) {
+                        bgAudio.play().catch(() => {});
+                    }
+                    return;
                 }
+
+                currentMusicPhase = phase;
+                if (!isMusicOn) return;
+                try {
+                    bgAudio.src = targetSrc;
+                    bgAudio.load();
+                    bgAudio.play().catch(() => {});
+                } catch (e) {}
             }
 
-            function addTrophy(amount) {
-                trophyCount += amount;
-                saveTrophy();
-                updateTrophyDisplay();
+            function startBackgroundMusic() {
+                if (!isMusicOn) return;
+                try {
+                    const targetSrc = (currentMusicPhase === 'PLAYING') ? MUSIC_FIGHT : MUSIC_FORMATION;
+                    const currentSrc = bgAudio.src || '';
+                    const currentFileName = getFileNameFromSrc(currentSrc);
+                    if (currentFileName !== targetSrc) {
+                        bgAudio.src = targetSrc;
+                        bgAudio.load();
+                    }
+                    if (bgAudio.paused) {
+                        bgAudio.play().catch(() => {});
+                    }
+                } catch (e) {}
             }
 
-            // ---- 儲存／載入 ----
-            function saveSettings() {
-                const data = {
-                    trophy: trophyCount,
-                    musicOn: isMusicOn,
-                    timestamp: new Date().toISOString()
-                };
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'text/plain;charset=utf-8' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `icq_save_${new Date().toISOString().slice(0,10)}.txt`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                showToast('💾 已儲存 (.txt)');
+            function stopBackgroundMusic() {
+                try { if (!bgAudio.paused) bgAudio.pause(); } catch (e) {}
             }
 
-            function loadSettings() {
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = '.txt,.json';
-                input.onchange = function(e) {
-                    const file = e.target.files[0];
-                    if (!file) return;
-                    const reader = new FileReader();
-                    reader.onload = function(ev) {
-                        try {
-                            const data = JSON.parse(ev.target.result);
-                            if (data.trophy !== undefined) {
-                                trophyCount = data.trophy;
-                                saveTrophy();
-                                updateTrophyDisplay();
-                            }
-                            if (data.musicOn !== undefined) {
-                                isMusicOn = data.musicOn;
-                                updateMusicUI();
-                                if (gameStarted || gamePhase === 'SELECT' || gamePhase === 'PLAYING') {
-                                    if (isMusicOn) startBackgroundMusic();
-                                    else stopBackgroundMusic();
-                                }
-                            }
-                            showToast('📁 設定已載入 (.txt)');
-                        } catch (err) {
-                            showToast('❌ 載入失敗');
-                            console.warn(err);
-                        }
-                    };
-                    reader.readAsText(file);
-                };
-                input.click();
-            }
-
-            function showToast(msg) {
-                const old = document.querySelector('.toast-msg');
-                if (old) old.remove();
-                const div = document.createElement('div');
-                div.className = 'toast-msg';
-                div.textContent = msg;
-                document.body.appendChild(div);
-                setTimeout(() => { div.style.opacity = '0';
-                    setTimeout(() => div.remove(), 500); }, 1800);
-            }
-
-            // ---- 音樂核心 (確保不中斷) ----
             function updateMusicUI() {
                 if (isMusicOn) {
                     btnMusicToggle.textContent = '🔊';
@@ -1427,48 +1371,6 @@
                 }
                 if (audioCtx.state === 'suspended') audioCtx.resume();
                 return audioCtx;
-            }
-
-            /** 設定音樂階段，若目標相同且正在播放則不做任何事（不中斷） */
-            function setMusicPhase(phase) {
-                const oldPhase = currentMusicPhase;
-                currentMusicPhase = phase;
-                if (!isMusicOn) return;
-                const targetSrc = (phase === 'PLAYING') ? MUSIC_FIGHT : MUSIC_FORMATION;
-                try {
-                    const currentSrc = bgAudio.src || '';
-                    // 如果目標與當前相同
-                    if (currentSrc.indexOf(targetSrc) !== -1) {
-                        // 若已暫停則恢復播放，否則不做任何事
-                        if (bgAudio.paused) {
-                            bgAudio.play().catch(() => {});
-                        }
-                        return;
-                    }
-                    // 目標不同，切換
-                    bgAudio.src = targetSrc;
-                    bgAudio.load();
-                    bgAudio.play().catch(() => {});
-                } catch (e) {}
-            }
-
-            function startBackgroundMusic() {
-                if (!isMusicOn) return;
-                try {
-                    const targetSrc = (currentMusicPhase === 'PLAYING') ? MUSIC_FIGHT : MUSIC_FORMATION;
-                    const currentSrc = bgAudio.src || '';
-                    if (currentSrc.indexOf(targetSrc) === -1) {
-                        bgAudio.src = targetSrc;
-                        bgAudio.load();
-                    }
-                    if (bgAudio.paused) {
-                        bgAudio.play().catch(() => {});
-                    }
-                } catch (e) {}
-            }
-
-            function stopBackgroundMusic() {
-                try { if (!bgAudio.paused) bgAudio.pause(); } catch (e) {}
             }
 
             function playSound(type) {
@@ -1570,74 +1472,81 @@
             document.addEventListener('mozfullscreenchange', updateFullscreenIcon);
             document.addEventListener('MSFullscreenChange', updateFullscreenIcon);
 
-            // ---- 封面背景滾動 ----
-            function startBgScroll() {
-                if (!bgScrollImg.complete) {
-                    bgScrollImg.onload = function() {
-                        doBgScroll();
-                    };
-                    return;
-                }
-                doBgScroll();
-            }
+            // ================================================================
+            //  ★ 背景滾動 (採用 background-position 控制，完美無空隙)
+            // ================================================================
+            let bgScrollState = 'pause-top'; // 'pause-top' | 'scroll-down' | 'pause-bottom' | 'scroll-up'
+            let bgScrollTimeInState = 0;
+            let bgScrollProgress = 0;
+            const BG_PAUSE_DURATION = 2.0;
+            const BG_SCROLL_DURATION = 4.0;
 
-            function doBgScroll() {
-                const wrap = bgScrollWrap;
-                const img = bgScrollImg;
-                const wrapRect = wrap.getBoundingClientRect();
-                const imgRect = img.getBoundingClientRect();
-                const imgH = imgRect.height;
-                const wrapH = wrapRect.height;
-                if (imgH <= wrapH) return;
-                const maxOffset = -(imgH - wrapH);
-                let currentOffset = 0;
-                let direction = 1;
-                let paused = false;
-                let pauseTimer = null;
+            function updateBackgroundScroll(deltaTime) {
+                if (!bgScrollLayer) return;
 
-                function animateScroll() {
-                    if (paused) return;
-                    const speed = 0.5;
-                    currentOffset += direction * speed;
-                    if (direction === 1 && currentOffset >= 0) {
-                        currentOffset = 0;
-                        direction = -1;
-                        paused = true;
-                        if (pauseTimer) clearTimeout(pauseTimer);
-                        pauseTimer = setTimeout(() => { paused = false;
-                            pauseTimer = null; }, 2000);
-                    } else if (direction === -1 && currentOffset <= maxOffset) {
-                        currentOffset = maxOffset;
-                        direction = 1;
-                        paused = true;
-                        if (pauseTimer) clearTimeout(pauseTimer);
-                        pauseTimer = setTimeout(() => { paused = false;
-                            pauseTimer = null; }, 2000);
-                    }
-                    img.style.transform = `translateY(${currentOffset}px)`;
-                    scrollAnimId = requestAnimationFrame(animateScroll);
-                }
+                bgScrollTimeInState += deltaTime;
 
-                img.style.transform = 'translateY(0px)';
-                currentOffset = 0;
-                direction = 1;
-                paused = true;
-                if (pauseTimer) clearTimeout(pauseTimer);
-                pauseTimer = setTimeout(() => {
-                    paused = false;
-                    pauseTimer = null;
-                    scrollAnimId = requestAnimationFrame(animateScroll);
-                }, 2000);
-            }
-
-            function stopBgScroll() {
-                if (scrollAnimId) {
-                    cancelAnimationFrame(scrollAnimId);
-                    scrollAnimId = null;
+                switch (bgScrollState) {
+                    case 'pause-top':
+                        if (bgScrollTimeInState >= BG_PAUSE_DURATION) {
+                            bgScrollState = 'scroll-down';
+                            bgScrollTimeInState = 0;
+                            bgScrollProgress = 0;
+                        }
+                        break;
+                    case 'scroll-down':
+                        bgScrollProgress = Math.min(1, bgScrollTimeInState / BG_SCROLL_DURATION);
+                        const yDown = bgScrollProgress * 100;
+                        bgScrollLayer.style.backgroundPosition = '50% ' + yDown + '%';
+                        if (bgScrollProgress >= 1) {
+                            bgScrollState = 'pause-bottom';
+                            bgScrollTimeInState = 0;
+                        }
+                        break;
+                    case 'pause-bottom':
+                        if (bgScrollTimeInState >= BG_PAUSE_DURATION) {
+                            bgScrollState = 'scroll-up';
+                            bgScrollTimeInState = 0;
+                            bgScrollProgress = 1;
+                        }
+                        break;
+                    case 'scroll-up':
+                        bgScrollProgress = Math.max(0, 1 - bgScrollTimeInState / BG_SCROLL_DURATION);
+                        const yUp = bgScrollProgress * 100;
+                        bgScrollLayer.style.backgroundPosition = '50% ' + yUp + '%';
+                        if (bgScrollProgress <= 0) {
+                            bgScrollState = 'pause-top';
+                            bgScrollTimeInState = 0;
+                        }
+                        break;
                 }
             }
 
-            // ---- 工具 ----
+            // 獨立背景滾動動畫循環
+            let bgLastTime = 0;
+
+            function bgScrollLoop(time) {
+                const dt = Math.min(0.05, (time - bgLastTime) / 1000);
+                bgLastTime = time;
+
+                // 只在封面顯示時更新
+                if (titleOverlay && titleOverlay.classList.contains('active')) {
+                    updateBackgroundScroll(dt);
+                }
+                requestAnimationFrame(bgScrollLoop);
+            }
+
+            // 重置背景滾動狀態（回到頂部暫停）
+            function resetBgScroll() {
+                bgScrollState = 'pause-top';
+                bgScrollTimeInState = 0;
+                bgScrollProgress = 0;
+                if (bgScrollLayer) {
+                    bgScrollLayer.style.backgroundPosition = '50% 0%';
+                }
+            }
+
+            // ---- 工具函數 ----
             function isInBounds(r, c) { return r >= 0 && r < ROWS && c >= 0 && c < COLS; }
 
             function getAdjacent(r, c) {
@@ -1716,7 +1625,7 @@
                 return new Promise((resolve) => {
                     rematchOverlay.classList.add('active');
                     rematchResult.textContent = '';
-                    rematchAttempt.textContent = `第 ${attempt} 次重猜`;
+                    rematchAttempt.textContent = '第 ' + attempt + ' 次重猜';
                     rematchSub.textContent = '請選擇你的武器';
 
                     const btns = rematchChoices.querySelectorAll('.choice-btn');
@@ -1729,7 +1638,7 @@
                         const choice = e.currentTarget.dataset.choice;
                         const playerChoice = choice;
                         const aiChoice = TYPES[Math.floor(Math.random() * TYPES.length)];
-                        rematchResult.textContent = `你：${EMOJI[playerChoice]}  vs  🤖：${EMOJI[aiChoice]}`;
+                        rematchResult.textContent = '你：' + EMOJI[playerChoice] + '  vs  🤖：' + EMOJI[aiChoice];
                         rematchSub.textContent = '比較中...';
 
                         if (playerChoice === aiChoice) {
@@ -1743,7 +1652,7 @@
 
                         const winner = BEATS[playerChoice] === aiChoice ? 'player' : 'computer';
                         rematchSub.textContent = winner === 'player' ? '🎉 你贏了！' : '🤖 電腦贏了！';
-                        rematchResult.textContent += `  → ${winner === 'player' ? '✅ 你勝出！' : '❌ 電腦勝出！'}`;
+                        rematchResult.textContent += '  → ' + (winner === 'player' ? '✅ 你勝出！' : '❌ 電腦勝出！');
                         btns.forEach(b => { b.disabled = true; });
 
                         setTimeout(() => {
@@ -1856,10 +1765,14 @@
             }
 
             // ---- 移動動畫 ----
+            let _moveTarget = null;
+            let _moveAnimPending = false;
+
             function playMoveAnimationOnBoard() {
                 if (!_moveTarget || _moveAnimPending === false) return;
                 _moveAnimPending = false;
-                const { r, c } = _moveTarget;
+                const r = _moveTarget.r,
+                    c = _moveTarget.c;
                 requestAnimationFrame(() => {
                     const cells = boardEl.querySelectorAll('.cell');
                     for (const cell of cells) {
@@ -2110,9 +2023,10 @@
             function updateLabels() {
                 const pColor = playerColor === 'blue' ? '🔵 藍方' : '🔴 紅方';
                 const cColor = playerColor === 'blue' ? '🔴 紅方' : '🔵 藍方';
-                playerLabel.innerHTML = `${pColor} <span class="num player-score" id="playerScore">${playerPieces.length}</span>`;
-                computerLabel.innerHTML =
-                    `${cColor} <span class="num computer-score" id="computerScore">${computerPieces.length}</span>`;
+                playerLabel.innerHTML = pColor + ' <span class="num player-score" id="playerScore">' + playerPieces
+                .length + '</span>';
+                computerLabel.innerHTML = cColor + ' <span class="num computer-score" id="computerScore">' +
+                    computerPieces.length + '</span>';
                 document.getElementById('playerScore').textContent = playerPieces.length;
                 document.getElementById('computerScore').textContent = computerPieces.length;
             }
@@ -2133,7 +2047,7 @@
                         if (piece) {
                             const div = document.createElement('div');
                             const pClass = getPieceClass(piece.owner, piece.color);
-                            div.className = `piece ${pClass}`;
+                            div.className = 'piece ' + pClass;
 
                             if (piece.owner === 'player' && piece.exposed) div.classList.add('exposed');
 
@@ -2381,7 +2295,7 @@
                         aliveNormals[i].revealed = true;
                     }
                     renderBoard();
-                    showToast(`🎲 已重抽 ${aliveNormals.length} 隻棋子！`);
+                    showToast('🎲 已重抽 ' + aliveNormals.length + ' 隻棋子！');
                     playSound('wind');
                 }
             }
@@ -2397,7 +2311,7 @@
                         const trapEmoji = trapPos ? '⚠️' : '❌';
                         const kingEmoji = kingPos ? '🚩' : '❌';
                         status.innerHTML =
-                            `✅ 已選 ${trapEmoji} 陷阱 和 ${kingEmoji} 棋手 ｜ 12隻棋子已分配包剪揼`;
+                            '✅ 已選 ' + trapEmoji + ' 陷阱 和 ' + kingEmoji + ' 棋手 ｜ 12隻棋子已分配包剪揼';
                     }
                 }
             }
@@ -2610,14 +2524,8 @@
 
                 const div = document.createElement('div');
                 div.className = 'select-phase';
-                div.innerHTML = `
-                    <div class="select-status">👆 點選一隻棋子當 <span class="highlight-trap">⚠️ 陷阱</span></div>
-                    <div class="select-hint">先選陷阱（⚠️），再選棋手（🚩）</div>
-                    <div class="select-buttons">
-                        <button class="btn btn-primary" id="selectStartBtn">▶️ 開始遊戲</button>
-                        <button class="btn btn-gold" id="selectRerollBtn" style="display:none;">🎲 重抽</button>
-                    </div>
-                `;
+                div.innerHTML =
+                    '<div class="select-status">👆 點選一隻棋子當 <span class="highlight-trap">⚠️ 陷阱</span></div><div class="select-hint">先選陷阱（⚠️），再選棋手（🚩）</div><div class="select-buttons"><button class="btn btn-primary" id="selectStartBtn">▶️ 開始遊戲</button><button class="btn btn-gold" id="selectRerollBtn" style="display:none;">🎲 重抽</button></div>';
                 const boardWrapper = document.querySelector('.board-wrapper');
                 boardWrapper.parentNode.insertBefore(div, boardWrapper.nextSibling);
 
@@ -2679,8 +2587,8 @@
                     window._selectObserver = null;
                 }
                 updateLabels();
-                stopBgScroll();
-                setTimeout(startBgScroll, 100);
+                // 重置背景滾動到頂部
+                resetBgScroll();
             }
 
             // ---- 開始遊戲（從標題） ----
@@ -2690,7 +2598,6 @@
                 gamePhase = 'SELECT';
                 initBoardForSelect();
                 if (isMusicOn) startBackgroundMusic();
-                else stopBackgroundMusic();
                 updateUI();
                 updateTurnUI();
                 updateButtons();
@@ -2698,23 +2605,102 @@
                 showToast('👆 請選擇陷阱和棋手');
             }
 
+            // ---- 重開遊戲 → 回到封面 ----
             function resetGame() {
                 if (!gameStarted && gamePhase !== 'PLAYING') return;
                 if (confirm('確定要重開遊戲嗎？進度將會遺失。')) {
-                    stopBackgroundMusic();
                     goToTitle();
-                    setTimeout(() => {
-                        titleOverlay.classList.remove('active');
-                        gamePhase = 'SELECT';
-                        initBoardForSelect();
-                        if (isMusicOn) startBackgroundMusic();
-                        updateUI();
-                        updateTurnUI();
-                        updateButtons();
-                        updateLabels();
-                        showToast('🔄 已重開，請選擇陷阱和棋手');
-                    }, 100);
+                    showToast('🏠 已回到封面');
                 }
+            }
+
+            // ---- 獎盃 ----
+            function loadTrophy() {
+                const saved = localStorage.getItem(TROPHY_KEY);
+                trophyCount = saved ? parseInt(saved, 10) || 0 : 0;
+                updateTrophyDisplay();
+            }
+
+            function saveTrophy() {
+                localStorage.setItem(TROPHY_KEY, String(trophyCount));
+            }
+
+            function updateTrophyDisplay() {
+                trophyCountEl.textContent = trophyCount;
+                if (titleTrophyFooter) {
+                    titleTrophyFooter.textContent = '🏆 ' + trophyCount;
+                }
+            }
+
+            function addTrophy(amount) {
+                trophyCount += amount;
+                saveTrophy();
+                updateTrophyDisplay();
+            }
+
+            // ---- 儲存／載入 ----
+            function saveSettings() {
+                const data = {
+                    trophy: trophyCount,
+                    musicOn: isMusicOn,
+                    timestamp: new Date().toISOString()
+                };
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'icq_save_' + new Date().toISOString().slice(0, 10) + '.txt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast('💾 已儲存 (.txt)');
+            }
+
+            function loadSettings() {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.txt,.json';
+                input.onchange = function(e) {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = function(ev) {
+                        try {
+                            const data = JSON.parse(ev.target.result);
+                            if (data.trophy !== undefined) {
+                                trophyCount = data.trophy;
+                                saveTrophy();
+                                updateTrophyDisplay();
+                            }
+                            if (data.musicOn !== undefined) {
+                                isMusicOn = data.musicOn;
+                                updateMusicUI();
+                                if (gameStarted || gamePhase === 'SELECT' || gamePhase === 'PLAYING') {
+                                    if (isMusicOn) startBackgroundMusic();
+                                    else stopBackgroundMusic();
+                                }
+                            }
+                            showToast('📁 設定已載入 (.txt)');
+                        } catch (err) {
+                            showToast('❌ 載入失敗');
+                            console.warn(err);
+                        }
+                    };
+                    reader.readAsText(file);
+                };
+                input.click();
+            }
+
+            function showToast(msg) {
+                const old = document.querySelector('.toast-msg');
+                if (old) old.remove();
+                const div = document.createElement('div');
+                div.className = 'toast-msg';
+                div.textContent = msg;
+                document.body.appendChild(div);
+                setTimeout(() => { div.style.opacity = '0';
+                    setTimeout(() => div.remove(), 500); }, 1800);
             }
 
             // ---- 初始化標題 ----
@@ -2752,7 +2738,8 @@
                 playerColor = 'blue';
                 previewBlue.classList.add('selected');
                 previewRed.classList.remove('selected');
-                setTimeout(startBgScroll, 300);
+                // 重置背景滾動
+                resetBgScroll();
             }
 
             // ---- 事件綁定 ----
@@ -2831,7 +2818,7 @@
             // ---- 版權 ----
             function setCopyright() {
                 const year = new Date().getFullYear();
-                copyrightEl.textContent = `v2.3.1 © ${year} ☕迪遜咖啡廳，版權所有。`;
+                copyrightEl.textContent = 'v2.3.3 © ' + year + ' ☕迪遜咖啡廳，版權所有。';
             }
 
             // ---- 洗牌 ----
@@ -2849,6 +2836,10 @@
             updateMusicUI();
             initTitle();
 
+            // 啟動背景滾動循環
+            bgLastTime = performance.now();
+            requestAnimationFrame(bgScrollLoop);
+
             document.addEventListener('click', () => {
                 if (!audioCtx) { try { initAudio(); } catch (e) {} }
                 if (isMusicOn && (gameStarted || gamePhase === 'SELECT' || gamePhase === 'PLAYING' || gamePhase ===
@@ -2860,25 +2851,26 @@
                         'PLAYING' || gamePhase === 'TITLE') && bgAudio.paused) startBackgroundMusic();
             });
 
-            console.log('🌼 ICQ 包剪揼 · 紅藍對決版 (v2.3.1) 已載入');
-            console.log(`🏆 當前獎盃: ${trophyCount}`);
-            console.log(`🎨 當前選色: ${playerColor}`);
-            console.log(`🎵 音樂階段: ${currentMusicPhase}`);
+            console.log('🌼 ICQ 包剪揼 · 紅藍對決版 (v2.3.3) 已載入');
+            console.log('✅ 修復：背景圖右側空隙 & 自動上下滾動（background-position 控制）');
+            console.log('🏆 當前獎盃: ' + trophyCount);
+            console.log('🎨 當前選色: ' + playerColor);
+            console.log('🎵 音樂階段: ' + currentMusicPhase);
 
             window.__game = {
-                addTrophy,
-                trophyCount: () => trophyCount,
-                isMusicOn: () => isMusicOn,
-                toggleMusic: () => { isMusicOn = !isMusicOn;
+                addTrophy: addTrophy,
+                trophyCount: function() { return trophyCount; },
+                isMusicOn: function() { return isMusicOn; },
+                toggleMusic: function() { isMusicOn = !isMusicOn;
                     updateMusicUI(); },
-                saveSettings,
-                loadSettings,
-                goToTitle,
-                startGame,
-                resetGame,
-                toggleFullscreen,
+                saveSettings: saveSettings,
+                loadSettings: loadSettings,
+                goToTitle: goToTitle,
+                startGame: startGame,
+                resetGame: resetGame,
+                toggleFullscreen: toggleFullscreen,
                 reroll: rerollNormalPieces,
-                getState: () => ({ phase: gamePhase, color: playerColor, musicPhase: currentMusicPhase })
+                getState: function() { return { phase: gamePhase, color: playerColor, musicPhase: currentMusicPhase }; }
             };
 
         })();
