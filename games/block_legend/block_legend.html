@@ -866,7 +866,7 @@
 
     <script>
         // ============================================================
-        //  ⛏️ 方塊傳說 · 終極版 (完整代碼)
+        //  ⛏️ 方塊傳說 · 終極版 (修复版)
         // ============================================================
 
         const $ = id => document.getElementById(id);
@@ -886,8 +886,6 @@
 
         function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
-        function uid() { return Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 4); }
-
         function toast(msg, type = 'info', duration = 2000) {
             toastEl.textContent = msg;
             toastEl.className = 'toast ' + type + ' show';
@@ -901,7 +899,6 @@
         let currentMusicEl = null;
         let rainNoiseNode = null;
         let rainGainNode = null;
-        let thunderTimeout = null;
         let _coverMusicStarted = false;
 
         function initAudio() {
@@ -918,53 +915,37 @@
             }
         }
 
-        // 播放指定主题音乐 (使用 <audio> 元素)
         function playMusic(theme) {
             if (!musicEnabled) {
                 if (currentMusicEl) { currentMusicEl.pause();
                     currentMusicEl = null; }
                 return;
             }
-            // 如果已经是同一首，不重复触发
             let el = null;
             if (theme === 'title') el = document.getElementById('music-title');
             else if (theme === 'day') el = document.getElementById('music-day');
             else if (theme === 'night') el = document.getElementById('music-night');
             else if (theme === 'battle') el = document.getElementById('music-battle');
             if (!el) return;
-
-            // 如果当前播放的正是这个元素且正在播放，则跳过
             if (currentMusicEl === el && !el.paused) return;
-
-            // 停止当前
-            if (currentMusicEl) {
-                currentMusicEl.pause();
-                currentMusicEl = null;
-            }
-
-            // 播放新音乐
+            if (currentMusicEl) { currentMusicEl.pause();
+                currentMusicEl = null; }
             el.currentTime = 0;
             el.loop = true;
             el.volume = 1;
-            el.play().catch(e => {
-                // 自动播放被阻止时静默处理，用户点击后会恢复
-                console.log('音乐播放被阻止，等待用户交互:', theme);
-            });
+            el.play().catch(e => console.log('音乐播放被阻止:', theme));
             currentMusicEl = el;
         }
 
-        // 停止所有音乐
         function stopAllMusic() {
-            if (currentMusicEl) {
-                currentMusicEl.pause();
-                currentMusicEl = null;
-            }
+            if (currentMusicEl) { currentMusicEl.pause();
+                currentMusicEl = null; }
         }
 
-        // 雨声 (白噪声)
+        // 雨声 - 防止重复创建
         function startRainSound() {
             if (!audioCtx || !musicEnabled) return;
-            if (rainNoiseNode) return;
+            if (rainNoiseNode) return; // 已存在则不重复创建
             try {
                 const bufferSize = 2 * audioCtx.sampleRate;
                 const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
@@ -980,7 +961,7 @@
                 rainNoiseNode.connect(rainGainNode);
                 rainGainNode.connect(audioCtx.destination);
                 rainNoiseNode.start();
-            } catch (e) {}
+            } catch (e) { console.log('雨声启动失败:', e); }
         }
 
         function stopRainSound() {
@@ -1015,25 +996,34 @@
             } catch (e) {}
         }
 
-        // ---------- 游戏状态更新时切换音乐 ----------
+        // 音效播放 (短音)
+        function playSound(frequency = 440, duration = 0.2, type = 'sine') {
+            if (!audioCtx || !musicEnabled) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.value = frequency;
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {}
+        }
+
+        // ---------- 更新音乐 (游戏内) ----------
         function updateMusic() {
             if (!musicEnabled) {
                 if (currentMusicEl) { currentMusicEl.pause();
                     currentMusicEl = null; }
                 return;
             }
-            // 如果游戏未开始（封面可见），不切换（由封面音乐控制）
-            if (cover.style.display !== 'none') return;
-
-            // 战斗优先
-            if (G.battle) {
-                playMusic('battle');
-                return;
-            }
-            // 夜晚或下雨/雷雨 → 夜间音乐
+            if (cover.style.display !== 'none') return; // 封面时由封面逻辑控制
+            if (G.battle) { playMusic('battle'); return; }
             if (G.isNight || G.weather === 'rain' || G.weather === 'thunder') {
                 playMusic('night');
-                // 雨声效在天气变化时已处理，这里确保同步
                 if (G.weather === 'rain' || G.weather === 'thunder') {
                     startRainSound();
                 } else {
@@ -1041,7 +1031,6 @@
                 }
                 return;
             }
-            // 白天 → 日间音乐
             playMusic('day');
             stopRainSound();
         }
@@ -1062,6 +1051,8 @@
             'raw_pork': { id: 'raw_pork', name: '生豬肉', icon: '🥩', type: 'food', heal: 8, desc: '食用恢復8HP' },
             'raw_beef': { id: 'raw_beef', name: '生牛肉', icon: '🥩', type: 'food', heal: 10, desc: '食用恢復10HP' },
             'raw_mutton': { id: 'raw_mutton', name: '生羊肉', icon: '🥩', type: 'food', heal: 6, desc: '食用恢復6HP' },
+            'horsemeat': { id: 'horsemeat', name: '馬肉', icon: '🥩', type: 'food', heal: 8, desc: '食用恢復8HP' },
+            'camelmeat': { id: 'camelmeat', name: '駱駝肉', icon: '🥩', type: 'food', heal: 8, desc: '食用恢復8HP' },
             'wool': { id: 'wool', name: '羊毛', icon: '🧶', type: 'resource', desc: '從羊掉落' },
             'bone': { id: 'bone', name: '骨頭', icon: '🦴', type: 'resource', desc: '從骷髏掉落' },
             'rotten_flesh': { id: 'rotten_flesh', name: '腐肉', icon: '🥓', type: 'resource', desc: '從喪屍掉落' },
@@ -1196,9 +1187,9 @@
             'skeleton': { id: 'skeleton', name: '💀 骷髏', hp: 45, atk: 10, def: 2, exp: 25, gold: 15, passive: false,
                 drops: [{ id: 'bone', chance: 0.4, count: 1 }] },
             'camel': { id: 'camel', name: '🐪 駱駝', hp: 40, atk: 0, def: 2, exp: 6, gold: 4, passive: true,
-                drops: [{ id: 'raw_beef', chance: 0.7, count: 1 }] },
+                drops: [{ id: 'camelmeat', chance: 0.7, count: 1 }] },
             'horse': { id: 'horse', name: '🐎 馬', hp: 40, atk: 0, def: 2, exp: 6, gold: 4, passive: true,
-                drops: [{ id: 'raw_beef', chance: 0.7, count: 1 }] },
+                drops: [{ id: 'horsemeat', chance: 0.7, count: 1 }] },
         };
 
         // ---------- 地图类型 ----------
@@ -1499,7 +1490,7 @@
                 if (!campPlaced) objects[3][3] = { type: 'camp' };
             }
 
-            // 箭头
+            // 箭头 (边界中间)
             const mid = Math.floor(w / 2);
             if (!objects[0][mid]) objects[0][mid] = { type: 'arrow', dir: 'north' };
             if (!objects[h - 1][mid]) objects[h - 1][mid] = { type: 'arrow', dir: 'south' };
@@ -1549,16 +1540,22 @@
             updateMusic();
         }
 
+        // ---------- 箭头处理 (修正落点：站在箭头上) ----------
         function handleArrow(dir, x, y) {
             const currentId = G.player.mapId;
             const nextId = getAdjacentMap(currentId, dir);
-            let spawnX = 9,
-                spawnY = 9;
-            if (dir === 'east') { spawnX = 1;
-                spawnY = 9; } else if (dir === 'west') { spawnX = 17;
-                spawnY = 9; } else if (dir === 'south') { spawnX = 9;
-                spawnY = 1; } else if (dir === 'north') { spawnX = 9;
-                spawnY = 17; }
+            const mid = 9; // 地图尺寸19，中心9
+            let spawnX = mid,
+                spawnY = mid;
+            // 站在对应方向的边界箭头上
+            if (dir === 'east') { spawnX = 18;
+                spawnY = mid; } // 东边界箭头位置 (18,9)
+            else if (dir === 'west') { spawnX = 0;
+                spawnY = mid; } // 西边界 (0,9)
+            else if (dir === 'south') { spawnX = mid;
+                spawnY = 18; } // 南边界 (9,18)
+            else if (dir === 'north') { spawnX = mid;
+                spawnY = 0; } // 北边界 (9,0)
             toast('🚀 前往 ' + MAP_TYPES[nextId].name, 'info');
             switchMap(nextId, spawnX, spawnY);
         }
@@ -2955,9 +2952,7 @@
             cover.style.display = 'none';
             game.style.display = 'flex';
 
-            // 切换游戏音乐（根据当前时间/天气）
             updateMusic();
-
             updateUI();
             render();
             if (G._loopId) cancelAnimationFrame(G._loopId);
@@ -3000,12 +2995,12 @@
                 cover.style.display = 'flex';
                 $('playerNameInput').value = '史蒂夫';
                 _coverMusicStarted = false;
-                // 停止所有音乐，播放封面音乐
                 stopAllMusic();
                 stopRainSound();
-                // 延迟一帧播放封面音乐（确保 DOM 已更新）
-                setTimeout(() => { playMusic('title');
-                    _coverMusicStarted = true; }, 100);
+                // 重置后播放封面音乐
+                setTimeout(() => { if (cover.style.display !== 'none') { initAudio();
+                        playMusic('title');
+                        _coverMusicStarted = true; } }, 100);
                 toast('🔄 已重置遊戲', 'info');
                 if (audioCtx) {
                     try { audioCtx.close(); } catch (e) {}
@@ -3014,21 +3009,27 @@
             }
         }
 
-        // ---------- 播放封面音乐（点击封面触发） ----------
+        // ---------- 封面音乐播放 (点击封面) ----------
         function startCoverMusic() {
             if (cover.style.display === 'none') return;
             if (!_coverMusicStarted) {
                 initAudio();
-                playMusic('title');
-                _coverMusicStarted = true;
+                // 确保音频上下文运行
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    audioCtx.resume().then(() => {
+                        playMusic('title');
+                        _coverMusicStarted = true;
+                    }).catch(e => console.log('音频恢复失败:', e));
+                } else {
+                    playMusic('title');
+                    _coverMusicStarted = true;
+                }
             }
         }
 
         // ---------- 事件绑定 ----------
         $('btnStartGame').addEventListener('click', () => {
-            // 先确保音频上下文激活，并播放封面音乐（短暂）
             initAudio();
-            // 进入游戏
             const name = $('playerNameInput').value.trim() || '史蒂夫';
             initGame(name);
         });
@@ -3038,17 +3039,22 @@
         });
         $('btnResetGame').addEventListener('click', resetGame);
 
-        // 点击封面任意位置播放封面音乐
+        // 封面点击播放音乐（排除按钮区域）
         cover.addEventListener('click', (e) => {
-            // 如果点击的是按钮，不重复触发（按钮有自己的逻辑）
             if (e.target.closest('button')) return;
             startCoverMusic();
         });
 
-        // 全局点击激活音频（符合浏览器策略）
+        // 全局点击激活音频（确保用户交互后音频可用）
         document.addEventListener('click', () => {
-            initAudio();
-        }, { once: true });
+            if (!audioCtx) initAudio();
+            else if (audioCtx.state === 'suspended') audioCtx.resume();
+            // 如果封面可见且未播放，则播放
+            if (cover.style.display !== 'none' && !_coverMusicStarted) {
+                playMusic('title');
+                _coverMusicStarted = true;
+            }
+        }, { once: false });
 
         // 战斗按钮
         $('battleAttackBtn').addEventListener('click', battleAttack);
@@ -3193,7 +3199,7 @@
         });
 
         // ---------- 启动 ----------
-        console.log('⛏️ 方塊傳說 · 終極版 已載入！');
+        console.log('⛏️ 方塊傳說 · 終極版 (修复版) 已載入！');
         console.log('🎮 操作: 方向鍵移動 | R休息 | I背包 | E裝備');
         console.log('📌 請確保以下音樂文件與HTML同目錄:');
         console.log('   Block Legend - The Crystal Spire.mp3');
@@ -3201,11 +3207,10 @@
         console.log('   Block Legend - No Sleeping.mp3');
         console.log('   Block Legend - Epic Fight.mp3');
 
-        // 页面加载后尝试播放封面音乐（延迟以确保DOM就绪）
+        // 页面加载后尝试播放封面音乐
         setTimeout(() => {
             if (cover.style.display !== 'none') {
                 initAudio();
-                // 如果音频上下文未激活，等待用户交互
                 if (audioCtx && audioCtx.state === 'running') {
                     playMusic('title');
                     _coverMusicStarted = true;
@@ -3213,36 +3218,19 @@
             }
         }, 500);
 
-        // 再次点击页面时确保封面音乐播放
+        // 确保点击页面任意处可激活音频并播放封面音乐（如果封面可见）
         document.addEventListener('click', function coverMusicHandler() {
             if (cover.style.display !== 'none' && !_coverMusicStarted) {
                 initAudio();
+                if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
                 playMusic('title');
                 _coverMusicStarted = true;
             }
         }, { once: false });
 
-        // 初始化雨滴渲染
         drawRain();
 
-        // 播放音效辅助函数
-        function playSound(frequency = 440, duration = 0.2, type = 'sine') {
-            if (!audioCtx || !musicEnabled) return;
-            try {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = type;
-                osc.frequency.value = frequency;
-                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + duration);
-            } catch (e) {}
-        }
-
-        // 暴露给全局
+        // 暴露播放音效
         window.playSound = playSound;
         window.startRainSound = startRainSound;
         window.stopRainSound = stopRainSound;
