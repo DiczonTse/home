@@ -175,7 +175,7 @@
             background: rgba(255, 255, 255, 0.15);
         }
         .float-btn.music {
-            bottom: 80px;
+            bottom: 20px;
             left: 20px;
         }
         .float-btn.fullscreen {
@@ -672,7 +672,7 @@
                 font-size: 20px;
             }
             .float-btn.music {
-                bottom: 70px;
+                bottom: 10px;
                 left: 10px;
             }
             .float-btn.fullscreen {
@@ -882,7 +882,7 @@
         </div>
     </div>
 
-    <div class="float-btn music" id="musicToggle" title="音效/音樂開關" style="bottom:20px; left:20px;">🔊</div>
+    <div class="float-btn music" id="musicToggle" title="音效/音樂開關">🔊</div>
     <div class="float-btn fullscreen" id="fullscreenToggle" title="全螢幕">⛶</div>
     <div id="toast" class="toast"></div>
 
@@ -892,14 +892,14 @@
         // ============================================================
         //  ⛏️ 方塊傳說 · 終極版 (完整修改版)
         //  修改内容：
-        //  1. 牛/羊/猪/马/骆驼不掉錢 (gold=0)
-        //  2. 木制工具/装备/武器不用金錢，只需木材 (商店/合成调整)
-        //  3. 玩家踩進草搜寻后，草会消失
+        //  1. 牛/羊/豬/馬/駱駝不掉錢 (gold=0)
+        //  2. 木制工具/裝備/武器不用金錢，只需木材 (商店/合成調整)
+        //  3. 玩家踩進草搜尋後，草會消失
         //  4. 制箭匠也賣弩，弓箭/弩升級鏈
-        //  5. 丧尸低机率掉木劍/木斧，骷髅低机率掉木弓
-        //  6. 海洋/河流新增魚類；平原/森林/山地新增鸡/鸭/蜜蜂/蜘蛛
+        //  5. 喪屍低机率掉木劍/木斧，骷髏低机率掉木弓
+        //  6. 海洋/河流新增魚類；平原/森林/山地新增雞/鴨/蜜蜂/蜘蛛
         //  7. 洞穴新增蜘蛛(全日)、寶箱、蜘蛛網
-        //  8. 魚肉/鸡肉/鸭肉回HP+SP，蜜糖回HP+MP+SP
+        //  8. 魚肉/雞肉/鴨肉回HP+SP，蜜糖回HP+MP+SP
         //  9. 洞穴/海洋/河流/沙漠不下雨
         // 10. 下雨/雷雨時魚類/怪物生成翻倍
         // 11. 日夜交替時被動生物不消失/刷新
@@ -931,7 +931,7 @@
             _toastTimer = setTimeout(() => toastEl.classList.remove('show'), duration);
         }
 
-        // ---------- 音频 ----------
+        // ---------- 音頻 ----------
         let audioCtx = null;
         let musicEnabled = true;
         let currentMusicEl = null;
@@ -941,7 +941,7 @@
 
         function initAudio() {
             if (!audioCtx) { audioCtx = new(window.AudioContext || window.webkitAudioContext)(); }
-            if (audioCtx.state === 'suspended') { audioCtx.resume().catch(e => console.log('音频恢复失敗:', e)); }
+            if (audioCtx.state === 'suspended') { audioCtx.resume().catch(e => console.log('音頻恢復失敗:', e)); }
             if (cover.style.display !== 'none' && !_coverMusicStarted) { playMusic('title');
                 _coverMusicStarted = true; }
         }
@@ -964,10 +964,10 @@
             el.loop = true;
             el.volume = 1;
             el.play().then(() => { currentMusicEl = el; }).catch(err => {
-                console.warn('播放音乐失敗:', err);
+                console.warn('播放音樂失敗:', err);
                 if (audioCtx && audioCtx.state === 'suspended') {
                     audioCtx.resume().then(() => { el.play().then(() => { currentMusicEl = el; }).catch(e => console.error(
-                            '重试失敗:', e)); }).catch(e => console.error('resume失敗:', e));
+                            '重試失敗:', e)); }).catch(e => console.error('resume失敗:', e));
                 }
             });
         }
@@ -996,7 +996,7 @@
                 rainNoiseNode.connect(rainGainNode);
                 rainGainNode.connect(audioCtx.destination);
                 rainNoiseNode.start();
-            } catch (e) { console.log('雨声启動失敗:', e); }
+            } catch (e) { console.log('雨聲啟動失敗:', e); }
         }
 
         function stopRainSound() {
@@ -1055,7 +1055,7 @@
             stopRainSound();
         }
 
-        // ---------- 物品定义 ----------
+        // ---------- 物品定義 ----------
         const ITEMS = {
             'wood': { id: 'wood', name: '木材', icon: '🎋', type: 'resource', desc: '基礎建材' },
             'stone': { id: 'stone', name: '石頭', icon: '🗻', type: 'resource', desc: '基礎石材' },
@@ -1063,21 +1063,21 @@
             'iron_ore': { id: 'iron_ore', name: '鐵礦', icon: '🔩', type: 'resource', desc: '鐵礦石' },
             'gold_ore': { id: 'gold_ore', name: '金礦', icon: '🟡', type: 'resource', desc: '金礦石' },
             'diamond': { id: 'diamond', name: '鑽石', icon: '💎', type: 'resource', desc: '珍贵寶石' },
-            'netherite': { id: 'netherite', name: '獄髓', icon: '⚫', type: 'resource', desc: '远古合金' },
+            'netherite': { id: 'netherite', name: '獄髓', icon: '⚫', type: 'resource', desc: '遠古合金' },
             'coal': { id: 'coal', name: '煤炭', icon: '⚫', type: 'resource', desc: '燃料' },
             'leather': { id: 'leather', name: '皮革', icon: '🟫', type: 'resource', desc: '從牛掉落' },
-            'gold_ingot': { id: 'gold_ingot', name: '金锭', icon: '🥇', type: 'resource', desc: '纯金' },
-            'raw_pork': { id: 'raw_pork', name: '生猪肉', icon: '🥩', type: 'food', heal: 8, sp: 3, desc: '食用恢复8HP+3SP' },
-            'raw_beef': { id: 'raw_beef', name: '生牛肉', icon: '🥩', type: 'food', heal: 10, sp: 4, desc: '食用恢复10HP+4SP' },
-            'raw_mutton': { id: 'raw_mutton', name: '生羊肉', icon: '🥩', type: 'food', heal: 6, sp: 2, desc: '食用恢复6HP+2SP' },
-            'horsemeat': { id: 'horsemeat', name: '马肉', icon: '🥩', type: 'food', heal: 8, sp: 3, desc: '食用恢复8HP+3SP' },
-            'camelmeat': { id: 'camelmeat', name: '骆驼肉', icon: '🥩', type: 'food', heal: 8, sp: 3, desc: '食用恢复8HP+3SP' },
+            'gold_ingot': { id: 'gold_ingot', name: '金錠', icon: '🥇', type: 'resource', desc: '纯金' },
+            'raw_pork': { id: 'raw_pork', name: '生豬肉', icon: '🥩', type: 'food', heal: 8, sp: 3, desc: '食用恢復8HP+3SP' },
+            'raw_beef': { id: 'raw_beef', name: '生牛肉', icon: '🥩', type: 'food', heal: 10, sp: 4, desc: '食用恢復10HP+4SP' },
+            'raw_mutton': { id: 'raw_mutton', name: '生羊肉', icon: '🥩', type: 'food', heal: 6, sp: 2, desc: '食用恢復6HP+2SP' },
+            'horsemeat': { id: 'horsemeat', name: '馬肉', icon: '🥩', type: 'food', heal: 8, sp: 3, desc: '食用恢復8HP+3SP' },
+            'camelmeat': { id: 'camelmeat', name: '駱駝肉', icon: '🥩', type: 'food', heal: 8, sp: 3, desc: '食用恢復8HP+3SP' },
             'wool': { id: 'wool', name: '羊毛', icon: '🧶', type: 'resource', desc: '從羊掉落' },
-            'bone': { id: 'bone', name: '骨頭', icon: '🦴', type: 'resource', desc: '從骷髅掉落' },
-            'rotten_flesh': { id: 'rotten_flesh', name: '腐肉', icon: '🥓', type: 'resource', desc: '從丧尸掉落' },
-            'bed': { id: 'bed', name: '床', icon: '🛏️', type: 'bed', desc: '放置后可在夜晚休息' },
+            'bone': { id: 'bone', name: '骨頭', icon: '🦴', type: 'resource', desc: '從骷髏掉落' },
+            'rotten_flesh': { id: 'rotten_flesh', name: '腐肉', icon: '🥓', type: 'resource', desc: '從喪屍掉落' },
+            'bed': { id: 'bed', name: '床', icon: '🛏️', type: 'bed', desc: '放置後可在夜晚休息' },
             'wheat': { id: 'wheat', name: '小麥', icon: '🌾', type: 'resource', desc: '農作物' },
-            'bread': { id: 'bread', name: '面包', icon: '🍞', type: 'food', heal: 4, sp: 4, desc: '食用恢复4HP+4SP' },
+            'bread': { id: 'bread', name: '麵包', icon: '🍞', type: 'food', heal: 4, sp: 4, desc: '食用恢復4HP+4SP' },
             'wood_sword': { id: 'wood_sword', name: '木劍', icon: '🗡️', type: 'weapon', atk: 3, desc: '攻擊+3' },
             'stone_sword': { id: 'stone_sword', name: '石劍', icon: '🗡️', type: 'weapon', atk: 5, desc: '攻擊+5' },
             'copper_sword': { id: 'copper_sword', name: '銅劍', icon: '⚔️', type: 'weapon', atk: 7, desc: '攻擊+7' },
@@ -1123,16 +1123,16 @@
                 desc: '採礦Lv6' },
             'netherite_pickaxe': { id: 'netherite_pickaxe', name: '獄髓鎬', icon: '⛏️', type: 'tool', tool: 'pickaxe',
                 level: 7, desc: '採礦Lv7' },
-            'leather_helmet': { id: 'leather_helmet', name: '皮帽', icon: '⛑️', type: 'helmet', def: 1, desc: '防御+1' },
+            'leather_helmet': { id: 'leather_helmet', name: '皮帽', icon: '⛑️', type: 'helmet', def: 1, desc: '防禦+1' },
             'leather_chestplate': { id: 'leather_chestplate', name: '皮甲', icon: '👕', type: 'chestplate', def: 2,
-                desc: '防御+2' },
-            'leather_gloves': { id: 'leather_gloves', name: '皮手套', icon: '🧤', type: 'gloves', def: 1, desc: '防御+1' },
+                desc: '防禦+2' },
+            'leather_gloves': { id: 'leather_gloves', name: '皮手套', icon: '🧤', type: 'gloves', def: 1, desc: '防禦+1' },
             'leather_leggings': { id: 'leather_leggings', name: '皮裤', icon: '👖', type: 'leggings', def: 2,
-                desc: '防御+2' },
-            'leather_boots': { id: 'leather_boots', name: '皮靴', icon: '👢', type: 'boots', def: 1, desc: '防御+1' },
-            'wood_shield': { id: 'wood_shield', name: '木盾', icon: '🛡️', type: 'shield', def: 2, desc: '防御+2' },
+                desc: '防禦+2' },
+            'leather_boots': { id: 'leather_boots', name: '皮靴', icon: '👢', type: 'boots', def: 1, desc: '防禦+1' },
+            'wood_shield': { id: 'wood_shield', name: '木盾', icon: '🛡️', type: 'shield', def: 2, desc: '防禦+2' },
             // ----- 新增弓系 -----
-            'bow': { id: 'bow', name: '弓箭', icon: '🏹', type: 'weapon', atk: 4, desc: '攻擊+4（远程）' },
+            'bow': { id: 'bow', name: '弓箭', icon: '🏹', type: 'weapon', atk: 4, desc: '攻擊+4（遠程）' },
             'short_bow': { id: 'short_bow', name: '短弓', icon: '🏹', type: 'weapon', atk: 6, desc: '攻擊+6' },
             'long_bow': { id: 'long_bow', name: '长弓', icon: '🏹', type: 'weapon', atk: 8, desc: '攻擊+8' },
             'hunt_bow': { id: 'hunt_bow', name: '獵弓', icon: '🏹', type: 'weapon', atk: 11, desc: '攻擊+11' },
@@ -1144,14 +1144,14 @@
             'heavy_crossbow2': { id: 'heavy_crossbow2', name: '重弩', icon: '🎯', type: 'weapon', atk: 14, desc: '攻擊+14' },
             'zhuge': { id: 'zhuge', name: '諸葛連弩', icon: '🎯', type: 'weapon', atk: 18, desc: '攻擊+18' },
             // ----- 新增食物 -----
-            'raw_fish': { id: 'raw_fish', name: '魚肉', icon: '🐟', type: 'food', heal: 8, sp: 5, desc: '食用恢复8HP+5SP' },
-            'raw_chicken': { id: 'raw_chicken', name: '鸡肉', icon: '🍗', type: 'food', heal: 6, sp: 4, desc: '食用恢复6HP+4SP' },
-            'raw_duck': { id: 'raw_duck', name: '鸭肉', icon: '🍗', type: 'food', heal: 7, sp: 4, desc: '食用恢复7HP+4SP' },
-            'honey': { id: 'honey', name: '蜜糖', icon: '🍯', type: 'food', heal: 4, mp: 6, sp: 4, desc: '食用恢复4HP+6MP+4SP' },
+            'raw_fish': { id: 'raw_fish', name: '魚肉', icon: '🐟', type: 'food', heal: 8, sp: 5, desc: '食用恢復8HP+5SP' },
+            'raw_chicken': { id: 'raw_chicken', name: '雞肉', icon: '🍗', type: 'food', heal: 6, sp: 4, desc: '食用恢復6HP+4SP' },
+            'raw_duck': { id: 'raw_duck', name: '鴨肉', icon: '🍗', type: 'food', heal: 7, sp: 4, desc: '食用恢復7HP+4SP' },
+            'honey': { id: 'honey', name: '蜜糖', icon: '🍯', type: 'food', heal: 4, mp: 6, sp: 4, desc: '食用恢復4HP+6MP+4SP' },
             // ----- 新增材料 -----
             'string': { id: 'string', name: '線', icon: '🧵', type: 'resource', desc: '從蜘蛛獲得' },
             'spider_eye': { id: 'spider_eye', name: '蜘蛛眼', icon: '👁️', type: 'resource', desc: '從蜘蛛掉落' },
-            'feather': { id: 'feather', name: '羽毛', icon: '🕊️', type: 'resource', desc: '從鸡/鸭掉落' },
+            'feather': { id: 'feather', name: '羽毛', icon: '🕊️', type: 'resource', desc: '從雞/鴨掉落' },
             'ink_sac': { id: 'ink_sac', name: '墨囊', icon: '✒️', type: 'resource', desc: '從墨魚掉落' },
         };
 
@@ -1177,22 +1177,22 @@
             { wood: 8, string: 5, netherite: 1, gold: 120 },
         ];
 
-        // ---------- 生物定义 ----------
+        // ---------- 生物定義 ----------
         const MOBS = {
             // 被動（不掉錢）
-            'pig': { id: 'pig', name: '🐷 猪', hp: 30, atk: 0, def: 1, exp: 5, gold: 0, passive: true,
+            'pig': { id: 'pig', name: '🐷 豬', hp: 30, atk: 0, def: 1, exp: 5, gold: 0, passive: true,
                 drops: [{ id: 'raw_pork', chance: 0.7, count: 1 }] },
             'cow': { id: 'cow', name: '🐮 牛', hp: 40, atk: 0, def: 2, exp: 6, gold: 0, passive: true,
                 drops: [{ id: 'raw_beef', chance: 0.7, count: 1 }, { id: 'leather', chance: 0.3, count: 1 }] },
             'sheep': { id: 'sheep', name: '🐑 羊', hp: 25, atk: 0, def: 1, exp: 5, gold: 0, passive: true,
                 drops: [{ id: 'raw_mutton', chance: 0.6, count: 1 }, { id: 'wool', chance: 0.3, count: 1 }] },
-            'camel': { id: 'camel', name: '🐪 骆驼', hp: 40, atk: 0, def: 2, exp: 6, gold: 0, passive: true,
+            'camel': { id: 'camel', name: '🐪 駱駝', hp: 40, atk: 0, def: 2, exp: 6, gold: 0, passive: true,
                 drops: [{ id: 'camelmeat', chance: 0.6, count: 1 }] },
-            'horse': { id: 'horse', name: '🐎 马', hp: 40, atk: 0, def: 2, exp: 6, gold: 0, passive: true,
+            'horse': { id: 'horse', name: '🐎 馬', hp: 40, atk: 0, def: 2, exp: 6, gold: 0, passive: true,
                 drops: [{ id: 'horsemeat', chance: 0.6, count: 1 }] },
-            'chicken': { id: 'chicken', name: '🐓 鸡', hp: 20, atk: 0, def: 0, exp: 4, gold: 0, passive: true,
+            'chicken': { id: 'chicken', name: '🐓 雞', hp: 20, atk: 0, def: 0, exp: 4, gold: 0, passive: true,
                 drops: [{ id: 'raw_chicken', chance: 0.7, count: 1 }, { id: 'feather', chance: 0.3, count: 1 }] },
-            'duck': { id: 'duck', name: '🦆 鸭', hp: 22, atk: 0, def: 0, exp: 4, gold: 0, passive: true,
+            'duck': { id: 'duck', name: '🦆 鴨', hp: 22, atk: 0, def: 0, exp: 4, gold: 0, passive: true,
                 drops: [{ id: 'raw_duck', chance: 0.7, count: 1 }, { id: 'feather', chance: 0.3, count: 1 }] },
             'bee': { id: 'bee', name: '🐝 蜜蜂', hp: 15, atk: 3, def: 0, exp: 3, gold: 0, passive: false,
                 drops: [{ id: 'honey', chance: 0.4, count: 1 }] },
@@ -1201,27 +1201,27 @@
                 drops: [{ id: 'raw_fish', chance: 0.8, count: 1 }] },
             'pufferfish': { id: 'pufferfish', name: '🐡 河豚', hp: 18, atk: 4, def: 0, exp: 5, gold: 0, passive: false,
                 drops: [{ id: 'raw_fish', chance: 0.7, count: 1 }] },
-            'tropical_fish': { id: 'tropical_fish', name: '🐠 热带魚', hp: 16, atk: 0, def: 0, exp: 3, gold: 0, passive: true,
+            'tropical_fish': { id: 'tropical_fish', name: '🐠 熱帶魚', hp: 16, atk: 0, def: 0, exp: 3, gold: 0, passive: true,
                 drops: [{ id: 'raw_fish', chance: 0.7, count: 1 }] },
             'octopus': { id: 'octopus', name: '🐙 八爪魚', hp: 25, atk: 5, def: 1, exp: 6, gold: 0, passive: false,
                 drops: [{ id: 'raw_fish', chance: 0.7, count: 1 }] },
             'squid': { id: 'squid', name: '🦑 墨魚', hp: 20, atk: 0, def: 0, exp: 4, gold: 0, passive: true,
                 drops: [{ id: 'ink_sac', chance: 0.5, count: 1 }] },
-            'shark': { id: 'shark', name: '🦈 鲨魚', hp: 50, atk: 10, def: 2, exp: 15, gold: 0, passive: false,
+            'shark': { id: 'shark', name: '🦈 鯊魚', hp: 50, atk: 10, def: 2, exp: 15, gold: 0, passive: false,
                 drops: [{ id: 'raw_fish', chance: 0.9, count: 2 }] },
             'dolphin': { id: 'dolphin', name: '🐬 海豚', hp: 30, atk: 6, def: 1, exp: 8, gold: 0, passive: false,
                 drops: [{ id: 'raw_fish', chance: 0.6, count: 1 }] },
             // 原敵對
-            'zombie': { id: 'zombie', name: '🧟 丧尸', hp: 50, atk: 8, def: 3, exp: 20, gold: 10, passive: false,
+            'zombie': { id: 'zombie', name: '🧟 喪屍', hp: 50, atk: 8, def: 3, exp: 20, gold: 10, passive: false,
                 drops: [{ id: 'rotten_flesh', chance: 0.7, count: 1 }, { id: 'wood_sword', chance: 0.05, count: 1 },
                     { id: 'wood_axe', chance: 0.05, count: 1 }] },
-            'skeleton': { id: 'skeleton', name: '💀 骷髅', hp: 45, atk: 10, def: 2, exp: 25, gold: 15, passive: false,
+            'skeleton': { id: 'skeleton', name: '💀 骷髏', hp: 45, atk: 10, def: 2, exp: 25, gold: 15, passive: false,
                 drops: [{ id: 'bone', chance: 0.7, count: 1 }, { id: 'bow', chance: 0.05, count: 1 }] },
             'spider': { id: 'spider', name: '🕷️ 蜘蛛', hp: 35, atk: 6, def: 1, exp: 12, gold: 0, passive: false,
                 drops: [{ id: 'string', chance: 0.7, count: 1 }, { id: 'spider_eye', chance: 0.1, count: 1 }] },
         };
 
-        // 定义哪些地圖不下雨
+        // 定義哪些地圖不下雨
         const NO_RAIN_MAPS = ['cave', 'ocean', 'river', 'desert'];
 
         // ---------- 地圖類型 ----------
@@ -1235,7 +1235,7 @@
             'cave': { name: '🕳️ 山洞', terrain: 'cave', color: '#3a3a4a', grass: '#4a4a5a' },
             'mountain': { name: '⛰️ 山地', terrain: 'mountain', color: '#6a5a4a', grass: '#7a6a5a' },
             'nether': { name: '🔥 地獄', terrain: 'nether', color: '#4a1a1a', grass: '#5a2a2a' },
-            'end': { name: '🌌 终界', terrain: 'end', color: '#2a2a3a', grass: '#3a3a4a' },
+            'end': { name: '🌌 終界', terrain: 'end', color: '#2a2a3a', grass: '#3a3a4a' },
             'heaven': { name: '☁️ 天堂', terrain: 'heaven', color: '#8ab4d8', grass: '#9ac4e8' }
         };
         const RANDOM_MAP_POOL = ['plain', 'forest', 'desert', 'ice', 'river', 'ocean', 'cave', 'mountain'];
@@ -1298,7 +1298,7 @@
             };
         }
 
-        // ---------- 计算屬性 ----------
+        // ---------- 計算屬性 ----------
         function getPlayerAtk(p) {
             let atk = p.baseAtk;
             if (p.equipment.weapon) atk += ITEMS[p.equipment.weapon]?.atk || 0;
@@ -1590,7 +1590,7 @@
             render();
             updateUI();
             if (mapId === 'ocean' || mapId === 'river') {
-                toast('🌊 進入水域，移動将消耗氧氣 (MP)！', 'warning', 2000);
+                toast('🌊 進入水域，移動將消耗氧氣 (MP)！', 'warning', 2000);
             }
             updateMusic();
             saveGameToLocal();
@@ -1757,7 +1757,7 @@
                     const consume = Math.min(5, p.mp);
                     p.mp -= consume;
                     if (p.mp === 0) {
-                        toast('⚠️ 氧氣耗盡，接下来移動将消耗生命！', 'warning', 2000);
+                        toast('⚠️ 氧氣耗盡，接下来移動將消耗生命！', 'warning', 2000);
                     }
                 } else {
                     p.hp = Math.max(0, p.hp - 1);
@@ -1838,7 +1838,7 @@
                 if (r < 0.2) { addItem('wheat', 1);
                     toast('🌾 找到小麥！', 'success'); } else if (r < 0.4) { addItem('wood', 1);
                     toast('🎋 找到木材！', 'success'); } else if (r < 0.55) { addItem('string', 1);
-                    toast('🧵 找到線！', 'success'); } else { toast('🌿 草叢中没有發現', 'info'); }
+                    toast('🧵 找到線！', 'success'); } else { toast('🌿 草叢中沒有發現', 'info'); }
                 G.map.objects[y][x] = null;
                 render();
                 updateUI();
@@ -1939,7 +1939,7 @@
             }
 
             const enemy = { ...mobData, currentHp: mobData.hp, maxHp: mobData.hp, x, y, mobId };
-            G.battle = { enemy, log: ['⚔️ 戰鬥开始！'], state: 'player_turn', turn: 0, ended: false };
+            G.battle = { enemy, log: ['⚔️ 戰鬥開始！'], state: 'player_turn', turn: 0, ended: false };
             $('battle-modal').classList.add('active');
             renderBattle();
             updateUI();
@@ -2183,12 +2183,12 @@
         function renderWeaponsmith(container) {
             const p = G.player;
 
-            // --- 輔助函數：检查玩家是否拥有某武器（背包或装备中） ---
+            // --- 輔助函數：檢查玩家是否擁有某武器（背包或裝備中） ---
             function hasWeapon(id) {
                 return countItem(id) > 0 || p.equipment.weapon === id;
             }
 
-            // --- 輔助函數：检查材料是否充足 ---
+            // --- 輔助函數：檢查材料是否充足 ---
             function canAfford(cost) {
                 if (!cost) return true;
                 if (cost.wood && countItem('wood') < cost.wood) return false;
@@ -2209,7 +2209,7 @@
                 section.className = 'shop-section';
                 section.innerHTML = `<h3>${sectionTitle}</h3>`;
 
-                // 1. 找到玩家拥有的该類型武器的最高級别
+                // 1. 找到玩家擁有的該類型武器的最高級别
                 let currentLevel = -1;
                 for (let i = 0; i < items.length; i++) {
                     if (hasWeapon(items[i].id)) {
@@ -2219,7 +2219,7 @@
 
                 // 2. 根据當前狀態决定顯示什么
                 if (currentLevel === -1) {
-                    // 没有任何该類型武器 → 顯示購買基礎武器（第0級）
+                    // 沒有任何該類型武器 → 顯示購買基礎武器（第0級）
                     const base = items[0];
                     const cost = { ...base };
                     // 移除 label 和 id，只保留材料字段
@@ -2262,7 +2262,7 @@
                     `;
                     div.querySelector('button').addEventListener('click', () => {
                         if (!canUpgrade) { toast('材料不足！', 'warning'); return; }
-                        if (!hasWeapon(items[currentLevel].id)) { toast('你没有前置武器', 'warning'); return; }
+                        if (!hasWeapon(items[currentLevel].id)) { toast('你沒有前置武器', 'warning'); return; }
                         // 移除舊武器
                         if (p.equipment.weapon === items[currentLevel].id) {
                             p.equipment.weapon = null;
@@ -2280,7 +2280,7 @@
                     });
                     section.appendChild(div);
                 } else {
-                    // 已經拥有最高級 → 顯示已滿級
+                    // 已經擁有最高級 → 顯示已滿級
                     const div = document.createElement('div');
                     div.className = 'shop-item';
                     div.innerHTML = `
@@ -2293,7 +2293,7 @@
                 container.appendChild(section);
             }
 
-            // --- 輔助函數：构建成本字符串 ---
+            // --- 輔助函數：構建成本字符串 ---
             function buildCostString(cost) {
                 let parts = [];
                 if (cost.wood) parts.push(`🎋${cost.wood}`);
@@ -2368,7 +2368,7 @@
         function renderFletcher(container) {
             const p = G.player;
 
-            // 輔助：獲取當前持有的最高級别索引（-1 表示没有）
+            // 輔助：獲取當前持有的最高級别索引（-1 表示沒有）
             function getCurrentLevel(chain) {
                 let level = -1;
                 for (let i = 0; i < chain.length; i++) {
@@ -2379,7 +2379,7 @@
                 return level;
             }
 
-            // 輔助：构建成本字符串
+            // 輔助：構建成本字符串
             function buildCostStr(cost) {
                 let parts = [];
                 if (cost.wood) parts.push(`🎋${cost.wood}`);
@@ -2412,7 +2412,7 @@
 
             const bowLevel = getCurrentLevel(BOW_CHAIN);
             if (bowLevel === -1) {
-                // 没有弓 → 顯示購買木弓
+                // 沒有弓 → 顯示購買木弓
                 const cost = { wood: 3, string: 1, gold: 5 };
                 const canBuy = (countItem('wood') >= cost.wood) &&
                                (countItem('string') >= cost.string) &&
@@ -2481,7 +2481,7 @@
 
             const xbowLevel = getCurrentLevel(CROSSBOW_CHAIN);
             if (xbowLevel === -1) {
-                // 没有弩 → 顯示購買弩
+                // 沒有弩 → 顯示購買弩
                 const cost = { wood: 3, string: 2, copper_ore: 1, gold: 8 };
                 const canBuy = (countItem('wood') >= cost.wood) &&
                                (countItem('string') >= cost.string) &&
@@ -2509,7 +2509,7 @@
                 const fromId = CROSSBOW_CHAIN[xbowLevel];
                 const toId = CROSSBOW_CHAIN[xbowLevel + 1];
                 const cost = CROSSBOW_UPGRADE_COST[xbowLevel];
-                // 检查材料
+                // 檢查材料
                 const canUpgrade = (countItem('wood') >= (cost.wood || 0)) &&
                                    (countItem('string') >= (cost.string || 0)) &&
                                    (cost.copper_ore ? countItem('copper_ore') >= cost.copper_ore : true) &&
@@ -2571,17 +2571,17 @@
             container.appendChild(sec1);
             const sec2 = document.createElement('div');
             sec2.className = 'shop-section';
-            sec2.innerHTML = '<h3>🍞 面包</h3>';
+            sec2.innerHTML = '<h3>🍞 麵包</h3>';
             const div2 = document.createElement('div');
             div2.className = 'shop-item';
             const canBread = (countItem('wheat') >= 3) && (p.gold >= 10);
             div2.innerHTML =
-                `<span>🍞 面包 <span class="cost">🌾3 💰10</span></span><button ${canBread ? '' : 'disabled'}>購買</button>`;
+                `<span>🍞 麵包 <span class="cost">🌾3 💰10</span></span><button ${canBread ? '' : 'disabled'}>購買</button>`;
             div2.querySelector('button').addEventListener('click', () => {
                 if (canBread) { removeItem('wheat', 3);
                     p.gold -= 10;
                     addItem('bread', 1);
-                    toast('✅ 獲得面包', 'success');
+                    toast('✅ 獲得麵包', 'success');
                     $('shopGold').textContent = p.gold;
                     renderFarmer(container);
                     updateUI();
@@ -2674,12 +2674,12 @@
                 { id: 'netherite_pickaxe', label: '獄髓鎬', wood: 1, netherite: 2, gold: 160 },
             ];
 
-            // 輔助：检查是否拥有
+            // 輔助：檢查是否擁有
             function hasTool(id) {
                 return countItem(id) > 0 || Object.values(p.equipment).includes(id);
             }
 
-            // 輔助：检查材料
+            // 輔助：檢查材料
             function canAfford(cost) {
                 if (cost.wood && countItem('wood') < cost.wood) return false;
                 if (cost.stone && countItem('stone') < cost.stone) return false;
@@ -2692,7 +2692,7 @@
                 return true;
             }
 
-            // 輔助：构建成本字符串
+            // 輔助：構建成本字符串
             function buildCostStr(cost) {
                 let parts = [];
                 if (cost.wood) parts.push(`🎋${cost.wood}`);
@@ -2727,7 +2727,7 @@
             }
 
             if (currentLevel === -1) {
-                // 没有任何鎬 → 顯示購買木鎬
+                // 沒有任何鎬 → 顯示購買木鎬
                 const base = toolChain[0];
                 const cost = { wood: base.wood, gold: base.gold };
                 const canBuy = canAfford(cost);
@@ -2764,7 +2764,7 @@
                 `;
                 div.querySelector('button').addEventListener('click', () => {
                     if (!canUpgrade) { toast('材料不足！', 'warning'); return; }
-                    // 移除舊鎬（只從背包移除，工具不装备）
+                    // 移除舊鎬（只從背包移除，工具不裝備）
                     removeItem(fromItem.id, 1);
                     deductCost(cost);
                     addItem(toItem.id, 1);
@@ -2794,7 +2794,7 @@
 
             const goods = [
                 { id: 'coal', name: '煤炭', price: 1 },
-                { id: 'gold_ingot', name: '金锭', price: 5 },
+                { id: 'gold_ingot', name: '金錠', price: 5 },
                 { id: 'diamond', name: '鑽石', price: 20 },
                 { id: 'netherite', name: '獄髓', price: 50 },
                 { id: 'string', name: '線', price: 2 },
@@ -2852,17 +2852,17 @@
                     G.gameTime = 0;
                     refreshMobsOnMap();
                     updateMusic();
-                    toast('🌅 睡了一觉，天亮了！', 'success', 2000); } else { toast(`⛺ 休息恢复 HP+${hpHeal} MP+${mpHeal} SP+${spHeal}`,
+                    toast('🌅 睡了一覺，天亮了！', 'success', 2000); } else { toast(`⛺ 休息恢復 HP+${hpHeal} MP+${mpHeal} SP+${spHeal}`,
                         'info'); }
                 updateUI();
                 render();
                 playSound(400, 0.3);
                 saveGameToLocal();
-            } else { toast('🛏️ 你需要一张床，且坐在床上才能休息！', 'warning'); }
+            } else { toast('🛏️ 你需要一張床，且坐在床上才能休息！', 'warning'); }
         }
 
         function placeBed() {
-            if (countItem('bed') < 1) { toast('你没有床！', 'warning'); return; }
+            if (countItem('bed') < 1) { toast('你沒有床！', 'warning'); return; }
             $('bed-modal').classList.add('active');
             window._bedPlacement = true;
             toast('🛏️ 點擊地圖上的空地放置床', 'info', 3000);
@@ -3065,7 +3065,7 @@
                                 if (mp > 0) p.mp = Math.min(p.maxMp, p.mp + mp);
                                 if (sp > 0) p.sp = Math.min(p.maxSp, p.sp + sp);
                                 removeItem(entry.id, 1);
-                                let msg = `🍴 食用 ${it.name}，恢复 ${heal} HP`;
+                                let msg = `🍴 食用 ${it.name}，恢復 ${heal} HP`;
                                 if (mp > 0) msg += ` +${mp} MP`;
                                 if (sp > 0) msg += ` +${sp} SP`;
                                 toast(msg, 'success');
@@ -3098,7 +3098,7 @@
                 { key: 'chestplate', label: '👕 胸甲', col: 2, row: 2 },
                 { key: 'shield', label: '🛡️ 盾牌', col: 3, row: 2 },
                 { key: 'gloves', label: '🧤 手套', col: 1, row: 3 },
-                { key: 'leggings', label: '👖 护腿', col: 2, row: 3 },
+                { key: 'leggings', label: '👖 護腿', col: 2, row: 3 },
                 { key: 'boots', label: '👢 靴子', col: 2, row: 4 },
             ];
             for (const slot of slots) {
@@ -3121,7 +3121,7 @@
                 return it && (it.type === 'weapon' || it.type === 'shield' || it.type === 'helmet' || it.type ===
                     'chestplate' || it.type === 'leggings' || it.type === 'boots' || it.type === 'gloves');
             });
-            if (equipable.length === 0) { avail.innerHTML = '<span style="color:#555;">没有可装备的物品</span>'; } else {
+            if (equipable.length === 0) { avail.innerHTML = '<span style="color:#555;">沒有可裝備的物品</span>'; } else {
                 for (const entry of equipable) {
                     const it = getItemDisplay(entry.id);
                     const span = document.createElement('span');
@@ -3146,7 +3146,7 @@
                 p.equipment[slot] = null;
                 addItem(oldId, 1); }
             if (removeItem(id, 1)) { p.equipment[slot] = id;
-                toast(`✅ 装备 ${item.name}`, 'success');
+                toast(`✅ 裝備 ${item.name}`, 'success');
                 renderEquipment();
                 updateUI();
                 checkAchievements();
@@ -3171,7 +3171,7 @@
             const p = G.player;
             const list = $('achievement-list');
             list.innerHTML = '';
-            if (p.achievements.length === 0) { list.innerHTML = '<div style="color:#666;padding:12px;">还没有解鎖成就</div>'; return; }
+            if (p.achievements.length === 0) { list.innerHTML = '<div style="color:#666;padding:12px;">還沒有解鎖成就</div>'; return; }
             const achMap = {
                 'first_kill': '🏆 初次獵殺',
                 'hunter': '🏆 獵人',
@@ -3198,11 +3198,11 @@
         function showStatus() {
             const p = G.player;
             const msg =
-                `🧒 ${p.name}  Lv.${p.level}\n❤️ HP ${Math.floor(p.hp)}/${p.maxHp}  🔮 MP ${Math.floor(p.mp)}/${p.maxMp}  ⚡ SP ${Math.floor(p.sp)}/${p.maxSp}\n⚔️ 攻擊 ${getPlayerAtk(p)}  🛡️ 防御 ${getPlayerDef(p)}\n💰 金幣 ${p.gold}  ⭐ 經驗 ${Math.floor(p.exp)}/${getPlayerMaxExp(p)}\n🗡️ 擊殺 ${p.totalKills}  🪵 採集 ${p.totalCollects}  🚶 移動 ${p.totalMoves}\n🗺️ 探索區域: ${p.discoveredMaps.length} 个`;
+                `🧒 ${p.name}  Lv.${p.level}\n❤️ HP ${Math.floor(p.hp)}/${p.maxHp}  🔮 MP ${Math.floor(p.mp)}/${p.maxMp}  ⚡ SP ${Math.floor(p.sp)}/${p.maxSp}\n⚔️ 攻擊 ${getPlayerAtk(p)}  🛡️ 防禦 ${getPlayerDef(p)}\n💰 金幣 ${p.gold}  ⭐ 經驗 ${Math.floor(p.exp)}/${getPlayerMaxExp(p)}\n🗡️ 擊殺 ${p.totalKills}  🪵 採集 ${p.totalCollects}  🚶 移動 ${p.totalMoves}\n🗺️ 探索區域: ${p.discoveredMaps.length} 个`;
             toast(msg, 'info', 5000);
         }
 
-        // ---------- 存档 ----------
+        // ---------- 存檔 ----------
         function saveGameToLocal() {
             if (!G.player) return;
             try {
@@ -3238,7 +3238,7 @@
         function clearLocalSave() { localStorage.removeItem('blockLegendSave'); }
 
         function saveGame() {
-            if (!G.player) { toast('❌ 没有游戲進度可储存', 'error'); return; }
+            if (!G.player) { toast('❌ 沒有游戲進度可儲存', 'error'); return; }
             try {
                 const data = {
                     player: G.player,
@@ -3260,17 +3260,17 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                const fileName = `方块传说_存档_${G.player.name}_${new Date().toISOString().slice(0,10)}.txt`;
+                const fileName = `方塊傳說_存檔_${G.player.name}_${new Date().toISOString().slice(0,10)}.txt`;
                 a.download = fileName;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                toast('💾 存档已导出為 .txt 档案！', 'success');
+                toast('💾 存檔已尋出為 .txt 檔案！', 'success');
                 saveGameToLocal();
             } catch (e) {
                 console.error(e);
-                toast('❌ 储存失敗: ' + e.message, 'error');
+                toast('❌ 儲存失敗: ' + e.message, 'error');
             }
         }
 
@@ -3286,7 +3286,7 @@
                 try {
                     const json = ev.target.result;
                     const data = JSON.parse(json);
-                    if (!data.player || !data.maps) { toast('❌ 無效的存档档案', 'error'); return; }
+                    if (!data.player || !data.maps) { toast('❌ 無效的存檔檔案', 'error'); return; }
                     G.player = data.player;
                     G.gameTime = data.gameTime || 0;
                     G.isNight = data.isNight || false;
@@ -3311,20 +3311,20 @@
                     if (G.weather === 'rain' || G.weather === 'thunder') startRainSound();
                     else stopRainSound();
                     saveGameToLocal();
-                    toast('📁 存档载入成功！', 'success');
+                    toast('📁 存檔載入成功！', 'success');
                     fileInput.value = '';
                 } catch (err) {
                     console.error(err);
-                    toast('❌ 载入失敗: ' + err.message, 'error');
+                    toast('❌ 載入失敗: ' + err.message, 'error');
                     fileInput.value = '';
                 }
             };
-            reader.onerror = function() { toast('❌ 读取档案失敗', 'error');
+            reader.onerror = function() { toast('❌ 讀取檔案失敗', 'error');
                 fileInput.value = ''; };
             reader.readAsText(file);
         });
 
-        // ---------- 游戲循环 ----------
+        // ---------- 游戲循環 ----------
         function gameLoop() {
             const p = G.player;
             if (!p || G.gameOver) { requestAnimationFrame(gameLoop); return; }
@@ -3382,7 +3382,7 @@
             render();
         }
 
-        // ---------- 键盘 ----------
+        // ---------- 鍵盤 ----------
         document.addEventListener('keydown', (e) => {
             const key = e.key;
             if (G.gameOver || G.battle) return;
@@ -3422,7 +3422,7 @@
                 modal.classList.add('active'); }
         }
 
-        // ---------- 启動 ----------
+        // ---------- 啟動 ----------
         let _savedData = null;
 
         function startGameFromCover() {
@@ -3463,7 +3463,7 @@
                 updateUI();
                 render();
                 saveGameToLocal();
-                toast('🌍 欢迎！方向键移動 | R休息 | I背包 | E装备', 'info', 3000);
+                toast('🌍 歡迎！方向鍵移動 | R休息 | I背包 | E裝備', 'info', 3000);
             }
             cover.style.display = 'none';
             game.style.display = 'flex';
@@ -3502,14 +3502,14 @@
             refreshMobsOnMap();
             if (G.weather === 'rain' || G.weather === 'thunder') startRainSound();
             else stopRainSound();
-            toast('📁 存档载入成功！', 'success');
+            toast('📁 存檔載入成功！', 'success');
         }
 
         // ---------- 事件绑定 ----------
         $('btnStartGame').addEventListener('click', startGameFromCover);
         $('playerNameInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') startGameFromCover(); });
         $('btnResetGame').addEventListener('click', () => {
-            if (confirm('确定要重新开始游戲吗？所有進度将遗失！')) {
+            if (confirm('確定要重新開始游戲嗎？所有進度將遺失！')) {
                 localStorage.removeItem('blockLegendSave');
                 _savedData = null;
                 G = {
@@ -3565,11 +3565,11 @@
                 _coverMusicStarted = true; }
         }, { once: false });
 
-        // 戰鬥按钮
+        // 戰鬥按鈕
         $('battleAttackBtn').addEventListener('click', battleAttack);
         $('battleFleeBtn').addEventListener('click', battleFlee);
         $('battleCloseBtn').addEventListener('click', () => {
-            if (G.battle && !G.battle.ended) { if (confirm('戰鬥中离开视為逃跑，确定吗？')) battleFlee(); } else { $(
+            if (G.battle && !G.battle.ended) { if (confirm('戰鬥中離開視為逃跑，確定嗎？')) battleFlee(); } else { $(
                     'battle-modal').classList.remove('active');
                 G.battle = null;
                 updateMusic(); }
@@ -3599,7 +3599,7 @@
             el.addEventListener('click', (e) => {
                 if (e.target === el) {
                     if (el.id === 'battle-modal' && G.battle && !G.battle.ended) {
-                        if (confirm('戰鬥中离开视為逃跑，确定吗？')) battleFlee();
+                        if (confirm('戰鬥中離開視為逃跑，確定嗎？')) battleFlee();
                     } else {
                         el.classList.remove('active');
                         if (el.id === 'battle-modal') { G.battle = null;
@@ -3642,8 +3642,8 @@
                             render();
                             updateUI();
                             saveGameToLocal();
-                        } else { toast('你没有床！', 'warning'); }
-                    } else { toast('该位置無法放置床', 'warning'); }
+                        } else { toast('你沒有床！', 'warning'); }
+                    } else { toast('該位置無法放置床', 'warning'); }
                 }
                 return;
             }
@@ -3693,11 +3693,11 @@
                 if (cover.style.display !== 'none') { playMusic('title');
                     _coverMusicStarted = true; } else updateMusic();
                 if (G.weather === 'rain' || G.weather === 'thunder') startRainSound();
-                toast('🔊 音乐已开启', 'info');
+                toast('🔊 音樂已開啟', 'info');
             } else {
                 stopAllMusic();
                 stopRainSound();
-                toast('🔇 音乐已关闭', 'info');
+                toast('🔇 音樂已關閉', 'info');
             }
         });
         $('fullscreenToggle').addEventListener('click', () => {
@@ -3712,7 +3712,7 @@
                 if (raw) {
                     const data = JSON.parse(raw);
                     if (data && data.player) { _savedData = data;
-                        console.log('✅ 發現存档，點擊"展开冒險"即可继续'); }
+                        console.log('✅ 發現存檔，點擊"展開冒險"即可继续'); }
                 }
             } catch (e) {}
             setTimeout(() => {
@@ -3724,9 +3724,9 @@
             }, 500);
         });
 
-        console.log('⛏️ 方块传说已载入！');
-        console.log('🎮 操作: 方向键移動 | R休息 | I背包 | E装备');
-        console.log('📦 新增: 弓/弩升級鏈、魚類、鸡/鸭/蜜蜂/蜘蛛、寶箱/蜘蛛網');
+        console.log('⛏️ 方塊傳說已載入！');
+        console.log('🎮 操作: 方向鍵移動 | R休息 | I背包 | E裝備');
+        console.log('📦 新增: 弓/弩升級鏈、魚類、雞/鴨/蜜蜂/蜘蛛、寶箱/蜘蛛網');
         console.log('🌧️ 天氣: 洞穴/海洋/河流/沙漠不下雨');
         console.log('🔄 被動生物日夜不消失');
     </script>
