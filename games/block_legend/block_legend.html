@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- 音频资源（请替换为真实MP3路径） -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <audio id="music-title" src="Block Legend - The Crystal Spire.mp3" preload="auto"></audio>
     <audio id="music-day" src="Block Legend - Dawn Craft.mp3" preload="auto"></audio>
     <audio id="music-night" src="Block Legend - No Sleeping.mp3" preload="auto"></audio>
     <audio id="music-battle" src="Block Legend - Epic Fight.mp3" preload="auto"></audio>
-    <title>⛏️方塊傳說 · 終極版</title>
+    <title>⛏️方塊傳說</title>
     <style>
+        /* 样式完全保留原有，未作改動 */
         * {
             margin: 0;
             padding: 0;
@@ -769,7 +769,7 @@
             <div style="margin-top:16px;font-size:13px;color:#5a7a9a;z-index:1;letter-spacing:1px;">🎵 點擊封面任意處播放音樂</div>
         </div>
 
-        <!-- 游戏界面 -->
+        <!-- 游戲界面 -->
         <div id="game">
             <div id="status-bar">
                 <span class="player-name" id="pName">史蒂夫</span>
@@ -788,7 +788,7 @@
                 <canvas id="gameCanvas" width="608" height="608"></canvas>
                 <canvas id="rain-canvas" width="608" height="608"></canvas>
                 <div id="gameover-overlay" class="gameover-overlay hidden">💀 GAME OVER</div>
-                <!-- 模态框 -->
+                <!-- 模態框 -->
                 <div class="modal-overlay" id="battle-modal">
                     <div class="modal-box">
                         <button class="close-btn" id="battleCloseBtn" style="display:none;">✕</button>
@@ -890,10 +890,19 @@
 
     <script>
         // ============================================================
-        //  ⛏️ 方塊傳說 · 終極版 (完整修復版)
-        //  修复：传送落点方向、首次进入地图落点、启动流程
-        //  新增：儲存/載入 .txt 檔、UI 穩定顯示、時間 HH:MM:SS
-        //  修复：进入地图后正确切换音乐 (Day/Night)
+        //  ⛏️ 方塊傳說 · 終極版 (完整修改版)
+        //  修改内容：
+        //  1. 牛/羊/猪/马/骆驼不掉錢 (gold=0)
+        //  2. 木制工具/装备/武器不用金錢，只需木材 (商店/合成调整)
+        //  3. 玩家踩進草搜寻后，草会消失
+        //  4. 制箭匠也賣弩，弓箭/弩升級鏈
+        //  5. 丧尸低机率掉木劍/木斧，骷髅低机率掉木弓
+        //  6. 海洋/河流新增魚類；平原/森林/山地新增鸡/鸭/蜜蜂/蜘蛛
+        //  7. 洞穴新增蜘蛛(全日)、寶箱、蜘蛛網
+        //  8. 魚肉/鸡肉/鸭肉回HP+SP，蜜糖回HP+MP+SP
+        //  9. 洞穴/海洋/河流/沙漠不下雨
+        // 10. 下雨/雷雨時魚類/怪物生成翻倍
+        // 11. 日夜交替時被動生物不消失/刷新
         // ============================================================
 
         const $ = id => document.getElementById(id);
@@ -908,7 +917,6 @@
         const gameoverOverlay = $('gameover-overlay');
         const fileInput = $('fileInput');
 
-        // ---------- 工具 ----------
         function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
         function randf(min, max) { return Math.random() * (max - min) + min; }
@@ -923,7 +931,7 @@
             _toastTimer = setTimeout(() => toastEl.classList.remove('show'), duration);
         }
 
-        // ---------- 音频系统 ----------
+        // ---------- 音频 ----------
         let audioCtx = null;
         let musicEnabled = true;
         let currentMusicEl = null;
@@ -932,28 +940,17 @@
         let _coverMusicStarted = false;
 
         function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new(window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume().catch(e => console.log('音频上下文恢复失败:', e));
-            }
-            if (cover.style.display !== 'none' && !_coverMusicStarted) {
-                playMusic('title');
-                _coverMusicStarted = true;
-            }
+            if (!audioCtx) { audioCtx = new(window.AudioContext || window.webkitAudioContext)(); }
+            if (audioCtx.state === 'suspended') { audioCtx.resume().catch(e => console.log('音频恢复失敗:', e)); }
+            if (cover.style.display !== 'none' && !_coverMusicStarted) { playMusic('title');
+                _coverMusicStarted = true; }
         }
 
         function playMusic(theme) {
-            if (!musicEnabled) {
-                if (currentMusicEl) { currentMusicEl.pause();
-                    currentMusicEl = null; }
-                return;
-            }
-            if (audioCtx && audioCtx.state === 'suspended') {
-                audioCtx.resume().catch(e => console.warn('AudioContext resume failed:', e));
-            }
-
+            if (!musicEnabled) { if (currentMusicEl) { currentMusicEl.pause();
+                    currentMusicEl = null; } return; }
+            if (audioCtx && audioCtx.state === 'suspended') { audioCtx.resume().catch(e => console.warn('AudioContext resume failed:',
+                    e)); }
             let el = null;
             if (theme === 'title') el = document.getElementById('music-title');
             else if (theme === 'day') el = document.getElementById('music-day');
@@ -961,45 +958,27 @@
             else if (theme === 'battle') el = document.getElementById('music-battle');
             if (!el) return;
             if (currentMusicEl === el && !el.paused) return;
-
             if (currentMusicEl) { currentMusicEl.pause();
                 currentMusicEl = null; }
-
             el.currentTime = 0;
             el.loop = true;
             el.volume = 1;
-
-            const attemptPlay = () => {
-                el.play().then(() => {
-                    currentMusicEl = el;
-                }).catch(err => {
-                    console.warn('播放音樂失敗，嘗試重新啟動 AudioContext:', err);
-                    if (audioCtx && audioCtx.state === 'suspended') {
-                        audioCtx.resume().then(() => {
-                            el.play().then(() => {
-                                currentMusicEl = el;
-                            }).catch(e => console.error('重試播放仍然失敗:', e));
-                        }).catch(e => console.error('AudioContext resume 失敗:', e));
-                    }
-                });
-            };
-            attemptPlay();
+            el.play().then(() => { currentMusicEl = el; }).catch(err => {
+                console.warn('播放音乐失敗:', err);
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    audioCtx.resume().then(() => { el.play().then(() => { currentMusicEl = el; }).catch(e => console.error(
+                            '重试失敗:', e)); }).catch(e => console.error('resume失敗:', e));
+                }
+            });
         }
 
         function stopAllMusic() {
-			const ids = ['music-title', 'music-day', 'music-night', 'music-battle'];
-			for (const id of ids) {
-				const el = document.getElementById(id);
-				if (el) {
-					el.pause();
-					el.currentTime = 0;
-				}
-			}
-			if (currentMusicEl) {
-				currentMusicEl.pause();
-				currentMusicEl = null;
-			}
-		}
+            const ids = ['music-title', 'music-day', 'music-night', 'music-battle'];
+            for (const id of ids) { const el = document.getElementById(id); if (el) { el.pause();
+                    el.currentTime = 0; } }
+            if (currentMusicEl) { currentMusicEl.pause();
+                currentMusicEl = null; }
+        }
 
         function startRainSound() {
             if (!audioCtx || !musicEnabled) return;
@@ -1017,16 +996,13 @@
                 rainNoiseNode.connect(rainGainNode);
                 rainGainNode.connect(audioCtx.destination);
                 rainNoiseNode.start();
-            } catch (e) { console.log('雨声启动失败:', e); }
+            } catch (e) { console.log('雨声启動失敗:', e); }
         }
 
         function stopRainSound() {
-            try {
-                if (rainNoiseNode) { rainNoiseNode.stop();
-                    rainNoiseNode = null; }
-                if (rainGainNode) { rainGainNode.disconnect();
-                    rainGainNode = null; }
-            } catch (e) {}
+            try { if (rainNoiseNode) { rainNoiseNode.stop();
+                    rainNoiseNode = null; } if (rainGainNode) { rainGainNode.disconnect();
+                    rainGainNode = null; } } catch (e) {}
         }
 
         function playThunder() {
@@ -1063,15 +1039,10 @@
         }
 
         function updateMusic() {
-            if (!musicEnabled) {
-                if (currentMusicEl) { currentMusicEl.pause();
-                    currentMusicEl = null; }
-                return;
-            }
-            if (audioCtx && audioCtx.state === 'suspended') {
-                audioCtx.resume().catch(e => console.warn('AudioContext resume failed:', e));
-            }
-            // 封面未隐藏时，不播放地图音乐（由封面音乐控制）
+            if (!musicEnabled) { if (currentMusicEl) { currentMusicEl.pause();
+                    currentMusicEl = null; } return; }
+            if (audioCtx && audioCtx.state === 'suspended') { audioCtx.resume().catch(e => console.warn('AudioContext resume failed:',
+                    e)); }
             if (cover.style.display !== 'none') return;
             if (G.battle) { playMusic('battle'); return; }
             if (G.isNight || G.weather === 'rain' || G.weather === 'thunder') {
@@ -1091,31 +1062,29 @@
             'copper_ore': { id: 'copper_ore', name: '銅礦', icon: '🟠', type: 'resource', desc: '銅礦石' },
             'iron_ore': { id: 'iron_ore', name: '鐵礦', icon: '🔩', type: 'resource', desc: '鐵礦石' },
             'gold_ore': { id: 'gold_ore', name: '金礦', icon: '🟡', type: 'resource', desc: '金礦石' },
-            'diamond': { id: 'diamond', name: '鑽石', icon: '💎', type: 'resource', desc: '珍貴寶石' },
-            'netherite': { id: 'netherite', name: '獄髓', icon: '⚫', type: 'resource', desc: '遠古合金' },
+            'diamond': { id: 'diamond', name: '鑽石', icon: '💎', type: 'resource', desc: '珍贵寶石' },
+            'netherite': { id: 'netherite', name: '獄髓', icon: '⚫', type: 'resource', desc: '远古合金' },
             'coal': { id: 'coal', name: '煤炭', icon: '⚫', type: 'resource', desc: '燃料' },
-            'fur': { id: 'fur', name: '毛皮', icon: '🧶', type: 'resource', desc: '從動物獲得' },
             'leather': { id: 'leather', name: '皮革', icon: '🟫', type: 'resource', desc: '從牛掉落' },
-            'gold_ingot': { id: 'gold_ingot', name: '金錠', icon: '🥇', type: 'resource', desc: '純金' },
-            'raw_pork': { id: 'raw_pork', name: '生豬肉', icon: '🥩', type: 'food', heal: 8, desc: '食用恢復8HP' },
-            'raw_beef': { id: 'raw_beef', name: '生牛肉', icon: '🥩', type: 'food', heal: 10, desc: '食用恢復10HP' },
-            'raw_mutton': { id: 'raw_mutton', name: '生羊肉', icon: '🥩', type: 'food', heal: 6, desc: '食用恢復6HP' },
-            'horsemeat': { id: 'horsemeat', name: '馬肉', icon: '🥩', type: 'food', heal: 8, desc: '食用恢復8HP' },
-            'camelmeat': { id: 'camelmeat', name: '駱駝肉', icon: '🥩', type: 'food', heal: 8, desc: '食用恢復8HP' },
+            'gold_ingot': { id: 'gold_ingot', name: '金锭', icon: '🥇', type: 'resource', desc: '纯金' },
+            'raw_pork': { id: 'raw_pork', name: '生猪肉', icon: '🥩', type: 'food', heal: 8, sp: 3, desc: '食用恢复8HP+3SP' },
+            'raw_beef': { id: 'raw_beef', name: '生牛肉', icon: '🥩', type: 'food', heal: 10, sp: 4, desc: '食用恢复10HP+4SP' },
+            'raw_mutton': { id: 'raw_mutton', name: '生羊肉', icon: '🥩', type: 'food', heal: 6, sp: 2, desc: '食用恢复6HP+2SP' },
+            'horsemeat': { id: 'horsemeat', name: '马肉', icon: '🥩', type: 'food', heal: 8, sp: 3, desc: '食用恢复8HP+3SP' },
+            'camelmeat': { id: 'camelmeat', name: '骆驼肉', icon: '🥩', type: 'food', heal: 8, sp: 3, desc: '食用恢复8HP+3SP' },
             'wool': { id: 'wool', name: '羊毛', icon: '🧶', type: 'resource', desc: '從羊掉落' },
-            'bone': { id: 'bone', name: '骨頭', icon: '🦴', type: 'resource', desc: '從骷髏掉落' },
-            'rotten_flesh': { id: 'rotten_flesh', name: '腐肉', icon: '🥓', type: 'resource', desc: '從喪屍掉落' },
-            'bed': { id: 'bed', name: '床', icon: '🛏️', type: 'bed', desc: '放置後可在夜晚休息' },
+            'bone': { id: 'bone', name: '骨頭', icon: '🦴', type: 'resource', desc: '從骷髅掉落' },
+            'rotten_flesh': { id: 'rotten_flesh', name: '腐肉', icon: '🥓', type: 'resource', desc: '從丧尸掉落' },
+            'bed': { id: 'bed', name: '床', icon: '🛏️', type: 'bed', desc: '放置后可在夜晚休息' },
             'wheat': { id: 'wheat', name: '小麥', icon: '🌾', type: 'resource', desc: '農作物' },
-            'bread': { id: 'bread', name: '麵包', icon: '🍞', type: 'food', heal: 4, desc: '食用恢復4HP+4SP' },
+            'bread': { id: 'bread', name: '面包', icon: '🍞', type: 'food', heal: 4, sp: 4, desc: '食用恢复4HP+4SP' },
             'wood_sword': { id: 'wood_sword', name: '木劍', icon: '🗡️', type: 'weapon', atk: 3, desc: '攻擊+3' },
             'stone_sword': { id: 'stone_sword', name: '石劍', icon: '🗡️', type: 'weapon', atk: 5, desc: '攻擊+5' },
             'copper_sword': { id: 'copper_sword', name: '銅劍', icon: '⚔️', type: 'weapon', atk: 7, desc: '攻擊+7' },
             'iron_sword': { id: 'iron_sword', name: '鐵劍', icon: '⚔️', type: 'weapon', atk: 9, desc: '攻擊+9' },
             'gold_sword': { id: 'gold_sword', name: '金劍', icon: '⚔️', type: 'weapon', atk: 11, desc: '攻擊+11' },
             'diamond_sword': { id: 'diamond_sword', name: '鑽石劍', icon: '⚔️', type: 'weapon', atk: 14, desc: '攻擊+14' },
-            'netherite_sword': { id: 'netherite_sword', name: '獄髓劍', icon: '⚔️', type: 'weapon', atk: 17,
-            desc: '攻擊+17' },
+            'netherite_sword': { id: 'netherite_sword', name: '獄髓劍', icon: '⚔️', type: 'weapon', atk: 17, desc: '攻擊+17' },
             'wood_axe': { id: 'wood_axe', name: '木斧', icon: '🪓', type: 'weapon', atk: 4, tool: 'axe', level: 1,
                 desc: '攻擊+4, 伐木Lv1' },
             'stone_axe': { id: 'stone_axe', name: '石斧', icon: '🪓', type: 'weapon', atk: 6, tool: 'axe', level: 2,
@@ -1126,8 +1095,8 @@
                 desc: '攻擊+10, 伐木Lv4' },
             'gold_axe': { id: 'gold_axe', name: '金斧', icon: '🪓', type: 'weapon', atk: 12, tool: 'axe', level: 5,
                 desc: '攻擊+12, 伐木Lv5' },
-            'diamond_axe': { id: 'diamond_axe', name: '鑽石斧', icon: '🪓', type: 'weapon', atk: 15, tool: 'axe',
-                level: 6, desc: '攻擊+15, 伐木Lv6' },
+            'diamond_axe': { id: 'diamond_axe', name: '鑽石斧', icon: '🪓', type: 'weapon', atk: 15, tool: 'axe', level: 6,
+                desc: '攻擊+15, 伐木Lv6' },
             'netherite_axe': { id: 'netherite_axe', name: '獄髓斧', icon: '🪓', type: 'weapon', atk: 18, tool: 'axe',
                 level: 7, desc: '攻擊+18, 伐木Lv7' },
             'wood_katana': { id: 'wood_katana', name: '木打刀', icon: '🔪', type: 'weapon', atk: 3, desc: '攻擊+3' },
@@ -1135,8 +1104,7 @@
             'copper_katana': { id: 'copper_katana', name: '銅打刀', icon: '🔪', type: 'weapon', atk: 7, desc: '攻擊+7' },
             'iron_katana': { id: 'iron_katana', name: '鐵打刀', icon: '🔪', type: 'weapon', atk: 9, desc: '攻擊+9' },
             'gold_katana': { id: 'gold_katana', name: '金打刀', icon: '🔪', type: 'weapon', atk: 11, desc: '攻擊+11' },
-            'diamond_katana': { id: 'diamond_katana', name: '鑽石打刀', icon: '🔪', type: 'weapon', atk: 14,
-            desc: '攻擊+14' },
+            'diamond_katana': { id: 'diamond_katana', name: '鑽石打刀', icon: '🔪', type: 'weapon', atk: 14, desc: '攻擊+14' },
             'netherite_katana': { id: 'netherite_katana', name: '獄髓打刀', icon: '🔪', type: 'weapon', atk: 17,
                 desc: '攻擊+17' },
             'murasame': { id: 'murasame', name: '村雨', icon: '⚡', type: 'weapon', atk: 20, desc: '攻擊+20' },
@@ -1145,94 +1113,134 @@
                 desc: '採礦Lv1' },
             'stone_pickaxe': { id: 'stone_pickaxe', name: '石鎬', icon: '⛏️', type: 'tool', tool: 'pickaxe', level: 2,
                 desc: '採礦Lv2' },
-            'copper_pickaxe': { id: 'copper_pickaxe', name: '銅鎬', icon: '⛏️', type: 'tool', tool: 'pickaxe',
-                level: 3, desc: '採礦Lv3' },
+            'copper_pickaxe': { id: 'copper_pickaxe', name: '銅鎬', icon: '⛏️', type: 'tool', tool: 'pickaxe', level: 3,
+                desc: '採礦Lv3' },
             'iron_pickaxe': { id: 'iron_pickaxe', name: '鐵鎬', icon: '⛏️', type: 'tool', tool: 'pickaxe', level: 4,
                 desc: '採礦Lv4' },
             'gold_pickaxe': { id: 'gold_pickaxe', name: '金鎬', icon: '⛏️', type: 'tool', tool: 'pickaxe', level: 5,
                 desc: '採礦Lv5' },
-            'diamond_pickaxe': { id: 'diamond_pickaxe', name: '鑽石鎬', icon: '⛏️', type: 'tool', tool: 'pickaxe',
-                level: 6, desc: '採礦Lv6' },
+            'diamond_pickaxe': { id: 'diamond_pickaxe', name: '鑽石鎬', icon: '⛏️', type: 'tool', tool: 'pickaxe', level: 6,
+                desc: '採礦Lv6' },
             'netherite_pickaxe': { id: 'netherite_pickaxe', name: '獄髓鎬', icon: '⛏️', type: 'tool', tool: 'pickaxe',
                 level: 7, desc: '採礦Lv7' },
-            'leather_helmet': { id: 'leather_helmet', name: '皮帽', icon: '⛑️', type: 'helmet', def: 1, desc: '防禦+1' },
+            'leather_helmet': { id: 'leather_helmet', name: '皮帽', icon: '⛑️', type: 'helmet', def: 1, desc: '防御+1' },
             'leather_chestplate': { id: 'leather_chestplate', name: '皮甲', icon: '👕', type: 'chestplate', def: 2,
-                desc: '防禦+2' },
-            'leather_gloves': { id: 'leather_gloves', name: '皮手套', icon: '🧤', type: 'gloves', def: 1, desc: '防禦+1' },
-            'leather_leggings': { id: 'leather_leggings', name: '皮褲', icon: '👖', type: 'leggings', def: 2,
-                desc: '防禦+2' },
-            'leather_boots': { id: 'leather_boots', name: '皮靴', icon: '👢', type: 'boots', def: 1, desc: '防禦+1' },
-            'wood_shield': { id: 'wood_shield', name: '木盾', icon: '🛡️', type: 'shield', def: 2, desc: '防禦+2' },
-            'bow': { id: 'bow', name: '弓箭', icon: '🏹', type: 'weapon', atk: 4, desc: '攻擊+4（遠程）' },
+                desc: '防御+2' },
+            'leather_gloves': { id: 'leather_gloves', name: '皮手套', icon: '🧤', type: 'gloves', def: 1, desc: '防御+1' },
+            'leather_leggings': { id: 'leather_leggings', name: '皮裤', icon: '👖', type: 'leggings', def: 2,
+                desc: '防御+2' },
+            'leather_boots': { id: 'leather_boots', name: '皮靴', icon: '👢', type: 'boots', def: 1, desc: '防御+1' },
+            'wood_shield': { id: 'wood_shield', name: '木盾', icon: '🛡️', type: 'shield', def: 2, desc: '防御+2' },
+            // ----- 新增弓系 -----
+            'bow': { id: 'bow', name: '弓箭', icon: '🏹', type: 'weapon', atk: 4, desc: '攻擊+4（远程）' },
+            'short_bow': { id: 'short_bow', name: '短弓', icon: '🏹', type: 'weapon', atk: 6, desc: '攻擊+6' },
+            'long_bow': { id: 'long_bow', name: '长弓', icon: '🏹', type: 'weapon', atk: 8, desc: '攻擊+8' },
+            'hunt_bow': { id: 'hunt_bow', name: '獵弓', icon: '🏹', type: 'weapon', atk: 11, desc: '攻擊+11' },
+            'elf_bow': { id: 'elf_bow', name: '精灵弓', icon: '🏹', type: 'weapon', atk: 14, desc: '攻擊+14' },
+            // ----- 新增弩系 -----
+            'crossbow': { id: 'crossbow', name: '弩', icon: '🎯', type: 'weapon', atk: 5, desc: '攻擊+5' },
+            'light_crossbow': { id: 'light_crossbow', name: '輕弩', icon: '🎯', type: 'weapon', atk: 8, desc: '攻擊+8' },
+            'heavy_crossbow': { id: 'heavy_crossbow', name: '十字弩', icon: '🎯', type: 'weapon', atk: 11, desc: '攻擊+11' },
+            'heavy_crossbow2': { id: 'heavy_crossbow2', name: '重弩', icon: '🎯', type: 'weapon', atk: 14, desc: '攻擊+14' },
+            'zhuge': { id: 'zhuge', name: '諸葛連弩', icon: '🎯', type: 'weapon', atk: 18, desc: '攻擊+18' },
+            // ----- 新增食物 -----
+            'raw_fish': { id: 'raw_fish', name: '魚肉', icon: '🐟', type: 'food', heal: 8, sp: 5, desc: '食用恢复8HP+5SP' },
+            'raw_chicken': { id: 'raw_chicken', name: '鸡肉', icon: '🍗', type: 'food', heal: 6, sp: 4, desc: '食用恢复6HP+4SP' },
+            'raw_duck': { id: 'raw_duck', name: '鸭肉', icon: '🍗', type: 'food', heal: 7, sp: 4, desc: '食用恢复7HP+4SP' },
+            'honey': { id: 'honey', name: '蜜糖', icon: '🍯', type: 'food', heal: 4, mp: 6, sp: 4, desc: '食用恢复4HP+6MP+4SP' },
+            // ----- 新增材料 -----
+            'string': { id: 'string', name: '線', icon: '🧵', type: 'resource', desc: '從蜘蛛獲得' },
+            'spider_eye': { id: 'spider_eye', name: '蜘蛛眼', icon: '👁️', type: 'resource', desc: '從蜘蛛掉落' },
+            'feather': { id: 'feather', name: '羽毛', icon: '🕊️', type: 'resource', desc: '從鸡/鸭掉落' },
+            'ink_sac': { id: 'ink_sac', name: '墨囊', icon: '✒️', type: 'resource', desc: '從墨魚掉落' },
         };
 
-        const UPGRADE_CHAINS = {
-            sword: ['wood_sword', 'stone_sword', 'copper_sword', 'iron_sword', 'gold_sword', 'diamond_sword',
-                'netherite_sword'
-            ],
-            axe: ['wood_axe', 'stone_axe', 'copper_axe', 'iron_axe', 'gold_axe', 'diamond_axe', 'netherite_axe'],
-            katana: ['wood_katana', 'stone_katana', 'copper_katana', 'iron_katana', 'gold_katana', 'diamond_katana',
-                'netherite_katana', 'murasame', 'muramasa'
-            ],
-            pickaxe: ['wood_pickaxe', 'stone_pickaxe', 'copper_pickaxe', 'iron_pickaxe', 'gold_pickaxe',
-                'diamond_pickaxe', 'netherite_pickaxe'
-            ]
-        };
-        const UPGRADE_COST = {
-            sword: [{ stone: 1, gold: 5 }, { copper_ore: 1, gold: 10 }, { iron_ore: 1, gold: 20 }, { gold_ore: 1,
-                    gold: 40 }, { diamond: 1, gold: 80 }, { netherite: 1, gold: 160 }],
-            axe: [{ stone: 1, gold: 5 }, { copper_ore: 1, gold: 10 }, { iron_ore: 1, gold: 20 }, { gold_ore: 1,
-                    gold: 40 }, { diamond: 1, gold: 80 }, { netherite: 1, gold: 160 }],
-            katana: [{ stone: 1, gold: 5 }, { copper_ore: 1, gold: 10 }, { iron_ore: 1, gold: 20 }, { gold_ore: 1,
-                    gold: 40 }, { diamond: 1, gold: 80 }, { netherite: 1, gold: 160 }, { gold: 500,
-                    netherite: 2 }, { gold: 1000, diamond: 3 }],
-            pickaxe: [{ stone: 1, gold: 5 }, { copper_ore: 1, gold: 10 }, { iron_ore: 1, gold: 20 }, { gold_ore: 1,
-                    gold: 40 }, { diamond: 1, gold: 80 }, { netherite: 1, gold: 160 }]
-        };
+        // 弓升級鏈 (木弓→短弓→长弓→獵弓→精灵弓)
+        const BOW_CHAIN = ['bow', 'short_bow', 'long_bow', 'hunt_bow', 'elf_bow'];
+        // 弩升級鏈 (弩→輕弩→十字弩→重弩→諸葛連弩)
+        const CROSSBOW_CHAIN = ['crossbow', 'light_crossbow', 'heavy_crossbow', 'heavy_crossbow2', 'zhuge'];
 
-        function getWeaponInfo(id) {
-            for (const [type, chain] of Object.entries(UPGRADE_CHAINS)) {
-                const idx = chain.indexOf(id);
-                if (idx !== -1) return { type, index: idx };
-            }
-            return null;
-        }
+        // 升級配方 (弓: 木+線+錢)
+        const BOW_UPGRADE_COST = [
+            { wood: 3, string: 1, gold: 0 },
+            { wood: 4, string: 2, gold: 10 },
+            { wood: 5, string: 3, gold: 20 },
+            { wood: 6, string: 4, gold: 40 },
+            { wood: 8, string: 5, gold: 80 },
+        ];
+        // 弩升級配方 (弩: 木+線+銅+錢; 輕弩: 木+線+鐵+錢; 十字弩: 木+線+金+錢; 重弩: 木+線+鑽石+錢; 諸葛連弩: 木+線+獄髓+錢)
+        const CROSSBOW_UPGRADE_COST = [
+            { wood: 3, string: 2, copper_ore: 1, gold: 8 },
+            { wood: 4, string: 2, iron_ore: 1, gold: 15 },
+            { wood: 5, string: 3, gold_ore: 1, gold: 30 },
+            { wood: 6, string: 4, diamond: 1, gold: 60 },
+            { wood: 8, string: 5, netherite: 1, gold: 120 },
+        ];
 
-        // ---------- 生物 ----------
+        // ---------- 生物定义 ----------
         const MOBS = {
-            'pig': { id: 'pig', name: '🐷 豬', hp: 30, atk: 0, def: 1, exp: 5, gold: 3, passive: true,
-            drops: [{ id: 'raw_pork', chance: 0.7, count: 1 }] },
-            'cow': { id: 'cow', name: '🐮 牛', hp: 40, atk: 0, def: 2, exp: 6, gold: 4, passive: true,
-            drops: [{ id: 'raw_beef', chance: 0.7, count: 1 }] },
-            'sheep': { id: 'sheep', name: '🐑 羊', hp: 25, atk: 0, def: 1, exp: 5, gold: 3, passive: true,
+            // 被動（不掉錢）
+            'pig': { id: 'pig', name: '🐷 猪', hp: 30, atk: 0, def: 1, exp: 5, gold: 0, passive: true,
+                drops: [{ id: 'raw_pork', chance: 0.7, count: 1 }] },
+            'cow': { id: 'cow', name: '🐮 牛', hp: 40, atk: 0, def: 2, exp: 6, gold: 0, passive: true,
+                drops: [{ id: 'raw_beef', chance: 0.7, count: 1 }, { id: 'leather', chance: 0.3, count: 1 }] },
+            'sheep': { id: 'sheep', name: '🐑 羊', hp: 25, atk: 0, def: 1, exp: 5, gold: 0, passive: true,
                 drops: [{ id: 'raw_mutton', chance: 0.6, count: 1 }, { id: 'wool', chance: 0.3, count: 1 }] },
-            'zombie': { id: 'zombie', name: '🧟 喪屍', hp: 50, atk: 8, def: 3, exp: 20, gold: 10, passive: false,
-                drops: [{ id: 'rotten_flesh', chance: 0.3, count: 1 }] },
-            'skeleton': { id: 'skeleton', name: '💀 骷髏', hp: 45, atk: 10, def: 2, exp: 25, gold: 15, passive: false,
-                drops: [{ id: 'bone', chance: 0.4, count: 1 }] },
-            'camel': { id: 'camel', name: '🐪 駱駝', hp: 40, atk: 0, def: 2, exp: 6, gold: 4, passive: true,
-                drops: [{ id: 'camelmeat', chance: 0.7, count: 1 }] },
-            'horse': { id: 'horse', name: '🐎 馬', hp: 40, atk: 0, def: 2, exp: 6, gold: 4, passive: true,
-                drops: [{ id: 'horsemeat', chance: 0.7, count: 1 }] },
+            'camel': { id: 'camel', name: '🐪 骆驼', hp: 40, atk: 0, def: 2, exp: 6, gold: 0, passive: true,
+                drops: [{ id: 'camelmeat', chance: 0.6, count: 1 }] },
+            'horse': { id: 'horse', name: '🐎 马', hp: 40, atk: 0, def: 2, exp: 6, gold: 0, passive: true,
+                drops: [{ id: 'horsemeat', chance: 0.6, count: 1 }] },
+            'chicken': { id: 'chicken', name: '🐓 鸡', hp: 20, atk: 0, def: 0, exp: 4, gold: 0, passive: true,
+                drops: [{ id: 'raw_chicken', chance: 0.7, count: 1 }, { id: 'feather', chance: 0.3, count: 1 }] },
+            'duck': { id: 'duck', name: '🦆 鸭', hp: 22, atk: 0, def: 0, exp: 4, gold: 0, passive: true,
+                drops: [{ id: 'raw_duck', chance: 0.7, count: 1 }, { id: 'feather', chance: 0.3, count: 1 }] },
+            'bee': { id: 'bee', name: '🐝 蜜蜂', hp: 15, atk: 3, def: 0, exp: 3, gold: 0, passive: false,
+                drops: [{ id: 'honey', chance: 0.4, count: 1 }] },
+            // 魚類（海洋/河流）
+            'salmon': { id: 'salmon', name: '🐟 三文魚', hp: 20, atk: 0, def: 0, exp: 4, gold: 0, passive: true,
+                drops: [{ id: 'raw_fish', chance: 0.8, count: 1 }] },
+            'pufferfish': { id: 'pufferfish', name: '🐡 河豚', hp: 18, atk: 4, def: 0, exp: 5, gold: 0, passive: false,
+                drops: [{ id: 'raw_fish', chance: 0.7, count: 1 }] },
+            'tropical_fish': { id: 'tropical_fish', name: '🐠 热带魚', hp: 16, atk: 0, def: 0, exp: 3, gold: 0, passive: true,
+                drops: [{ id: 'raw_fish', chance: 0.7, count: 1 }] },
+            'octopus': { id: 'octopus', name: '🐙 八爪魚', hp: 25, atk: 5, def: 1, exp: 6, gold: 0, passive: false,
+                drops: [{ id: 'raw_fish', chance: 0.7, count: 1 }] },
+            'squid': { id: 'squid', name: '🦑 墨魚', hp: 20, atk: 0, def: 0, exp: 4, gold: 0, passive: true,
+                drops: [{ id: 'ink_sac', chance: 0.5, count: 1 }] },
+            'shark': { id: 'shark', name: '🦈 鲨魚', hp: 50, atk: 10, def: 2, exp: 15, gold: 0, passive: false,
+                drops: [{ id: 'raw_fish', chance: 0.9, count: 2 }] },
+            'dolphin': { id: 'dolphin', name: '🐬 海豚', hp: 30, atk: 6, def: 1, exp: 8, gold: 0, passive: false,
+                drops: [{ id: 'raw_fish', chance: 0.6, count: 1 }] },
+            // 原敵對
+            'zombie': { id: 'zombie', name: '🧟 丧尸', hp: 50, atk: 8, def: 3, exp: 20, gold: 10, passive: false,
+                drops: [{ id: 'rotten_flesh', chance: 0.7, count: 1 }, { id: 'wood_sword', chance: 0.05, count: 1 },
+                    { id: 'wood_axe', chance: 0.05, count: 1 }] },
+            'skeleton': { id: 'skeleton', name: '💀 骷髅', hp: 45, atk: 10, def: 2, exp: 25, gold: 15, passive: false,
+                drops: [{ id: 'bone', chance: 0.7, count: 1 }, { id: 'bow', chance: 0.05, count: 1 }] },
+            'spider': { id: 'spider', name: '🕷️ 蜘蛛', hp: 35, atk: 6, def: 1, exp: 12, gold: 0, passive: false,
+                drops: [{ id: 'string', chance: 0.7, count: 1 }, { id: 'spider_eye', chance: 0.1, count: 1 }] },
         };
 
-        // ---------- 地图类型 ----------
+        // 定义哪些地圖不下雨
+        const NO_RAIN_MAPS = ['cave', 'ocean', 'river', 'desert'];
+
+        // ---------- 地圖類型 ----------
         const MAP_TYPES = {
             'plain': { name: '🏞️ 平原', terrain: 'plain', color: '#4a8f5a', grass: '#5a9f6a' },
             'forest': { name: '🌲 森林', terrain: 'forest', color: '#2d6a3a', grass: '#3d7a4a' },
             'desert': { name: '🏜️ 沙漠', terrain: 'desert', color: '#c4a86a', grass: '#d4b87a' },
             'ice': { name: '❄️ 冰原', terrain: 'ice', color: '#8ab4d8', grass: '#9ac4e8' },
-            'river': { name: '🌊 河流', terrain: 'river', color: '#3a7aaa', grass: '#4a8aba' },
+            'river': { name: '🏞️ 河流', terrain: 'river', color: '#3a7aaa', grass: '#4a8aba' },
             'ocean': { name: '🌊 海洋', terrain: 'ocean', color: '#1a4a7a', grass: '#2a5a8a' },
             'cave': { name: '🕳️ 山洞', terrain: 'cave', color: '#3a3a4a', grass: '#4a4a5a' },
             'mountain': { name: '⛰️ 山地', terrain: 'mountain', color: '#6a5a4a', grass: '#7a6a5a' },
             'nether': { name: '🔥 地獄', terrain: 'nether', color: '#4a1a1a', grass: '#5a2a2a' },
-            'end': { name: '🌌 終界', terrain: 'end', color: '#2a2a3a', grass: '#3a3a4a' },
+            'end': { name: '🌌 终界', terrain: 'end', color: '#2a2a3a', grass: '#3a3a4a' },
             'heaven': { name: '☁️ 天堂', terrain: 'heaven', color: '#8ab4d8', grass: '#9ac4e8' }
         };
         const RANDOM_MAP_POOL = ['plain', 'forest', 'desert', 'ice', 'river', 'ocean', 'cave', 'mountain'];
 
-        // ---------- 游戏状态 ----------
+        // ---------- 游戲狀態 ----------
         let G = {
             player: null,
             map: null,
@@ -1290,7 +1298,7 @@
             };
         }
 
-        // ---------- 计算属性 ----------
+        // ---------- 计算屬性 ----------
         function getPlayerAtk(p) {
             let atk = p.baseAtk;
             if (p.equipment.weapon) atk += ITEMS[p.equipment.weapon]?.atk || 0;
@@ -1321,7 +1329,7 @@
 
         function hasTool(toolType) { return getBestToolLevel(toolType) > 0; }
 
-        // ---------- 地图生成 ----------
+        // ---------- 地圖生成 ----------
         function generateMap(mapId) {
             const w = 19,
                 h = 19;
@@ -1340,6 +1348,7 @@
                 if (x >= 0 && x < w && y >= 0 && y < h) objects[y][x] = { type: 'obstacle' };
             };
 
+            // ---------- 障礙物 ----------
             if (is('plain')) {
                 for (let i = 0; i < 3; i++) {
                     let x = rand(2, w - 3),
@@ -1390,8 +1399,8 @@
                 }
             }
 
-            // 村庄
-            if (!is('ocean') && !is('river') && !is('nether') && !is('end') && !is('heaven')) {
+            // ---------- 村莊（海洋/河流/洞穴不生成） ----------
+			if (!is('ocean') && !is('river') && !is('nether') && !is('end') && !is('heaven') && !is('cave')) {
                 let villagePlaced = false;
                 for (let attempt = 0; attempt < 100; attempt++) {
                     const x = rand(2, w - 3),
@@ -1407,9 +1416,8 @@
                 if (!villagePlaced) objects[5][5] = { type: 'village', profession: 'farmer' };
             }
 
-            // 草
-            if (!is('ocean') && !is('river') && !is('desert') && !is('ice') && !is('nether') && !is('end') && !is(
-                'heaven')) {
+            // ---------- 草（海洋/河流不生成） ----------
+            if (!is('ocean') && !is('river') && !is('desert') && !is('ice') && !is('cave') && !is('nether') && !is('end') && !is('heaven')) {
                 const grassCount = is('plain') ? 20 : is('forest') ? 25 : 10;
                 for (let i = 0; i < grassCount; i++) {
                     const x = rand(1, w - 2),
@@ -1418,7 +1426,7 @@
                 }
             }
 
-            // 资源
+            // ---------- 資源（海洋/河流不生成樹/石/礦） ----------
             if (!is('ocean') && !is('river')) {
                 const treeCount = is('forest') ? 18 : is('plain') ? 10 : is('desert') ? 6 : 4;
                 for (let i = 0; i < treeCount; i++) {
@@ -1450,33 +1458,78 @@
                 }
             }
 
-            // 生物
-            let mobPool = [];
-            if (is('ocean') || is('river')) {} else if (is('desert')) mobPool = ['camel', 'zombie', 'skeleton'];
-            else if (is('ice')) mobPool = ['zombie', 'skeleton'];
-            else if (is('plain')) mobPool = ['pig', 'cow', 'sheep', 'horse', 'zombie', 'skeleton'];
-            else if (is('forest')) mobPool = ['pig', 'sheep', 'zombie', 'skeleton'];
-            else if (is('cave')) mobPool = ['zombie', 'skeleton'];
-            else if (is('mountain')) mobPool = ['zombie', 'skeleton'];
-            else mobPool = ['pig', 'cow', 'sheep'];
+            // ---------- 洞穴寶箱/蜘蛛網 ----------
+            if (is('cave')) {
+                for (let i = 0; i < 5; i++) {
+                    const x = rand(1, w - 2),
+                        y = rand(1, h - 2);
+                    if (!objects[y][x]) objects[y][x] = { type: 'chest' };
+                }
+                for (let i = 0; i < 6; i++) {
+                    const x = rand(1, w - 2),
+                        y = rand(1, h - 2);
+                    if (!objects[y][x]) objects[y][x] = { type: 'web' };
+                }
+            }
 
+            // ---------- 🌊 生物生成（海洋/河流 vs 陸地） ----------
             const isNight = G.isNight || false;
             const isRain = G.weather === 'rain' || G.weather === 'thunder';
-            if (isNight || isRain || is('cave')) mobPool = mobPool.concat(['zombie', 'skeleton']);
-            mobPool = [...new Set(mobPool)];
-            if (mobPool.length > 0 && !is('ocean') && !is('river')) {
-                const mobCount = is('cave') ? 8 : (isNight ? 6 : 4);
-                for (let i = 0; i < mobCount; i++) {
+
+            if (is('ocean') || is('river')) {
+                // ===== 海洋/河流：生成魚類 =====
+                const fishPool = ['salmon', 'pufferfish', 'tropical_fish', 'octopus', 'squid', 'dolphin'];
+                if (is('ocean')) fishPool.push('shark');
+                const count = (isRain || isNight) ? 12 : 8;
+                for (let i = 0; i < count; i++) {
                     const x = rand(1, w - 2),
                         y = rand(1, h - 2);
                     if (!objects[y][x]) {
-                        const mobId = mobPool[rand(0, mobPool.length - 1)];
-                        objects[y][x] = { type: 'mob', mobId };
+                        const id = fishPool[rand(0, fishPool.length - 1)];
+                        objects[y][x] = { type: 'mob', mobId: id };
+                    }
+                }
+            } else {
+                // ===== 陸地生物 =====
+                let mobPool = [];
+                if (is('plain') || is('forest') || is('mountain')) {
+                    mobPool = ['chicken', 'duck', 'bee'];
+                    if (isNight) mobPool.push('zombie', 'skeleton', 'spider');
+                }
+                if (is('desert')) {
+                    mobPool = ['sheep', 'camel'];
+                    if (isNight) mobPool.push('zombie', 'skeleton', 'spider');
+                }
+                if (is('ice')) {
+                    mobPool = ['cow', 'sheep', 'horse'];
+                    if (isNight) mobPool.push('zombie', 'skeleton', 'spider');
+                }
+                if (is('cave')) {
+                    mobPool = ['pig', 'spider', 'zombie', 'skeleton'];
+                }
+                if (is('plain')) mobPool = mobPool.concat(['cow', 'sheep', 'pig', 'horse']);
+                else if (is('forest')) mobPool = mobPool.concat(['cow', 'sheep', 'pig']);
+
+                mobPool = [...new Set(mobPool)];
+                let multiplier = 1;
+                if (isRain) multiplier = 2;
+                if (G.weather === 'thunder') multiplier = 2;
+
+                if (mobPool.length > 0) {
+                    const baseCount = is('cave') ? 8 : (isNight ? 6 : 4);
+                    const count = Math.floor(baseCount * multiplier);
+                    for (let i = 0; i < count; i++) {
+                        const x = rand(1, w - 2),
+                            y = rand(1, h - 2);
+                        if (!objects[y][x]) {
+                            const mobId = mobPool[rand(0, mobPool.length - 1)];
+                            objects[y][x] = { type: 'mob', mobId };
+                        }
                     }
                 }
             }
 
-            // 流浪商人
+            // ---------- 流浪商人（海洋/河流不生成） ----------
             if (!is('ocean') && !is('river') && !is('nether') && !is('end') && !is('heaven')) {
                 let campPlaced = false;
                 for (let attempt = 0; attempt < 50; attempt++) {
@@ -1491,7 +1544,7 @@
                 if (!campPlaced) objects[3][3] = { type: 'camp' };
             }
 
-            // 箭头
+            // ========== ⬆️⬇️⬅️➡️ 箭頭（所有地圖都生成！） ==========
             const mid = Math.floor(w / 2);
             if (!objects[0][mid]) objects[0][mid] = { type: 'arrow', dir: 'north' };
             if (!objects[h - 1][mid]) objects[h - 1][mid] = { type: 'arrow', dir: 'south' };
@@ -1501,7 +1554,7 @@
             return { id: mapId, width: w, height: h, terrain, objects };
         }
 
-        // ---------- 地图管理 ----------
+        // ---------- 地圖管理 ----------
         function getMap(id) {
             if (!G.maps[id]) G.maps[id] = generateMap(id);
             return G.maps[id];
@@ -1536,6 +1589,9 @@
             refreshMobsOnMap();
             render();
             updateUI();
+            if (mapId === 'ocean' || mapId === 'river') {
+                toast('🌊 進入水域，移動将消耗氧氣 (MP)！', 'warning', 2000);
+            }
             updateMusic();
             saveGameToLocal();
         }
@@ -1555,28 +1611,73 @@
             switchMap(nextId, spawnX, spawnY);
         }
 
+        // ---------- 刷新生物 (被動生物不消失) ----------
         function refreshMobsOnMap() {
             const map = G.map;
             if (!map) return;
+            const isNight = G.isNight;
+            const isRain = G.weather === 'rain' || G.weather === 'thunder';
+            const isOcean = map.id === 'ocean' || map.id === 'river';
+
+            // ---- 清除原有生物（但保留陸地被動生物） ----
             for (let y = 0; y < map.height; y++) {
                 for (let x = 0; x < map.width; x++) {
                     const obj = map.objects[y]?.[x];
-                    if (obj && obj.type === 'mob') map.objects[y][x] = null;
+                    if (obj && obj.type === 'mob') {
+                        const mob = MOBS[obj.mobId];
+                        if (mob && mob.passive && !isOcean) {
+                            continue;
+                        }
+                        map.objects[y][x] = null;
+                    }
                 }
             }
-            const isNight = G.isNight;
-            const isRain = G.weather === 'rain' || G.weather === 'thunder';
-            const isCave = map.id === 'cave';
-            const isOcean = map.id === 'ocean' || map.id === 'river';
-            if (isOcean) return;
+
+            // ---- 海洋/河流：重新生成魚類（數量充足） ----
+            if (isOcean) {
+                const fishPool = ['salmon', 'pufferfish', 'tropical_fish', 'octopus', 'squid', 'dolphin'];
+                if (map.id === 'ocean') fishPool.push('shark');
+                const count = (isRain || isNight) ? 12 : 8;
+                for (let i = 0; i < count; i++) {
+                    const x = rand(1, map.width - 2),
+                        y = rand(1, map.height - 2);
+                    if (!map.objects[y][x]) {
+                        const id = fishPool[rand(0, fishPool.length - 1)];
+                        map.objects[y][x] = { type: 'mob', mobId: id };
+                    }
+                }
+                return;
+            }
+
+            // ---- 陸地：生成敵對生物（被動已保留） ----
             let mobPool = [];
-            if (isNight || isRain || isCave) mobPool = ['zombie', 'skeleton'];
-            if (map.id === 'plain') mobPool = mobPool.concat(['pig', 'cow', 'sheep', 'horse']);
-            else if (map.id === 'forest') mobPool = mobPool.concat(['pig', 'sheep']);
-            else if (map.id === 'desert') mobPool = mobPool.concat(['camel']);
+            if (map.id === 'plain' || map.id === 'forest' || map.id === 'mountain') {
+                mobPool = ['chicken', 'duck', 'bee'];
+                if (isNight) mobPool.push('zombie', 'skeleton', 'spider');
+            }
+            if (map.id === 'desert') {
+                mobPool = ['sheep', 'camel'];
+                if (isNight) mobPool.push('zombie', 'skeleton', 'spider');
+            }
+            if (map.id === 'ice') {
+                mobPool = ['cow', 'sheep', 'horse'];
+                if (isNight) mobPool.push('zombie', 'skeleton', 'spider');
+            }
+            if (map.id === 'cave') {
+                mobPool = ['pig', 'spider', 'zombie', 'skeleton'];
+            }
+            if (map.id === 'plain') mobPool = mobPool.concat(['cow', 'sheep', 'pig', 'horse']);
+            else if (map.id === 'forest') mobPool = mobPool.concat(['cow', 'sheep', 'pig']);
+
             mobPool = [...new Set(mobPool)];
+
+            let multiplier = 1;
+            if (isRain) multiplier = 2;
+            if (G.weather === 'thunder') multiplier = 2;
+
             if (mobPool.length > 0) {
-                const count = isCave ? 8 : (isNight ? 6 : 4);
+                const baseCount = map.id === 'cave' ? 8 : (isNight ? 6 : 4);
+                const count = Math.floor(baseCount * multiplier);
                 for (let i = 0; i < count; i++) {
                     const x = rand(1, map.width - 2),
                         y = rand(1, map.height - 2);
@@ -1588,11 +1689,12 @@
             }
         }
 
+        // ---------- 時間與天氣 ----------
         function updateTimeDisplay() {
-            const totalSec = G.gameTime
-			const hours = Math.floor(totalSec / 3600);
-			const mins  = Math.floor((totalSec % 3600) / 60);
-			const secs  = Math.floor(totalSec % 60);
+            const totalSec = G.gameTime;
+            const hours = Math.floor(totalSec / 3600);
+            const mins = Math.floor((totalSec % 3600) / 60);
+            const secs = Math.floor(totalSec % 60);
             const timeStr =
                 `${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
             const icon = G.isNight ? '🌙' : '☀️';
@@ -1609,10 +1711,16 @@
             if (G.gameTime >= G.dayLength) {
                 G.gameTime = 0;
                 G.isNight = !G.isNight;
-                const r = Math.random();
-                if (r < 0.6) G.weather = 'clear';
-                else if (r < 0.85) G.weather = 'rain';
-                else G.weather = 'thunder';
+                const mapId = G.player.mapId;
+                const canRain = !NO_RAIN_MAPS.includes(mapId);
+                if (canRain) {
+                    const r = Math.random();
+                    if (r < 0.6) G.weather = 'clear';
+                    else if (r < 0.85) G.weather = 'rain';
+                    else G.weather = 'thunder';
+                } else {
+                    G.weather = 'clear';
+                }
                 refreshMobsOnMap();
                 updateUI();
                 updateMusic();
@@ -1626,7 +1734,7 @@
             updateTimeDisplay();
         }
 
-        // ---------- 玩家移动 ----------
+        // ---------- 玩家移動 ----------
         function movePlayer(dx, dy) {
             const p = G.player;
             if (G.gameOver || G.battle) return;
@@ -1637,18 +1745,39 @@
             const obj = map.objects[ny]?.[nx];
             if (obj && obj.type === 'obstacle') { toast('🚫 此處無法通行', 'warning'); return; }
             if (p.sp < 1) { toast('⚡ 體力不足！', 'warning'); return; }
+
             p.sp = Math.max(0, p.sp - 1);
             p.x = nx;
             p.y = ny;
             p.totalMoves++;
+
+            const currentMapId = p.mapId;
+            if (currentMapId === 'ocean' || currentMapId === 'river') {
+                if (p.mp > 0) {
+                    const consume = Math.min(5, p.mp);
+                    p.mp -= consume;
+                    if (p.mp === 0) {
+                        toast('⚠️ 氧氣耗盡，接下来移動将消耗生命！', 'warning', 2000);
+                    }
+                } else {
+                    p.hp = Math.max(0, p.hp - 1);
+                    if (p.hp <= 0) {
+                        die();
+                        return;
+                    }
+                    toast('💧 氧氣耗盡，生命 -1', 'warning', 800);
+                }
+            }
+
             if (obj) handleObjectInteraction(obj, nx, ny);
             else { render();
                 updateUI(); }
+
             playSound(300, 0.05);
             saveGameToLocal();
         }
 
-        // ---------- 物体交互 ----------
+        // ---------- 物體交互 ----------
         function handleObjectInteraction(obj, x, y) {
             const p = G.player;
             if (obj.type === 'obstacle') return;
@@ -1707,16 +1836,50 @@
             if (obj.type === 'grass') {
                 const r = Math.random();
                 if (r < 0.2) { addItem('wheat', 1);
-                    toast('🌾 找到小麥！', 'success');
-                    saveGameToLocal(); } else if (r < 0.4) { addItem('wood', 1);
-                    toast('🎋 找到木材！', 'success');
-                    saveGameToLocal(); } else { toast('🌿 草叢中沒有發現', 'info'); }
+                    toast('🌾 找到小麥！', 'success'); } else if (r < 0.4) { addItem('wood', 1);
+                    toast('🎋 找到木材！', 'success'); } else if (r < 0.55) { addItem('string', 1);
+                    toast('🧵 找到線！', 'success'); } else { toast('🌿 草叢中没有發現', 'info'); }
+                G.map.objects[y][x] = null;
+                render();
+                updateUI();
+                playSound(350, 0.1);
+                saveGameToLocal();
                 return;
             }
             if (obj.type === 'mob') { startBattle(obj.mobId, x, y); return; }
             if (obj.type === 'arrow') { handleArrow(obj.dir, x, y); return; }
             if (obj.type === 'village') { openVillageShop(obj.profession); return; }
             if (obj.type === 'camp') { openTraderCamp(); return; }
+            if (obj.type === 'chest') {
+                const r = Math.random();
+                if (r < 0.5) {
+                    const goldAmt = rand(5, 30);
+                    p.gold += goldAmt;
+                    toast(`🎁 寶箱！獲得 💰${goldAmt} 金幣！`, 'success');
+                } else {
+                    const dmg = rand(5, 20);
+                    p.hp = Math.max(0, p.hp - dmg);
+                    toast(`💀 陷阱！損失 ${dmg} HP`, 'error');
+                }
+                G.map.objects[y][x] = null;
+                render();
+                updateUI();
+                saveGameToLocal();
+                return;
+            }
+            if (obj.type === 'web') {
+                if (Math.random() < 0.4) {
+                    addItem('string', 1);
+                    toast('🧵 從蜘蛛網獲得線', 'success');
+                } else {
+                    toast('🕸️ 蜘蛛網是空的', 'info');
+                }
+                G.map.objects[y][x] = null;
+                render();
+                updateUI();
+                saveGameToLocal();
+                return;
+            }
         }
 
         // ---------- 物品系统 ----------
@@ -1746,7 +1909,7 @@
 
         function getItemDisplay(id) { return ITEMS[id] || { name: id, icon: '❓', desc: '' }; }
 
-        // ---------- 战斗 ----------
+        // ---------- 戰鬥 ----------
         function startBattle(mobId, x, y) {
             const p = G.player;
             const mobData = MOBS[mobId];
@@ -1763,10 +1926,9 @@
                 }
                 p.totalKills++;
                 p.exp += mobData.exp || 5;
-                p.gold += mobData.gold || 3;
+                p.gold += mobData.gold || 0;
                 G.map.objects[y][x] = null;
-                toast(`✅ 擊殺 ${mobData.name}！獲得 ${mobData.exp}經驗 💰${mobData.gold}金幣 ${dropMsg.join(' ')}`,
-                'success');
+                toast(`✅ 擊殺 ${mobData.name}！獲得 ${mobData.exp}經驗 ${dropMsg.join(' ')}`, 'success');
                 checkLevelUp();
                 checkAchievements();
                 render();
@@ -1777,7 +1939,7 @@
             }
 
             const enemy = { ...mobData, currentHp: mobData.hp, maxHp: mobData.hp, x, y, mobId };
-            G.battle = { enemy, log: ['⚔️ 戰鬥開始！'], state: 'player_turn', turn: 0, ended: false };
+            G.battle = { enemy, log: ['⚔️ 戰鬥开始！'], state: 'player_turn', turn: 0, ended: false };
             $('battle-modal').classList.add('active');
             renderBattle();
             updateUI();
@@ -1855,7 +2017,7 @@
             const e = b.enemy;
             const expGain = e.exp || 10;
             p.exp += expGain;
-            const goldGain = e.gold || 5;
+            const goldGain = e.gold || 0;
             p.gold += goldGain;
             const drops = e.drops || [];
             let dropMsg = [];
@@ -1866,7 +2028,8 @@
                     dropMsg.push(`${item.icon}${item.name}x${drop.count||1}`);
                 }
             }
-            b.log.push(`🎉 擊敗 ${e.name}！獲得 ${expGain}經驗 💰${goldGain}金幣`);
+            b.log.push(`🎉 擊敗 ${e.name}！獲得 ${expGain}經驗`);
+            if (goldGain > 0) b.log.push(`💰 +${goldGain}金幣`);
             if (dropMsg.length) b.log.push(`💰 掉落: ${dropMsg.join(', ')}`);
             p.totalKills++;
             G.map.objects[e.y] && (G.map.objects[e.y][e.x] = null);
@@ -1901,7 +2064,7 @@
             playSound(150, 0.5);
             saveGameToLocal();
             setTimeout(() => {
-                toast('💀 遊戲結束... 點擊「狀態」查看結局', 'error', 4000);
+                toast('💀 游戲結束... 點擊「狀態」查看結局', 'error', 4000);
                 $('battle-modal').classList.remove('active');
                 G.battle = null;
                 render();
@@ -1940,7 +2103,18 @@
             updateUI();
         }
 
-        // ---------- 等级 ----------
+        function die() {
+            if (G.gameOver) return;
+            G.gameOver = true;
+            gameoverOverlay.classList.remove('hidden');
+            toast('💀 你死了... 點擊「狀態」查看結局', 'error', 4000);
+            playSound(150, 0.5);
+            saveGameToLocal();
+            render();
+            updateUI();
+        }
+
+        // ---------- 等級 ----------
         function checkLevelUp() {
             const p = G.player;
             const maxExp = getPlayerMaxExp(p);
@@ -1987,7 +2161,7 @@
                 '鑽石武器');
         }
 
-        // ---------- 商店等 ----------
+        // ========== 商店系统 ==========
         function openVillageShop(profession) {
             const p = G.player;
             $('shopGold').textContent = p.gold;
@@ -2003,6 +2177,376 @@
             else if (profession === 'shepherd') renderShepherd(content);
             else if (profession === 'farmer') renderFarmer(content);
             $('shop-modal').classList.add('active');
+        }
+
+        // ----- 武器匠（全新升級鏈版本）-----
+        function renderWeaponsmith(container) {
+            const p = G.player;
+
+            // --- 輔助函數：检查玩家是否拥有某武器（背包或装备中） ---
+            function hasWeapon(id) {
+                return countItem(id) > 0 || p.equipment.weapon === id;
+            }
+
+            // --- 輔助函數：检查材料是否充足 ---
+            function canAfford(cost) {
+                if (!cost) return true;
+                if (cost.wood && countItem('wood') < cost.wood) return false;
+                if (cost.stone && countItem('stone') < cost.stone) return false;
+                if (cost.copper_ore && countItem('copper_ore') < cost.copper_ore) return false;
+                if (cost.iron_ore && countItem('iron_ore') < cost.iron_ore) return false;
+                if (cost.gold_ore && countItem('gold_ore') < cost.gold_ore) return false;
+                if (cost.diamond && countItem('diamond') < cost.diamond) return false;
+                if (cost.netherite && countItem('netherite') < cost.netherite) return false;
+                if (cost.gold && p.gold < cost.gold) return false;
+                return true;
+            }
+
+            // --- 輔助函數：生成一个武器鏈的顯示 ---
+            function renderChain(chainData, sectionTitle) {
+                const items = chainData;
+                const section = document.createElement('div');
+                section.className = 'shop-section';
+                section.innerHTML = `<h3>${sectionTitle}</h3>`;
+
+                // 1. 找到玩家拥有的该類型武器的最高級别
+                let currentLevel = -1;
+                for (let i = 0; i < items.length; i++) {
+                    if (hasWeapon(items[i].id)) {
+                        currentLevel = i;
+                    }
+                }
+
+                // 2. 根据當前狀態决定顯示什么
+                if (currentLevel === -1) {
+                    // 没有任何该類型武器 → 顯示購買基礎武器（第0級）
+                    const base = items[0];
+                    const cost = { ...base };
+                    // 移除 label 和 id，只保留材料字段
+                    delete cost.label;
+                    delete cost.id;
+                    const canBuy = canAfford(cost);
+                    const div = document.createElement('div');
+                    div.className = 'shop-item';
+                    const costStr = buildCostString(cost);
+                    div.innerHTML = `
+                        <span>${getItemDisplay(base.id).icon} ${base.label} <span class="cost">${costStr}</span></span>
+                        <button ${canBuy ? '' : 'disabled'}>購買</button>
+                    `;
+                    div.querySelector('button').addEventListener('click', () => {
+                        if (!canBuy) { toast('材料不足！', 'warning'); return; }
+                        if (hasWeapon(base.id)) { toast('你已經有了', 'warning'); return; }
+                        // 扣除材料
+                        deductCost(cost);
+                        addItem(base.id, 1);
+                        toast(`✅ 獲得 ${base.label}`, 'success');
+                        $('shopGold').textContent = p.gold;
+                        renderWeaponsmith(container);
+                        updateUI();
+                        saveGameToLocal();
+                    });
+                    section.appendChild(div);
+                } else if (currentLevel < items.length - 1) {
+                    // 有武器但不是最高級 → 顯示升級到下一級
+                    const nextItem = items[currentLevel + 1];
+                    const cost = { ...nextItem };
+                    delete cost.label;
+                    delete cost.id;
+                    const canUpgrade = canAfford(cost);
+                    const div = document.createElement('div');
+                    div.className = 'shop-item';
+                    const costStr = buildCostString(cost);
+                    div.innerHTML = `
+                        <span>${getItemDisplay(items[currentLevel].id).icon} → ${getItemDisplay(nextItem.id).icon} ${nextItem.label} <span class="cost">${costStr}</span></span>
+                        <button ${canUpgrade ? '' : 'disabled'}>升級</button>
+                    `;
+                    div.querySelector('button').addEventListener('click', () => {
+                        if (!canUpgrade) { toast('材料不足！', 'warning'); return; }
+                        if (!hasWeapon(items[currentLevel].id)) { toast('你没有前置武器', 'warning'); return; }
+                        // 移除舊武器
+                        if (p.equipment.weapon === items[currentLevel].id) {
+                            p.equipment.weapon = null;
+                        } else {
+                            removeItem(items[currentLevel].id, 1);
+                        }
+                        // 扣除材料
+                        deductCost(cost);
+                        addItem(nextItem.id, 1);
+                        toast(`✅ 升級為 ${nextItem.label}`, 'success');
+                        $('shopGold').textContent = p.gold;
+                        renderWeaponsmith(container);
+                        updateUI();
+                        saveGameToLocal();
+                    });
+                    section.appendChild(div);
+                } else {
+                    // 已經拥有最高級 → 顯示已滿級
+                    const div = document.createElement('div');
+                    div.className = 'shop-item';
+                    div.innerHTML = `
+                        <span>✨ ${getItemDisplay(items[currentLevel].id).icon} ${items[currentLevel].label}（已滿級）</span>
+                        <span style="color:#4a8a5a;">✅</span>
+                    `;
+                    section.appendChild(div);
+                }
+
+                container.appendChild(section);
+            }
+
+            // --- 輔助函數：构建成本字符串 ---
+            function buildCostString(cost) {
+                let parts = [];
+                if (cost.wood) parts.push(`🎋${cost.wood}`);
+                if (cost.stone) parts.push(`🗻${cost.stone}`);
+                if (cost.copper_ore) parts.push(`🟠${cost.copper_ore}`);
+                if (cost.iron_ore) parts.push(`🔩${cost.iron_ore}`);
+                if (cost.gold_ore) parts.push(`🟡${cost.gold_ore}`);
+                if (cost.diamond) parts.push(`💎${cost.diamond}`);
+                if (cost.netherite) parts.push(`⚫${cost.netherite}`);
+                if (cost.gold) parts.push(`💰${cost.gold}`);
+                return parts.join(' ') || '（免費）';
+            }
+
+            // --- 輔助函數：扣除材料 ---
+            function deductCost(cost) {
+                if (cost.wood) removeItem('wood', cost.wood);
+                if (cost.stone) removeItem('stone', cost.stone);
+                if (cost.copper_ore) removeItem('copper_ore', cost.copper_ore);
+                if (cost.iron_ore) removeItem('iron_ore', cost.iron_ore);
+                if (cost.gold_ore) removeItem('gold_ore', cost.gold_ore);
+                if (cost.diamond) removeItem('diamond', cost.diamond);
+                if (cost.netherite) removeItem('netherite', cost.netherite);
+                if (cost.gold) p.gold -= cost.gold;
+            }
+
+            // =========================================================
+            // 1. 劍鏈
+            // =========================================================
+            const swordChain = [
+                { id: 'wood_sword', label: '木劍', wood: 2, gold: 0 },
+                { id: 'stone_sword', label: '石劍', wood: 1, stone: 2, gold: 5 },
+                { id: 'copper_sword', label: '銅劍', wood: 1, copper_ore: 2, gold: 10 },
+                { id: 'iron_sword', label: '鐵劍', wood: 1, iron_ore: 2, gold: 20 },
+                { id: 'gold_sword', label: '金劍', wood: 1, gold_ore: 2, gold: 40 },
+                { id: 'diamond_sword', label: '鑽石劍', wood: 1, diamond: 2, gold: 80 },
+                { id: 'netherite_sword', label: '獄髓劍', wood: 1, netherite: 2, gold: 160 },
+            ];
+            renderChain(swordChain, '⚔️ 劍');
+
+            // =========================================================
+            // 2. 斧鏈
+            // =========================================================
+            const axeChain = [
+                { id: 'wood_axe', label: '木斧', wood: 2, gold: 0 },
+                { id: 'stone_axe', label: '石斧', wood: 1, stone: 2, gold: 5 },
+                { id: 'copper_axe', label: '銅斧', wood: 1, copper_ore: 2, gold: 10 },
+                { id: 'iron_axe', label: '鐵斧', wood: 1, iron_ore: 2, gold: 20 },
+                { id: 'gold_axe', label: '金斧', wood: 1, gold_ore: 2, gold: 40 },
+                { id: 'diamond_axe', label: '鑽石斧', wood: 1, diamond: 2, gold: 80 },
+                { id: 'netherite_axe', label: '獄髓斧', wood: 1, netherite: 2, gold: 160 },
+            ];
+            renderChain(axeChain, '🪓 斧');
+
+            // =========================================================
+            // 3. 打刀鏈（包含村雨、村正）
+            // =========================================================
+            const katanaChain = [
+                { id: 'wood_katana', label: '木打刀', wood: 2, gold: 0 },
+                { id: 'stone_katana', label: '石打刀', wood: 1, stone: 2, gold: 5 },
+                { id: 'copper_katana', label: '銅打刀', wood: 1, copper_ore: 2, gold: 10 },
+                { id: 'iron_katana', label: '鐵打刀', wood: 1, iron_ore: 2, gold: 20 },
+                { id: 'gold_katana', label: '金打刀', wood: 1, gold_ore: 2, gold: 40 },
+                { id: 'diamond_katana', label: '鑽石打刀', wood: 1, diamond: 2, gold: 80 },
+                { id: 'netherite_katana', label: '獄髓打刀', wood: 1, netherite: 2, gold: 160 },
+                { id: 'murasame', label: '村雨', wood: 2, diamond: 1, gold: 200 },
+                { id: 'muramasa', label: '妖刀村正', wood: 2, netherite: 1, gold: 300 },
+            ];
+            renderChain(katanaChain, '🔪 打刀');
+        }
+
+        // ----- 制箭匠（全新升級鏈版本）-----
+        function renderFletcher(container) {
+            const p = G.player;
+
+            // 輔助：獲取當前持有的最高級别索引（-1 表示没有）
+            function getCurrentLevel(chain) {
+                let level = -1;
+                for (let i = 0; i < chain.length; i++) {
+                    if (countItem(chain[i]) > 0 || (p.equipment.weapon === chain[i])) {
+                        level = i;
+                    }
+                }
+                return level;
+            }
+
+            // 輔助：构建成本字符串
+            function buildCostStr(cost) {
+                let parts = [];
+                if (cost.wood) parts.push(`🎋${cost.wood}`);
+                if (cost.string) parts.push(`🧵${cost.string}`);
+                if (cost.copper_ore) parts.push(`🟠${cost.copper_ore}`);
+                if (cost.iron_ore) parts.push(`🔩${cost.iron_ore}`);
+                if (cost.gold_ore) parts.push(`🟡${cost.gold_ore}`);
+                if (cost.diamond) parts.push(`💎${cost.diamond}`);
+                if (cost.netherite) parts.push(`⚫${cost.netherite}`);
+                if (cost.gold) parts.push(`💰${cost.gold}`);
+                return parts.join(' ') || '（免費）';
+            }
+
+            // 輔助：扣除材料（通用）
+            function deductCost(cost) {
+                if (cost.wood) removeItem('wood', cost.wood);
+                if (cost.string) removeItem('string', cost.string);
+                if (cost.copper_ore) removeItem('copper_ore', cost.copper_ore);
+                if (cost.iron_ore) removeItem('iron_ore', cost.iron_ore);
+                if (cost.gold_ore) removeItem('gold_ore', cost.gold_ore);
+                if (cost.diamond) removeItem('diamond', cost.diamond);
+                if (cost.netherite) removeItem('netherite', cost.netherite);
+                if (cost.gold) p.gold -= cost.gold;
+            }
+
+            // ----- 弓部分 -----
+            const bowSection = document.createElement('div');
+            bowSection.className = 'shop-section';
+            bowSection.innerHTML = '<h3>🏹 弓</h3><div class="sub">木弓→短弓→长弓→獵弓→精灵弓</div>';
+
+            const bowLevel = getCurrentLevel(BOW_CHAIN);
+            if (bowLevel === -1) {
+                // 没有弓 → 顯示購買木弓
+                const cost = { wood: 3, string: 1, gold: 5 };
+                const canBuy = (countItem('wood') >= cost.wood) &&
+                               (countItem('string') >= cost.string) &&
+                               (p.gold >= cost.gold);
+                const div = document.createElement('div');
+                div.className = 'shop-item';
+                div.innerHTML = `
+                    <span>${getItemDisplay(BOW_CHAIN[0]).icon} 木弓 <span class="cost">${buildCostStr(cost)}</span></span>
+                    <button ${canBuy ? '' : 'disabled'}>購買</button>
+                `;
+                div.querySelector('button').addEventListener('click', () => {
+                    if (!canBuy) { toast('材料不足！', 'warning'); return; }
+                    deductCost(cost);
+                    addItem(BOW_CHAIN[0], 1);
+                    toast('✅ 獲得木弓！', 'success');
+                    $('shopGold').textContent = p.gold;
+                    renderFletcher(container); // 刷新
+                    updateUI();
+                    saveGameToLocal();
+                });
+                bowSection.appendChild(div);
+            } else if (bowLevel < BOW_CHAIN.length - 1) {
+                // 有弓但不是最高級 → 顯示升級到下一級
+                const fromId = BOW_CHAIN[bowLevel];
+                const toId = BOW_CHAIN[bowLevel + 1];
+                const cost = BOW_UPGRADE_COST[bowLevel];
+                const canUpgrade = (countItem('wood') >= cost.wood) &&
+                                   (countItem('string') >= cost.string) &&
+                                   (p.gold >= cost.gold);
+                const div = document.createElement('div');
+                div.className = 'shop-item';
+                div.innerHTML = `
+                    <span>${getItemDisplay(fromId).icon} → ${getItemDisplay(toId).icon} <span class="cost">${buildCostStr(cost)}</span></span>
+                    <button ${canUpgrade ? '' : 'disabled'}>升級</button>
+                `;
+                div.querySelector('button').addEventListener('click', () => {
+                    if (!canUpgrade) { toast('材料不足！', 'warning'); return; }
+                    // 移除舊弓
+                    if (p.equipment.weapon === fromId) {
+                        p.equipment.weapon = null;
+                    } else {
+                        removeItem(fromId, 1);
+                    }
+                    deductCost(cost);
+                    addItem(toId, 1);
+                    toast(`✅ 升級為 ${getItemDisplay(toId).name}`, 'success');
+                    $('shopGold').textContent = p.gold;
+                    renderFletcher(container);
+                    updateUI();
+                    saveGameToLocal();
+                });
+                bowSection.appendChild(div);
+            } else {
+                // 已滿級
+                const div = document.createElement('div');
+                div.className = 'shop-item';
+                div.innerHTML = `<span>✨ ${getItemDisplay(BOW_CHAIN[bowLevel]).icon} ${getItemDisplay(BOW_CHAIN[bowLevel]).name}（已滿級）</span><span style="color:#4a8a5a;">✅</span>`;
+                bowSection.appendChild(div);
+            }
+            container.appendChild(bowSection);
+
+            // ----- 弩部分 -----
+            const crossbowSection = document.createElement('div');
+            crossbowSection.className = 'shop-section';
+            crossbowSection.innerHTML = '<h3>🎯 弩</h3><div class="sub">弩→輕弩→十字弩→重弩→諸葛連弩</div>';
+
+            const xbowLevel = getCurrentLevel(CROSSBOW_CHAIN);
+            if (xbowLevel === -1) {
+                // 没有弩 → 顯示購買弩
+                const cost = { wood: 3, string: 2, copper_ore: 1, gold: 8 };
+                const canBuy = (countItem('wood') >= cost.wood) &&
+                               (countItem('string') >= cost.string) &&
+                               (countItem('copper_ore') >= cost.copper_ore) &&
+                               (p.gold >= cost.gold);
+                const div = document.createElement('div');
+                div.className = 'shop-item';
+                div.innerHTML = `
+                    <span>${getItemDisplay(CROSSBOW_CHAIN[0]).icon} 弩 <span class="cost">${buildCostStr(cost)}</span></span>
+                    <button ${canBuy ? '' : 'disabled'}>購買</button>
+                `;
+                div.querySelector('button').addEventListener('click', () => {
+                    if (!canBuy) { toast('材料不足！', 'warning'); return; }
+                    deductCost(cost);
+                    addItem(CROSSBOW_CHAIN[0], 1);
+                    toast('✅ 獲得弩！', 'success');
+                    $('shopGold').textContent = p.gold;
+                    renderFletcher(container);
+                    updateUI();
+                    saveGameToLocal();
+                });
+                crossbowSection.appendChild(div);
+            } else if (xbowLevel < CROSSBOW_CHAIN.length - 1) {
+                // 有弩但不是最高級 → 顯示升級到下一級
+                const fromId = CROSSBOW_CHAIN[xbowLevel];
+                const toId = CROSSBOW_CHAIN[xbowLevel + 1];
+                const cost = CROSSBOW_UPGRADE_COST[xbowLevel];
+                // 检查材料
+                const canUpgrade = (countItem('wood') >= (cost.wood || 0)) &&
+                                   (countItem('string') >= (cost.string || 0)) &&
+                                   (cost.copper_ore ? countItem('copper_ore') >= cost.copper_ore : true) &&
+                                   (cost.iron_ore ? countItem('iron_ore') >= cost.iron_ore : true) &&
+                                   (cost.gold_ore ? countItem('gold_ore') >= cost.gold_ore : true) &&
+                                   (cost.diamond ? countItem('diamond') >= cost.diamond : true) &&
+                                   (cost.netherite ? countItem('netherite') >= cost.netherite : true) &&
+                                   (p.gold >= (cost.gold || 0));
+                const div = document.createElement('div');
+                div.className = 'shop-item';
+                div.innerHTML = `
+                    <span>${getItemDisplay(fromId).icon} → ${getItemDisplay(toId).icon} <span class="cost">${buildCostStr(cost)}</span></span>
+                    <button ${canUpgrade ? '' : 'disabled'}>升級</button>
+                `;
+                div.querySelector('button').addEventListener('click', () => {
+                    if (!canUpgrade) { toast('材料不足！', 'warning'); return; }
+                    if (p.equipment.weapon === fromId) {
+                        p.equipment.weapon = null;
+                    } else {
+                        removeItem(fromId, 1);
+                    }
+                    deductCost(cost);
+                    addItem(toId, 1);
+                    toast(`✅ 升級為 ${getItemDisplay(toId).name}`, 'success');
+                    $('shopGold').textContent = p.gold;
+                    renderFletcher(container);
+                    updateUI();
+                    saveGameToLocal();
+                });
+                crossbowSection.appendChild(div);
+            } else {
+                const div = document.createElement('div');
+                div.className = 'shop-item';
+                div.innerHTML = `<span>✨ ${getItemDisplay(CROSSBOW_CHAIN[xbowLevel]).icon} ${getItemDisplay(CROSSBOW_CHAIN[xbowLevel]).name}（已滿級）</span><span style="color:#4a8a5a;">✅</span>`;
+                crossbowSection.appendChild(div);
+            }
+            container.appendChild(crossbowSection);
         }
 
         function renderFarmer(container) {
@@ -2027,17 +2571,17 @@
             container.appendChild(sec1);
             const sec2 = document.createElement('div');
             sec2.className = 'shop-section';
-            sec2.innerHTML = '<h3>🍞 麵包</h3>';
+            sec2.innerHTML = '<h3>🍞 面包</h3>';
             const div2 = document.createElement('div');
             div2.className = 'shop-item';
             const canBread = (countItem('wheat') >= 3) && (p.gold >= 10);
             div2.innerHTML =
-                `<span>🍞 麵包 <span class="cost">🌾3 💰10</span></span><button ${canBread ? '' : 'disabled'}>購買</button>`;
+                `<span>🍞 面包 <span class="cost">🌾3 💰10</span></span><button ${canBread ? '' : 'disabled'}>購買</button>`;
             div2.querySelector('button').addEventListener('click', () => {
                 if (canBread) { removeItem('wheat', 3);
                     p.gold -= 10;
                     addItem('bread', 1);
-                    toast('✅ 獲得麵包', 'success');
+                    toast('✅ 獲得面包', 'success');
                     $('shopGold').textContent = p.gold;
                     renderFarmer(container);
                     updateUI();
@@ -2072,15 +2616,226 @@
             container.appendChild(sec);
         }
 
-        function renderWeaponsmith(container) { /* 略 */ }
+        function renderArmorer(container) {
+            const p = G.player;
+            const sec = document.createElement('div');
+            sec.className = 'shop-section';
+            sec.innerHTML = '<h3>🛡️ 防具</h3>';
 
-        function renderArmorer(container) { /* 略 */ }
+            const items = [
+                { id: 'wood_shield', label: '木盾', wood: 2, gold: 0 },
+                { id: 'leather_helmet', label: '皮帽', wood: 2, gold: 5 },
+                { id: 'leather_chestplate', label: '皮甲', wood: 3, gold: 10 },
+                { id: 'leather_leggings', label: '皮裤', wood: 2, gold: 8 },
+                { id: 'leather_boots', label: '皮靴', wood: 2, gold: 6 },
+                { id: 'leather_gloves', label: '皮手套', wood: 2, gold: 4 },
+            ];
 
-        function renderToolsmith(container) { /* 略 */ }
+            for (const it of items) {
+                const div = document.createElement('div');
+                div.className = 'shop-item';
+                const has = countItem(it.id) > 0 || Object.values(p.equipment).includes(it.id);
+                const can = (countItem('wood') >= it.wood) && (p.gold >= it.gold);
+                const costStr = `🎋${it.wood} 💰${it.gold}`;
+                div.innerHTML = `
+                    <span>${getItemDisplay(it.id).icon} ${it.label} <span class="cost">${costStr}</span></span>
+                    <button ${(!has && can) ? '' : 'disabled'}>合成</button>
+                `;
+                div.querySelector('button').addEventListener('click', () => {
+                    if (has) { toast('你已經有了', 'warning'); return; }
+                    if (!can) { toast('材料不足！', 'warning'); return; }
+                    removeItem('wood', it.wood);
+                    p.gold -= it.gold;
+                    addItem(it.id, 1);
+                    toast(`✅ 獲得 ${it.label}`, 'success');
+                    $('shopGold').textContent = p.gold;
+                    renderArmorer(container);
+                    updateUI();
+                    saveGameToLocal();
+                });
+                sec.appendChild(div);
+            }
+            container.appendChild(sec);
+        }
 
-        function renderFletcher(container) { /* 略 */ }
+        function renderToolsmith(container) {
+            const p = G.player;
+            const sec = document.createElement('div');
+            sec.className = 'shop-section';
+            sec.innerHTML = '<h3>⛏️ 鎬</h3><div class="sub">木鎬→石鎬→銅鎬→鐵鎬→金鎬→鑽石鎬→獄髓鎬</div>';
 
-        function openTraderCamp() { /* 略 */ }
+            const toolChain = [
+                { id: 'wood_pickaxe', label: '木鎬', wood: 2, gold: 0 },
+                { id: 'stone_pickaxe', label: '石鎬', wood: 1, stone: 2, gold: 5 },
+                { id: 'copper_pickaxe', label: '銅鎬', wood: 1, copper_ore: 2, gold: 10 },
+                { id: 'iron_pickaxe', label: '鐵鎬', wood: 1, iron_ore: 2, gold: 20 },
+                { id: 'gold_pickaxe', label: '金鎬', wood: 1, gold_ore: 2, gold: 40 },
+                { id: 'diamond_pickaxe', label: '鑽石鎬', wood: 1, diamond: 2, gold: 80 },
+                { id: 'netherite_pickaxe', label: '獄髓鎬', wood: 1, netherite: 2, gold: 160 },
+            ];
+
+            // 輔助：检查是否拥有
+            function hasTool(id) {
+                return countItem(id) > 0 || Object.values(p.equipment).includes(id);
+            }
+
+            // 輔助：检查材料
+            function canAfford(cost) {
+                if (cost.wood && countItem('wood') < cost.wood) return false;
+                if (cost.stone && countItem('stone') < cost.stone) return false;
+                if (cost.copper_ore && countItem('copper_ore') < cost.copper_ore) return false;
+                if (cost.iron_ore && countItem('iron_ore') < cost.iron_ore) return false;
+                if (cost.gold_ore && countItem('gold_ore') < cost.gold_ore) return false;
+                if (cost.diamond && countItem('diamond') < cost.diamond) return false;
+                if (cost.netherite && countItem('netherite') < cost.netherite) return false;
+                if (cost.gold && p.gold < cost.gold) return false;
+                return true;
+            }
+
+            // 輔助：构建成本字符串
+            function buildCostStr(cost) {
+                let parts = [];
+                if (cost.wood) parts.push(`🎋${cost.wood}`);
+                if (cost.stone) parts.push(`🗻${cost.stone}`);
+                if (cost.copper_ore) parts.push(`🟠${cost.copper_ore}`);
+                if (cost.iron_ore) parts.push(`🔩${cost.iron_ore}`);
+                if (cost.gold_ore) parts.push(`🟡${cost.gold_ore}`);
+                if (cost.diamond) parts.push(`💎${cost.diamond}`);
+                if (cost.netherite) parts.push(`⚫${cost.netherite}`);
+                if (cost.gold) parts.push(`💰${cost.gold}`);
+                return parts.join(' ') || '（免費）';
+            }
+
+            // 輔助：扣除材料
+            function deductCost(cost) {
+                if (cost.wood) removeItem('wood', cost.wood);
+                if (cost.stone) removeItem('stone', cost.stone);
+                if (cost.copper_ore) removeItem('copper_ore', cost.copper_ore);
+                if (cost.iron_ore) removeItem('iron_ore', cost.iron_ore);
+                if (cost.gold_ore) removeItem('gold_ore', cost.gold_ore);
+                if (cost.diamond) removeItem('diamond', cost.diamond);
+                if (cost.netherite) removeItem('netherite', cost.netherite);
+                if (cost.gold) p.gold -= cost.gold;
+            }
+
+            // 獲取當前等級
+            let currentLevel = -1;
+            for (let i = 0; i < toolChain.length; i++) {
+                if (hasTool(toolChain[i].id)) {
+                    currentLevel = i;
+                }
+            }
+
+            if (currentLevel === -1) {
+                // 没有任何鎬 → 顯示購買木鎬
+                const base = toolChain[0];
+                const cost = { wood: base.wood, gold: base.gold };
+                const canBuy = canAfford(cost);
+                const div = document.createElement('div');
+                div.className = 'shop-item';
+                div.innerHTML = `
+                    <span>${getItemDisplay(base.id).icon} ${base.label} <span class="cost">${buildCostStr(cost)}</span></span>
+                    <button ${canBuy ? '' : 'disabled'}>購買</button>
+                `;
+                div.querySelector('button').addEventListener('click', () => {
+                    if (!canBuy) { toast('材料不足！', 'warning'); return; }
+                    deductCost(cost);
+                    addItem(base.id, 1);
+                    toast(`✅ 獲得 ${base.label}`, 'success');
+                    $('shopGold').textContent = p.gold;
+                    renderToolsmith(container);
+                    updateUI();
+                    saveGameToLocal();
+                });
+                sec.appendChild(div);
+            } else if (currentLevel < toolChain.length - 1) {
+                // 有鎬但不是最高級 → 顯示升級到下一級
+                const fromItem = toolChain[currentLevel];
+                const toItem = toolChain[currentLevel + 1];
+                const cost = { ...toItem };
+                delete cost.id;
+                delete cost.label;
+                const canUpgrade = canAfford(cost);
+                const div = document.createElement('div');
+                div.className = 'shop-item';
+                div.innerHTML = `
+                    <span>${getItemDisplay(fromItem.id).icon} → ${getItemDisplay(toItem.id).icon} ${toItem.label} <span class="cost">${buildCostStr(cost)}</span></span>
+                    <button ${canUpgrade ? '' : 'disabled'}>升級</button>
+                `;
+                div.querySelector('button').addEventListener('click', () => {
+                    if (!canUpgrade) { toast('材料不足！', 'warning'); return; }
+                    // 移除舊鎬（只從背包移除，工具不装备）
+                    removeItem(fromItem.id, 1);
+                    deductCost(cost);
+                    addItem(toItem.id, 1);
+                    toast(`✅ 升級為 ${toItem.label}`, 'success');
+                    $('shopGold').textContent = p.gold;
+                    renderToolsmith(container);
+                    updateUI();
+                    saveGameToLocal();
+                });
+                sec.appendChild(div);
+            } else {
+                // 已滿級
+                const div = document.createElement('div');
+                div.className = 'shop-item';
+                div.innerHTML = `<span>✨ ${getItemDisplay(toolChain[currentLevel].id).icon} ${toolChain[currentLevel].label}（已滿級）</span><span style="color:#4a8a5a;">✅</span>`;
+                sec.appendChild(div);
+            }
+
+            container.appendChild(sec);
+        }
+
+        function openTraderCamp() {
+            const p = G.player;
+            $('traderGold').textContent = p.gold;
+            const container = $('trader-grid');
+            container.innerHTML = '';
+
+            const goods = [
+                { id: 'coal', name: '煤炭', price: 1 },
+                { id: 'gold_ingot', name: '金锭', price: 5 },
+                { id: 'diamond', name: '鑽石', price: 20 },
+                { id: 'netherite', name: '獄髓', price: 50 },
+                { id: 'string', name: '線', price: 2 },
+                { id: 'feather', name: '羽毛', price: 2 },
+                { id: 'bone', name: '骨頭', price: 3 },
+                { id: 'wool', name: '羊毛', price: 4 },
+            ];
+
+            for (const g of goods) {
+                const div = document.createElement('div');
+                div.className = 'shop-item';
+                const canBuy = p.gold >= g.price;
+                const item = getItemDisplay(g.id);
+                div.innerHTML = `
+                    <span>${item.icon} ${g.name} <span class="cost">💰${g.price}</span></span>
+                    <button ${canBuy ? '' : 'disabled'}>購買</button>
+                `;
+                div.querySelector('button').addEventListener('click', () => {
+                    if (p.gold < g.price) { toast('金幣不足！', 'warning'); return; }
+                    p.gold -= g.price;
+                    addItem(g.id, 1);
+                    toast(`✅ 購買 ${g.name}`, 'success');
+                    $('traderGold').textContent = p.gold;
+                    openTraderCamp();
+                    updateUI();
+                    saveGameToLocal();
+                });
+                container.appendChild(div);
+            }
+
+            const refreshBtn = document.createElement('div');
+            refreshBtn.style.cssText = 'text-align:center;margin-top:8px;';
+            refreshBtn.innerHTML = `<button style="padding:4px 16px;background:#2a5a7a;border:none;border-radius:6px;color:#fff;cursor:pointer;">🔄 刷新商品</button>`;
+            refreshBtn.querySelector('button').addEventListener('click', () => {
+                toast('商品已刷新', 'info');
+                openTraderCamp();
+            });
+            container.appendChild(refreshBtn);
+
+            $('trader-modal').classList.add('active');
+        }
 
         // ---------- 休息 ----------
         function rest() {
@@ -2097,17 +2852,17 @@
                     G.gameTime = 0;
                     refreshMobsOnMap();
                     updateMusic();
-                    toast('🌅 睡了一覺，天亮了！', 'success', 2000); } else { toast(`⛺ 休息恢復 HP+${hpHeal} MP+${mpHeal} SP+${spHeal}`,
+                    toast('🌅 睡了一觉，天亮了！', 'success', 2000); } else { toast(`⛺ 休息恢复 HP+${hpHeal} MP+${mpHeal} SP+${spHeal}`,
                         'info'); }
                 updateUI();
                 render();
                 playSound(400, 0.3);
                 saveGameToLocal();
-            } else { toast('🛏️ 你需要一張床，且坐在床上才能休息！', 'warning'); }
+            } else { toast('🛏️ 你需要一张床，且坐在床上才能休息！', 'warning'); }
         }
 
         function placeBed() {
-            if (countItem('bed') < 1) { toast('你沒有床！', 'warning'); return; }
+            if (countItem('bed') < 1) { toast('你没有床！', 'warning'); return; }
             $('bed-modal').classList.add('active');
             window._bedPlacement = true;
             toast('🛏️ 點擊地圖上的空地放置床', 'info', 3000);
@@ -2171,12 +2926,14 @@
                         color = '#aaa'; } else if (obj.type === 'grass') { icon = '🌿';
                         color = '#4a8f5a'; } else if (obj.type === 'mob') { const mob = MOBS[obj.mobId];
                         icon = mob ? mob.name.split(' ')[0] : '👾';
-                        color = '#ff6b6b'; } else if (obj.type === 'arrow') { const dirs = { north: '⬆️', south: '⬇️',
-                            east: '➡️', west: '⬅️' };
+                        color = mob && mob.passive ? '#6ab04c' : '#ff6b6b'; } else if (obj.type === 'arrow') { const dirs =
+                            { north: '⬆️', south: '⬇️', east: '➡️', west: '⬅️' };
                         icon = dirs[obj.dir] || '➡️';
                         color = '#ffd700'; } else if (obj.type === 'village') { icon = '🏘️';
                         color = '#f1c40f'; } else if (obj.type === 'camp') { icon = '⛺';
-                        color = '#e67e22'; }
+                        color = '#e67e22'; } else if (obj.type === 'chest') { icon = '🎁';
+                        color = '#f39c12'; } else if (obj.type === 'web') { icon = '🕸️';
+                        color = '#aaa'; }
                     ctx.fillStyle = 'rgba(0,0,0,0.3)';
                     ctx.beginPath();
                     ctx.arc(cx, cy + 1, 14, 0, Math.PI * 2);
@@ -2301,18 +3058,22 @@
                     if (it) {
                         if (it.type === 'food') {
                             const heal = it.heal || 5;
-                            const spRestore = it.id === 'bread' ? 4 : 0;
-                            if (p.hp < p.maxHp || (spRestore > 0 && p.sp < p.maxSp)) {
+                            const mp = it.mp || 0;
+                            const sp = it.sp || 0;
+                            if (p.hp < p.maxHp || (mp > 0 && p.mp < p.maxMp) || (sp > 0 && p.sp < p.maxSp)) {
                                 p.hp = Math.min(p.maxHp, p.hp + heal);
-                                if (spRestore > 0) p.sp = Math.min(p.maxSp, p.sp + spRestore);
+                                if (mp > 0) p.mp = Math.min(p.maxMp, p.mp + mp);
+                                if (sp > 0) p.sp = Math.min(p.maxSp, p.sp + sp);
                                 removeItem(entry.id, 1);
-                                toast(`🍴 食用 ${it.name}，恢復 ${heal} HP${spRestore>0?' 和 '+spRestore+' SP':''}`,
-                                    'success');
+                                let msg = `🍴 食用 ${it.name}，恢复 ${heal} HP`;
+                                if (mp > 0) msg += ` +${mp} MP`;
+                                if (sp > 0) msg += ` +${sp} SP`;
+                                toast(msg, 'success');
                                 updateUI();
                                 renderInventory();
                                 render();
                                 saveGameToLocal();
-                            } else { toast('HP/SP已滿，不需要進食', 'info'); }
+                            } else { toast('HP/MP/SP已滿，不需要進食', 'info'); }
                             return;
                         }
                         if (it.type === 'bed') { placeBed(); return; }
@@ -2337,7 +3098,7 @@
                 { key: 'chestplate', label: '👕 胸甲', col: 2, row: 2 },
                 { key: 'shield', label: '🛡️ 盾牌', col: 3, row: 2 },
                 { key: 'gloves', label: '🧤 手套', col: 1, row: 3 },
-                { key: 'leggings', label: '👖 護腿', col: 2, row: 3 },
+                { key: 'leggings', label: '👖 护腿', col: 2, row: 3 },
                 { key: 'boots', label: '👢 靴子', col: 2, row: 4 },
             ];
             for (const slot of slots) {
@@ -2360,7 +3121,7 @@
                 return it && (it.type === 'weapon' || it.type === 'shield' || it.type === 'helmet' || it.type ===
                     'chestplate' || it.type === 'leggings' || it.type === 'boots' || it.type === 'gloves');
             });
-            if (equipable.length === 0) { avail.innerHTML = '<span style="color:#555;">沒有可裝備的物品</span>'; } else {
+            if (equipable.length === 0) { avail.innerHTML = '<span style="color:#555;">没有可装备的物品</span>'; } else {
                 for (const entry of equipable) {
                     const it = getItemDisplay(entry.id);
                     const span = document.createElement('span');
@@ -2385,7 +3146,7 @@
                 p.equipment[slot] = null;
                 addItem(oldId, 1); }
             if (removeItem(id, 1)) { p.equipment[slot] = id;
-                toast(`✅ 裝備 ${item.name}`, 'success');
+                toast(`✅ 装备 ${item.name}`, 'success');
                 renderEquipment();
                 updateUI();
                 checkAchievements();
@@ -2410,7 +3171,7 @@
             const p = G.player;
             const list = $('achievement-list');
             list.innerHTML = '';
-            if (p.achievements.length === 0) { list.innerHTML = '<div style="color:#666;padding:12px;">還沒有解鎖成就</div>'; return; }
+            if (p.achievements.length === 0) { list.innerHTML = '<div style="color:#666;padding:12px;">还没有解鎖成就</div>'; return; }
             const achMap = {
                 'first_kill': '🏆 初次獵殺',
                 'hunter': '🏆 獵人',
@@ -2437,11 +3198,11 @@
         function showStatus() {
             const p = G.player;
             const msg =
-                `🧒 ${p.name}  Lv.${p.level}\n❤️ HP ${Math.floor(p.hp)}/${p.maxHp}  🔮 MP ${Math.floor(p.mp)}/${p.maxMp}  ⚡ SP ${Math.floor(p.sp)}/${p.maxSp}\n⚔️ 攻擊 ${getPlayerAtk(p)}  🛡️ 防禦 ${getPlayerDef(p)}\n💰 金幣 ${p.gold}  ⭐ 經驗 ${Math.floor(p.exp)}/${getPlayerMaxExp(p)}\n🗡️ 擊殺 ${p.totalKills}  🪵 採集 ${p.totalCollects}  🚶 移動 ${p.totalMoves}\n🗺️ 探索區域: ${p.discoveredMaps.length} 個`;
+                `🧒 ${p.name}  Lv.${p.level}\n❤️ HP ${Math.floor(p.hp)}/${p.maxHp}  🔮 MP ${Math.floor(p.mp)}/${p.maxMp}  ⚡ SP ${Math.floor(p.sp)}/${p.maxSp}\n⚔️ 攻擊 ${getPlayerAtk(p)}  🛡️ 防御 ${getPlayerDef(p)}\n💰 金幣 ${p.gold}  ⭐ 經驗 ${Math.floor(p.exp)}/${getPlayerMaxExp(p)}\n🗡️ 擊殺 ${p.totalKills}  🪵 採集 ${p.totalCollects}  🚶 移動 ${p.totalMoves}\n🗺️ 探索區域: ${p.discoveredMaps.length} 个`;
             toast(msg, 'info', 5000);
         }
 
-        // ---------- 存檔：localStorage 自動保存 ----------
+        // ---------- 存档 ----------
         function saveGameToLocal() {
             if (!G.player) return;
             try {
@@ -2461,7 +3222,7 @@
                     gameOver: G.gameOver
                 };
                 localStorage.setItem('blockLegendSave', JSON.stringify(data));
-            } catch (e) { console.log('自动保存失败:', e); }
+            } catch (e) { console.log('自動保存失敗:', e); }
         }
 
         function loadGameFromLocal() {
@@ -2476,9 +3237,8 @@
 
         function clearLocalSave() { localStorage.removeItem('blockLegendSave'); }
 
-        // ===== 儲存為 .txt 檔案 =====
         function saveGame() {
-            if (!G.player) { toast('❌ 沒有遊戲進度可儲存', 'error'); return; }
+            if (!G.player) { toast('❌ 没有游戲進度可储存', 'error'); return; }
             try {
                 const data = {
                     player: G.player,
@@ -2500,21 +3260,20 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                const fileName = `方塊傳說_存檔_${G.player.name}_${new Date().toISOString().slice(0,10)}.txt`;
+                const fileName = `方块传说_存档_${G.player.name}_${new Date().toISOString().slice(0,10)}.txt`;
                 a.download = fileName;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                toast('💾 存檔已匯出為 .txt 檔案！', 'success');
+                toast('💾 存档已导出為 .txt 档案！', 'success');
                 saveGameToLocal();
             } catch (e) {
                 console.error(e);
-                toast('❌ 儲存失敗: ' + e.message, 'error');
+                toast('❌ 储存失敗: ' + e.message, 'error');
             }
         }
 
-        // ===== 從 .txt 檔案載入 =====
         function loadGame() {
             fileInput.click();
         }
@@ -2527,10 +3286,7 @@
                 try {
                     const json = ev.target.result;
                     const data = JSON.parse(json);
-                    if (!data.player || !data.maps) {
-                        toast('❌ 無效的存檔檔案', 'error');
-                        return;
-                    }
+                    if (!data.player || !data.maps) { toast('❌ 無效的存档档案', 'error'); return; }
                     G.player = data.player;
                     G.gameTime = data.gameTime || 0;
                     G.isNight = data.isNight || false;
@@ -2555,34 +3311,33 @@
                     if (G.weather === 'rain' || G.weather === 'thunder') startRainSound();
                     else stopRainSound();
                     saveGameToLocal();
-                    toast('📁 存檔載入成功！', 'success');
+                    toast('📁 存档载入成功！', 'success');
                     fileInput.value = '';
                 } catch (err) {
                     console.error(err);
-                    toast('❌ 載入失敗: ' + err.message, 'error');
+                    toast('❌ 载入失敗: ' + err.message, 'error');
                     fileInput.value = '';
                 }
             };
-            reader.onerror = function() {
-                toast('❌ 讀取檔案失敗', 'error');
-                fileInput.value = '';
-            };
+            reader.onerror = function() { toast('❌ 读取档案失敗', 'error');
+                fileInput.value = ''; };
             reader.readAsText(file);
         });
 
-        // ---------- 游戏循环 ----------
+        // ---------- 游戲循环 ----------
         function gameLoop() {
             const p = G.player;
             if (!p || G.gameOver) { requestAnimationFrame(gameLoop); return; }
             if (!G._timeCounter) G._timeCounter = 0;
             G._timeCounter++;
-            if (G._timeCounter >= 60) {
-				G._timeCounter = 0;
-				updateTimeAndWeather();
-			}
+            if (G._timeCounter >= 60) { G._timeCounter = 0;
+                updateTimeAndWeather(); }
             const now = Date.now();
             if (!G._spTime) G._spTime = now;
-            if (now - G._spTime > 3000) { G._spTime = now; if (p.sp < p.maxSp) { p.sp = Math.min(p.maxSp, p.sp + 1);
+            if (now - G._spTime > 5000) { G._spTime = now; if (p.sp < p.maxSp) { p.sp = Math.min(p.maxSp, p.sp + 1);
+                    updateUI(); } }
+            if (!G._mpTime) G._mpTime = now;
+            if (now - G._mpTime > 3000) { G._mpTime = now; if (p.mp < p.maxMp) { p.mp = Math.min(p.maxMp, p.mp + 1);
                     updateUI(); } }
             if (!G._mobTime) G._mobTime = now;
             if (now - G._mobTime > 4000) { G._mobTime = now;
@@ -2592,6 +3347,7 @@
         }
 
         function moveMobs() {
+            if (G.battle && !G.battle.ended) return;
             const map = G.map;
             if (!map) return;
             const p = G.player;
@@ -2609,6 +3365,7 @@
                 }
             }
             for (const mob of mobs) {
+                const mobData = MOBS[mob.obj.mobId];
                 if (Math.random() < 0.4) {
                     const dir = dirs[rand(0, 3)];
                     const nx = mob.x + dir[0],
@@ -2665,7 +3422,7 @@
                 modal.classList.add('active'); }
         }
 
-        // ---------- 启动流程 ----------
+        // ---------- 启動 ----------
         let _savedData = null;
 
         function startGameFromCover() {
@@ -2684,6 +3441,7 @@
                 G.isNight = false;
                 G.weather = 'clear';
                 G._spTime = Date.now();
+                G._mpTime = Date.now();
                 G._mobTime = Date.now();
                 G._timeCounter = 0;
                 G.bedPlaced = false;
@@ -2705,22 +3463,15 @@
                 updateUI();
                 render();
                 saveGameToLocal();
-                toast('🌍 歡迎！方向鍵移動 | R休息 | I背包 | E裝備', 'info', 3000);
+                toast('🌍 欢迎！方向键移動 | R休息 | I背包 | E装备', 'info', 3000);
             }
-            // 隐藏封面，显示游戏
             cover.style.display = 'none';
             game.style.display = 'flex';
 
-           initAudio();
-		   // ★★★ 关键修复：在封面隐藏后初始化音频并更新音乐 ★★★
-            if (!audioCtx) {
-				audioCtx = new(window.AudioContext || window.webkitAudioContext)();
-			}
-			if (audioCtx.state === 'suspended') {
-				audioCtx.resume().catch(e => console.warn('AudioContext resume 失敗:', e));
-			}
+            initAudio();
+            if (!audioCtx) { audioCtx = new(window.AudioContext || window.webkitAudioContext)(); }
+            if (audioCtx.state === 'suspended') { audioCtx.resume().catch(e => console.warn('AudioContext resume 失敗:', e)); }
             stopAllMusic();
-			// 现在封面已隐藏，updateMusic() 会根据游戏状态播放 Day/Night 音乐
             updateMusic();
 
             if (G._loopId) cancelAnimationFrame(G._loopId);
@@ -2749,20 +3500,16 @@
             updateUI();
             render();
             refreshMobsOnMap();
-            // 注意：此处不调用 updateMusic()，因为调用时封面可能还未隐藏
-            // 由 startGameFromCover 在封面隐藏后统一调用
             if (G.weather === 'rain' || G.weather === 'thunder') startRainSound();
             else stopRainSound();
-            toast('📁 存檔載入成功！', 'success');
+            toast('📁 存档载入成功！', 'success');
         }
 
         // ---------- 事件绑定 ----------
         $('btnStartGame').addEventListener('click', startGameFromCover);
-        $('playerNameInput').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') startGameFromCover();
-        });
+        $('playerNameInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') startGameFromCover(); });
         $('btnResetGame').addEventListener('click', () => {
-            if (confirm('確定要重新開始遊戲嗎？所有進度將遺失！')) {
+            if (confirm('确定要重新开始游戲吗？所有進度将遗失！')) {
                 localStorage.removeItem('blockLegendSave');
                 _savedData = null;
                 G = {
@@ -2797,7 +3544,7 @@
                 setTimeout(() => { if (cover.style.display !== 'none') { initAudio();
                         playMusic('title');
                         _coverMusicStarted = true; } }, 100);
-                toast('🔄 已重置遊戲', 'info');
+                toast('🔄 已重置游戲', 'info');
                 if (audioCtx) { try { audioCtx.close(); } catch (e) {}
                     audioCtx = null; }
             }
@@ -2814,17 +3561,15 @@
         document.addEventListener('click', () => {
             if (!audioCtx) initAudio();
             else if (audioCtx.state === 'suspended') audioCtx.resume();
-            if (cover.style.display !== 'none' && !_coverMusicStarted) {
-                playMusic('title');
-                _coverMusicStarted = true;
-            }
+            if (cover.style.display !== 'none' && !_coverMusicStarted) { playMusic('title');
+                _coverMusicStarted = true; }
         }, { once: false });
 
-        // 战斗按钮
+        // 戰鬥按钮
         $('battleAttackBtn').addEventListener('click', battleAttack);
         $('battleFleeBtn').addEventListener('click', battleFlee);
         $('battleCloseBtn').addEventListener('click', () => {
-            if (G.battle && !G.battle.ended) { if (confirm('戰鬥中離開視為逃跑，確定嗎？')) battleFlee(); } else { $(
+            if (G.battle && !G.battle.ended) { if (confirm('戰鬥中离开视為逃跑，确定吗？')) battleFlee(); } else { $(
                     'battle-modal').classList.remove('active');
                 G.battle = null;
                 updateMusic(); }
@@ -2854,7 +3599,7 @@
             el.addEventListener('click', (e) => {
                 if (e.target === el) {
                     if (el.id === 'battle-modal' && G.battle && !G.battle.ended) {
-                        if (confirm('戰鬥中離開視為逃跑，確定嗎？')) battleFlee();
+                        if (confirm('戰鬥中离开视為逃跑，确定吗？')) battleFlee();
                     } else {
                         el.classList.remove('active');
                         if (el.id === 'battle-modal') { G.battle = null;
@@ -2864,10 +3609,8 @@
             });
         });
 
-        // 画布点击
-        function isAnyModalOpen() {
-            return document.querySelector('.modal-overlay.active') !== null;
-        }
+        function isAnyModalOpen() { return document.querySelector('.modal-overlay.active') !== null; }
+
         canvas.addEventListener('click', (e) => {
             if (G.gameOver || G.battle) return;
             if (isAnyModalOpen()) return;
@@ -2899,8 +3642,8 @@
                             render();
                             updateUI();
                             saveGameToLocal();
-                        } else { toast('你沒有床！', 'warning'); }
-                    } else { toast('該位置無法放置床', 'warning'); }
+                        } else { toast('你没有床！', 'warning'); }
+                    } else { toast('该位置無法放置床', 'warning'); }
                 }
                 return;
             }
@@ -2915,7 +3658,6 @@
             }
         });
 
-        // 触摸
         let touchStartX = 0,
             touchStartY = 0;
         canvas.addEventListener('touchstart', (e) => {
@@ -2943,7 +3685,6 @@
             touchStartY = 0;
         }, { passive: true });
 
-        // 浮动按钮
         $('musicToggle').addEventListener('click', () => {
             musicEnabled = !musicEnabled;
             $('musicToggle').textContent = musicEnabled ? '🔊' : '🔇';
@@ -2952,46 +3693,42 @@
                 if (cover.style.display !== 'none') { playMusic('title');
                     _coverMusicStarted = true; } else updateMusic();
                 if (G.weather === 'rain' || G.weather === 'thunder') startRainSound();
-                toast('🔊 音樂已開啟', 'info');
+                toast('🔊 音乐已开启', 'info');
             } else {
                 stopAllMusic();
                 stopRainSound();
-                toast('🔇 音樂已關閉', 'info');
+                toast('🔇 音乐已关闭', 'info');
             }
         });
         $('fullscreenToggle').addEventListener('click', () => {
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => { toast('無法進入全螢幕', 'error'); });
+                document.documentElement.requestFullscreen().catch(err => { toast('無法進入全屏幕', 'error'); });
             } else { document.exitFullscreen(); }
         });
 
-        // 页面加载时预读存档
         window.addEventListener('load', () => {
             try {
                 const raw = localStorage.getItem('blockLegendSave');
                 if (raw) {
                     const data = JSON.parse(raw);
-                    if (data && data.player) {
-                        _savedData = data;
-                        console.log('✅ 发现存档，点击"展开冒险"即可继续');
-                    }
+                    if (data && data.player) { _savedData = data;
+                        console.log('✅ 發現存档，點擊"展开冒險"即可继续'); }
                 }
             } catch (e) {}
             setTimeout(() => {
                 if (cover.style.display !== 'none') {
                     initAudio();
-                    if (audioCtx && audioCtx.state === 'running') {
-                        playMusic('title');
-                        _coverMusicStarted = true;
-                    }
+                    if (audioCtx && audioCtx.state === 'running') { playMusic('title');
+                        _coverMusicStarted = true; }
                 }
             }, 500);
         });
 
-        console.log('⛏️ 方塊傳說 · 終極版 (完整修复版) 已載入！');
-        console.log('🎮 操作: 方向鍵移動 | R休息 | I背包 | E裝備');
-        console.log('💾 儲存/載入 .txt 檔已啟用');
-        console.log('🎵 音樂修復: 進入地圖後自動切換 Day/Night 音樂');
+        console.log('⛏️ 方块传说已载入！');
+        console.log('🎮 操作: 方向键移動 | R休息 | I背包 | E装备');
+        console.log('📦 新增: 弓/弩升級鏈、魚類、鸡/鸭/蜜蜂/蜘蛛、寶箱/蜘蛛網');
+        console.log('🌧️ 天氣: 洞穴/海洋/河流/沙漠不下雨');
+        console.log('🔄 被動生物日夜不消失');
     </script>
 </body>
 </html>
