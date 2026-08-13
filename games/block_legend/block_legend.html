@@ -893,9 +893,9 @@
                 </div>
             </div>
             <div id="action-bar">
-                <button id="btnStatus">📊 狀態</button>
-                <button id="btnEquip">🛡️ 裝備</button>
                 <button id="btnInventory">🎒 背包</button>
+				<button id="btnEquip">🛡️ 裝備</button>
+				<button id="btnStatus">📊 狀態</button>
                 <button id="btnRest" class="primary">⛺ 休息</button>
                 <button id="btnAchievement">🏆 成就</button>
                 <button id="btnSave">💾 儲存</button>
@@ -1324,7 +1324,10 @@
             thunderFlash: 0,
             _spTime: 0,
             _mobTime: 0,
-            _timeCounter: 0
+            _timeCounter: 0,
+			mapGrid: {},
+			playerMapRow: 0,
+			playerMapCol: 0
         };
 
         // ---------- 玩家 ----------
@@ -1490,7 +1493,7 @@
             }
 
             // ---------- 資源（海洋/河流不生成樹/石/礦） ----------
-            if (!is('ocean') && !is('river')) {
+            if (!is('ocean') && !is('river') && !is('ice')) {
                 const treeCount = is('forest') ? 18 : is('plain') ? 10 : is('desert') ? 6 : 4;
                 for (let i = 0; i < treeCount; i++) {
                     const x = rand(1, w - 2),
@@ -1638,41 +1641,61 @@
         }
 
         function switchMap(mapId, px, py) {
-            const p = G.player;
-            p.mapId = mapId;
-            p.x = clamp(px !== undefined ? px : 9, 0, 18);
-            p.y = clamp(py !== undefined ? py : 9, 0, 18);
-            G.map = getMap(mapId);
-            if (!G.player.discoveredMaps.includes(mapId)) {
-                G.player.discoveredMaps.push(mapId);
-                toast('🗺️ 發現新區域: ' + MAP_TYPES[mapId].name, 'info');
-                checkAchievements();
-            }
-            updateMapName();
-            refreshMobsOnMap();
-            render();
-            updateUI();
-            if (mapId === 'ocean' || mapId === 'river') {
-                toast('🌊 進入水域，移動將消耗氧氣 (MP)！', 'warning', 2000);
-            }
-            updateMusic();
-            saveGameToLocal();
-        }
+			const p = G.player;
+			p.mapId = mapId;
+			p.x = clamp(px !== undefined ? px : 9, 0, 18);
+			p.y = clamp(py !== undefined ? py : 9, 0, 18);
+			G.map = getMap(mapId);
+			if (!G.player.discoveredMaps.includes(mapId)) {
+				G.player.discoveredMaps.push(mapId);
+				toast('🗺️ 發現新區域: ' + MAP_TYPES[mapId].name, 'info');
+				checkAchievements();
+			}
+			updateMapName();
+			refreshMobsOnMap();
+			render();
+			updateUI();
+			updateMusic();
+			saveGameToLocal();
+		}
 
-        function handleArrow(dir, x, y) {
-            const currentId = G.player.mapId;
-            const nextId = getAdjacentMap(currentId, dir);
-            const mid = 9;
-            let spawnX = mid,
-                spawnY = mid;
-            if (dir === 'east') { spawnX = 0;
-                spawnY = mid; } else if (dir === 'west') { spawnX = 18;
-                spawnY = mid; } else if (dir === 'south') { spawnX = mid;
-                spawnY = 0; } else if (dir === 'north') { spawnX = mid;
-                spawnY = 18; }
-            toast('🚀 前往 ' + MAP_TYPES[nextId].name, 'info');
-            switchMap(nextId, spawnX, spawnY);
-        }
+		function handleArrow(dir, x, y) {
+			const currentMapId = G.player.mapId;
+			const opposite = { 'north': 'south', 'south': 'north', 'east': 'west', 'west': 'east' };
+			
+			// 先查是否已有相鄰地圖
+			let nextMapId = G.mapAdjacency[currentMapId]?.[dir];
+			
+			if (!nextMapId) {
+				// 隨機生成新地圖
+				let pool = RANDOM_MAP_POOL.filter(id => id !== currentMapId && !['nether','end','heaven'].includes(id));
+				const discovered = G.player.discoveredMaps || [];
+				const undiscovered = pool.filter(id => !discovered.includes(id));
+				if (undiscovered.length > 0) pool = undiscovered;
+				if (pool.length === 0) pool = RANDOM_MAP_POOL.filter(id => id !== currentMapId);
+				nextMapId = pool[rand(0, pool.length - 1)];
+				
+				// 記錄雙向關係
+				if (!G.mapAdjacency[currentMapId]) G.mapAdjacency[currentMapId] = {};
+				if (!G.mapAdjacency[nextMapId]) G.mapAdjacency[nextMapId] = {};
+				G.mapAdjacency[currentMapId][dir] = nextMapId;
+				G.mapAdjacency[nextMapId][opposite[dir]] = currentMapId;
+				
+				// 生成地圖實例
+				getMap(nextMapId);
+			}
+			
+			// 計算出生點（地圖邊緣）
+			const mid = 9;
+			let spawnX = mid, spawnY = mid;
+			if (dir === 'east')  { spawnX = 0; spawnY = mid; }
+			else if (dir === 'west')  { spawnX = 18; spawnY = mid; }
+			else if (dir === 'south') { spawnX = mid; spawnY = 0; }
+			else if (dir === 'north') { spawnX = mid; spawnY = 18; }
+			
+			// 切換地圖（不再需要 row/col 參數）
+			switchMap(nextMapId, spawnX, spawnY);
+		}
 
         // ---------- 刷新生物 (被動生物不消失) ----------
         function refreshMobsOnMap() {
@@ -3626,7 +3649,9 @@
 
         // ---------- 鍵盤 ----------
         document.addEventListener('keydown', (e) => {
-            const key = e.key;
+            if (cover.style.display !== 'none') return;
+			if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+			const key = e.key;
             if (G.gameOver || G.battle) return;
             if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'W', 's', 'S', 'a', 'A', 'd', 'D'].includes(key)) {
                 e.preventDefault();
@@ -3670,7 +3695,7 @@
         function startGameFromCover() {
             const name = $('playerNameInput').value.trim() || '史蒂夫';
             if (_savedData) {
-                loadGameFromLocalData(_savedData);
+				loadGameFromLocalData(_savedData);
                 _savedData = null;
             } else {
                 const player = createPlayer(name);
@@ -3774,7 +3799,10 @@
                     thunderFlash: 0,
                     _spTime: 0,
                     _mobTime: 0,
-                    _timeCounter: 0
+                    _timeCounter: 0,
+					mapGrid: {},
+					playerMapRow: 0,
+					playerMapCol: 0
                 };
                 game.style.display = 'none';
                 cover.style.display = 'flex';
