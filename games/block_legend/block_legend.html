@@ -487,13 +487,24 @@
         #inventory-grid .item-slot {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 8px;
-            padding: 4px;
+            padding: 4px 2px;
+			min-height: 60px;
             text-align: center;
             border: 1px solid #2a4a6a;
             cursor: pointer;
             transition: 0.2s;
             font-size: 11px;
         }
+		#inventory-grid .item-slot .item-desc {
+			font-size: 8px;
+			color: #888;
+			margin-top: 1px;
+			line-height: 1.2;
+			max-height: 24px;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
         #inventory-grid .item-slot:hover {
             background: rgba(255, 255, 255, 0.12);
             border-color: #6a8fc9;
@@ -952,6 +963,130 @@
             clearTimeout(_toastTimer);
             _toastTimer = setTimeout(() => toastEl.classList.remove('show'), duration);
         }
+
+		// ======== 全局辅助函数（供所有商店共用） ========
+		function hasItem(id) {
+			const p = G.player;
+			if (!p) return false;
+			return countItem(id) > 0 || Object.values(p.equipment).includes(id);
+		}
+
+		function canAfford(cost) {
+			const p = G.player;
+			if (!cost) return true;
+			if (cost.wood && countItem('wood') < cost.wood) return false;
+			if (cost.stone && countItem('stone') < cost.stone) return false;
+			if (cost.leather && countItem('leather') < cost.leather) return false;
+			if (cost.copper_ore && countItem('copper_ore') < cost.copper_ore) return false;
+			if (cost.iron_ore && countItem('iron_ore') < cost.iron_ore) return false;
+			if (cost.gold_ore && countItem('gold_ore') < cost.gold_ore) return false;
+			if (cost.diamond && countItem('diamond') < cost.diamond) return false;
+			if (cost.netherite && countItem('netherite') < cost.netherite) return false;
+			if (cost.gold && p.gold < cost.gold) return false;
+			return true;
+		}
+
+		function buildCostStr(cost) {
+			let parts = [];
+			if (cost.wood) parts.push(`🎋${cost.wood}`);
+			if (cost.stone) parts.push(`🗻${cost.stone}`);
+			if (cost.leather) parts.push(`🟫${cost.leather}`);
+			if (cost.copper_ore) parts.push(`🟠${cost.copper_ore}`);
+			if (cost.iron_ore) parts.push(`🔩${cost.iron_ore}`);
+			if (cost.gold_ore) parts.push(`🟡${cost.gold_ore}`);
+			if (cost.diamond) parts.push(`💎${cost.diamond}`);
+			if (cost.netherite) parts.push(`⚫${cost.netherite}`);
+			if (cost.gold) parts.push(`💰${cost.gold}`);
+			return parts.join(' ') || '（免費）';
+		}
+
+		function deductCost(cost) {
+			const p = G.player;
+			if (cost.wood) removeItem('wood', cost.wood);
+			if (cost.stone) removeItem('stone', cost.stone);
+			if (cost.leather) removeItem('leather', cost.leather);
+			if (cost.copper_ore) removeItem('copper_ore', cost.copper_ore);
+			if (cost.iron_ore) removeItem('iron_ore', cost.iron_ore);
+			if (cost.gold_ore) removeItem('gold_ore', cost.gold_ore);
+			if (cost.diamond) removeItem('diamond', cost.diamond);
+			if (cost.netherite) removeItem('netherite', cost.netherite);
+			if (cost.gold) p.gold -= cost.gold;
+		}
+		
+		function renderUpgradeChain(container, config) {
+			const p = G.player;
+			if (!p) return;
+
+			const section = document.createElement('div');
+			section.className = 'shop-section';
+			const arrow = config.ids.map(id => getItemDisplay(id).icon).join('→');
+			section.innerHTML = `<h3>${config.label}</h3>${config.sub ? `<div class="sub">${config.sub}</div>` : `<div class="sub">${arrow}</div>`}`;
+			let currentLevel = -1;
+			for (let i = 0; i < config.ids.length; i++) {
+				if (hasItem(config.ids[i])) {
+					currentLevel = i;
+				}
+			}
+
+			const div = document.createElement('div');
+			div.className = 'shop-item';
+
+			if (currentLevel === -1) {
+				const baseId = config.ids[0];
+				const cost = config.baseCost;
+				const canBuy = canAfford(cost);
+				div.innerHTML = `
+					<span>${getItemDisplay(baseId).icon} ${getItemDisplay(baseId).name} <span class="cost">${buildCostStr(cost)}</span></span>
+					<button ${canBuy ? '' : 'disabled'}>購買</button>
+				`;
+				div.querySelector('button').addEventListener('click', () => {
+					if (!canBuy) { toast('材料不足！', 'warning'); return; }
+					if (hasItem(baseId)) { toast('你已經有了', 'warning'); return; }
+					deductCost(cost);
+					addItem(baseId, 1);
+					toast(`✅ 獲得 ${getItemDisplay(baseId).name}`, 'success');
+					// 刷新商店（重新渲染整个容器）
+					container.innerHTML = '';
+					renderUpgradeChain(container, config);
+					updateUI();
+					saveGameToLocal();
+				});
+			} else if (currentLevel < config.ids.length - 1) {
+				const fromId = config.ids[currentLevel];
+				const toId = config.ids[currentLevel + 1];
+				const cost = config.upgradeCosts[currentLevel];
+				const canUpgrade = canAfford(cost);
+				div.innerHTML = `
+					<span>${getItemDisplay(fromId).icon} → ${getItemDisplay(toId).icon} ${getItemDisplay(toId).name} <span class="cost">${buildCostStr(cost)}</span></span>
+					<button ${canUpgrade ? '' : 'disabled'}>升級</button>
+				`;
+				div.querySelector('button').addEventListener('click', () => {
+					if (!canUpgrade) { toast('材料不足！', 'warning'); return; }
+					if (!hasItem(fromId)) { toast('你沒有前置物品', 'warning'); return; }
+					if (config.slot && p.equipment[config.slot] === fromId) {
+						p.equipment[config.slot] = null;
+					} else {
+						removeItem(fromId, 1);
+					}
+					deductCost(cost);
+					addItem(toId, 1);
+					toast(`✅ 升級為 ${getItemDisplay(toId).name}`, 'success');
+					container.innerHTML = '';
+					renderUpgradeChain(container, config);
+					updateUI();
+					saveGameToLocal();
+				});
+			} else {
+				const maxId = config.ids[config.ids.length - 1];
+				div.innerHTML = `
+					<span>✨ ${getItemDisplay(maxId).icon} ${getItemDisplay(maxId).name}（已滿級）</span>
+					<span style="color:#4a8a5a;">✅</span>
+				`;
+			}
+
+			section.appendChild(div);
+			container.appendChild(section);
+		}
 
         // ---------- 音頻 ----------
         let audioCtx = null;
@@ -1630,12 +1765,73 @@
 
             return { id: mapId, width: w, height: h, terrain, objects };
         }
+		
+		// ========== 地圖壓縮 / 解壓縮 ==========
+		function compressMap(map) {
+			const w = map.width || 19;
+			const h = map.height || 19;
+			const terrainDiff = {};
+			const objectsDiff = {};
+			const defaultTerrain = 'plain';  // 預設地形（可依實際情況調整）
 
+			for (let y = 0; y < h; y++) {
+				for (let x = 0; x < w; x++) {
+					const t = map.terrain[y]?.[x];
+					if (t && t !== defaultTerrain) {
+						terrainDiff[`${x},${y}`] = t;
+					}
+					const o = map.objects[y]?.[x];
+					if (o) {
+						objectsDiff[`${x},${y}`] = o;
+					}
+				}
+			}
+			return {
+				id: map.id,
+				w,
+				h,
+				terrainDiff,
+				objectsDiff
+			};
+		}
+
+		function decompressMap(data) {
+			if (data.terrainDiff && data.objectsDiff) {
+				const w = data.w || 19;
+				const h = data.h || 19;
+				const defaultTerrain = data.id || 'plain';
+				const terrain = [];
+				const objects = [];
+				for (let y = 0; y < h; y++) {
+					terrain[y] = new Array(w).fill(defaultTerrain);
+					objects[y] = new Array(w).fill(null);
+				}
+				for (const [key, val] of Object.entries(data.terrainDiff)) {
+					const [x, y] = key.split(',').map(Number);
+					if (x >= 0 && x < w && y >= 0 && y < h) terrain[y][x] = val;
+				}
+				for (const [key, val] of Object.entries(data.objectsDiff)) {
+					const [x, y] = key.split(',').map(Number);
+					if (x >= 0 && x < w && y >= 0 && y < h) objects[y][x] = val;
+				}
+				return { id: data.id, width: w, height: h, terrain, objects };
+			}
+			console.warn('⚠️ 地圖資料不完整或格式錯誤，重新生成:', data.id || 'unknown');
+			return generateMap(data.id || 'plain');
+		}
+		
         // ---------- 地圖管理 ----------
         function getMap(id) {
-            if (!G.maps[id]) G.maps[id] = generateMap(id);
-            return G.maps[id];
-        }
+			if (!G.maps[id]) G.maps[id] = generateMap(id);
+			const map = G.maps[id];
+			if (!Array.isArray(map.terrain) || map.terrain.length === 0 ||
+				!Array.isArray(map.objects) || map.objects.length === 0) {
+				console.warn(`getMap: 地圖 ${id} 損壞，重新生成`);
+				G.maps[id] = generateMap(id);
+				return G.maps[id];
+			}
+			return map;
+		}
 
         function getAdjacentMap(currentId, dir) {
             if (!G.mapAdjacency[currentId]) G.mapAdjacency[currentId] = {};
@@ -1661,6 +1857,22 @@
 				G.player.discoveredMaps.push(mapId);
 				toast('🗺️ 發現新區域: ' + MAP_TYPES[mapId].name, 'info');
 				checkAchievements();
+			}
+			if (NO_RAIN_MAPS.includes(mapId)) {
+				G.weather = 'clear';
+				stopRainSound();
+				// 停止雨滴循环
+				if (window._rainLoopId) {
+					cancelAnimationFrame(window._rainLoopId);
+					window._rainLoopId = null;
+				}
+				rainCtx.clearRect(0, 0, 608, 608);
+			} else {
+				// 若当前天气是 rain/thunder，启动雨声和雨滴
+				if (G.weather === 'rain' || G.weather === 'thunder') {
+					startRainSound();
+					if (!window._rainLoopId) drawRain();
+				}
 			}
 			updateMapName();
 			refreshMobsOnMap();
@@ -1712,6 +1924,12 @@
         function refreshMobsOnMap() {
             const map = G.map;
             if (!map) return;
+			if (!Array.isArray(map.terrain) || map.terrain.length === 0) {
+				console.warn('refreshMobsOnMap: 地图 terrain 无效，重新生成');
+				G.map = generateMap(G.player.mapId || 'plain');
+				G.maps[G.player.mapId] = G.map;
+				return;
+			}
             const isNight = G.isNight;
             const isRain = G.weather === 'rain' || G.weather === 'thunder';
             const isOcean = map.id === 'ocean' || map.id === 'river';
@@ -2277,375 +2495,196 @@
             $('shop-modal').classList.add('active');
         }
 
-        // ----- 武器匠（全新升級鏈版本）-----
+        // ----- 武器匠-----
         function renderWeaponsmith(container) {
-            const p = G.player;
+			container.innerHTML = '';
 
-            // --- 輔助函數：檢查玩家是否擁有某武器（背包或裝備中） ---
-            function hasWeapon(id) {
-                return countItem(id) > 0 || p.equipment.weapon === id;
-            }
+			// 剑
+			renderUpgradeChain(container, {
+				label: '⚔️ 劍',
+				ids: ['wood_sword', 'stone_sword', 'copper_sword', 'iron_sword', 'gold_sword', 'diamond_sword', 'netherite_sword'],
+				baseCost: { wood: 3, gold: 0 },
+				upgradeCosts: [
+					{ wood: 1, stone: 2, gold: 30 },
+					{ wood: 1, copper_ore: 2, gold: 60 },
+					{ wood: 1, iron_ore: 2, gold: 90 },
+					{ wood: 1, gold_ore: 2, gold: 120 },
+					{ wood: 1, diamond: 2, gold: 150 },
+					{ wood: 1, netherite: 2, gold: 180 }
+				],
+				slot: 'weapon'
+			});
 
-            // --- 輔助函數：檢查材料是否充足 ---
-            function canAfford(cost) {
-                if (!cost) return true;
-                if (cost.wood && countItem('wood') < cost.wood) return false;
-                if (cost.stone && countItem('stone') < cost.stone) return false;
-                if (cost.copper_ore && countItem('copper_ore') < cost.copper_ore) return false;
-                if (cost.iron_ore && countItem('iron_ore') < cost.iron_ore) return false;
-                if (cost.gold_ore && countItem('gold_ore') < cost.gold_ore) return false;
-                if (cost.diamond && countItem('diamond') < cost.diamond) return false;
-                if (cost.netherite && countItem('netherite') < cost.netherite) return false;
-                if (cost.gold && p.gold < cost.gold) return false;
-                return true;
-            }
+			// 斧
+			renderUpgradeChain(container, {
+				label: '🪓 斧',
+				ids: ['wood_axe', 'stone_axe', 'copper_axe', 'iron_axe', 'gold_axe', 'diamond_axe', 'netherite_axe'],
+				baseCost: { wood: 5, gold: 0 },
+				upgradeCosts: [
+					{ wood: 2, stone: 3, gold: 40 },
+					{ wood: 2, copper_ore: 3, gold: 70 },
+					{ wood: 2, iron_ore: 3, gold: 100 },
+					{ wood: 2, gold_ore: 3, gold: 130 },
+					{ wood: 2, diamond: 3, gold: 160 },
+					{ wood: 2, netherite: 3, gold: 190 }
+				],
+				slot: 'weapon'
+			});
 
-            // --- 輔助函數：生成一个武器鏈的顯示 ---
-            function renderChain(chainData, sectionTitle) {
-                const items = chainData;
-                const section = document.createElement('div');
-                section.className = 'shop-section';
-                section.innerHTML = `<h3>${sectionTitle}</h3>`;
+			// 打刀（含村雨/村正）
+			renderUpgradeChain(container, {
+				label: '🔪 打刀',
+				ids: ['wood_katana', 'stone_katana', 'copper_katana', 'iron_katana', 'gold_katana', 'diamond_katana', 'netherite_katana', 'murasame', 'muramasa'],
+				baseCost: { wood: 3, gold: 0 },
+				upgradeCosts: [
+					{ wood: 1, stone: 2, gold: 30 },
+					{ wood: 1, copper_ore: 2, gold: 60 },
+					{ wood: 1, iron_ore: 2, gold: 90 },
+					{ wood: 1, gold_ore: 2, gold: 120 },
+					{ wood: 1, diamond: 2, gold: 150 },
+					{ wood: 1, netherite: 2, gold: 180 },
+					{ wood: 1, diamond: 3, gold: 210 },
+					{ wood: 1, netherite: 3, gold: 240 }
+				],
+				slot: 'weapon'
+			});
+			//  向玩家收購資源
+			const sellSection = document.createElement('div');
+			sellSection.className = 'shop-section';
+			sellSection.innerHTML = '<h3>💰 出售資源</h3><div class="sub">將多餘材料賣給他</div>';
 
-                // 1. 找到玩家擁有的該類型武器的最高級别
-                let currentLevel = -1;
-                for (let i = 0; i < items.length; i++) {
-                    if (hasWeapon(items[i].id)) {
-                        currentLevel = i;
-                    }
-                }
+			const sellable = [
+				{ id: 'wood',       icon: '🎋', name: '木材',    price: 1 },
+				{ id: 'stone',      icon: '🗻', name: '石頭',    price: 1 },
+				{ id: 'copper_ore', icon: '🟠', name: '銅礦',    price: 2 },
+				{ id: 'iron_ore',   icon: '🔩', name: '鐵礦',    price: 3 },
+				{ id: 'gold_ore',   icon: '🟡', name: '金礦',    price: 5 },
+				{ id: 'diamond',    icon: '💎', name: '鑽石',    price: 15 },
+				{ id: 'netherite',  icon: '⚫', name: '獄髓',    price: 40 },
+				{ id: 'string',     icon: '🧵', name: '線',      price: 1 },
+				{ id: 'leather',    icon: '🟫', name: '皮革',    price: 2 },
+				{ id: 'bone',       icon: '🦴', name: '骨頭',    price: 2 },
+				{ id: 'coal',       icon: '⚫', name: '煤炭',    price: 1 },
+				{ id: 'gold_ingot', icon: '🥇', name: '金錠',    price: 4 },
+			];
 
-                // 2. 根据當前狀態决定顯示什么
-                if (currentLevel === -1) {
-                    // 沒有任何該類型武器 → 顯示購買基礎武器（第0級）
-                    const base = items[0];
-                    const cost = { ...base };
-                    // 移除 label 和 id，只保留材料字段
-                    delete cost.label;
-                    delete cost.id;
-                    const canBuy = canAfford(cost);
-                    const div = document.createElement('div');
-                    div.className = 'shop-item';
-                    const costStr = buildCostString(cost);
-                    div.innerHTML = `
-                        <span>${getItemDisplay(base.id).icon} ${base.label} <span class="cost">${costStr}</span></span>
-                        <button ${canBuy ? '' : 'disabled'}>購買</button>
-                    `;
-                    div.querySelector('button').addEventListener('click', () => {
-                        if (!canBuy) { toast('材料不足！', 'warning'); return; }
-                        if (hasWeapon(base.id)) { toast('你已經有了', 'warning'); return; }
-                        // 扣除材料
-                        deductCost(cost);
-                        addItem(base.id, 1);
-                        toast(`✅ 獲得 ${base.label}`, 'success');
-                        $('shopGold').textContent = p.gold;
-                        renderWeaponsmith(container);
-                        updateUI();
-                        saveGameToLocal();
-                    });
-                    section.appendChild(div);
-                } else if (currentLevel < items.length - 1) {
-                    // 有武器但不是最高級 → 顯示升級到下一級
-                    const nextItem = items[currentLevel + 1];
-                    const cost = { ...nextItem };
-                    delete cost.label;
-                    delete cost.id;
-                    const canUpgrade = canAfford(cost);
-                    const div = document.createElement('div');
-                    div.className = 'shop-item';
-                    const costStr = buildCostString(cost);
-                    div.innerHTML = `
-                        <span>${getItemDisplay(items[currentLevel].id).icon} → ${getItemDisplay(nextItem.id).icon} ${nextItem.label} <span class="cost">${costStr}</span></span>
-                        <button ${canUpgrade ? '' : 'disabled'}>升級</button>
-                    `;
-                    div.querySelector('button').addEventListener('click', () => {
-                        if (!canUpgrade) { toast('材料不足！', 'warning'); return; }
-                        if (!hasWeapon(items[currentLevel].id)) { toast('你沒有前置武器', 'warning'); return; }
-                        // 移除舊武器
-                        if (p.equipment.weapon === items[currentLevel].id) {
-                            p.equipment.weapon = null;
-                        } else {
-                            removeItem(items[currentLevel].id, 1);
-                        }
-                        // 扣除材料
-                        deductCost(cost);
-                        addItem(nextItem.id, 1);
-                        toast(`✅ 升級為 ${nextItem.label}`, 'success');
-                        $('shopGold').textContent = p.gold;
-                        renderWeaponsmith(container);
-                        updateUI();
-                        saveGameToLocal();
-                    });
-                    section.appendChild(div);
-                } else {
-                    // 已經擁有最高級 → 顯示已滿級
-                    const div = document.createElement('div');
-                    div.className = 'shop-item';
-                    div.innerHTML = `
-                        <span>✨ ${getItemDisplay(items[currentLevel].id).icon} ${items[currentLevel].label}（已滿級）</span>
-                        <span style="color:#4a8a5a;">✅</span>
-                    `;
-                    section.appendChild(div);
-                }
+			for (const item of sellable) {
+				const count = countItem(item.id);
+				const div = document.createElement('div');
+				div.className = 'shop-item';
+				const canSell = count > 0;
 
-                container.appendChild(section);
-            }
+				div.innerHTML = `
+					<span>${item.icon} ${item.name} x1 <span class="cost">💰 ${item.price}</span> (持有: ${count})</span>
+					<button ${canSell ? '' : 'disabled'}>出售</button>
+				`;
 
-            // --- 輔助函數：構建成本字符串 ---
-            function buildCostString(cost) {
-                let parts = [];
-                if (cost.wood) parts.push(`🎋${cost.wood}`);
-                if (cost.stone) parts.push(`🗻${cost.stone}`);
-                if (cost.copper_ore) parts.push(`🟠${cost.copper_ore}`);
-                if (cost.iron_ore) parts.push(`🔩${cost.iron_ore}`);
-                if (cost.gold_ore) parts.push(`🟡${cost.gold_ore}`);
-                if (cost.diamond) parts.push(`💎${cost.diamond}`);
-                if (cost.netherite) parts.push(`⚫${cost.netherite}`);
-                if (cost.gold) parts.push(`💰${cost.gold}`);
-                return parts.join(' ') || '（免費）';
-            }
+				div.querySelector('button').addEventListener('click', () => {
+					const p = G.player;
+					if (!p) {
+						toast('玩家数据丢失', 'error');
+						return;
+					}
+					if (removeItem(item.id, 1)) {
+						p.gold += item.price;
+						toast(`💰 賣出 ${item.name} +${item.price}金`, 'success');
+						$('shopGold').textContent = p.gold;
+						renderWeaponsmith(container);
+						updateUI();
+						saveGameToLocal();
+					} else {
+						toast('❌ 材料不足', 'warning');
+					}
+				});
 
-            // --- 輔助函數：扣除材料 ---
-            function deductCost(cost) {
-                if (cost.wood) removeItem('wood', cost.wood);
-                if (cost.stone) removeItem('stone', cost.stone);
-                if (cost.copper_ore) removeItem('copper_ore', cost.copper_ore);
-                if (cost.iron_ore) removeItem('iron_ore', cost.iron_ore);
-                if (cost.gold_ore) removeItem('gold_ore', cost.gold_ore);
-                if (cost.diamond) removeItem('diamond', cost.diamond);
-                if (cost.netherite) removeItem('netherite', cost.netherite);
-                if (cost.gold) p.gold -= cost.gold;
-            }
+				sellSection.appendChild(div);
+			}
 
-            // =========================================================
-            // 1. 劍鏈
-            // =========================================================
-            const swordChain = [
-                { id: 'wood_sword', label: '木劍', wood: 3, gold: 0 },
-                { id: 'stone_sword', label: '石劍', wood: 1, stone: 2, gold: 30 },
-                { id: 'copper_sword', label: '銅劍', wood: 1, copper_ore: 2, gold: 60 },
-                { id: 'iron_sword', label: '鐵劍', wood: 1, iron_ore: 2, gold: 90 },
-                { id: 'gold_sword', label: '金劍', wood: 1, gold_ore: 2, gold: 120 },
-                { id: 'diamond_sword', label: '鑽石劍', wood: 1, diamond: 2, gold: 150 },
-                { id: 'netherite_sword', label: '獄髓劍', wood: 1, netherite: 2, gold: 180 },
-            ];
-            renderChain(swordChain, '⚔️ 劍');
-
-            // =========================================================
-            // 2. 斧鏈
-            // =========================================================
-            const axeChain = [
-                { id: 'wood_axe', label: '木斧', wood: 5, gold: 0 },
-                { id: 'stone_axe', label: '石斧', wood: 2, stone: 3, gold: 40 },
-                { id: 'copper_axe', label: '銅斧', wood: 2, copper_ore: 3, gold: 70 },
-                { id: 'iron_axe', label: '鐵斧', wood: 2, iron_ore: 3, gold: 100 },
-                { id: 'gold_axe', label: '金斧', wood: 2, gold_ore: 3, gold: 130 },
-                { id: 'diamond_axe', label: '鑽石斧', wood: 2, diamond: 3, gold: 160 },
-                { id: 'netherite_axe', label: '獄髓斧', wood: 2, netherite: 3, gold: 190 },
-            ];
-            renderChain(axeChain, '🪓 斧');
-
-            // =========================================================
-            // 3. 打刀鏈（包含村雨、村正）
-            // =========================================================
-            const katanaChain = [
-                { id: 'wood_katana', label: '木打刀', wood: 3, gold: 0 },
-                { id: 'stone_katana', label: '石打刀', wood: 1, stone: 2, gold: 30 },
-                { id: 'copper_katana', label: '銅打刀', wood: 1, copper_ore: 2, gold: 60 },
-                { id: 'iron_katana', label: '鐵打刀', wood: 1, iron_ore: 2, gold: 90 },
-                { id: 'gold_katana', label: '金打刀', wood: 1, gold_ore: 2, gold: 120 },
-                { id: 'diamond_katana', label: '鑽石打刀', wood: 1, diamond: 2, gold: 150 },
-                { id: 'netherite_katana', label: '獄髓打刀', wood: 1, netherite: 2, gold: 180 },
-                { id: 'murasame', label: '村雨', wood: 1, diamond: 3, gold: 210 },
-                { id: 'muramasa', label: '妖刀村正', wood: 1, netherite: 3, gold: 240 },
-            ];
-            renderChain(katanaChain, '🔪 打刀');
+			container.appendChild(sellSection);
         }
 
         // ----- 制箭匠（全新升級鏈版本）-----
         function renderFletcher(container) {
-            const p = G.player;
+			container.innerHTML = '';
 
-            // 輔助：獲取當前持有的最高級别索引（-1 表示沒有）
-            function getCurrentLevel(chain) {
-                let level = -1;
-                for (let i = 0; i < chain.length; i++) {
-                    if (countItem(chain[i]) > 0 || (p.equipment.weapon === chain[i])) {
-                        level = i;
-                    }
-                }
-                return level;
-            }
+			// 弓
+			renderUpgradeChain(container, {
+				label: '🏹 弓',
+				ids: ['bow', 'short_bow', 'long_bow', 'hunt_bow', 'elf_bow'],
+				baseCost: { wood: 3, string: 1, gold: 5 },
+				upgradeCosts: [
+					{ wood: 3, string: 3, gold: 0 },
+					{ wood: 4, string: 4, gold: 30 },
+					{ wood: 5, string: 5, gold: 60 },
+					{ wood: 6, string: 6, gold: 90 }
+				],
+				slot: 'weapon',
+				sub: '木弓→短弓→長弓→獵弓→精靈弓'
+			});
 
-            // 輔助：構建成本字符串
-            function buildCostStr(cost) {
-                let parts = [];
-                if (cost.wood) parts.push(`🎋${cost.wood}`);
-                if (cost.string) parts.push(`🧵${cost.string}`);
-                if (cost.copper_ore) parts.push(`🟠${cost.copper_ore}`);
-                if (cost.iron_ore) parts.push(`🔩${cost.iron_ore}`);
-                if (cost.gold_ore) parts.push(`🟡${cost.gold_ore}`);
-                if (cost.diamond) parts.push(`💎${cost.diamond}`);
-                if (cost.netherite) parts.push(`⚫${cost.netherite}`);
-                if (cost.gold) parts.push(`💰${cost.gold}`);
-                return parts.join(' ') || '（免費）';
-            }
+			// 弩
+			renderUpgradeChain(container, {
+				label: '🎯 弩',
+				ids: ['crossbow', 'light_crossbow', 'heavy_crossbow', 'heavy_crossbow2', 'zhuge'],
+				baseCost: { wood: 3, string: 2, copper_ore: 1, gold: 8 },
+				upgradeCosts: [
+					{ wood: 4, string: 3, iron_ore: 1, gold: 45 },
+					{ wood: 5, string: 4, gold_ore: 1, gold: 80 },
+					{ wood: 6, string: 5, diamond: 1, gold: 115 },
+					{ wood: 7, string: 6, netherite: 1, gold: 150 }
+				],
+				slot: 'weapon',
+				sub: '弩→輕弩→十字弩→重弩→諸葛連弩'
+			});
+			const sellSection = document.createElement('div');
+			sellSection.className = 'shop-section';
+			sellSection.innerHTML = '<h3>💰 出售資源</h3><div class="sub">將多餘材料賣給制箭匠</div>';
 
-            // 輔助：扣除材料（通用）
-            function deductCost(cost) {
-                if (cost.wood) removeItem('wood', cost.wood);
-                if (cost.string) removeItem('string', cost.string);
-                if (cost.copper_ore) removeItem('copper_ore', cost.copper_ore);
-                if (cost.iron_ore) removeItem('iron_ore', cost.iron_ore);
-                if (cost.gold_ore) removeItem('gold_ore', cost.gold_ore);
-                if (cost.diamond) removeItem('diamond', cost.diamond);
-                if (cost.netherite) removeItem('netherite', cost.netherite);
-                if (cost.gold) p.gold -= cost.gold;
-            }
+			const sellable = [
+				{ id: 'wood',       icon: '🎋', name: '木材',    price: 1 },
+				{ id: 'string',     icon: '🧵', name: '線',      price: 2 },
+				{ id: 'feather',    icon: '🕊️', name: '羽毛',    price: 2 },
+				{ id: 'bone',       icon: '🦴', name: '骨頭',    price: 2 },
+				{ id: 'leather',    icon: '🟫', name: '皮革',    price: 2 },
+				{ id: 'wool',       icon: '🧶', name: '羊毛',    price: 3 },
+				// 可依需求增删其他资源
+			];
 
-            // ----- 弓部分 -----
-            const bowSection = document.createElement('div');
-            bowSection.className = 'shop-section';
-            bowSection.innerHTML = '<h3>🏹 弓</h3><div class="sub">木弓→短弓→長弓→獵弓→精靈弓</div>';
+			for (const item of sellable) {
+				const count = countItem(item.id);
+				const div = document.createElement('div');
+				div.className = 'shop-item';
+				const canSell = count > 0;
 
-            const bowLevel = getCurrentLevel(BOW_CHAIN);
-            if (bowLevel === -1) {
-                // 沒有弓 → 顯示購買木弓
-                const cost = { wood: 3, string: 1, gold: 5 };
-                const canBuy = (countItem('wood') >= cost.wood) &&
-                               (countItem('string') >= cost.string) &&
-                               (p.gold >= cost.gold);
-                const div = document.createElement('div');
-                div.className = 'shop-item';
-                div.innerHTML = `
-                    <span>${getItemDisplay(BOW_CHAIN[0]).icon} 木弓 <span class="cost">${buildCostStr(cost)}</span></span>
-                    <button ${canBuy ? '' : 'disabled'}>購買</button>
-                `;
-                div.querySelector('button').addEventListener('click', () => {
-                    if (!canBuy) { toast('材料不足！', 'warning'); return; }
-                    deductCost(cost);
-                    addItem(BOW_CHAIN[0], 1);
-                    toast('✅ 獲得木弓！', 'success');
-                    $('shopGold').textContent = p.gold;
-                    renderFletcher(container); // 刷新
-                    updateUI();
-                    saveGameToLocal();
-                });
-                bowSection.appendChild(div);
-            } else if (bowLevel < BOW_CHAIN.length - 1) {
-                // 有弓但不是最高級 → 顯示升級到下一級
-                const fromId = BOW_CHAIN[bowLevel];
-                const toId = BOW_CHAIN[bowLevel + 1];
-                const cost = BOW_UPGRADE_COST[bowLevel];
-                const canUpgrade = (countItem('wood') >= cost.wood) &&
-                                   (countItem('string') >= cost.string) &&
-                                   (p.gold >= cost.gold);
-                const div = document.createElement('div');
-                div.className = 'shop-item';
-                div.innerHTML = `
-                    <span>${getItemDisplay(fromId).icon} → ${getItemDisplay(toId).icon} <span class="cost">${buildCostStr(cost)}</span></span>
-                    <button ${canUpgrade ? '' : 'disabled'}>升級</button>
-                `;
-                div.querySelector('button').addEventListener('click', () => {
-                    if (!canUpgrade) { toast('材料不足！', 'warning'); return; }
-                    // 移除舊弓
-                    if (p.equipment.weapon === fromId) {
-                        p.equipment.weapon = null;
-                    } else {
-                        removeItem(fromId, 1);
-                    }
-                    deductCost(cost);
-                    addItem(toId, 1);
-                    toast(`✅ 升級為 ${getItemDisplay(toId).name}`, 'success');
-                    $('shopGold').textContent = p.gold;
-                    renderFletcher(container);
-                    updateUI();
-                    saveGameToLocal();
-                });
-                bowSection.appendChild(div);
-            } else {
-                // 已滿級
-                const div = document.createElement('div');
-                div.className = 'shop-item';
-                div.innerHTML = `<span>✨ ${getItemDisplay(BOW_CHAIN[bowLevel]).icon} ${getItemDisplay(BOW_CHAIN[bowLevel]).name}（已滿級）</span><span style="color:#4a8a5a;">✅</span>`;
-                bowSection.appendChild(div);
-            }
-            container.appendChild(bowSection);
+				div.innerHTML = `
+					<span>${item.icon} ${item.name} x1 <span class="cost">💰 ${item.price}</span> (持有: ${count})</span>
+					<button ${canSell ? '' : 'disabled'}>出售</button>
+				`;
 
-            // ----- 弩部分 -----
-            const crossbowSection = document.createElement('div');
-            crossbowSection.className = 'shop-section';
-            crossbowSection.innerHTML = '<h3>🎯 弩</h3><div class="sub">弩→輕弩→十字弩→重弩→諸葛連弩</div>';
+				div.querySelector('button').addEventListener('click', () => {
+					const p = G.player;
+					if (!p) {
+						toast('玩家数据丢失', 'error');
+						return;
+					}
+					if (removeItem(item.id, 1)) {
+						p.gold += item.price;
+						toast(`💰 賣出 ${item.name} +${item.price}金`, 'success');
+						// 刷新商店界面
+						$('shopGold').textContent = p.gold;
+						renderFletcher(container);
+						updateUI();
+						saveGameToLocal();
+					} else {
+						toast('❌ 材料不足', 'warning');
+					}
+				});
 
-            const xbowLevel = getCurrentLevel(CROSSBOW_CHAIN);
-            if (xbowLevel === -1) {
-                // 沒有弩 → 顯示購買弩
-                const cost = { wood: 3, string: 2, copper_ore: 1, gold: 8 };
-                const canBuy = (countItem('wood') >= cost.wood) &&
-                               (countItem('string') >= cost.string) &&
-                               (countItem('copper_ore') >= cost.copper_ore) &&
-                               (p.gold >= cost.gold);
-                const div = document.createElement('div');
-                div.className = 'shop-item';
-                div.innerHTML = `
-                    <span>${getItemDisplay(CROSSBOW_CHAIN[0]).icon} 弩 <span class="cost">${buildCostStr(cost)}</span></span>
-                    <button ${canBuy ? '' : 'disabled'}>購買</button>
-                `;
-                div.querySelector('button').addEventListener('click', () => {
-                    if (!canBuy) { toast('材料不足！', 'warning'); return; }
-                    deductCost(cost);
-                    addItem(CROSSBOW_CHAIN[0], 1);
-                    toast('✅ 獲得弩！', 'success');
-                    $('shopGold').textContent = p.gold;
-                    renderFletcher(container);
-                    updateUI();
-                    saveGameToLocal();
-                });
-                crossbowSection.appendChild(div);
-            } else if (xbowLevel < CROSSBOW_CHAIN.length - 1) {
-                // 有弩但不是最高級 → 顯示升級到下一級
-                const fromId = CROSSBOW_CHAIN[xbowLevel];
-                const toId = CROSSBOW_CHAIN[xbowLevel + 1];
-                const cost = CROSSBOW_UPGRADE_COST[xbowLevel];
-                // 檢查材料
-                const canUpgrade = (countItem('wood') >= (cost.wood || 0)) &&
-                                   (countItem('string') >= (cost.string || 0)) &&
-                                   (cost.copper_ore ? countItem('copper_ore') >= cost.copper_ore : true) &&
-                                   (cost.iron_ore ? countItem('iron_ore') >= cost.iron_ore : true) &&
-                                   (cost.gold_ore ? countItem('gold_ore') >= cost.gold_ore : true) &&
-                                   (cost.diamond ? countItem('diamond') >= cost.diamond : true) &&
-                                   (cost.netherite ? countItem('netherite') >= cost.netherite : true) &&
-                                   (p.gold >= (cost.gold || 0));
-                const div = document.createElement('div');
-                div.className = 'shop-item';
-                div.innerHTML = `
-                    <span>${getItemDisplay(fromId).icon} → ${getItemDisplay(toId).icon} <span class="cost">${buildCostStr(cost)}</span></span>
-                    <button ${canUpgrade ? '' : 'disabled'}>升級</button>
-                `;
-                div.querySelector('button').addEventListener('click', () => {
-                    if (!canUpgrade) { toast('材料不足！', 'warning'); return; }
-                    if (p.equipment.weapon === fromId) {
-                        p.equipment.weapon = null;
-                    } else {
-                        removeItem(fromId, 1);
-                    }
-                    deductCost(cost);
-                    addItem(toId, 1);
-                    toast(`✅ 升級為 ${getItemDisplay(toId).name}`, 'success');
-                    $('shopGold').textContent = p.gold;
-                    renderFletcher(container);
-                    updateUI();
-                    saveGameToLocal();
-                });
-                crossbowSection.appendChild(div);
-            } else {
-                const div = document.createElement('div');
-                div.className = 'shop-item';
-                div.innerHTML = `<span>✨ ${getItemDisplay(CROSSBOW_CHAIN[xbowLevel]).icon} ${getItemDisplay(CROSSBOW_CHAIN[xbowLevel]).name}（已滿級）</span><span style="color:#4a8a5a;">✅</span>`;
-                crossbowSection.appendChild(div);
-            }
-            container.appendChild(crossbowSection);
-        }
+				sellSection.appendChild(div);
+			}
+
+			container.appendChild(sellSection);
+		}
 
         function renderFarmer(container) {
             const p = G.player;
@@ -2716,353 +2755,122 @@
 
 		function renderArmorer(container) {
 			const p = G.player;
-			function hasItem(id) {
-				return countItem(id) > 0 || Object.values(p.equipment).includes(id);
-			}
+			if (!p) return;
+			container.innerHTML = '';
 
-			function canAfford(cost) {
-				if (cost.wood && countItem('wood') < cost.wood) return false;
-				if (cost.stone && countItem('stone') < cost.stone) return false;
-				if (cost.leather && countItem('leather') < cost.leather) return false;
-				if (cost.copper_ore && countItem('copper_ore') < cost.copper_ore) return false;
-				if (cost.iron_ore && countItem('iron_ore') < cost.iron_ore) return false;
-				if (cost.gold_ore && countItem('gold_ore') < cost.gold_ore) return false;
-				if (cost.diamond && countItem('diamond') < cost.diamond) return false;
-				if (cost.netherite && countItem('netherite') < cost.netherite) return false;
-				if (cost.gold && p.gold < cost.gold) return false;
-				return true;
-			}
+			// 盾牌
+			renderUpgradeChain(container, {
+				label: '🛡️ 盾牌',
+				ids: ['wood_shield', 'stone_shield', 'copper_shield', 'iron_shield', 'gold_shield', 'diamond_shield', 'netherite_shield'],
+				baseCost: { wood: 2, gold: 0 },
+				upgradeCosts: [
+					{ wood: 1, stone: 2, gold: 5 },
+					{ wood: 1, copper_ore: 2, gold: 10 },
+					{ wood: 1, iron_ore: 2, gold: 20 },
+					{ wood: 1, gold_ore: 2, gold: 40 },
+					{ wood: 1, diamond: 2, gold: 80 },
+					{ wood: 1, netherite: 2, gold: 160 }
+				],
+				slot: 'shield',
+				sub: '木盾→石盾→銅盾→鐵盾→金盾→鑽石盾→獄髓盾'
+			});
 
-			function buildCostStr(cost) {
-				let parts = [];
-				if (cost.wood) parts.push(`🎋${cost.wood}`);
-				if (cost.stone) parts.push(`🗻${cost.stone}`);
-				if (cost.leather) parts.push(`🟫${cost.leather}`);
-				if (cost.copper_ore) parts.push(`🟠${cost.copper_ore}`);
-				if (cost.iron_ore) parts.push(`🔩${cost.iron_ore}`);
-				if (cost.gold_ore) parts.push(`🟡${cost.gold_ore}`);
-				if (cost.diamond) parts.push(`💎${cost.diamond}`);
-				if (cost.netherite) parts.push(`⚫${cost.netherite}`);
-				if (cost.gold) parts.push(`💰${cost.gold}`);
-				return parts.join(' ') || '（免費）';
-			}
+			// 頭盔
+			renderUpgradeChain(container, {
+				label: '⛑️ 頭盔',
+				ids: ['leather_helmet', 'copper_helmet', 'iron_helmet', 'gold_helmet', 'diamond_helmet', 'netherite_helmet'],
+				baseCost: { leather: 2, gold: 5 },
+				upgradeCosts: [
+					{ leather: 1, copper_ore: 2, gold: 10 },
+					{ leather: 1, iron_ore: 2, gold: 20 },
+					{ leather: 1, gold_ore: 2, gold: 40 },
+					{ leather: 1, diamond: 2, gold: 80 },
+					{ leather: 1, netherite: 2, gold: 160 }
+				],
+				slot: 'helmet',
+				sub: '皮帽→銅頭盔→鐵頭盔→金頭盔→鑽石頭盔→獄髓頭盔'
+			});
 
-			function deductCost(cost) {
-				if (cost.wood) removeItem('wood', cost.wood);
-				if (cost.stone) removeItem('stone', cost.stone);
-				if (cost.leather) removeItem('leather', cost.leather);
-				if (cost.copper_ore) removeItem('copper_ore', cost.copper_ore);
-				if (cost.iron_ore) removeItem('iron_ore', cost.iron_ore);
-				if (cost.gold_ore) removeItem('gold_ore', cost.gold_ore);
-				if (cost.diamond) removeItem('diamond', cost.diamond);
-				if (cost.netherite) removeItem('netherite', cost.netherite);
-				if (cost.gold) p.gold -= cost.gold;
-			}
+			// 胸甲
+			renderUpgradeChain(container, {
+				label: '👕 胸甲',
+				ids: ['leather_chestplate', 'copper_chestplate', 'iron_chestplate', 'gold_chestplate', 'diamond_chestplate', 'netherite_chestplate'],
+				baseCost: { leather: 3, gold: 10 },
+				upgradeCosts: [
+					{ leather: 1, copper_ore: 2, gold: 10 },
+					{ leather: 1, iron_ore: 2, gold: 20 },
+					{ leather: 1, gold_ore: 2, gold: 40 },
+					{ leather: 1, diamond: 2, gold: 80 },
+					{ leather: 1, netherite: 2, gold: 160 }
+				],
+				slot: 'chestplate',
+				sub: '皮甲→銅甲→鐵甲→金甲→鑽石甲→獄髓甲'
+			});
 
-			// ---------- 定義所有升級鏈 ----------
-			const chains = [
-				{
-					label: '🛡️ 盾牌',
-					ids: ['wood_shield', 'stone_shield', 'copper_shield', 'iron_shield', 'gold_shield', 'diamond_shield', 'netherite_shield'],
-					// 購買第一級所需材料
-					baseCost: { wood: 2, gold: 0 },
-					// 每一級升級到下一級所需材料（數組長度 = ids.length - 1）
-					upgradeCosts: [
-						{ wood: 1, stone: 2, gold: 5 },
-						{ wood: 1, copper_ore: 2, gold: 10 },
-						{ wood: 1, iron_ore: 2, gold: 20 },
-						{ wood: 1, gold_ore: 2, gold: 40 },
-						{ wood: 1, diamond: 2, gold: 80 },
-						{ wood: 1, netherite: 2, gold: 160 }
-					]
-				},
-				{
-					label: '⛑️ 頭盔',
-					ids: ['leather_helmet', 'copper_helmet', 'iron_helmet', 'gold_helmet', 'diamond_helmet', 'netherite_helmet'],
-					baseCost: { leather: 2, gold: 5 },
-					upgradeCosts: [
-						{ leather: 1, copper_ore: 2, gold: 10 },
-						{ leather: 1, iron_ore: 2, gold: 20 },
-						{ leather: 1, gold_ore: 2, gold: 40 },
-						{ leather: 1, diamond: 2, gold: 80 },
-						{ leather: 1, netherite: 2, gold: 160 }
-					]
-				},
-				{
-					label: '👕 胸甲',
-					ids: ['leather_chestplate', 'copper_chestplate', 'iron_chestplate', 'gold_chestplate', 'diamond_chestplate', 'netherite_chestplate'],
-					baseCost: { leather: 3, gold: 10 },
-					upgradeCosts: [
-						{ leather: 1, copper_ore: 2, gold: 10 },
-						{ leather: 1, iron_ore: 2, gold: 20 },
-						{ leather: 1, gold_ore: 2, gold: 40 },
-						{ leather: 1, diamond: 2, gold: 80 },
-						{ leather: 1, netherite: 2, gold: 160 }
-					]
-				},
-				{
-					label: '🧤 手套',
-					ids: ['leather_gloves', 'copper_gloves', 'iron_gloves', 'gold_gloves', 'diamond_gloves', 'netherite_gloves'],
-					baseCost: { leather: 2, gold: 4 },
-					upgradeCosts: [
-						{ leather: 1, copper_ore: 2, gold: 10 },
-						{ leather: 1, iron_ore: 2, gold: 20 },
-						{ leather: 1, gold_ore: 2, gold: 40 },
-						{ leather: 1, diamond: 2, gold: 80 },
-						{ leather: 1, netherite: 2, gold: 160 }
-					]
-				},
-				{
-					label: '👖 護腿',
-					ids: ['leather_leggings', 'copper_leggings', 'iron_leggings', 'gold_leggings', 'diamond_leggings', 'netherite_leggings'],
-					baseCost: { leather: 2, gold: 8 },
-					upgradeCosts: [
-						{ leather: 1, copper_ore: 2, gold: 10 },
-						{ leather: 1, iron_ore: 2, gold: 20 },
-						{ leather: 1, gold_ore: 2, gold: 40 },
-						{ leather: 1, diamond: 2, gold: 80 },
-						{ leather: 1, netherite: 2, gold: 160 }
-					]
-				},
-				{
-					label: '👢 靴子',
-					ids: ['leather_boots', 'copper_boots', 'iron_boots', 'gold_boots', 'diamond_boots', 'netherite_boots'],
-					baseCost: { leather: 2, gold: 6 },
-					upgradeCosts: [
-						{ leather: 1, copper_ore: 2, gold: 10 },
-						{ leather: 1, iron_ore: 2, gold: 20 },
-						{ leather: 1, gold_ore: 2, gold: 40 },
-						{ leather: 1, diamond: 2, gold: 80 },
-						{ leather: 1, netherite: 2, gold: 160 }
-					]
-				}
-			];
+			// 手套
+			renderUpgradeChain(container, {
+				label: '🧤 手套',
+				ids: ['leather_gloves', 'copper_gloves', 'iron_gloves', 'gold_gloves', 'diamond_gloves', 'netherite_gloves'],
+				baseCost: { leather: 2, gold: 4 },
+				upgradeCosts: [
+					{ leather: 1, copper_ore: 2, gold: 10 },
+					{ leather: 1, iron_ore: 2, gold: 20 },
+					{ leather: 1, gold_ore: 2, gold: 40 },
+					{ leather: 1, diamond: 2, gold: 80 },
+					{ leather: 1, netherite: 2, gold: 160 }
+				],
+				slot: 'gloves',
+				sub: '皮手套→銅手套→鐵手套→金手套→鑽石手套→獄髓手套'
+			});
 
-			// ---------- 渲染每個類別 ----------
-			for (const chain of chains) {
-				const section = document.createElement('div');
-				section.className = 'shop-section';
-				const arrow = chain.ids.length > 1 ? 
-					chain.ids.map(id => getItemDisplay(id).icon).join('→') : 
-					getItemDisplay(chain.ids[0]).icon;
-				section.innerHTML = `<h3>${chain.label}</h3><div class="sub">${arrow}</div>`;
+			// 護腿
+			renderUpgradeChain(container, {
+				label: '👖 護腿',
+				ids: ['leather_leggings', 'copper_leggings', 'iron_leggings', 'gold_leggings', 'diamond_leggings', 'netherite_leggings'],
+				baseCost: { leather: 2, gold: 8 },
+				upgradeCosts: [
+					{ leather: 1, copper_ore: 2, gold: 10 },
+					{ leather: 1, iron_ore: 2, gold: 20 },
+					{ leather: 1, gold_ore: 2, gold: 40 },
+					{ leather: 1, diamond: 2, gold: 80 },
+					{ leather: 1, netherite: 2, gold: 160 }
+				],
+				slot: 'leggings',
+				sub: '皮褲→銅護腿→鐵護腿→金護腿→鑽石護腿→獄髓護腿'
+			});
 
-				// 計算目前擁有的最高等級索引
-				let currentLevel = -1;
-				for (let i = 0; i < chain.ids.length; i++) {
-					if (hasItem(chain.ids[i])) {
-						currentLevel = i;
-					}
-				}
-
-				const div = document.createElement('div');
-				div.className = 'shop-item';
-
-				if (currentLevel === -1) {
-					// 沒有任何該類型裝備 → 顯示購買基礎版
-					const baseId = chain.ids[0];
-					const cost = chain.baseCost;
-					const canBuy = canAfford(cost);
-					div.innerHTML = `
-						<span>${getItemDisplay(baseId).icon} ${getItemDisplay(baseId).name} <span class="cost">${buildCostStr(cost)}</span></span>
-						<button ${canBuy ? '' : 'disabled'}>購買</button>
-					`;
-					div.querySelector('button').addEventListener('click', () => {
-						if (!canBuy) { toast('材料不足！', 'warning'); return; }
-						if (hasItem(baseId)) { toast('你已經有了', 'warning'); return; }
-						deductCost(cost);
-						addItem(baseId, 1);
-						toast(`✅ 獲得 ${getItemDisplay(baseId).name}`, 'success');
-						$('shopGold').textContent = p.gold;
-						renderArmorer(container);
-						updateUI();
-						saveGameToLocal();
-					});
-				} else if (currentLevel < chain.ids.length - 1) {
-					// 擁有但不是最高級 → 顯示升級到下一級
-					const fromId = chain.ids[currentLevel];
-					const toId = chain.ids[currentLevel + 1];
-					const cost = chain.upgradeCosts[currentLevel];
-					const canUpgrade = canAfford(cost);
-					div.innerHTML = `
-						<span>${getItemDisplay(fromId).icon} → ${getItemDisplay(toId).icon} ${getItemDisplay(toId).name} <span class="cost">${buildCostStr(cost)}</span></span>
-						<button ${canUpgrade ? '' : 'disabled'}>升級</button>
-					`;
-					div.querySelector('button').addEventListener('click', () => {
-						if (!canUpgrade) { toast('材料不足！', 'warning'); return; }
-						if (!hasItem(fromId)) { toast('你沒有前置裝備', 'warning'); return; }
-						// 卸下或移除舊物品
-						const slotMap = {
-							'wood_shield': 'shield', 'stone_shield': 'shield', 'copper_shield': 'shield', 
-							'iron_shield': 'shield', 'gold_shield': 'shield', 'diamond_shield': 'shield', 
-							'netherite_shield': 'shield',
-							'leather_helmet': 'helmet', 'copper_helmet': 'helmet', 'iron_helmet': 'helmet',
-							'gold_helmet': 'helmet', 'diamond_helmet': 'helmet', 'netherite_helmet': 'helmet',
-							'leather_chestplate': 'chestplate', 'copper_chestplate': 'chestplate', 
-							'iron_chestplate': 'chestplate', 'gold_chestplate': 'chestplate',
-							'diamond_chestplate': 'chestplate', 'netherite_chestplate': 'chestplate',
-							'leather_leggings': 'leggings', 'copper_leggings': 'leggings', 
-							'iron_leggings': 'leggings', 'gold_leggings': 'leggings',
-							'diamond_leggings': 'leggings', 'netherite_leggings': 'leggings',
-							'leather_boots': 'boots', 'copper_boots': 'boots', 'iron_boots': 'boots',
-							'gold_boots': 'boots', 'diamond_boots': 'boots', 'netherite_boots': 'boots',
-							'leather_gloves': 'gloves', 'copper_gloves': 'gloves', 'iron_gloves': 'gloves',
-							'gold_gloves': 'gloves', 'diamond_gloves': 'gloves', 'netherite_gloves': 'gloves'
-						};
-						const slot = slotMap[fromId];
-						if (slot && p.equipment[slot] === fromId) {
-							p.equipment[slot] = null;
-						} else {
-							removeItem(fromId, 1);
-						}
-						deductCost(cost);
-						addItem(toId, 1);
-						toast(`✅ 升級為 ${getItemDisplay(toId).name}`, 'success');
-						$('shopGold').textContent = p.gold;
-						renderArmorer(container);
-						updateUI();
-						saveGameToLocal();
-					});
-				} else {
-					// 已满级
-					const maxId = chain.ids[chain.ids.length - 1];
-					div.innerHTML = `
-						<span>✨ ${getItemDisplay(maxId).icon} ${getItemDisplay(maxId).name}（已滿級）</span>
-						<span style="color:#4a8a5a;">✅</span>
-					`;
-				}
-				section.appendChild(div);
-				container.appendChild(section);
-			}
+			// 靴子
+			renderUpgradeChain(container, {
+				label: '👢 靴子',
+				ids: ['leather_boots', 'copper_boots', 'iron_boots', 'gold_boots', 'diamond_boots', 'netherite_boots'],
+				baseCost: { leather: 2, gold: 6 },
+				upgradeCosts: [
+					{ leather: 1, copper_ore: 2, gold: 10 },
+					{ leather: 1, iron_ore: 2, gold: 20 },
+					{ leather: 1, gold_ore: 2, gold: 40 },
+					{ leather: 1, diamond: 2, gold: 80 },
+					{ leather: 1, netherite: 2, gold: 160 }
+				],
+				slot: 'boots',
+				sub: '皮靴→銅靴→鐵靴→金靴→鑽石靴→獄髓靴'
+			});
 		}
 
         function renderToolsmith(container) {
-            const p = G.player;
-            const sec = document.createElement('div');
-            sec.className = 'shop-section';
-            sec.innerHTML = '<h3>⛏️ 鎬</h3><div class="sub">木鎬→石鎬→銅鎬→鐵鎬→金鎬→鑽石鎬→獄髓鎬</div>';
+			container.innerHTML = '';
 
-            const toolChain = [
-                { id: 'wood_pickaxe', label: '木鎬', wood: 2, gold: 0 },
-                { id: 'stone_pickaxe', label: '石鎬', wood: 1, stone: 2, gold: 5 },
-                { id: 'copper_pickaxe', label: '銅鎬', wood: 1, copper_ore: 2, gold: 10 },
-                { id: 'iron_pickaxe', label: '鐵鎬', wood: 1, iron_ore: 2, gold: 20 },
-                { id: 'gold_pickaxe', label: '金鎬', wood: 1, gold_ore: 2, gold: 40 },
-                { id: 'diamond_pickaxe', label: '鑽石鎬', wood: 1, diamond: 2, gold: 80 },
-                { id: 'netherite_pickaxe', label: '獄髓鎬', wood: 1, netherite: 2, gold: 160 },
-            ];
-
-            // 輔助：檢查是否擁有
-            function hasTool(id) {
-                return countItem(id) > 0 || Object.values(p.equipment).includes(id);
-            }
-
-            // 輔助：檢查材料
-            function canAfford(cost) {
-                if (cost.wood && countItem('wood') < cost.wood) return false;
-                if (cost.stone && countItem('stone') < cost.stone) return false;
-                if (cost.copper_ore && countItem('copper_ore') < cost.copper_ore) return false;
-                if (cost.iron_ore && countItem('iron_ore') < cost.iron_ore) return false;
-                if (cost.gold_ore && countItem('gold_ore') < cost.gold_ore) return false;
-                if (cost.diamond && countItem('diamond') < cost.diamond) return false;
-                if (cost.netherite && countItem('netherite') < cost.netherite) return false;
-                if (cost.gold && p.gold < cost.gold) return false;
-                return true;
-            }
-
-            // 輔助：構建成本字符串
-            function buildCostStr(cost) {
-                let parts = [];
-                if (cost.wood) parts.push(`🎋${cost.wood}`);
-                if (cost.stone) parts.push(`🗻${cost.stone}`);
-                if (cost.copper_ore) parts.push(`🟠${cost.copper_ore}`);
-                if (cost.iron_ore) parts.push(`🔩${cost.iron_ore}`);
-                if (cost.gold_ore) parts.push(`🟡${cost.gold_ore}`);
-                if (cost.diamond) parts.push(`💎${cost.diamond}`);
-                if (cost.netherite) parts.push(`⚫${cost.netherite}`);
-                if (cost.gold) parts.push(`💰${cost.gold}`);
-                return parts.join(' ') || '（免費）';
-            }
-
-            // 輔助：扣除材料
-            function deductCost(cost) {
-                if (cost.wood) removeItem('wood', cost.wood);
-                if (cost.stone) removeItem('stone', cost.stone);
-                if (cost.copper_ore) removeItem('copper_ore', cost.copper_ore);
-                if (cost.iron_ore) removeItem('iron_ore', cost.iron_ore);
-                if (cost.gold_ore) removeItem('gold_ore', cost.gold_ore);
-                if (cost.diamond) removeItem('diamond', cost.diamond);
-                if (cost.netherite) removeItem('netherite', cost.netherite);
-                if (cost.gold) p.gold -= cost.gold;
-            }
-
-            // 獲取當前等級
-            let currentLevel = -1;
-            for (let i = 0; i < toolChain.length; i++) {
-                if (hasTool(toolChain[i].id)) {
-                    currentLevel = i;
-                }
-            }
-
-            if (currentLevel === -1) {
-                // 沒有任何鎬 → 顯示購買木鎬
-                const base = toolChain[0];
-                const cost = { wood: base.wood, gold: base.gold };
-                const canBuy = canAfford(cost);
-                const div = document.createElement('div');
-                div.className = 'shop-item';
-                div.innerHTML = `
-                    <span>${getItemDisplay(base.id).icon} ${base.label} <span class="cost">${buildCostStr(cost)}</span></span>
-                    <button ${canBuy ? '' : 'disabled'}>購買</button>
-                `;
-                div.querySelector('button').addEventListener('click', () => {
-                    if (!canBuy) { toast('材料不足！', 'warning'); return; }
-                    deductCost(cost);
-                    addItem(base.id, 1);
-                    toast(`✅ 獲得 ${base.label}`, 'success');
-                    $('shopGold').textContent = p.gold;
-                    renderToolsmith(container);
-                    updateUI();
-                    saveGameToLocal();
-                });
-                sec.appendChild(div);
-            } else if (currentLevel < toolChain.length - 1) {
-                // 有鎬但不是最高級 → 顯示升級到下一級
-                const fromItem = toolChain[currentLevel];
-                const toItem = toolChain[currentLevel + 1];
-                const cost = { ...toItem };
-                delete cost.id;
-                delete cost.label;
-                const canUpgrade = canAfford(cost);
-                const div = document.createElement('div');
-                div.className = 'shop-item';
-                div.innerHTML = `
-                    <span>${getItemDisplay(fromItem.id).icon} → ${getItemDisplay(toItem.id).icon} ${toItem.label} <span class="cost">${buildCostStr(cost)}</span></span>
-                    <button ${canUpgrade ? '' : 'disabled'}>升級</button>
-                `;
-                div.querySelector('button').addEventListener('click', () => {
-                    if (!canUpgrade) { toast('材料不足！', 'warning'); return; }
-                    // 移除舊鎬（只從背包移除，工具不裝備）
-                    removeItem(fromItem.id, 1);
-                    deductCost(cost);
-                    addItem(toItem.id, 1);
-                    toast(`✅ 升級為 ${toItem.label}`, 'success');
-                    $('shopGold').textContent = p.gold;
-                    renderToolsmith(container);
-                    updateUI();
-                    saveGameToLocal();
-                });
-                sec.appendChild(div);
-            } else {
-                // 已滿級
-                const div = document.createElement('div');
-                div.className = 'shop-item';
-                div.innerHTML = `<span>✨ ${getItemDisplay(toolChain[currentLevel].id).icon} ${toolChain[currentLevel].label}（已滿級）</span><span style="color:#4a8a5a;">✅</span>`;
-                sec.appendChild(div);
-            }
-
-            container.appendChild(sec);
-        }
+			renderUpgradeChain(container, {
+				label: '⛏️ 鎬',
+				ids: ['wood_pickaxe','stone_pickaxe','copper_pickaxe','iron_pickaxe','gold_pickaxe','diamond_pickaxe','netherite_pickaxe'],
+				baseCost: { wood: 2, gold: 0 },
+				upgradeCosts: [
+					{ wood:1, stone:2, gold:5 }, { wood:1, copper_ore:2, gold:10 },
+					{ wood:1, iron_ore:2, gold:20 }, { wood:1, gold_ore:2, gold:40 },
+					{ wood:1, diamond:2, gold:80 }, { wood:1, netherite:2, gold:160 }
+				]
+				// 工具不装备，无需 slot
+			});
+		}
 
         function openTraderCamp() {
             const p = G.player;
@@ -3195,6 +3003,12 @@
 							ctx.fillStyle = '#3a3a3a';
 						}
 						ctx.fillRect(tx, ty, size, size);
+						if (map.id === 'forest' && !obj.variant) {
+							ctx.font = '22px serif';
+							ctx.textAlign = 'center';
+							ctx.textBaseline = 'middle';
+							ctx.fillText('🌳', tx + size / 2, ty + size / 2 + 2);
+						}
 						continue;
 					}
                     let icon = '❓',
@@ -3265,11 +3079,15 @@
                 length: randf(10, 20), opacity: randf(0.3, 0.7) });
         }
         initRainDrops();
-
+		let rainLoopId = null;
         function drawRain() {
             const c = rainCtx;
             c.clearRect(0, 0, 608, 608);
-            if (G.weather === 'clear') return;
+            if (G.weather === 'clear') {
+				rainCtx.clearRect(0, 0, 608, 608);
+				if (rainLoopId) { cancelAnimationFrame(rainLoopId); rainLoopId = null; }
+				return;
+			}
             const isRain = G.weather === 'rain',
                 isThunder = G.weather === 'thunder';
             if (!isRain && !isThunder) return;
@@ -3292,8 +3110,14 @@
                 } else { if (Math.random() < 0.005) { G.thunderFlash = 1.0;
                         playThunder(); } }
             }
-            requestAnimationFrame(drawRain);
+			rainLoopId = requestAnimationFrame(drawRain);
         }
+		
+		function startRainLoop() {
+			if (rainLoopId === null && (G.weather === 'rain' || G.weather === 'thunder')) {
+				drawRain();
+			}
+		}
 
         // ---------- UI ----------
         function updateUI() {
@@ -3333,7 +3157,7 @@
                 const div = document.createElement('div');
                 div.className = 'item-slot';
                 div.innerHTML =
-                    `<div class="item-icon">${item.icon||'📦'}</div><div class="item-name">${item.name}</div><div class="item-count">x${entry.count}</div>`;
+                    `<div class="item-icon">${item.icon||'📦'}</div><div class="item-name">${item.name}</div><div class="item-desc">${item.desc || ''}</div><div class="item-count">x${entry.count}</div>`;
                 div.title = item.desc || '';
                 div.addEventListener('click', () => {
                     const it = ITEMS[entry.id];
@@ -3484,16 +3308,22 @@
             toast(msg, 'info', 5000);
         }
 
-        // ---------- 存檔 ----------
+        // ========== 🆕 修改儲存/讀取邏輯 ==========
         function saveGameToLocal() {
             if (!G.player) return;
             try {
+                // 壓縮所有地圖
+                const compressedMaps = {};
+                for (const [id, map] of Object.entries(G.maps)) {
+                    compressedMaps[id] = compressMap(map);
+                }
+
                 const data = {
                     player: G.player,
                     gameTime: G.gameTime,
                     isNight: G.isNight,
                     weather: G.weather,
-                    maps: G.maps,
+                    maps: compressedMaps,          // ✅ 存壓縮版
                     mapAdjacency: G.mapAdjacency,
                     currentMapId: G.currentMapId,
                     bedPlaced: G.bedPlaced,
@@ -3513,6 +3343,14 @@
                 if (!raw) return null;
                 const data = JSON.parse(raw);
                 if (!data.player || !data.maps) return null;
+
+                // 解壓縮地圖
+                const fullMaps = {};
+                for (const [id, compressed] of Object.entries(data.maps)) {
+                    fullMaps[id] = decompressMap(compressed);
+                }
+                data.maps = fullMaps;
+
                 return data;
             } catch (e) { return null; }
         }
@@ -3520,14 +3358,14 @@
         function clearLocalSave() { localStorage.removeItem('blockLegendSave'); }
 
         function saveGame() {
-            if (!G.player) { toast('❌ 沒有游戲進度可儲存', 'error'); return; }
+            if (!G.player) { toast('❌ 沒有遊戲進度可儲存', 'error'); return; }
             try {
                 const data = {
                     player: G.player,
                     gameTime: G.gameTime,
                     isNight: G.isNight,
                     weather: G.weather,
-                    maps: G.maps,
+                    maps: G.maps,   // 此處儲存時會由 saveGameToLocal 壓縮，但直接匯出檔案時可選擇壓縮或原始，此處維持原樣以相容
                     mapAdjacency: G.mapAdjacency,
                     currentMapId: G.currentMapId,
                     bedPlaced: G.bedPlaced,
@@ -3537,7 +3375,15 @@
                     discoveredMaps: G.player.discoveredMaps,
                     gameOver: G.gameOver
                 };
-                const json = JSON.stringify(data, null, 2);
+                // 匯出時建議也壓縮，但為了可讀性，此處可選。為節省空間，我們壓縮後匯出。
+                const compressedData = {
+                    ...data,
+                    maps: {}
+                };
+                for (const [id, map] of Object.entries(data.maps)) {
+                    compressedData.maps[id] = compressMap(map);
+                }
+                const json = JSON.stringify(compressedData, null, 2);
                 const blob = new Blob([json], { type: 'text/plain;charset=utf-8' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -3548,7 +3394,7 @@
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                toast('💾 存檔已尋出為 .txt 檔案！', 'success');
+                toast('💾 存檔已導出為 .txt 檔案！', 'success');
                 saveGameToLocal();
             } catch (e) {
                 console.error(e);
@@ -3569,11 +3415,18 @@
                     const json = ev.target.result;
                     const data = JSON.parse(json);
                     if (!data.player || !data.maps) { toast('❌ 無效的存檔檔案', 'error'); return; }
+                    // 解壓縮地圖（若已是壓縮格式則解壓，若為舊格式則保持）
+                    const fullMaps = {};
+                    for (const [id, mapData] of Object.entries(data.maps)) {
+                        fullMaps[id] = decompressMap(mapData);
+                    }
+                    data.maps = fullMaps;
+
                     G.player = data.player;
                     G.gameTime = data.gameTime || 0;
                     G.isNight = data.isNight || false;
                     G.weather = data.weather || 'clear';
-                    G.maps = data.maps || {};
+                    G.maps = data.maps;
                     G.mapAdjacency = data.mapAdjacency || {};
                     G.currentMapId = data.currentMapId || 'plain';
                     G.bedPlaced = data.bedPlaced || false;
@@ -3583,7 +3436,25 @@
                     G.gameOver = data.gameOver || false;
                     const p = G.player;
                     p.discoveredMaps = data.discoveredMaps || ['plain'];
-                    G.map = getMap(p.mapId);
+                    for (const id in G.maps) {
+						const mapData = G.maps[id];
+						// 检查是否有有效的 terrain 和 objects（必须为数组且长度 > 0）
+						if (!Array.isArray(mapData.terrain) || mapData.terrain.length === 0 ||
+							!Array.isArray(mapData.objects) || mapData.objects.length === 0) {
+							console.warn(`🗺️ 地图 ${id} 无效，重新生成`);
+							G.maps[id] = generateMap(id);
+						} else {
+							// 确保 width/height 存在
+							mapData.width = mapData.width || 19;
+							mapData.height = mapData.height || 19;
+						}
+					}
+					// 确保当前地图有效
+					const currentMapId = G.player.mapId || 'plain';
+					if (!G.maps[currentMapId] || !G.maps[currentMapId].terrain) {
+						G.maps[currentMapId] = generateMap(currentMapId);
+					}
+					G.map = G.maps[currentMapId];
                     if (G.gameOver) gameoverOverlay.classList.remove('hidden');
                     else gameoverOverlay.classList.add('hidden');
                     updateUI();
@@ -3764,7 +3635,25 @@
         }
 
         function loadGameFromLocalData(data) {
-            G.player = data.player;
+            const fullMaps = {};
+			for (const [id, mapData] of Object.entries(data.maps || {})) {
+				if (mapData && typeof mapData === 'object') {
+					if (mapData.terrainDiff && mapData.objectsDiff) {
+						fullMaps[id] = decompressMap(mapData);
+					} else if (mapData.terrain && Array.isArray(mapData.terrain) && mapData.terrain.length > 0) {
+						fullMaps[id] = mapData; // 已是完整格式
+					} else {
+						console.warn(`loadGameFromLocalData: 地圖 ${id} 無效，重新生成`);
+						fullMaps[id] = generateMap(id);
+					}
+				} else {
+					fullMaps[id] = generateMap(id);
+				}
+			}
+			if (Object.keys(fullMaps).length === 0) {
+				fullMaps['plain'] = generateMap('plain');
+			}
+			G.player = data.player;
             G.gameTime = data.gameTime || 0;
             G.isNight = data.isNight || false;
             G.weather = data.weather || 'clear';
@@ -3994,28 +3883,27 @@
         });
 
         window.addEventListener('load', () => {
-            try {
-                const raw = localStorage.getItem('blockLegendSave');
-                if (raw) {
-                    const data = JSON.parse(raw);
-                    if (data && data.player) { _savedData = data;
-                        console.log('✅ 發現存檔，點擊"展開冒險"即可继续'); }
-                }
-            } catch (e) {}
-            setTimeout(() => {
-                if (cover.style.display !== 'none') {
-                    initAudio();
-                    if (audioCtx && audioCtx.state === 'running') { playMusic('title');
-                        _coverMusicStarted = true; }
-                }
-            }, 500);
-        });
+			const data = loadGameFromLocal();
+			if (data) {
+				_savedData = data;
+				console.log('✅ 發現存檔，點擊"展開冒險"即可繼續');
+			}
+			setTimeout(() => {
+				if (cover.style.display !== 'none') {
+					initAudio();
+					if (audioCtx && audioCtx.state === 'running') { playMusic('title');
+						_coverMusicStarted = true; }
+				}
+			}, 500);
+		});
+
 
         console.log('⛏️ 方塊傳說已載入！');
         console.log('🎮 操作: 方向鍵移動 | R休息 | I背包 | E裝備');
         console.log('📦 新增: 弓/弩升級鏈、魚類、雞/鴨/蜜蜂/蜘蛛、寶箱/蜘蛛網');
         console.log('🌧️ 天氣: 洞穴/海洋/河流/沙漠不下雨');
         console.log('🔄 被動生物日夜不消失');
+		console.log('🗜️ 地圖壓縮功能已啟用 (儲存更省空間)');
     </script>
 </body>
 </html>
