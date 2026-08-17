@@ -529,7 +529,6 @@
             overflow: hidden;
             padding: 0;
         }
-        /* 背景圖片滾動層 (改用背景圖 + background-position) */
         #titleOverlay .modal .bg-scroll-wrap {
             position: absolute;
             top: 0;
@@ -539,7 +538,7 @@
             overflow: hidden;
             pointer-events: none;
             z-index: 0;
-            background-color: #1a2a1a; /* 備用底色 */
+            background-color: #1a2a1a;
         }
         #titleOverlay .modal .bg-scroll-wrap #bgScrollLayer {
             width: 100%;
@@ -550,7 +549,6 @@
             background-position: 50% 0%;
             transition: none;
         }
-        /* 內容層 - 降低背景不透明度與模糊，讓圖片更清晰 */
         #titleOverlay .modal .modal-content {
             position: relative;
             z-index: 1;
@@ -730,6 +728,13 @@
             padding: 4px 16px;
             border-radius: 30px;
             display: inline-block;
+        }
+        /* FIX: 封面版權資訊樣式 */
+        .title-copyright {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #7a9a82;
+            letter-spacing: 0.3px;
         }
         .color-preview {
             display: flex;
@@ -1030,6 +1035,9 @@
                 font-size: 12px;
                 padding: 3px 12px;
             }
+            .title-copyright {
+                font-size: 10px;
+            }
             .color-preview .preview-piece {
                 font-size: 32px;
             }
@@ -1135,11 +1143,9 @@
     <!-- ===== 標題畫面 ===== -->
     <div class="overlay active" id="titleOverlay">
         <div class="modal">
-            <!-- 背景圖片滾動層 (改用背景圖方式) -->
             <div class="bg-scroll-wrap" id="bgScrollWrap">
                 <div id="bgScrollLayer"></div>
             </div>
-            <!-- 內容層 -->
             <div class="modal-content">
                 <div class="big-icon">🌼</div>
                 <div class="title">ICQ 包剪揼</div>
@@ -1171,8 +1177,10 @@
                         <button class="btn-big small" id="btnTitleLoad">📁 載入</button>
                     </div>
                 </div>
-                <div style="margin-top:14px; display:flex; justify-content:center;">
+                <div style="margin-top:14px; display:flex; flex-direction:column; align-items:center;">
                     <span class="title-footer-trophy" id="titleTrophyFooter">🏆 0</span>
+                    <!-- FIX: 封面版權資訊 -->
+                    <div class="title-copyright" id="titleCopyright">v2.0 © <span id="copyrightYear"></span> ☕迪遜咖啡廳，版權所有。</div>
                 </div>
             </div>
         </div>
@@ -1219,8 +1227,8 @@
 
     <script>
         // ================================================================
-        //  🌼 ICQ 包剪揼 · 紅藍對決版 (v2.3.3)
-        //  修復：背景圖自動滾動（使用 background-position 控制）
+        //  🌼 ICQ 包剪揼 · 紅藍對決版 (v2.3.4)
+        //  修復：手機版棋子消失、封面版權、AI 追擊邏輯 (打和 + 剋制)
         // ================================================================
 
         (function() {
@@ -1270,6 +1278,8 @@
             const previewBlue = document.getElementById('previewBlue');
             const previewRed = document.getElementById('previewRed');
             const bgScrollLayer = document.getElementById('bgScrollLayer');
+            // FIX: 封面版權年份
+            const copyrightYearEl = document.getElementById('copyrightYear');
 
             // ---- 遊戲狀態 ----
             let board = [];
@@ -1473,9 +1483,9 @@
             document.addEventListener('MSFullscreenChange', updateFullscreenIcon);
 
             // ================================================================
-            //  ★ 背景滾動 (採用 background-position 控制，完美無空隙)
+            //  ★ 背景滾動 (採用 background-position 控制)
             // ================================================================
-            let bgScrollState = 'pause-top'; // 'pause-top' | 'scroll-down' | 'pause-bottom' | 'scroll-up'
+            let bgScrollState = 'pause-top';
             let bgScrollTimeInState = 0;
             let bgScrollProgress = 0;
             const BG_PAUSE_DURATION = 2.0;
@@ -1522,21 +1532,18 @@
                 }
             }
 
-            // 獨立背景滾動動畫循環
             let bgLastTime = 0;
 
             function bgScrollLoop(time) {
                 const dt = Math.min(0.05, (time - bgLastTime) / 1000);
                 bgLastTime = time;
 
-                // 只在封面顯示時更新
                 if (titleOverlay && titleOverlay.classList.contains('active')) {
                     updateBackgroundScroll(dt);
                 }
                 requestAnimationFrame(bgScrollLoop);
             }
 
-            // 重置背景滾動狀態（回到頂部暫停）
             function resetBgScroll() {
                 bgScrollState = 'pause-top';
                 bgScrollTimeInState = 0;
@@ -1720,6 +1727,8 @@
                 if (attackerWins) {
                     removePiece(toR, toC);
                     movePiece(fromR, fromC, toR, toC);
+                    // FIX: 設置動畫狀態，防止棋子消失
+                    _moveAnimPending = true;
                 } else if (defenderWins) {
                     removePiece(fromR, fromC);
                 } else if (bothDie) {
@@ -1728,14 +1737,15 @@
                 } else if (disarm) {
                     removePiece(toR, toC);
                     movePiece(fromR, fromC, toR, toC);
+                    // FIX: 設置動畫狀態，防止棋子消失
+                    _moveAnimPending = true;
                 }
 
                 if (attackerWins || result === 'king') playSound('levelUp');
                 else if (defenderWins || result === 'trap' || bothDie) playSound('levelDown');
 
                 renderBoard();
-                if (_moveTarget) {
-                    _moveAnimPending = true;
+                if (_moveTarget && _moveAnimPending) {
                     playMoveAnimationOnBoard();
                 }
 
@@ -1847,7 +1857,7 @@
                 setTimeout(() => computerTurn(), 400);
             }
 
-            // ---- 電腦 AI ----
+            // ---- 電腦 AI (改進：剋制 + 打和) ----
             async function computerTurn() {
                 if (gameOver || !gameStarted || currentTurn !== 'computer' || animating) return;
                 if (isProcessing) return;
@@ -1884,32 +1894,73 @@
 
                 const knownPlayer = playerPieces.filter(p => p.revealed === true);
                 let bestMoves = [];
+
                 if (knownPlayer.length > 0) {
+                    // 對每個已知的玩家棋子，評估最佳應對
                     for (const known of knownPlayer) {
+                        // 1. 優先使用剋制對方的類型 (BEAT_BY[known.type])
                         const counterType = BEAT_BY[known.type];
-                        const candidates = moves.filter(m => m.piece.type === counterType);
+                        // 2. 其次使用相同類型 (打和)
+                        const sameType = known.type;
+
+                        // 先找剋制類型的棋子
+                        let candidates = moves.filter(m => m.piece.type === counterType);
+                        // 如果沒有剋制類型，找相同類型 (打和)
+                        if (candidates.length === 0) {
+                            candidates = moves.filter(m => m.piece.type === sameType);
+                        }
+                        // 如果還是沒有，使用所有棋子
+                        if (candidates.length === 0) {
+                            candidates = moves;
+                        }
+
+                        // 優先選擇能直接攻擊的
                         const direct = candidates.filter(m => m.action === 'battle' && m.target === known);
-                        if (direct.length > 0) bestMoves = bestMoves.concat(direct);
-                        else {
+                        if (direct.length > 0) {
+                            bestMoves = bestMoves.concat(direct);
+                        } else {
+                            // 其次選擇能移動到附近的
                             const near = candidates.filter(m => {
                                 const adj = getAdjacent(known.row, known.col);
                                 return adj.some(pos => pos.r === m.toR && pos.c === m.toC);
                             });
-                            if (near.length > 0) bestMoves = bestMoves.concat(near);
+                            if (near.length > 0) {
+                                bestMoves = bestMoves.concat(near);
+                            } else {
+                                // 否則隨機選一個候選
+                                if (candidates.length > 0) {
+                                    const pick = candidates[Math.floor(Math.random() * candidates.length)];
+                                    bestMoves.push(pick);
+                                }
+                            }
                         }
                     }
-                    if (bestMoves.length > 0) {
-                        const direct = bestMoves.filter(m => m.action === 'battle' && m.target && m.target.owner ===
-                            'player');
-                        if (direct.length > 0) bestMoves = direct;
-                        else {
-                            const near = bestMoves.filter(m => m.action === 'move');
-                            if (near.length > 0) bestMoves = near;
+
+                    // 去重：避免重複移動
+                    const uniqueMoves = [];
+                    const seen = new Set();
+                    for (const m of bestMoves) {
+                        const key = `${m.fromR},${m.fromC},${m.toR},${m.toC}`;
+                        if (!seen.has(key)) {
+                            seen.add(key);
+                            uniqueMoves.push(m);
                         }
+                    }
+                    bestMoves = uniqueMoves;
+
+                    // 優先選擇戰鬥動作
+                    const battleMoves = bestMoves.filter(m => m.action === 'battle' && m.target && m.target.owner === 'player');
+                    if (battleMoves.length > 0) {
+                        bestMoves = battleMoves;
+                    } else {
+                        const moveMoves = bestMoves.filter(m => m.action === 'move');
+                        if (moveMoves.length > 0) bestMoves = moveMoves;
                     }
                 }
+
                 if (bestMoves.length === 0) bestMoves = moves;
 
+                // 隨機選擇一個最佳移動
                 const pick = bestMoves[Math.floor(Math.random() * bestMoves.length)];
 
                 if (pick.action === 'move') {
@@ -2094,7 +2145,8 @@
                                 div.classList.add('selected');
                             }
 
-                            if (_moveTarget && _moveTarget.r === r && _moveTarget.c === c) {
+                            // FIX: 只有在 _moveAnimPending 為 true 時才隱藏棋子，避免永久消失
+                            if (_moveTarget && _moveTarget.r === r && _moveTarget.c === c && _moveAnimPending) {
                                 div.style.opacity = '0';
                                 div.dataset.moveTarget = '1';
                             }
@@ -2587,7 +2639,6 @@
                     window._selectObserver = null;
                 }
                 updateLabels();
-                // 重置背景滾動到頂部
                 resetBgScroll();
             }
 
@@ -2738,8 +2789,11 @@
                 playerColor = 'blue';
                 previewBlue.classList.add('selected');
                 previewRed.classList.remove('selected');
-                // 重置背景滾動
                 resetBgScroll();
+                // FIX: 設定版權年份
+                if (copyrightYearEl) {
+                    copyrightYearEl.textContent = new Date().getFullYear();
+                }
             }
 
             // ---- 事件綁定 ----
@@ -2818,7 +2872,10 @@
             // ---- 版權 ----
             function setCopyright() {
                 const year = new Date().getFullYear();
-                copyrightEl.textContent = 'v2.3.3 © ' + year + ' ☕迪遜咖啡廳，版權所有。';
+                copyrightEl.textContent = 'v2.3.4 © ' + year + ' ☕迪遜咖啡廳，版權所有。';
+                if (copyrightYearEl) {
+                    copyrightYearEl.textContent = year;
+                }
             }
 
             // ---- 洗牌 ----
@@ -2836,7 +2893,6 @@
             updateMusicUI();
             initTitle();
 
-            // 啟動背景滾動循環
             bgLastTime = performance.now();
             requestAnimationFrame(bgScrollLoop);
 
@@ -2851,8 +2907,10 @@
                         'PLAYING' || gamePhase === 'TITLE') && bgAudio.paused) startBackgroundMusic();
             });
 
-            console.log('🌼 ICQ 包剪揼 · 紅藍對決版 (v2.3.3) 已載入');
-            console.log('✅ 修復：背景圖右側空隙 & 自動上下滾動（background-position 控制）');
+            console.log('🌼 ICQ 包剪揼 · 紅藍對決版 (v2.3.4) 已載入');
+            console.log('✅ 修復：手機版棋子消失（_moveAnimPending 控制）');
+            console.log('✅ 修復：封面版權資訊');
+            console.log('✅ 修復：AI 追擊邏輯（剋制 + 打和）');
             console.log('🏆 當前獎盃: ' + trophyCount);
             console.log('🎨 當前選色: ' + playerColor);
             console.log('🎵 音樂階段: ' + currentMusicPhase);
