@@ -733,7 +733,7 @@
         .title-copyright {
             margin-top: 8px;
             font-size: 12px;
-            color: #7a9a82;
+            color: #f5ffe0;
             letter-spacing: 0.3px;
         }
         .color-preview {
@@ -1227,8 +1227,9 @@
 
     <script>
         // ================================================================
-        //  🌼 ICQ 包剪揼 · 紅藍對決版 (v2.3.4)
-        //  修復：手機版棋子消失、封面版權、AI 追擊邏輯 (打和 + 剋制)
+        //  🌼 ICQ 包剪揼 · 紅藍對決版 (v2.4.0)
+        //  修復：國王送頭問題 (國王攻擊普通棋子必勝 + AI 極度保護國王)
+        //  新增：AI 積極追殺玩家國王
         // ================================================================
 
         (function() {
@@ -1278,7 +1279,6 @@
             const previewBlue = document.getElementById('previewBlue');
             const previewRed = document.getElementById('previewRed');
             const bgScrollLayer = document.getElementById('bgScrollLayer');
-            // FIX: 封面版權年份
             const copyrightYearEl = document.getElementById('copyrightYear');
 
             // ---- 遊戲狀態 ----
@@ -1483,7 +1483,7 @@
             document.addEventListener('MSFullscreenChange', updateFullscreenIcon);
 
             // ================================================================
-            //  ★ 背景滾動 (採用 background-position 控制)
+            //  ★ 背景滾動
             // ================================================================
             let bgScrollState = 'pause-top';
             let bgScrollTimeInState = 0;
@@ -1614,12 +1614,18 @@
                 return result;
             }
 
-            // ---- 戰鬥解析 ----
+            // ---- ★ 戰鬥解析 (修正：國王攻擊普通棋子必勝) ----
             function resolveBattleBasic(attacker, defender) {
+                // 國王特殊規則
                 if (attacker.type === 'king' && defender.type === 'king') return { result: 'win', winner: 'attacker' };
                 if (attacker.type === 'king' && defender.type === 'trap') return { result: 'disarm', winner: 'attacker' };
                 if (defender.type === 'trap') return { result: 'trap', winner: 'defender' };
-                if (defender.type === 'king') return { result: 'king', winner: 'attacker' };
+                if (defender.type === 'king') return { result: 'king', winner: 'attacker' }; // 普通棋手擊殺國王
+
+                // ★ 核心修正：國王攻擊普通棋子 → 國王獲勝 (避免國王送頭)
+                if (attacker.type === 'king') return { result: 'win', winner: 'attacker' };
+
+                // 普通剪刀石頭布邏輯
                 const aType = attacker.type,
                     dType = defender.type;
                 if (aType === dType) return { result: 'draw', winner: null };
@@ -1727,50 +1733,123 @@
                 if (attackerWins) {
                     removePiece(toR, toC);
                     movePiece(fromR, fromC, toR, toC);
-                    // FIX: 設置動畫狀態，防止棋子消失
                     _moveAnimPending = true;
-                } else if (defenderWins) {
-                    removePiece(fromR, fromC);
-                } else if (bothDie) {
-                    removePiece(fromR, fromC);
-                    removePiece(toR, toC);
-                } else if (disarm) {
-                    removePiece(toR, toC);
-                    movePiece(fromR, fromC, toR, toC);
-                    // FIX: 設置動畫狀態，防止棋子消失
-                    _moveAnimPending = true;
-                }
-
-                if (attackerWins || result === 'king') playSound('levelUp');
-                else if (defenderWins || result === 'trap' || bothDie) playSound('levelDown');
-
-                renderBoard();
-                if (_moveTarget && _moveAnimPending) {
-                    playMoveAnimationOnBoard();
-                }
-
-                const cells = boardEl.querySelectorAll('.cell');
-                let winnerCell = null;
-                if (attackerWins || disarm || result === 'king') {
-                    for (const cell of cells) {
-                        const r = parseInt(cell.dataset.r);
-                        const c = parseInt(cell.dataset.c);
-                        if (r === toR && c === toC) { winnerCell = cell; break; }
+                    playSound('levelUp');
+                    renderBoard();
+                    if (_moveTarget && _moveAnimPending) {
+                        playMoveAnimationOnBoard();
                     }
-                }
-                if (winnerCell) {
-                    const piece = winnerCell.querySelector('.piece');
-                    if (piece) {
-                        piece.classList.add('attacking');
+                    animating = false;
+                    callback(battle);
+                    return;
+
+                } else if (defenderWins) {
+                    playSound('levelDown');
+                    const cells = boardEl.querySelectorAll('.cell');
+                    let targetCell = null;
+                    for (const cell of cells) {
+                        if (parseInt(cell.dataset.r) === fromR && parseInt(cell.dataset.c) === fromC) {
+                            targetCell = cell;
+                            break;
+                        }
+                    }
+
+                    let hasAnim = false;
+                    if (targetCell) {
+                        const pieceEl = targetCell.querySelector('.piece');
+                        if (pieceEl) {
+                            pieceEl.classList.add('defeated');
+                            hasAnim = true;
+                        }
+                    }
+
+                    if (hasAnim) {
                         setTimeout(() => {
-                            piece.classList.remove('attacking');
+                            removePiece(fromR, fromC);
                             animating = false;
+                            renderBoard();
+                            if (_moveTarget && _moveAnimPending) {
+                                playMoveAnimationOnBoard();
+                            }
                             callback(battle);
                         }, 500);
                         return;
+                    } else {
+                        removePiece(fromR, fromC);
+                        animating = false;
+                        renderBoard();
+                        if (_moveTarget && _moveAnimPending) {
+                            playMoveAnimationOnBoard();
+                        }
+                        callback(battle);
+                        return;
                     }
+
+                } else if (bothDie) {
+                    playSound('levelDown');
+
+                    const cells = boardEl.querySelectorAll('.cell');
+                    let attackerCell = null,
+                        defenderCell = null;
+                    for (const cell of cells) {
+                        const r = parseInt(cell.dataset.r);
+                        const c = parseInt(cell.dataset.c);
+                        if (r === fromR && c === fromC) attackerCell = cell;
+                        if (r === toR && c === toC) defenderCell = cell;
+                    }
+
+                    let hasAnim = false;
+                    if (attackerCell) {
+                        const el = attackerCell.querySelector('.piece');
+                        if (el) { el.classList.add('defeated');
+                            hasAnim = true; }
+                    }
+                    if (defenderCell) {
+                        const el = defenderCell.querySelector('.piece');
+                        if (el) { el.classList.add('defeated');
+                            hasAnim = true; }
+                    }
+
+                    if (hasAnim) {
+                        setTimeout(() => {
+                            removePiece(fromR, fromC);
+                            removePiece(toR, toC);
+                            animating = false;
+                            renderBoard();
+                            if (_moveTarget && _moveAnimPending) {
+                                playMoveAnimationOnBoard();
+                            }
+                            callback(battle);
+                        }, 500);
+                        return;
+                    } else {
+                        removePiece(fromR, fromC);
+                        removePiece(toR, toC);
+                        animating = false;
+                        renderBoard();
+                        if (_moveTarget && _moveAnimPending) {
+                            playMoveAnimationOnBoard();
+                        }
+                        callback(battle);
+                        return;
+                    }
+
+                } else if (disarm) {
+                    removePiece(toR, toC);
+                    movePiece(fromR, fromC, toR, toC);
+                    _moveAnimPending = true;
+                    playSound('levelUp');
+                    renderBoard();
+                    if (_moveTarget && _moveAnimPending) {
+                        playMoveAnimationOnBoard();
+                    }
+                    animating = false;
+                    callback(battle);
+                    return;
                 }
+
                 animating = false;
+                renderBoard();
                 callback(battle);
             }
 
@@ -1857,15 +1936,14 @@
                 setTimeout(() => computerTurn(), 400);
             }
 
-            // ---- 電腦 AI (改進：剋制 + 打和) ----
+            // ---- ★ 電腦 AI (強化版：極度保護國王，積極追殺玩家國王) ----
             async function computerTurn() {
                 if (gameOver || !gameStarted || currentTurn !== 'computer' || animating) return;
                 if (isProcessing) return;
                 isProcessing = true;
 
                 const pieces = getPieces('computer');
-                if (pieces.length === 0) { isProcessing = false;
-                    checkGameOver(); return; }
+                if (pieces.length === 0) { isProcessing = false; checkGameOver(); return; }
 
                 let moves = [];
                 for (const p of pieces) {
@@ -1893,76 +1971,85 @@
                 }
 
                 const knownPlayer = playerPieces.filter(p => p.revealed === true);
-                let bestMoves = [];
+                let weightedMoves = [];
 
-                if (knownPlayer.length > 0) {
-                    // 對每個已知的玩家棋子，評估最佳應對
-                    for (const known of knownPlayer) {
-                        // 1. 優先使用剋制對方的類型 (BEAT_BY[known.type])
-                        const counterType = BEAT_BY[known.type];
-                        // 2. 其次使用相同類型 (打和)
-                        const sameType = known.type;
+                // ★ 70% 機率理性，30% 機率誘餌，但誘餌模式也會過濾國王
+                const useTactic = Math.random() < 0.70;
 
-                        // 先找剋制類型的棋子
-                        let candidates = moves.filter(m => m.piece.type === counterType);
-                        // 如果沒有剋制類型，找相同類型 (打和)
-                        if (candidates.length === 0) {
-                            candidates = moves.filter(m => m.piece.type === sameType);
-                        }
-                        // 如果還是沒有，使用所有棋子
-                        if (candidates.length === 0) {
-                            candidates = moves;
-                        }
+                if (knownPlayer.length > 0 && useTactic) {
+                    for (const m of moves) {
+                        let weight = 1;
 
-                        // 優先選擇能直接攻擊的
-                        const direct = candidates.filter(m => m.action === 'battle' && m.target === known);
-                        if (direct.length > 0) {
-                            bestMoves = bestMoves.concat(direct);
-                        } else {
-                            // 其次選擇能移動到附近的
-                            const near = candidates.filter(m => {
-                                const adj = getAdjacent(known.row, known.col);
-                                return adj.some(pos => pos.r === m.toR && pos.c === m.toC);
-                            });
-                            if (near.length > 0) {
-                                bestMoves = bestMoves.concat(near);
+                        for (const known of knownPlayer) {
+                            // ★ 高優先級：如果發現玩家國王，直接刺殺或包圍
+                            if (known.type === 'king') {
+                                if (m.action === 'battle' && m.target === known) {
+                                    weight += 20; // 直接攻擊國王，最高權重！
+                                } else {
+                                    // 檢查是否移動到國王旁邊
+                                    const adj = getAdjacent(known.row, known.col);
+                                    const isNear = adj.some(pos => pos.r === m.toR && pos.c === m.toC);
+                                    if (isNear) {
+                                        weight += 8; // 靠近國王，準備包圍
+                                    }
+                                }
+                                continue; // 跳過後續的屬性判斷，專注於國王
+                            }
+
+                            // 對付普通玩家棋子 (原本的剋制邏輯)
+                            const counterType = BEAT_BY[known.type];
+                            const sameType = known.type;
+
+                            if (m.action === 'battle' && m.target === known) {
+                                if (m.piece.type === counterType) {
+                                    weight += 10;
+                                } else if (m.piece.type === sameType) {
+                                    weight += 4;
+                                } else {
+                                    weight += 2;
+                                }
                             } else {
-                                // 否則隨機選一個候選
-                                if (candidates.length > 0) {
-                                    const pick = candidates[Math.floor(Math.random() * candidates.length)];
-                                    bestMoves.push(pick);
+                                if (m.piece.type === counterType) {
+                                    weight += 6;
+                                } else if (m.piece.type === sameType) {
+                                    weight += 3;
+                                } else {
+                                    weight += 1;
                                 }
                             }
                         }
-                    }
 
-                    // 去重：避免重複移動
-                    const uniqueMoves = [];
-                    const seen = new Set();
-                    for (const m of bestMoves) {
-                        const key = `${m.fromR},${m.fromC},${m.toR},${m.toC}`;
-                        if (!seen.has(key)) {
-                            seen.add(key);
-                            uniqueMoves.push(m);
+                        // ★ 核心保護：如果是國王，強制壓低權重，避免送頭
+                        if (m.piece.type === 'king') {
+                            weight = Math.min(weight, 0.1); // 幾乎不會被選中
                         }
-                    }
-                    bestMoves = uniqueMoves;
 
-                    // 優先選擇戰鬥動作
-                    const battleMoves = bestMoves.filter(m => m.action === 'battle' && m.target && m.target.owner === 'player');
-                    if (battleMoves.length > 0) {
-                        bestMoves = battleMoves;
-                    } else {
-                        const moveMoves = bestMoves.filter(m => m.action === 'move');
-                        if (moveMoves.length > 0) bestMoves = moveMoves;
+                        weightedMoves.push({ ...m, weight });
+                    }
+                } else {
+                    // ---- 誘餌模式：但國王依然被保護 ----
+                    for (const m of moves) {
+                        let weight = 1;
+                        if (m.piece.type === 'king') {
+                            weight = 0.1; // 誘餌模式下也極度保護國王
+                        }
+                        weightedMoves.push({ ...m, weight });
                     }
                 }
 
-                if (bestMoves.length === 0) bestMoves = moves;
+                // ---- 輪盤賭抽選 ----
+                const totalWeight = weightedMoves.reduce((sum, m) => sum + m.weight, 0);
+                let rand = Math.random() * totalWeight;
+                let pick = weightedMoves[0];
+                for (const m of weightedMoves) {
+                    rand -= m.weight;
+                    if (rand <= 0) {
+                        pick = m;
+                        break;
+                    }
+                }
 
-                // 隨機選擇一個最佳移動
-                const pick = bestMoves[Math.floor(Math.random() * bestMoves.length)];
-
+                // ---- 執行 ----
                 if (pick.action === 'move') {
                     movePiece(pick.fromR, pick.fromC, pick.toR, pick.toC);
                     playSound('wind');
@@ -2063,7 +2150,9 @@
 
             // ---- UI ----
             function updateUI() {
-                renderBoard();
+                if (!animating) {
+                    renderBoard();
+                }
                 playerScoreEl.textContent = playerPieces.length;
                 computerScoreEl.textContent = computerPieces.length;
                 updateTrophyDisplay();
@@ -2083,6 +2172,8 @@
             }
 
             function renderBoard() {
+                if (animating) return;
+
                 boardEl.innerHTML = '';
                 for (let r = 0; r < ROWS; r++) {
                     for (let c = 0; c < COLS; c++) {
@@ -2145,7 +2236,6 @@
                                 div.classList.add('selected');
                             }
 
-                            // FIX: 只有在 _moveAnimPending 為 true 時才隱藏棋子，避免永久消失
                             if (_moveTarget && _moveTarget.r === r && _moveTarget.c === c && _moveAnimPending) {
                                 div.style.opacity = '0';
                                 div.dataset.moveTarget = '1';
@@ -2175,6 +2265,7 @@
 
             // ---- 點擊 ----
             function onCellClick(r, c) {
+                if (animating) return;
                 if (gamePhase === 'SELECT') {
                     handleSelectClick(r, c);
                     return;
@@ -2656,7 +2747,7 @@
                 showToast('👆 請選擇陷阱和棋手');
             }
 
-            // ---- 重開遊戲 → 回到封面 ----
+            // ---- 重開遊戲 ----
             function resetGame() {
                 if (!gameStarted && gamePhase !== 'PLAYING') return;
                 if (confirm('確定要重開遊戲嗎？進度將會遺失。')) {
@@ -2790,7 +2881,6 @@
                 previewBlue.classList.add('selected');
                 previewRed.classList.remove('selected');
                 resetBgScroll();
-                // FIX: 設定版權年份
                 if (copyrightYearEl) {
                     copyrightYearEl.textContent = new Date().getFullYear();
                 }
@@ -2872,7 +2962,7 @@
             // ---- 版權 ----
             function setCopyright() {
                 const year = new Date().getFullYear();
-                copyrightEl.textContent = 'v2.3.4 © ' + year + ' ☕迪遜咖啡廳，版權所有。';
+                copyrightEl.textContent = 'v2.4.0 © ' + year + ' ☕迪遜咖啡廳，版權所有。';
                 if (copyrightYearEl) {
                     copyrightYearEl.textContent = year;
                 }
@@ -2907,10 +2997,9 @@
                         'PLAYING' || gamePhase === 'TITLE') && bgAudio.paused) startBackgroundMusic();
             });
 
-            console.log('🌼 ICQ 包剪揼 · 紅藍對決版 (v2.3.4) 已載入');
-            console.log('✅ 修復：手機版棋子消失（_moveAnimPending 控制）');
-            console.log('✅ 修復：封面版權資訊');
-            console.log('✅ 修復：AI 追擊邏輯（剋制 + 打和）');
+            console.log('🌼 ICQ 包剪揼 · 紅藍對決版 (v2.4.0) 已載入');
+            console.log('✅ 核心修正：國王送頭問題 (國王攻擊普通棋子必勝，AI 極度保護國王)');
+            console.log('✅ 新增：AI 積極追殺玩家國王 (權重 +20)');
             console.log('🏆 當前獎盃: ' + trophyCount);
             console.log('🎨 當前選色: ' + playerColor);
             console.log('🎵 音樂階段: ' + currentMusicPhase);
