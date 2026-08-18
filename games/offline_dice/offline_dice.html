@@ -29,6 +29,9 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="🎲 離線骰子">
     <meta name="theme-color" content="#6D4C41">
+    <!-- ★ 修改2：預載兩首新封面音樂 -->
+    <link rel="preload" as="audio" href="Offline Dice - We Stand Tall (Grand Piano Version).mp3">
+    <link rel="preload" as="audio" href="Offline Dice - We Stand Tall.mp3">
     <style>
         * {
             margin: 0;
@@ -1639,10 +1642,11 @@
     <link rel="preload" as="audio" href="Offline Dice - Rank.mp3">
     <link rel="preload" as="audio" href="Offline Dice - Deck Build.mp3">
     <link rel="preload" as="audio" href="Offline Dice - Last Wave Hold.mp3">
-	<link rel="preload" as="audio" href="Offline Dice - Troll The Die.mp3">
+    <link rel="preload" as="audio" href="Offline Dice - Troll The Die.mp3">
     <link rel="preload" as="audio" href="Offline Dice - Dice Showdown.mp3">
     <link rel="preload" as="audio" href="Offline Dice - Fortress Charge.mp3">
     <link rel="preload" as="audio" href="Offline Dice - Dice Riot.mp3">
+    <!-- ★ 修改2：預載兩首新封面音樂（已在 head 中宣告，此處保留兼容） -->
 
     <div class="game-wrapper" id="gameWrapper">
         <!-- 起始覆蓋層 (背景圖片由內部 bg-scroll-layer 控制滾動) -->
@@ -3709,7 +3713,7 @@
             }
         }
 
-        // ★ 修改1：升級Class時即時更新商店獎盃數 (在函數內調用 updateShopUI)
+        // ★ 修改1：升級Class時即時更新商店獎盃數 & 封面獎盃數
         function upgradeDiceClass(type) {
             if (type !== 'FIRE' && type !== 'THUNDER' && type !== 'WIND' && type !== 'POISON' && type !== 'ICE') {
                 showToast(getData().classOnlyFireThunder, 1500);
@@ -3786,6 +3790,8 @@
             updateDicePreview();
             // ★ 修改1：升級後更新商店UI，獎盃數即時刷新
             updateShopUI();
+            // ★ 修改1：同時更新封面獎盃數
+            updateCoverUI();
 
             const detailOverlay = document.getElementById('diceDetailOverlay');
             if (detailOverlay.classList.contains('visible')) {
@@ -4194,22 +4200,73 @@
         const SHOP_MUSIC_URL = 'Offline Dice - Shop.mp3';
         const RANK_MUSIC_URL = 'Offline Dice - Rank.mp3';
         const DECK_BUILD_URL = 'Offline Dice - Deck Build.mp3';
+        // ★ 修改2：新增兩首封面音樂
+        const MENU_MUSIC_URL_PIANO = 'Offline Dice - We Stand Tall (Grand Piano Version).mp3';
+        const MENU_MUSIC_URL_SPECIAL = 'Offline Dice - We Stand Tall.mp3';
 
         const BGM_LIST = [
             { url: 'Offline Dice - Dice Rush.mp3', label: 'BGM 1' },
             { url: 'Offline Dice - Last Wave Hold.mp3', label: 'BGM 2' },
-			{ url: 'Offline Dice - Troll The Die.mp3', label: 'BGM 3' },
+            { url: 'Offline Dice - Troll The Die.mp3', label: 'BGM 3' },
             { url: 'Offline Dice - Dice Showdown.mp3', label: 'BGM 4' },
             { url: 'Offline Dice - Fortress Charge.mp3', label: 'BGM 5' },
             { url: 'Offline Dice - Dice Riot.mp3', label: 'BGM 6' },
         ];
         let currentBgmIndex = 0;
 
+        // ★ 修改2：日期判斷函數
+        function getEasterDate(year) {
+            const a = year % 19;
+            const b = Math.floor(year / 100);
+            const c = year % 100;
+            const d = Math.floor(b / 4);
+            const e = b % 4;
+            const f = Math.floor((b + 8) / 25);
+            const g = Math.floor((b - f + 1) / 3);
+            const h = (19 * a + b - d - g + 15) % 30;
+            const i = Math.floor(c / 4);
+            const k = c % 4;
+            const l = (32 + 2 * e + 2 * i - h - k) % 7;
+            const m = Math.floor((a + 11 * h + 22 * l) / 451);
+            const month = Math.floor((h + l - 7 * m + 114) / 31);
+            const day = ((h + l - 7 * m + 114) % 31) + 1;
+            return new Date(year, month - 1, day);
+        }
+
+        function isEaster(date) {
+            const year = date.getFullYear();
+            const easter = getEasterDate(year);
+            return date.getMonth() === easter.getMonth() && date.getDate() === easter.getDate();
+        }
+
+        function isHalloween(date) {
+            return date.getMonth() === 9 && date.getDate() === 31;
+        }
+
+        function isChristmas(date) {
+            return date.getMonth() === 11 && date.getDate() === 25;
+        }
+
+        function getMenuMusicUrl() {
+            const now = new Date();
+            const day = now.getDay(); // 0=周日, 6=周六
+            if (isEaster(now) || isHalloween(now) || isChristmas(now)) {
+                return MENU_MUSIC_URL_SPECIAL;
+            } else if (day === 0 || day === 6) {
+                return MENU_MUSIC_URL_PIANO;
+            } else {
+                return MENU_MUSIC_URL;
+            }
+        }
+
         function preloadAllAudio() {
             const audioIds = ['bgmAudio', 'shopBgmAudio', 'rankAudio', 'deckBuildAudio'];
             const urls = [
                 MENU_MUSIC_URL, GAME_MUSIC_URL, SHOP_MUSIC_URL, RANK_MUSIC_URL, DECK_BUILD_URL,
-                'Offline Dice - Last Wave Hold.mp3', 'Offline Dice - Dice Showdown.mp3', 'Offline Dice - Fortress Charge.mp3', 'Offline Dice - Dice Riot.mp3'
+                'Offline Dice - Last Wave Hold.mp3', 'Offline Dice - Dice Showdown.mp3', 'Offline Dice - Fortress Charge.mp3',
+                'Offline Dice - Dice Riot.mp3',
+                // ★ 修改2：新增兩首封面音樂預載
+                MENU_MUSIC_URL_PIANO, MENU_MUSIC_URL_SPECIAL
             ];
             for (const id of audioIds) {
                 const el = document.getElementById(id);
@@ -4338,6 +4395,7 @@
         let shopBgmLoadFailed = false;
         let rankBgmLoadFailed = false;
 
+        // ★ 修改2：修改 playBgMusic，在 menu 模式下根據日期選擇音樂
         function playBgMusic(loop) {
             if (!soundEnabled) {
                 stopBgMusic();
@@ -4349,13 +4407,15 @@
 
             let url;
             if (loop === 'menu') {
-                url = MENU_MUSIC_URL;
+                // ★ 修改2：根據日期選擇封面音樂
+                url = getMenuMusicUrl();
             } else {
                 if (BGM_LIST.length === 0) return;
                 url = BGM_LIST[currentBgmIndex % BGM_LIST.length].url;
             }
 
             if (!url || url === '') return;
+            // 如果當前播放的已經是同一首且正在播放，則不重複加載
             if (audio.src && audio.src.includes(url) && !audio.paused) return;
 
             audio.src = url;
@@ -5294,8 +5354,7 @@
                             return;
                         }
                         const sameStar = sourceDice.star === targetDice.star;
-                        if (!sameStar) { showToast(data.mergeNeedSameStar); } else if (sourceDice.star >= game.maxStar && !
-                                sourceDice.isJoker && !sourceDice.isMimic) { showToast(data.mergeMaxStar.replace(
+                        if (!sameStar) { showToast(data.mergeNeedSameStar); } else if (sourceDice.star >= game.maxStar && !sourceDice.isJoker && !sourceDice.isMimic) { showToast(data.mergeMaxStar.replace(
                                 /\{max\}/g, game.maxStar)); } else {
                             let merged = false;
                             if (game.bossLockedDice.some(d => (d.row === row && d.col === col) || (d.row === src.row && d
@@ -8187,6 +8246,7 @@
             document.getElementById('scoreEarned').textContent = data.scoreEarned.replace(/\{score\}/g, scoreEarned);
             document.getElementById('gameoverOverlay').classList.add('visible');
             document.getElementById('rollBtn').disabled = true;
+            // ★ 修改1：遊戲結束時更新封面獎盃數（玩家可能從封面查看）
             updateCoverUI();
 
             const isRanking = isRankingWave(game.wave);
@@ -10844,7 +10904,7 @@
         }
 
         requestAnimationFrame(gameLoop);
-        console.log('🎲 Offline Dice v2.8.0 - 風/毒/冰 Class 升級系統 + 全局暴擊整合 + 封面背景滾動');
+        console.log('🎲 Offline Dice v2.8.0 - 風/毒/冰 Class 升級系統 + 全局暴擊整合 + 封面背景滾動 + 封面音樂動態切換');
     </script>
 </body>
 </html>
