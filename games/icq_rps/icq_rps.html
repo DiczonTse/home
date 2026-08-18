@@ -53,8 +53,6 @@
             width: 100%;
             position: relative;
         }
-
-        /* ===== 頂欄 ===== */
         .game-header {
             display: flex;
             justify-content: space-between;
@@ -138,8 +136,6 @@
             background: #ffdd44;
             box-shadow: 0 0 12px #ffdd44;
         }
-
-        /* ===== 棋盤 ===== */
         .board-wrapper {
             background: var(--bg-board);
             border-radius: var(--radius-md);
@@ -307,8 +303,6 @@
                 box-shadow: 0 0 50px #ffffaa, inset 0 0 40px rgba(255, 255, 120, 0.20);
             }
         }
-
-        /* ===== fly-in 動畫 ===== */
         @keyframes fly-in {
             0% {
                 transform: scale(2.0) translate(0, -30px);
@@ -371,8 +365,6 @@
             border-color: #ffdd44 !important;
             box-shadow: 0 0 40px #ffdd44, inset 0 0 30px rgba(255, 220, 68, 0.25);
         }
-
-        /* ===== 底部 ===== */
         .game-footer {
             display: flex;
             justify-content: space-between;
@@ -485,8 +477,6 @@
             letter-spacing: 0.3px;
             width: 100%;
         }
-
-        /* ===== 覆蓋層 ===== */
         .overlay {
             position: fixed;
             top: 0;
@@ -514,8 +504,6 @@
                 transform: scale(1);
             }
         }
-
-        /* ===== 標題畫面 - 封面背景 + 磨砂層優化 ===== */
         #titleOverlay {
             backdrop-filter: none;
             background: rgba(0, 20, 0, 0.70);
@@ -573,7 +561,6 @@
             color: #d4f5dc;
             text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
         }
-
         .modal {
             background: #1f4d30;
             border-radius: var(--radius-lg);
@@ -729,7 +716,6 @@
             border-radius: 30px;
             display: inline-block;
         }
-        /* FIX: 封面版權資訊樣式 */
         .title-copyright {
             margin-top: 8px;
             font-size: 12px;
@@ -787,8 +773,6 @@
             font-size: 12px;
             color: #aacfaa;
         }
-
-        /* VS 分隔樣式 */
         .vs-divider {
             font-size: 32px;
             font-weight: 900;
@@ -800,8 +784,6 @@
             flex-shrink: 0;
             line-height: 1.2;
         }
-
-        /* ===== 選擇棋子階段 ===== */
         .select-phase {
             margin: 10px 0 6px;
             padding: 12px;
@@ -832,8 +814,6 @@
             justify-content: center;
             flex-wrap: wrap;
         }
-
-        /* ===== 重猜彈窗 ===== */
         .rematch-modal .choices {
             display: flex;
             gap: 16px;
@@ -869,8 +849,6 @@
             margin: 8px 0;
             font-weight: 600;
         }
-
-        /* ===== Toast ===== */
         .toast-msg {
             position: fixed;
             bottom: 80px;
@@ -890,8 +868,6 @@
             text-align: center;
             pointer-events: none;
         }
-
-        /* ===== 全屏按鈕 (右下) ===== */
         .fullscreen-btn {
             position: fixed;
             right: 18px;
@@ -929,8 +905,6 @@
             font-size: 24px;
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
         }
-
-        /* ===== 響應式 ===== */
         @media (max-width: 640px) {
             .game-container {
                 padding: 12px 12px 14px;
@@ -1109,7 +1083,6 @@
 <body>
 
     <div class="game-container">
-        <!-- 頂欄 -->
         <div class="game-header">
             <div class="game-title">
                 <span class="icon">🌼</span> ICQ 包剪揼
@@ -1120,13 +1093,9 @@
                 <span id="turnText">等待開始</span>
             </div>
         </div>
-
-        <!-- 棋盤 -->
         <div class="board-wrapper">
             <div class="board" id="board"></div>
         </div>
-
-        <!-- 底部 -->
         <div class="game-footer">
             <div class="score-area">
                 <span id="playerLabel">🔵 藍方/🔴 紅方<span class="num player-score" id="playerScore">0</span></span>
@@ -1179,8 +1148,7 @@
                 </div>
                 <div style="margin-top:14px; display:flex; flex-direction:column; align-items:center;">
                     <span class="title-footer-trophy" id="titleTrophyFooter">🏆 0</span>
-                    <!-- FIX: 封面版權資訊 -->
-                    <div class="title-copyright" id="titleCopyright">v2.0 © <span id="copyrightYear"></span> ☕迪遜咖啡廳，版權所有。</div>
+                    <div class="title-copyright" id="titleCopyright">v2.5.0 © <span id="copyrightYear"></span> ☕迪遜咖啡廳，版權所有。</div>
                 </div>
             </div>
         </div>
@@ -1227,9 +1195,9 @@
 
     <script>
         // ================================================================
-        //  🌼 ICQ 包剪揼 · 紅藍對決版 (v2.4.0)
-        //  修復：國王送頭問題 (國王攻擊普通棋子必勝 + AI 極度保護國王)
-        //  新增：AI 積極追殺玩家國王
+        //  🌼 ICQ 包剪揼 · 紅藍對決版 (v2.5.0)
+        //  修復：AI 發現玩家旗手時盲目送頭問題
+        //  新增：安全性評估、分層權重、智能圍攻
         // ================================================================
 
         (function() {
@@ -1482,9 +1450,7 @@
             document.addEventListener('mozfullscreenchange', updateFullscreenIcon);
             document.addEventListener('MSFullscreenChange', updateFullscreenIcon);
 
-            // ================================================================
-            //  ★ 背景滾動
-            // ================================================================
+            // ---- 背景滾動 ----
             let bgScrollState = 'pause-top';
             let bgScrollTimeInState = 0;
             let bgScrollProgress = 0;
@@ -1493,9 +1459,7 @@
 
             function updateBackgroundScroll(deltaTime) {
                 if (!bgScrollLayer) return;
-
                 bgScrollTimeInState += deltaTime;
-
                 switch (bgScrollState) {
                     case 'pause-top':
                         if (bgScrollTimeInState >= BG_PAUSE_DURATION) {
@@ -1537,7 +1501,6 @@
             function bgScrollLoop(time) {
                 const dt = Math.min(0.05, (time - bgLastTime) / 1000);
                 bgLastTime = time;
-
                 if (titleOverlay && titleOverlay.classList.contains('active')) {
                     updateBackgroundScroll(dt);
                 }
@@ -1614,18 +1577,14 @@
                 return result;
             }
 
-            // ---- ★ 戰鬥解析 (修正：國王攻擊普通棋子必勝) ----
+            // ---- ★ 戰鬥解析 ----
             function resolveBattleBasic(attacker, defender) {
-                // 國王特殊規則
                 if (attacker.type === 'king' && defender.type === 'king') return { result: 'win', winner: 'attacker' };
                 if (attacker.type === 'king' && defender.type === 'trap') return { result: 'disarm', winner: 'attacker' };
                 if (defender.type === 'trap') return { result: 'trap', winner: 'defender' };
-                if (defender.type === 'king') return { result: 'king', winner: 'attacker' }; // 普通棋手擊殺國王
-
-                // ★ 核心修正：國王攻擊普通棋子 → 國王獲勝 (避免國王送頭)
+                if (defender.type === 'king') return { result: 'king', winner: 'attacker' };
                 if (attacker.type === 'king') return { result: 'win', winner: 'attacker' };
 
-                // 普通剪刀石頭布邏輯
                 const aType = attacker.type,
                     dType = defender.type;
                 if (aType === dType) return { result: 'draw', winner: null };
@@ -1936,14 +1895,74 @@
                 setTimeout(() => computerTurn(), 400);
             }
 
-            // ---- ★ 電腦 AI (強化版：極度保護國王，積極追殺玩家國王) ----
+            // ================================================================
+            //  ★ 核心修復：AI 安全性評估 + 分層權重（解決送頭問題）
+            // ================================================================
+
+            /**
+             * 評估某個位置對 AI 棋子的安全程度
+             * @param {number} r - 行
+             * @param {number} c - 列
+             * @param {object} piece - AI 棋子
+             * @returns {number} 安全分數（越高越安全，0 表示極度危險）
+             */
+            function evaluateSafetyForAI(r, c, piece) {
+                let safety = 1.0;
+                const playerPiecesList = playerPieces;
+                for (const p of playerPiecesList) {
+                    if (p.type === 'trap') continue;
+                    const moves = getValidMoves(p.row, p.col);
+                    for (const m of moves) {
+                        if (m.r === r && m.c === c) {
+                            // 玩家棋子可以攻擊這個位置
+                            const battle = resolveBattleBasic(p, piece);
+                            if (battle.result === 'win' || battle.result === 'king') {
+                                // 玩家棋子能擊敗 AI 棋子 → 極度危險
+                                safety *= 0.1;
+                            } else if (battle.result === 'draw') {
+                                safety *= 0.4;
+                            } else {
+                                // AI 棋子能擊敗玩家棋子 → 輕微危險
+                                safety *= 0.7;
+                            }
+                        }
+                    }
+                }
+                // 檢查是否在玩家陷阱旁邊（陷阱保護）
+                for (const p of playerPiecesList) {
+                    if (p.type === 'trap') {
+                        const adj = getAdjacent(p.row, p.col);
+                        for (const pos of adj) {
+                            if (pos.r === r && pos.c === c) {
+                                safety *= 0.5;
+                            }
+                        }
+                    }
+                }
+                return Math.max(0.05, Math.min(1.0, safety));
+            }
+
+            /**
+             * 評估 AI 移動後是否會被玩家反擊殺死
+             * @param {number} r - 目標行
+             * @param {number} c - 目標列
+             * @param {object} piece - AI 棋子
+             * @returns {boolean} 是否安全
+             */
+            function isMoveSafeForAI(r, c, piece) {
+                const safety = evaluateSafetyForAI(r, c, piece);
+                return safety > 0.3;
+            }
+
+            // ---- ★ 重構後的 AI 回合 ----
             async function computerTurn() {
                 if (gameOver || !gameStarted || currentTurn !== 'computer' || animating) return;
                 if (isProcessing) return;
                 isProcessing = true;
 
                 const pieces = getPieces('computer');
-                if (pieces.length === 0) { isProcessing = false; checkGameOver(); return; }
+                if (pieces.length === 0) { isProcessing = false;
+                    checkGameOver(); return; }
 
                 let moves = [];
                 for (const p of pieces) {
@@ -1973,42 +1992,53 @@
                 const knownPlayer = playerPieces.filter(p => p.revealed === true);
                 let weightedMoves = [];
 
-                // ★ 85% 機率理性，15% 機率誘餌，但誘餌模式也會過濾國王
+                // ---- 理性模式 (85%) vs 誘餌模式 (15%) ----
                 const useTactic = Math.random() < 0.85;
 
                 if (knownPlayer.length > 0 && useTactic) {
                     for (const m of moves) {
-                        let weight = 1;
+                        let weight = 1.0;
 
+                        // ---- 1. 基礎安全性評估 ----
+                        const safety = evaluateSafetyForAI(m.toR, m.toC, m.piece);
+                        weight *= safety;
+
+                        // ---- 2. 針對玩家國王的策略 ----
+                        let hasKingTarget = false;
                         for (const known of knownPlayer) {
-                            // ★ 高優先級：如果發現玩家國王，直接刺殺或包圍
                             if (known.type === 'king') {
-                                if (m.action === 'battle' && m.target === known) {
-                                    weight += 20; // 直接攻擊國王，最高權重！
-                                } else {
-                                    // 檢查是否移動到國王旁邊
-                                    const adj = getAdjacent(known.row, known.col);
-                                    const isNear = adj.some(pos => pos.r === m.toR && pos.c === m.toC);
-                                    if (isNear) {
-                                        weight += 8; // 靠近國王，準備包圍
+                                hasKingTarget = true;
+                                // 只有非國王棋子才參與攻擊國王（國王不送頭）
+                                if (m.piece.type !== 'king') {
+                                    if (m.action === 'battle' && m.target === known) {
+                                        // ★ 直接攻擊國王：高權重，但必須安全
+                                        if (safety > 0.5) {
+                                            weight += 12;
+                                        } else {
+                                            weight += 2; // 不安全時大幅降低
+                                        }
+                                    } else {
+                                        // ★ 靠近國王：權重降低，且必須安全
+                                        const adj = getAdjacent(known.row, known.col);
+                                        const isNear = adj.some(pos => pos.r === m.toR && pos.c === m.toC);
+                                        if (isNear && safety > 0.6) {
+                                            weight += 3; // 從 8 降到 3
+                                        } else if (isNear) {
+                                            weight += 0.5; // 不安全時幾乎不給權重
+                                        }
                                     }
                                 }
-                                continue; // 跳過後續的屬性判斷，專注於國王
+                                // 國王棋子不處理靠近/攻擊國王的邏輯（由下方國王保護邏輯處理）
                             }
+                        }
 
-                            // 對付普通玩家棋子 (原本的剋制邏輯)
+                        // ---- 3. 克制關係（針對非國王玩家棋子） ----
+                        for (const known of knownPlayer) {
+                            if (known.type === 'king' || known.type === 'trap') continue;
                             const counterType = BEAT_BY[known.type];
                             const sameType = known.type;
 
                             if (m.action === 'battle' && m.target === known) {
-                                if (m.piece.type === counterType) {
-                                    weight += 10;
-                                } else if (m.piece.type === sameType) {
-                                    weight += 4;
-                                } else {
-                                    weight += 2;
-                                }
-                            } else {
                                 if (m.piece.type === counterType) {
                                     weight += 6;
                                 } else if (m.piece.type === sameType) {
@@ -2016,33 +2046,118 @@
                                 } else {
                                     weight += 1;
                                 }
+                            } else {
+                                const adj = getAdjacent(known.row, known.col);
+                                const isNear = adj.some(pos => pos.r === m.toR && pos.c === m.toC);
+                                if (isNear) {
+                                    if (m.piece.type === counterType) {
+                                        weight += 3;
+                                    } else if (m.piece.type === sameType) {
+                                        weight += 1.5;
+                                    } else {
+                                        weight += 0.5;
+                                    }
+                                }
                             }
                         }
 
-                        // ★ 核心保護：如果是國王，強制壓低權重，避免送頭
+                        // ---- 4. ★ 核心保護：國王棋子極度保守 ----
                         if (m.piece.type === 'king') {
-                            weight = Math.min(weight, 0.1); // 幾乎不會被選中
+                            // 國王只做安全的移動
+                            if (safety < 0.6) {
+                                weight *= 0.05; // 極度危險時幾乎不移動
+                            } else {
+                                weight *= 0.3; // 國王移動權重極低
+                            }
+                            // 如果國王正在被攻擊，才允許逃跑或反擊
+                            const underAttack = playerPieces.some(p => {
+                                const moves = getValidMoves(p.row, p.col);
+                                return moves.some(mv => mv.r === m.fromR && mv.c === m.fromC);
+                            });
+                            if (underAttack && safety > 0.5) {
+                                weight += 2; // 被攻擊時可以移動逃跑
+                            }
                         }
+
+                        // ---- 5. 陷阱保護：AI 陷阱不移動，但可以保護周圍 ----
+                        // （陷阱已在前面被過濾掉）
+
+                        // ---- 6. 隨機性 ----
+                        weight *= (0.9 + Math.random() * 0.2);
 
                         weightedMoves.push({ ...m, weight });
                     }
                 } else {
-                    // ---- 誘餌模式：但國王依然被保護 ----
+                    // ---- 誘餌模式：依然保護國王 ----
                     for (const m of moves) {
-                        let weight = 1;
+                        let weight = 1.0;
+                        const safety = evaluateSafetyForAI(m.toR, m.toC, m.piece);
+                        weight *= safety;
+
                         if (m.piece.type === 'king') {
-                            weight = 0.1; // 誘餌模式下也極度保護國王
+                            if (safety < 0.5) {
+                                weight *= 0.05;
+                            } else {
+                                weight *= 0.3;
+                            }
                         }
+
+                        // 誘餌模式下，增加一些隨機移動
+                        weight *= (0.6 + Math.random() * 0.8);
                         weightedMoves.push({ ...m, weight });
                     }
                 }
 
+                // ---- 過濾掉權重為 0 或極低的移動 ----
+                weightedMoves = weightedMoves.filter(m => m.weight > 0.01);
+                if (weightedMoves.length === 0) {
+                    // 如果沒有有效移動，選擇一個最安全的移動
+                    const safeMoves = moves.filter(m => {
+                        const safety = evaluateSafetyForAI(m.toR, m.toC, m.piece);
+                        return safety > 0.3;
+                    });
+                    if (safeMoves.length > 0) {
+                        weightedMoves = safeMoves.map(m => ({ ...m, weight: 1.0 }));
+                    } else {
+                        // 真的沒有任何安全移動，隨便選一個
+                        weightedMoves = moves.map(m => ({ ...m, weight: 0.5 }));
+                    }
+                }
+
                 // ---- 輪盤賭抽選 ----
-                const totalWeight = weightedMoves.reduce((sum, m) => sum + m.weight, 0);
+                const totalWeight = weightedMoves.reduce((sum, m) => sum + Math.max(0, m.weight), 0);
+                if (totalWeight <= 0) {
+                    // 防禦性處理
+                    const fallback = weightedMoves.length > 0 ? weightedMoves[0] : moves[0];
+                    if (fallback) {
+                        if (fallback.action === 'move') {
+                            movePiece(fallback.fromR, fallback.fromC, fallback.toR, fallback.toC);
+                            playSound('wind');
+                            _moveAnimPending = true;
+                            afterComputerAction();
+                        } else {
+                            const defender = board[fallback.toR][fallback.toC];
+                            await executeBattleWithAnimation(fallback.piece, defender, (battle) => {
+                                if (battle.result === 'king' || battle.result === 'win') {
+                                    if (checkGameOver()) { isProcessing = false; return; }
+                                }
+                                afterComputerAction();
+                            });
+                        }
+                    } else {
+                        isProcessing = false;
+                        if (checkGameOver()) return;
+                        currentTurn = 'player';
+                        updateTurnUI();
+                        isProcessing = false;
+                    }
+                    return;
+                }
+
                 let rand = Math.random() * totalWeight;
                 let pick = weightedMoves[0];
                 for (const m of weightedMoves) {
-                    rand -= m.weight;
+                    rand -= Math.max(0, m.weight);
                     if (rand <= 0) {
                         pick = m;
                         break;
@@ -2050,6 +2165,15 @@
                 }
 
                 // ---- 執行 ----
+                if (!pick) {
+                    isProcessing = false;
+                    if (checkGameOver()) return;
+                    currentTurn = 'player';
+                    updateTurnUI();
+                    isProcessing = false;
+                    return;
+                }
+
                 if (pick.action === 'move') {
                     movePiece(pick.fromR, pick.fromC, pick.toR, pick.toC);
                     playSound('wind');
@@ -2164,7 +2288,7 @@
                 const pColor = playerColor === 'blue' ? '🔵 藍方' : '🔴 紅方';
                 const cColor = playerColor === 'blue' ? '🔴 紅方' : '🔵 藍方';
                 playerLabel.innerHTML = pColor + ' <span class="num player-score" id="playerScore">' + playerPieces
-                .length + '</span>';
+                    .length + '</span>';
                 computerLabel.innerHTML = cColor + ' <span class="num computer-score" id="computerScore">' +
                     computerPieces.length + '</span>';
                 document.getElementById('playerScore').textContent = playerPieces.length;
@@ -2962,7 +3086,7 @@
             // ---- 版權 ----
             function setCopyright() {
                 const year = new Date().getFullYear();
-                copyrightEl.textContent = 'v2.4.0 © ' + year + ' ☕迪遜咖啡廳，版權所有。';
+                copyrightEl.textContent = 'v2.5.0 © ' + year + ' ☕迪遜咖啡廳，版權所有。';
                 if (copyrightYearEl) {
                     copyrightYearEl.textContent = year;
                 }
@@ -2997,12 +3121,11 @@
                         'PLAYING' || gamePhase === 'TITLE') && bgAudio.paused) startBackgroundMusic();
             });
 
-            console.log('🌼 ICQ 包剪揼 · 紅藍對決版 (v2.4.0) 已載入');
-            console.log('✅ 核心修正：國王送頭問題 (國王攻擊普通棋子必勝，AI 極度保護國王)');
-            console.log('✅ 新增：AI 積極追殺玩家國王 (權重 +20)');
+            console.log('🌼 ICQ 包剪揼 · 紅藍對決版 (v2.5.0) 已載入');
+            console.log('✅ 核心修復：AI 不再盲目送頭 (安全性評估 + 分層權重)');
+            console.log('✅ AI 國王極度保守，普通棋子只在安全時靠近/攻擊國王');
             console.log('🏆 當前獎盃: ' + trophyCount);
             console.log('🎨 當前選色: ' + playerColor);
-            console.log('🎵 音樂階段: ' + currentMusicPhase);
 
             window.__game = {
                 addTrophy: addTrophy,
