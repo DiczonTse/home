@@ -21,7 +21,7 @@
     <meta property="og:image" content="pics/diczon_cafe.jpg">
     <meta property="og:url" content="https://diczontse.github.io/home/index.html">
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="網頁書籤管理工具">
+    <meta property="og:site_name" content="☕迪遜咖啡廳 | Diczon's Cafe">
     <meta property="og:locale" content="zh_Hant">
     <!--Twitter Card Meta Tags-->
     <meta name="twitter:card" content="summary_large_image">
@@ -32506,16 +32506,16 @@
         ];
 
         const CHANNEL_OPTGROUP = [
-            { labelKey: 'tools_group', options: [
+            { labelKey: 'games_group', options: [
+                    { value: 'games/offline_dice/offline_dice.html', key: 'dice' },
+                    { value: 'games/block_legend/block_legend.html', key: 'block_legend' },
+					{ value: 'games/icq_rps/icq_rps.html', key: 'icq_rps' },
+                    { value: 'games/tic_tac_toe/tic_tac_toe.html', key: 'tic_tac_toe' }
+                ] },
+			{ labelKey: 'tools_group', options: [
                     { value: 'tools/bookmarks.html', key: 'bookmark' },
                     { value: 'tools/relatives.html', key: 'relatives' },
                     { value: 'tools/task_manager.html', key: 'task_manager' },
-                ] },
-            { labelKey: 'games_group', options: [
-                    { value: 'games/offline_dice/offline_dice.html', key: 'dice' },
-					{ value: 'games/icq_rps/icq_rps.html', key: 'icq_rps' },
-                    { value: 'games/block_legend/block_legend.html', key: 'block_legend' },
-                    { value: 'games/tic_tac_toe/tic_tac_toe.html', key: 'tic_tac_toe' }
                 ] }
         ];
 
@@ -33061,7 +33061,38 @@
                         </div>
                     </div>
                 `;
-
+				el.addEventListener('dragstart', (e) => {
+					draggedIdx = parseInt(el.dataset.index);
+					el.classList.add('dragging');
+					e.dataTransfer.effectAllowed = 'move';
+					e.dataTransfer.setData('text/plain', String(draggedIdx));
+				});
+				el.addEventListener('dragend', (e) => {
+					el.classList.remove('dragging');
+					document.querySelectorAll('.card.drag-over').forEach(c => c.classList.remove('drag-over'));
+				});
+				el.addEventListener('dragover', (e) => {
+					e.preventDefault();
+					e.dataTransfer.dropEffect = 'move';
+					const targetIdx = parseInt(el.dataset.index);
+					if (targetIdx !== draggedIdx) {
+						document.querySelectorAll('.card.drag-over').forEach(c => c.classList.remove('drag-over'));
+						el.classList.add('drag-over');
+						dragOverIdx = targetIdx;
+					}
+				});
+				el.addEventListener('drop', (e) => {
+					e.preventDefault();
+					el.classList.remove('drag-over');
+					const targetIdx = parseInt(el.dataset.index);
+					if (draggedIdx !== null && targetIdx !== null && draggedIdx !== targetIdx) {
+						const [movedCard] = cards.splice(draggedIdx, 1);
+						cards.splice(targetIdx, 0, movedCard);
+						renderAll();
+					}
+					draggedIdx = null;
+					dragOverIdx = null;
+				});
                 container.appendChild(el);
             });
 
@@ -33220,7 +33251,7 @@
             const thumb = $('thumbnail').value.trim();
             const tags = $('tags').value.split(',').map(s => s.trim()).filter(Boolean);
             if (!cat || !title || !url || !thumb) return alert('請填寫分類、名字、網址和預覽圖');
-            const anchor = title.replace(/\s+/g, '_') + '_' + Date.now();
+            const anchor = title.replace(/\s+/g, '_');
             cards.unshift({
                 title,
                 trd_chi: title,
