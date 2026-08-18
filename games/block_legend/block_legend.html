@@ -736,6 +736,12 @@
                 white-space: normal;
                 max-width: 95%;
             }
+			#gameover-overlay {
+				font-size: 28px;
+				letter-spacing: 4px;
+				white-space: nowrap;
+				flex-wrap: nowrap;
+			}
         }
         @media (max-width:400px) {
             #cover h1 {
@@ -748,6 +754,10 @@
             #equip-grid .equip-slot {
                 min-height: 50px;
             }
+			#gameover-overlay {
+				font-size: 22px;
+				letter-spacing: 2px;
+			}
         }
         #map-name {
             text-align: center;
@@ -823,6 +833,7 @@
                 <button class="btn-reset" id="btnResetGame">🔄 重新開始</button>
             </div>
             <div style="margin-top:16px;font-size:13px;color:#cccccc;z-index:1;letter-spacing:1px;">🎵 點擊封面任意處播放音樂</div>
+			<div id="copyright" style="margin-top:8px;font-size:11px;color:#ffffff;z-index:1;letter-spacing:1px;"></div>
         </div>
 
         <!-- 游戲界面 -->
@@ -1054,6 +1065,9 @@
             const p = G.player;
             if (!cost) return true;
             if (cost.wood && countItem('wood') < cost.wood) return false;
+			if (cost.string && countItem('string') < cost.string) return false;
+			if (cost.feather && countItem('feather') < cost.feather) return false;
+			if (cost.bone && countItem('bone') < cost.bone) return false;
             if (cost.stone && countItem('stone') < cost.stone) return false;
             if (cost.leather && countItem('leather') < cost.leather) return false;
             if (cost.copper_ore && countItem('copper_ore') < cost.copper_ore) return false;
@@ -1068,6 +1082,9 @@
         function buildCostStr(cost) {
             let parts = [];
             if (cost.wood) parts.push(`🎋${cost.wood}`);
+			if (cost.string) parts.push(`🧵${cost.string}`);
+			if (cost.feather) parts.push(`🕊️${cost.feather}`);
+			if (cost.bone) parts.push(`🦴${cost.bone}`);
             if (cost.stone) parts.push(`🗻${cost.stone}`);
             if (cost.leather) parts.push(`🟫${cost.leather}`);
             if (cost.copper_ore) parts.push(`🟠${cost.copper_ore}`);
@@ -1089,7 +1106,10 @@
             if (cost.gold_ore) removeItem('gold_ore', cost.gold_ore);
             if (cost.diamond) removeItem('diamond', cost.diamond);
             if (cost.netherite) removeItem('netherite', cost.netherite);
-            if (cost.gold) p.gold -= cost.gold;
+			if (cost.string) removeItem('string', cost.string);
+			if (cost.feather) removeItem('feather', cost.feather);
+			if (cost.bone) removeItem('bone', cost.bone);
+			if (cost.gold) p.gold -= cost.gold;
         }
 
         function renderUpgradeChain(container, config) {
@@ -1251,7 +1271,7 @@
                 const source = audioCtx.createBufferSource();
                 source.buffer = buffer;
                 const gain = audioCtx.createGain();
-                gain.gain.value = 0.15;
+                gain.gain.value = 0.05;
                 source.connect(gain);
                 gain.connect(audioCtx.destination);
                 source.start();
@@ -1539,6 +1559,7 @@
             gameTime: 0,
             dayLength: 300,
             isNight: false,
+			lastHour: -1,
             weather: 'clear',
             bedPlaced: false,
             bedX: -1,
@@ -1552,6 +1573,7 @@
             mapGrid: {},
             playerMapRow: 0,
             playerMapCol: 0,
+			usedProfessions: [],
             // ===== 🆕 有限地圖鏈 =====
             mapChain: [], // 有序列表 ['plain', 'forest', ...]
             mapEntryDir: {}, // 每個地圖的入口方向 (玩家從哪個方向進入)
@@ -1645,6 +1667,7 @@
             // 地圖池 = RANDOM_MAP_POOL 中排除 'plain'
             G.mapPool = RANDOM_MAP_POOL.filter(id => id !== 'plain');
             G.isWorldExhausted = false;
+			G.usedProfessions = [];
 
             // 起始地圖隨機生成一個出口方向 (4選1)
             const dirs = ['north', 'south', 'east', 'west'];
@@ -1880,20 +1903,39 @@
 
             // ---------- 村莊 ----------
             if (!is('ocean') && !is('river') && !is('nether') && !is('end') && !is('heaven') && !is('cave')) {
-                let villagePlaced = false;
-                for (let attempt = 0; attempt < 100; attempt++) {
-                    const x = rand(2, w - 3),
-                        y = rand(2, h - 3);
-                    if (!objects[y][x] && !(x === 9 && y === 9)) {
-                        const professions = ['weaponsmith', 'armorer', 'toolsmith', 'fletcher', 'shepherd', 'farmer'];
-                        const prof = professions[rand(0, professions.length - 1)];
-                        objects[y][x] = { type: 'village', profession: prof };
-                        villagePlaced = true;
-                        break;
-                    }
-                }
-                if (!villagePlaced) objects[5][5] = { type: 'village', profession: 'farmer' };
-            }
+				const allProfessions = ['weaponsmith', 'armorer', 'toolsmith', 'fletcher', 'shepherd', 'farmer'];
+				const available = allProfessions.filter(p => !G.usedProfessions.includes(p));
+				if (available.length > 0) {
+					let villagePlaced = false;
+					// 嘗試隨機放置 100 次
+					for (let attempt = 0; attempt < 100; attempt++) {
+						const x = rand(2, w - 3), y = rand(2, h - 3);
+						if (!objects[y][x] && !(x === 9 && y === 9)) {
+							const prof = available[rand(0, available.length - 1)];
+							objects[y][x] = { type: 'village', profession: prof };
+							G.usedProfessions.push(prof);
+							villagePlaced = true;
+							break;
+						}
+					}
+					// 若隨機放置失敗，則強制找一個空位放置
+					if (!villagePlaced) {
+						const prof = available[0];
+						for (let y = 0; y < h; y++) {
+							for (let x = 0; x < w; x++) {
+								if (!objects[y][x] && !(x === 9 && y === 9)) {
+									objects[y][x] = { type: 'village', profession: prof };
+									G.usedProfessions.push(prof);
+									villagePlaced = true;
+									break;
+								}
+							}
+							if (villagePlaced) break;
+						}
+					}
+				}
+				// 若 available 為空，則不放置任何村莊
+			}
 
             // ---------- 草 ----------
             if (!is('ocean') && !is('river') && !is('desert') && !is('ice') && !is('cave') && !is('nether') && !is(
@@ -2218,6 +2260,7 @@
             if (NO_RAIN_MAPS.includes(mapId)) {
                 G.weather = 'clear';
                 stopRainSound();
+				stopRainLoop();
                 if (window._rainLoopId) {
                     cancelAnimationFrame(window._rainLoopId);
                     window._rainLoopId = null;
@@ -2226,6 +2269,7 @@
             } else {
                 if (G.weather === 'rain' || G.weather === 'thunder') {
                     startRainSound();
+					startRainLoop();
                     if (!window._rainLoopId) drawRain();
                 }
             }
@@ -2328,51 +2372,72 @@
 
         // ---------- 時間與天氣 ----------
         function updateTimeDisplay() {
-            const totalSec = G.gameTime;
-            const scale = 43200 / G.dayLength;
-            const displaySec = totalSec * scale;
-            const hours = Math.floor(displaySec / 3600);
-            const mins = Math.floor((displaySec % 3600) / 60);
-            const secs = Math.floor(displaySec % 60);
-            const timeStr =
-                `${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
-            const icon = G.isNight ? '🌙' : '☀️';
-            const weatherIcon = G.weather === 'clear' ? '' : G.weather === 'rain' ? '🌧️' : '⛈️';
-            $('timeDisplay').textContent = `${icon} ${timeStr} ${weatherIcon}`;
-            if (G.isNight) app.classList.add('night');
-            else app.classList.remove('night');
-        }
+			const p = G.player;
+			if (!p) return;
+			const daySec = (G.gameTime * 86400 / G.dayLength) % 86400;
+			const displaySec = (daySec + 6 * 3600) % 86400;
+			const hours = Math.floor(displaySec / 3600);
+			const mins = Math.floor((displaySec % 3600) / 60);
+			const secs = Math.floor(displaySec % 60);
+			const timeStr =
+				`${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+			const icon = G.isNight ? '🌙' : '☀️';
+			const weatherIcon = G.weather === 'clear' ? '' : G.weather === 'rain' ? '🌧️' : '⛈️';
+			$('timeDisplay').textContent = `${icon} ${timeStr} ${weatherIcon}`;
+			if (G.isNight) app.classList.add('night');
+			else app.classList.remove('night');
+		}
 
         function updateTimeAndWeather() {
-            const p = G.player;
-            if (!p || G.gameOver) return;
-            G.gameTime += 1;
-            if (G.gameTime >= G.dayLength) {
-                G.gameTime = 0;
-                G.isNight = !G.isNight;
-                const mapId = G.player.mapId;
-                const canRain = !NO_RAIN_MAPS.includes(mapId);
-                if (canRain) {
-                    const r = Math.random();
-                    // ===== 🆕 天氣概率：60%晴天 / 30%雨天 / 10%雷雨天 =====
-                    if (r < 0.6) G.weather = 'clear';
-                    else if (r < 0.9) G.weather = 'rain';
-                    else G.weather = 'thunder';
-                } else {
-                    G.weather = 'clear';
-                }
-                refreshMobsOnMap();
-                updateUI();
-                updateMusic();
-                if (G.weather === 'rain') { startRainSound();
-                    toast('🌧️ 下雨了', 'info', 1500); } else if (G.weather === 'thunder') { startRainSound();
-                    playThunder();
-                    toast('⛈️ 雷雨交加！', 'warning', 1500); } else { stopRainSound(); }
-                toast(G.isNight ? '🌙 夜晚降臨！' : '☀️ 天亮了！', 'info', 1500);
-                render();
-            }
-            updateTimeDisplay();
-        }
+			const p = G.player;
+			if (!p || G.gameOver) return;
+			G.gameTime += 1;
+			const daySec = (G.gameTime * 86400 / G.dayLength) % 86400;
+			const displaySec = (daySec + 6 * 3600) % 86400;
+			const hours = Math.floor(displaySec / 3600);
+			const minutes = Math.floor((displaySec % 3600) / 60);
+			const seconds = Math.floor(displaySec % 60);
+			const isNightNow = (hours >= 18 || hours < 6);
+			if (G.lastHour !== -1 && G.lastHour !== hours) {
+				const crossedDawn = (G.lastHour < 6 && hours >= 6);
+				const crossedDusk = (G.lastHour < 18 && hours >= 18);
+
+				if (crossedDawn || crossedDusk) {
+					const mapId = G.player.mapId;
+					const canRain = !NO_RAIN_MAPS.includes(mapId);
+
+					if (canRain) {
+						const r = Math.random();
+						if (r < 0.6) {
+							G.weather = 'clear';
+							stopRainLoop();
+						} else if (r < 0.9) {
+							G.weather = 'rain';
+							startRainLoop();
+						} else {
+							G.weather = 'thunder';
+							startRainLoop();
+						}
+					} else {
+						G.weather = 'clear';
+						stopRainLoop();
+					}
+
+					refreshMobsOnMap();
+					updateMusic();
+
+					if (G.weather === 'rain') { startRainSound(); toast('🌧️ 下雨了', 'info', 1500); }
+					else if (G.weather === 'thunder') { startRainSound(); playThunder(); toast('⛈️ 雷雨交加！', 'warning', 1500); }
+					else { stopRainSound(); }
+
+					const msg = crossedDawn ? '☀️ 天亮了！' : '🌙 夜晚降臨！';
+					toast(msg, 'info', 1500);
+				}
+			}
+			G.isNight = isNightNow;
+			G.lastHour = hours;
+			updateTimeDisplay();
+		}
 
         // ---------- 玩家移動 ----------
         function movePlayer(dx, dy) {
@@ -3488,34 +3553,36 @@
 
         // ---------- 休息 ----------
         function rest() {
-            const p = G.player;
-            if (G.battle) return;
-            if (p.bedPlaced && p.bedMapId === p.mapId && p.x === p.bedX && p.y === p.bedY) {
-                const hpHeal = Math.floor(p.maxHp * 0.3);
-                const mpHeal = Math.floor(p.maxMp * 0.3);
-                const spHeal = Math.floor(p.maxSp * 0.4);
-                p.hp = Math.min(p.maxHp, p.hp + hpHeal);
-                p.mp = Math.min(p.maxMp, p.mp + mpHeal);
-                p.sp = Math.min(p.maxSp, p.sp + spHeal);
-                if (G.isNight) { G.isNight = false;
-                    G.gameTime = 0;
-                    refreshMobsOnMap();
-                    updateMusic();
-                    toast('🌅 睡了一覺，天亮了！', 'success', 2000); } else { toast(`⛺ 休息恢復 HP+${hpHeal} MP+${mpHeal} SP+${spHeal}`,
-                        'info'); }
-                updateUI();
-                render();
-                playSound(400, 0.3);
-                saveGameToLocal();
-            } else { toast('🛏️ 你需要一張床，且坐在床上才能休息！', 'warning'); }
-        }
-
-        function placeBed() {
-            if (countItem('bed') < 1) { toast('你沒有床！', 'warning'); return; }
-            $('bed-modal').classList.add('active');
-            window._bedPlacement = true;
-            toast('🛏️ 點擊地圖上的空地放置床', 'info', 3000);
-        }
+			const p = G.player;
+			if (G.battle) return;
+			if (p.bedPlaced && p.bedMapId === p.mapId && p.x === p.bedX && p.y === p.bedY) {
+				const hpHeal = Math.floor(p.maxHp * 0.3);
+				const mpHeal = Math.floor(p.maxMp * 0.3);
+				const spHeal = Math.floor(p.maxSp * 0.4);
+				p.hp = Math.min(p.maxHp, p.hp + hpHeal);
+				p.mp = Math.min(p.maxMp, p.mp + mpHeal);
+				p.sp = Math.min(p.maxSp, p.sp + spHeal);
+				if (G.isNight) {
+					const currentDaySec = (G.gameTime * 86400 / G.dayLength) % 86400;
+					const deltaDaySec = (86400 - currentDaySec) % 86400;
+					const deltaGameTime = deltaDaySec * G.dayLength / 86400;
+					G.gameTime += deltaGameTime;
+					G.isNight = false;
+					G.lastHour = 6;
+					refreshMobsOnMap();
+					updateMusic();
+					toast('🌅 睡了一覺，天亮了！', 'success', 2000);
+				} else {
+					toast(`⛺ 休息恢復 HP+${hpHeal} MP+${mpHeal} SP+${spHeal}`, 'info');
+				}
+				updateUI();
+				render();
+				playSound(400, 0.3);
+				saveGameToLocal();
+			} else {
+				toast('🛏️ 你需要一張床，且坐在床上才能休息！', 'warning');
+			}
+		}
 
         // ---------- 渲染 ----------
         function render() {
@@ -3653,7 +3720,6 @@
             ctx.setLineDash([4, 4]);
             ctx.strokeRect(px, py, size, size);
             ctx.setLineDash([]);
-            drawRain();
             if (G.isNight) {
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
                 ctx.fillRect(0, 0, 608, 608);
@@ -3699,7 +3765,7 @@
                     c.fillStyle = `rgba(255,255,255,${G.thunderFlash * 0.3})`;
                     c.fillRect(0, 0, 608, 608);
                     G.thunderFlash -= 0.02;
-                } else { if (Math.random() < 0.005) { G.thunderFlash = 1.0;
+                } else { if (Math.random() < 0.001) { G.thunderFlash = 1.0;
                         playThunder(); } }
             }
             rainLoopId = requestAnimationFrame(drawRain);
@@ -3710,6 +3776,14 @@
                 drawRain();
             }
         }
+		
+		function stopRainLoop() {
+			if (rainLoopId) {
+				cancelAnimationFrame(rainLoopId);
+				rainLoopId = null;
+			}
+			rainCtx.clearRect(0, 0, 608, 608);
+		}
 
         // ---------- UI ----------
         function updateUI() {
@@ -3928,6 +4002,7 @@
                     mapExitDir: G.mapExitDir,
                     mapPool: G.mapPool,
                     isWorldExhausted: G.isWorldExhausted,
+					usedProfessions: G.usedProfessions,
                 };
                 localStorage.setItem('blockLegendSave', JSON.stringify(data));
             } catch (e) { console.log('自動保存失敗:', e); }
@@ -4280,6 +4355,7 @@
             G.mapExitDir = data.mapExitDir || {};
             G.mapPool = data.mapPool || RANDOM_MAP_POOL.filter(id => id !== 'plain');
             G.isWorldExhausted = data.isWorldExhausted || false;
+			G.usedProfessions = data.usedProfessions || [];
 
             const p = G.player;
             p.discoveredMaps = data.discoveredMaps || ['plain'];
@@ -4298,6 +4374,11 @@
             if (G.weather === 'rain' || G.weather === 'thunder') startRainSound();
             else stopRainSound();
             toast('📁 存檔載入成功！', 'success');
+			if (G.weather === 'rain' || G.weather === 'thunder') {
+				startRainLoop();
+			} else {
+				stopRainLoop();
+			}
         }
 
         // ---------- 事件绑定 ----------
@@ -4399,18 +4480,26 @@
             toast('🛏️ 點擊地圖上的空地放置床', 'info', 3000); });
 
         document.querySelectorAll('.modal-overlay').forEach(el => {
-            el.addEventListener('click', (e) => {
-                if (e.target === el) {
-                    if (el.id === 'battle-modal' && G.battle && !G.battle.ended) {
-                        if (confirm('戰鬥中離開視為逃跑，確定嗎？')) battleFlee();
-                    } else {
-                        el.classList.remove('active');
-                        if (el.id === 'battle-modal') { G.battle = null;
-                            updateMusic(); }
-                    }
-                }
-            });
-        });
+			el.addEventListener('click', (e) => {
+				if (e.target === el) {
+					if (el.id === 'battle-modal') {
+						// 戰鬥進行中，點擊背景不觸發任何動作
+						if (G.battle && !G.battle.ended) {
+							return;
+						} else {
+							// 戰鬥已結束，允許關閉
+							el.classList.remove('active');
+							G.battle = null;
+							updateMusic();
+						}
+					} else {
+						// 其他模態框正常關閉
+						el.classList.remove('active');
+						if (el.id === 'battle-modal') { G.battle = null; updateMusic(); }
+					}
+				}
+			});
+		});
 
         function isAnyModalOpen() { return document.querySelector('.modal-overlay.active') !== null; }
 
@@ -4456,9 +4545,8 @@
             if (Math.abs(dx) + Math.abs(dy) === 1) {
                 movePlayer(dx, dy);
             } else if (Math.abs(dx) + Math.abs(dy) === 2 && Math.abs(dx) === 1 && Math.abs(dy) === 1) {
-                movePlayer(Math.sign(dx), 0);
-                setTimeout(() => { if (!G.gameOver && !G.battle) movePlayer(0, Math.sign(dy)); }, 150);
-            }
+				// 不執行任何動作
+			}
         });
 
         let touchStartX = 0,
@@ -4523,6 +4611,13 @@
                 }
             }, 500);
         });
+		// 在頁面載入後設定版權年份
+		document.addEventListener('DOMContentLoaded', function() {
+			const copyright = document.getElementById('copyright');
+			if (copyright) {
+				copyright.textContent = `v2.0 © ${new Date().getFullYear()} ☕迪遜咖啡廳，版權所有。`;
+			}
+		});
 
         console.log('⛏️ 方塊傳說已載入！');
         console.log('🎮 操作: 方向鍵移動 | R休息 | I背包 | E裝備');
