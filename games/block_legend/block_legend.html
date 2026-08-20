@@ -126,6 +126,35 @@
         .gameover-overlay { position:absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.6); z-index:50; pointer-events:none; font-size:48px; font-weight:bold; color:#e74c3c; text-shadow:0 0 20px #ff0000,0 0 40px #ff0000; letter-spacing:6px; }
         .gameover-overlay.hidden { display:none; }
         #fileInput { display:none; }
+
+        /* ===== 新增：制作系统样式 ===== */
+        #craft-grid { display:grid; grid-template-columns:1fr; gap:4px; margin:6px 0; max-height:360px; overflow-y:auto; padding-right:4px; }
+        #craft-grid .craft-category { background:rgba(255,255,255,0.03); border-radius:8px; padding:4px 6px; border-left:3px solid #4a6fa5; }
+        #craft-grid .craft-category .cat-title { font-size:13px; color:#8ab4f8; font-weight:bold; padding:2px 0; border-bottom:1px solid #1a3a5a; margin-bottom:4px; }
+        #craft-grid .craft-item { display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.04); padding:3px 8px; border-radius:6px; border:1px solid #1a3a5a; margin-bottom:2px; font-size:12px; flex-wrap:wrap; }
+        #craft-grid .craft-item .ci-icon { font-size:18px; flex-shrink:0; width:28px; text-align:center; }
+        #craft-grid .craft-item .ci-name { font-weight:bold; color:#ddd; flex-shrink:0; min-width:60px; }
+        #craft-grid .craft-item .ci-mats { color:#aaa; font-size:11px; display:flex; flex-wrap:wrap; gap:2px 6px; flex:1; }
+        #craft-grid .craft-item .ci-mats .mat { display:inline-flex; align-items:center; gap:1px; }
+        #craft-grid .craft-item .ci-mats .mat .mat-icon { font-size:13px; }
+        #craft-grid .craft-item .ci-mats .mat .mat-count { color:#888; }
+        #craft-grid .craft-item .ci-mats .mat.have { color:#4a8a5a; }
+        #craft-grid .craft-item .ci-mats .mat.lack { color:#e74c3c; }
+        #craft-grid .craft-item .ci-btn { padding:2px 12px; background:#2a5a3a; border:1px solid #4a8a5a; border-radius:6px; color:#fff; cursor:pointer; font-size:11px; transition:0.2s; flex-shrink:0; }
+        #craft-grid .craft-item .ci-btn:hover:not(:disabled) { background:#3a7a4a; }
+        #craft-grid .craft-item .ci-btn:disabled { opacity:0.4; cursor:not-allowed; }
+        #craft-grid .craft-item .ci-owned { color:#666; font-size:10px; flex-shrink:0; }
+        #craft-grid .craft-item .ci-owned .owned-num { color:#aaa; }
+        #craft-modal .modal-box { max-width:560px; }
+        #craft-modal .modal-box .craft-tabs { display:flex; gap:4px; flex-wrap:wrap; margin-bottom:6px; border-bottom:1px solid #2a4a6a; padding-bottom:4px; }
+        #craft-modal .modal-box .craft-tabs .tab-btn { padding:2px 12px; background:transparent; border:1px solid #2a4a6a; border-radius:12px; color:#888; cursor:pointer; font-size:11px; transition:0.2s; }
+        #craft-modal .modal-box .craft-tabs .tab-btn:hover { background:rgba(255,255,255,0.05); color:#ddd; }
+        #craft-modal .modal-box .craft-tabs .tab-btn.active { background:#4a6fa5; color:#fff; border-color:#4a6fa5; }
+        #craft-search { width:100%; padding:4px 10px; background:rgba(0,0,0,0.3); border:1px solid #2a4a6a; border-radius:16px; color:#fff; font-size:12px; outline:none; margin-bottom:4px; }
+        #craft-search::placeholder { color:#556; }
+        #craft-search:focus { border-color:#4a6fa5; }
+        #craft-grid .craft-item .ci-has { font-size:10px; color:#4a8a5a; flex-shrink:0; }
+        @media (max-width:600px) { #craft-grid .craft-item { font-size:10px; padding:2px 4px; } #craft-grid .craft-item .ci-icon { font-size:15px; width:22px; } #craft-grid .craft-item .ci-name { min-width:40px; font-size:10px; } #craft-grid .craft-item .ci-btn { font-size:10px; padding:1px 8px; } #craft-grid .craft-item .ci-mats { font-size:10px; } }
     </style>
 </head>
 <body>
@@ -248,13 +277,33 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- ===== 新增：制作模态框 ===== -->
+                <div class="modal-overlay" id="craft-modal">
+                    <div class="modal-box">
+                        <button class="close-btn" id="craftCloseBtn">✕</button>
+                        <h2>🔨 製作</h2>
+                        <input type="text" id="craft-search" placeholder="🔍 搜尋物品..." />
+                        <div class="craft-tabs" id="craftTabs">
+                            <button class="tab-btn active" data-cat="all">📦 全部</button>
+                            <button class="tab-btn" data-cat="weapon">⚔️ 武器</button>
+                            <button class="tab-btn" data-cat="tool">🛠️ 工具</button>
+                            <button class="tab-btn" data-cat="armor">🛡️ 防具</button>
+                            <button class="tab-btn" data-cat="other">📦 其他</button>
+                        </div>
+                        <div id="craft-grid"></div>
+                        <div style="margin-top:4px;font-size:10px;color:#666;text-align:center;">材料足夠時點擊製作按鈕</div>
+                    </div>
+                </div>
             </div>
             <div id="action-bar">
                 <button id="btnInventory">🎒 背包</button>
                 <button id="btnEquip">🛡️ 裝備</button>
+                <!-- ===== 新增：制作按钮 ===== -->
+                <button id="btnCraft" class="primary">🔨 製作</button>
                 <button id="btnStatus">📊 狀態</button>
-                <button id="btnRest" class="primary">⛺ 休息</button>
-                <button id="btnAchievement">🏆 成就</button>
+                <button id="btnRest">⛺ 休息</button>
+                <button id="btnAchievement" class="primary">🏆 成就</button>
                 <button id="btnSave">💾 儲存</button>
                 <button id="btnLoad">📁 載入</button>
             </div>
@@ -268,13 +317,6 @@
     <input type="file" id="fileInput" accept=".txt">
 
     <script>
-        //  ⛏️ 方塊傳說 · 終極版 (洞穴持久化 + 煤炭 + 地獄傳送門)
-        //  新增功能：
-        //  1. 煤炭礦物 (等級與石頭相同，需鎬)
-        //  2. 廢棄傳送門 (20%機率出現，🚪 圖示，通往地獄)
-        //  3. 地獄暫存地圖 (含喪屍豬人、礦物，出口🚪在4邊隨機位置)
-        //  4. 全繁體中文顯示
-
         const $ = id => document.getElementById(id);
         const cover = $('cover');
         const game = $('game');
@@ -607,7 +649,7 @@
         const ITEMS = {
             'wood': { id: 'wood', name: '木材', icon: '🎋', type: 'resource', desc: '基礎建材' },
             'stone': { id: 'stone', name: '石頭', icon: '🗻', type: 'resource', desc: '基礎石材' },
-            'coal': { id: 'coal', name: '煤炭', icon: '⚫', type: 'resource', desc: '燃料' },
+            'coal': { id: 'coal', name: '煤炭', icon: '🔥', type: 'resource', desc: '燃料' },
             'leather': { id: 'leather', name: '皮革', icon: '🟫', type: 'resource', desc: '從牛掉落' },
             'copper_ore': { id: 'copper_ore', name: '銅礦', icon: '🟠', type: 'resource', desc: '銅礦石' },
             'iron_ore': { id: 'iron_ore', name: '鐵礦', icon: '🔩', type: 'resource', desc: '鐵礦石' },
@@ -617,6 +659,7 @@
             'bed': { id: 'bed', name: '床', icon: '🛏️', type: 'bed', desc: '放置後可在夜晚休息' },
             'wheat': { id: 'wheat', name: '小麥', icon: '🌾', type: 'resource', desc: '農作物' },
             'sapling': { id: 'sapling', name: '樹苗', icon: '🌱', type: 'resource', desc: '可以種樹' },
+            'flower': { id: 'flower', name: '花束', icon: '💐', type: 'resource', desc: '美麗的花束' },
             'wool': { id: 'wool', name: '羊毛', icon: '🧶', type: 'resource', desc: '從羊掉落' },
             'bone': { id: 'bone', name: '骨頭', icon: '🦴', type: 'resource', desc: '從骷髏掉落' },
             'string': { id: 'string', name: '線', icon: '🧵', type: 'resource', desc: '從蜘蛛掉落' },
@@ -758,6 +801,7 @@
             'skeleton': { id: 'skeleton', name: '💀 骷髏', hp: 20, atk: 4, def: 0, exp: 5, gold: 5, passive: false, drops: [{ id: 'bone', chance: 0.3, count: 1 }, { id: 'bow', chance: 0.085, count: 1 }] },
             'spider': { id: 'spider', name: '🕷️ 蜘蛛', hp: 16, atk: 3, def: 0, exp: 5, gold: 0, passive: false, drops: [{ id: 'string', chance: 0.33, count: 1 }, { id: 'spider_eye', chance: 0.33, count: 1 }] },
             'zombie_pigman': { id: 'zombie_pigman', name: '🐽 喪屍豬人', hp: 20, atk: 12, def: 0, exp: 8, gold: 8, passive: false, drops: [{ id: 'rotten_flesh', chance: 0.5, count: 1 }, { id: 'gold_ore', chance: 0.025, count: 1 }, { id: 'gold_sword', chance: 0.085, count: 1 }] },
+            'wither_skeleton': { id: 'wither_skeleton', name: '💀 凋零骷髏', hp: 20, atk: 12, def: 0, exp: 8, gold: 8, passive: false, drops: [{ id: 'bone', chance: 0.3, count: 1 }, { id: 'coal', chance: 0.3, count: 1 }, { id: 'stone_sword', chance: 0.085, count: 1 }]},
         };
 
         const NO_RAIN_MAPS = ['cave', 'ocean', 'river', 'desert', 'nether'];
@@ -765,6 +809,7 @@
         // ---------- 地圖類型 ----------
         const MAP_TYPES = {
             'plain': { name: '🏞️ 平原', terrain: 'plain', color: '#4a8f5a', grass: '#5a9f6a' },
+            'sunflower_plain': { name: '🌻 向日葵平原', terrain: 'plain', color: '#4a8f5a', grass: '#5a9f6a' },
             'forest': { name: '🌲 森林', terrain: 'forest', color: '#2d6a3a', grass: '#3d7a4a' },
             'desert': { name: '🏜️ 沙漠', terrain: 'desert', color: '#c4a86a', grass: '#d4b87a' },
             'ice': { name: '❄️ 冰刺平原', terrain: 'ice', color: '#8ab4d8', grass: '#9ac4e8' },
@@ -776,7 +821,7 @@
             'end': { name: '🌌 終界', terrain: 'end', color: '#2a2a3a', grass: '#3a3a4a' },
             'heaven': { name: '☁️ 天堂', terrain: 'heaven', color: '#8ab4d8', grass: '#9ac4e8' }
         };
-        const RANDOM_MAP_POOL = ['plain', 'forest', 'desert', 'ice', 'river', 'ocean', 'mountain'];
+        const RANDOM_MAP_POOL = ['plain', 'forest', 'desert', 'ice', 'river', 'ocean', 'mountain', 'sunflower_plain'];
 
         // ---------- 遊戲狀態 ----------
         let G = {
@@ -810,13 +855,11 @@
             mapExitDir: {},
             mapPool: [],
             isWorldExhausted: false,
-            // 洞穴專用
             inCave: false,
             caveOriginMapId: '',
             caveOriginX: 0,
             caveOriginY: 0,
             tempCaveMap: null,
-            // 地獄專用 (新增)
             inNether: false,
             netherOriginMapId: '',
             netherOriginX: 0,
@@ -1083,11 +1126,12 @@
                     }
                 }
             } else if (is('nether')) {
-                // 地獄障礙物 (地獄岩)
                 for (let i = 0; i < 25; i++) {
                     let x = rand(1, w - 2), y = rand(1, h - 2);
                     for (let j = 0; j < 4; j++) {
-                        if (!(x === 9 && y === 9)) addObstacle(x, y);
+                        if (!(x === 9 && y === 9)) {
+                            objects[y][x] = { type: 'obstacle', variant: 'lava' };
+                        }
                         x += rand(-1, 1);
                         y += rand(-1, 1);
                         x = clamp(x, 1, w - 2);
@@ -1156,7 +1200,7 @@
                 }
             }
 
-            // ===== 新增：廢棄傳送門 (20%機率) =====
+            // 廢棄傳送門 (20%機率)
             if (!is('ocean') && !is('river') && !is('nether') && !is('end') && !is('heaven') && !is('cave')) {
                 if (Math.random() < 0.20) {
                     let placed = false;
@@ -1192,6 +1236,28 @@
                 }
             }
 
+            // 在平原生成花朵
+            if (is('plain')) {
+                const flowerCount = 10 + Math.floor(Math.random() * 6);
+                for (let i = 0; i < flowerCount; i++) {
+                    const x = rand(1, w - 2), y = rand(1, h - 2);
+                    if (!objects[y][x] && !(x === 9 && y === 9)) {
+                        const variant = Math.random() < 0.5 ? 'tulip' : 'daisy';
+                        objects[y][x] = { type: 'flower', variant };
+                    }
+                }
+            }
+
+            if (is('sunflower_plain')) {
+                const flowerCount = 20 + Math.floor(Math.random() * 11);
+                for (let i = 0; i < flowerCount; i++) {
+                    const x = rand(1, w - 2), y = rand(1, h - 2);
+                    if (!objects[y][x] && !(x === 9 && y === 9)) {
+                        objects[y][x] = { type: 'flower', variant: 'sunflower' };
+                    }
+                }
+            }
+
             // 資源 (樹木、石頭、礦物)
             if (!is('ocean') && !is('river') && !is('ice') && !is('cave') && !is('nether')) {
                 const treeCount = is('forest') ? 18 : is('plain') ? 4 : is('desert') ? 6 : 4;
@@ -1207,89 +1273,95 @@
                     const x = rand(1, w - 2), y = rand(1, h - 2);
                     if (!objects[y][x]) objects[y][x] = { type: 'stone' };
                 }
-                // 礦物（包含煤炭）
                 const oreCount = is('cave') ? 10 : is('mountain') ? 8 : 4;
                 for (let i = 0; i < oreCount; i++) {
                     const x = rand(1, w - 2), y = rand(1, h - 2);
                     if (!objects[y][x]) {
                         const r = Math.random();
-                        if (r < 0.20) objects[y][x] = { type: 'ore', variant: 'coal' };
-                        else if (r < 0.40) objects[y][x] = { type: 'ore', variant: 'copper' };
-                        else if (r < 0.60) objects[y][x] = { type: 'ore', variant: 'iron' };
-                        else if (r < 0.80) objects[y][x] = { type: 'ore', variant: 'gold' };
-                        else if (r < 0.95) objects[y][x] = { type: 'ore', variant: 'diamond' };
-                        else objects[y][x] = { type: 'ore', variant: 'netherite' };
+                        if (r < 0.40) objects[y][x] = { type: 'ore', variant: 'coal' };
+                        else if (r < 0.70) objects[y][x] = { type: 'ore', variant: 'copper' };
+                        else if (r < 0.90) objects[y][x] = { type: 'ore', variant: 'iron' };
+                        else objects[y][x] = { type: 'ore', variant: 'gold' };
                     }
                 }
             }
 
-            // 洞穴寶箱/蜘蛛網（僅洞穴地圖）
+            // 洞穴礦物/寶箱/蜘蛛網
             if (is('cave')) {
+                for (let i = 0; i < 10; i++) {
+                    const x = rand(1, w - 2), y = rand(1, h - 2);
+                    if (!objects[y][x]) {
+                        const r = Math.random();
+                        if (r < 0.30) {
+                            objects[y][x] = { type: 'stone'};
+                        } else if (r < 0.55) {
+                            objects[y][x] = { type: 'ore', variant: 'coal' };
+                        } else if (r < 0.75) {
+                            objects[y][x] = { type: 'ore', variant: 'copper' };
+                        } else if (r < 0.90) {
+                            objects[y][x] = { type: 'ore', variant: 'iron' };
+                        } else if (r < 0.98) {
+                            objects[y][x] = { type: 'ore', variant: 'gold' };
+                        } else {
+                            objects[y][x] = { type: 'ore', variant: 'diamond' };
+                        }
+                    }
+                }
                 for (let i = 0; i < 5; i++) {
                     const x = rand(1, w - 2), y = rand(1, h - 2);
                     if (!objects[y][x]) objects[y][x] = { type: 'chest' };
                 }
-                for (let i = 0; i < 6; i++) {
+                for (let i = 0; i < 8; i++) {
                     const x = rand(1, w - 2), y = rand(1, h - 2);
                     if (!objects[y][x]) objects[y][x] = { type: 'web' };
                 }
             }
 
-            // ===== 地獄專屬內容 =====
+            // 地獄專屬內容
             if (is('nether')) {
-                // 地獄礦物 (煤炭、鐵、金)
                 for (let i = 0; i < 12; i++) {
                     const x = rand(1, w - 2), y = rand(1, h - 2);
                     if (!objects[y][x]) {
                         const r = Math.random();
-                        if (r < 0.35) objects[y][x] = { type: 'ore', variant: 'coal' };
-                        else if (r < 0.65) objects[y][x] = { type: 'ore', variant: 'iron' };
-                        else if (r < 0.90) objects[y][x] = { type: 'ore', variant: 'gold' };
-                        else objects[y][x] = { type: 'ore', variant: 'diamond' };
+                        if (r < 0.90) objects[y][x] = { type: 'ore', variant: 'gold' };
+                        else objects[y][x] = { type: 'ore', variant: 'netherite' };
                     }
                 }
-                // 地獄喪屍豬人
                 for (let i = 0; i < 8; i++) {
                     const x = rand(1, w - 2), y = rand(1, h - 2);
                     if (!objects[y][x]) {
-                        objects[y][x] = { type: 'mob', mobId: 'zombie_pigman' };
+                        const mobId = Math.random() < 0.5 ? 'zombie_pigman' : 'wither_skeleton';
+                        objects[y][x] = { type: 'mob', mobId };
                     }
                 }
-                // 地獄出口傳送門 (4邊隨機位置)
-                const dirs = ['north', 'south', 'east', 'west'];
-                const chosenDir = dirs[rand(0, 3)];
-                const pos = getEdgePos(chosenDir);
-                // 確保出口位置有效
-                // 地獄出口傳送門 (強制放在最外圍邊緣)
-				let exitPlaced = false;
-				let edgeCells = [];
-				for (let y = 0; y < h; y++) {
-					for (let x = 0; x < w; x++) {
-						if ((x === 0 || x === w-1 || y === 0 || y === h-1) && !objects[y][x] && !(x === 9 && y === 9)) {
-							edgeCells.push({x, y});
-						}
-					}
-				}
-				if (edgeCells.length > 0) {
-					const cell = edgeCells[rand(0, edgeCells.length - 1)];
-					objects[cell.y][cell.x] = { type: 'portal', isExit: true };
-					exitPlaced = true;
-				} else {
-					// 若邊緣全被佔據，強行清除障礙物
-					for (let y = 0; y < h; y++) {
-						for (let x = 0; x < w; x++) {
-							if ((x === 0 || x === w-1 || y === 0 || y === h-1) && !(x === 9 && y === 9)) {
-								objects[y][x] = { type: 'portal', isExit: true };
-								exitPlaced = true;
-								break;
-							}
-						}
-						if (exitPlaced) break;
-					}
-				}
-				if (!exitPlaced) {
-					objects[0][0] = { type: 'portal', isExit: true }; // 最終備案
-				}
+                let exitPlaced = false;
+                let edgeCells = [];
+                for (let y = 0; y < h; y++) {
+                    for (let x = 0; x < w; x++) {
+                        if ((x === 0 || x === w-1 || y === 0 || y === h-1) && !objects[y][x] && !(x === 9 && y === 9)) {
+                            edgeCells.push({x, y});
+                        }
+                    }
+                }
+                if (edgeCells.length > 0) {
+                    const cell = edgeCells[rand(0, edgeCells.length - 1)];
+                    objects[cell.y][cell.x] = { type: 'portal', isExit: true };
+                    exitPlaced = true;
+                } else {
+                    for (let y = 0; y < h; y++) {
+                        for (let x = 0; x < w; x++) {
+                            if ((x === 0 || x === w-1 || y === 0 || y === h-1) && !(x === 9 && y === 9)) {
+                                objects[y][x] = { type: 'portal', isExit: true };
+                                exitPlaced = true;
+                                break;
+                            }
+                        }
+                        if (exitPlaced) break;
+                    }
+                }
+                if (!exitPlaced) {
+                    objects[0][0] = { type: 'portal', isExit: true };
+                }
             }
 
             // 生物
@@ -1308,9 +1380,8 @@
                     }
                 }
             } else if (!is('nether')) {
-                // 非地獄生物生成 (地獄生物已在上方生成)
                 let mobPool = [];
-                if (is('plain') || is('forest') || is('mountain')) {
+                if (is('plain') || is('forest') || is('mountain') || is('sunflower_plain')) {
                     mobPool = ['chicken', 'duck', 'bee'];
                     if (isNight) mobPool.push('zombie', 'skeleton', 'spider');
                 }
@@ -1347,7 +1418,7 @@
                 }
             }
 
-            // 流浪商人（僅非洞穴、非特殊、非地獄）
+            // 流浪商人
             if (!is('ocean') && !is('river') && !is('nether') && !is('end') && !is('heaven') && !is('cave')) {
                 let campPlaced = false;
                 for (let attempt = 0; attempt < 50; attempt++) {
@@ -1405,7 +1476,6 @@
 
         // ---------- 地圖管理 ----------
         function getMap(id) {
-            // 洞穴特殊處理
             if (id === 'cave') {
                 if (G.tempCaveMap) return G.tempCaveMap;
                 if (G.maps['cave_temp']) {
@@ -1416,7 +1486,6 @@
                 G.tempCaveMap = newCave;
                 return newCave;
             }
-            // 地獄特殊處理 (新增)
             if (id === 'nether') {
                 if (G.tempNetherMap) return G.tempNetherMap;
                 if (G.maps['nether_temp']) {
@@ -1427,7 +1496,6 @@
                 G.tempNetherMap = newNether;
                 return newNether;
             }
-            // 常規地圖
             if (!G.maps[id]) {
                 G.maps[id] = generateMap(id);
                 if (G.mapChain.includes(id)) setupArrows(id);
@@ -1457,36 +1525,27 @@
             G.caveOriginMapId = p.mapId;
             G.caveOriginX = p.x;
             G.caveOriginY = p.y;
-            if (!G.tempCaveMap) {
-                G.tempCaveMap = generateMap('cave');
-            } else {
-                G.tempCaveMap = generateMap('cave');
-            }
+            G.tempCaveMap = generateMap('cave');
             G.inCave = true;
             const mid = Math.floor(G.tempCaveMap.width / 2);
             p.mapId = 'cave';
             p.x = mid;
             p.y = mid;
-            const exitDir = ['north', 'south', 'east', 'west'][rand(0, 3)];
-            const pos = getEdgePos(exitDir);
-            if (!G.tempCaveMap.objects[pos.y]?.[pos.x] || G.tempCaveMap.objects[pos.y][pos.x].type === 'obstacle') {
-                let found = false;
-                for (let dy = 0; dy <= 0 && !found; dy++) {
-                    for (let dx = -2; dx <= 2 && !found; dx++) {
-                        const nx = pos.x + dx, ny = pos.y + dy;
-                        if (nx >= 0 && nx < G.tempCaveMap.width && ny >= 0 && ny < G.tempCaveMap.height) {
-                            if (!G.tempCaveMap.objects[ny]?.[nx]) {
-                                G.tempCaveMap.objects[ny][nx] = { type: 'arrow', dir: 'return', isReturn: true };
-                                found = true;
-                            }
-                        }
+            const w = G.tempCaveMap.width;
+            const h = G.tempCaveMap.height;
+            const edgeCells = [];
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    if ((x === 0 || x === w - 1 || y === 0 || y === h - 1) && !(x === mid && y === mid)) {
+                        edgeCells.push({ x, y });
                     }
                 }
-                if (!found) {
-                    G.tempCaveMap.objects[pos.y][pos.x] = { type: 'arrow', dir: 'return', isReturn: true };
-                }
+            }
+            if (edgeCells.length === 0) {
+                G.tempCaveMap.objects[0][0] = { type: 'arrow', dir: 'return', isReturn: true };
             } else {
-                G.tempCaveMap.objects[pos.y][pos.x] = { type: 'arrow', dir: 'return', isReturn: true };
+                const cell = edgeCells[rand(0, edgeCells.length - 1)];
+                G.tempCaveMap.objects[cell.y][cell.x] = { type: 'arrow', dir: 'return', isReturn: true };
             }
             G.map = G.tempCaveMap;
             G.currentMapId = 'cave';
@@ -1534,29 +1593,25 @@
             saveGameToLocal();
         }
 
-        // ===== 新增：地獄傳送門處理 =====
+        // ===== 地獄傳送門處理 =====
         function enterNether() {
             const p = G.player;
             if (G.inNether) return;
-            // 記錄原位置
             G.netherOriginMapId = p.mapId;
             G.netherOriginX = p.x;
             G.netherOriginY = p.y;
-            // 生成臨時地獄地圖
             if (!G.tempNetherMap) {
                 G.tempNetherMap = generateMap('nether');
             } else {
                 G.tempNetherMap = generateMap('nether');
             }
             G.inNether = true;
-            // 將玩家置於地獄中央附近
             const mid = Math.floor(G.tempNetherMap.width / 2);
             p.mapId = 'nether';
             p.x = mid;
             p.y = mid;
             G.map = G.tempNetherMap;
             G.currentMapId = 'nether';
-            // 確保地獄中有出口傳送門 (生成時已放置，但以防萬一)
             let hasExit = false;
             for (let y = 0; y < G.map.height; y++) {
                 for (let x = 0; x < G.map.width; x++) {
@@ -1565,17 +1620,14 @@
                 }
             }
             if (!hasExit) {
-                // 在4邊隨機位置補一個出口
                 const dirs = ['north', 'south', 'east', 'west'];
                 const chosenDir = dirs[rand(0, 3)];
                 const pos = getEdgePos(chosenDir);
                 G.map.objects[pos.y][pos.x] = { type: 'portal', isExit: true };
             }
-            // 切換地圖
             updateUI();
             render();
             toast('🔥 進入地獄！', 'info', 1500);
-            // 地獄不應下雨
             if (G.weather !== 'clear') {
                 G.weather = 'clear';
                 stopRainSound();
@@ -1589,11 +1641,9 @@
         function exitNether() {
             const p = G.player;
             if (!G.inNether) return;
-            // 恢復原位置
             const originMapId = G.netherOriginMapId || 'plain';
             const originX = G.netherOriginX !== undefined ? G.netherOriginX : 9;
             const originY = G.netherOriginY !== undefined ? G.netherOriginY : 9;
-            // 清除臨時地獄
             if (G.maps['nether_temp']) delete G.maps['nether_temp'];
             G.tempNetherMap = null;
             G.inNether = false;
@@ -1607,7 +1657,6 @@
             G.netherOriginY = 0;
             updateUI();
             render();
-            // 恢復天氣
             if (G.weather === 'clear' && (G.isNight || Math.random() < 0.3)) {
                 const r = Math.random();
                 if (r < 0.6) G.weather = 'clear';
@@ -1621,7 +1670,6 @@
             saveGameToLocal();
         }
 
-        // 修改 handleArrow 以支持洞穴返回
         function handleArrow(dir, x, y) {
             if (G.inCave) {
                 exitCave();
@@ -1746,7 +1794,6 @@
             }
 
             if (isNether) {
-                // 地獄刷新喪屍豬人
                 for (let i = 0; i < 8; i++) {
                     const x = rand(1, map.width - 2), y = rand(1, map.height - 2);
                     if (!map.objects[y][x]) {
@@ -1757,8 +1804,8 @@
             }
 
             let mobPool = [];
-            if (map.id === 'plain' || map.id === 'forest' || map.id === 'mountain') {
-                mobPool = ['chicken', 'duck', 'bee'];
+            if (map.id === 'plain' || map.id === 'forest' || map.id === 'mountain' || map.id === 'sunflower_plain') {
+                mobPool = ['chicken', 'duck'];
                 if (isNight) mobPool.push('zombie', 'skeleton', 'spider');
             }
             if (map.id === 'desert') {
@@ -1892,7 +1939,6 @@
             const p = G.player;
             if (obj.type === 'obstacle') return;
 
-            // ===== 新增：傳送門交互 =====
             if (obj.type === 'portal') {
                 if (obj.isExit === true || G.inNether) {
                     exitNether();
@@ -1904,6 +1950,18 @@
 
             if (obj.type === 'cave_entrance') {
                 enterCave(x, y);
+                return;
+            }
+            if (obj.type === 'flower') {
+                addItem('flower', 1);
+                p.totalCollects++;
+                toast('💐 採到花朵！', 'success');
+                G.map.objects[y][x] = null;
+                checkAchievements();
+                render();
+                updateUI();
+                playSound(350, 0.1);
+                saveGameToLocal();
                 return;
             }
             if (obj.type === 'tree') {
@@ -1935,7 +1993,6 @@
             }
             if (obj.type === 'ore') {
                 const variant = obj.variant || 'copper';
-                // 等級映射：煤炭與石頭同等級 (1)
                 const levelMap = { 'coal': 1, 'copper': 2, 'iron': 3, 'gold': 4, 'diamond': 5, 'netherite': 6 };
                 const required = levelMap[variant] || 2;
                 const pickLevel = getBestToolLevel('pickaxe');
@@ -1973,18 +2030,65 @@
             if (obj.type === 'village') { openVillageShop(obj.profession); return; }
             if (obj.type === 'camp') { openTraderCamp(); return; }
             if (obj.type === 'chest') {
-                const r = Math.random();
-                if (r < 0.5) {
+                const r = Math.random() * 100;
+                let got = false;
+                if (r < 5) {
                     const goldAmt = rand(5, 30);
                     p.gold += goldAmt;
                     toast(`🎁 寶箱！獲得 💰${goldAmt} 金幣！`, 'success');
+                    got = true;
+                } else if (r < 11) {
+                    addItem('bone', 1);
+                    toast('🎁 寶箱！獲得 🦴 骨頭', 'success');
+                    got = true;
+                } else if (r < 17) {
+                    addItem('rotten_flesh', 1);
+                    toast('🎁 寶箱！獲得 🥓 腐肉', 'success');
+                    got = true;
+                } else if (r < 23) {
+                    addItem('string', 1);
+                    toast('🎁 寶箱！獲得 🧵 線', 'success');
+                    got = true;
+                } else if (r < 27) {
+                    addItem('wheat', 1);
+                    toast('🎁 寶箱！獲得 🌾 小麥', 'success');
+                    got = true;
+                } else if (r < 31) {
+                    addItem('bread', 1);
+                    toast('🎁 寶箱！獲得 🍞 麵包', 'success');
+                    got = true;
+                } else if (r < 34) {
+                    addItem('coal', 1);
+                    toast('🎁 寶箱！獲得 🔥 煤炭', 'success');
+                    got = true;
+                } else if (r < 37) {
+                    addItem('leather', 1);
+                    toast('🎁 寶箱！獲得 🟫 皮革', 'success');
+                    got = true;
+                } else if (r < 39) {
+                    addItem('iron_ore', 1);
+                    toast('🎁 寶箱！獲得 🔩 鐵礦', 'success');
+                    got = true;
+                } else if (r < 40) {
+                    addItem('gold_ore', 1);
+                    toast('🎁 寶箱！獲得 🟡 金礦', 'success');
+                    got = true;
+                } else if (r < 90) {
+                    toast('🎁 寶箱是空的...', 'info');
+                    got = true;
                 } else {
-                    const dmg = rand(5, 20);
+                    const dmg = rand(5, 10);
                     p.hp = Math.max(0, p.hp - dmg);
                     toast(`💀 陷阱！損失 ${dmg} HP`, 'error');
+                    if (p.hp <= 0) {
+                        die();
+                        return;
+                    }
+                    got = true;
                 }
                 G.map.objects[y][x] = null;
-                render(); updateUI();
+                render();
+                updateUI();
                 saveGameToLocal();
                 return;
             }
@@ -2304,12 +2408,11 @@
             $('shop-modal').classList.add('active');
         }
 
-        // ----- 武器匠（包含長槍）-----
+        // ----- 武器匠 -----
         function renderWeaponsmith(container) {
             container.innerHTML = '';
             const refreshShop = () => renderWeaponsmith(container);
 
-            // 劍
             renderUpgradeChain(container, {
                 label: '⚔️ 劍',
                 ids: ['wood_sword', 'stone_sword', 'copper_sword', 'iron_sword', 'gold_sword', 'diamond_sword', 'netherite_sword'],
@@ -2325,7 +2428,6 @@
                 slot: 'weapon'
             }, refreshShop);
 
-            // 斧
             renderUpgradeChain(container, {
                 label: '🪓 斧',
                 ids: ['wood_axe', 'stone_axe', 'copper_axe', 'iron_axe', 'gold_axe', 'diamond_axe', 'netherite_axe'],
@@ -2341,7 +2443,6 @@
                 slot: 'weapon'
             }, refreshShop);
 
-            // 打刀
             renderUpgradeChain(container, {
                 label: '🔪 打刀',
                 ids: ['wood_katana', 'stone_katana', 'copper_katana', 'iron_katana', 'gold_katana', 'diamond_katana', 'netherite_katana', 'murasame', 'muramasa'],
@@ -2359,7 +2460,6 @@
                 slot: 'weapon'
             }, refreshShop);
 
-            // 長槍
             renderUpgradeChain(container, {
                 label: '🔱 長槍',
                 ids: ['wood_spear', 'stone_spear', 'copper_spear', 'iron_spear', 'gold_spear', 'diamond_spear', 'netherite_spear'],
@@ -2375,14 +2475,13 @@
                 slot: 'weapon'
             }, refreshShop);
 
-            // 出售資源
             const sellSection = document.createElement('div');
             sellSection.className = 'shop-section';
             sellSection.innerHTML = '<h3>💰 出售資源</h3><div class="sub">將多餘材料賣給武器匠</div>';
             const sellable = [
                 { id: 'wood', icon: '🎋', name: '木材', price: 1 },
                 { id: 'stone', icon: '🗻', name: '石頭', price: 1 },
-                { id: 'coal', icon: '⚫', name: '煤炭', price: 2 },
+                { id: 'coal', icon: '🔥', name: '煤炭', price: 2 },
                 { id: 'leather', icon: '🟫', name: '皮革', price: 2 },
                 { id: 'copper_ore', icon: '🟠', name: '銅礦', price: 3 },
                 { id: 'iron_ore', icon: '🔩', name: '鐵礦', price: 4 },
@@ -2557,6 +2656,7 @@
             sellSection.className = 'shop-section';
             sellSection.innerHTML = '<h3>💰 出售資源</h3><div class="sub">將多餘作物賣給農夫</div>';
             const sellable = [
+                { id: 'flower', icon: '💐', name: '花束', price: 1 },
                 { id: 'wheat', icon: '🌾', name: '小麥', price: 1 },
                 { id: 'carrot', icon: '🥕', name: '胡蘿蔔', price: 2 },
                 { id: 'potato', icon: '🥔', name: '馬鈴薯', price: 2 },
@@ -2751,7 +2851,7 @@
             const sellable = [
                 { id: 'wood', icon: '🎋', name: '木材', price: 1 },
                 { id: 'stone', icon: '🗻', name: '石頭', price: 1 },
-                { id: 'coal', icon: '⚫', name: '煤炭', price: 2 },
+                { id: 'coal', icon: '🔥', name: '煤炭', price: 2 },
                 { id: 'copper_ore', icon: '🟠', name: '銅礦', price: 2 },
                 { id: 'iron_ore', icon: '🔩', name: '鐵礦', price: 3 },
                 { id: 'gold_ore', icon: '🟡', name: '金礦', price: 4 },
@@ -2784,13 +2884,12 @@
             container.appendChild(sellSection);
         }
 
-        // ----- 牧羊人（包含長槍）-----
+        // ----- 牧羊人 -----
         function renderShepherd(container) {
             container.innerHTML = '';
             const p = G.player;
             const refreshShop = () => renderShepherd(container);
 
-            // 床
             const sec = document.createElement('div');
             sec.className = 'shop-section';
             sec.innerHTML = '<h3>🛏️ 床</h3>';
@@ -2814,7 +2913,6 @@
             sec.appendChild(div);
             container.appendChild(sec);
 
-            // 長槍
             renderUpgradeChain(container, {
                 label: '🔱 長槍',
                 ids: ['wood_spear', 'stone_spear', 'copper_spear', 'iron_spear', 'gold_spear', 'diamond_spear', 'netherite_spear'],
@@ -2831,7 +2929,6 @@
                 sub: '木長槍→石長槍→銅長槍→鐵長槍→金長槍→鑽石長槍→獄髓長槍'
             }, refreshShop);
 
-            // 出售
             const sellSection = document.createElement('div');
             sellSection.className = 'shop-section';
             sellSection.innerHTML = '<h3>💰 出售資源</h3><div class="sub">將多餘材料賣給牧羊人</div>';
@@ -2867,7 +2964,7 @@
             container.appendChild(sellSection);
         }
 
-        // ----- 流浪商人（收購）-----
+        // ----- 流浪商人 -----
         function openTraderCamp() {
             const p = G.player;
             if (!p) return;
@@ -2924,14 +3021,14 @@
                 container.appendChild(div);
             }
 
-            // 收購
             const buySection = document.createElement('div');
             buySection.style.marginTop = '12px';
             buySection.innerHTML = '<h3 style="color:#8ab4f8;font-size:14px;border-bottom:1px solid #2a4a6a;padding-bottom:4px;">💰 出售資源給商人</h3>';
             const buyable = [
                 { id: 'wood', icon: '🎋', name: '木材', price: 1 },
+                { id: 'flower', icon: '💐', name: '花束', price: 1 },
                 { id: 'stone', icon: '🗻', name: '石頭', price: 1 },
-                { id: 'coal', icon: '⚫', name: '煤炭', price: 2 },
+                { id: 'coal', icon: '🔥', name: '煤炭', price: 2 },
                 { id: 'leather', icon: '🟫', name: '皮革', price: 2 },
                 { id: 'copper_ore', icon: '🟠', name: '銅礦', price: 3 },
                 { id: 'iron_ore', icon: '🔩', name: '鐵礦', price: 4 },
@@ -3075,8 +3172,8 @@
                     let isZombiePigman = false;
                     if (obj.type === 'tree') { icon = obj.variant === 'oak' ? '🌳' : obj.variant === 'birch' ? '🌲' : '🌵'; color = '#5a8a3a'; }
                     else if (obj.type === 'stone') { icon = '🗻'; color = '#888'; }
-                    else if (obj.type === 'ore') { const v = obj.variant || 'copper'; const map2 = { 'coal': '⚫', 'copper': '🟠', 'iron': '🔩', 'gold': '🟡', 'diamond': '💎', 'netherite': '⚫' }; icon = map2[v] || '⛓️'; color = '#aaa'; }
-                    else if (obj.type === 'grass') { icon = '🌿'; color = '#4a8f5a'; }
+                    else if (obj.type === 'ore') { const v = obj.variant || 'copper'; const map2 = { 'coal': '🔥', 'copper': '🟠', 'iron': '🔩', 'gold': '🟡', 'diamond': '💎', 'netherite': '⚫' }; icon = map2[v] || '⛓️'; color = '#aaa'; }
+                    else if (obj.type === 'grass') { const useLeaf = (x + y) % 2 === 0; icon = useLeaf ? '🌿' : '🍃'; color = useLeaf ? '#4a8f5a' : '#8B5A2B'; }
                     else if (obj.type === 'mob') {
                         isMob = true;
                         const mob = MOBS[obj.mobId];
@@ -3089,7 +3186,19 @@
                         color = isReturn ? '#ffd700' : '#4fc3f7';
                         const dirMap = { north: '⬆️', south: '⬇️', east: '➡️', west: '⬅️' };
                         if (obj.dir) icon = dirMap[obj.dir] || icon;
-                    } else if (obj.type === 'village') { icon = '🏘️'; color = '#f1c40f'; }
+                    } else if (obj.type === 'flower') {
+                        if (obj.variant === 'sunflower') {
+                            icon = '🌻';
+                            color = '#FFD700';
+                        } else if (obj.variant === 'tulip') {
+                            icon = '🌷';
+                            color = '#ff69b4';
+                        } else {
+                            icon = '🌼';
+                            color = '#ffd700';
+                        }
+                    }
+                    else if (obj.type === 'village') { icon = '🏘️'; color = '#f1c40f'; }
                     else if (obj.type === 'camp') { icon = '⛺'; color = '#e67e22'; }
                     else if (obj.type === 'chest') { icon = '🎁'; color = '#f39c12'; }
                     else if (obj.type === 'web') { icon = '🕸️'; color = '#aaa'; }
@@ -3109,6 +3218,14 @@
                         ctx.lineWidth = 3;
                         ctx.strokeRect(tx + 2, ty + 2, size - 4, size - 4);
                         ctx.strokeStyle = 'rgba(0,255,0,0.3)';
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(tx + 6, ty + 6, size - 12, size - 12);
+                    }
+                    if (obj.mobId === 'wither_skeleton') {
+                        ctx.strokeStyle = '#000000';
+                        ctx.lineWidth = 3;
+                        ctx.strokeRect(tx + 2, ty + 2, size - 4, size - 4);
+                        ctx.strokeStyle = 'rgba(0,0,0,0.3)';
                         ctx.lineWidth = 1;
                         ctx.strokeRect(tx + 6, ty + 6, size - 12, size - 12);
                     }
@@ -3396,7 +3513,6 @@
                     isWorldExhausted: G.isWorldExhausted,
                     usedProfessions: G.usedProfessions,
                 };
-                // 洞穴狀態
                 if (G.inCave && G.tempCaveMap) {
                     data.inCave = true;
                     data.caveOriginMapId = G.caveOriginMapId;
@@ -3406,7 +3522,6 @@
                 } else {
                     data.inCave = false;
                 }
-                // 地獄狀態 (新增)
                 if (G.inNether && G.tempNetherMap) {
                     data.inNether = true;
                     data.netherOriginMapId = G.netherOriginMapId;
@@ -3522,7 +3637,6 @@
                     G.isWorldExhausted = data.isWorldExhausted || false;
                     G.usedProfessions = data.usedProfessions || [];
 
-                    // 恢復洞穴狀態
                     if (data.inCave) {
                         G.inCave = true;
                         G.caveOriginMapId = data.caveOriginMapId || 'plain';
@@ -3550,7 +3664,6 @@
                         if (G.maps['cave_temp']) delete G.maps['cave_temp'];
                     }
 
-                    // 恢復地獄狀態 (新增)
                     if (data.inNether) {
                         G.inNether = true;
                         G.netherOriginMapId = data.netherOriginMapId || 'plain';
@@ -3625,7 +3738,7 @@
             requestAnimationFrame(gameLoop);
         }
 
-        // ---------- 移動怪物（主動敵人可踩玩家） ----------
+        // ---------- 移動怪物 ----------
         function moveMobs() {
             if (G.battle) return;
             const map = G.map;
@@ -3698,7 +3811,288 @@
             else { renderAchievements(); modal.classList.add('active'); }
         }
 
-        // ---------- 啟動 ----------
+        // ===== 新增：制作系统 =====
+        // ---------- 制作配方定义 (不含金币) ----------
+        const CRAFTING_RECIPES = {
+            // ----- 武器 -----
+            'wood_sword': { mats: { wood: 3 }, category: 'weapon' },
+            'stone_sword': { mats: { wood: 1, stone: 2 }, category: 'weapon' },
+            'copper_sword': { mats: { wood: 1, copper_ore: 2 }, category: 'weapon' },
+            'iron_sword': { mats: { wood: 1, iron_ore: 2 }, category: 'weapon' },
+            'gold_sword': { mats: { wood: 1, gold_ore: 2 }, category: 'weapon' },
+            'diamond_sword': { mats: { wood: 1, diamond: 2 }, category: 'weapon' },
+            'netherite_sword': { mats: { wood: 1, netherite: 2 }, category: 'weapon' },
+
+            'wood_axe': { mats: { wood: 5 }, category: 'weapon' },
+            'stone_axe': { mats: { wood: 2, stone: 3 }, category: 'weapon' },
+            'copper_axe': { mats: { wood: 2, copper_ore: 3 }, category: 'weapon' },
+            'iron_axe': { mats: { wood: 2, iron_ore: 3 }, category: 'weapon' },
+            'gold_axe': { mats: { wood: 2, gold_ore: 3 }, category: 'weapon' },
+            'diamond_axe': { mats: { wood: 2, diamond: 3 }, category: 'weapon' },
+            'netherite_axe': { mats: { wood: 2, netherite: 3 }, category: 'weapon' },
+
+            'wood_katana': { mats: { wood: 3 }, category: 'weapon' },
+            'stone_katana': { mats: { wood: 1, stone: 2 }, category: 'weapon' },
+            'copper_katana': { mats: { wood: 1, copper_ore: 2 }, category: 'weapon' },
+            'iron_katana': { mats: { wood: 1, iron_ore: 2 }, category: 'weapon' },
+            'gold_katana': { mats: { wood: 1, gold_ore: 2 }, category: 'weapon' },
+            'diamond_katana': { mats: { wood: 1, diamond: 2 }, category: 'weapon' },
+            'netherite_katana': { mats: { wood: 1, netherite: 2 }, category: 'weapon' },
+            'murasame': { mats: { wood: 1, diamond: 3 }, category: 'weapon' },
+            'muramasa': { mats: { wood: 1, netherite: 3 }, category: 'weapon' },
+
+            'wood_spear': { mats: { wood: 4 }, category: 'weapon' },
+            'stone_spear': { mats: { wood: 2, stone: 1 }, category: 'weapon' },
+            'copper_spear': { mats: { wood: 2, copper_ore: 1 }, category: 'weapon' },
+            'iron_spear': { mats: { wood: 2, iron_ore: 1 }, category: 'weapon' },
+            'gold_spear': { mats: { wood: 2, gold_ore: 1 }, category: 'weapon' },
+            'diamond_spear': { mats: { wood: 2, diamond: 1 }, category: 'weapon' },
+            'netherite_spear': { mats: { wood: 2, netherite: 1 }, category: 'weapon' },
+
+            // ----- 工具 -----
+            'wood_pickaxe': { mats: { wood: 5 }, category: 'tool' },
+            'stone_pickaxe': { mats: { wood: 2, stone: 3 }, category: 'tool' },
+            'copper_pickaxe': { mats: { wood: 2, copper_ore: 3 }, category: 'tool' },
+            'iron_pickaxe': { mats: { wood: 2, iron_ore: 3 }, category: 'tool' },
+            'gold_pickaxe': { mats: { wood: 2, gold_ore: 3 }, category: 'tool' },
+            'diamond_pickaxe': { mats: { wood: 2, diamond: 3 }, category: 'tool' },
+            'netherite_pickaxe': { mats: { wood: 2, netherite: 3 }, category: 'tool' },
+
+            // 斧在工具中也有 (但已在武器中定义，此处不再重复)
+            // 但为了分类显示，工具类只放镐
+
+            // ----- 弓弩 -----
+            'bow': { mats: { wood: 3, string: 3 }, category: 'weapon' },
+            'short_bow': { mats: { wood: 4, string: 4 }, category: 'weapon' },
+            'long_bow': { mats: { wood: 5, string: 5 }, category: 'weapon' },
+            'hunt_bow': { mats: { wood: 6, string: 6 }, category: 'weapon' },
+            'elf_bow': { mats: { wood: 7, string: 7 }, category: 'weapon' },
+
+            'crossbow': { mats: { wood: 3, string: 2, copper_ore: 1 }, category: 'weapon' },
+            'light_crossbow': { mats: { wood: 4, string: 3, iron_ore: 1 }, category: 'weapon' },
+            'heavy_crossbow': { mats: { wood: 5, string: 4, gold_ore: 1 }, category: 'weapon' },
+            'heavy_crossbow2': { mats: { wood: 6, string: 5, diamond: 1 }, category: 'weapon' },
+            'zhuge': { mats: { wood: 7, string: 6, netherite: 1 }, category: 'weapon' },
+
+            // ----- 防具 -----
+            'wood_shield': { mats: { wood: 7 }, category: 'armor' },
+            'stone_shield': { mats: { stone: 7 }, category: 'armor' },
+            'copper_shield': { mats: { copper_ore: 7 }, category: 'armor' },
+            'iron_shield': { mats: { iron_ore: 7 }, category: 'armor' },
+            'gold_shield': { mats: { gold_ore: 7 }, category: 'armor' },
+            'diamond_shield': { mats: { diamond: 7 }, category: 'armor' },
+            'netherite_shield': { mats: { netherite: 7 }, category: 'armor' },
+
+            'leather_helmet': { mats: { leather: 5 }, category: 'armor' },
+            'copper_helmet': { mats: { leather: 1, copper_ore: 2 }, category: 'armor' },
+            'iron_helmet': { mats: { leather: 1, iron_ore: 2 }, category: 'armor' },
+            'gold_helmet': { mats: { leather: 1, gold_ore: 2 }, category: 'armor' },
+            'diamond_helmet': { mats: { leather: 1, diamond: 2 }, category: 'armor' },
+            'netherite_helmet': { mats: { leather: 1, netherite: 2 }, category: 'armor' },
+
+            'leather_chestplate': { mats: { leather: 3 }, category: 'armor' },
+            'copper_chestplate': { mats: { leather: 1, copper_ore: 2 }, category: 'armor' },
+            'iron_chestplate': { mats: { leather: 1, iron_ore: 2 }, category: 'armor' },
+            'gold_chestplate': { mats: { leather: 1, gold_ore: 2 }, category: 'armor' },
+            'diamond_chestplate': { mats: { leather: 1, diamond: 2 }, category: 'armor' },
+            'netherite_chestplate': { mats: { leather: 1, netherite: 2 }, category: 'armor' },
+
+            'leather_gloves': { mats: { leather: 2 }, category: 'armor' },
+            'copper_gloves': { mats: { leather: 1, copper_ore: 2 }, category: 'armor' },
+            'iron_gloves': { mats: { leather: 1, iron_ore: 2 }, category: 'armor' },
+            'gold_gloves': { mats: { leather: 1, gold_ore: 2 }, category: 'armor' },
+            'diamond_gloves': { mats: { leather: 1, diamond: 2 }, category: 'armor' },
+            'netherite_gloves': { mats: { leather: 1, netherite: 2 }, category: 'armor' },
+
+            'leather_leggings': { mats: { leather: 2 }, category: 'armor' },
+            'copper_leggings': { mats: { leather: 1, copper_ore: 2 }, category: 'armor' },
+            'iron_leggings': { mats: { leather: 1, iron_ore: 2 }, category: 'armor' },
+            'gold_leggings': { mats: { leather: 1, gold_ore: 2 }, category: 'armor' },
+            'diamond_leggings': { mats: { leather: 1, diamond: 2 }, category: 'armor' },
+            'netherite_leggings': { mats: { leather: 1, netherite: 2 }, category: 'armor' },
+
+            'leather_boots': { mats: { leather: 2 }, category: 'armor' },
+            'copper_boots': { mats: { leather: 1, copper_ore: 2 }, category: 'armor' },
+            'iron_boots': { mats: { leather: 1, iron_ore: 2 }, category: 'armor' },
+            'gold_boots': { mats: { leather: 1, gold_ore: 2 }, category: 'armor' },
+            'diamond_boots': { mats: { leather: 1, diamond: 2 }, category: 'armor' },
+            'netherite_boots': { mats: { leather: 1, netherite: 2 }, category: 'armor' },
+
+            // ----- 其他 -----
+            'bed': { mats: { wool: 3, wood: 3 }, category: 'other' },
+            'bread': { mats: { wheat: 3 }, category: 'other' },
+        };
+
+        // 工具类中的斧（补充，避免与武器中的斧重复，但为了分类，我们将工具中的斧单独列出）
+        // 但为了避免重复，工具类只放镐，斧在武器中已经有了
+
+        // ---------- 制作界面 ----------
+        let _craftFilter = 'all';
+        let _craftSearch = '';
+
+        function renderCraft() {
+            const p = G.player;
+            if (!p) return;
+            const grid = $('craft-grid');
+            grid.innerHTML = '';
+
+            // 收集所有可制作的物品（排除已拥有或已装备的？不，允许重复制作）
+            const entries = Object.entries(CRAFTING_RECIPES);
+            let filtered = entries;
+
+            // 分类过滤
+            if (_craftFilter !== 'all') {
+                filtered = filtered.filter(([id, recipe]) => recipe.category === _craftFilter);
+            }
+
+            // 搜索过滤
+            if (_craftSearch.trim()) {
+                const q = _craftSearch.trim().toLowerCase();
+                filtered = filtered.filter(([id, recipe]) => {
+                    const item = ITEMS[id];
+                    return item && (item.name.includes(q) || id.includes(q) || recipe.category.includes(q));
+                });
+            }
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#666;padding:20px;">沒有符合的製作項目</div>';
+                return;
+            }
+
+            // 按分类分组
+            const groups = {};
+            for (const [id, recipe] of filtered) {
+                const cat = recipe.category || 'other';
+                if (!groups[cat]) groups[cat] = [];
+                groups[cat].push([id, recipe]);
+            }
+
+            const catNames = {
+                'weapon': '⚔️ 武器',
+                'tool': '🛠️ 工具',
+                'armor': '🛡️ 防具',
+                'other': '📦 其他'
+            };
+
+            for (const [cat, items] of Object.entries(groups)) {
+                const section = document.createElement('div');
+                section.className = 'craft-category';
+                section.innerHTML = `<div class="cat-title">${catNames[cat] || cat}</div>`;
+                for (const [id, recipe] of items) {
+                    const item = ITEMS[id];
+                    if (!item) continue;
+                    const div = document.createElement('div');
+                    div.className = 'craft-item';
+
+                    // 检查材料
+                    let canCraft = true;
+                    let matsHtml = '';
+                    const mats = recipe.mats || {};
+                    const matKeys = Object.keys(mats);
+                    for (const matId of matKeys) {
+                        const need = mats[matId] || 0;
+                        const have = countItem(matId);
+                        const matItem = getItemDisplay(matId);
+                        const enough = have >= need;
+                        if (!enough) canCraft = false;
+                        matsHtml += `<span class="mat ${enough ? 'have' : 'lack'}">
+                            <span class="mat-icon">${matItem.icon}</span>
+                            <span class="mat-count">${have}/${need}</span>
+                        </span>`;
+                    }
+
+                    const owned = countItem(id);
+
+                    div.innerHTML = `
+                        <span class="ci-icon">${item.icon}</span>
+                        <span class="ci-name">${item.name}</span>
+                        <span class="ci-mats">${matsHtml}</span>
+                        <span class="ci-owned">持有: <span class="owned-num">${owned}</span></span>
+                        <button class="ci-btn" ${canCraft ? '' : 'disabled'} data-id="${id}">製作</button>
+                    `;
+                    section.appendChild(div);
+                }
+                grid.appendChild(section);
+            }
+
+            // 绑定制作按钮事件
+            grid.querySelectorAll('.ci-btn:not(:disabled)').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.dataset.id;
+                    if (id) craftItem(id);
+                });
+            });
+        }
+
+        function craftItem(id) {
+            const p = G.player;
+            if (!p) return;
+            const recipe = CRAFTING_RECIPES[id];
+            if (!recipe) { toast('❌ 未知的製作配方', 'error'); return; }
+
+            // 检查材料
+            const mats = recipe.mats || {};
+            for (const [matId, need] of Object.entries(mats)) {
+                const have = countItem(matId);
+                if (have < need) {
+                    const matItem = getItemDisplay(matId);
+                    toast(`❌ 材料不足：需要 ${matItem.icon}${matItem.name} x${need}，持有 ${have}`, 'warning');
+                    return;
+                }
+            }
+
+            // 消耗材料
+            for (const [matId, need] of Object.entries(mats)) {
+                if (!removeItem(matId, need)) {
+                    toast('❌ 材料扣除失敗', 'error');
+                    return;
+                }
+            }
+
+            // 获得物品
+            addItem(id, 1);
+            const item = ITEMS[id];
+            toast(`✅ 製作成功！獲得 ${item.icon} ${item.name}`, 'success');
+            playSound(500, 0.15);
+            renderCraft();
+            updateUI();
+            saveGameToLocal();
+        }
+
+        function toggleCraft() {
+            const modal = $('craft-modal');
+            if (modal.classList.contains('active')) {
+                modal.classList.remove('active');
+            } else {
+                _craftFilter = 'all';
+                _craftSearch = '';
+                $('craft-search').value = '';
+                // 更新标签激活状态
+                document.querySelectorAll('#craftTabs .tab-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.cat === 'all');
+                });
+                renderCraft();
+                modal.classList.add('active');
+            }
+        }
+
+        // 制作标签切换
+        document.getElementById('craftTabs')?.addEventListener('click', (e) => {
+            const btn = e.target.closest('.tab-btn');
+            if (!btn) return;
+            document.querySelectorAll('#craftTabs .tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            _craftFilter = btn.dataset.cat || 'all';
+            renderCraft();
+        });
+
+        // 搜索输入
+        document.getElementById('craft-search')?.addEventListener('input', (e) => {
+            _craftSearch = e.target.value;
+            renderCraft();
+        });
+
+        // ---------- 启动 ----------
         let _savedData = null;
 
         function startGameFromCover() {
@@ -3751,7 +4145,7 @@
                 updateUI();
                 render();
                 saveGameToLocal();
-                toast('🌍 歡迎！方向鍵移動 | R休息 | I背包 | E裝備', 'info', 3000);
+                toast('🌍 歡迎！方向鍵移動 | R休息 | I背包 | E裝備 | K製作', 'info', 3000);
             }
             cover.style.display = 'none';
             game.style.display = 'flex';
@@ -3931,6 +4325,10 @@
         $('btnSave').addEventListener('click', saveGame);
         $('btnLoad').addEventListener('click', loadGame);
 
+        // ===== 新增：制作按钮事件 =====
+        $('btnCraft').addEventListener('click', toggleCraft);
+        $('craftCloseBtn').addEventListener('click', () => $('craft-modal').classList.remove('active'));
+
         $('inventoryCloseBtn').addEventListener('click', () => $('inventory-modal').classList.remove('active'));
         $('equipCloseBtn').addEventListener('click', () => $('equip-modal').classList.remove('active'));
         $('achievementCloseBtn').addEventListener('click', () => $('achievement-modal').classList.remove('active'));
@@ -4043,6 +4441,16 @@
             } else { document.exitFullscreen(); }
         });
 
+        // 快捷键 K 打开制作
+        document.addEventListener('keydown', (e) => {
+            if (cover.style.display !== 'none') return;
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (e.key === 'k' || e.key === 'K') {
+                e.preventDefault();
+                toggleCraft();
+            }
+        });
+
         window.addEventListener('load', () => {
             const data = loadGameFromLocal();
             if (data) { _savedData = data; console.log('✅ 發現存檔，點擊"展開冒險"即可繼續'); }
@@ -4061,7 +4469,7 @@
         });
 
         console.log('⛏️ 方塊傳說已載入！');
-        console.log('🎮 操作: 方向鍵移動 | R休息 | I背包 | E裝備');
+        console.log('🎮 操作: 方向鍵移動 | R休息 | I背包 | E裝備 | K製作');
         console.log('🕳️ 洞穴入口: 地圖上隨機生成，進入後生成臨時洞穴，離開後重置');
         console.log('🚪 廢棄傳送門: 20%機率出現，通往地獄 (暫存地圖，離開重設)');
         console.log('🔥 地獄: 含喪屍豬人、礦物 (煤炭/鐵/金/鑽石)，出口🚪在4邊隨機位置');
@@ -4077,6 +4485,7 @@
         console.log('🆕 流浪商人收購資源');
         console.log('🆕 繁體中文顯示');
         console.log('🆕 煤炭礦物 (等級1，需鎬)');
+        console.log('🆕 製作系統: 按K或點擊「製作」按鈕，使用材料製作裝備/物品');
     </script>
 </body>
 </html>
