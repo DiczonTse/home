@@ -780,7 +780,6 @@
         footer {
             background: var(--bg-footer);
             color: white;
-            /* 關鍵修正：底部增加額外內距，避開固定導航欄 */
             padding: 2rem 1rem calc(2rem + 90px) 1rem;
             margin-top: auto;
             transition: background 0.3s ease;
@@ -990,7 +989,6 @@
                 min-width: 200px;
             }
 
-            /* 桌面端 footer 底部內距略增，配合較高的導航欄 */
             footer {
                 padding: 2rem 1rem calc(2rem + 100px) 1rem;
             }
@@ -1041,7 +1039,6 @@
             }
         }
 
-        /* ===== 暗色模式過渡 ===== */
         body,
         .bg-card,
         .bg-secondary,
@@ -1056,7 +1053,6 @@
             transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
         }
 
-        /* ===== 聚焦狀態 ===== */
         button:focus-visible,
         input:focus-visible,
         textarea:focus-visible,
@@ -1065,7 +1061,6 @@
             outline-offset: 2px;
         }
 
-        /* ===== 選取文字 ===== */
         ::selection {
             background: var(--primary);
             color: white;
@@ -1112,7 +1107,6 @@
             <ul class="task-list" id="taskList"></ul>
         </section>
 
-        <!-- 底部佔位，避免被導航遮擋 -->
         <div style="height: 0.5rem;"></div>
     </main>
 
@@ -1316,7 +1310,6 @@
             }
             updateDate();
 
-            // Footer 年份
             document.getElementById('currentYear').textContent = new Date().getFullYear();
 
             // ============================================================
@@ -1330,11 +1323,9 @@
                 icon.className = dark ? 'fas fa-sun' : 'fas fa-moon';
             }
 
-            // 初始套用
             if (isDark) applyTheme(true);
             else applyTheme(false);
 
-            // 監聽系統偏好
             const media = window.matchMedia('(prefers-color-scheme: dark)');
             if (!localStorage.getItem(THEME_KEY)) {
                 applyTheme(media.matches);
@@ -1396,7 +1387,6 @@
                         </li>
                     `).join('');
 
-                    // 事件綁定
                     document.querySelectorAll('.task-checkbox').forEach(el => {
                         el.addEventListener('click', function() {
                             const id = this.closest('.task-item').dataset.id;
@@ -1417,13 +1407,11 @@
                     });
                 }
 
-                // 更新計數
                 const total = tasks.length;
                 const done = tasks.filter(t => t.completed).length;
                 taskCount.textContent = `${done}/${total} 個任務`;
             }
 
-            // 簡單防 XSS
             function escapeHtml(str) {
                 if (!str) return '';
                 return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -1492,10 +1480,11 @@
             }
 
             // ============================================================
-            //  7. 表單（移動端彈出） - 增強顯示控制
+            //  7. 表單（移動端彈出） — 修復編輯功能
             // ============================================================
+
+            // 開啓表單（不重置內容，由調用方決定是否重置）
             function openForm() {
-                resetForm();
                 mobileFormContainer.style.display = 'block';
                 mobileFormOverlay.classList.add('open');
                 requestAnimationFrame(() => {
@@ -1515,6 +1504,7 @@
                 resetForm();
             }
 
+            // 重置表單為「新增」模式（清空所有欄位與狀態）
             function resetForm() {
                 editingTaskId = null;
                 mobileTaskId.value = '';
@@ -1527,9 +1517,12 @@
                 mobileCancelBtn.style.display = 'none';
             }
 
+            // 開啓編輯模式（設定資料後再開啓表單）
             function openEditForm(id) {
                 const task = tasks.find(t => t.id === id);
                 if (!task) return;
+
+                // 設定編輯資料
                 editingTaskId = id;
                 mobileTaskId.value = id;
                 mobileTaskTitle.value = task.title;
@@ -1539,6 +1532,8 @@
                 mobileFormSubtitle.textContent = '修改任務資料';
                 mobileSubmitBtn.innerHTML = '<i class="fas fa-save"></i> 更新任務';
                 mobileCancelBtn.style.display = 'flex';
+
+                // 開啓表單（此時不會重置內容）
                 openForm();
             }
 
@@ -1612,6 +1607,7 @@
             navAdd.addEventListener('click', function() {
                 document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
+                // 新增模式：先重置再開啓
                 resetForm();
                 openForm();
                 closeToolsMenu();
@@ -1800,7 +1796,7 @@
             });
 
             // ============================================================
-            //  14. FAB
+            //  14. FAB — 新增模式
             // ============================================================
             fab.addEventListener('click', function() {
                 resetForm();
@@ -1823,7 +1819,7 @@
             }
 
             // ============================================================
-            //  16. 鍵盤快速鍵 (ESC 關閉)
+            //  16. 鍵盤快速鍵
             // ============================================================
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
@@ -1841,7 +1837,7 @@
             });
 
             // ============================================================
-            //  17. 初始化：強制關閉表單，確保頁面載入後完全隱藏
+            //  17. 初始化
             // ============================================================
             render();
 
