@@ -1762,8 +1762,8 @@
             'zombie': { id: 'zombie', name: '🧟 喪屍', hp: 20, atk: 5, def: 0, exp: 5, gold: 5, passive: false,
                 drops: [{ id: 'rotten_flesh', chance: 0.33, count: 1 }, { id: 'iron_ore', chance: 0.008, count: 1 },
                     { id: 'carrot', chance: 0.008, count: 1 }, { id: 'potato', chance: 0.008, count: 1 },
-                    { id: 'wood_sword', chance: 0.08, count: 1 }, { id: 'wood_axe', chance: 0.08, count: 1 },
-                    { id: 'wood_katana', chance: 0.08, count: 1 }
+                    { id: 'iron_sword', chance: 0.08, count: 1 }, { id: 'iron_axe', chance: 0.08, count: 1 },
+                    { id: 'iron_katana', chance: 0.08, count: 1 }
                 ] },
             'skeleton': { id: 'skeleton', name: '💀 骷髏', hp: 20, atk: 4, def: 0, exp: 5, gold: 5, passive: false,
                 drops: [{ id: 'bone', chance: 0.3, count: 1 }, { id: 'bow', chance: 0.085, count: 1 }] },
@@ -2161,61 +2161,8 @@
                 }
             }
 
-            // 洞穴入口
-            if (!is('ocean') && !is('river') && !is('nether') && !is('end') && !is('heaven') && !is('cave')) {
-                if (Math.random() < 0.33) {
-                    let placed = false;
-                    for (let attempt = 0; attempt < 50; attempt++) {
-                        const x = rand(2, w - 3),
-                            y = rand(2, h - 3);
-                        if (!objects[y][x] && !(x === 9 && y === 9)) {
-                            objects[y][x] = { type: 'cave_entrance' };
-                            placed = true;
-                            break;
-                        }
-                    }
-                    if (!placed) {
-                        for (let y = 1; y < h - 1; y++) {
-                            for (let x = 1; x < w - 1; x++) {
-                                if (!objects[y][x] && !(x === 9 && y === 9)) {
-                                    objects[y][x] = { type: 'cave_entrance' };
-                                    placed = true;
-                                    break;
-                                }
-                            }
-                            if (placed) break;
-                        }
-                    }
-                }
-            }
-
-            // 廢棄傳送門
-            if (!is('ocean') && !is('river') && !is('nether') && !is('end') && !is('heaven') && !is('cave')) {
-                if (Math.random() < 0.20) {
-                    let placed = false;
-                    for (let attempt = 0; attempt < 50; attempt++) {
-                        const x = rand(2, w - 3),
-                            y = rand(2, h - 3);
-                        if (!objects[y][x] && !(x === 9 && y === 9)) {
-                            objects[y][x] = { type: 'portal', isExit: false };
-                            placed = true;
-                            break;
-                        }
-                    }
-                    if (!placed) {
-                        for (let y = 1; y < h - 1; y++) {
-                            for (let x = 1; x < w - 1; x++) {
-                                if (!objects[y][x] && !(x === 9 && y === 9)) {
-                                    objects[y][x] = { type: 'portal', isExit: false };
-                                    placed = true;
-                                    break;
-                                }
-                            }
-                            if (placed) break;
-                        }
-                    }
-                }
-            }
+            // 洞穴入口/廢棄傳送門
+			addSpecialStructures({ id: mapId, width: w, height: h, objects });
 
             // 草
             if (!is('ocean') && !is('river') && !is('desert') && !is('ice') && !is('cave') && !is('nether') && !is('end') &&
@@ -2227,7 +2174,7 @@
                     if (!objects[y][x]) objects[y][x] = { type: 'grass' };
                 }
             }
-
+			//花
             if (is('plain')) {
                 const flowerCount = 10 + Math.floor(Math.random() * 6);
                 for (let i = 0; i < flowerCount; i++) {
@@ -2249,8 +2196,7 @@
                     }
                 }
             }
-
-            // 資源
+            // 資源(樹、石頭、礦物)
             if (!is('ocean') && !is('river') && !is('ice') && !is('cave') && !is('nether')) {
                 const treeCount = is('forest') ? 18 : is('plain') ? 4 : is('desert') ? 6 : 4;
                 for (let i = 0; i < treeCount; i++) {
@@ -2280,7 +2226,7 @@
                     }
                 }
             }
-
+			// 洞穴資源
             if (is('cave')) {
                 for (let i = 0; i < 10; i++) {
                     const x = rand(1, w - 2),
@@ -2381,13 +2327,13 @@
                     }
                 }
                 if (is('desert')) {
-                    mobPool = ['sheep', 'camel'];
+                    mobPool = ['camel'];
                     if (isNight && !(G.player && G.player.equipment.shield === 'torch')) {
                         mobPool.push('zombie', 'skeleton', 'spider');
                     }
                 }
                 if (is('ice')) {
-                    mobPool = ['cow', 'sheep', 'horse'];
+                    mobPool = ['sheep'];
                     if (isNight && !(G.player && G.player.equipment.shield === 'torch')) {
                         mobPool.push('zombie', 'skeleton', 'spider');
                     }
@@ -2436,6 +2382,61 @@
 
             return { id: mapId, width: w, height: h, terrain, objects };
         }
+		function addSpecialStructures(map) {
+			const w = map.width, h = map.height;
+			const objects = map.objects;
+			const is = (id) => map.id === id;
+			if (!is('ocean') && !is('river') && !is('nether') && !is('end') && !is('heaven') && !is('cave')) {
+				if (Math.random() < 0.33) {
+					let placed = false;
+					for (let attempt = 0; attempt < 50; attempt++) {
+						const x = rand(2, w - 3), y = rand(2, h - 3);
+						if (!objects[y]?.[x] && !(x === 9 && y === 9)) {
+							objects[y][x] = { type: 'cave_entrance' };
+							placed = true;
+							break;
+						}
+					}
+					if (!placed) {
+						for (let y = 1; y < h - 1; y++) {
+							for (let x = 1; x < w - 1; x++) {
+								if (!objects[y]?.[x] && !(x === 9 && y === 9)) {
+									objects[y][x] = { type: 'cave_entrance' };
+									placed = true;
+									break;
+								}
+							}
+							if (placed) break;
+						}
+					}
+				}
+			}
+			if (!is('ocean') && !is('river') && !is('nether') && !is('end') && !is('heaven') && !is('cave')) {
+				if (Math.random() < 0.20) {
+					let placed = false;
+					for (let attempt = 0; attempt < 50; attempt++) {
+						const x = rand(2, w - 3), y = rand(2, h - 3);
+						if (!objects[y]?.[x] && !(x === 9 && y === 9)) {
+							objects[y][x] = { type: 'portal', isExit: false };
+							placed = true;
+							break;
+						}
+					}
+					if (!placed) {
+						for (let y = 1; y < h - 1; y++) {
+							for (let x = 1; x < w - 1; x++) {
+								if (!objects[y]?.[x] && !(x === 9 && y === 9)) {
+									objects[y][x] = { type: 'portal', isExit: false };
+									placed = true;
+									break;
+								}
+							}
+							if (placed) break;
+						}
+					}
+				}
+			}
+		}
 
         // ===== 地圖壓縮/解壓縮 =====
         function compressMap(map) {
@@ -2531,6 +2532,7 @@
             G.caveOriginMapId = p.mapId;
             G.caveOriginX = p.x;
             G.caveOriginY = p.y;
+			G.savedWeather = G.weather;
             G.tempCaveMap = generateMap('cave');
             G.inCave = true;
             const map = G.tempCaveMap;
@@ -2577,36 +2579,42 @@
         }
 
         function exitCave() {
-            const p = G.player;
-            if (!G.inCave) return;
-            const originMapId = G.caveOriginMapId || 'plain';
-            const originX = G.caveOriginX !== undefined ? G.caveOriginX : 9;
-            const originY = G.caveOriginY !== undefined ? G.caveOriginY : 9;
-            if (G.maps['cave_temp']) delete G.maps['cave_temp'];
-            G.tempCaveMap = null;
-            G.inCave = false;
-            p.mapId = originMapId;
-            p.x = originX;
-            p.y = originY;
-            G.currentMapId = originMapId;
-            G.map = getMap(originMapId);
-            G.caveOriginMapId = '';
-            G.caveOriginX = 0;
-            G.caveOriginY = 0;
-            updateUI();
-            render();
-            if (G.weather === 'clear' && (G.isNight || Math.random() < 0.3)) {
-                const r = Math.random();
-                if (r < 0.6) G.weather = 'clear';
-                else if (r < 0.9) G.weather = 'rain';
-                else G.weather = 'thunder';
-                if (G.weather !== 'clear') startRainSound();
-                else stopRainSound();
-            }
-            updateMusic();
-            toast('↩️ 回到地面', 'info', 1500);
-            saveGameToLocal();
-        }
+			const p = G.player;
+			if (!G.inCave) return;
+			const originMapId = G.caveOriginMapId || 'plain';
+			const originX = G.caveOriginX !== undefined ? G.caveOriginX : 9;
+			const originY = G.caveOriginY !== undefined ? G.caveOriginY : 9;
+			if (G.maps['cave_temp']) delete G.maps['cave_temp'];
+			G.tempCaveMap = null;
+			G.inCave = false;
+			p.mapId = originMapId;
+			p.x = originX;
+			p.y = originY;
+			G.currentMapId = originMapId;
+			G.map = getMap(originMapId);
+			G.caveOriginMapId = '';
+			G.caveOriginX = 0;
+			G.caveOriginY = 0;
+			updateUI();
+			render();
+			if (G.savedWeather) {
+				G.weather = G.savedWeather;
+				G.savedWeather = null;
+			} else {
+				G.weather = 'clear';
+			}
+			if (G.weather === 'rain' || G.weather === 'thunder') {
+				startRainSound();
+				startRainLoop();
+			} else {
+				stopRainSound();
+				stopRainLoop();
+				rainCtx.clearRect(0, 0, 608, 608);
+			}
+			updateMusic();
+			toast('↩️ 回到地面', 'info', 1500);
+			saveGameToLocal();
+		}
 
         // ===== 地獄 =====
         function enterNether() {
@@ -2615,6 +2623,7 @@
             G.netherOriginMapId = p.mapId;
             G.netherOriginX = p.x;
             G.netherOriginY = p.y;
+			G.savedWeather = G.weather;
             G.tempNetherMap = generateMap('nether');
             G.inNether = true;
             let spawnX = 9, spawnY = 9;
@@ -2668,36 +2677,45 @@
         }
 
         function exitNether() {
-            const p = G.player;
-            if (!G.inNether) return;
-            const originMapId = G.netherOriginMapId || 'plain';
-            const originX = G.netherOriginX !== undefined ? G.netherOriginX : 9;
-            const originY = G.netherOriginY !== undefined ? G.netherOriginY : 9;
-            if (G.maps['nether_temp']) delete G.maps['nether_temp'];
-            G.tempNetherMap = null;
-            G.inNether = false;
-            p.mapId = originMapId;
-            p.x = originX;
-            p.y = originY;
-            G.currentMapId = originMapId;
-            G.map = getMap(originMapId);
-            G.netherOriginMapId = '';
-            G.netherOriginX = 0;
-            G.netherOriginY = 0;
-            updateUI();
-            render();
-            if (G.weather === 'clear' && (G.isNight || Math.random() < 0.3)) {
-                const r = Math.random();
-                if (r < 0.6) G.weather = 'clear';
-                else if (r < 0.9) G.weather = 'rain';
-                else G.weather = 'thunder';
-                if (G.weather !== 'clear') startRainSound();
-                else stopRainSound();
-            }
-            updateMusic();
-            toast('↩️ 離開地獄', 'info', 1500);
-            saveGameToLocal();
-        }
+			const p = G.player;
+			if (!G.inNether) return;
+			const originMapId = G.netherOriginMapId || 'plain';
+			const originX = G.netherOriginX !== undefined ? G.netherOriginX : 9;
+			const originY = G.netherOriginY !== undefined ? G.netherOriginY : 9;
+			if (G.maps['nether_temp']) delete G.maps['nether_temp'];
+			G.tempNetherMap = null;
+			G.inNether = false;
+			p.mapId = originMapId;
+			p.x = originX;
+			p.y = originY;
+			G.currentMapId = originMapId;
+			G.map = getMap(originMapId);
+			G.netherOriginMapId = '';
+			G.netherOriginX = 0;
+			G.netherOriginY = 0;
+			updateUI();
+			render();
+
+			if (G.savedWeather) {
+				G.weather = G.savedWeather;
+				G.savedWeather = null;
+			} else {
+				G.weather = 'clear';
+			}
+
+			if (G.weather === 'rain' || G.weather === 'thunder') {
+				startRainSound();
+				startRainLoop();
+			} else {
+				stopRainSound();
+				stopRainLoop();
+				rainCtx.clearRect(0, 0, 608, 608);
+			}
+
+			updateMusic();
+			toast('↩️ 離開地獄', 'info', 1500);
+			saveGameToLocal();
+		}
 
         function handleArrow(dir, x, y) {
             if (G.inCave) {
@@ -2755,6 +2773,15 @@
             p.x = clamp(px !== undefined ? px : 9, 0, 18);
             p.y = clamp(py !== undefined ? py : 9, 0, 18);
             G.map = getMap(mapId);
+			for (let y = 0; y < G.map.height; y++) {
+				for (let x = 0; x < G.map.width; x++) {
+					const obj = G.map.objects[y]?.[x];
+					if (obj && (obj.type === 'cave_entrance' || (obj.type === 'portal' && !obj.isExit))) {
+						G.map.objects[y][x] = null;
+					}
+				}
+			}
+			addSpecialStructures(G.map);
             if (!G.player.discoveredMaps.includes(mapId)) {
                 G.player.discoveredMaps.push(mapId);
                 toast('🗺️ 發現新區域: ' + MAP_TYPES[mapId].name, 'info');
@@ -2929,13 +2956,27 @@
             if (obj.type === 'obstacle') return;
 
             if (obj.type === 'portal') {
-                if (obj.isExit === true || G.inNether) {
-                    exitNether();
-                } else {
-                    enterNether();
-                }
-                return;
-            }
+				if (obj.isExit === true) {
+					// 出口傳送門（從地獄返回）
+					if (G.player.equipment.shield !== 'torch') {
+						toast('🔥 需要火把點燃門框！', 'warning', 2000);
+						return;
+					}
+					exitNether();
+				} else {
+					// 入口傳送門（進入地獄）
+					if (G.inNether) {
+						toast('⚠️ 這不是返回的傳送門', 'warning');
+						return;
+					}
+					if (G.player.equipment.shield !== 'torch') {
+						toast('🔥 需要火把點燃門框！', 'warning', 2000);
+						return;
+					}
+					enterNether();
+				}
+				return;
+			}
 
             if (obj.type === 'cave_entrance') {
                 enterCave(x, y);
@@ -3999,7 +4040,7 @@
             ctx.setLineDash([]);
 
             // 火把光晕（装备火把且为夜晚）
-            if (p.equipment.shield === 'torch' && G.isNight) {
+            if (p.equipment.shield === 'torch' && G.isNight && !G.inCave && !G.inNether) {
                 const cx = p.x * size + size / 2;
                 const cy = p.y * size + size / 2;
                 const radius = 120; // 光晕半径
@@ -4214,7 +4255,6 @@
                 saveGameToLocal();
                 // 如果装备的是盾牌（包括火把），刷新怪物
                 if (slot === 'shield') {
-                    refreshMobsOnMap();
                     render();
                     updateUI();
                 }
@@ -4235,7 +4275,6 @@
             saveGameToLocal();
             // 如果卸下的是盾牌（包括火把），刷新怪物
             if (slot === 'shield') {
-                refreshMobsOnMap();
                 render();
                 updateUI();
             }
