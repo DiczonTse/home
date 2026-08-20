@@ -4,7 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>🧮 精準計算機</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bignumber.js/9.1.2/bignumber.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bignumber.js/9.1.2/bignumber.min.js">
+    </script>
     <style>
         /* ================================================================
            全域 CSS 變數 (淺色 & 深色)
@@ -81,7 +82,7 @@
             background: var(--card-bg);
             border-radius: 32px;
             padding: 24px 20px 18px;
-            box-shadow: 0 20px 60px var(--shadow-color), 0 8px 24px rgba(0,0,0,0.05);
+            box-shadow: 0 20px 60px var(--shadow-color), 0 8px 24px rgba(0, 0, 0, 0.05);
             transition: background 0.3s, box-shadow 0.3s, border-color 0.3s;
             border: 1px solid var(--border-color);
             position: relative;
@@ -122,7 +123,7 @@
             cursor: pointer;
             transition: background 0.3s;
             position: relative;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .theme-toggle .toggle-slider {
@@ -131,7 +132,7 @@
             background: var(--toggle-icon);
             border-radius: 50%;
             transition: transform 0.3s, background 0.3s;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
         }
 
         [data-theme="dark"] .theme-toggle .toggle-slider {
@@ -157,7 +158,7 @@
             justify-content: center;
             cursor: pointer;
             transition: background 0.3s, box-shadow 0.3s;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
             font-size: 16px;
             color: var(--vibration-inactive);
             position: relative;
@@ -166,7 +167,7 @@
 
         .vibration-toggle.active {
             color: var(--vibration-active);
-            box-shadow: 0 0 0 2px var(--vibration-active), inset 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 0 0 2px var(--vibration-active), inset 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .vibration-toggle .vibration-icon {
@@ -195,7 +196,7 @@
             word-break: break-all;
             line-height: 1.2;
             border: 1px solid var(--border-color);
-            box-shadow: inset 0 2px 6px rgba(0,0,0,0.02);
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.02);
             overflow: hidden;
             transition: background 0.3s, color 0.3s, border-color 0.3s;
         }
@@ -225,7 +226,7 @@
             justify-content: center;
             background: var(--button-bg);
             color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -239,6 +240,7 @@
             border: 1px solid var(--border-color);
             box-shadow: none;
         }
+
         .calc-btn:not(.operator):not(.special):not(.equals):active {
             background: var(--border-color);
         }
@@ -248,6 +250,7 @@
             color: var(--operator-color);
             border: 1px solid transparent;
         }
+
         .calc-btn.operator:active {
             background: var(--border-color);
         }
@@ -257,6 +260,7 @@
             color: var(--special-color);
             border: 1px solid transparent;
         }
+
         .calc-btn.special:active {
             background: var(--border-color);
         }
@@ -267,6 +271,7 @@
             border: none;
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
         }
+
         .calc-btn.equals:active {
             background: var(--button-hover);
             transform: scale(0.94);
@@ -313,7 +318,8 @@
             .calc-title {
                 font-size: 0.95rem;
             }
-            .theme-toggle, .vibration-toggle {
+            .theme-toggle,
+            .vibration-toggle {
                 width: 40px;
                 height: 22px;
             }
@@ -345,416 +351,446 @@
         }
 
         @keyframes pulse-error {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.4;
+            }
         }
         .calc-error {
             animation: pulse-error 0.6s ease 2;
             color: #ef4444 !important;
         }
+
+        /* 小數點按鈕閃爍提示 */
+        @keyframes dot-flash {
+            0%,
+            100% {
+                background-color: var(--special-bg);
+            }
+            50% {
+                background-color: #fbbf24;
+            }
+        }
+        .dot-flash {
+            animation: dot-flash 0.4s ease 2;
+        }
     </style>
 </head>
 <body>
 
-<div class="calculator-wrapper">
-    <div class="calc-header">
-        <span class="calc-title">🧮 計算機</span>
-        <div class="header-controls">
-            <button class="vibration-toggle" id="vibrationToggle" aria-label="切換按鍵觸感">
-                <span class="vibration-icon">📳</span>
-            </button>
-            <button class="theme-toggle" id="themeToggle" aria-label="切換深色/淺色模式">
-                <span class="toggle-icon">☀️</span>
-                <span class="toggle-slider"></span>
-                <span class="toggle-icon">🌙</span>
-            </button>
+    <div class="calculator-wrapper">
+        <div class="calc-header">
+            <span class="calc-title">🧮 計算機</span>
+            <div class="header-controls">
+                <button class="vibration-toggle" id="vibrationToggle" aria-label="切換按鍵觸感">
+                    <span class="vibration-icon">📳</span>
+                </button>
+                <button class="theme-toggle" id="themeToggle" aria-label="切換深色/淺色模式">
+                    <span class="toggle-icon">☀️</span>
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-icon">🌙</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="calculator-display" id="calcDisplay">0</div>
+
+        <div class="calculator-buttons">
+            <button class="calc-btn special" data-action="lparen">(</button>
+            <button class="calc-btn special" data-action="rparen">)</button>
+            <button class="calc-btn special" data-action="clear">C</button>
+            <button class="calc-btn operator" data-action="divide">÷</button>
+
+            <button class="calc-btn" data-action="7">7</button>
+            <button class="calc-btn" data-action="8">8</button>
+            <button class="calc-btn" data-action="9">9</button>
+            <button class="calc-btn operator" data-action="multiply">×</button>
+
+            <button class="calc-btn" data-action="4">4</button>
+            <button class="calc-btn" data-action="5">5</button>
+            <button class="calc-btn" data-action="6">6</button>
+            <button class="calc-btn operator" data-action="subtract">−</button>
+
+            <button class="calc-btn" data-action="1">1</button>
+            <button class="calc-btn" data-action="2">2</button>
+            <button class="calc-btn" data-action="3">3</button>
+            <button class="calc-btn operator" data-action="add">+</button>
+
+            <button class="calc-btn" data-action="0">0</button>
+            <button class="calc-btn" data-action="dot" id="dotBtn">.</button>
+            <button class="calc-btn special" data-action="del">Del</button>
+            <button class="calc-btn equals" data-action="equals">=</button>
+        </div>
+
+        <div class="calculator-footer">
+            <span class="coffee-icon">☕</span>迪遜咖啡廳
+            <span style="margin-left:10px;font-size:0.7rem;opacity:0.7;">v2.2．修正減號小數點 Bug</span>
         </div>
     </div>
 
-    <div class="calculator-display" id="calcDisplay">0</div>
+    <script>
+        (function() {
+            "use strict";
 
-    <div class="calculator-buttons">
-        <button class="calc-btn special" data-action="lparen">(</button>
-        <button class="calc-btn special" data-action="rparen">)</button>
-        <button class="calc-btn special" data-action="clear">C</button>
-        <button class="calc-btn operator" data-action="divide">÷</button>
+            // ================================================================
+            //  1. 使用 BigNumber.js 進行高精度運算
+            // ================================================================
 
-        <button class="calc-btn" data-action="7">7</button>
-        <button class="calc-btn" data-action="8">8</button>
-        <button class="calc-btn" data-action="9">9</button>
-        <button class="calc-btn operator" data-action="multiply">×</button>
-
-        <button class="calc-btn" data-action="4">4</button>
-        <button class="calc-btn" data-action="5">5</button>
-        <button class="calc-btn" data-action="6">6</button>
-        <button class="calc-btn operator" data-action="subtract">−</button>
-
-        <button class="calc-btn" data-action="1">1</button>
-        <button class="calc-btn" data-action="2">2</button>
-        <button class="calc-btn" data-action="3">3</button>
-        <button class="calc-btn operator" data-action="add">+</button>
-
-        <button class="calc-btn" data-action="0">0</button>
-        <button class="calc-btn" data-action="dot">.</button>
-        <button class="calc-btn special" data-action="del">Del</button>
-        <button class="calc-btn equals" data-action="equals">=</button>
-    </div>
-
-    <div class="calculator-footer">
-        <span class="coffee-icon">☕</span>迪遜咖啡廳
-		<span style="margin-left:10px;font-size:0.7rem;opacity:0.7;">v2.0．精準計算</span>
-    </div>
-</div>
-
-<script>
-    (function() {
-        "use strict";
-
-        // ================================================================
-        //  1. 使用 BigNumber.js 進行高精度運算
-        // ================================================================
-
-        // 將顯示用的字串轉為 BigNumber，若失敗回傳 null
-        function toBigNumber(str) {
-            try {
-                return new BigNumber(str);
-            } catch (_) {
-                return null;
+            function toBigNumber(str) {
+                try {
+                    return new BigNumber(str);
+                } catch (_) {
+                    return null;
+                }
             }
-        }
 
-        // 將 BigNumber 轉為顯示字串 (避免科學記號, 保留足夠精度)
-        function formatBigNumber(bn) {
-            if (!bn || !bn.isFinite()) return 'Error';
-            // 如果數值太大或太小，使用 toExponential 較佳，但這裡我們盡量保留原樣
-            // 但 BigNumber 的 toString() 可能產生指數表示，我們用 toFixed 控制
-            // 為了顯示美觀，若為整數則顯示整數，否則顯示小數 (不超過 15 位)
-            if (bn.isInteger()) {
-                return bn.toString(10);
-            } else {
-                // 保留最多 15 位小數，去除尾隨零
-                let fixed = bn.toFixed(15);
-                // 移除尾隨零 (但保留小數點後至少一位)
-                fixed = fixed.replace(/\.?0+$/, '');
-                if (fixed.endsWith('.')) fixed = fixed.slice(0, -1);
-                return fixed;
-            }
-        }
-
-        // ================================================================
-        //  2. 計算機狀態 (使用字串表示表達式，並由 BigNumber 處理)
-        // ================================================================
-
-        let displayValue = '0';           // 目前顯示的字串 (使用者輸入)
-        let justCalculated = false;      // 是否剛按下等號
-        let expression = '';             // 用於儲存完整表達式（可選），但我們直接使用 displayValue 作為表達式
-
-        const display = document.getElementById('calcDisplay');
-
-        // -------- 更新顯示 --------
-        function updateDisplay(value) {
-            if (value === undefined || value === null) {
-                display.textContent = '0';
-                return;
-            }
-            let str = String(value);
-            // 如果過長，縮小字體
-            display.textContent = str;
-            if (str.length > 14) {
-                display.classList.add('shrink');
-            } else {
-                display.classList.remove('shrink');
-            }
-        }
-
-        // -------- 輸入字元 (數字/運算子/括號) --------
-        function inputChar(ch) {
-            // 若剛計算完畢且輸入數字或小數點，重新開始
-            if (justCalculated) {
-                if (ch === '.' || /[0-9]/.test(ch)) {
-                    displayValue = '0';
+            function formatBigNumber(bn) {
+                if (!bn || !bn.isFinite()) return 'Error';
+                if (bn.isInteger()) {
+                    return bn.toString(10);
                 } else {
-                    // 若是運算子或括號，則保留結果繼續
-                    // 但我們希望 2+3=5 再按 + 變成 5+ ，保留結果
-                    // 這裡 displayValue 已經是結果，直接附加運算子
-                }
-                justCalculated = false;
-            }
-
-            // 避免連續多個小數點
-            if (ch === '.') {
-                // 找當前最後一個數字是否已有小數點
-                const lastNum = displayValue.split(/[\+\-\×\÷\(\)]/).pop();
-                if (lastNum && lastNum.includes('.')) {
-                    return; // 已有小數點
+                    let fixed = bn.toFixed(15);
+                    fixed = fixed.replace(/\.?0+$/, '');
+                    if (fixed.endsWith('.')) fixed = fixed.slice(0, -1);
+                    return fixed;
                 }
             }
 
-            // 避免重複運算子 (若 displayValue 結尾是運算子，則取代)
-            if (['+', '−', '×', '÷'].includes(ch)) {
-                const lastChar = displayValue.slice(-1);
-                if (['+', '−', '×', '÷'].includes(lastChar)) {
-                    displayValue = displayValue.slice(0, -1) + ch;
-                    updateDisplay(displayValue);
+            // ================================================================
+            //  2. 計算機狀態
+            // ================================================================
+
+            let displayValue = '0';
+            let justCalculated = false;
+
+            const display = document.getElementById('calcDisplay');
+            const dotBtn = document.getElementById('dotBtn');
+
+            // -------- 更新顯示 --------
+            function updateDisplay(value) {
+                if (value === undefined || value === null) {
+                    display.textContent = '0';
                     return;
                 }
+                let str = String(value);
+                display.textContent = str;
+                if (str.length > 14) {
+                    display.classList.add('shrink');
+                } else {
+                    display.classList.remove('shrink');
+                }
             }
 
-            // 處理開頭的 0
-            if (displayValue === '0' && ch !== '.') {
-                displayValue = '';
+            // -------- 【重點修正】取得當前操作數（最後一個數字） --------
+            function getCurrentNumber() {
+                // 注意：顯示中使用的減號是 − (U+2212)，必須正確切割！
+                const parts = displayValue.split(/[\+\−\×\÷\(\)]/);
+                return parts[parts.length - 1] || '';
             }
-            displayValue += ch;
-            updateDisplay(displayValue);
-        }
 
-        // -------- 清除 / 刪除 --------
-        function clearDisplay() {
-            displayValue = '0';
-            justCalculated = false;
-            updateDisplay(displayValue);
-        }
+            // -------- 改進後的小數點輸入 --------
+            function inputDot() {
+                // 若剛計算完畢，重新開始
+                if (justCalculated) {
+                    displayValue = '0';
+                    justCalculated = false;
+                }
 
-        function deleteLastChar() {
-            if (justCalculated) {
-                clearDisplay();
-                return;
+                const currentNum = getCurrentNumber();
+
+                // 如果當前數字已經有小數點 → 閃爍提示，不輸入
+                if (currentNum.includes('.')) {
+                    dotBtn.classList.add('dot-flash');
+                    setTimeout(() => dotBtn.classList.remove('dot-flash'), 800);
+                    return;
+                }
+
+                // 如果當前數字是空（例如運算子結尾），補上 0
+                if (currentNum === '') {
+                    displayValue += '0.';
+                } else {
+                    displayValue += '.';
+                }
+
+                updateDisplay(displayValue);
             }
-            displayValue = displayValue.slice(0, -1);
-            if (displayValue === '') displayValue = '0';
-            updateDisplay(displayValue);
-        }
 
-        // ================================================================
-        //  3. 核心計算：使用 BigNumber 解析並計算表達式
-        // ================================================================
+            // -------- 輸入字元 (數字/運算子/括號) --------
+            function inputChar(ch) {
+                if (justCalculated) {
+                    if (ch === '.' || /[0-9]/.test(ch)) {
+                        displayValue = '0';
+                    }
+                    justCalculated = false;
+                }
 
-        function calculate() {
-            try {
-                let expr = displayValue;
-                // 替換顯示符號為 JS 可辨識符號
-                let sanitized = expr
-                    .replace(/×/g, '*')
-                    .replace(/÷/g, '/')
-                    .replace(/−/g, '-');
+                // 處理小數點
+                if (ch === '.') {
+                    inputDot();
+                    return;
+                }
 
-                // 若空，忽略
-                if (!sanitized || sanitized.trim() === '') return;
+                // 避免重複運算子 (ex: 5+-3 自動變成 5-3)
+                if (['+', '−', '×', '÷'].includes(ch)) {
+                    const lastChar = displayValue.slice(-1);
+                    if (['+', '−', '×', '÷'].includes(lastChar)) {
+                        displayValue = displayValue.slice(0, -1) + ch;
+                        updateDisplay(displayValue);
+                        return;
+                    }
+                }
 
-                // 下面實作一個基於 BigNumber 的簡單計算器
-                function parseAndEval(expr) {
-                    // 去除空白
-                    expr = expr.replace(/\s/g, '');
-                    // 定義 token 類型
-                    let pos = 0;
-                    let tokens = [];
-                    // 詞法分析
-                    while (pos < expr.length) {
-                        let ch = expr[pos];
-                        if (ch === '(' || ch === ')' || ch === '+' || ch === '-' || ch === '*' || ch === '/') {
-                            tokens.push({ type: 'op', value: ch });
-                            pos++;
-                        } else if (ch >= '0' && ch <= '9' || ch === '.') {
-                            let num = '';
-                            while (pos < expr.length && ((expr[pos] >= '0' && expr[pos] <= '9') || expr[pos] === '.')) {
-                                num += expr[pos];
+                // 處理開頭的 0
+                if (displayValue === '0' && ch !== '.') {
+                    displayValue = '';
+                }
+                displayValue += ch;
+                updateDisplay(displayValue);
+            }
+
+            // -------- 清除 / 刪除 --------
+            function clearDisplay() {
+                displayValue = '0';
+                justCalculated = false;
+                updateDisplay(displayValue);
+            }
+
+            function deleteLastChar() {
+                if (justCalculated) {
+                    clearDisplay();
+                    return;
+                }
+                displayValue = displayValue.slice(0, -1);
+                if (displayValue === '') displayValue = '0';
+                updateDisplay(displayValue);
+            }
+
+            // ================================================================
+            //  3. 核心計算
+            // ================================================================
+
+            function calculate() {
+                try {
+                    let expr = displayValue;
+                    // 將顯示符號轉為 JS 可運算符號
+                    let sanitized = expr
+                        .replace(/×/g, '*')
+                        .replace(/÷/g, '/')
+                        .replace(/−/g, '-');
+
+                    if (!sanitized || sanitized.trim() === '') return;
+
+                    function parseAndEval(expr) {
+                        expr = expr.replace(/\s/g, '');
+                        let pos = 0;
+                        let tokens = [];
+
+                        while (pos < expr.length) {
+                            let ch = expr[pos];
+                            if (ch === '(' || ch === ')' || ch === '+' || ch === '-' || ch === '*' || ch === '/') {
+                                tokens.push({ type: 'op', value: ch });
+                                pos++;
+                            } else if (ch >= '0' && ch <= '9' || ch === '.') {
+                                let num = '';
+                                while (pos < expr.length && ((expr[pos] >= '0' && expr[pos] <= '9') || expr[pos] === '.')) {
+                                    num += expr[pos];
+                                    pos++;
+                                }
+                                tokens.push({ type: 'num', value: num });
+                            } else {
                                 pos++;
                             }
-                            tokens.push({ type: 'num', value: num });
-                        } else {
-                            // 忽略未知字符
-                            pos++;
                         }
-                    }
 
-                    // 遞迴下降解析
-                    let current = 0;
-                    function peek() { return tokens[current]; }
-                    function next() { return tokens[current++]; }
+                        let current = 0;
 
-                    function parseExpression() {
-                        let left = parseTerm();
-                        while (peek() && (peek().value === '+' || peek().value === '-')) {
-                            let op = next().value;
-                            let right = parseTerm();
-                            if (op === '+') {
-                                left = left.plus(right);
-                            } else {
-                                left = left.minus(right);
-                            }
-                        }
-                        return left;
-                    }
+                        function peek() { return tokens[current]; }
 
-                    function parseTerm() {
-                        let left = parseFactor();
-                        while (peek() && (peek().value === '*' || peek().value === '/')) {
-                            let op = next().value;
-                            let right = parseFactor();
-                            if (op === '*') {
-                                left = left.times(right);
-                            } else {
-                                if (right.isZero()) {
-                                    throw new Error('除以零');
+                        function next() { return tokens[current++]; }
+
+                        function parseExpression() {
+                            let left = parseTerm();
+                            while (peek() && (peek().value === '+' || peek().value === '-')) {
+                                let op = next().value;
+                                let right = parseTerm();
+                                if (op === '+') {
+                                    left = left.plus(right);
+                                } else {
+                                    left = left.minus(right);
                                 }
-                                left = left.div(right);
                             }
+                            return left;
                         }
-                        return left;
-                    }
 
-                    function parseFactor() {
-                        let tok = peek();
-                        if (tok && tok.type === 'num') {
-                            next();
-                            return new BigNumber(tok.value);
-                        } else if (tok && tok.value === '(') {
-                            next();
-                            let result = parseExpression();
-                            if (peek() && peek().value === ')') {
+                        function parseTerm() {
+                            let left = parseFactor();
+                            while (peek() && (peek().value === '*' || peek().value === '/')) {
+                                let op = next().value;
+                                let right = parseFactor();
+                                if (op === '*') {
+                                    left = left.times(right);
+                                } else {
+                                    if (right.isZero()) {
+                                        throw new Error('除以零');
+                                    }
+                                    left = left.div(right);
+                                }
+                            }
+                            return left;
+                        }
+
+                        function parseFactor() {
+                            let tok = peek();
+                            if (tok && tok.type === 'num') {
                                 next();
+                                return new BigNumber(tok.value);
+                            } else if (tok && tok.value === '(') {
+                                next();
+                                let result = parseExpression();
+                                if (peek() && peek().value === ')') {
+                                    next();
+                                } else {
+                                    throw new Error('括號不匹配');
+                                }
+                                return result;
                             } else {
-                                throw new Error('括號不匹配');
+                                throw new Error('語法錯誤');
                             }
-                            return result;
-                        } else {
-                            throw new Error('語法錯誤');
                         }
+
+                        let result = parseExpression();
+                        if (peek()) {
+                            throw new Error('多餘字符');
+                        }
+                        return result;
                     }
 
-                    let result = parseExpression();
-                    if (peek()) {
-                        throw new Error('多餘字符');
+                    let resultBN = parseAndEval(sanitized);
+                    if (!resultBN || !resultBN.isFinite()) {
+                        throw new Error('無效結果');
                     }
-                    return result;
+
+                    let resultStr = formatBigNumber(resultBN);
+                    displayValue = resultStr;
+                    justCalculated = true;
+                    updateDisplay(displayValue);
+                } catch (error) {
+                    display.textContent = 'Error';
+                    display.classList.add('calc-error');
+                    setTimeout(() => {
+                        display.classList.remove('calc-error');
+                        updateDisplay(displayValue || '0');
+                    }, 1000);
                 }
+            }
 
-                // 執行解析
-                let resultBN = parseAndEval(sanitized);
-                if (!resultBN || !resultBN.isFinite()) {
-                    throw new Error('無效結果');
+            // ================================================================
+            //  4. 震動 & 主題
+            // ================================================================
+
+            let vibrationEnabled = true;
+            const storedVibration = localStorage.getItem('calculator-vibration');
+            if (storedVibration !== null) {
+                vibrationEnabled = storedVibration === 'true';
+            }
+            const vibrationToggle = document.getElementById('vibrationToggle');
+
+            function updateVibrationUI() {
+                if (vibrationEnabled) {
+                    vibrationToggle.classList.add('active');
+                } else {
+                    vibrationToggle.classList.remove('active');
                 }
-
-                // 格式化結果
-                let resultStr = formatBigNumber(resultBN);
-                displayValue = resultStr;
-                justCalculated = true;
-                updateDisplay(displayValue);
-            } catch (error) {
-                display.textContent = 'Error';
-                display.classList.add('calc-error');
-                setTimeout(() => {
-                    display.classList.remove('calc-error');
-                    updateDisplay(displayValue || '0');
-                }, 1000);
             }
-        }
 
-        // ================================================================
-        //  4. 震動 & 主題切換 (與原版一致)
-        // ================================================================
-
-        let vibrationEnabled = true;
-        const storedVibration = localStorage.getItem('calculator-vibration');
-        if (storedVibration !== null) {
-            vibrationEnabled = storedVibration === 'true';
-        }
-        const vibrationToggle = document.getElementById('vibrationToggle');
-
-        function updateVibrationUI() {
-            if (vibrationEnabled) {
-                vibrationToggle.classList.add('active');
-            } else {
-                vibrationToggle.classList.remove('active');
+            function triggerVibration() {
+                if (!vibrationEnabled) return;
+                if (navigator.vibrate) {
+                    try { navigator.vibrate(10); } catch (_) {}
+                }
             }
-        }
 
-        function triggerVibration() {
-            if (!vibrationEnabled) return;
-            if (navigator.vibrate) {
-                try { navigator.vibrate(10); } catch (_) {}
-            }
-        }
-
-        vibrationToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            vibrationEnabled = !vibrationEnabled;
-            localStorage.setItem('calculator-vibration', String(vibrationEnabled));
-            updateVibrationUI();
-            if (vibrationEnabled && navigator.vibrate) {
-                try { navigator.vibrate(10); } catch (_) {}
-            }
-        });
-        updateVibrationUI();
-
-        // 主題
-        const themeToggle = document.getElementById('themeToggle');
-        const currentTheme = localStorage.getItem('calculator-theme') || 'light';
-        document.documentElement.setAttribute('data-theme', currentTheme);
-        themeToggle.addEventListener('click', () => {
-            const current = document.documentElement.getAttribute('data-theme');
-            const next = current === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', next);
-            localStorage.setItem('calculator-theme', next);
-        });
-
-        // ================================================================
-        //  5. 按鍵事件綁定
-        // ================================================================
-
-        document.querySelectorAll('.calc-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                triggerVibration();
-                const action = btn.dataset.action;
-
-                if (action >= '0' && action <= '9') { inputChar(action); return; }
-                if (action === 'dot') { inputChar('.'); return; }
-                if (action === 'add') { inputChar('+'); return; }
-                if (action === 'subtract') { inputChar('−'); return; }
-                if (action === 'multiply') { inputChar('×'); return; }
-                if (action === 'divide') { inputChar('÷'); return; }
-                if (action === 'lparen') { inputChar('('); return; }
-                if (action === 'rparen') { inputChar(')'); return; }
-                if (action === 'clear') { clearDisplay(); return; }
-                if (action === 'del') { deleteLastChar(); return; }
-                if (action === 'equals') { calculate(); return; }
+            vibrationToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                vibrationEnabled = !vibrationEnabled;
+                localStorage.setItem('calculator-vibration', String(vibrationEnabled));
+                updateVibrationUI();
+                if (vibrationEnabled && navigator.vibrate) {
+                    try { navigator.vibrate(10); } catch (_) {}
+                }
             });
-        });
+            updateVibrationUI();
 
-        // 鍵盤支援 (不觸發震動)
-        document.addEventListener('keydown', (e) => {
-            const key = e.key;
-            if (/^[0-9]$/.test(key)) { e.preventDefault();
-                inputChar(key); return; }
-            if (key === '+') { e.preventDefault();
-                inputChar('+'); return; }
-            if (key === '-') { e.preventDefault();
-                inputChar('−'); return; }
-            if (key === '*') { e.preventDefault();
-                inputChar('×'); return; }
-            if (key === '/') { e.preventDefault();
-                inputChar('÷'); return; }
-            if (key === '.') { e.preventDefault();
-                inputChar('.'); return; }
-            if (key === '(') { e.preventDefault();
-                inputChar('('); return; }
-            if (key === ')') { e.preventDefault();
-                inputChar(')'); return; }
-            if (key === 'Enter' || key === '=') { e.preventDefault();
-                calculate(); return; }
-            if (key === 'Backspace') { e.preventDefault();
-                deleteLastChar(); return; }
-            if (key === 'Escape' || key === 'Delete') { e.preventDefault();
-                clearDisplay(); return; }
-        });
+            // 主題
+            const themeToggle = document.getElementById('themeToggle');
+            const currentTheme = localStorage.getItem('calculator-theme') || 'light';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            themeToggle.addEventListener('click', () => {
+                const current = document.documentElement.getAttribute('data-theme');
+                const next = current === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', next);
+                localStorage.setItem('calculator-theme', next);
+            });
 
-        // 初始化顯示
-        updateDisplay(displayValue);
+            // ================================================================
+            //  5. 按鍵事件綁定
+            // ================================================================
 
-        console.log('🧮 精準計算機 (BigNumber.js) 已啟動');
-        console.log('✅ 0.1+0.2 =', formatBigNumber(new BigNumber('0.1').plus('0.2')));
-        console.log('✅ 震動狀態:', vibrationEnabled ? '啟用' : '關閉');
-    })();
-</script>
+            document.querySelectorAll('.calc-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    triggerVibration();
+                    const action = btn.dataset.action;
+
+                    if (action >= '0' && action <= '9') { inputChar(action); return; }
+                    if (action === 'dot') { inputChar('.'); return; }
+                    if (action === 'add') { inputChar('+'); return; }
+                    if (action === 'subtract') { inputChar('−'); return; }
+                    if (action === 'multiply') { inputChar('×'); return; }
+                    if (action === 'divide') { inputChar('÷'); return; }
+                    if (action === 'lparen') { inputChar('('); return; }
+                    if (action === 'rparen') { inputChar(')'); return; }
+                    if (action === 'clear') { clearDisplay(); return; }
+                    if (action === 'del') { deleteLastChar(); return; }
+                    if (action === 'equals') { calculate(); return; }
+                });
+            });
+
+            // 鍵盤支援
+            document.addEventListener('keydown', (e) => {
+                const key = e.key;
+                if (/^[0-9]$/.test(key)) { e.preventDefault();
+                    inputChar(key); return; }
+                if (key === '+') { e.preventDefault();
+                    inputChar('+'); return; }
+                if (key === '-') { e.preventDefault();
+                    inputChar('−'); return; }
+                if (key === '*') { e.preventDefault();
+                    inputChar('×'); return; }
+                if (key === '/') { e.preventDefault();
+                    inputChar('÷'); return; }
+                if (key === '.') { e.preventDefault();
+                    inputChar('.'); return; }
+                if (key === '(') { e.preventDefault();
+                    inputChar('('); return; }
+                if (key === ')') { e.preventDefault();
+                    inputChar(')'); return; }
+                if (key === 'Enter' || key === '=') { e.preventDefault();
+                    calculate(); return; }
+                if (key === 'Backspace') { e.preventDefault();
+                    deleteLastChar(); return; }
+                if (key === 'Escape' || key === 'Delete') { e.preventDefault();
+                    clearDisplay(); return; }
+            });
+
+            // 初始化
+            updateDisplay(displayValue);
+
+            console.log('🧮 精準計算機 v2.2 已啟動 (修正減號小數點 Bug)');
+            console.log('✅ 測試案例 66.33−33.33 現在可以順利輸入小數點');
+        })();
+    </script>
 </body>
 </html>
