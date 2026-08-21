@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-Hant">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -856,8 +856,6 @@
         #fileInput {
             display: none;
         }
-
-        /* ===== 制作系统样式（升级链） ===== */
         #craft-grid {
             display: flex;
             flex-direction: column;
@@ -1072,7 +1070,7 @@
                 <span class="player-level" id="pLevel">Lv.1</span>
                 <span class="stat bar-hp"><span class="icon">❤️</span><span class="val" id="pHp">100/100</span><span class="bar-bg"><span class="bar-fill" id="pHpBar" style="width:100%"></span></span></span>
                 <span class="stat bar-mp"><span class="icon">🔮</span><span class="val" id="pMp">50/50</span><span class="bar-bg"><span class="bar-fill" id="pMpBar" style="width:100%"></span></span></span>
-                <span class="stat bar-sp"><span class="icon">⚡</span><span class="val" id="pSp">100/100</span><span class="bar-bg"><span class="bar-fill" id="pSpBar" style="width:100%"></span></span></span>
+                <span class="stat bar-sp"><span class="icon">🍖</span><span class="val" id="pSp">100/100</span><span class="bar-bg"><span class="bar-fill" id="pSpBar" style="width:100%"></span></span></span>
                 <span class="stat"><span class="icon">⚔️</span>Atk <span class="val" id="pAtk">5</span></span>
                 <span class="stat"><span class="icon">🛡️</span>Def <span class="val" id="pDef">3</span></span>
                 <span class="stat"><span class="icon">⭐</span>Exp <span class="val" id="pExp">0/20</span><span class="bar-bg bar-exp"><span class="bar-fill" id="pExpBar" style="width:0%"></span></span></span>
@@ -1179,7 +1177,7 @@
                     </div>
                 </div>
 
-                <!-- ===== 制作模态框（升级链版） ===== -->
+                <!-- 製作 -->
                 <div class="modal-overlay" id="craft-modal">
                     <div class="modal-box">
                         <button class="close-btn" id="craftCloseBtn">✕</button>
@@ -1219,7 +1217,8 @@
 
     <script>
         // =========================================================================
-        // 方塊傳說 - 完整遊戲腳本（加入火把功能）
+        // 方塊傳說 - 完整遊戲腳本（繁體中文版）
+        // 新增：長槍/弓/弩範圍攻擊、主動怪追蹤、冰刺之地雪景、新生物
         // =========================================================================
 
         const $ = id => document.getElementById(id);
@@ -1518,8 +1517,13 @@
             let locationTag = '';
             if (G.inCave) locationTag = ' 🕳️';
             else if (G.inNether) locationTag = ' 🔥';
-            
-            $('timeDisplay').textContent = `${icon} ${timeStr} ${weatherIcon}${locationTag}`;
+            // 冰刺之地天氣特殊顯示
+            let extra = '';
+            if (G.player.mapId === 'ice') {
+                if (G.weather === 'rain') extra = ' ❄️雪';
+                else if (G.weather === 'thunder') extra = ' ❄️大雪';
+            }
+            $('timeDisplay').textContent = `${icon} ${timeStr} ${weatherIcon}${locationTag}${extra}`;
 
             if (G.isNight) app.classList.add('night');
             else app.classList.remove('night');
@@ -1556,12 +1560,20 @@
                         G.weather = 'clear';
                         stopRainLoop();
                     }
+                    // 冰刺之地：雨→雪，雷雨→大雪（天氣名稱不變，渲染時處理）
                     refreshMobsOnMap();
                     updateMusic();
-                    if (G.weather === 'rain') { startRainSound();
-                        toast('🌧️ 下雨了', 'info', 1500); } else if (G.weather === 'thunder') { startRainSound();
-                        playThunder();
-                        toast('⛈️ 雷雨交加！', 'warning', 1500); } else { stopRainSound(); }
+                    if (G.weather === 'rain') {
+                        if (mapId === 'ice') { startRainSound();
+                            toast('❄️ 下雪了', 'info', 1500); } else { startRainSound();
+                            toast('🌧️ 下雨了', 'info', 1500); }
+                    } else if (G.weather === 'thunder') {
+                        if (mapId === 'ice') { startRainSound();
+                            playThunder();
+                            toast('❄️ 大雪紛飛！', 'warning', 1500); } else { startRainSound();
+                            playThunder();
+                            toast('⛈️ 雷雨交加！', 'warning', 1500); }
+                    } else { stopRainSound(); }
                     const msg = crossedDawn ? '☀️ 天亮了！' : '🌙 夜晚降臨！';
                     toast(msg, 'info', 1500);
                 }
@@ -1569,7 +1581,7 @@
             updateTimeDisplay();
         }
 
-        // ===== 物品定義 =====
+        // ===== 物品定義（繁體中文） =====
         const ITEMS = {
             'wood': { id: 'wood', name: '木材', icon: '🎋', type: 'resource', desc: '基礎建材' },
             'stone': { id: 'stone', name: '石頭', icon: '🗻', type: 'resource', desc: '基礎石材' },
@@ -1610,6 +1622,9 @@
             'carrot': { id: 'carrot', name: '胡蘿蔔', icon: '🥕', type: 'food', heal: 2, desc: '食用恢復2HP' },
             'potato': { id: 'potato', name: '馬鈴薯', icon: '🥔', type: 'food', sp: 2, desc: '食用恢復2SP' },
             'torch': { id: 'torch', name: '火把', icon: '🔦', type: 'shield', def: 0, desc: '照亮夜晚，驅散主動怪物' },
+            'rabbit_foot': { id: 'rabbit_foot', name: '兔腳', icon: '🥠', type: 'resource', desc: '幸運兔腳' },
+            'bear_meat': { id: 'bear_meat', name: '熊肉', icon: '🥩', type: 'food', heal: 6, sp: 4, desc: '食用恢復6HP+4SP' },
+            'rabbit_meat': { id: 'rabbit_meat', name: '兔肉', icon: '🥩', type: 'food', heal: 3, sp: 2, desc: '食用恢復3HP+2SP' },
             'wood_sword': { id: 'wood_sword', name: '木劍', icon: '🗡️', type: 'weapon', atk: 2, desc: '攻擊+2' },
             'stone_sword': { id: 'stone_sword', name: '石劍', icon: '🗡️', type: 'weapon', atk: 3, desc: '攻擊+3' },
             'copper_sword': { id: 'copper_sword', name: '銅劍', icon: '🗡️', type: 'weapon', atk: 4, desc: '攻擊+4' },
@@ -1643,14 +1658,20 @@
                 desc: '攻擊+9' },
             'murasame': { id: 'murasame', name: '村雨', icon: '🔪', type: 'weapon', atk: 10, desc: '攻擊+10' },
             'muramasa': { id: 'muramasa', name: '妖刀村正', icon: '🔪', type: 'weapon', atk: 11, desc: '攻擊+11' },
-            'wood_spear': { id: 'wood_spear', name: '木長槍', icon: '🔱', type: 'weapon', atk: 2, desc: '攻擊+2' },
-            'stone_spear': { id: 'stone_spear', name: '石長槍', icon: '🔱', type: 'weapon', atk: 3, desc: '攻擊+3' },
-            'copper_spear': { id: 'copper_spear', name: '銅長槍', icon: '🔱', type: 'weapon', atk: 4, desc: '攻擊+4' },
-            'iron_spear': { id: 'iron_spear', name: '鐵長槍', icon: '🔱', type: 'weapon', atk: 5, desc: '攻擊+5' },
-            'gold_spear': { id: 'gold_spear', name: '金長槍', icon: '🔱', type: 'weapon', atk: 6, desc: '攻擊+6' },
-            'diamond_spear': { id: 'diamond_spear', name: '鑽石長槍', icon: '🔱', type: 'weapon', atk: 7, desc: '攻擊+7' },
-            'netherite_spear': { id: 'netherite_spear', name: '獄髓長槍', icon: '🔱', type: 'weapon', atk: 8,
-                desc: '攻擊+8' },
+            'wood_spear': { id: 'wood_spear', name: '木長槍', icon: '🔱', type: 'weapon', atk: 2, range: 2,
+                desc: '攻擊+2, 可遠程攻擊2格內' },
+            'stone_spear': { id: 'stone_spear', name: '石長槍', icon: '🔱', type: 'weapon', atk: 3, range: 2,
+                desc: '攻擊+3, 可遠程攻擊2格內' },
+            'copper_spear': { id: 'copper_spear', name: '銅長槍', icon: '🔱', type: 'weapon', atk: 4, range: 2,
+                desc: '攻擊+4, 可遠程攻擊2格內' },
+            'iron_spear': { id: 'iron_spear', name: '鐵長槍', icon: '🔱', type: 'weapon', atk: 5, range: 2,
+                desc: '攻擊+5, 可遠程攻擊2格內' },
+            'gold_spear': { id: 'gold_spear', name: '金長槍', icon: '🔱', type: 'weapon', atk: 6, range: 2,
+                desc: '攻擊+6, 可遠程攻擊2格內' },
+            'diamond_spear': { id: 'diamond_spear', name: '鑽石長槍', icon: '🔱', type: 'weapon', atk: 7, range: 2,
+                desc: '攻擊+7, 可遠程攻擊2格內' },
+            'netherite_spear': { id: 'netherite_spear', name: '獄髓長槍', icon: '🔱', type: 'weapon', atk: 8, range: 2,
+                desc: '攻擊+8, 可遠程攻擊2格內' },
             'wood_pickaxe': { id: 'wood_pickaxe', name: '木鎬', icon: '⛏️', type: 'tool', tool: 'pickaxe', level: 1,
                 desc: '採礦Lv1' },
             'stone_pickaxe': { id: 'stone_pickaxe', name: '石鎬', icon: '⛏️', type: 'tool', tool: 'pickaxe', level: 2,
@@ -1665,21 +1686,30 @@
                 desc: '採礦Lv6' },
             'netherite_pickaxe': { id: 'netherite_pickaxe', name: '獄髓鎬', icon: '⛏️', type: 'tool', tool: 'pickaxe',
                 level: 7, desc: '採礦Lv7' },
-            'bow': { id: 'bow', name: '弓箭', icon: '🏹', type: 'weapon', atk: 3, desc: '攻擊+3' },
-            'short_bow': { id: 'short_bow', name: '短弓', icon: '🏹', type: 'weapon', atk: 4, desc: '攻擊+4' },
-            'long_bow': { id: 'long_bow', name: '長弓', icon: '🏹', type: 'weapon', atk: 5, desc: '攻擊+5' },
-            'hunt_bow': { id: 'hunt_bow', name: '獵弓', icon: '🏹', type: 'weapon', atk: 6, desc: '攻擊+6' },
-            'elf_bow': { id: 'elf_bow', name: '精靈弓', icon: '🏹', type: 'weapon', atk: 7, desc: '攻擊+7' },
-            'crossbow': { id: 'crossbow', name: '弩', icon: '🔫', type: 'weapon', atk: 5, desc: '攻擊+5' },
-            'light_crossbow': { id: 'light_crossbow', name: '輕弩', icon: '🔫', type: 'weapon', atk: 6, desc: '攻擊+6' },
-            'heavy_crossbow': { id: 'heavy_crossbow', name: '十字弩', icon: '🔫', type: 'weapon', atk: 7, desc: '攻擊+7' },
-            'heavy_crossbow2': { id: 'heavy_crossbow2', name: '重弩', icon: '🔫', type: 'weapon', atk: 8, desc: '攻擊+8' },
-            'zhuge': { id: 'zhuge', name: '諸葛連弩', icon: '🔫', type: 'weapon', atk: 9, desc: '攻擊+9' },
+            'bow': { id: 'bow', name: '弓箭', icon: '🏹', type: 'weapon', atk: 3, range: 3, desc: '攻擊+3, 可遠程攻擊3格內' },
+            'short_bow': { id: 'short_bow', name: '短弓', icon: '🏹', type: 'weapon', atk: 4, range: 3,
+                desc: '攻擊+4, 可遠程攻擊3格內' },
+            'long_bow': { id: 'long_bow', name: '長弓', icon: '🏹', type: 'weapon', atk: 5, range: 3,
+                desc: '攻擊+5, 可遠程攻擊3格內' },
+            'hunt_bow': { id: 'hunt_bow', name: '獵弓', icon: '🏹', type: 'weapon', atk: 6, range: 3,
+                desc: '攻擊+6, 可遠程攻擊3格內' },
+            'elf_bow': { id: 'elf_bow', name: '精靈弓', icon: '🏹', type: 'weapon', atk: 7, range: 3,
+                desc: '攻擊+7, 可遠程攻擊3格內' },
+            'crossbow': { id: 'crossbow', name: '弩', icon: '🔫', type: 'weapon', atk: 5, range: 3,
+                desc: '攻擊+5, 可遠程攻擊3格內' },
+            'light_crossbow': { id: 'light_crossbow', name: '輕弩', icon: '🔫', type: 'weapon', atk: 6, range: 3,
+                desc: '攻擊+6, 可遠程攻擊3格內' },
+            'heavy_crossbow': { id: 'heavy_crossbow', name: '十字弩', icon: '🔫', type: 'weapon', atk: 7, range: 3,
+                desc: '攻擊+7, 可遠程攻擊3格內' },
+            'heavy_crossbow2': { id: 'heavy_crossbow2', name: '重弩', icon: '🔫', type: 'weapon', atk: 8, range: 3,
+                desc: '攻擊+8, 可遠程攻擊3格內' },
+            'zhuge': { id: 'zhuge', name: '諸葛連弩', icon: '🔫', type: 'weapon', atk: 9, range: 3,
+                desc: '攻擊+9, 可遠程攻擊3格內' },
             'leather_helmet': { id: 'leather_helmet', name: '皮帽', icon: '⛑️', type: 'helmet', def: 1, desc: '防禦+1' },
             'copper_helmet': { id: 'copper_helmet', name: '銅頭盔', icon: '⛑️', type: 'helmet', def: 2, desc: '防禦+2' },
             'iron_helmet': { id: 'iron_helmet', name: '鐵頭盔', icon: '⛑️', type: 'helmet', def: 3, desc: '防禦+3' },
             'gold_helmet': { id: 'gold_helmet', name: '金頭盔', icon: '⛑️', type: 'helmet', def: 4, desc: '防禦+4' },
-            'diamond_helmet': { id: 'diamond_helmet', name: '鑽石頭盔', icon: '⛑️', type: 'helmet', def: 6, desc: '防禦+6' },
+            'diamond_helmet': { id: 'diamond_helmet', name: '鑽石头盔', icon: '⛑️', type: 'helmet', def: 6, desc: '防禦+6' },
             'netherite_helmet': { id: 'netherite_helmet', name: '獄髓頭盔', icon: '⛑️', type: 'helmet', def: 8,
                 desc: '防禦+8' },
             'leather_chestplate': { id: 'leather_chestplate', name: '皮甲', icon: '👕', type: 'chestplate', def: 3,
@@ -1727,7 +1757,7 @@
                 desc: '防禦+10' },
         };
 
-        // ===== 生物定義 =====
+        // ===== 生物定義（繁體中文） =====
         const MOBS = {
             'pig': { id: 'pig', name: '🐖 豬', hp: 10, atk: 0, def: 0, exp: 3, gold: 0, passive: true, drops: [{ id: 'raw_pork',
                     chance: 1, count: 1 }] },
@@ -1779,6 +1809,15 @@
                 drops: [{ id: 'bone', chance: 0.3, count: 1 }, { id: 'coal', chance: 0.3, count: 1 },
                     { id: 'stone_sword', chance: 0.085, count: 1 }
                 ] },
+            // 新增生物
+            'bat': { id: 'bat', name: '🦇 蝙蝠', hp: 6, atk: 0, def: 0, exp: 1, gold: 0, passive: true,
+                drops: [] },
+            'rabbit': { id: 'rabbit', name: '🐇 兔', hp: 3, atk: 0, def: 0, exp: 3, gold: 0, passive: true,
+                drops: [{ id: 'rabbit_meat', chance: 1, count: 1 }, { id: 'leather', chance: 0.5, count: 1 },
+                    { id: 'rabbit_foot', chance: 0.1, count: 1 }
+                ] },
+            'polar_bear': { id: 'polar_bear', name: '🐻 北極熊', hp: 30, atk: 9, def: 0, exp: 3, gold: 0, passive: false,
+                drops: [{ id: 'bear_meat', chance: 1, count: 1 }, { id: 'raw_fish', chance: 0.5, count: 1 }] },
         };
 
         const NO_RAIN_MAPS = ['cave', 'ocean', 'river', 'desert', 'nether'];
@@ -1842,6 +1881,7 @@
             netherOriginX: 0,
             netherOriginY: 0,
             tempNetherMap: null,
+            savedWeather: null,
         };
 
         // ===== 玩家 =====
@@ -2055,7 +2095,7 @@
                     let steps = 12 + Math.floor(Math.random() * 4);
                     for (let j = 0; j < steps; j++) {
                         if (!objects[y]?.[x] && !(x === 9 && y === 9)) objects[y][x] = { type: 'obstacle',
-                        variant: 'water' };
+                            variant: 'water' };
                         if (Math.random() < 0.5) x += (Math.random() < 0.5 ? 1 : -1);
                         else y += (Math.random() < 0.5 ? 1 : -1);
                         x = clamp(x, 1, w - 2);
@@ -2068,7 +2108,7 @@
                     let steps = 8 + Math.floor(Math.random() * 3);
                     for (let j = 0; j < steps; j++) {
                         if (!objects[y]?.[x] && !(x === 9 && y === 9)) objects[y][x] = { type: 'obstacle',
-                        variant: 'lava' };
+                            variant: 'lava' };
                         if (Math.random() < 0.5) x += (Math.random() < 0.5 ? 1 : -1);
                         else y += (Math.random() < 0.5 ? 1 : -1);
                         x = clamp(x, 1, w - 2);
@@ -2162,7 +2202,7 @@
             }
 
             // 洞穴入口/廢棄傳送門
-			addSpecialStructures({ id: mapId, width: w, height: h, objects });
+            addSpecialStructures({ id: mapId, width: w, height: h, objects });
 
             // 草
             if (!is('ocean') && !is('river') && !is('desert') && !is('ice') && !is('cave') && !is('nether') && !is('end') &&
@@ -2174,7 +2214,7 @@
                     if (!objects[y][x]) objects[y][x] = { type: 'grass' };
                 }
             }
-			//花
+            // 花
             if (is('plain')) {
                 const flowerCount = 10 + Math.floor(Math.random() * 6);
                 for (let i = 0; i < flowerCount; i++) {
@@ -2226,7 +2266,7 @@
                     }
                 }
             }
-			// 洞穴資源
+            // 洞穴資源
             if (is('cave')) {
                 for (let i = 0; i < 10; i++) {
                     const x = rand(1, w - 2),
@@ -2304,6 +2344,8 @@
             // 生物
             const isNight = G.isNight || false;
             const isRain = G.weather === 'rain' || G.weather === 'thunder';
+            // 冰刺之地特殊處理
+            const isIce = is('ice');
 
             if (is('ocean') || is('river')) {
                 const fishPool = ['salmon', 'pufferfish', 'tropical_fish', 'octopus', 'squid', 'dolphin'];
@@ -2317,45 +2359,46 @@
                         objects[y][x] = { type: 'mob', mobId: id };
                     }
                 }
-            } else if (!is('nether')) {
+            } else if (is('nether')) {
+                // 地獄生物已在上面生成
+            } else {
                 let mobPool = [];
                 if (is('plain') || is('forest') || is('mountain') || is('sunflower_plain')) {
                     mobPool = ['chicken', 'duck', 'bee'];
-                    // 火把判定：夜晚且未装备火把才加入主动怪
                     if (isNight && !(G.player && G.player.equipment.shield === 'torch')) {
-                        mobPool.push('zombie', 'skeleton', 'spider');
+                        mobPool.push('zombie', 'skeleton', 'spider', 'bat');
                     }
                 }
                 if (is('desert')) {
                     mobPool = ['camel'];
                     if (isNight && !(G.player && G.player.equipment.shield === 'torch')) {
-                        mobPool.push('zombie', 'skeleton', 'spider');
+                        mobPool.push('zombie', 'skeleton', 'spider', 'bat');
                     }
                 }
                 if (is('ice')) {
-                    mobPool = ['sheep'];
+                    mobPool = ['rabbit', 'polar_bear'];
                     if (isNight && !(G.player && G.player.equipment.shield === 'torch')) {
-                        mobPool.push('zombie', 'skeleton', 'spider');
+                        mobPool.push('zombie', 'skeleton', 'spider', 'bat');
                     }
                 }
                 if (is('cave')) {
-                    mobPool = ['pig', 'spider', 'zombie', 'skeleton'];
+                    mobPool = ['bat', 'spider', 'zombie', 'skeleton'];
                 }
                 if (is('plain')) mobPool = mobPool.concat(['cow', 'sheep', 'pig', 'horse']);
                 else if (is('forest')) mobPool = mobPool.concat(['cow', 'sheep', 'pig']);
                 mobPool = [...new Set(mobPool)];
                 let multiplier = 1;
                 if (isRain) multiplier = 2;
-                if (G.weather === 'thunder') multiplier = 2;
+                if (G.weather === 'thunder') multiplier = 3;
                 if (mobPool.length > 0) {
-                    const baseCount = is('cave') ? 8 : (isNight ? 6 : 4);
+                    const baseCount = is('cave') ? 20 : (isNight ? 16 : 10);
                     const count = Math.floor(baseCount * multiplier);
                     for (let i = 0; i < count; i++) {
                         const x = rand(1, w - 2),
                             y = rand(1, h - 2);
                         if (!objects[y][x]) {
                             let mobId = mobPool[rand(0, mobPool.length - 1)];
-                            if (G.weather === 'thunder' && mapId !== 'cave' && mobId === 'pig' && Math.random() <
+                            if (G.weather === 'thunder' && mobId === 'pig' && Math.random() <
                                 0.00046) {
                                 mobId = 'zombie_pigman';
                             }
@@ -2382,61 +2425,65 @@
 
             return { id: mapId, width: w, height: h, terrain, objects };
         }
-		function addSpecialStructures(map) {
-			const w = map.width, h = map.height;
-			const objects = map.objects;
-			const is = (id) => map.id === id;
-			if (!is('ocean') && !is('river') && !is('nether') && !is('end') && !is('heaven') && !is('cave')) {
-				if (Math.random() < 0.33) {
-					let placed = false;
-					for (let attempt = 0; attempt < 50; attempt++) {
-						const x = rand(2, w - 3), y = rand(2, h - 3);
-						if (!objects[y]?.[x] && !(x === 9 && y === 9)) {
-							objects[y][x] = { type: 'cave_entrance' };
-							placed = true;
-							break;
-						}
-					}
-					if (!placed) {
-						for (let y = 1; y < h - 1; y++) {
-							for (let x = 1; x < w - 1; x++) {
-								if (!objects[y]?.[x] && !(x === 9 && y === 9)) {
-									objects[y][x] = { type: 'cave_entrance' };
-									placed = true;
-									break;
-								}
-							}
-							if (placed) break;
-						}
-					}
-				}
-			}
-			if (!is('ocean') && !is('river') && !is('nether') && !is('end') && !is('heaven') && !is('cave')) {
-				if (Math.random() < 0.20) {
-					let placed = false;
-					for (let attempt = 0; attempt < 50; attempt++) {
-						const x = rand(2, w - 3), y = rand(2, h - 3);
-						if (!objects[y]?.[x] && !(x === 9 && y === 9)) {
-							objects[y][x] = { type: 'portal', isExit: false };
-							placed = true;
-							break;
-						}
-					}
-					if (!placed) {
-						for (let y = 1; y < h - 1; y++) {
-							for (let x = 1; x < w - 1; x++) {
-								if (!objects[y]?.[x] && !(x === 9 && y === 9)) {
-									objects[y][x] = { type: 'portal', isExit: false };
-									placed = true;
-									break;
-								}
-							}
-							if (placed) break;
-						}
-					}
-				}
-			}
-		}
+
+        function addSpecialStructures(map) {
+            const w = map.width,
+                h = map.height;
+            const objects = map.objects;
+            const is = (id) => map.id === id;
+            if (!is('ocean') && !is('river') && !is('nether') && !is('end') && !is('heaven') && !is('cave')) {
+                if (Math.random() < 0.33) {
+                    let placed = false;
+                    for (let attempt = 0; attempt < 50; attempt++) {
+                        const x = rand(2, w - 3),
+                            y = rand(2, h - 3);
+                        if (!objects[y]?.[x] && !(x === 9 && y === 9)) {
+                            objects[y][x] = { type: 'cave_entrance' };
+                            placed = true;
+                            break;
+                        }
+                    }
+                    if (!placed) {
+                        for (let y = 1; y < h - 1; y++) {
+                            for (let x = 1; x < w - 1; x++) {
+                                if (!objects[y]?.[x] && !(x === 9 && y === 9)) {
+                                    objects[y][x] = { type: 'cave_entrance' };
+                                    placed = true;
+                                    break;
+                                }
+                            }
+                            if (placed) break;
+                        }
+                    }
+                }
+            }
+            if (!is('ocean') && !is('river') && !is('nether') && !is('end') && !is('heaven') && !is('cave')) {
+                if (Math.random() < 0.20) {
+                    let placed = false;
+                    for (let attempt = 0; attempt < 50; attempt++) {
+                        const x = rand(2, w - 3),
+                            y = rand(2, h - 3);
+                        if (!objects[y]?.[x] && !(x === 9 && y === 9)) {
+                            objects[y][x] = { type: 'portal', isExit: false };
+                            placed = true;
+                            break;
+                        }
+                    }
+                    if (!placed) {
+                        for (let y = 1; y < h - 1; y++) {
+                            for (let x = 1; x < w - 1; x++) {
+                                if (!objects[y]?.[x] && !(x === 9 && y === 9)) {
+                                    objects[y][x] = { type: 'portal', isExit: false };
+                                    placed = true;
+                                    break;
+                                }
+                            }
+                            if (placed) break;
+                        }
+                    }
+                }
+            }
+        }
 
         // ===== 地圖壓縮/解壓縮 =====
         function compressMap(map) {
@@ -2532,7 +2579,7 @@
             G.caveOriginMapId = p.mapId;
             G.caveOriginX = p.x;
             G.caveOriginY = p.y;
-			G.savedWeather = G.weather;
+            G.savedWeather = G.weather;
             G.tempCaveMap = generateMap('cave');
             G.inCave = true;
             const map = G.tempCaveMap;
@@ -2579,42 +2626,42 @@
         }
 
         function exitCave() {
-			const p = G.player;
-			if (!G.inCave) return;
-			const originMapId = G.caveOriginMapId || 'plain';
-			const originX = G.caveOriginX !== undefined ? G.caveOriginX : 9;
-			const originY = G.caveOriginY !== undefined ? G.caveOriginY : 9;
-			if (G.maps['cave_temp']) delete G.maps['cave_temp'];
-			G.tempCaveMap = null;
-			G.inCave = false;
-			p.mapId = originMapId;
-			p.x = originX;
-			p.y = originY;
-			G.currentMapId = originMapId;
-			G.map = getMap(originMapId);
-			G.caveOriginMapId = '';
-			G.caveOriginX = 0;
-			G.caveOriginY = 0;
-			updateUI();
-			render();
-			if (G.savedWeather) {
-				G.weather = G.savedWeather;
-				G.savedWeather = null;
-			} else {
-				G.weather = 'clear';
-			}
-			if (G.weather === 'rain' || G.weather === 'thunder') {
-				startRainSound();
-				startRainLoop();
-			} else {
-				stopRainSound();
-				stopRainLoop();
-				rainCtx.clearRect(0, 0, 608, 608);
-			}
-			updateMusic();
-			toast('↩️ 回到地面', 'info', 1500);
-			saveGameToLocal();
-		}
+            const p = G.player;
+            if (!G.inCave) return;
+            const originMapId = G.caveOriginMapId || 'plain';
+            const originX = G.caveOriginX !== undefined ? G.caveOriginX : 9;
+            const originY = G.caveOriginY !== undefined ? G.caveOriginY : 9;
+            if (G.maps['cave_temp']) delete G.maps['cave_temp'];
+            G.tempCaveMap = null;
+            G.inCave = false;
+            p.mapId = originMapId;
+            p.x = originX;
+            p.y = originY;
+            G.currentMapId = originMapId;
+            G.map = getMap(originMapId);
+            G.caveOriginMapId = '';
+            G.caveOriginX = 0;
+            G.caveOriginY = 0;
+            updateUI();
+            render();
+            if (G.savedWeather) {
+                G.weather = G.savedWeather;
+                G.savedWeather = null;
+            } else {
+                G.weather = 'clear';
+            }
+            if (G.weather === 'rain' || G.weather === 'thunder') {
+                startRainSound();
+                startRainLoop();
+            } else {
+                stopRainSound();
+                stopRainLoop();
+                rainCtx.clearRect(0, 0, 608, 608);
+            }
+            updateMusic();
+            toast('↩️ 回到地面', 'info', 1500);
+            saveGameToLocal();
+        }
 
         // ===== 地獄 =====
         function enterNether() {
@@ -2623,10 +2670,11 @@
             G.netherOriginMapId = p.mapId;
             G.netherOriginX = p.x;
             G.netherOriginY = p.y;
-			G.savedWeather = G.weather;
+            G.savedWeather = G.weather;
             G.tempNetherMap = generateMap('nether');
             G.inNether = true;
-            let spawnX = 9, spawnY = 9;
+            let spawnX = 9,
+                spawnY = 9;
             const map = G.tempNetherMap;
             for (let y = 0; y < map.height; y++) {
                 for (let x = 0; x < map.width; x++) {
@@ -2644,7 +2692,7 @@
                 spawnX = mid;
                 spawnY = mid;
             }
-            
+
             p.mapId = 'nether';
             p.x = spawnX;
             p.y = spawnY;
@@ -2677,45 +2725,45 @@
         }
 
         function exitNether() {
-			const p = G.player;
-			if (!G.inNether) return;
-			const originMapId = G.netherOriginMapId || 'plain';
-			const originX = G.netherOriginX !== undefined ? G.netherOriginX : 9;
-			const originY = G.netherOriginY !== undefined ? G.netherOriginY : 9;
-			if (G.maps['nether_temp']) delete G.maps['nether_temp'];
-			G.tempNetherMap = null;
-			G.inNether = false;
-			p.mapId = originMapId;
-			p.x = originX;
-			p.y = originY;
-			G.currentMapId = originMapId;
-			G.map = getMap(originMapId);
-			G.netherOriginMapId = '';
-			G.netherOriginX = 0;
-			G.netherOriginY = 0;
-			updateUI();
-			render();
+            const p = G.player;
+            if (!G.inNether) return;
+            const originMapId = G.netherOriginMapId || 'plain';
+            const originX = G.netherOriginX !== undefined ? G.netherOriginX : 9;
+            const originY = G.netherOriginY !== undefined ? G.netherOriginY : 9;
+            if (G.maps['nether_temp']) delete G.maps['nether_temp'];
+            G.tempNetherMap = null;
+            G.inNether = false;
+            p.mapId = originMapId;
+            p.x = originX;
+            p.y = originY;
+            G.currentMapId = originMapId;
+            G.map = getMap(originMapId);
+            G.netherOriginMapId = '';
+            G.netherOriginX = 0;
+            G.netherOriginY = 0;
+            updateUI();
+            render();
 
-			if (G.savedWeather) {
-				G.weather = G.savedWeather;
-				G.savedWeather = null;
-			} else {
-				G.weather = 'clear';
-			}
+            if (G.savedWeather) {
+                G.weather = G.savedWeather;
+                G.savedWeather = null;
+            } else {
+                G.weather = 'clear';
+            }
 
-			if (G.weather === 'rain' || G.weather === 'thunder') {
-				startRainSound();
-				startRainLoop();
-			} else {
-				stopRainSound();
-				stopRainLoop();
-				rainCtx.clearRect(0, 0, 608, 608);
-			}
+            if (G.weather === 'rain' || G.weather === 'thunder') {
+                startRainSound();
+                startRainLoop();
+            } else {
+                stopRainSound();
+                stopRainLoop();
+                rainCtx.clearRect(0, 0, 608, 608);
+            }
 
-			updateMusic();
-			toast('↩️ 離開地獄', 'info', 1500);
-			saveGameToLocal();
-		}
+            updateMusic();
+            toast('↩️ 離開地獄', 'info', 1500);
+            saveGameToLocal();
+        }
 
         function handleArrow(dir, x, y) {
             if (G.inCave) {
@@ -2773,15 +2821,15 @@
             p.x = clamp(px !== undefined ? px : 9, 0, 18);
             p.y = clamp(py !== undefined ? py : 9, 0, 18);
             G.map = getMap(mapId);
-			for (let y = 0; y < G.map.height; y++) {
-				for (let x = 0; x < G.map.width; x++) {
-					const obj = G.map.objects[y]?.[x];
-					if (obj && (obj.type === 'cave_entrance' || (obj.type === 'portal' && !obj.isExit))) {
-						G.map.objects[y][x] = null;
-					}
-				}
-			}
-			addSpecialStructures(G.map);
+            for (let y = 0; y < G.map.height; y++) {
+                for (let x = 0; x < G.map.width; x++) {
+                    const obj = G.map.objects[y]?.[x];
+                    if (obj && (obj.type === 'cave_entrance' || (obj.type === 'portal' && !obj.isExit))) {
+                        G.map.objects[y][x] = null;
+                    }
+                }
+            }
+            addSpecialStructures(G.map);
             if (!G.player.discoveredMaps.includes(mapId)) {
                 G.player.discoveredMaps.push(mapId);
                 toast('🗺️ 發現新區域: ' + MAP_TYPES[mapId].name, 'info');
@@ -2825,6 +2873,7 @@
             const isRain = G.weather === 'rain' || G.weather === 'thunder';
             const isOcean = map.id === 'ocean' || map.id === 'river';
             const isNether = map.id === 'nether';
+            const isIce = map.id === 'ice';
 
             // 清除所有怪物
             for (let y = 0; y < map.height; y++) {
@@ -2832,7 +2881,6 @@
                     const obj = map.objects[y]?.[x];
                     if (obj && obj.type === 'mob') {
                         const mob = MOBS[obj.mobId];
-                        // 保留被动生物（除非是海洋或地狱）
                         if (mob && mob.passive && !isOcean && !isNether) continue;
                         map.objects[y][x] = null;
                     }
@@ -2870,22 +2918,26 @@
                 mobPool = ['chicken', 'duck'];
                 if (isNight && !(p && p.equipment.shield === 'torch')) {
                     mobPool.push('zombie', 'skeleton', 'spider');
+                    mobPool.push('bat');
                 }
             }
             if (map.id === 'desert') {
                 mobPool = ['sheep', 'camel'];
                 if (isNight && !(p && p.equipment.shield === 'torch')) {
                     mobPool.push('zombie', 'skeleton', 'spider');
+                    mobPool.push('bat');
                 }
             }
             if (map.id === 'ice') {
-                mobPool = ['cow', 'sheep', 'horse'];
+                // 冰刺之地：兔和北極熊，晚上加主動怪+蝙蝠
+                mobPool = ['rabbit', 'polar_bear'];
                 if (isNight && !(p && p.equipment.shield === 'torch')) {
-                    mobPool.push('zombie', 'skeleton', 'spider');
+                    mobPool.push('zombie', 'skeleton', 'spider', 'bat');
                 }
             }
             if (map.id === 'cave') {
                 mobPool = ['pig', 'spider', 'zombie', 'skeleton'];
+                if (isNight) mobPool.push('bat');
             }
             if (map.id === 'plain') mobPool = mobPool.concat(['cow', 'sheep', 'pig', 'horse']);
             else if (map.id === 'forest') mobPool = mobPool.concat(['cow', 'sheep', 'pig']);
@@ -2893,9 +2945,9 @@
 
             let multiplier = 1;
             if (isRain) multiplier = 2;
-            if (G.weather === 'thunder') multiplier = 2;
+            if (G.weather === 'thunder') multiplier = 3;
             if (mobPool.length > 0) {
-                const baseCount = map.id === 'cave' ? 8 : (isNight ? 6 : 4);
+                const baseCount = map.id === 'cave' ? 20 : (isNight ? 16 : 10);
                 const count = Math.floor(baseCount * multiplier);
                 for (let i = 0; i < count; i++) {
                     const x = rand(1, map.width - 2),
@@ -2922,7 +2974,7 @@
             if (nx < 0 || nx >= map.width || ny < 0 || ny >= map.height) return;
             const obj = map.objects[ny]?.[nx];
             if (obj && obj.type === 'obstacle') { toast('🚫 此處無法通行', 'warning'); return; }
-            if (p.sp < 1) { toast('⚡ 體力不足！', 'warning'); return; }
+            if (p.sp < 1) { toast('🍖 體力不足！', 'warning'); return; }
 
             p.sp = Math.max(0, p.sp - 1);
             p.x = nx;
@@ -2946,8 +2998,84 @@
             else { render();
                 updateUI(); }
 
+            // 移動後執行範圍攻擊（如果有裝備遠程武器）
+            performRangeAttack();
+
             playSound(300, 0.05);
             saveGameToLocal();
+        }
+
+        // ===== 範圍攻擊（長槍2格，弓/弩3格） =====
+        function performRangeAttack() {
+            const p = G.player;
+            if (!p || G.battle || G.gameOver) return;
+            const weaponId = p.equipment.weapon;
+            if (!weaponId) return;
+            const weapon = ITEMS[weaponId];
+            if (!weapon || !weapon.range) return;
+            const range = weapon.range; // 2 或 3
+            const map = G.map;
+            if (!map) return;
+
+            // 掃描範圍內生物
+            const targets = [];
+            for (let dy = -range; dy <= range; dy++) {
+                for (let dx = -range; dx <= range; dx++) {
+                    if (dx === 0 && dy === 0) continue;
+                    const dist = Math.max(Math.abs(dx), Math.abs(dy));
+                    if (dist > range) continue;
+                    const tx = p.x + dx,
+                        ty = p.y + dy;
+                    if (tx < 0 || tx >= map.width || ty < 0 || ty >= map.height) continue;
+                    const obj = map.objects[ty]?.[tx];
+                    if (obj && obj.type === 'mob') {
+                        targets.push({ x: tx, y: ty, obj });
+                    }
+                }
+            }
+
+            if (targets.length === 0) return;
+
+            // 優先攻擊主動生物，再攻擊被動生物
+            const active = targets.filter(t => !MOBS[t.obj.mobId]?.passive);
+            const passive = targets.filter(t => MOBS[t.obj.mobId]?.passive);
+            const sorted = [...active, ...passive];
+            const target = sorted[0];
+            if (!target) return;
+
+            const mobData = MOBS[target.obj.mobId];
+            if (!mobData) return;
+
+            // 如果是被動生物，直接擊殺
+            if (mobData.passive) {
+                const drops = mobData.drops || [];
+                let dropMsg = [];
+                for (const drop of drops) {
+                    if (Math.random() < drop.chance) {
+                        addItem(drop.id, drop.count || 1);
+                        const item = getItemDisplay(drop.id);
+                        dropMsg.push(`${item.icon}${item.name}x${drop.count||1}`);
+                    }
+                }
+                p.totalKills++;
+                p.exp += mobData.exp || 5;
+                p.gold += mobData.gold || 0;
+                map.objects[target.y][target.x] = null;
+                const weaponName = weapon.name || '遠程武器';
+                toast(`🏹 ${weaponName} 擊殺 ${mobData.name}！獲得 ${mobData.exp}經驗 ${dropMsg.join(' ')}`, 'success');
+                checkLevelUp();
+                checkAchievements();
+                render();
+                updateUI();
+                playSound(500, 0.2);
+                saveGameToLocal();
+                return;
+            }
+
+            // 如果是主動生物，觸發戰鬥
+            if (!mobData.passive) {
+                startBattle(target.obj.mobId, target.x, target.y);
+            }
         }
 
         // ===== 物體交互 =====
@@ -2956,27 +3084,25 @@
             if (obj.type === 'obstacle') return;
 
             if (obj.type === 'portal') {
-				if (obj.isExit === true) {
-					// 出口傳送門（從地獄返回）
-					if (G.player.equipment.shield !== 'torch') {
-						toast('🔥 需要火把點燃門框！', 'warning', 2000);
-						return;
-					}
-					exitNether();
-				} else {
-					// 入口傳送門（進入地獄）
-					if (G.inNether) {
-						toast('⚠️ 這不是返回的傳送門', 'warning');
-						return;
-					}
-					if (G.player.equipment.shield !== 'torch') {
-						toast('🔥 需要火把點燃門框！', 'warning', 2000);
-						return;
-					}
-					enterNether();
-				}
-				return;
-			}
+                if (obj.isExit === true) {
+                    if (G.player.equipment.shield !== 'torch') {
+                        toast('🔥 需要火把點燃門框！', 'warning', 2000);
+                        return;
+                    }
+                    exitNether();
+                } else {
+                    if (G.inNether) {
+                        toast('⚠️ 這不是返回的傳送門', 'warning');
+                        return;
+                    }
+                    if (G.player.equipment.shield !== 'torch') {
+                        toast('🔥 需要火把點燃門框！', 'warning', 2000);
+                        return;
+                    }
+                    enterNether();
+                }
+                return;
+            }
 
             if (obj.type === 'cave_entrance') {
                 enterCave(x, y);
@@ -2995,29 +3121,29 @@
                 return;
             }
             if (obj.type === 'tree') {
-				const axeLevel = getBestToolLevel('axe');
-				if (axeLevel === 0) { toast('🪓 需要斧頭！', 'warning'); return; }
-				
-				const woodCount = 4 + (axeLevel - 1);
-				let msg = `🎋 砍伐獲得 ${woodCount} 木材`;
+                const axeLevel = getBestToolLevel('axe');
+                if (axeLevel === 0) { toast('🪓 需要斧頭！', 'warning'); return; }
 
-				addItem('wood', woodCount);
-				addItem('sapling', 1);
-				msg += ' + 🌱樹苗';
-				if (Math.random() < 0.25) {
-					addItem('apple', 1);
-					msg += ' + 🍎蘋果';
-				}
-				p.totalCollects++;
-				toast(msg, 'success');
-				G.map.objects[y][x] = null;
-				checkAchievements();
-				render();
-				updateUI();
-				playSound(400, 0.2);
-				saveGameToLocal();
-				return;
-			}
+                const woodCount = 4 + (axeLevel - 1);
+                let msg = `🎋 砍伐獲得 ${woodCount} 木材`;
+
+                addItem('wood', woodCount);
+                addItem('sapling', 1);
+                msg += ' + 🌱樹苗';
+                if (Math.random() < 0.25) {
+                    addItem('apple', 1);
+                    msg += ' + 🍎蘋果';
+                }
+                p.totalCollects++;
+                toast(msg, 'success');
+                G.map.objects[y][x] = null;
+                checkAchievements();
+                render();
+                updateUI();
+                playSound(400, 0.2);
+                saveGameToLocal();
+                return;
+            }
             if (obj.type === 'stone') {
                 if (!hasTool('pickaxe')) { toast('⛏️ 需要鎬！', 'warning'); return; }
                 addItem('stone', 1);
@@ -3072,7 +3198,23 @@
                 saveGameToLocal();
                 return;
             }
-            if (obj.type === 'mob') { startBattle(obj.mobId, x, y); return; }
+            if (obj.type === 'mob') {
+                // 檢查是否裝備遠程武器，如果是則執行遠程攻擊
+                const weaponId = p.equipment.weapon;
+                const weapon = weaponId ? ITEMS[weaponId] : null;
+                if (weapon && weapon.range) {
+                    const dx = Math.abs(p.x - x);
+                    const dy = Math.abs(p.y - y);
+                    const dist = Math.max(dx, dy);
+                    if (dist <= weapon.range) {
+                        performRangeAttack();
+                        return;
+                    }
+                }
+                // 否則普通戰鬥
+                startBattle(obj.mobId, x, y);
+                return;
+            }
             if (obj.type === 'arrow') { handleArrow(obj.dir, x, y); return; }
             if (obj.type === 'village') { openVillageShop(obj.profession); return; }
             if (obj.type === 'camp') { openTraderCamp(); return; }
@@ -3442,34 +3584,34 @@
                 '鑽石武器');
         }
 
-        // ===== 商店系統（保留，與製作系統分離） =====
+        // ===== 商店系統 =====
         function openVillageShop(profession) {
-			const p = G.player;
-			$('shopGold').textContent = p.gold;
-			const title = {
-				'weaponsmith': '⚔️ 武器匠',
-				'armorer': '🛡️ 盔甲匠',
-				'toolsmith': '🛠️ 工具匠',
-				'fletcher': '🏹 制箭匠',
-				'shepherd': '👨‍🌾 牧羊人',
-				'farmer': '👨‍🌾 農夫'
-			};
-			$('shopTitle').textContent = (title[profession] || '🏘️ 村莊商店');
-			const content = $('shop-content');
-			content.innerHTML = '';
-			const refreshAll = () => openVillageShop(profession);
-			if (profession === 'weaponsmith') renderWeaponsmith(content, refreshAll);
-			else if (profession === 'armorer') renderArmorer(content, refreshAll);
-			else if (profession === 'toolsmith') renderToolsmith(content, refreshAll);
-			else if (profession === 'fletcher') renderFletcher(content, refreshAll);
-			else if (profession === 'shepherd') renderShepherd(content, refreshAll);
-			else if (profession === 'farmer') renderFarmer(content, refreshAll);
-			const buySection = document.createElement('div');
-			buySection.style.marginTop = '12px';
-			buySection.innerHTML = `<h3 style="color:#8ab4f8;font-size:14px;border-bottom:1px solid #2a4a6a;padding-bottom:4px;">💰 出售資源給村民</h3>`;
+            const p = G.player;
+            $('shopGold').textContent = p.gold;
+            const title = {
+                'weaponsmith': '⚔️ 武器匠',
+                'armorer': '🛡️ 盔甲匠',
+                'toolsmith': '🛠️ 工具匠',
+                'fletcher': '🏹 製箭匠',
+                'shepherd': '👨‍🌾 牧羊人',
+                'farmer': '👨‍🌾 農夫'
+            };
+            $('shopTitle').textContent = (title[profession] || '🏘️ 村莊商店');
+            const content = $('shop-content');
+            content.innerHTML = '';
+            const refreshAll = () => openVillageShop(profession);
+            if (profession === 'weaponsmith') renderWeaponsmith(content, refreshAll);
+            else if (profession === 'armorer') renderArmorer(content, refreshAll);
+            else if (profession === 'toolsmith') renderToolsmith(content, refreshAll);
+            else if (profession === 'fletcher') renderFletcher(content, refreshAll);
+            else if (profession === 'shepherd') renderShepherd(content, refreshAll);
+            else if (profession === 'farmer') renderFarmer(content, refreshAll);
+            const buySection = document.createElement('div');
+            buySection.style.marginTop = '12px';
+            buySection.innerHTML = `<h3 style="color:#8ab4f8;font-size:14px;border-bottom:1px solid #2a4a6a;padding-bottom:4px;">💰 出售資源給村民</h3>`;
 
-			const sellable = [
-				{ id: 'wood', icon: '🎋', name: '木材', price: 1 },
+            const sellable = [
+                { id: 'wood', icon: '🎋', name: '木材', price: 1 },
                 { id: 'wheat', icon: '🌾', name: '小麥', price: 1 },
                 { id: 'flower', icon: '💐', name: '花束', price: 1 },
                 { id: 'sapling', icon: '🌱', name: '樹苗', price: 8 },
@@ -3486,50 +3628,50 @@
                 { id: 'feather', icon: '🕊️', name: '羽毛', price: 2 },
                 { id: 'rotten_flesh', icon: '🥓', name: '腐肉', price: 6 },
                 { id: 'bone', icon: '🦴', name: '骨頭', price: 2 },
-				{ id: 'raw_fish', icon: '🐟', name: '魚肉', price: 2 },
-				{ id: 'raw_chicken', icon: '🍗', name: '雞肉', price: 2 },
-				{ id: 'raw_duck', icon: '🍗', name: '鴨肉', price: 2 },
-				{ id: 'raw_pork', icon: '🥩', name: '生豬排', price: 3 },
-				{ id: 'raw_beef', icon: '🥩', name: '生牛肉', price: 3 },
-				{ id: 'raw_mutton', icon: '🥩', name: '生羊肉', price: 3 },
-				{ id: 'horsemeat', icon: '🥩', name: '馬肉', price: 3 },
-				{ id: 'camelmeat', icon: '🥩', name: '駱駝肉', price: 3 },
-				{ id: 'honey', icon: '🍯', name: '蜜糖', price: 6 },
-				{ id: 'bread', icon: '🍞', name: '麵包', price: 3 },
-				{ id: 'apple', icon: '🍎', name: '蘋果', price: 2 },
-				{ id: 'carrot', icon: '🥕', name: '胡蘿蔔', price: 2 },
-				{ id: 'potato', icon: '🥔', name: '馬鈴薯', price: 2 },
+                { id: 'raw_fish', icon: '🐟', name: '魚肉', price: 2 },
+                { id: 'raw_chicken', icon: '🍗', name: '雞肉', price: 2 },
+                { id: 'raw_duck', icon: '🍗', name: '鴨肉', price: 2 },
+                { id: 'raw_pork', icon: '🥩', name: '生豬排', price: 3 },
+                { id: 'raw_beef', icon: '🥩', name: '生牛肉', price: 3 },
+                { id: 'raw_mutton', icon: '🥩', name: '生羊肉', price: 3 },
+                { id: 'horsemeat', icon: '🥩', name: '馬肉', price: 3 },
+                { id: 'camelmeat', icon: '🥩', name: '駱駝肉', price: 3 },
+                { id: 'honey', icon: '🍯', name: '蜜糖', price: 6 },
+                { id: 'bread', icon: '🍞', name: '麵包', price: 3 },
+                { id: 'apple', icon: '🍎', name: '蘋果', price: 2 },
+                { id: 'carrot', icon: '🥕', name: '胡蘿蔔', price: 2 },
+                { id: 'potato', icon: '🥔', name: '馬鈴薯', price: 2 },
                 { id: 'stone_sword', icon: '🗡️', name: '石劍', price: 17 },
                 { id: 'iron_sword', icon: '🗡️', name: '鐵劍', price: 33 },
                 { id: 'gold_sword', icon: '🗡️', name: '金劍', price: 65 },
-				{ id: 'bow', icon: '🏹', name: '弓箭', price: 6 },
-			];
-			for (const item of sellable) {
-				const count = countItem(item.id);
-				const div = document.createElement('div');
-				div.className = 'shop-item';
-				const canSell = count > 0;
-				div.innerHTML = `
-					<span>${item.icon} ${item.name} x1 <span class="cost">💰 ${item.price}</span> (持有: ${count})</span>
-					<button ${canSell ? '' : 'disabled'}>出售</button>
-				`;
-				div.querySelector('button').addEventListener('click', () => {
-					if (removeItem(item.id, 1)) {
-						p.gold += item.price;
-						toast(`💰 賣出 ${item.name} +${item.price}金`, 'success');
-						refreshAll();
-						updateUI();
-						saveGameToLocal();
-					} else toast('❌ 材料不足', 'warning');
-				});
-				buySection.appendChild(div);
-			}
-			content.appendChild(buySection);
+                { id: 'bow', icon: '🏹', name: '弓箭', price: 6 },
+            ];
+            for (const item of sellable) {
+                const count = countItem(item.id);
+                const div = document.createElement('div');
+                div.className = 'shop-item';
+                const canSell = count > 0;
+                div.innerHTML = `
+                        <span>${item.icon} ${item.name} x1 <span class="cost">💰 ${item.price}</span> (持有: ${count})</span>
+                        <button ${canSell ? '' : 'disabled'}>出售</button>
+                    `;
+                div.querySelector('button').addEventListener('click', () => {
+                    if (removeItem(item.id, 1)) {
+                        p.gold += item.price;
+                        toast(`💰 賣出 ${item.name} +${item.price}金`, 'success');
+                        refreshAll();
+                        updateUI();
+                        saveGameToLocal();
+                    } else toast('❌ 材料不足', 'warning');
+                });
+                buySection.appendChild(div);
+            }
+            content.appendChild(buySection);
 
-			$('shop-modal').classList.add('active');
-		}
+            $('shop-modal').classList.add('active');
+        }
 
-        // ---- 商店子函數（簡化版，保持原有邏輯） ----
+        // ---- 商店子函數（簡化） ----
         function renderUpgradeChain(container, config, onUpdate) {
             const p = G.player;
             if (!p) return;
@@ -3542,9 +3684,9 @@
             section.className = 'shop-section';
             const arrow = config.ids.map(id => getItemDisplay(id).icon).join('→');
             section.innerHTML = `
-                <h3>${config.label}</h3>
-                ${config.sub ? `<div class="sub">${config.sub}</div>` : `<div class="sub">${arrow}</div>`}
-            `;
+                    <h3>${config.label}</h3>
+                    ${config.sub ? `<div class="sub">${config.sub}</div>` : `<div class="sub">${arrow}</div>`}
+                `;
             let currentLevel = -1;
             for (let i = 0; i < config.ids.length; i++) {
                 if (hasItem(config.ids[i])) currentLevel = i;
@@ -3557,9 +3699,9 @@
                 const canBuy = canAfford(cost);
                 const span = document.createElement('span');
                 span.innerHTML = `
-                    ${getItemDisplay(baseId).icon} ${getItemDisplay(baseId).name}
-                    <span class="cost">${buildCostStr(cost)}</span>
-                `;
+                        ${getItemDisplay(baseId).icon} ${getItemDisplay(baseId).name}
+                        <span class="cost">${buildCostStr(cost)}</span>
+                    `;
                 div.appendChild(span);
                 const btn = document.createElement('button');
                 btn.textContent = '購買';
@@ -3585,9 +3727,9 @@
                 const canUpgrade = canAfford(cost);
                 const span = document.createElement('span');
                 span.innerHTML = `
-                    ${getItemDisplay(fromId).icon} → ${getItemDisplay(toId).icon} ${getItemDisplay(toId).name}
-                    <span class="cost">${buildCostStr(cost)}</span>
-                `;
+                        ${getItemDisplay(fromId).icon} → ${getItemDisplay(toId).icon} ${getItemDisplay(toId).name}
+                        <span class="cost">${buildCostStr(cost)}</span>
+                    `;
                 div.appendChild(span);
                 const btn = document.createElement('button');
                 btn.textContent = '升級';
@@ -3624,222 +3766,243 @@
             container.appendChild(wrapper);
         }
 
-        // 簡化商店函數（保留原有實現，但減少重複）
         function renderWeaponsmith(container, refreshFunc) {
-			container.innerHTML = '';
-			const refresh = refreshFunc || (() => renderWeaponsmith(container, refreshFunc));
-			renderUpgradeChain(container, {
-				label: '🗡️ 劍',
-				ids: ['wood_sword', 'stone_sword', 'copper_sword', 'iron_sword', 'gold_sword', 'diamond_sword', 'netherite_sword'],
-				baseCost: { gold: 3 },
-				upgradeCosts: [{ gold: 10 }, { gold: 34 }, { gold: 66 }, { gold: 130 }, { gold: 258 }, { gold: 514 }],
-				slot: 'weapon'
-			}, refresh);
-			renderUpgradeChain(container, {
-				label: '🪓 斧',
-				ids: ['wood_axe', 'stone_axe', 'copper_axe', 'iron_axe', 'gold_axe', 'diamond_axe', 'netherite_axe'],
-				baseCost: { gold: 10 },
-				upgradeCosts: [{ gold: 14 }, { gold: 52 }, { gold: 100 }, { gold: 196 }, { gold: 388 }, { gold: 722 }],
-				slot: 'weapon'
-			}, refresh);
-			renderUpgradeChain(container, {
-				label: '🔪 打刀',
-				ids: ['wood_katana', 'stone_katana', 'copper_katana', 'iron_katana', 'gold_katana', 'diamond_katana', 'netherite_katana', 'murasame', 'muramasa'],
-				baseCost: { gold: 3 },
-				upgradeCosts: [{ gold: 10 }, { gold: 34 }, { gold: 66 }, { gold: 130 }, { gold: 258 }, { gold: 514 }, { gold: 770 }, { gold: 1026 }],
-				slot: 'weapon'
-			}, refresh);
-			renderUpgradeChain(container, {
-				label: '🔱 長槍',
-				ids: ['wood_spear', 'stone_spear', 'copper_spear', 'iron_spear', 'gold_spear', 'diamond_spear', 'netherite_spear'],
-				baseCost: { gold: 3 },
-				upgradeCosts: [{ gold: 8 }, { gold: 12 }, { gold: 20 }, { gold: 36 }, { gold: 68 }, { gold: 132 }],
-				slot: 'weapon'
-			}, refresh);
-		}
+            container.innerHTML = '';
+            const refresh = refreshFunc || (() => renderWeaponsmith(container, refreshFunc));
+            renderUpgradeChain(container, {
+                label: '🗡️ 劍',
+                ids: ['wood_sword', 'stone_sword', 'copper_sword', 'iron_sword', 'gold_sword', 'diamond_sword',
+                    'netherite_sword'
+                ],
+                baseCost: { gold: 3 },
+                upgradeCosts: [{ gold: 10 }, { gold: 34 }, { gold: 66 }, { gold: 130 }, { gold: 258 }, { gold: 514 }],
+                slot: 'weapon'
+            }, refresh);
+            renderUpgradeChain(container, {
+                label: '🪓 斧',
+                ids: ['wood_axe', 'stone_axe', 'copper_axe', 'iron_axe', 'gold_axe', 'diamond_axe', 'netherite_axe'],
+                baseCost: { gold: 10 },
+                upgradeCosts: [{ gold: 14 }, { gold: 52 }, { gold: 100 }, { gold: 196 }, { gold: 388 }, { gold: 722 }],
+                slot: 'weapon'
+            }, refresh);
+            renderUpgradeChain(container, {
+                label: '🔪 打刀',
+                ids: ['wood_katana', 'stone_katana', 'copper_katana', 'iron_katana', 'gold_katana', 'diamond_katana',
+                    'netherite_katana', 'murasame', 'muramasa'
+                ],
+                baseCost: { gold: 3 },
+                upgradeCosts: [{ gold: 10 }, { gold: 34 }, { gold: 66 }, { gold: 130 }, { gold: 258 }, { gold: 514 },
+                    { gold: 770 }, { gold: 1026 }
+                ],
+                slot: 'weapon'
+            }, refresh);
+            renderUpgradeChain(container, {
+                label: '🔱 長槍',
+                ids: ['wood_spear', 'stone_spear', 'copper_spear', 'iron_spear', 'gold_spear', 'diamond_spear',
+                    'netherite_spear'
+                ],
+                baseCost: { gold: 3 },
+                upgradeCosts: [{ gold: 8 }, { gold: 12 }, { gold: 20 }, { gold: 36 }, { gold: 68 }, { gold: 132 }],
+                slot: 'weapon'
+            }, refresh);
+        }
 
         function renderFletcher(container, refreshFunc) {
-			container.innerHTML = '';
-			const refresh = refreshFunc || (() => renderFletcher(container, refreshFunc));
-			renderUpgradeChain(container, {
-				label: '🏹 弓',
-				ids: ['bow', 'short_bow', 'long_bow', 'hunt_bow', 'elf_bow'],
-				baseCost: { gold: 12 },
-				upgradeCosts: [{ gold: 16 }, { gold: 20 }, { gold: 24 }, { gold: 28 }],
-				slot: 'weapon'
-			}, refresh);
-			renderUpgradeChain(container, {
-				label: '🔫 弩',
-				ids: ['crossbow', 'light_crossbow', 'heavy_crossbow', 'heavy_crossbow2', 'zhuge'],
-				baseCost: { gold: 26 },
-				upgradeCosts: [{ gold: 46 }, { gold: 82 }, { gold: 150 }, { gold: 282 }],
-				slot: 'weapon'
-			}, refresh);
-		}
+            container.innerHTML = '';
+            const refresh = refreshFunc || (() => renderFletcher(container, refreshFunc));
+            renderUpgradeChain(container, {
+                label: '🏹 弓',
+                ids: ['bow', 'short_bow', 'long_bow', 'hunt_bow', 'elf_bow'],
+                baseCost: { gold: 12 },
+                upgradeCosts: [{ gold: 16 }, { gold: 20 }, { gold: 24 }, { gold: 28 }],
+                slot: 'weapon'
+            }, refresh);
+            renderUpgradeChain(container, {
+                label: '🔫 弩',
+                ids: ['crossbow', 'light_crossbow', 'heavy_crossbow', 'heavy_crossbow2', 'zhuge'],
+                baseCost: { gold: 26 },
+                upgradeCosts: [{ gold: 46 }, { gold: 82 }, { gold: 150 }, { gold: 282 }],
+                slot: 'weapon'
+            }, refresh);
+        }
 
         function renderFarmer(container, refreshFunc) {
-			container.innerHTML = '';
-			const p = G.player;
-			const refresh = refreshFunc || (() => renderFarmer(container, refreshFunc));
-			const sec = document.createElement('div');
-			sec.className = 'shop-section';
-			sec.innerHTML = '<h3>🌾 農夫商品</h3>';
+            container.innerHTML = '';
+            const p = G.player;
+            const refresh = refreshFunc || (() => renderFarmer(container, refreshFunc));
+            const sec = document.createElement('div');
+            sec.className = 'shop-section';
+            sec.innerHTML = '<h3>🌾 農夫商品</h3>';
 
-			// ----- 麵包 -----
-			const breadDiv = document.createElement('div');
-			breadDiv.className = 'shop-item';
-			const canBread = (p.gold >= 6);
-			breadDiv.innerHTML = `<span>🍞 麵包 <span class="cost">💰6</span></span><button ${canBread ? '' : 'disabled'}>購買</button>`;
-			breadDiv.querySelector('button').addEventListener('click', () => {
-				if (p.gold >= 6) {
-					p.gold -= 6;
-					addItem('bread', 1);
-					toast('✅ 獲得麵包', 'success');
-					refresh();
-					updateUI();
-					saveGameToLocal();
-				}
-			});
-			sec.appendChild(breadDiv);
-			// ----- 胡蘿蔔 -----
-			const carrotDiv = document.createElement('div');
-			carrotDiv.className = 'shop-item';
-			const canCarrot = (p.gold >= 4);
-			carrotDiv.innerHTML = `<span>🥕 胡蘿蔔 <span class="cost">💰4</span></span><button ${canCarrot ? '' : 'disabled'}>購買</button>`;
-			carrotDiv.querySelector('button').addEventListener('click', () => {
-				if (p.gold >= 4) {
-					p.gold -= 4;
-					addItem('carrot', 1);
-					toast('✅ 獲得胡蘿蔔', 'success');
-					refresh();
-					updateUI();
-					saveGameToLocal();
-				}
-			});
-			sec.appendChild(carrotDiv);
-			// ----- 馬鈴薯 -----
-			const potatoDiv = document.createElement('div');
-			potatoDiv.className = 'shop-item';
-			const canPotato = (p.gold >= 4);
-			potatoDiv.innerHTML = `<span>🥔 馬鈴薯 <span class="cost">💰4</span></span><button ${canPotato ? '' : 'disabled'}>購買</button>`;
-			potatoDiv.querySelector('button').addEventListener('click', () => {
-				if (p.gold >= 4) {
-					p.gold -= 4;
-					addItem('potato', 1);
-					toast('✅ 獲得馬鈴薯', 'success');
-					refresh();
-					updateUI();
-					saveGameToLocal();
-				}
-			});
-			sec.appendChild(potatoDiv);
+            const breadDiv = document.createElement('div');
+            breadDiv.className = 'shop-item';
+            const canBread = (p.gold >= 6);
+            breadDiv.innerHTML =
+                `<span>🍞 麵包 <span class="cost">💰6</span></span><button ${canBread ? '' : 'disabled'}>購買</button>`;
+            breadDiv.querySelector('button').addEventListener('click', () => {
+                if (p.gold >= 6) {
+                    p.gold -= 6;
+                    addItem('bread', 1);
+                    toast('✅ 獲得麵包', 'success');
+                    refresh();
+                    updateUI();
+                    saveGameToLocal();
+                }
+            });
+            sec.appendChild(breadDiv);
 
-			container.appendChild(sec);
-		}
+            const carrotDiv = document.createElement('div');
+            carrotDiv.className = 'shop-item';
+            const canCarrot = (p.gold >= 4);
+            carrotDiv.innerHTML =
+                `<span>🥕 胡蘿蔔 <span class="cost">💰4</span></span><button ${canCarrot ? '' : 'disabled'}>購買</button>`;
+            carrotDiv.querySelector('button').addEventListener('click', () => {
+                if (p.gold >= 4) {
+                    p.gold -= 4;
+                    addItem('carrot', 1);
+                    toast('✅ 獲得胡蘿蔔', 'success');
+                    refresh();
+                    updateUI();
+                    saveGameToLocal();
+                }
+            });
+            sec.appendChild(carrotDiv);
+
+            const potatoDiv = document.createElement('div');
+            potatoDiv.className = 'shop-item';
+            const canPotato = (p.gold >= 4);
+            potatoDiv.innerHTML =
+                `<span>🥔 馬鈴薯 <span class="cost">💰4</span></span><button ${canPotato ? '' : 'disabled'}>購買</button>`;
+            potatoDiv.querySelector('button').addEventListener('click', () => {
+                if (p.gold >= 4) {
+                    p.gold -= 4;
+                    addItem('potato', 1);
+                    toast('✅ 獲得馬鈴薯', 'success');
+                    refresh();
+                    updateUI();
+                    saveGameToLocal();
+                }
+            });
+            sec.appendChild(potatoDiv);
+
+            container.appendChild(sec);
+        }
 
         function renderArmorer(container, refreshFunc) {
-			container.innerHTML = '';
-			const refresh = refreshFunc || (() => renderArmorer(container, refreshFunc));
-			renderUpgradeChain(container, {
-				label: '🛡️ 盾牌',
-				ids: ['wood_shield', 'stone_shield', 'copper_shield', 'iron_shield', 'gold_shield', 'diamond_shield', 'netherite_shield'],
-				baseCost: { gold: 14 },
-				upgradeCosts: [{ gold: 28 }, { gold: 112 }, { gold: 224 }, { gold: 448 }, { gold: 896 }, { gold: 1792 }],
-				slot: 'shield'
-			}, refresh);
-			renderUpgradeChain(container, {
-				label: '⛑️ 頭盔',
-				ids: ['leather_helmet', 'copper_helmet', 'iron_helmet', 'gold_helmet', 'diamond_helmet', 'netherite_helmet'],
-				baseCost: { gold: 40 },
-				upgradeCosts: [{ gold: 80 }, { gold: 160 }, { gold: 320 }, { gold: 640 }, { gold: 1280 }],
-				slot: 'helmet'
-			}, refresh);
-			renderUpgradeChain(container, {
-				label: '👕 胸甲',
-				ids: ['leather_chestplate', 'copper_chestplate', 'iron_chestplate', 'gold_chestplate', 'diamond_chestplate', 'netherite_chestplate'],
-				baseCost: { gold: 64 },
-				upgradeCosts: [{ gold: 128 }, { gold: 256 }, { gold: 512 }, { gold: 1024 }, { gold: 2048 }],
-				slot: 'chestplate'
-			}, refresh);
-			renderUpgradeChain(container, {
-				label: '🧤 手套',
-				ids: ['leather_gloves', 'copper_gloves', 'iron_gloves', 'gold_gloves', 'diamond_gloves', 'netherite_gloves'],
-				baseCost: { gold: 32 },
-				upgradeCosts: [{ gold: 64 }, { gold: 128 }, { gold: 256 }, { gold: 512 }, { gold: 1024 }],
-				slot: 'gloves'
-			}, refresh);
-			renderUpgradeChain(container, {
-				label: '👖 護腿',
-				ids: ['leather_leggings', 'copper_leggings', 'iron_leggings', 'gold_leggings', 'diamond_leggings', 'netherite_leggings'],
-				baseCost: { gold: 56 },
-				upgradeCosts: [{ gold: 112 }, { gold: 224 }, { gold: 448 }, { gold: 896 }, { gold: 1792 }],
-				slot: 'leggings'
-			}, refresh);
-			renderUpgradeChain(container, {
-				label: '👢 靴子',
-				ids: ['leather_boots', 'copper_boots', 'iron_boots', 'gold_boots', 'diamond_boots', 'netherite_boots'],
-				baseCost: { gold: 32 },
-				upgradeCosts: [{ gold: 64 }, { gold: 128 }, { gold: 256 }, { gold: 512 }, { gold: 1024 }],
-				slot: 'boots'
-			}, refresh);
-		}
+            container.innerHTML = '';
+            const refresh = refreshFunc || (() => renderArmorer(container, refreshFunc));
+            renderUpgradeChain(container, {
+                label: '🛡️ 盾牌',
+                ids: ['wood_shield', 'stone_shield', 'copper_shield', 'iron_shield', 'gold_shield', 'diamond_shield',
+                    'netherite_shield'
+                ],
+                baseCost: { gold: 14 },
+                upgradeCosts: [{ gold: 28 }, { gold: 112 }, { gold: 224 }, { gold: 448 }, { gold: 896 }, { gold: 1792 }],
+                slot: 'shield'
+            }, refresh);
+            renderUpgradeChain(container, {
+                label: '⛑️ 頭盔',
+                ids: ['leather_helmet', 'copper_helmet', 'iron_helmet', 'gold_helmet', 'diamond_helmet',
+                    'netherite_helmet'
+                ],
+                baseCost: { gold: 40 },
+                upgradeCosts: [{ gold: 80 }, { gold: 160 }, { gold: 320 }, { gold: 640 }, { gold: 1280 }],
+                slot: 'helmet'
+            }, refresh);
+            renderUpgradeChain(container, {
+                label: '👕 胸甲',
+                ids: ['leather_chestplate', 'copper_chestplate', 'iron_chestplate', 'gold_chestplate',
+                    'diamond_chestplate', 'netherite_chestplate'
+                ],
+                baseCost: { gold: 64 },
+                upgradeCosts: [{ gold: 128 }, { gold: 256 }, { gold: 512 }, { gold: 1024 }, { gold: 2048 }],
+                slot: 'chestplate'
+            }, refresh);
+            renderUpgradeChain(container, {
+                label: '🧤 手套',
+                ids: ['leather_gloves', 'copper_gloves', 'iron_gloves', 'gold_gloves', 'diamond_gloves',
+                    'netherite_gloves'
+                ],
+                baseCost: { gold: 32 },
+                upgradeCosts: [{ gold: 64 }, { gold: 128 }, { gold: 256 }, { gold: 512 }, { gold: 1024 }],
+                slot: 'gloves'
+            }, refresh);
+            renderUpgradeChain(container, {
+                label: '👖 護腿',
+                ids: ['leather_leggings', 'copper_leggings', 'iron_leggings', 'gold_leggings', 'diamond_leggings',
+                    'netherite_leggings'
+                ],
+                baseCost: { gold: 56 },
+                upgradeCosts: [{ gold: 112 }, { gold: 224 }, { gold: 448 }, { gold: 896 }, { gold: 1792 }],
+                slot: 'leggings'
+            }, refresh);
+            renderUpgradeChain(container, {
+                label: '👢 靴子',
+                ids: ['leather_boots', 'copper_boots', 'iron_boots', 'gold_boots', 'diamond_boots', 'netherite_boots'],
+                baseCost: { gold: 32 },
+                upgradeCosts: [{ gold: 64 }, { gold: 128 }, { gold: 256 }, { gold: 512 }, { gold: 1024 }],
+                slot: 'boots'
+            }, refresh);
+        }
 
         function renderToolsmith(container, refreshFunc) {
-			container.innerHTML = '';
-			const refresh = refreshFunc || (() => renderToolsmith(container, refreshFunc));
-			renderUpgradeChain(container, {
-				label: '🪓 斧',
-				ids: ['wood_axe', 'stone_axe', 'copper_axe', 'iron_axe', 'gold_axe', 'diamond_axe', 'netherite_axe'],
-				baseCost: { gold: 10 },
-				upgradeCosts: [{ gold: 14 }, { gold: 52 }, { gold: 100 }, { gold: 196 }, { gold: 388 }, { gold: 722 }],
-				slot: 'weapon'
-			}, refresh);
-			renderUpgradeChain(container, {
-				label: '⛏️ 鎬',
-				ids: ['wood_pickaxe', 'stone_pickaxe', 'copper_pickaxe', 'iron_pickaxe', 'gold_pickaxe', 'diamond_pickaxe', 'netherite_pickaxe'],
-				baseCost: { gold: 10 },
-				upgradeCosts: [{ gold: 14 }, { gold: 52 }, { gold: 100 }, { gold: 196 }, { gold: 388 }, { gold: 722 }],
-			}, refresh);
-		}
+            container.innerHTML = '';
+            const refresh = refreshFunc || (() => renderToolsmith(container, refreshFunc));
+            renderUpgradeChain(container, {
+                label: '🪓 斧',
+                ids: ['wood_axe', 'stone_axe', 'copper_axe', 'iron_axe', 'gold_axe', 'diamond_axe', 'netherite_axe'],
+                baseCost: { gold: 10 },
+                upgradeCosts: [{ gold: 14 }, { gold: 52 }, { gold: 100 }, { gold: 196 }, { gold: 388 }, { gold: 722 }],
+                slot: 'weapon'
+            }, refresh);
+            renderUpgradeChain(container, {
+                label: '⛏️ 鎬',
+                ids: ['wood_pickaxe', 'stone_pickaxe', 'copper_pickaxe', 'iron_pickaxe', 'gold_pickaxe',
+                    'diamond_pickaxe', 'netherite_pickaxe'
+                ],
+                baseCost: { gold: 10 },
+                upgradeCosts: [{ gold: 14 }, { gold: 52 }, { gold: 100 }, { gold: 196 }, { gold: 388 }, { gold: 722 }],
+            }, refresh);
+        }
 
         function renderShepherd(container, refreshFunc) {
-			container.innerHTML = '';
-			const p = G.player;
-			const refresh = refreshFunc || (() => renderShepherd(container, refreshFunc));
-			const sec = document.createElement('div');
-			sec.className = 'shop-section';
-			sec.innerHTML = '<h3>🛏️ 床</h3>';
-			const div = document.createElement('div');
-			div.className = 'shop-item';
-			const canBed = (p.gold >= 12);
-			div.innerHTML =
-				`<span>🛏️ 床 <span class="cost">💰12</span></span><button ${canBed ? '' : 'disabled'}>交換</button>`;
-			div.querySelector('button').addEventListener('click', () => {
-				if (p.gold >= 12) {
-					p.gold -= 12;
-					addItem('bed', 1);
-					toast('✅ 獲得床！', 'success');
-					refresh();
-					updateUI();
-					saveGameToLocal();
-				}
-			});
-			sec.appendChild(div);
-			container.appendChild(sec);
+            container.innerHTML = '';
+            const p = G.player;
+            const refresh = refreshFunc || (() => renderShepherd(container, refreshFunc));
+            const sec = document.createElement('div');
+            sec.className = 'shop-section';
+            sec.innerHTML = '<h3>🛏️ 床</h3>';
+            const div = document.createElement('div');
+            div.className = 'shop-item';
+            const canBed = (p.gold >= 12);
+            div.innerHTML =
+                `<span>🛏️ 床 <span class="cost">💰12</span></span><button ${canBed ? '' : 'disabled'}>交換</button>`;
+            div.querySelector('button').addEventListener('click', () => {
+                if (p.gold >= 12) {
+                    p.gold -= 12;
+                    addItem('bed', 1);
+                    toast('✅ 獲得床！', 'success');
+                    refresh();
+                    updateUI();
+                    saveGameToLocal();
+                }
+            });
+            sec.appendChild(div);
+            container.appendChild(sec);
 
-			// ---- 長槍升級鏈（沿用原有配置） ----
-			renderUpgradeChain(
-				container,
-				{
-					label: '🔱 長槍',
-					ids: ['wood_spear', 'stone_spear', 'copper_spear', 'iron_spear', 'gold_spear', 'diamond_spear', 'netherite_spear'],
-					baseCost: { gold: 3 },
-					upgradeCosts: [{ gold: 8 }, { gold: 12 }, { gold: 20 }, { gold: 36 }, { gold: 68 }, { gold: 132 }],
-					slot: 'weapon'
-				},
-				refresh
-			);
-		}
+            renderUpgradeChain(
+                container, {
+                    label: '🔱 長槍',
+                    ids: ['wood_spear', 'stone_spear', 'copper_spear', 'iron_spear', 'gold_spear', 'diamond_spear',
+                        'netherite_spear'
+                    ],
+                    baseCost: { gold: 3 },
+                    upgradeCosts: [{ gold: 8 }, { gold: 12 }, { gold: 20 }, { gold: 36 }, { gold: 68 }, { gold: 132 }],
+                    slot: 'weapon'
+                },
+                refresh
+            );
+        }
 
         // ---- 流浪商人 ----
         function openTraderCamp() {
@@ -3882,9 +4045,9 @@
                 const canBuy = p.gold >= g.price;
                 const item = getItemDisplay(g.id);
                 div.innerHTML = `
-                    <span>${item.icon} ${g.name} <span class="cost">💰${g.price}</span></span>
-                    <button ${canBuy ? '' : 'disabled'}>購買</button>
-                `;
+                        <span>${item.icon} ${g.name} <span class="cost">💰${g.price}</span></span>
+                        <button ${canBuy ? '' : 'disabled'}>購買</button>
+                    `;
                 div.querySelector('button').addEventListener('click', () => {
                     if (p.gold < g.price) { toast('金幣不足！', 'warning'); return; }
                     p.gold -= g.price;
@@ -3919,23 +4082,23 @@
                 { id: 'feather', icon: '🕊️', name: '羽毛', price: 2 },
                 { id: 'rotten_flesh', icon: '🥓', name: '腐肉', price: 6 },
                 { id: 'bone', icon: '🦴', name: '骨頭', price: 2 },
-				{ id: 'raw_fish', icon: '🐟', name: '魚肉', price: 2 },
-				{ id: 'raw_chicken', icon: '🍗', name: '雞肉', price: 2 },
-				{ id: 'raw_duck', icon: '🍗', name: '鴨肉', price: 2 },
-				{ id: 'raw_pork', icon: '🥩', name: '生豬排', price: 3 },
-				{ id: 'raw_beef', icon: '🥩', name: '生牛肉', price: 3 },
-				{ id: 'raw_mutton', icon: '🥩', name: '生羊肉', price: 3 },
-				{ id: 'horsemeat', icon: '🥩', name: '馬肉', price: 3 },
-				{ id: 'camelmeat', icon: '🥩', name: '駱駝肉', price: 3 },
-				{ id: 'honey', icon: '🍯', name: '蜜糖', price: 6 },
-				{ id: 'bread', icon: '🍞', name: '麵包', price: 3 },
-				{ id: 'apple', icon: '🍎', name: '蘋果', price: 2 },
-				{ id: 'carrot', icon: '🥕', name: '胡蘿蔔', price: 2 },
-				{ id: 'potato', icon: '🥔', name: '馬鈴薯', price: 2 },
+                { id: 'raw_fish', icon: '🐟', name: '魚肉', price: 2 },
+                { id: 'raw_chicken', icon: '🍗', name: '雞肉', price: 2 },
+                { id: 'raw_duck', icon: '🍗', name: '鴨肉', price: 2 },
+                { id: 'raw_pork', icon: '🥩', name: '生豬排', price: 3 },
+                { id: 'raw_beef', icon: '🥩', name: '生牛肉', price: 3 },
+                { id: 'raw_mutton', icon: '🥩', name: '生羊肉', price: 3 },
+                { id: 'horsemeat', icon: '🥩', name: '馬肉', price: 3 },
+                { id: 'camelmeat', icon: '🥩', name: '駱駝肉', price: 3 },
+                { id: 'honey', icon: '🍯', name: '蜜糖', price: 6 },
+                { id: 'bread', icon: '🍞', name: '麵包', price: 3 },
+                { id: 'apple', icon: '🍎', name: '蘋果', price: 2 },
+                { id: 'carrot', icon: '🥕', name: '胡蘿蔔', price: 2 },
+                { id: 'potato', icon: '🥔', name: '馬鈴薯', price: 2 },
                 { id: 'stone_sword', icon: '🗡️', name: '石劍', price: 17 },
                 { id: 'iron_sword', icon: '🗡️', name: '鐵劍', price: 33 },
                 { id: 'gold_sword', icon: '🗡️', name: '金劍', price: 65 },
-				{ id: 'bow', icon: '🏹', name: '弓箭', price: 6 },
+                { id: 'bow', icon: '🏹', name: '弓箭', price: 6 },
             ];
             for (const item of buyable) {
                 const count = countItem(item.id);
@@ -3943,9 +4106,9 @@
                 div.className = 'shop-item';
                 const canSell = count > 0;
                 div.innerHTML = `
-                    <span>${item.icon} ${item.name} x1 <span class="cost">💰 ${item.price}</span> (持有: ${count})</span>
-                    <button ${canSell ? '' : 'disabled'}>出售</button>
-                `;
+                        <span>${item.icon} ${item.name} x1 <span class="cost">💰 ${item.price}</span> (持有: ${count})</span>
+                        <button ${canSell ? '' : 'disabled'}>出售</button>
+                    `;
                 div.querySelector('button').addEventListener('click', () => {
                     const p = G.player;
                     if (!p) { toast('玩家資料遺失', 'error'); return; }
@@ -3982,38 +4145,38 @@
         }
 
         function rest() {
-			const p = G.player;
-			if (G.battle) return;
-			if (!G.isNight) {
-				toast('🌙 只能在晚上才能睡覺！', 'warning');
-				return;
-			}
+            const p = G.player;
+            if (G.battle) return;
+            if (!G.isNight) {
+                toast('🌙 只能在晚上才能睡覺！', 'warning');
+                return;
+            }
 
-			if (p.bedPlaced && p.bedMapId === p.mapId && p.x === p.bedX && p.y === p.bedY) {
-				p.hp = p.maxHp;
-				p.mp = p.maxMp;
-				p.sp = p.maxSp;
-				if (G.isNight) {
-					const currentDaySec = (G.gameTime * 86400 / G.dayLength) % 86400;
-					const deltaDaySec = (86400 - currentDaySec) % 86400;
-					const deltaGameTime = deltaDaySec * G.dayLength / 86400;
-					G.gameTime += deltaGameTime;
-					G.isNight = false;
-					G.lastHour = 6;
-					refreshMobsOnMap();
-					updateMusic();
-					toast('🌅 睡了一覺，天亮了！', 'success', 2000);
-				} else {
-					toast(`⛺ 休息恢復 HP+${hpHeal} MP+${mpHeal} SP+${spHeal}`, 'info');
-				}
-				updateUI();
-				render();
-				playSound(400, 0.3);
-				saveGameToLocal();
-			} else {
-				toast('🛏️ 你需要一張床，且坐在床上才能休息！', 'warning');
-			}
-		}
+            if (p.bedPlaced && p.bedMapId === p.mapId && p.x === p.bedX && p.y === p.bedY) {
+                p.hp = p.maxHp;
+                p.mp = p.maxMp;
+                p.sp = p.maxSp;
+                if (G.isNight) {
+                    const currentDaySec = (G.gameTime * 86400 / G.dayLength) % 86400;
+                    const deltaDaySec = (86400 - currentDaySec) % 86400;
+                    const deltaGameTime = deltaDaySec * G.dayLength / 86400;
+                    G.gameTime += deltaGameTime;
+                    G.isNight = false;
+                    G.lastHour = 6;
+                    refreshMobsOnMap();
+                    updateMusic();
+                    toast('🌅 睡了一覺，天亮了！', 'success', 2000);
+                } else {
+                    toast(`⛺ 休息恢復 HP+${hpHeal} MP+${mpHeal} SP+${spHeal}`, 'info');
+                }
+                updateUI();
+                render();
+                playSound(400, 0.3);
+                saveGameToLocal();
+            } else {
+                toast('🛏️ 你需要一張床，且坐在床上才能休息！', 'warning');
+            }
+        }
 
         // ===== 渲染 =====
         function render() {
@@ -4159,11 +4322,11 @@
             ctx.strokeRect(px, py, size, size);
             ctx.setLineDash([]);
 
-            // 火把光晕（装备火把且为夜晚）
+            // 火把光暈
             if (p.equipment.shield === 'torch' && G.isNight && !G.inCave && !G.inNether) {
                 const cx = p.x * size + size / 2;
                 const cy = p.y * size + size / 2;
-                const radius = 120; // 光晕半径
+                const radius = 120;
                 const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
                 gradient.addColorStop(0, 'rgba(255, 255, 200, 0.5)');
                 gradient.addColorStop(0.5, 'rgba(255, 220, 150, 0.3)');
@@ -4180,8 +4343,9 @@
             }
         }
 
-        // ===== 雨滴 =====
+        // ===== 雨/雪 粒子 =====
         let rainDrops = [];
+        let snowDrops = [];
 
         function initRainDrops() {
             rainDrops = [];
@@ -4189,20 +4353,79 @@
                 length: randf(10, 20), opacity: randf(0.3, 0.7) });
         }
         initRainDrops();
+
+        function initSnowDrops() {
+            snowDrops = [];
+            for (let i = 0; i < 120; i++) snowDrops.push({ x: randf(0, 608), y: randf(-20, 608), speed: randf(0.5, 2),
+                size: randf(2, 5), opacity: randf(0.4, 0.9), drift: randf(-0.5, 0.5) });
+        }
+        initSnowDrops();
+
         let rainLoopId = null;
+        let snowLoopId = null;
 
         function drawRain() {
             const c = rainCtx;
             c.clearRect(0, 0, 608, 608);
+
+            // 檢查是否在冰刺之地
+            const isIce = G.player && G.player.mapId === 'ice';
+            const isRain = G.weather === 'rain';
+            const isThunder = G.weather === 'thunder';
+
             if (G.weather === 'clear') {
                 rainCtx.clearRect(0, 0, 608, 608);
                 if (rainLoopId) { cancelAnimationFrame(rainLoopId);
                     rainLoopId = null; }
+                if (snowLoopId) { cancelAnimationFrame(snowLoopId);
+                    snowLoopId = null; }
                 return;
             }
-            const isRain = G.weather === 'rain',
-                isThunder = G.weather === 'thunder';
-            if (!isRain && !isThunder) return;
+
+            // 冰刺之地：下雪 / 大雪
+            if (isIce && (isRain || isThunder)) {
+                const isHeavy = isThunder;
+                c.clearRect(0, 0, 608, 608);
+                const count = isHeavy ? 180 : 100;
+                if (snowDrops.length < count) {
+                    for (let i = snowDrops.length; i < count; i++) {
+                        snowDrops.push({ x: randf(0, 608), y: randf(-20, 608), speed: randf(0.5, isHeavy ? 2.5 : 1.8),
+                            size: randf(isHeavy ? 3 : 2, isHeavy ? 7 : 5), opacity: randf(0.5, 0.95),
+                            drift: randf(-0.8, 0.8) });
+                    }
+                }
+                for (const drop of snowDrops) {
+                    c.beginPath();
+                    c.arc(drop.x, drop.y, drop.size, 0, Math.PI * 2);
+                    c.fillStyle = `rgba(255,255,255,${drop.opacity * 0.7})`;
+                    c.fill();
+                    drop.y += drop.speed;
+                    drop.x += drop.drift * 0.3;
+                    if (drop.y > 608) { drop.y = -10;
+                        drop.x = randf(0, 608); }
+                    if (drop.x < -10) drop.x = 608;
+                    if (drop.x > 618) drop.x = -10;
+                }
+                if (isThunder && G.thunderFlash > 0) {
+                    c.fillStyle = `rgba(255,255,255,${G.thunderFlash * 0.3})`;
+                    c.fillRect(0, 0, 608, 608);
+                    G.thunderFlash -= 0.02;
+                } else if (isThunder && Math.random() < 0.0008) {
+                    G.thunderFlash = 1.0;
+                    playThunder();
+                }
+                snowLoopId = requestAnimationFrame(drawRain);
+                if (rainLoopId) { cancelAnimationFrame(rainLoopId);
+                    rainLoopId = null; }
+                return;
+            }
+
+            // 一般下雨
+            if (rainLoopId) { cancelAnimationFrame(rainLoopId);
+                rainLoopId = null; }
+            if (snowLoopId) { cancelAnimationFrame(snowLoopId);
+                snowLoopId = null; }
+
             c.strokeStyle = 'rgba(150,200,255,0.5)';
             c.lineWidth = 1.5;
             for (const drop of rainDrops) {
@@ -4219,19 +4442,29 @@
                     c.fillStyle = `rgba(255,255,255,${G.thunderFlash * 0.3})`;
                     c.fillRect(0, 0, 608, 608);
                     G.thunderFlash -= 0.02;
-                } else { if (Math.random() < 0.001) { G.thunderFlash = 1.0;
-                        playThunder(); } }
+                } else if (Math.random() < 0.001) {
+                    G.thunderFlash = 1.0;
+                    playThunder();
+                }
             }
             rainLoopId = requestAnimationFrame(drawRain);
         }
 
         function startRainLoop() {
-            if (rainLoopId === null && (G.weather === 'rain' || G.weather === 'thunder')) drawRain();
+            if (G.weather === 'clear') return;
+            const isIce = G.player && G.player.mapId === 'ice';
+            if (isIce && (G.weather === 'rain' || G.weather === 'thunder')) {
+                if (!snowLoopId) drawRain();
+                return;
+            }
+            if (!rainLoopId) drawRain();
         }
 
         function stopRainLoop() {
             if (rainLoopId) { cancelAnimationFrame(rainLoopId);
                 rainLoopId = null; }
+            if (snowLoopId) { cancelAnimationFrame(snowLoopId);
+                snowLoopId = null; }
             rainCtx.clearRect(0, 0, 608, 608);
         }
 
@@ -4373,7 +4606,6 @@
                 updateUI();
                 checkAchievements();
                 saveGameToLocal();
-                // 如果装备的是盾牌（包括火把），刷新怪物
                 if (slot === 'shield') {
                     render();
                     updateUI();
@@ -4393,7 +4625,6 @@
             renderEquipment();
             updateUI();
             saveGameToLocal();
-            // 如果卸下的是盾牌（包括火把），刷新怪物
             if (slot === 'shield') {
                 render();
                 updateUI();
@@ -4431,7 +4662,7 @@
         function showStatus() {
             const p = G.player;
             const msg =
-                `🧒 ${p.name}  Lv.${p.level}\n❤️ HP ${Math.floor(p.hp)}/${p.maxHp}  🔮 MP ${Math.floor(p.mp)}/${p.maxMp}  ⚡ SP ${Math.floor(p.sp)}/${p.maxSp}\n⚔️ 攻擊 ${getPlayerAtk(p)}  🛡️ 防禦 ${getPlayerDef(p)}\n💰 金幣 ${p.gold}  ⭐ 經驗 ${Math.floor(p.exp)}/${getPlayerMaxExp(p)}\n🗡️ 擊殺 ${p.totalKills}  🪵 採集 ${p.totalCollects}  🚶 移動 ${p.totalMoves}\n🗺️ 探索區域: ${p.discoveredMaps.length} 個`;
+                `🧒 ${p.name}  Lv.${p.level}\n❤️ HP ${Math.floor(p.hp)}/${p.maxHp}  🔮 MP ${Math.floor(p.mp)}/${p.maxMp}  🍖 SP ${Math.floor(p.sp)}/${p.maxSp}\n⚔️ 攻擊 ${getPlayerAtk(p)}  🛡️ 防禦 ${getPlayerDef(p)}\n💰 金幣 ${p.gold}  ⭐ 經驗 ${Math.floor(p.exp)}/${getPlayerMaxExp(p)}\n🗡️ 擊殺 ${p.totalKills}  🪵 採集 ${p.totalCollects}  🚶 移動 ${p.totalMoves}\n🗺️ 探索區域: ${p.discoveredMaps.length} 個`;
             toast(msg, 'info', 5000);
         }
 
@@ -4696,7 +4927,7 @@
             requestAnimationFrame(gameLoop);
         }
 
-        // ===== 移動怪物 =====
+        // ===== 移動怪物（主動怪向玩家移動） =====
         function moveMobs() {
             if (G.battle) return;
             const map = G.map;
@@ -4717,16 +4948,44 @@
             }
             for (const mob of mobs) {
                 const mobData = MOBS[mob.obj.mobId];
-                if (Math.random() < 0.4) {
+                if (!mobData) continue;
+                // 主動生物向玩家移動
+                if (!mobData.passive) {
+                    const dx = p.x - mob.x;
+                    const dy = p.y - mob.y;
+                    const dist = Math.max(Math.abs(dx), Math.abs(dy));
+                    if (dist <= 8 && dist > 0) {
+                        let moveX = 0,
+                            moveY = 0;
+                        if (Math.abs(dx) >= Math.abs(dy)) {
+                            moveX = dx > 0 ? 1 : -1;
+                        } else {
+                            moveY = dy > 0 ? 1 : -1;
+                        }
+                        const nx = mob.x + moveX,
+                            ny = mob.y + moveY;
+                        if (nx >= 0 && nx < map.width && ny >= 0 && ny < map.height) {
+                            const target = map.objects[ny]?.[nx];
+                            if (nx === p.x && ny === p.y) {
+                                // 遇到玩家，觸發戰鬥
+                                startBattle(mob.obj.mobId, mob.x, mob.y);
+                                continue;
+                            }
+                            if (!target && !(nx === p.x && ny === p.y)) {
+                                map.objects[ny][nx] = mob.obj;
+                                map.objects[mob.y][mob.x] = null;
+                            }
+                        }
+                        continue;
+                    }
+                }
+                // 被動生物隨機移動（原有邏輯）
+                if (Math.random() < 0.3) {
                     const dir = dirs[rand(0, 3)];
                     const nx = mob.x + dir[0],
                         ny = mob.y + dir[1];
                     if (nx >= 0 && nx < map.width && ny >= 0 && ny < map.height) {
                         const target = map.objects[ny]?.[nx];
-                        if (nx === p.x && ny === p.y && !mobData.passive) {
-                            startBattle(mob.obj.mobId, mob.x, mob.y);
-                            continue;
-                        }
                         if (!target && !(nx === p.x && ny === p.y)) {
                             map.objects[ny][nx] = mob.obj;
                             map.objects[mob.y][mob.x] = null;
@@ -4739,38 +4998,52 @@
 
         // ===== 鍵盤 =====
         document.addEventListener('keydown', (e) => {
-			if (cover.style.display !== 'none') return;
-			if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-			const key = e.key;
-			if (G.gameOver || G.battle) return;
-			if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'W', 's', 'S', 'a', 'A', 'd', 'D'].includes(key)) {
-				e.preventDefault();
-				let dx = 0, dy = 0;
-				if (key === 'ArrowUp' || key === 'w' || key === 'W') dy = -1;
-				if (key === 'ArrowDown' || key === 's' || key === 'S') dy = 1;
-				if (key === 'ArrowLeft' || key === 'a' || key === 'A') dx = -1;
-				if (key === 'ArrowRight' || key === 'd' || key === 'D') dx = 1;
-				movePlayer(dx, dy);
-				return;
-			}
-			if (key === ' ' || key === 'Space') {
-				e.preventDefault();
-				if (isAnyModalOpen()) return;
-				const p = G.player;
-				if (!p) return;
-				const obj = G.map.objects[p.y]?.[p.x];
-				if (obj) {
-					handleObjectInteraction(obj, p.x, p.y);
-				} else {
-					toast('此處沒有可互動的物件', 'info');
-				}
-				return;
-			}
-			if (key === 'r' || key === 'R') rest();
-			if (key === 'i' || key === 'I') toggleInventory();
-			if (key === 'e' || key === 'E') toggleEquipment();
-			if (key === 'k' || key === 'K') { e.preventDefault(); toggleCraft(); }
-		});
+            if (cover.style.display !== 'none') return;
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            const key = e.key;
+            if (G.gameOver || G.battle) return;
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'W', 's', 'S', 'a', 'A', 'd', 'D'].includes(key)) {
+                e.preventDefault();
+                let dx = 0,
+                    dy = 0;
+                if (key === 'ArrowUp' || key === 'w' || key === 'W') dy = -1;
+                if (key === 'ArrowDown' || key === 's' || key === 'S') dy = 1;
+                if (key === 'ArrowLeft' || key === 'a' || key === 'A') dx = -1;
+                if (key === 'ArrowRight' || key === 'd' || key === 'D') dx = 1;
+                movePlayer(dx, dy);
+                return;
+            }
+            if (key === ' ' || key === 'Space') {
+                e.preventDefault();
+                if (isAnyModalOpen()) return;
+                const p = G.player;
+                if (!p) return;
+                // 先嚐試範圍攻擊
+                const weaponId = p.equipment.weapon;
+                const weapon = weaponId ? ITEMS[weaponId] : null;
+                if (weapon && weapon.range) {
+                    performRangeAttack();
+                    return;
+                }
+                const obj = G.map.objects[p.y]?.[p.x];
+                if (obj) {
+                    handleObjectInteraction(obj, p.x, p.y);
+                } else {
+                    toast('此處沒有可互動的物件', 'info');
+                }
+                return;
+            }
+            if (key === 'r' || key === 'R') rest();
+            if (key === 'i' || key === 'I') toggleInventory();
+            if (key === 'e' || key === 'E') toggleEquipment();
+            if (key === 'k' || key === 'K') { e.preventDefault(); toggleCraft(); }
+            if (key === 'f' || key === 'F') {
+                e.preventDefault();
+                if (!G.battle && !G.gameOver) {
+                    performRangeAttack();
+                }
+            }
+        });
 
         function toggleInventory() {
             const modal = $('inventory-modal');
@@ -4794,7 +5067,7 @@
         }
 
         // =========================================================================
-        // ===== 升級鏈配置（製作系統）— 加入火把 =====
+        // ===== 升級鏈配置（製作系統） =====
         // =========================================================================
 
         const CRAFT_CHAINS = [{
@@ -5005,7 +5278,7 @@
             upgradeCosts: []
         }];
 
-        // ===== 製作系統渲染（升級鏈版） =====
+        // ===== 製作系統渲染 =====
         let _craftFilter = 'all';
         let _craftSearch = '';
 
@@ -5041,14 +5314,12 @@
                 const section = document.createElement('div');
                 section.className = 'craft-chain';
 
-                // 標題
                 const titleDiv = document.createElement('div');
                 titleDiv.className = 'chain-title';
                 const arrow = chain.ids.map(id => getItemDisplay(id).icon).join('→');
                 titleDiv.textContent = chain.label + '  ' + arrow;
                 section.appendChild(titleDiv);
 
-                // 判斷當前等級
                 let currentLevel = -1;
                 for (let i = 0; i < chain.ids.length; i++) {
                     if (hasItem(chain.ids[i])) currentLevel = i;
@@ -5058,7 +5329,6 @@
                 statusDiv.className = 'chain-status';
 
                 if (currentLevel === -1) {
-                    // 沒有該鏈的任何物品 → 顯示製作
                     const baseId = chain.ids[0];
                     const baseItem = ITEMS[baseId];
                     const cost = chain.baseCost || {};
@@ -5074,7 +5344,6 @@
                     nameSpan.textContent = baseItem.name;
                     statusDiv.appendChild(nameSpan);
 
-                    // 材料
                     const matsDiv = document.createElement('div');
                     matsDiv.className = 'chain-mats';
                     const matKeys = Object.keys(cost);
@@ -5091,7 +5360,6 @@
                     }
                     statusDiv.appendChild(matsDiv);
 
-                    // 按鈕：製作
                     const btn = document.createElement('button');
                     btn.className = 'chain-btn primary-btn';
                     btn.textContent = '製作';
@@ -5101,7 +5369,6 @@
                     });
                     statusDiv.appendChild(btn);
 
-                    // 持有數
                     const owned = countItem(baseId);
                     const ownedSpan = document.createElement('span');
                     ownedSpan.className = 'chain-owned';
@@ -5109,7 +5376,6 @@
                     statusDiv.appendChild(ownedSpan);
 
                 } else if (currentLevel < chain.ids.length - 1) {
-                    // 有物品但不是最高級 → 顯示升級
                     const fromId = chain.ids[currentLevel];
                     const toId = chain.ids[currentLevel + 1];
                     const fromItem = ITEMS[fromId];
@@ -5142,7 +5408,6 @@
                     toName.textContent = toItem.name;
                     statusDiv.appendChild(toName);
 
-                    // 材料
                     const matsDiv = document.createElement('div');
                     matsDiv.className = 'chain-mats';
                     const matKeys = Object.keys(cost);
@@ -5159,7 +5424,6 @@
                     }
                     statusDiv.appendChild(matsDiv);
 
-                    // 按鈕：升級
                     const btn = document.createElement('button');
                     btn.className = 'chain-btn';
                     btn.textContent = '升級';
@@ -5169,7 +5433,6 @@
                     });
                     statusDiv.appendChild(btn);
 
-                    // 持有數
                     const owned = countItem(toId);
                     const ownedSpan = document.createElement('span');
                     ownedSpan.className = 'chain-owned';
@@ -5177,7 +5440,6 @@
                     statusDiv.appendChild(ownedSpan);
 
                 } else {
-                    // 已滿級
                     const maxId = chain.ids[chain.ids.length - 1];
                     const maxItem = ITEMS[maxId];
                     const iconSpan = document.createElement('span');
@@ -5207,16 +5469,13 @@
             }
         }
 
-        // ===== 處理製作/升級動作 =====
         function handleCraftAction(chain, currentLevel) {
             const p = G.player;
             if (!p) return;
 
             if (currentLevel === -1) {
-                // ---- 製作基礎物品 ----
                 const baseId = chain.ids[0];
                 const cost = chain.baseCost || {};
-                // 檢查材料
                 for (const [matId, need] of Object.entries(cost)) {
                     if (countItem(matId) < need) {
                         const matItem = getItemDisplay(matId);
@@ -5224,14 +5483,12 @@
                         return;
                     }
                 }
-                // 扣除材料
                 for (const [matId, need] of Object.entries(cost)) {
                     if (!removeItem(matId, need)) {
                         toast('❌ 材料扣除失敗', 'error');
                         return;
                     }
                 }
-                // 添加物品
                 addItem(baseId, 1);
                 const item = ITEMS[baseId];
                 toast(`✅ 製作成功！獲得 ${item.icon} ${item.name}`, 'success');
@@ -5242,19 +5499,16 @@
                 return;
             }
 
-            // ---- 升級 ----
             const fromId = chain.ids[currentLevel];
             const toId = chain.ids[currentLevel + 1];
             const cost = chain.upgradeCosts[currentLevel] || {};
 
-            // 檢查是否有前置物品（背包或裝備中）
             const hasFrom = hasItem(fromId) || (chain.slot && p.equipment[chain.slot] === fromId);
             if (!hasFrom) {
                 toast('❌ 你沒有前置物品', 'warning');
                 return;
             }
 
-            // 檢查材料
             for (const [matId, need] of Object.entries(cost)) {
                 if (countItem(matId) < need) {
                     const matItem = getItemDisplay(matId);
@@ -5263,7 +5517,6 @@
                 }
             }
 
-            // 扣除材料
             for (const [matId, need] of Object.entries(cost)) {
                 if (!removeItem(matId, need)) {
                     toast('❌ 材料扣除失敗', 'error');
@@ -5271,13 +5524,11 @@
                 }
             }
 
-            // 移除前置物品（如果是裝備中則卸下，否則從背包移除）
             if (chain.slot && p.equipment[chain.slot] === fromId) {
                 p.equipment[chain.slot] = null;
             } else {
                 if (!removeItem(fromId, 1)) {
                     toast('❌ 前置物品移除失敗', 'error');
-                    // 補回材料
                     for (const [matId, need] of Object.entries(cost)) {
                         addItem(matId, need);
                     }
@@ -5285,7 +5536,6 @@
                 }
             }
 
-            // 添加新物品
             addItem(toId, 1);
             const toItem = ITEMS[toId];
             toast(`✅ 升級成功！獲得 ${toItem.icon} ${toItem.name}`, 'success');
@@ -5295,7 +5545,6 @@
             saveGameToLocal();
         }
 
-        // ===== 打開/關閉製作面板 =====
         function toggleCraft() {
             const modal = $('craft-modal');
             if (modal.classList.contains('active')) {
@@ -5312,7 +5561,6 @@
             }
         }
 
-        // ===== 製作系統事件綁定 =====
         document.getElementById('craftTabs')?.addEventListener('click', (e) => {
             const btn = e.target.closest('.tab-btn');
             if (!btn) return;
@@ -5364,6 +5612,7 @@
                 G.netherOriginMapId = '';
                 G.netherOriginX = 0;
                 G.netherOriginY = 0;
+                G.savedWeather = null;
                 gameoverOverlay.classList.add('hidden');
                 initMapChain();
                 const map = getMap('plain');
@@ -5380,7 +5629,7 @@
                 updateUI();
                 render();
                 saveGameToLocal();
-                toast('🌍 歡迎！方向鍵移動 | R休息 | I背包 | E裝備 | K製作', 'info', 3000);
+                toast('🌍 歡迎！方向鍵移動 | R休息 | I背包 | E裝備 | K製作 | F遠程攻擊', 'info', 3000);
             }
             cover.style.display = 'none';
             game.style.display = 'flex';
@@ -5547,6 +5796,7 @@
                     netherOriginX: 0,
                     netherOriginY: 0,
                     tempNetherMap: null,
+                    savedWeather: null,
                 };
                 game.style.display = 'none';
                 cover.style.display = 'flex';
@@ -5666,15 +5916,32 @@
                 return;
             }
             const p = G.player;
-			if (gx === p.x && gy === p.y) {
-				const obj = G.map.objects[p.y]?.[p.x];
-				if (obj) {
-					handleObjectInteraction(obj, p.x, p.y);
-				} else {
-					toast('此處沒有可互動的物件', 'info');
-				}
-				return;
-			}
+            // 檢查點擊的是否是生物且裝備了遠程武器
+            const obj = G.map.objects[gy]?.[gx];
+            if (obj && obj.type === 'mob') {
+                const weaponId = p.equipment.weapon;
+                const weapon = weaponId ? ITEMS[weaponId] : null;
+                if (weapon && weapon.range) {
+                    const dx = Math.abs(gx - p.x);
+                    const dy = Math.abs(gy - p.y);
+                    const dist = Math.max(dx, dy);
+                    if (dist <= weapon.range) {
+                        performRangeAttack();
+                        return;
+                    }
+                }
+                // 否則普通戰鬥
+                startBattle(obj.mobId, gx, gy);
+                return;
+            }
+            if (gx === p.x && gy === p.y) {
+                if (obj) {
+                    handleObjectInteraction(obj, p.x, p.y);
+                } else {
+                    toast('此處沒有可互動的物件', 'info');
+                }
+                return;
+            }
             const dx = gx - p.x,
                 dy = gy - p.y;
             if (Math.abs(dx) + Math.abs(dy) === 1) {
@@ -5750,9 +6017,14 @@
         });
 
         console.log('⛏️ 方塊傳說已載入！');
-        console.log('🎮 操作: 方向鍵移動 | R休息 | I背包 | E裝備 | K製作');
-        console.log('🔦 新增火把：1煤+1木製作，裝備於盾牌位，夜晚照明並驅逐主動怪物');
-        console.log('📦 每個裝備/工具都有完整的升級路徑，材料足夠即可升級');
+        console.log('🎮 操作: 方向鍵移動 | R休息 | I背包 | E裝備 | K製作 | F遠程攻擊');
+        console.log('🔦 火把：1煤+1木製作，裝備盾牌位，夜晚照明並驅逐主動怪物');
+        console.log('🔱 長槍：可遠程攻擊2格內生物');
+        console.log('🏹 弓/弩：可遠程攻擊3格內生物');
+        console.log('❄️ 冰刺之地：下雨→下雪，雷雨→大雪');
+        console.log('🦇 蝙蝠：夜晚生成，被動生物');
+        console.log('🐇 兔：冰刺之地生成，掉落兔肉、皮革、兔腳');
+        console.log('🐻‍❄️ 北極熊：冰刺之地生成，主動生物');
     </script>
 </body>
 </html>
