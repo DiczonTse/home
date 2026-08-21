@@ -1218,7 +1218,7 @@
     <script>
         // =========================================================================
         // 方塊傳說 - 完整遊戲腳本（繁體中文版）
-        // 新增：長槍/弓/弩範圍攻擊、主動怪追蹤、冰刺之地雪景、新生物
+        // 新增：流浪者、喪屍村民、屍殼、沉屍、冰刺之地藍色冰塊
         // =========================================================================
 
         const $ = id => document.getElementById(id);
@@ -1517,7 +1517,6 @@
             let locationTag = '';
             if (G.inCave) locationTag = ' 🕳️';
             else if (G.inNether) locationTag = ' 🔥';
-            // 冰刺之地天氣特殊顯示
             let extra = '';
             if (G.player.mapId === 'ice') {
                 if (G.weather === 'rain') extra = ' ❄️雪';
@@ -1560,7 +1559,6 @@
                         G.weather = 'clear';
                         stopRainLoop();
                     }
-                    // 冰刺之地：雨→雪，雷雨→大雪（天氣名稱不變，渲染時處理）
                     refreshMobsOnMap();
                     updateMusic();
                     if (G.weather === 'rain') {
@@ -1758,6 +1756,7 @@
         };
 
         // ===== 生物定義（繁體中文） =====
+        // ==== 新增生物：流浪者、喪屍村民、屍殼、沉屍 ====
         const MOBS = {
             'pig': { id: 'pig', name: '🐖 豬', hp: 10, atk: 0, def: 0, exp: 3, gold: 0, passive: true, drops: [{ id: 'raw_pork',
                     chance: 1, count: 1 }] },
@@ -1795,7 +1794,7 @@
                     { id: 'iron_sword', chance: 0.08, count: 1 }, { id: 'iron_axe', chance: 0.08, count: 1 },
                     { id: 'iron_katana', chance: 0.08, count: 1 }
                 ] },
-            'skeleton': { id: 'skeleton', name: '💀 骷髏', hp: 20, atk: 4, def: 0, exp: 5, gold: 5, passive: false,
+            'skeleton': { id: 'skeleton', name: '💀 骷髏弓箭手', hp: 20, atk: 6, def: 0, exp: 5, gold: 5, passive: false,
                 drops: [{ id: 'bone', chance: 0.3, count: 1 }, { id: 'bow', chance: 0.085, count: 1 }] },
             'spider': { id: 'spider', name: '🕷️ 蜘蛛', hp: 16, atk: 3, def: 0, exp: 5, gold: 0, passive: false,
                 drops: [{ id: 'string', chance: 0.33, count: 1 }, { id: 'spider_eye', chance: 0.33, count: 1 }] },
@@ -1809,7 +1808,6 @@
                 drops: [{ id: 'bone', chance: 0.3, count: 1 }, { id: 'coal', chance: 0.3, count: 1 },
                     { id: 'stone_sword', chance: 0.085, count: 1 }
                 ] },
-            // 新增生物
             'bat': { id: 'bat', name: '🦇 蝙蝠', hp: 6, atk: 0, def: 0, exp: 1, gold: 0, passive: true,
                 drops: [] },
             'rabbit': { id: 'rabbit', name: '🐇 兔', hp: 3, atk: 0, def: 0, exp: 3, gold: 0, passive: true,
@@ -1818,6 +1816,17 @@
                 ] },
             'polar_bear': { id: 'polar_bear', name: '🐻 北極熊', hp: 30, atk: 9, def: 0, exp: 3, gold: 0, passive: false,
                 drops: [{ id: 'bear_meat', chance: 1, count: 1 }, { id: 'raw_fish', chance: 0.5, count: 1 }] },
+            // ===== 新增生物 =====
+            'wanderer': { id: 'wanderer', name: '💀 流浪者', hp: 20, atk: 6, def: 0, exp: 5, gold: 5, passive: false,
+                drops: [{ id: 'bone', chance: 0.3, count: 1 }, { id: 'bow', chance: 0.085, count: 1 }] },
+            'zombie_villager': { id: 'zombie_villager', name: '🤢 喪屍村民', hp: 20, atk: 5, def: 0, exp: 5, gold: 5,
+                passive: false,
+                drops: [{ id: 'rotten_flesh', chance: 0.33, count: 1 }, { id: 'iron_ore', chance: 0.008, count: 1 },
+                    { id: 'carrot', chance: 0.008, count: 1 }, { id: 'potato', chance: 0.008, count: 1 }] },
+            'husk': { id: 'husk', name: '🧟‍♂️ 屍殼', hp: 20, atk: 5, def: 0, exp: 5, gold: 5, passive: false,
+                drops: [{ id: 'rotten_flesh', chance: 0.33, count: 1 }, { id: 'iron_ore', chance: 0.008, count: 1 }] },
+            'drowned': { id: 'drowned', name: '🧟‍♂️ 沉屍', hp: 20, atk: 5, def: 0, exp: 5, gold: 5, passive: false,
+                drops: [{ id: 'rotten_flesh', chance: 0.33, count: 1 }, { id: 'iron_ore', chance: 0.008, count: 1 }] },
         };
 
         const NO_RAIN_MAPS = ['cave', 'ocean', 'river', 'desert', 'nether'];
@@ -2167,6 +2176,29 @@
                 }
             }
 
+            // ==== 新增：冰刺之地藍色冰塊障礙物（有框，1x1 / 2x2） ====
+            if (is('ice')) {
+                const blockCount = 8 + Math.floor(Math.random() * 6);
+                for (let i = 0; i < blockCount; i++) {
+                    const size = 1
+                    let x = rand(1, w - size - 1);
+                    let y = rand(1, h - size - 1);
+                    if (x <= 9 && x + size > 9 && y <= 9 && y + size > 9) continue;
+                    let conflict = false;
+                    for (let dy = 0; dy < size; dy++) {
+                        for (let dx = 0; dx < size; dx++) {
+                            if (objects[y + dy]?.[x + dx]) conflict = true;
+                        }
+                    }
+                    if (conflict) continue;
+                    for (let dy = 0; dy < size; dy++) {
+                        for (let dx = 0; dx < size; dx++) {
+                            objects[y + dy][x + dx] = { type: 'ice_block', size: size };
+                        }
+                    }
+                }
+            }
+
             // 村莊
             if (!is('ocean') && !is('river') && !is('nether') && !is('end') && !is('heaven') && !is('cave')) {
                 const allProfessions = ['weaponsmith', 'armorer', 'toolsmith', 'fletcher', 'shepherd', 'farmer'];
@@ -2344,7 +2376,6 @@
             // 生物
             const isNight = G.isNight || false;
             const isRain = G.weather === 'rain' || G.weather === 'thunder';
-            // 冰刺之地特殊處理
             const isIce = is('ice');
 
             if (is('ocean') || is('river')) {
@@ -2857,7 +2888,7 @@
             saveGameToLocal();
         }
 
-        // ===== 刷新生物 =====
+        // ===== 刷新生物（新增：流浪者、喪屍村民、屍殼、沉屍） =====
         function refreshMobsOnMap() {
             const map = G.map;
             if (!map) return;
@@ -2874,19 +2905,24 @@
             const isOcean = map.id === 'ocean' || map.id === 'river';
             const isNether = map.id === 'nether';
             const isIce = map.id === 'ice';
+            const isDesert = map.id === 'desert';
 
-            // 清除所有怪物
+            // 清除所有怪物（保留被動生物？這裡全部清除再重新生成）
             for (let y = 0; y < map.height; y++) {
                 for (let x = 0; x < map.width; x++) {
                     const obj = map.objects[y]?.[x];
                     if (obj && obj.type === 'mob') {
-                        const mob = MOBS[obj.mobId];
-                        if (mob && mob.passive && !isOcean && !isNether) continue;
+                        // 屍殼在沙漠白天不消失（保留），沉屍在海洋/河流白天消失
+                        const mobId = obj.mobId;
+                        if (mobId === 'husk' && isDesert) continue; // 屍殼不消失
+                        if (mobId === 'drowned' && isOcean) continue; // 沉屍保留（晚上生成，白天由邏輯移除）
+                        // 被動生物保留？但我們重新生成，所以全部清除
                         map.objects[y][x] = null;
                     }
                 }
             }
 
+            // 海洋/河流：魚類 + 沉屍（晚上）
             if (isOcean) {
                 const fishPool = ['salmon', 'pufferfish', 'tropical_fish', 'octopus', 'squid', 'dolphin'];
                 if (map.id === 'ocean') fishPool.push('shark');
@@ -2897,6 +2933,27 @@
                     if (!map.objects[y][x]) {
                         const id = fishPool[rand(0, fishPool.length - 1)];
                         map.objects[y][x] = { type: 'mob', mobId: id };
+                    }
+                }
+                // 沉屍：海洋和河流晚上生成
+                if (isNight) {
+                    const drownCount = 4 + rand(0, 4);
+                    for (let i = 0; i < drownCount; i++) {
+                        const x = rand(1, map.width - 2),
+                            y = rand(1, map.height - 2);
+                        if (!map.objects[y][x]) {
+                            map.objects[y][x] = { type: 'mob', mobId: 'drowned' };
+                        }
+                    }
+                } else {
+                    // 白天移除沉屍
+                    for (let y = 0; y < map.height; y++) {
+                        for (let x = 0; x < map.width; x++) {
+                            const obj = map.objects[y]?.[x];
+                            if (obj && obj.type === 'mob' && obj.mobId === 'drowned') {
+                                map.objects[y][x] = null;
+                            }
+                        }
                     }
                 }
                 return;
@@ -2914,30 +2971,53 @@
             }
 
             let mobPool = [];
+            let hasZombie = false;
+
             if (map.id === 'plain' || map.id === 'forest' || map.id === 'mountain' || map.id === 'sunflower_plain') {
                 mobPool = ['chicken', 'duck'];
                 if (isNight && !(p && p.equipment.shield === 'torch')) {
-                    mobPool.push('zombie', 'skeleton', 'spider');
-                    mobPool.push('bat');
+                    mobPool.push('zombie', 'skeleton', 'spider', 'bat');
+                    hasZombie = true;
                 }
             }
             if (map.id === 'desert') {
                 mobPool = ['sheep', 'camel'];
                 if (isNight && !(p && p.equipment.shield === 'torch')) {
-                    mobPool.push('zombie', 'skeleton', 'spider');
-                    mobPool.push('bat');
+                    mobPool.push('zombie', 'skeleton', 'spider', 'bat');
+                    hasZombie = true;
+                }
+                // 屍殼：沙漠晚上生成，白天不消失（已在清除時保留）
+                if (isNight) {
+                    const huskCount = 3 + rand(0, 4);
+                    for (let i = 0; i < huskCount; i++) {
+                        const x = rand(1, map.width - 2),
+                            y = rand(1, map.height - 2);
+                        if (!map.objects[y][x]) {
+                            map.objects[y][x] = { type: 'mob', mobId: 'husk' };
+                        }
+                    }
                 }
             }
             if (map.id === 'ice') {
-                // 冰刺之地：兔和北極熊，晚上加主動怪+蝙蝠
                 mobPool = ['rabbit', 'polar_bear'];
                 if (isNight && !(p && p.equipment.shield === 'torch')) {
                     mobPool.push('zombie', 'skeleton', 'spider', 'bat');
+                    hasZombie = true;
+                }
+                // 流浪者：冰刺之地生成（白天晚上都有）
+                const wandererCount = 2 + rand(0, 3);
+                for (let i = 0; i < wandererCount; i++) {
+                    const x = rand(1, map.width - 2),
+                        y = rand(1, map.height - 2);
+                    if (!map.objects[y][x]) {
+                        map.objects[y][x] = { type: 'mob', mobId: 'wanderer' };
+                    }
                 }
             }
             if (map.id === 'cave') {
                 mobPool = ['pig', 'spider', 'zombie', 'skeleton'];
                 if (isNight) mobPool.push('bat');
+                hasZombie = true;
             }
             if (map.id === 'plain') mobPool = mobPool.concat(['cow', 'sheep', 'pig', 'horse']);
             else if (map.id === 'forest') mobPool = mobPool.concat(['cow', 'sheep', 'pig']);
@@ -2959,6 +3039,50 @@
                             mobId = 'zombie_pigman';
                         }
                         map.objects[y][x] = { type: 'mob', mobId };
+                        // 如果有喪屍，同時生成喪屍村民
+                        if (mobId === 'zombie' && Math.random() < 0.5) {
+                            // 在附近找一個空位放置喪屍村民
+                            for (let attempt = 0; attempt < 10; attempt++) {
+                                const nx = x + rand(-1, 1),
+                                    ny = y + rand(-1, 1);
+                                if (nx >= 0 && nx < map.width && ny >= 0 && ny < map.height && !map.objects[ny]?.[
+                                    nx]) {
+                                    map.objects[ny][nx] = { type: 'mob', mobId: 'zombie_villager' };
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 補充：如果地圖有喪屍但沒有喪屍村民，補一些
+            if (hasZombie) {
+                let zombieCount = 0,
+                    villagerCount = 0;
+                for (let y = 0; y < map.height; y++) {
+                    for (let x = 0; x < map.width; x++) {
+                        const obj = map.objects[y]?.[x];
+                        if (obj && obj.type === 'mob') {
+                            if (obj.mobId === 'zombie') zombieCount++;
+                            if (obj.mobId === 'zombie_villager') villagerCount++;
+                        }
+                    }
+                }
+                if (zombieCount > 0 && villagerCount < zombieCount * 0.3) {
+                    const need = Math.min(zombieCount, Math.floor(zombieCount * 0.5));
+                    for (let i = 0; i < need; i++) {
+                        let placed = false;
+                        for (let attempt = 0; attempt < 30; attempt++) {
+                            const x = rand(1, map.width - 2),
+                                y = rand(1, map.height - 2);
+                            if (!map.objects[y]?.[x]) {
+                                map.objects[y][x] = { type: 'mob', mobId: 'zombie_villager' };
+                                placed = true;
+                                break;
+                            }
+                        }
+                        if (!placed) break;
                     }
                 }
             }
@@ -2973,7 +3097,8 @@
                 ny = p.y + dy;
             if (nx < 0 || nx >= map.width || ny < 0 || ny >= map.height) return;
             const obj = map.objects[ny]?.[nx];
-            if (obj && obj.type === 'obstacle') { toast('🚫 此處無法通行', 'warning'); return; }
+            // 冰塊障礙物不可通行
+            if (obj && (obj.type === 'obstacle' || obj.type === 'ice_block')) { toast('🚫 此處無法通行', 'warning'); return; }
             if (p.sp < 1) { toast('🍖 體力不足！', 'warning'); return; }
 
             p.sp = Math.max(0, p.sp - 1);
@@ -2998,14 +3123,13 @@
             else { render();
                 updateUI(); }
 
-            // 移動後執行範圍攻擊（如果有裝備遠程武器）
             performRangeAttack();
 
             playSound(300, 0.05);
             saveGameToLocal();
         }
 
-        // ===== 範圍攻擊（長槍2格，弓/弩3格） =====
+        // ===== 範圍攻擊 =====
         function performRangeAttack() {
             const p = G.player;
             if (!p || G.battle || G.gameOver) return;
@@ -3013,11 +3137,10 @@
             if (!weaponId) return;
             const weapon = ITEMS[weaponId];
             if (!weapon || !weapon.range) return;
-            const range = weapon.range; // 2 或 3
+            const range = weapon.range;
             const map = G.map;
             if (!map) return;
 
-            // 掃描範圍內生物
             const targets = [];
             for (let dy = -range; dy <= range; dy++) {
                 for (let dx = -range; dx <= range; dx++) {
@@ -3036,7 +3159,6 @@
 
             if (targets.length === 0) return;
 
-            // 優先攻擊主動生物，再攻擊被動生物
             const active = targets.filter(t => !MOBS[t.obj.mobId]?.passive);
             const passive = targets.filter(t => MOBS[t.obj.mobId]?.passive);
             const sorted = [...active, ...passive];
@@ -3046,7 +3168,6 @@
             const mobData = MOBS[target.obj.mobId];
             if (!mobData) return;
 
-            // 如果是被動生物，直接擊殺
             if (mobData.passive) {
                 const drops = mobData.drops || [];
                 let dropMsg = [];
@@ -3072,7 +3193,6 @@
                 return;
             }
 
-            // 如果是主動生物，觸發戰鬥
             if (!mobData.passive) {
                 startBattle(target.obj.mobId, target.x, target.y);
             }
@@ -3081,7 +3201,7 @@
         // ===== 物體交互 =====
         function handleObjectInteraction(obj, x, y) {
             const p = G.player;
-            if (obj.type === 'obstacle') return;
+            if (obj.type === 'obstacle' || obj.type === 'ice_block') return;
 
             if (obj.type === 'portal') {
                 if (obj.isExit === true) {
@@ -3199,7 +3319,6 @@
                 return;
             }
             if (obj.type === 'mob') {
-                // 檢查是否裝備遠程武器，如果是則執行遠程攻擊
                 const weaponId = p.equipment.weapon;
                 const weapon = weaponId ? ITEMS[weaponId] : null;
                 if (weapon && weapon.range) {
@@ -3211,7 +3330,6 @@
                         return;
                     }
                 }
-                // 否則普通戰鬥
                 startBattle(obj.mobId, x, y);
                 return;
             }
@@ -4178,7 +4296,7 @@
             }
         }
 
-        // ===== 渲染 =====
+        // ===== 渲染（新增：冰塊、流浪者藍框、屍殼啡框、沉屍藍框） =====
         function render() {
             const map = G.map;
             const p = G.player;
@@ -4218,6 +4336,36 @@
                         ty = y * size;
                     const cx = tx + size / 2,
                         cy = ty + size / 2;
+
+                    // ==== 新增：冰塊障礙物渲染（有框藍色正方形，1x1/2x2） ====
+                    if (obj.type === 'ice_block') {
+                        const blockSize = (obj.size || 1) * size;
+                        ctx.fillStyle = '#4a8fc9';
+                        ctx.fillRect(tx, ty, blockSize, blockSize);
+                        ctx.strokeStyle = '#1a4a7a';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(tx, ty, blockSize, blockSize);
+                        // 內部網格線
+                        if (obj.size > 1) {
+                            ctx.strokeStyle = 'rgba(26,74,122,0.3)';
+                            ctx.lineWidth = 1;
+                            for (let i = 1; i < obj.size; i++) {
+                                ctx.beginPath();
+                                ctx.moveTo(tx + i * size, ty);
+                                ctx.lineTo(tx + i * size, ty + blockSize);
+                                ctx.stroke();
+                                ctx.beginPath();
+                                ctx.moveTo(tx, ty + i * size);
+                                ctx.lineTo(tx + blockSize, ty + i * size);
+                                ctx.stroke();
+                            }
+                        }
+                        // 冰塊光澤
+                        ctx.fillStyle = 'rgba(255,255,255,0.15)';
+                        ctx.fillRect(tx + 2, ty + 2, blockSize * 0.3, blockSize * 0.15);
+                        continue;
+                    }
+
                     if (obj.type === 'obstacle') {
                         if (obj.variant === 'water') ctx.fillStyle = '#2196F3';
                         else if (obj.variant === 'lava') ctx.fillStyle = '#FF5722';
@@ -4235,6 +4383,8 @@
                         color = '#fff';
                     let isMob = false;
                     let isZombiePigman = false;
+                    let mobId = null;
+
                     if (obj.type === 'tree') { icon = obj.variant === 'oak' ? '🌳' : obj.variant === 'birch' ? '🌲' : '🌵';
                         color = '#5a8a3a'; } else if (obj.type === 'stone') { icon = '🗻';
                         color = '#888'; } else if (obj.type === 'ore') { const v = obj.variant || 'copper'; const map2 = {
@@ -4245,10 +4395,11 @@
                         icon = useLeaf ? '🌿' : '🍃';
                         color = useLeaf ? '#4a8f5a' : '#8B5A2B'; } else if (obj.type === 'mob') {
                         isMob = true;
-                        const mob = MOBS[obj.mobId];
+                        mobId = obj.mobId;
+                        const mob = MOBS[mobId];
                         icon = mob ? mob.name.split(' ')[0] : '👾';
                         color = mob && mob.passive ? '#6ab04c' : '#ff6b6b';
-                        if (obj.mobId === 'zombie_pigman') { isZombiePigman = true;
+                        if (mobId === 'zombie_pigman') { isZombiePigman = true;
                             color = '#ff6b6b'; }
                     } else if (obj.type === 'arrow') {
                         const isReturn = obj.isReturn === true;
@@ -4268,6 +4419,7 @@
                         color = '#aaa'; } else if (obj.type === 'cave_entrance') { icon = '🕳️';
                         color = '#8a6e4b'; } else if (obj.type === 'portal') { icon = '🚪';
                         color = '#8B00FF'; if (obj.isExit) { color = '#FF4500'; } }
+
                     ctx.fillStyle = 'rgba(0,0,0,0.3)';
                     ctx.beginPath();
                     ctx.arc(cx, cy + 1, 14, 0, Math.PI * 2);
@@ -4277,21 +4429,54 @@
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(icon, cx, cy + 1);
-                    if (isZombiePigman) {
-                        ctx.strokeStyle = '#00ff00';
-                        ctx.lineWidth = 3;
-                        ctx.strokeRect(tx + 2, ty + 2, size - 4, size - 4);
-                        ctx.strokeStyle = 'rgba(0,255,0,0.3)';
-                        ctx.lineWidth = 1;
-                        ctx.strokeRect(tx + 6, ty + 6, size - 12, size - 12);
-                    }
-                    if (obj.mobId === 'wither_skeleton') {
-                        ctx.strokeStyle = '#000000';
-                        ctx.lineWidth = 3;
-                        ctx.strokeRect(tx + 2, ty + 2, size - 4, size - 4);
-                        ctx.strokeStyle = 'rgba(0,0,0,0.3)';
-                        ctx.lineWidth = 1;
-                        ctx.strokeRect(tx + 6, ty + 6, size - 12, size - 12);
+
+                    // ==== 新增：生物邊框 ====
+                    if (isMob && mobId) {
+                        // 流浪者：藍框
+                        if (mobId === 'wanderer') {
+                            ctx.strokeStyle = '#2196F3';
+                            ctx.lineWidth = 3;
+                            ctx.strokeRect(tx + 2, ty + 2, size - 4, size - 4);
+                            ctx.strokeStyle = 'rgba(33,150,243,0.3)';
+                            ctx.lineWidth = 1;
+                            ctx.strokeRect(tx + 6, ty + 6, size - 12, size - 12);
+                        }
+                        // 喪屍村民：無特殊邊框（或綠色？）但需求沒說，保持普通
+                        // 屍殼：啡框（棕色）
+                        if (mobId === 'husk') {
+                            ctx.strokeStyle = '#8D6E63';
+                            ctx.lineWidth = 3;
+                            ctx.strokeRect(tx + 2, ty + 2, size - 4, size - 4);
+                            ctx.strokeStyle = 'rgba(141,110,99,0.3)';
+                            ctx.lineWidth = 1;
+                            ctx.strokeRect(tx + 6, ty + 6, size - 12, size - 12);
+                        }
+                        // 沉屍：藍框
+                        if (mobId === 'drowned') {
+                            ctx.strokeStyle = '#1a73e8';
+                            ctx.lineWidth = 3;
+                            ctx.strokeRect(tx + 2, ty + 2, size - 4, size - 4);
+                            ctx.strokeStyle = 'rgba(26,115,232,0.3)';
+                            ctx.lineWidth = 1;
+                            ctx.strokeRect(tx + 6, ty + 6, size - 12, size - 12);
+                        }
+                        // 原有特殊邊框
+                        if (isZombiePigman) {
+                            ctx.strokeStyle = '#00ff00';
+                            ctx.lineWidth = 3;
+                            ctx.strokeRect(tx + 2, ty + 2, size - 4, size - 4);
+                            ctx.strokeStyle = 'rgba(0,255,0,0.3)';
+                            ctx.lineWidth = 1;
+                            ctx.strokeRect(tx + 6, ty + 6, size - 12, size - 12);
+                        }
+                        if (mobId === 'wither_skeleton') {
+                            ctx.strokeStyle = '#000000';
+                            ctx.lineWidth = 3;
+                            ctx.strokeRect(tx + 2, ty + 2, size - 4, size - 4);
+                            ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+                            ctx.lineWidth = 1;
+                            ctx.strokeRect(tx + 6, ty + 6, size - 12, size - 12);
+                        }
                     }
                 }
             }
@@ -4322,7 +4507,6 @@
             ctx.strokeRect(px, py, size, size);
             ctx.setLineDash([]);
 
-            // 火把光暈
             if (p.equipment.shield === 'torch' && G.isNight && !G.inCave && !G.inNether) {
                 const cx = p.x * size + size / 2;
                 const cy = p.y * size + size / 2;
@@ -4368,7 +4552,6 @@
             const c = rainCtx;
             c.clearRect(0, 0, 608, 608);
 
-            // 檢查是否在冰刺之地
             const isIce = G.player && G.player.mapId === 'ice';
             const isRain = G.weather === 'rain';
             const isThunder = G.weather === 'thunder';
@@ -4382,7 +4565,6 @@
                 return;
             }
 
-            // 冰刺之地：下雪 / 大雪
             if (isIce && (isRain || isThunder)) {
                 const isHeavy = isThunder;
                 c.clearRect(0, 0, 608, 608);
@@ -4420,7 +4602,6 @@
                 return;
             }
 
-            // 一般下雨
             if (rainLoopId) { cancelAnimationFrame(rainLoopId);
                 rainLoopId = null; }
             if (snowLoopId) { cancelAnimationFrame(snowLoopId);
@@ -4927,7 +5108,7 @@
             requestAnimationFrame(gameLoop);
         }
 
-        // ===== 移動怪物（主動怪向玩家移動） =====
+        // ===== 移動怪物 =====
         function moveMobs() {
             if (G.battle) return;
             const map = G.map;
@@ -4949,7 +5130,6 @@
             for (const mob of mobs) {
                 const mobData = MOBS[mob.obj.mobId];
                 if (!mobData) continue;
-                // 主動生物向玩家移動
                 if (!mobData.passive) {
                     const dx = p.x - mob.x;
                     const dy = p.y - mob.y;
@@ -4967,7 +5147,6 @@
                         if (nx >= 0 && nx < map.width && ny >= 0 && ny < map.height) {
                             const target = map.objects[ny]?.[nx];
                             if (nx === p.x && ny === p.y) {
-                                // 遇到玩家，觸發戰鬥
                                 startBattle(mob.obj.mobId, mob.x, mob.y);
                                 continue;
                             }
@@ -4979,7 +5158,6 @@
                         continue;
                     }
                 }
-                // 被動生物隨機移動（原有邏輯）
                 if (Math.random() < 0.3) {
                     const dir = dirs[rand(0, 3)];
                     const nx = mob.x + dir[0],
@@ -5018,7 +5196,6 @@
                 if (isAnyModalOpen()) return;
                 const p = G.player;
                 if (!p) return;
-                // 先嚐試範圍攻擊
                 const weaponId = p.equipment.weapon;
                 const weapon = weaponId ? ITEMS[weaponId] : null;
                 if (weapon && weapon.range) {
@@ -5066,10 +5243,7 @@
                 modal.classList.add('active'); }
         }
 
-        // =========================================================================
-        // ===== 升級鏈配置（製作系統） =====
-        // =========================================================================
-
+        // ===== 製作系統配置 =====
         const CRAFT_CHAINS = [{
             label: '🗡️ 劍',
             category: 'weapon',
@@ -5205,8 +5379,8 @@
         }, {
             label: '👕 胸甲',
             category: 'armor',
-            ids: ['leather_chestplate', 'copper_chestplate', 'iron_chestplate', 'gold_chestplate', 'diamond_chestplate',
-                'netherite_chestplate'
+            ids: ['leather_chestplate', 'copper_chestplate', 'iron_chestplate', 'gold_chestplate',
+                'diamond_chestplate', 'netherite_chestplate'
             ],
             baseCost: { leather: 8 },
             upgradeCosts: [
@@ -5220,7 +5394,9 @@
         }, {
             label: '🧤 手套',
             category: 'armor',
-            ids: ['leather_gloves', 'copper_gloves', 'iron_gloves', 'gold_gloves', 'diamond_gloves', 'netherite_gloves'],
+            ids: ['leather_gloves', 'copper_gloves', 'iron_gloves', 'gold_gloves', 'diamond_gloves',
+                'netherite_gloves'
+            ],
             baseCost: { leather: 4 },
             upgradeCosts: [
                 { copper_ore: 4 },
@@ -5916,7 +6092,6 @@
                 return;
             }
             const p = G.player;
-            // 檢查點擊的是否是生物且裝備了遠程武器
             const obj = G.map.objects[gy]?.[gx];
             if (obj && obj.type === 'mob') {
                 const weaponId = p.equipment.weapon;
@@ -5930,7 +6105,6 @@
                         return;
                     }
                 }
-                // 否則普通戰鬥
                 startBattle(obj.mobId, gx, gy);
                 return;
             }
@@ -6025,6 +6199,11 @@
         console.log('🦇 蝙蝠：夜晚生成，被動生物');
         console.log('🐇 兔：冰刺之地生成，掉落兔肉、皮革、兔腳');
         console.log('🐻‍❄️ 北極熊：冰刺之地生成，主動生物');
+        console.log('💀 流浪者：冰刺之地生成，藍框，數值同骷髏弓箭手');
+        console.log('🤢 喪屍村民：有喪屍的地方就有，數值同喪屍');
+        console.log('🧟‍♂️ 屍殼：沙漠晚上生成，啡框，數值同喪屍，白天不消失');
+        console.log('🧟‍♂️ 沉屍：海洋/河流晚上生成，藍框，數值同喪屍，白天消失');
+        console.log('🧊 冰刺之地藍色冰塊：有框藍色正方形，1x1或2x2');
     </script>
 </body>
 </html>
