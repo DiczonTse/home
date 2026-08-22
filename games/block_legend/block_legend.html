@@ -1853,6 +1853,13 @@
         };
 
         const NO_RAIN_MAPS = ['cave', 'ocean', 'river', 'desert', 'nether', 'heaven'];
+		const AQUATIC_MOBS = new Set([
+			'salmon', 'tropical_fish', 'pufferfish',
+			'octopus', 'squid', 'shark', 'dolphin'
+		]);
+		function isAquatic(mobId) {
+			return AQUATIC_MOBS.has(mobId);
+		}
 
         // ===== 地圖類型（更新：新增雪原、天堂） =====
         const MAP_TYPES = {
@@ -2152,7 +2159,8 @@
                     let steps = 12 + Math.floor(Math.random() * 4);
                     for (let j = 0; j < steps; j++) {
                         if (!objects[y]?.[x] && !(x === 9 && y === 9)) {
-                            objects[y][x] = { type: 'obstacle', variant: 'water' };
+                            terrain[y][x] = 'river';
+							objects[y][x] = null;
                         }
                         if (Math.random() < 0.5) x += (Math.random() < 0.5 ? 1 : -1);
                         else y += (Math.random() < 0.5 ? 1 : -1);
@@ -2236,8 +2244,9 @@
                     const x = rand(1, w - 2),
                         y = rand(1, h - 2);
                     if (!objects[y][x]) {
-                        objects[y][x] = { type: 'tree', variant: 'snowy' };
-                    }
+						const variant = Math.random() < 0.5 ? 'oak' : 'birch';
+						objects[y][x] = { type: 'tree', variant };
+					}
                 }
                 // 石頭
                 for (let i = 0; i < 4; i++) {
@@ -2559,7 +2568,7 @@
             // ---- 資源（樹、石頭、礦物） ----
             let treePositions = [];
             if (!is('ocean') && !is('river') && !is('ice') && !is('cave') && !is('nether') && !is('heaven') && !is(
-                    'snowy_plains')) {
+                    'snowy_plains') && !is('desert')) {
                 const treeCount = is('forest') ? 35 : is('plain') ? 12 : is('desert') ? 6 : is('mountain') ? 12 : 6;
                 for (let i = 0; i < treeCount; i++) {
                     const x = rand(1, w - 2),
@@ -2942,7 +2951,7 @@
                 h = map.height || 19;
             const terrainDiff = {},
                 objectsDiff = {};
-            const defaultTerrain = 'plain';
+            const defaultTerrain = map.id || 'plain';
             for (let y = 0; y < h; y++) {
                 for (let x = 0; x < w; x++) {
                     const t = map.terrain[y]?.[x];
@@ -3462,12 +3471,15 @@
                 if (map.id === 'ocean') fishPool.push('shark');
                 const count = (isRain || isNight) ? 12 : 8;
                 for (let i = 0; i < count; i++) {
-                    const x = rand(1, map.width - 2),
-                        y = rand(1, map.height - 2);
-                    if (map.terrain[y]?.[x] === 'ocean' && !map.objects[y][x]) {
-                        const id = fishPool[rand(0, fishPool.length - 1)];
-                        map.objects[y][x] = { type: 'mob', mobId: id };
-                    }
+                    const x = rand(1, map.width - 2), y = rand(1, map.height - 2);
+                    const obj = map.objects[y]?.[x];
+					const terrainType = map.terrain[y]?.[x];
+					const isEmpty = !obj;
+					const isWaterObstacle = (obj && obj.type === 'obstacle' && obj.variant === 'water');
+					if ((isEmpty || isWaterObstacle) && (terrainType === 'ocean' || terrainType === 'river')) {
+						const id = fishPool[rand(0, fishPool.length - 1)];
+						map.objects[y][x] = { type: 'mob', mobId: id };
+					}
                 }
                 if (isNight) {
                     const drownCount = 4 + rand(0, 4);
@@ -3490,6 +3502,21 @@
                 }
                 return;
             }
+			
+			if (map.id === 'plain') {
+				const fishPool = ['salmon', 'tropical_fish', 'pufferfish'];
+				for (let y = 0; y < map.height; y++) {
+					for (let x = 0; x < map.width; x++) {
+						if (map.terrain[y]?.[x] === 'river' && !map.objects[y][x]) {
+							if (x === p.x && y === p.y) continue;
+							if (Math.random() < 0.3) {
+								const mobId = fishPool[rand(0, fishPool.length - 1)];
+								map.objects[y][x] = { type: 'mob', mobId };
+							}
+						}
+					}
+				}
+			}
 
             if (isNether) {
                 for (let i = 0; i < 8; i++) {
@@ -3520,7 +3547,7 @@
                 }
             }
             if (map.id === 'desert') {
-                mobPool = ['sheep', 'camel'];
+                mobPool = ['camel'];
                 if (isNight && !(p && p.equipment.shield === 'torch')) {
                     mobPool.push('bat', 'spider', 'zombie', 'zombie_villager', 'skeleton', 'husk');
                     hasZombie = true;
@@ -3589,7 +3616,10 @@
                 ny = p.y + dy;
             if (nx < 0 || nx >= map.width || ny < 0 || ny >= map.height) return;
             const obj = map.objects[ny]?.[nx];
-            if (obj && (obj.type === 'obstacle' || obj.type === 'ice_block')) { toast('🚫 此處無法通行', 'warning'); return; }
+            if (obj && (obj.type === 'ice_block' || (obj.type === 'obstacle' && obj.variant !== 'water'))) {
+				toast('🚫 此處無法通行', 'warning');
+				return;
+			}
             // 天堂障礙物（空島分隔）
             if (obj && obj.type === 'obstacle' && obj.variant === 'sky_island') { toast('🚫 此處無法通行', 'warning'); return; }
             if (p.sp < 1) { toast('🍖 體力不足！', 'warning'); return; }
@@ -3628,13 +3658,15 @@
             // 鐵桶裝水：在河流/海洋/湖的水中打開物品欄使用鐵桶
             // 在物品欄點擊鐵桶時處理
 
-            if (obj) handleObjectInteraction(obj, nx, ny);
-            else { render();
-                updateUI(); }
-            playSound(300, 0.05);
-            saveGameToLocal();
-        }
-
+            if (obj) {
+				handleObjectInteraction(obj, nx, ny);
+			}
+			// 無論是否有物體，移動後都強制刷新畫面與狀態列
+			render();
+			updateUI();
+			playSound(300, 0.05);
+			saveGameToLocal();
+		}
         // ===== 物體交互（更新：天堂傳送門、鐵桶） =====
         function handleObjectInteraction(obj, x, y) {
             const p = G.player;
@@ -6214,6 +6246,12 @@
                             ny = mob.y + moveY;
                         if (nx >= 0 && nx < map.width && ny >= 0 && ny < map.height) {
                             const target = map.objects[ny]?.[nx];
+							if (isAquatic(mob.obj.mobId)) {
+								const targetTerrain = map.terrain[ny]?.[nx];
+								if (targetTerrain !== 'ocean' && targetTerrain !== 'river') {
+									continue; // 不能移動到非水域
+								}
+							}
                             if (nx === p.x && ny === p.y) {
                                 startBattle(mob.obj.mobId, mob.x, mob.y);
                                 continue;
@@ -6231,12 +6269,20 @@
                     const nx = mob.x + dir[0],
                         ny = mob.y + dir[1];
                     if (nx >= 0 && nx < map.width && ny >= 0 && ny < map.height) {
-                        const target = map.objects[ny]?.[nx];
-                        if (!target && !(nx === p.x && ny === p.y)) {
-                            map.objects[ny][nx] = mob.obj;
-                            map.objects[mob.y][mob.x] = null;
-                        }
-                    }
+						const target = map.objects[ny]?.[nx];
+						const isWaterMap = (map.id === 'ocean' || map.id === 'river');
+						const targetTerrain = map.terrain[ny]?.[nx];
+						if (isAquatic(mob.obj.mobId)) {
+							const targetTerrain = map.terrain[ny]?.[nx];
+							if (targetTerrain !== 'ocean' && targetTerrain !== 'river') {
+								continue;
+							}
+						}
+						if (!target && !(nx === p.x && ny === p.y)) {
+							map.objects[ny][nx] = mob.obj;
+							map.objects[mob.y][mob.x] = null;
+						}
+					}
                 }
             }
             render();
