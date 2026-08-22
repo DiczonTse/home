@@ -1217,8 +1217,8 @@
 
     <script>
         // =========================================================================
-        // 方塊傳說 - 完整遊戲腳本（繁體中文版）
-        // 新增：流浪者、喪屍村民、屍殼、沉屍、冰刺之地藍色冰塊
+        // 方塊傳說 - 完整遊戲腳本（繁體中文版） v3.0
+        // 新增：雪原、鐵桶/水桶、天堂、傳送門外框、河流/海洋陸地、水邏輯
         // =========================================================================
 
         const $ = id => document.getElementById(id);
@@ -1497,10 +1497,11 @@
         function updateTimeDisplay() {
             const p = G.player;
             if (!p) return;
-            if (G.inCave || G.inNether) {
+            if (G.inCave || G.inNether || G.inHeaven) {
                 let locationTag = '';
                 if (G.inCave) locationTag = ' 🕳️';
                 else if (G.inNether) locationTag = ' 🔥';
+                else if (G.inHeaven) locationTag = ' ☁️';
                 $('timeDisplay').textContent = `❓${locationTag}`;
                 if (G.isNight) app.classList.add('night');
                 else app.classList.remove('night');
@@ -1517,13 +1518,13 @@
             let locationTag = '';
             if (G.inCave) locationTag = ' 🕳️';
             else if (G.inNether) locationTag = ' 🔥';
+            else if (G.inHeaven) locationTag = ' ☁️';
             let extra = '';
-            if (G.player.mapId === 'ice') {
+            if (G.player.mapId === 'ice' || G.player.mapId === 'snowy_plains') {
                 if (G.weather === 'rain') extra = ' ❄️雪';
                 else if (G.weather === 'thunder') extra = ' ❄️大雪';
             }
             $('timeDisplay').textContent = `${icon} ${timeStr} ${weatherIcon}${locationTag}${extra}`;
-
             if (G.isNight) app.classList.add('night');
             else app.classList.remove('night');
         }
@@ -1531,7 +1532,7 @@
         function updateTimeAndWeather() {
             const p = G.player;
             if (!p || G.gameOver) return;
-            if (G.inCave || G.inNether) {
+            if (G.inCave || G.inNether || G.inHeaven) {
                 updateTimeDisplay();
                 return;
             }
@@ -1560,14 +1561,14 @@
                         stopRainLoop();
                     }
                     refreshMobsOnMap();
-					growSaplings();
+                    growSaplings();
                     updateMusic();
                     if (G.weather === 'rain') {
-                        if (mapId === 'ice') { startRainSound();
+                        if (mapId === 'ice' || mapId === 'snowy_plains') { startRainSound();
                             toast('❄️ 下雪了', 'info', 1500); } else { startRainSound();
                             toast('🌧️ 下雨了', 'info', 1500); }
                     } else if (G.weather === 'thunder') {
-                        if (mapId === 'ice') { startRainSound();
+                        if (mapId === 'ice' || mapId === 'snowy_plains') { startRainSound();
                             playThunder();
                             toast('❄️ 大雪紛飛！', 'warning', 1500); } else { startRainSound();
                             playThunder();
@@ -1592,8 +1593,8 @@
             'diamond': { id: 'diamond', name: '鑽石', icon: '💎', type: 'resource', desc: '珍貴寶石' },
             'netherite': { id: 'netherite', name: '獄髓', icon: '⚫', type: 'resource', desc: '獄髓' },
             'wheat': { id: 'wheat', name: '小麥', icon: '🌾', type: 'resource', desc: '農作物' },
-			'red_mushroom': { id: 'red_mushroom', name: '红色蘑菇', icon: '🍄', type: 'resource', desc: '可出售或用于催熟' },
-            'brown_mushroom': { id: 'brown_mushroom', name: '啡色蘑菇', icon: '🍄', type: 'resource', desc: '可出售或用于催熟' },
+            'red_mushroom': { id: 'red_mushroom', name: '红色蘑菇', icon: '🍄', type: 'resource', desc: '可出售或用於催熟' },
+            'brown_mushroom': { id: 'brown_mushroom', name: '啡色蘑菇', icon: '🍄', type: 'resource', desc: '可出售或用於催熟' },
             'sapling': { id: 'sapling', name: '樹苗', icon: '🌱', type: 'resource', desc: '可以種樹' },
             'flower': { id: 'flower', name: '花束', icon: '💐', type: 'resource', desc: '美麗的花束' },
             'wool': { id: 'wool', name: '羊毛', icon: '🧶', type: 'resource', desc: '從羊掉落' },
@@ -1622,11 +1623,16 @@
             'carrot': { id: 'carrot', name: '胡蘿蔔', icon: '🥕', type: 'food', heal: 2, desc: '食用恢復2HP' },
             'potato': { id: 'potato', name: '馬鈴薯', icon: '🥔', type: 'food', sp: 2, desc: '食用恢復2SP' },
             'torch': { id: 'torch', name: '火把', icon: '🔦', type: 'shield', def: 0, desc: '照亮夜晚，驅散主動怪物' },
-			'shears': { id: 'shears', name: '剪刀', icon: '✂️', type: 'shield', def: 0, desc: '裝備後殺羊能獲得更多羊毛' },
-			'bed': { id: 'bed', name: '床', icon: '🛏️', type: 'bed', desc: '放置後可在夜晚休息' },
+            'shears': { id: 'shears', name: '剪刀', icon: '✂️', type: 'shield', def: 0, desc: '裝備後殺羊能獲得更多羊毛' },
+            'bed': { id: 'bed', name: '床', icon: '🛏️', type: 'bed', desc: '放置後可在夜晚休息' },
             'rabbit_foot': { id: 'rabbit_foot', name: '兔腳', icon: '🥠', type: 'resource', desc: '幸運兔腳' },
             'bear_meat': { id: 'bear_meat', name: '熊肉', icon: '🥩', type: 'food', heal: 6, sp: 4, desc: '食用恢復6HP+4SP' },
             'rabbit_meat': { id: 'rabbit_meat', name: '兔肉', icon: '🥩', type: 'food', heal: 3, sp: 2, desc: '食用恢復3HP+2SP' },
+            // ===== 新增：鐵桶、水桶 =====
+            'bucket': { id: 'bucket', name: '鐵桶', icon: '🗑️', type: 'tool', desc: '裝水用（3鐵製作）' },
+            'water_bucket': { id: 'water_bucket', name: '水桶', icon: '🌊', type: 'shield', def: 0,
+                desc: '裝備後可進出天堂傳送門' },
+            // 武器
             'wood_sword': { id: 'wood_sword', name: '木劍', icon: '🗡️', type: 'weapon', atk: 2, desc: '攻擊+2' },
             'stone_sword': { id: 'stone_sword', name: '石劍', icon: '🗡️', type: 'weapon', atk: 3, desc: '攻擊+3' },
             'copper_sword': { id: 'copper_sword', name: '銅劍', icon: '🗡️', type: 'weapon', atk: 4, desc: '攻擊+4' },
@@ -1649,13 +1655,14 @@
                 desc: '攻擊+8, 伐木Lv6' },
             'netherite_axe': { id: 'netherite_axe', name: '獄髓斧', icon: '🪓', type: 'weapon', atk: 9, tool: 'axe',
                 level: 7, desc: '攻擊+9, 伐木Lv7' },
-			'wood_dagger': { id: 'wood_dagger', name: '木匕首', icon: '🔪', type: 'weapon', atk: 1, desc: '攻擊+1，可偷襲敵人' },
-			'stone_dagger': { id: 'stone_dagger', name: '石匕首', icon: '🔪', type: 'weapon', atk: 2, desc: '攻擊+2，可偷襲敵人' },
-			'copper_dagger': { id: 'copper_dagger', name: '銅匕首', icon: '🔪', type: 'weapon', atk: 3, desc: '攻擊+3，可偷襲敵人' },
-			'iron_dagger': { id: 'iron_dagger', name: '鐵匕首', icon: '🔪', type: 'weapon', atk: 4, desc: '攻擊+4，可偷襲敵人' },
-			'gold_dagger': { id: 'gold_dagger', name: '金匕首', icon: '🔪', type: 'weapon', atk: 5, desc: '攻擊+5，可偷襲敵人' },
-			'diamond_dagger': { id: 'diamond_dagger', name: '鑽石匕首', icon: '🔪', type: 'weapon', atk: 6, desc: '攻擊+6，可偷襲敵人' },
-			'netherite_dagger': { id: 'netherite_dagger', name: '獄髓匕首', icon: '🔪', type: 'weapon', atk: 7, desc: '攻擊+7，可偷襲敵人' },
+            'wood_dagger': { id: 'wood_dagger', name: '木匕首', icon: '🔪', type: 'weapon', atk: 1, desc: '攻擊+1，可偷襲敵人' },
+            'stone_dagger': { id: 'stone_dagger', name: '石匕首', icon: '🔪', type: 'weapon', atk: 2, desc: '攻擊+2，可偷襲敵人' },
+            'copper_dagger': { id: 'copper_dagger', name: '銅匕首', icon: '🔪', type: 'weapon', atk: 3, desc: '攻擊+3，可偷襲敵人' },
+            'iron_dagger': { id: 'iron_dagger', name: '鐵匕首', icon: '🔪', type: 'weapon', atk: 4, desc: '攻擊+4，可偷襲敵人' },
+            'gold_dagger': { id: 'gold_dagger', name: '金匕首', icon: '🔪', type: 'weapon', atk: 5, desc: '攻擊+5，可偷襲敵人' },
+            'diamond_dagger': { id: 'diamond_dagger', name: '鑽石匕首', icon: '🔪', type: 'weapon', atk: 6, desc: '攻擊+6，可偷襲敵人' },
+            'netherite_dagger': { id: 'netherite_dagger', name: '獄髓匕首', icon: '🔪', type: 'weapon', atk: 7,
+                desc: '攻擊+7，可偷襲敵人' },
             'wood_katana': { id: 'wood_katana', name: '木打刀', icon: '🔪', type: 'weapon', atk: 3, desc: '攻擊+3' },
             'stone_katana': { id: 'stone_katana', name: '石打刀', icon: '🔪', type: 'weapon', atk: 4, desc: '攻擊+4' },
             'copper_katana': { id: 'copper_katana', name: '銅打刀', icon: '🔪', type: 'weapon', atk: 5, desc: '攻擊+5' },
@@ -1767,7 +1774,6 @@
         };
 
         // ===== 生物定義（繁體中文） =====
-        // ==== 新增生物：流浪者、喪屍村民、屍殼、沉屍 ====
         const MOBS = {
             'pig': { id: 'pig', name: '🐖 豬', hp: 10, atk: 0, def: 0, exp: 3, gold: 0, passive: true, drops: [{ id: 'raw_pork',
                     chance: 1, count: 1 }] },
@@ -1800,24 +1806,32 @@
             'dolphin': { id: 'dolphin', name: '🐬 海豚', hp: 10, atk: 5, def: 0, exp: 5, gold: 0, passive: false,
                 drops: [{ id: 'raw_fish', chance: 0.6, count: 2 }] },
             'zombie': { id: 'zombie', name: '🧟 喪屍', hp: 20, atk: 5, def: 0, exp: 5, gold: 5, passive: false,
-                drops: [{ id: 'rotten_flesh', chance: 0.67, count: 1 }, { id: 'iron_ore', chance: 0.008, count: 1 }, { id: 'red_mushroom', chance: 0.50, count: 1 }, { id: 'carrot', chance: 0.008, count: 1 }, { id: 'potato', chance: 0.008, count: 1 },
-                    { id: 'iron_sword', chance: 0.08, count: 1 }, { id: 'iron_axe', chance: 0.08, count: 1 },
-                    { id: 'iron_katana', chance: 0.08, count: 1 }] },
-			'zombie_villager': { id: 'zombie_villager', name: '🤢 喪屍村民', hp: 20, atk: 5, def: 0, exp: 5, gold: 5, passive: false,
                 drops: [{ id: 'rotten_flesh', chance: 0.67, count: 1 }, { id: 'iron_ore', chance: 0.008, count: 1 },
-                    { id: 'carrot', chance: 0.008, count: 1 }, { id: 'potato', chance: 0.008, count: 1 }] },
+                    { id: 'red_mushroom', chance: 0.50, count: 1 }, { id: 'carrot', chance: 0.008, count: 1 },
+                    { id: 'potato', chance: 0.008, count: 1 },
+                    { id: 'iron_sword', chance: 0.08, count: 1 }, { id: 'iron_axe', chance: 0.08, count: 1 },
+                    { id: 'iron_katana', chance: 0.08, count: 1 }
+                ] },
+            'zombie_villager': { id: 'zombie_villager', name: '🤢 喪屍村民', hp: 20, atk: 5, def: 0, exp: 5, gold: 5,
+                passive: false,
+                drops: [{ id: 'rotten_flesh', chance: 0.67, count: 1 }, { id: 'iron_ore', chance: 0.008, count: 1 },
+                    { id: 'carrot', chance: 0.008, count: 1 }, { id: 'potato', chance: 0.008, count: 1 }
+                ] },
             'husk': { id: 'husk', name: '🧟 屍殼', hp: 20, atk: 5, def: 0, exp: 5, gold: 5, passive: false,
-                drops: [{ id: 'rotten_flesh', chance: 0.67, count: 1 }, { id: 'iron_ore', chance: 0.008, count: 1 }, { id: 'carrot', chance: 0.008, count: 1 }, { id: 'potato', chance: 0.008, count: 1 }, { id: 'rabbit_foot', chance: 0.5, count: 1 }] },
+                drops: [{ id: 'rotten_flesh', chance: 0.67, count: 1 }, { id: 'iron_ore', chance: 0.008, count: 1 },
+                    { id: 'carrot', chance: 0.008, count: 1 }, { id: 'potato', chance: 0.008, count: 1 },
+                    { id: 'rabbit_foot', chance: 0.5, count: 1 }
+                ] },
             'drowned': { id: 'drowned', name: '🧟 沉屍', hp: 20, atk: 5, def: 0, exp: 5, gold: 5, passive: false,
                 drops: [{ id: 'rotten_flesh', chance: 0.33, count: 1 }, { id: 'copper_ore', chance: 0.11, count: 1 }] },
             'skeleton': { id: 'skeleton', name: '💀 骷髏弓箭手', hp: 20, atk: 6, def: 0, exp: 5, gold: 5, passive: false,
                 drops: [{ id: 'bone', chance: 0.67, count: 1 }, { id: 'bow', chance: 0.085, count: 1 }] },
-			'wanderer': { id: 'wanderer', name: '💀 流浪者', hp: 20, atk: 6, def: 0, exp: 5, gold: 5, passive: false,
+            'wanderer': { id: 'wanderer', name: '💀 流浪者', hp: 20, atk: 6, def: 0, exp: 5, gold: 5, passive: false,
                 drops: [{ id: 'bone', chance: 0.3, count: 1 }, { id: 'bow', chance: 0.085, count: 1 }] },
             'spider': { id: 'spider', name: '🕷️ 蜘蛛', hp: 16, atk: 3, def: 0, exp: 5, gold: 0, passive: false,
                 drops: [{ id: 'string', chance: 0.67, count: 1 }, { id: 'spider_eye', chance: 0.33, count: 1 }] },
-			'cave_spider': { id: 'cave_spider', name: '🕷️ 洞穴蜘蛛', hp: 12, atk: 3, def: 0, exp: 5, gold: 0, passive: false,
-				drops: [{ id: 'string', chance: 0.67, count: 1 }, { id: 'spider_eye', chance: 0.33, count: 1 }] },
+            'cave_spider': { id: 'cave_spider', name: '🕷️ 洞穴蜘蛛', hp: 12, atk: 3, def: 0, exp: 5, gold: 0, passive: false,
+                drops: [{ id: 'string', chance: 0.67, count: 1 }, { id: 'spider_eye', chance: 0.33, count: 1 }] },
             'zombie_pigman': { id: 'zombie_pigman', name: '🐽 喪屍豬人', hp: 20, atk: 12, def: 0, exp: 8, gold: 8,
                 passive: false,
                 drops: [{ id: 'rotten_flesh', chance: 0.5, count: 1 }, { id: 'gold_ore', chance: 0.025, count: 1 },
@@ -1838,15 +1852,16 @@
                 drops: [{ id: 'bear_meat', chance: 1, count: 1 }, { id: 'raw_fish', chance: 0.5, count: 1 }] },
         };
 
-        const NO_RAIN_MAPS = ['cave', 'ocean', 'river', 'desert', 'nether'];
+        const NO_RAIN_MAPS = ['cave', 'ocean', 'river', 'desert', 'nether', 'heaven'];
 
-        // ===== 地圖類型 =====
+        // ===== 地圖類型（更新：新增雪原、天堂） =====
         const MAP_TYPES = {
             'plain': { name: '🏞️ 平原', terrain: 'plain', color: '#4a8f5a', grass: '#5a9f6a' },
             'sunflower_plain': { name: '🌻 向日葵平原', terrain: 'plain', color: '#4a8f5a', grass: '#5a9f6a' },
             'forest': { name: '🌲 森林', terrain: 'forest', color: '#2d6a3a', grass: '#3d7a4a' },
             'desert': { name: '🏜️ 沙漠', terrain: 'desert', color: '#c4a86a', grass: '#d4b87a' },
             'ice': { name: '❄️ 冰刺之地', terrain: 'ice', color: '#8ab4d8', grass: '#9ac4e8' },
+            'snowy_plains': { name: '🏔️ 雪原', terrain: 'snowy_plains', color: '#d4e8f0', grass: '#e4f8ff' },
             'river': { name: '🏞️ 河流', terrain: 'river', color: '#3a7aaa', grass: '#4a8aba' },
             'ocean': { name: '🌊 海洋', terrain: 'ocean', color: '#1a4a7a', grass: '#2a5a8a' },
             'cave': { name: '🕳️ 洞穴', terrain: 'cave', color: '#3a3a4a', grass: '#4a4a5a' },
@@ -1855,7 +1870,9 @@
             'end': { name: '🌌 終界', terrain: 'end', color: '#2a2a3a', grass: '#3a3a4a' },
             'heaven': { name: '☁️ 天堂', terrain: 'heaven', color: '#8ab4d8', grass: '#9ac4e8' }
         };
-        const RANDOM_MAP_POOL = ['plain', 'forest', 'desert', 'ice', 'river', 'ocean', 'mountain', 'sunflower_plain'];
+        const RANDOM_MAP_POOL = ['plain', 'forest', 'desert', 'ice', 'snowy_plains', 'river', 'ocean', 'mountain',
+            'sunflower_plain'
+        ];
 
         // ===== 遊戲狀態 =====
         let G = {
@@ -1899,6 +1916,11 @@
             netherOriginX: 0,
             netherOriginY: 0,
             tempNetherMap: null,
+            inHeaven: false,
+            heavenOriginMapId: '',
+            heavenOriginX: 0,
+            heavenOriginY: 0,
+            tempHeavenMap: null,
             savedWeather: null,
         };
 
@@ -1918,7 +1940,7 @@
                 baseAtk: 1,
                 baseDef: 0,
                 gold: 0,
-				poisonTicks: 0,
+                poisonTicks: 0,
                 x: 9,
                 y: 9,
                 mapId: 'plain',
@@ -1974,6 +1996,21 @@
         }
 
         function hasTool(toolType) { return getBestToolLevel(toolType) > 0; }
+
+        // ===== 檢查玩家是否在水中（河流/海洋/湖） =====
+        function isPlayerInWater() {
+            const p = G.player;
+            if (!p) return false;
+            const map = G.map;
+            if (!map) return false;
+            const obj = map.objects[p.y]?.[p.x];
+            if (obj && obj.type === 'obstacle' && obj.variant === 'water') return true;
+            if (p.mapId === 'river' || p.mapId === 'ocean') {
+                const terrain = map.terrain[p.y]?.[p.x];
+                if (terrain === 'river' || terrain === 'ocean') return true;
+            }
+            return false;
+        }
 
         // ===== 地圖鏈 =====
         function initMapChain() {
@@ -2087,7 +2124,7 @@
             return newMapId;
         }
 
-        // ===== 地圖生成 =====
+        // ===== 地圖生成（更新：雪原、河流、海洋、天堂） =====
         function generateMap(mapId) {
             const w = 19,
                 h = 19;
@@ -2102,10 +2139,11 @@
                 }
             }
             const is = (id) => mapId === id;
-            const addObstacle = (x, y) => {
-                if (x >= 0 && x < w && y >= 0 && y < h) objects[y][x] = { type: 'obstacle' };
+            const addObstacle = (x, y, variant) => {
+                if (x >= 0 && x < w && y >= 0 && y < h) objects[y][x] = { type: 'obstacle', variant: variant || null };
             };
 
+            // ---- 平原（湖可走進去） ----
             if (is('plain')) {
                 let lakeClusters = 1 + Math.floor(Math.random() * 2);
                 for (let i = 0; i < lakeClusters; i++) {
@@ -2113,8 +2151,9 @@
                         y = rand(2, h - 3);
                     let steps = 12 + Math.floor(Math.random() * 4);
                     for (let j = 0; j < steps; j++) {
-                        if (!objects[y]?.[x] && !(x === 9 && y === 9)) objects[y][x] = { type: 'obstacle',
-                            variant: 'water' };
+                        if (!objects[y]?.[x] && !(x === 9 && y === 9)) {
+                            objects[y][x] = { type: 'obstacle', variant: 'water' };
+                        }
                         if (Math.random() < 0.5) x += (Math.random() < 0.5 ? 1 : -1);
                         else y += (Math.random() < 0.5 ? 1 : -1);
                         x = clamp(x, 1, w - 2);
@@ -2126,15 +2165,277 @@
                         y = rand(2, h - 3);
                     let steps = 8 + Math.floor(Math.random() * 3);
                     for (let j = 0; j < steps; j++) {
-                        if (!objects[y]?.[x] && !(x === 9 && y === 9)) objects[y][x] = { type: 'obstacle',
-                            variant: 'lava' };
+                        if (!objects[y]?.[x] && !(x === 9 && y === 9)) {
+                            objects[y][x] = { type: 'obstacle', variant: 'lava' };
+                        }
                         if (Math.random() < 0.5) x += (Math.random() < 0.5 ? 1 : -1);
                         else y += (Math.random() < 0.5 ? 1 : -1);
                         x = clamp(x, 1, w - 2);
                         y = clamp(y, 1, h - 2);
                     }
                 }
-            } else if (is('mountain') || is('river') || is('ocean')) {
+            }
+
+            // ---- 雪原：雪地、冰地、草地混合 ----
+            if (is('snowy_plains')) {
+                // 地形混合：隨機生成雪地（淺色）和冰地（藍白）和草地（淺綠）
+                for (let y = 0; y < h; y++) {
+                    for (let x = 0; x < w; x++) {
+                        const r = Math.random();
+                        if (r < 0.4) terrain[y][x] = 'snowy_plains';
+                        else if (r < 0.7) terrain[y][x] = 'ice';
+                        else terrain[y][x] = 'plain';
+                    }
+                }
+                // 冰地旁的草地生成🎋樹木
+                const treePositions = [];
+                for (let y = 1; y < h - 1; y++) {
+                    for (let x = 1; x < w - 1; x++) {
+                        if (terrain[y][x] === 'plain') {
+                            let hasIceNear = false;
+                            for (let dy = -1; dy <= 1; dy++) {
+                                for (let dx = -1; dx <= 1; dx++) {
+                                    if (dx === 0 && dy === 0) continue;
+                                    const ny = y + dy,
+                                        nx = x + dx;
+                                    if (ny >= 0 && ny < h && nx >= 0 && nx < w) {
+                                        if (terrain[ny][nx] === 'ice') hasIceNear = true;
+                                    }
+                                }
+                            }
+                            if (hasIceNear && Math.random() < 0.6) {
+                                if (!objects[y][x] && !(x === 9 && y === 9)) {
+                                    objects[y][x] = { type: 'tree', variant: 'snowy' };
+                                    treePositions.push({ x, y });
+                                }
+                            }
+                        }
+                    }
+                }
+                // 冰刺之地生物（兔、北極熊、流浪者）
+                let mobCount = 6 + rand(0, 4);
+                for (let i = 0; i < mobCount; i++) {
+                    const x = rand(1, w - 2),
+                        y = rand(1, h - 2);
+                    if (!objects[y][x]) {
+                        const pool = ['rabbit', 'polar_bear', 'wanderer'];
+                        const id = pool[rand(0, pool.length - 1)];
+                        objects[y][x] = { type: 'mob', mobId: id };
+                    }
+                }
+                // 草
+                const grassCount = 10 + rand(0, 5);
+                for (let i = 0; i < grassCount; i++) {
+                    const x = rand(1, w - 2),
+                        y = rand(1, h - 2);
+                    if (!objects[y][x]) objects[y][x] = { type: 'grass' };
+                }
+                // 樹（普通樹）
+                const treeCount2 = 6 + rand(0, 4);
+                for (let i = 0; i < treeCount2; i++) {
+                    const x = rand(1, w - 2),
+                        y = rand(1, h - 2);
+                    if (!objects[y][x]) {
+                        objects[y][x] = { type: 'tree', variant: 'snowy' };
+                    }
+                }
+                // 石頭
+                for (let i = 0; i < 4; i++) {
+                    const x = rand(1, w - 2),
+                        y = rand(1, h - 2);
+                    if (!objects[y][x]) objects[y][x] = { type: 'stone' };
+                }
+                // 礦物
+                for (let i = 0; i < 3; i++) {
+                    const x = rand(1, w - 2),
+                        y = rand(1, h - 2);
+                    if (!objects[y][x]) {
+                        const r = Math.random();
+                        if (r < 0.4) objects[y][x] = { type: 'ore', variant: 'coal' };
+                        else if (r < 0.7) objects[y][x] = { type: 'ore', variant: 'copper' };
+                        else if (r < 0.9) objects[y][x] = { type: 'ore', variant: 'iron' };
+                        else objects[y][x] = { type: 'ore', variant: 'gold' };
+                    }
+                }
+                // 洞穴入口和傳送門
+                addSpecialStructures({ id: mapId, width: w, height: h, objects });
+                // 村莊
+                addVillage({ id: mapId, width: w, height: h, objects });
+            }
+
+            // ---- 河流：中間河流，兩邊陸地 ----
+            if (is('river')) {
+                const riverYStart = 6,
+                    riverYEnd = 12;
+                for (let y = 0; y < h; y++) {
+                    for (let x = 0; x < w; x++) {
+                        if (y >= riverYStart && y <= riverYEnd) {
+                            terrain[y][x] = 'river';
+                        } else {
+                            terrain[y][x] = 'plain';
+                        }
+                    }
+                }
+                // 陸地障礙物（樹、石頭等）
+                for (let i = 0; i < 12; i++) {
+                    const x = rand(1, w - 2),
+                        y = rand(1, riverYStart - 1);
+                    if (!objects[y][x]) {
+                        if (Math.random() < 0.5) objects[y][x] = { type: 'tree', variant: 'oak' };
+                        else objects[y][x] = { type: 'stone' };
+                    }
+                }
+                for (let i = 0; i < 12; i++) {
+                    const x = rand(1, w - 2),
+                        y = rand(riverYEnd + 1, h - 2);
+                    if (!objects[y][x]) {
+                        if (Math.random() < 0.5) objects[y][x] = { type: 'tree', variant: 'oak' };
+                        else objects[y][x] = { type: 'stone' };
+                    }
+                }
+                // 河流生物（魚類）
+                const fishCount = 10 + rand(0, 5);
+                for (let i = 0; i < fishCount; i++) {
+                    const x = rand(1, w - 2),
+                        y = rand(riverYStart + 1, riverYEnd - 1);
+                    if (!objects[y][x]) {
+                        const pool = ['salmon', 'pufferfish', 'tropical_fish'];
+                        objects[y][x] = { type: 'mob', mobId: pool[rand(0, pool.length - 1)] };
+                    }
+                }
+                // 夜晚沉屍
+                if (G.isNight) {
+                    const drownCount = 2 + rand(0, 3);
+                    for (let i = 0; i < drownCount; i++) {
+                        const x = rand(1, w - 2),
+                            y = rand(riverYStart + 1, riverYEnd - 1);
+                        if (!objects[y][x]) {
+                            objects[y][x] = { type: 'mob', mobId: 'drowned' };
+                        }
+                    }
+                }
+                // 陸地村莊
+                addVillage({ id: mapId, width: w, height: h, objects });
+                // 洞穴入口/傳送門
+                addSpecialStructures({ id: mapId, width: w, height: h, objects });
+            }
+
+            // ---- 海洋：海洋中有幾個小陸地 ----
+            if (is('ocean')) {
+                for (let y = 0; y < h; y++) {
+                    for (let x = 0; x < w; x++) {
+                        terrain[y][x] = 'ocean';
+                    }
+                }
+                // 小陸地（3-5個）
+                const landCount = 3 + rand(0, 2);
+                for (let i = 0; i < landCount; i++) {
+                    const cx = rand(3, w - 4),
+                        cy = rand(3, h - 4);
+                    const radius = rand(1, 2);
+                    for (let dy = -radius; dy <= radius; dy++) {
+                        for (let dx = -radius; dx <= radius; dx++) {
+                            const dist = Math.abs(dx) + Math.abs(dy);
+                            if (dist <= radius) {
+                                const nx = cx + dx,
+                                    ny = cy + dy;
+                                if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+                                    terrain[ny][nx] = 'plain';
+                                    if (Math.random() < 0.3 && !objects[ny][nx]) {
+                                        objects[ny][nx] = { type: 'tree', variant: 'oak' };
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                // 海洋生物
+                const fishCount = 15 + rand(0, 8);
+                for (let i = 0; i < fishCount; i++) {
+                    const x = rand(1, w - 2),
+                        y = rand(1, h - 2);
+                    if (terrain[y][x] === 'ocean' && !objects[y][x]) {
+                        const pool = ['salmon', 'pufferfish', 'tropical_fish', 'octopus', 'squid', 'shark', 'dolphin'];
+                        objects[y][x] = { type: 'mob', mobId: pool[rand(0, pool.length - 1)] };
+                    }
+                }
+                // 夜晚沉屍
+                if (G.isNight) {
+                    const drownCount = 4 + rand(0, 5);
+                    for (let i = 0; i < drownCount; i++) {
+                        const x = rand(1, w - 2),
+                            y = rand(1, h - 2);
+                        if (terrain[y][x] === 'ocean' && !objects[y][x]) {
+                            objects[y][x] = { type: 'mob', mobId: 'drowned' };
+                        }
+                    }
+                }
+                // 陸地上的樹和石頭
+                for (let y = 0; y < h; y++) {
+                    for (let x = 0; x < w; x++) {
+                        if (terrain[y][x] === 'plain' && !objects[y][x]) {
+                            if (Math.random() < 0.2) objects[y][x] = { type: 'tree', variant: 'oak' };
+                            else if (Math.random() < 0.15) objects[y][x] = { type: 'stone' };
+                        }
+                    }
+                }
+                // 洞穴入口/傳送門（陸地上）
+                addSpecialStructures({ id: mapId, width: w, height: h, objects });
+            }
+
+            // ---- 天堂：空島，障礙物分隔，沒日夜 ----
+            if (is('heaven')) {
+                for (let y = 0; y < h; y++) {
+                    for (let x = 0; x < w; x++) {
+                        terrain[y][x] = 'heaven';
+                    }
+                }
+                // 空島：隨機生成多個分離的島嶼（以障礙物分隔）
+                const islandCount = 6 + rand(0, 4);
+                for (let i = 0; i < islandCount; i++) {
+                    const cx = rand(2, w - 3),
+                        cy = rand(2, h - 3);
+                    const radius = rand(1, 3);
+                    for (let dy = -radius; dy <= radius; dy++) {
+                        for (let dx = -radius; dx <= radius; dx++) {
+                            const dist = Math.abs(dx) + Math.abs(dy);
+                            if (dist <= radius) {
+                                const nx = cx + dx,
+                                    ny = cy + dy;
+                                if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+                                    if (dist === radius && Math.random() < 0.3) continue;
+                                    if (!(nx === 9 && ny === 9)) {
+                                        objects[ny][nx] = { type: 'obstacle', variant: 'sky_island' };
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                // 樹、石頭、礦物、豬
+                for (let i = 0; i < 20; i++) {
+                    const x = rand(1, w - 2),
+                        y = rand(1, h - 2);
+                    if (!objects[y][x] && !(x === 9 && y === 9)) {
+                        const r = Math.random();
+                        if (r < 0.3) objects[y][x] = { type: 'tree', variant: 'oak' };
+                        else if (r < 0.5) objects[y][x] = { type: 'stone' };
+                        else if (r < 0.7) {
+                            const oreR = Math.random();
+                            if (oreR < 0.4) objects[y][x] = { type: 'ore', variant: 'coal' };
+                            else if (oreR < 0.7) objects[y][x] = { type: 'ore', variant: 'copper' };
+                            else if (oreR < 0.9) objects[y][x] = { type: 'ore', variant: 'iron' };
+                            else objects[y][x] = { type: 'ore', variant: 'gold' };
+                        } else if (r < 0.85) {
+                            objects[y][x] = { type: 'mob', mobId: 'pig' };
+                        }
+                    }
+                }
+                // 天堂不生成村莊、洞穴、傳送門
+            }
+
+            // ---- 其他地圖（保留原有邏輯） ----
+            if (is('mountain') || is('forest')) {
                 for (let i = 0; i < 15; i++) {
                     let x = rand(1, w - 2),
                         y = rand(1, h - 2);
@@ -2146,7 +2447,8 @@
                         y = clamp(y, 1, h - 2);
                     }
                 }
-            } else if (is('forest')) {
+            }
+            if (is('forest')) {
                 for (let i = 0; i < 30; i++) {
                     let x = rand(1, w - 2),
                         y = rand(1, h - 2);
@@ -2158,7 +2460,8 @@
                         y = clamp(y, 1, h - 2);
                     }
                 }
-            } else if (is('cave')) {
+            }
+            if (is('cave')) {
                 for (let i = 0; i < 20; i++) {
                     let x = rand(1, w - 2),
                         y = rand(1, h - 2);
@@ -2170,7 +2473,8 @@
                         y = clamp(y, 1, h - 2);
                     }
                 }
-            } else if (is('nether')) {
+            }
+            if (is('nether')) {
                 for (let i = 0; i < 25; i++) {
                     let x = rand(1, w - 2),
                         y = rand(1, h - 2);
@@ -2186,7 +2490,7 @@
                 }
             }
 
-            // ==== 新增：冰刺之地藍色冰塊障礙物（有框，1x1 / 2x2） ====
+            // ---- 冰刺之地藍色冰塊（保留） ----
             if (is('ice')) {
                 const blockCount = 8 + Math.floor(Math.random() * 6);
                 for (let i = 0; i < blockCount; i++) {
@@ -2209,46 +2513,20 @@
                 }
             }
 
-            // 村莊
-            if (!is('ocean') && !is('river') && !is('nether') && !is('end') && !is('heaven') && !is('cave')) {
-                const allProfessions = ['weaponsmith', 'armorer', 'toolsmith', 'fletcher', 'shepherd', 'farmer'];
-                const available = allProfessions.filter(p => !G.usedProfessions.includes(p));
-                if (available.length > 0) {
-                    let villagePlaced = false;
-                    for (let attempt = 0; attempt < 100; attempt++) {
-                        const x = rand(2, w - 3),
-                            y = rand(2, h - 3);
-                        if (!objects[y][x] && !(x === 9 && y === 9)) {
-                            const prof = available[rand(0, available.length - 1)];
-                            objects[y][x] = { type: 'village', profession: prof };
-                            G.usedProfessions.push(prof);
-                            villagePlaced = true;
-                            break;
-                        }
-                    }
-                    if (!villagePlaced) {
-                        const prof = available[0];
-                        for (let y = 0; y < h; y++) {
-                            for (let x = 0; x < w; x++) {
-                                if (!objects[y][x] && !(x === 9 && y === 9)) {
-                                    objects[y][x] = { type: 'village', profession: prof };
-                                    G.usedProfessions.push(prof);
-                                    villagePlaced = true;
-                                    break;
-                                }
-                            }
-                            if (villagePlaced) break;
-                        }
-                    }
-                }
+            // ---- 村莊（非特殊地圖） ----
+            if (!is('ocean') && !is('river') && !is('nether') && !is('end') && !is('heaven') && !is('cave') && !is(
+                    'snowy_plains')) {
+                addVillage({ id: mapId, width: w, height: h, objects });
             }
 
-            // 洞穴入口/廢棄傳送門
-            addSpecialStructures({ id: mapId, width: w, height: h, objects });
+            // ---- 洞穴入口/廢棄傳送門（非特殊地圖） ----
+            if (!is('ocean') && !is('river') && !is('nether') && !is('end') && !is('heaven') && !is('cave')) {
+                addSpecialStructures({ id: mapId, width: w, height: h, objects });
+            }
 
-            // 草
+            // ---- 草地/花（非特殊地圖） ----
             if (!is('ocean') && !is('river') && !is('desert') && !is('ice') && !is('cave') && !is('nether') && !is('end') &&
-                !is('heaven')) {
+                !is('heaven') && !is('snowy_plains')) {
                 const grassCount = is('plain') ? 35 : is('forest') ? 25 : 10;
                 for (let i = 0; i < grassCount; i++) {
                     const x = rand(1, w - 2),
@@ -2256,7 +2534,6 @@
                     if (!objects[y][x]) objects[y][x] = { type: 'grass' };
                 }
             }
-            // 花
             if (is('plain')) {
                 const flowerCount = 10 + Math.floor(Math.random() * 6);
                 for (let i = 0; i < flowerCount; i++) {
@@ -2278,9 +2555,11 @@
                     }
                 }
             }
-            // 資源(樹、石頭、礦物)
+
+            // ---- 資源（樹、石頭、礦物） ----
             let treePositions = [];
-			if (!is('ocean') && !is('river') && !is('ice') && !is('cave') && !is('nether')) {
+            if (!is('ocean') && !is('river') && !is('ice') && !is('cave') && !is('nether') && !is('heaven') && !is(
+                    'snowy_plains')) {
                 const treeCount = is('forest') ? 35 : is('plain') ? 12 : is('desert') ? 6 : is('mountain') ? 12 : 6;
                 for (let i = 0; i < treeCount; i++) {
                     const x = rand(1, w - 2),
@@ -2288,17 +2567,20 @@
                     if (!objects[y][x]) {
                         const variant = is('desert') ? 'cactus' : (rand(0, 1) ? 'oak' : 'birch');
                         objects[y][x] = { type: 'tree', variant };
+                        treePositions.push({ x, y });
                     }
                 }
-				const saplingCount = Math.min(treePositions.length, 20);
+                const saplingCount = Math.min(treePositions.length, 20);
                 for (let i = 0; i < saplingCount; i++) {
                     if (treePositions.length === 0) break;
                     const tree = treePositions[rand(0, treePositions.length - 1)];
                     let placed = false;
                     for (let attempt = 0; attempt < 10; attempt++) {
-                        const dx = rand(-2, 2), dy = rand(-2, 2);
+                        const dx = rand(-2, 2),
+                            dy = rand(-2, 2);
                         if (dx === 0 && dy === 0) continue;
-                        const nx = tree.x + dx, ny = tree.y + dy;
+                        const nx = tree.x + dx,
+                            ny = tree.y + dy;
                         if (nx >= 1 && nx < w - 1 && ny >= 1 && ny < h - 1 && !objects[ny][nx]) {
                             objects[ny][nx] = { type: 'sapling' };
                             placed = true;
@@ -2307,35 +2589,38 @@
                     }
                     if (!placed) {
                         for (let attempt = 0; attempt < 5; attempt++) {
-                            const x = rand(1, w - 2), y = rand(1, h - 2);
+                            const x = rand(1, w - 2),
+                                y = rand(1, h - 2);
                             if (!objects[y][x]) {
                                 objects[y][x] = { type: 'sapling' };
                                 break;
                             }
                         }
                     }
-				}
-				// === 蘑菇生成 ===
-				if (is('forest') || is('nether')) {
-					const mushroomCount = is('forest') ? 12 : 8;
-					for (let i = 0; i < mushroomCount; i++) {
-						const x = rand(1, w - 2), y = rand(1, h - 2);
-						if (!objects[y][x]) {
-							const type = Math.random() < 0.5 ? 'red_mushroom' : 'brown_mushroom';
-							objects[y][x] = { type: type };
-						}
-					}
-					if (is('forest')) {
-						const giantCount = 4 + rand(0, 3);
-						for (let i = 0; i < giantCount; i++) {
-							const x = rand(1, w - 2), y = rand(1, h - 2);
-							if (!objects[y][x]) {
-								const type = Math.random() < 0.5 ? 'giant_red_mushroom' : 'giant_brown_mushroom';
-								objects[y][x] = { type: type };
-							}
-						}
-					}
-				}
+                }
+                // 蘑菇
+                if (is('forest') || is('nether')) {
+                    const mushroomCount = is('forest') ? 12 : 8;
+                    for (let i = 0; i < mushroomCount; i++) {
+                        const x = rand(1, w - 2),
+                            y = rand(1, h - 2);
+                        if (!objects[y][x]) {
+                            const type = Math.random() < 0.5 ? 'red_mushroom' : 'brown_mushroom';
+                            objects[y][x] = { type: type };
+                        }
+                    }
+                    if (is('forest')) {
+                        const giantCount = 4 + rand(0, 3);
+                        for (let i = 0; i < giantCount; i++) {
+                            const x = rand(1, w - 2),
+                                y = rand(1, h - 2);
+                            if (!objects[y][x]) {
+                                const type = Math.random() < 0.5 ? 'giant_red_mushroom' : 'giant_brown_mushroom';
+                                objects[y][x] = { type: type };
+                            }
+                        }
+                    }
+                }
                 const stoneCount = is('cave') ? 12 : is('mountain') ? 10 : 5;
                 for (let i = 0; i < stoneCount; i++) {
                     const x = rand(1, w - 2),
@@ -2355,7 +2640,8 @@
                     }
                 }
             }
-            // 洞穴資源
+
+            // ---- 洞穴資源 ----
             if (is('cave')) {
                 for (let i = 0; i < 10; i++) {
                     const x = rand(1, w - 2),
@@ -2382,6 +2668,7 @@
                 }
             }
 
+            // ---- 地獄 ----
             if (is('nether')) {
                 for (let i = 0; i < 12; i++) {
                     const x = rand(1, w - 2),
@@ -2411,13 +2698,13 @@
                 }
                 if (edgeCells.length > 0) {
                     const cell = edgeCells[rand(0, edgeCells.length - 1)];
-                    objects[cell.y][cell.x] = { type: 'portal', isExit: true };
+                    objects[cell.y][cell.x] = { type: 'portal', isExit: true, isNether: true };
                     exitPlaced = true;
                 } else {
                     for (let y = 0; y < h; y++) {
                         for (let x = 0; x < w; x++) {
                             if ((x === 0 || x === w - 1 || y === 0 || y === h - 1) && !(x === 9 && y === 9)) {
-                                objects[y][x] = { type: 'portal', isExit: true };
+                                objects[y][x] = { type: 'portal', isExit: true, isNether: true };
                                 exitPlaced = true;
                                 break;
                             }
@@ -2426,77 +2713,71 @@
                     }
                 }
                 if (!exitPlaced) {
-                    objects[0][0] = { type: 'portal', isExit: true };
+                    objects[0][0] = { type: 'portal', isExit: true, isNether: true };
                 }
+                // 地獄傳送門有紅色外框（渲染時處理）
             }
 
-            // 生物
-            const isNight = G.isNight || false;
-            const isRain = G.weather === 'rain' || G.weather === 'thunder';
-            const isIce = is('ice');
+            // ---- 生物（非天堂） ----
+            if (!is('heaven')) {
+                const isNight = G.isNight || false;
+                const isRain = G.weather === 'rain' || G.weather === 'thunder';
+                const isIce = is('ice') || is('snowy_plains');
 
-            if (is('ocean') || is('river')) {
-                const fishPool = ['salmon', 'pufferfish', 'tropical_fish', 'octopus', 'squid', 'dolphin'];
-                if (is('ocean')) fishPool.push('shark');
-                const count = (isRain || isNight) ? 12 : 8;
-                for (let i = 0; i < count; i++) {
-                    const x = rand(1, w - 2),
-                        y = rand(1, h - 2);
-                    if (!objects[y][x]) {
-                        const id = fishPool[rand(0, fishPool.length - 1)];
-                        objects[y][x] = { type: 'mob', mobId: id };
+                if (is('ocean') || is('river')) {
+                    // 已在上面處理
+                } else if (is('nether')) {
+                    // 已處理
+                } else {
+                    let mobPool = [];
+                    if (is('plain') || is('forest') || is('mountain') || is('sunflower_plain') || is('snowy_plains')) {
+                        mobPool = ['chicken', 'duck', 'bee'];
+                        if (is('snowy_plains')) mobPool = ['rabbit', 'polar_bear', 'wanderer'];
+                        if (isNight && !(G.player && G.player.equipment.shield === 'torch')) {
+                            mobPool.push('bat', 'spider', 'zombie', 'zombie_villager', 'skeleton');
+                            if (is('snowy_plains')) mobPool.push('wanderer');
+                        }
                     }
-                }
-            } else if (is('nether')) {
-                // 地獄生物已在上面生成
-            } else {
-                let mobPool = [];
-                if (is('plain') || is('forest') || is('mountain') || is('sunflower_plain')) {
-                    mobPool = ['chicken', 'duck', 'bee'];
-                    if (isNight && !(G.player && G.player.equipment.shield === 'torch')) {
-                        mobPool.push('zombie', 'skeleton', 'spider', 'bat');
+                    if (is('desert')) {
+                        mobPool = ['camel'];
+                        if (isNight && !(G.player && G.player.equipment.shield === 'torch')) {
+                            mobPool.push('bat', 'spider', 'zombie', 'zombie_villager', 'skeleton', 'husk');
+                        }
                     }
-                }
-                if (is('desert')) {
-                    mobPool = ['camel'];
-                    if (isNight && !(G.player && G.player.equipment.shield === 'torch')) {
-                        mobPool.push('zombie', 'skeleton', 'spider', 'bat');
+                    if (is('ice')) {
+                        mobPool = ['rabbit', 'polar_bear'];
+                        if (isNight && !(G.player && G.player.equipment.shield === 'torch')) {
+                            mobPool.push('bat', 'spider', 'zombie', 'zombie_villager', 'skeleton', 'wanderer');
+                        }
                     }
-                }
-                if (is('ice')) {
-                    mobPool = ['rabbit', 'polar_bear'];
-                    if (isNight && !(G.player && G.player.equipment.shield === 'torch')) {
-                        mobPool.push('zombie', 'skeleton', 'spider', 'bat');
+                    if (is('cave')) {
+                        mobPool = ['bat', 'spider', 'cave_spider', 'zombie', 'zombie_villager', 'skeleton'];
                     }
-                }
-                if (is('cave')) {
-                    mobPool = ['bat', 'spider', 'zombie', 'skeleton'];
-                }
-                if (is('plain')) mobPool = mobPool.concat(['cow', 'sheep', 'pig', 'horse']);
-                else if (is('forest')) mobPool = mobPool.concat(['cow', 'sheep', 'pig']);
-                mobPool = [...new Set(mobPool)];
-                let multiplier = 1;
-                if (isRain) multiplier = 2;
-                if (G.weather === 'thunder') multiplier = 3;
-                if (mobPool.length > 0) {
-                    const baseCount = is('cave') ? 20 : (isNight ? 16 : 10);
-                    const count = Math.floor(baseCount * multiplier);
-                    for (let i = 0; i < count; i++) {
-                        const x = rand(1, w - 2),
-                            y = rand(1, h - 2);
-                        if (!objects[y][x]) {
-                            let mobId = mobPool[rand(0, mobPool.length - 1)];
-                            if (G.weather === 'thunder' && mobId === 'pig' && Math.random() <
-                                0.00046) {
-                                mobId = 'zombie_pigman';
+                    if (is('plain')) mobPool = mobPool.concat(['cow', 'sheep', 'pig', 'horse']);
+                    else if (is('forest')) mobPool = mobPool.concat(['cow', 'sheep', 'pig']);
+                    mobPool = [...new Set(mobPool)];
+                    let multiplier = 1;
+                    if (isRain) multiplier = 2;
+                    if (G.weather === 'thunder') multiplier = 3;
+                    if (mobPool.length > 0) {
+                        const baseCount = is('cave') ? 20 : (isNight ? 16 : 10);
+                        const count = Math.floor(baseCount * multiplier);
+                        for (let i = 0; i < count; i++) {
+                            const x = rand(1, w - 2),
+                                y = rand(1, h - 2);
+                            if (!objects[y][x]) {
+                                let mobId = mobPool[rand(0, mobPool.length - 1)];
+                                if (G.weather === 'thunder' && mobId === 'pig' && Math.random() < 0.00046) {
+                                    mobId = 'zombie_pigman';
+                                }
+                                objects[y][x] = { type: 'mob', mobId };
                             }
-                            objects[y][x] = { type: 'mob', mobId };
                         }
                     }
                 }
             }
 
-            // 流浪商人
+            // ---- 流浪商人 ----
             if (!is('ocean') && !is('river') && !is('nether') && !is('end') && !is('heaven') && !is('cave')) {
                 let campPlaced = false;
                 for (let attempt = 0; attempt < 50; attempt++) {
@@ -2513,6 +2794,43 @@
 
             return { id: mapId, width: w, height: h, terrain, objects };
         }
+
+        function addVillage(map) {
+            const w = map.width,
+                h = map.height;
+            const objects = map.objects;
+            const allProfessions = ['weaponsmith', 'armorer', 'toolsmith', 'fletcher', 'shepherd', 'farmer', 'butcher'];
+            const available = allProfessions.filter(p => !G.usedProfessions.includes(p));
+            if (available.length > 0) {
+                let villagePlaced = false;
+                for (let attempt = 0; attempt < 100; attempt++) {
+                    const x = rand(2, w - 3),
+                        y = rand(2, h - 3);
+                    if (!objects[y][x] && !(x === 9 && y === 9)) {
+                        const prof = available[rand(0, available.length - 1)];
+                        objects[y][x] = { type: 'village', profession: prof };
+                        G.usedProfessions.push(prof);
+                        villagePlaced = true;
+                        break;
+                    }
+                }
+                if (!villagePlaced) {
+                    const prof = available[0];
+                    for (let y = 0; y < h; y++) {
+                        for (let x = 0; x < w; x++) {
+                            if (!objects[y][x] && !(x === 9 && y === 9)) {
+                                objects[y][x] = { type: 'village', profession: prof };
+                                G.usedProfessions.push(prof);
+                                villagePlaced = true;
+                                break;
+                            }
+                        }
+                        if (villagePlaced) break;
+                    }
+                }
+            }
+        }
+
         function growSaplings() {
             const map = G.map;
             if (!map) return;
@@ -2532,12 +2850,15 @@
                 toast('🌳 樹木生長了！', 'info', 2000);
             }
         }
+
         function addSpecialStructures(map) {
             const w = map.width,
                 h = map.height;
             const objects = map.objects;
             const is = (id) => map.id === id;
-            if (!is('ocean') && !is('river') && !is('nether') && !is('end') && !is('heaven') && !is('cave')) {
+            if (!is('ocean') && !is('river') && !is('nether') && !is('end') && !is('heaven') && !is('cave') && !is(
+                    'snowy_plains')) {
+                // 洞穴入口
                 if (Math.random() < 0.33) {
                     let placed = false;
                     for (let attempt = 0; attempt < 50; attempt++) {
@@ -2562,15 +2883,14 @@
                         }
                     }
                 }
-            }
-            if (!is('ocean') && !is('river') && !is('nether') && !is('end') && !is('heaven') && !is('cave')) {
+                // 地獄傳送門
                 if (Math.random() < 0.20) {
                     let placed = false;
                     for (let attempt = 0; attempt < 50; attempt++) {
                         const x = rand(2, w - 3),
                             y = rand(2, h - 3);
                         if (!objects[y]?.[x] && !(x === 9 && y === 9)) {
-                            objects[y][x] = { type: 'portal', isExit: false };
+                            objects[y][x] = { type: 'portal', isExit: false, isNether: true };
                             placed = true;
                             break;
                         }
@@ -2579,7 +2899,32 @@
                         for (let y = 1; y < h - 1; y++) {
                             for (let x = 1; x < w - 1; x++) {
                                 if (!objects[y]?.[x] && !(x === 9 && y === 9)) {
-                                    objects[y][x] = { type: 'portal', isExit: false };
+                                    objects[y][x] = { type: 'portal', isExit: false, isNether: true };
+                                    placed = true;
+                                    break;
+                                }
+                            }
+                            if (placed) break;
+                        }
+                    }
+                }
+                // 天堂傳送門（有地獄傳送門的地圖機率生成）
+                if (Math.random() < 0.15) {
+                    let placed = false;
+                    for (let attempt = 0; attempt < 50; attempt++) {
+                        const x = rand(2, w - 3),
+                            y = rand(2, h - 3);
+                        if (!objects[y]?.[x] && !(x === 9 && y === 9)) {
+                            objects[y][x] = { type: 'portal', isExit: false, isHeaven: true };
+                            placed = true;
+                            break;
+                        }
+                    }
+                    if (!placed) {
+                        for (let y = 1; y < h - 1; y++) {
+                            for (let x = 1; x < w - 1; x++) {
+                                if (!objects[y]?.[x] && !(x === 9 && y === 9)) {
+                                    objects[y][x] = { type: 'portal', isExit: false, isHeaven: true };
                                     placed = true;
                                     break;
                                 }
@@ -2655,6 +3000,16 @@
                 const newNether = generateMap('nether');
                 G.tempNetherMap = newNether;
                 return newNether;
+            }
+            if (id === 'heaven') {
+                if (G.tempHeavenMap) return G.tempHeavenMap;
+                if (G.maps['heaven_temp']) {
+                    G.tempHeavenMap = G.maps['heaven_temp'];
+                    return G.tempHeavenMap;
+                }
+                const newHeaven = generateMap('heaven');
+                G.tempHeavenMap = newHeaven;
+                return newHeaven;
             }
             if (!G.maps[id]) {
                 G.maps[id] = generateMap(id);
@@ -2815,7 +3170,7 @@
                 const dirs = ['north', 'south', 'east', 'west'];
                 const chosenDir = dirs[rand(0, 3)];
                 const pos = getEdgePos(chosenDir);
-                G.map.objects[pos.y][pos.x] = { type: 'portal', isExit: true };
+                G.map.objects[pos.y][pos.x] = { type: 'portal', isExit: true, isNether: true };
             }
             updateUI();
             render();
@@ -2871,9 +3226,102 @@
             saveGameToLocal();
         }
 
+        // ===== 天堂 =====
+        function enterHeaven() {
+            const p = G.player;
+            if (G.inHeaven) return;
+            // 檢查是否裝備水桶
+            if (p.equipment.shield !== 'water_bucket') {
+                toast('🌊 需要裝備水桶才能進入天堂傳送門！', 'warning', 2000);
+                return;
+            }
+            G.heavenOriginMapId = p.mapId;
+            G.heavenOriginX = p.x;
+            G.heavenOriginY = p.y;
+            G.savedWeather = G.weather;
+            G.tempHeavenMap = generateMap('heaven');
+            G.inHeaven = true;
+            let spawnX = 9,
+                spawnY = 9;
+            const map = G.tempHeavenMap;
+            // 找一個空位生成
+            for (let y = 0; y < map.height; y++) {
+                for (let x = 0; x < map.width; x++) {
+                    if (!map.objects[y]?.[x] && !(x === 9 && y === 9)) {
+                        spawnX = x;
+                        spawnY = y;
+                        break;
+                    }
+                }
+                if (spawnX !== 9 || spawnY !== 9) break;
+            }
+            p.mapId = 'heaven';
+            p.x = spawnX;
+            p.y = spawnY;
+            G.map = G.tempHeavenMap;
+            G.currentMapId = 'heaven';
+            updateUI();
+            render();
+            toast('☁️ 進入天堂！', 'info', 1500);
+            if (G.weather !== 'clear') {
+                G.weather = 'clear';
+                stopRainSound();
+                stopRainLoop();
+                rainCtx.clearRect(0, 0, 608, 608);
+            }
+            updateMusic();
+            saveGameToLocal();
+        }
+
+        function exitHeaven() {
+            const p = G.player;
+            if (!G.inHeaven) return;
+            const originMapId = G.heavenOriginMapId || 'plain';
+            const originX = G.heavenOriginX !== undefined ? G.heavenOriginX : 9;
+            const originY = G.heavenOriginY !== undefined ? G.heavenOriginY : 9;
+            if (G.maps['heaven_temp']) delete G.maps['heaven_temp'];
+            G.tempHeavenMap = null;
+            G.inHeaven = false;
+            p.mapId = originMapId;
+            p.x = originX;
+            p.y = originY;
+            G.currentMapId = originMapId;
+            G.map = getMap(originMapId);
+            G.heavenOriginMapId = '';
+            G.heavenOriginX = 0;
+            G.heavenOriginY = 0;
+            updateUI();
+            render();
+
+            if (G.savedWeather) {
+                G.weather = G.savedWeather;
+                G.savedWeather = null;
+            } else {
+                G.weather = 'clear';
+            }
+
+            if (G.weather === 'rain' || G.weather === 'thunder') {
+                startRainSound();
+                startRainLoop();
+            } else {
+                stopRainSound();
+                stopRainLoop();
+                rainCtx.clearRect(0, 0, 608, 608);
+            }
+
+            updateMusic();
+            toast('↩️ 離開天堂', 'info', 1500);
+            saveGameToLocal();
+        }
+
+        // ===== 箭頭處理（更新：天堂傳送門） =====
         function handleArrow(dir, x, y) {
             if (G.inCave) {
                 exitCave();
+                return;
+            }
+            if (G.inHeaven) {
+                exitHeaven();
                 return;
             }
             const currentMapId = G.player.mapId;
@@ -2963,7 +3411,7 @@
             saveGameToLocal();
         }
 
-        // ===== 刷新生物（新增：流浪者、喪屍村民、屍殼、沉屍） =====
+        // ===== 刷新生物（更新：雪原） =====
         function refreshMobsOnMap() {
             const map = G.map;
             if (!map) return;
@@ -2979,25 +3427,36 @@
             const isRain = G.weather === 'rain' || G.weather === 'thunder';
             const isOcean = map.id === 'ocean' || map.id === 'river';
             const isNether = map.id === 'nether';
-            const isIce = map.id === 'ice';
+            const isIce = map.id === 'ice' || map.id === 'snowy_plains';
             const isDesert = map.id === 'desert';
+            const isHeaven = map.id === 'heaven';
 
             // 清除所有怪物（保留被動生物？這裡全部清除再重新生成）
             for (let y = 0; y < map.height; y++) {
                 for (let x = 0; x < map.width; x++) {
                     const obj = map.objects[y]?.[x];
                     if (obj && obj.type === 'mob') {
-                        // 屍殼在沙漠白天不消失（保留），沉屍在海洋/河流白天消失
                         const mobId = obj.mobId;
-                        if (mobId === 'husk' && isDesert) continue; // 屍殼不消失
-                        if (mobId === 'drowned' && isOcean) continue; // 沉屍保留（晚上生成，白天由邏輯移除）
-                        // 被動生物保留？但我們重新生成，所以全部清除
+                        if (mobId === 'husk' && isDesert) continue;
+                        if (mobId === 'drowned' && isOcean) continue;
+                        if (mobId === 'wanderer' && isIce) continue;
                         map.objects[y][x] = null;
                     }
                 }
             }
 
-            // 海洋/河流：魚類 + 沉屍（晚上）
+            if (isHeaven) {
+                // 天堂只生成豬
+                for (let i = 0; i < 8; i++) {
+                    const x = rand(1, map.width - 2),
+                        y = rand(1, map.height - 2);
+                    if (!map.objects[y][x]) {
+                        map.objects[y][x] = { type: 'mob', mobId: 'pig' };
+                    }
+                }
+                return;
+            }
+
             if (isOcean) {
                 const fishPool = ['salmon', 'pufferfish', 'tropical_fish', 'octopus', 'squid', 'dolphin'];
                 if (map.id === 'ocean') fishPool.push('shark');
@@ -3005,23 +3464,21 @@
                 for (let i = 0; i < count; i++) {
                     const x = rand(1, map.width - 2),
                         y = rand(1, map.height - 2);
-                    if (!map.objects[y][x]) {
+                    if (map.terrain[y]?.[x] === 'ocean' && !map.objects[y][x]) {
                         const id = fishPool[rand(0, fishPool.length - 1)];
                         map.objects[y][x] = { type: 'mob', mobId: id };
                     }
                 }
-                // 沉屍：海洋和河流晚上生成
                 if (isNight) {
                     const drownCount = 4 + rand(0, 4);
                     for (let i = 0; i < drownCount; i++) {
                         const x = rand(1, map.width - 2),
                             y = rand(1, map.height - 2);
-                        if (!map.objects[y][x]) {
+                        if (map.terrain[y]?.[x] === 'ocean' && !map.objects[y][x]) {
                             map.objects[y][x] = { type: 'mob', mobId: 'drowned' };
                         }
                     }
                 } else {
-                    // 白天移除沉屍
                     for (let y = 0; y < map.height; y++) {
                         for (let x = 0; x < map.width; x++) {
                             const obj = map.objects[y]?.[x];
@@ -3051,17 +3508,23 @@
             if (map.id === 'plain' || map.id === 'forest' || map.id === 'mountain' || map.id === 'sunflower_plain') {
                 mobPool = ['chicken', 'duck'];
                 if (isNight && !(p && p.equipment.shield === 'torch')) {
-                    mobPool.push('zombie', 'skeleton', 'spider', 'bat');
+                    mobPool.push('bat', 'spider', 'zombie', 'zombie_villager', 'skeleton');
+                    hasZombie = true;
+                }
+            }
+            if (map.id === 'snowy_plains') {
+                mobPool = ['rabbit', 'polar_bear', 'wanderer'];
+                if (isNight && !(p && p.equipment.shield === 'torch')) {
+                    mobPool.push('bat', 'spider', 'zombie', 'zombie_villager', 'skeleton', 'wanderer');
                     hasZombie = true;
                 }
             }
             if (map.id === 'desert') {
                 mobPool = ['sheep', 'camel'];
                 if (isNight && !(p && p.equipment.shield === 'torch')) {
-                    mobPool.push('zombie', 'skeleton', 'spider', 'bat');
+                    mobPool.push('bat', 'spider', 'zombie', 'zombie_villager', 'skeleton', 'husk');
                     hasZombie = true;
                 }
-                // 屍殼：沙漠晚上生成，白天不消失（已在清除時保留）
                 if (isNight) {
                     const huskCount = 3 + rand(0, 4);
                     for (let i = 0; i < huskCount; i++) {
@@ -3076,10 +3539,9 @@
             if (map.id === 'ice') {
                 mobPool = ['rabbit', 'polar_bear'];
                 if (isNight && !(p && p.equipment.shield === 'torch')) {
-                    mobPool.push('zombie', 'skeleton', 'spider', 'bat');
+                    mobPool.push('bat', 'spider', 'zombie', 'zombie_villager', 'skeleton', 'wanderer');
                     hasZombie = true;
                 }
-                // 流浪者：冰刺之地生成（白天晚上都有）
                 const wandererCount = 2 + rand(0, 3);
                 for (let i = 0; i < wandererCount; i++) {
                     const x = rand(1, map.width - 2),
@@ -3090,8 +3552,7 @@
                 }
             }
             if (map.id === 'cave') {
-                mobPool = ['pig', 'spider', 'zombie', 'skeleton'];
-                if (isNight) mobPool.push('bat');
+                mobPool = ['bat', 'spider', 'cave_spider', 'zombie', 'zombie_villager', 'skeleton', 'skeleton'];
                 hasZombie = true;
             }
             if (map.id === 'plain') mobPool = mobPool.concat(['cow', 'sheep', 'pig', 'horse']);
@@ -3114,56 +3575,12 @@
                             mobId = 'zombie_pigman';
                         }
                         map.objects[y][x] = { type: 'mob', mobId };
-                        // 如果有喪屍，同時生成喪屍村民
-                        if (mobId === 'zombie' && Math.random() < 0.5) {
-                            // 在附近找一個空位放置喪屍村民
-                            for (let attempt = 0; attempt < 10; attempt++) {
-                                const nx = x + rand(-1, 1),
-                                    ny = y + rand(-1, 1);
-                                if (nx >= 0 && nx < map.width && ny >= 0 && ny < map.height && !map.objects[ny]?.[
-                                    nx]) {
-                                    map.objects[ny][nx] = { type: 'mob', mobId: 'zombie_villager' };
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            // 補充：如果地圖有喪屍但沒有喪屍村民，補一些
-            if (hasZombie) {
-                let zombieCount = 0,
-                    villagerCount = 0;
-                for (let y = 0; y < map.height; y++) {
-                    for (let x = 0; x < map.width; x++) {
-                        const obj = map.objects[y]?.[x];
-                        if (obj && obj.type === 'mob') {
-                            if (obj.mobId === 'zombie') zombieCount++;
-                            if (obj.mobId === 'zombie_villager') villagerCount++;
-                        }
-                    }
-                }
-                if (zombieCount > 0 && villagerCount < zombieCount * 0.3) {
-                    const need = Math.min(zombieCount, Math.floor(zombieCount * 0.5));
-                    for (let i = 0; i < need; i++) {
-                        let placed = false;
-                        for (let attempt = 0; attempt < 30; attempt++) {
-                            const x = rand(1, map.width - 2),
-                                y = rand(1, map.height - 2);
-                            if (!map.objects[y]?.[x]) {
-                                map.objects[y][x] = { type: 'mob', mobId: 'zombie_villager' };
-                                placed = true;
-                                break;
-                            }
-                        }
-                        if (!placed) break;
                     }
                 }
             }
         }
 
-        // ===== 玩家移動 =====
+        // ===== 玩家移動（更新：水邏輯、鐵桶） =====
         function movePlayer(dx, dy) {
             const p = G.player;
             if (G.gameOver || G.battle) return;
@@ -3173,6 +3590,8 @@
             if (nx < 0 || nx >= map.width || ny < 0 || ny >= map.height) return;
             const obj = map.objects[ny]?.[nx];
             if (obj && (obj.type === 'obstacle' || obj.type === 'ice_block')) { toast('🚫 此處無法通行', 'warning'); return; }
+            // 天堂障礙物（空島分隔）
+            if (obj && obj.type === 'obstacle' && obj.variant === 'sky_island') { toast('🚫 此處無法通行', 'warning'); return; }
             if (p.sp < 1) { toast('🍖 體力不足！', 'warning'); return; }
 
             p.sp = Math.max(0, p.sp - 1);
@@ -3180,8 +3599,9 @@
             p.y = ny;
             p.totalMoves++;
 
-            const currentMapId = p.mapId;
-            if (currentMapId === 'ocean' || currentMapId === 'river') {
+            // 水邏輯：河流/海洋/湖中消耗MP
+            const inWater = isPlayerInWater();
+            if (inWater) {
                 if (p.mp > 0) {
                     const consume = Math.min(5, p.mp);
                     p.mp -= consume;
@@ -3191,14 +3611,22 @@
                     if (p.hp <= 0) { die(); return; }
                     toast('💧 氧氣耗盡，生命 -1', 'warning', 800);
                 }
+            } else {
+                // 陸地上回復MP（緩慢）
+                if (p.mp < p.maxMp && G._mpTime && Date.now() - G._mpTime > 2000) {
+                    // 在循環中處理
+                }
             }
-			
-			if (p.poisonTicks > 0) {
-				p.hp = Math.max(0, p.hp - 1);
-				p.poisonTicks--;
-				if (p.hp <= 0) { die(); return; }
-				toast(`☠️ 中毒，剩餘 ${p.poisonTicks+1} 步`, 'warning', 1000);
-			}
+
+            if (p.poisonTicks > 0) {
+                p.hp = Math.max(0, p.hp - 1);
+                p.poisonTicks--;
+                if (p.hp <= 0) { die(); return; }
+                toast(`☠️ 中毒，剩餘 ${p.poisonTicks+1} 步`, 'warning', 1000);
+            }
+
+            // 鐵桶裝水：在河流/海洋/湖的水中打開物品欄使用鐵桶
+            // 在物品欄點擊鐵桶時處理
 
             if (obj) handleObjectInteraction(obj, nx, ny);
             else { render();
@@ -3207,150 +3635,49 @@
             saveGameToLocal();
         }
 
-        // ===== 範圍攻擊 =====
-        function performRangeAttack() {
-            const p = G.player;
-            if (!p || G.battle || G.gameOver) return;
-            const weaponId = p.equipment.weapon;
-            if (!weaponId) return;
-            const weapon = ITEMS[weaponId];
-            if (!weapon || !weapon.range) return;
-            const range = weapon.range;
-            const map = G.map;
-            if (!map) return;
-
-            const targets = [];
-            for (let dy = -range; dy <= range; dy++) {
-                for (let dx = -range; dx <= range; dx++) {
-                    if (dx === 0 && dy === 0) continue;
-                    const dist = Math.abs(dx) + Math.abs(dy);
-                    if (dist > range) continue;
-                    const tx = p.x + dx,
-                        ty = p.y + dy;
-                    if (tx < 0 || tx >= map.width || ty < 0 || ty >= map.height) continue;
-                    const obj = map.objects[ty]?.[tx];
-                    if (obj && obj.type === 'mob') {
-                        targets.push({ x: tx, y: ty, obj });
-                    }
-                }
-            }
-
-            if (targets.length === 0) return;
-
-            const active = targets.filter(t => !MOBS[t.obj.mobId]?.passive);
-            const passive = targets.filter(t => MOBS[t.obj.mobId]?.passive);
-            const sorted = [...active, ...passive];
-            const target = sorted[0];
-            if (!target) return;
-
-            const mobData = MOBS[target.obj.mobId];
-            if (!mobData) return;
-
-            if (mobData.passive) {
-                let extraWool = 0;
-				if (mobId === 'sheep' && p.equipment.shield === 'shears') {
-					extraWool = 3;
-				}
-				const drops = mobData.drops || [];
-                let dropMsg = [];
-                for (const drop of drops) {
-                    let count = drop.count || 1;
-					if (drop.id === 'wool' && extraWool > 0) {
-						count += extraWool;
-						extraWool = 0;
-					}
-					if (Math.random() < drop.chance) {
-                        addItem(drop.id, drop.count || 1);
-                        const item = getItemDisplay(drop.id);
-                        dropMsg.push(`${item.icon}${item.name}x${drop.count||1}`);
-                    }
-                }
-                p.totalKills++;
-                p.exp += mobData.exp || 5;
-                p.gold += mobData.gold || 0;
-                map.objects[target.y][target.x] = null;
-                const weapon = ITEMS[p.equipment.weapon];
-				const weaponIcon = weapon?.icon || '🏹';
-				const weaponName = weapon?.name || '遠程武器';
-				toast(`${weaponIcon} ${weaponName} 擊殺 ${mobData.name}！獲得 ${mobData.exp}經驗 ${dropMsg.join(' ')}`, 'success');
-                checkLevelUp();
-                checkAchievements();
-                render();
-                updateUI();
-                playSound(500, 0.2);
-                saveGameToLocal();
-                return;
-            }
-
-            if (!mobData.passive) {
-                startBattle(target.obj.mobId, target.x, target.y);
-            }
-        }
-		
-		// 遠程攻擊指定目標（單體）
-		function rangedAttackTarget(mobId, x, y) {
-			const p = G.player;
-			const map = G.map;
-			const mobData = MOBS[mobId];
-			if (!mobData) return;
-			const weapon = ITEMS[p.equipment.weapon];
-			const obj = map.objects[y]?.[x];
-			if (!obj || obj.type !== 'mob' || obj.mobId !== mobId) {
-				toast('目標已消失', 'info');
-				return;
-			}
-			if (mobData.passive) {
-				const drops = mobData.drops || [];
-				let dropMsg = [];
-				for (const drop of drops) {
-					if (Math.random() < drop.chance) {
-						addItem(drop.id, drop.count || 1);
-						const item = getItemDisplay(drop.id);
-						dropMsg.push(`${item.icon}${item.name}x${drop.count||1}`);
-					}
-				}
-				p.totalKills++;
-				p.exp += mobData.exp || 5;
-				p.gold += mobData.gold || 0;
-				map.objects[y][x] = null;
-				const weaponIcon = weapon?.icon || '🏹';
-				const weaponName = weapon?.name || '遠程武器';
-				toast(`${weaponIcon} ${weaponName} 擊殺 ${mobData.name}！獲得 ${mobData.exp}經驗 ${dropMsg.join(' ')}`, 'success');
-				checkLevelUp();
-				checkAchievements();
-				render();
-				updateUI();
-				playSound(500, 0.2);
-				saveGameToLocal();
-				return;
-			}
-			startBattle(mobId, x, y);
-		}
-
-        // ===== 物體交互 =====
+        // ===== 物體交互（更新：天堂傳送門、鐵桶） =====
         function handleObjectInteraction(obj, x, y) {
             const p = G.player;
-            if (obj.type === 'obstacle' || obj.type === 'ice_block') return;
+            if (obj.type === 'obstacle' || obj.type === 'ice_block' || (obj.type === 'obstacle' && obj.variant ===
+                    'sky_island')) return;
 
+            // ==== 傳送門 ====
             if (obj.type === 'portal') {
                 if (obj.isExit === true) {
-                    if (G.player.equipment.shield !== 'torch') {
-                        toast('🔥 需要火把點燃門框！', 'warning', 2000);
-                        return;
+                    if (obj.isNether) {
+                        if (G.player.equipment.shield !== 'torch') {
+                            toast('🔥 需要火把點燃門框！', 'warning', 2000);
+                            return;
+                        }
+                        exitNether();
+                    } else if (obj.isHeaven) {
+                        exitHeaven();
+                    } else {
+                        toast('⚠️ 未知的傳送門', 'warning');
                     }
-                    exitNether();
+                    return;
                 } else {
-                    if (G.inNether) {
-                        toast('⚠️ 這不是返回的傳送門', 'warning');
-                        return;
+                    if (obj.isNether) {
+                        if (G.inNether) {
+                            toast('⚠️ 這不是返回的傳送門', 'warning');
+                            return;
+                        }
+                        if (G.player.equipment.shield !== 'torch') {
+                            toast('🔥 需要火把點燃門框！', 'warning', 2000);
+                            return;
+                        }
+                        enterNether();
+                    } else if (obj.isHeaven) {
+                        if (G.inHeaven) {
+                            toast('⚠️ 這不是返回的傳送門', 'warning');
+                            return;
+                        }
+                        enterHeaven();
+                    } else {
+                        toast('⚠️ 未知的傳送門', 'warning');
                     }
-                    if (G.player.equipment.shield !== 'torch') {
-                        toast('🔥 需要火把點燃門框！', 'warning', 2000);
-                        return;
-                    }
-                    enterNether();
+                    return;
                 }
-                return;
             }
 
             if (obj.type === 'cave_entrance') {
@@ -3393,32 +3720,44 @@
                 saveGameToLocal();
                 return;
             }
-			if (obj.type === 'red_mushroom') {
-				addItem('red_mushroom', 1);
-				toast('🍄 採集到紅色蘑菇', 'success');
-				map.objects[y][x] = null;
-				render(); updateUI(); saveGameToLocal(); return;
-			}
-			if (obj.type === 'brown_mushroom') {
-				addItem('brown_mushroom', 1);
-				toast('🍄 採集到啡色蘑菇', 'success');
-				map.objects[y][x] = null;
-				render(); updateUI(); saveGameToLocal(); return;
-			}
-			if (obj.type === 'giant_red_mushroom') {
-				if (getBestToolLevel('axe') === 0) { toast('🪓 需要斧頭！', 'warning'); return; }
-				addItem('bone', 51);
-				toast('🍄 採集巨型红色蘑菇，獲得51個骨頭！', 'success');
-				map.objects[y][x] = null;
-				render(); updateUI(); saveGameToLocal(); return;
-			}
-			if (obj.type === 'giant_brown_mushroom') {
-				if (getBestToolLevel('axe') === 0) { toast('🪓 需要斧頭！', 'warning'); return; }
-				addItem('bone', 16);
-				toast('🍄 採集巨型啡色蘑菇，獲得16個骨頭！', 'success');
-				map.objects[y][x] = null;
-				render(); updateUI(); saveGameToLocal(); return;
-			}
+            if (obj.type === 'red_mushroom') {
+                addItem('red_mushroom', 1);
+                toast('🍄 採集到紅色蘑菇', 'success');
+                map.objects[y][x] = null;
+                render();
+                updateUI();
+                saveGameToLocal();
+                return;
+            }
+            if (obj.type === 'brown_mushroom') {
+                addItem('brown_mushroom', 1);
+                toast('🍄 採集到啡色蘑菇', 'success');
+                map.objects[y][x] = null;
+                render();
+                updateUI();
+                saveGameToLocal();
+                return;
+            }
+            if (obj.type === 'giant_red_mushroom') {
+                if (getBestToolLevel('axe') === 0) { toast('🪓 需要斧頭！', 'warning'); return; }
+                addItem('bone', 51);
+                toast('🍄 採集巨型红色蘑菇，獲得51個骨頭！', 'success');
+                map.objects[y][x] = null;
+                render();
+                updateUI();
+                saveGameToLocal();
+                return;
+            }
+            if (obj.type === 'giant_brown_mushroom') {
+                if (getBestToolLevel('axe') === 0) { toast('🪓 需要斧頭！', 'warning'); return; }
+                addItem('bone', 16);
+                toast('🍄 採集巨型啡色蘑菇，獲得16個骨頭！', 'success');
+                map.objects[y][x] = null;
+                render();
+                updateUI();
+                saveGameToLocal();
+                return;
+            }
             if (obj.type === 'stone') {
                 if (!hasTool('pickaxe')) { toast('⛏️ 需要鎬！', 'warning'); return; }
                 addItem('stone', 1);
@@ -3485,25 +3824,25 @@
                         return;
                     }
                 }
-				if (weapon && weapon.id && weapon.id.endsWith('_dagger')) {
-					const mobData = MOBS[obj.mobId];
-					if (mobData && !mobData.passive) {
-						const atk = getPlayerAtk(p);
-						const def = mobData.def || 0;
-						let damage = Math.max(1, atk - Math.floor(def / 2) + rand(-2, 4));
-						const remainingHp = mobData.hp - damage;
-						if (remainingHp <= 0) {
-							killMobDirect(obj.mobId, x, y);
-						} else {
-							startBattle(obj.mobId, x, y, remainingHp);
-						}
-						return;
-					}
-					if (mobData && mobData.passive) {
-						killMobDirect(obj.mobId, x, y);
-						return;
-					}
-				}
+                if (weaponId && weaponId.endsWith('_dagger')) {
+                    const mobData = MOBS[obj.mobId];
+                    if (mobData) {
+                        if (!mobData.passive) {
+                            const atk = getPlayerAtk(p);
+                            const def = mobData.def || 0;
+                            let damage = Math.max(1, atk - Math.floor(def / 2) + rand(-2, 4));
+                            const remainingHp = mobData.hp - damage;
+                            if (remainingHp <= 0) {
+                                killMobDirect(obj.mobId, x, y);
+                            } else {
+                                startBattle(obj.mobId, x, y, remainingHp);
+                            }
+                        } else {
+                            killMobDirect(obj.mobId, x, y);
+                        }
+                        return;
+                    }
+                }
                 startBattle(obj.mobId, x, y);
                 return;
             }
@@ -3582,9 +3921,14 @@
                 saveGameToLocal();
                 return;
             }
+            if (obj.type === 'sapling') {
+                // 樹苗在之前已處理
+                toast('🌱 這是一棵樹苗', 'info');
+                return;
+            }
         }
 
-        // ===== 物品系統 =====
+        // ===== 物品系統（更新：鐵桶裝水） =====
         function addItem(id, count = 1) {
             const p = G.player;
             const existing = p.inventory.find(i => i.id === id);
@@ -3609,22 +3953,185 @@
             return item ? item.count : 0;
         }
 
+        // ===== 鐵桶裝水功能 =====
+        function useBucketInWater() {
+            const p = G.player;
+            if (!p) return;
+            if (!isPlayerInWater()) {
+                toast('🗑️ 需要在水域中使用鐵桶', 'warning');
+                return;
+            }
+            if (!removeItem('bucket', 1)) {
+                toast('❌ 你沒有鐵桶', 'warning');
+                return;
+            }
+            addItem('water_bucket', 1);
+            toast('🌊 用鐵桶裝滿水，獲得水桶！', 'success');
+            updateUI();
+            renderInventory();
+            saveGameToLocal();
+        }
+
+        // ===== 範圍攻擊 =====
+        function performRangeAttack() {
+            const p = G.player;
+            if (!p || G.battle || G.gameOver) return;
+            const weaponId = p.equipment.weapon;
+            if (!weaponId) return;
+            const weapon = ITEMS[weaponId];
+            if (!weapon || !weapon.range) return;
+            const range = weapon.range;
+            const map = G.map;
+            if (!map) return;
+
+            const targets = [];
+            for (let dy = -range; dy <= range; dy++) {
+                for (let dx = -range; dx <= range; dx++) {
+                    if (dx === 0 && dy === 0) continue;
+                    const dist = Math.abs(dx) + Math.abs(dy);
+                    if (dist > range) continue;
+                    const tx = p.x + dx,
+                        ty = p.y + dy;
+                    if (tx < 0 || tx >= map.width || ty < 0 || ty >= map.height) continue;
+                    const obj = map.objects[ty]?.[tx];
+                    if (obj && obj.type === 'mob') {
+                        targets.push({ x: tx, y: ty, obj });
+                    }
+                }
+            }
+
+            if (targets.length === 0) return;
+
+            const active = targets.filter(t => !MOBS[t.obj.mobId]?.passive);
+            const passive = targets.filter(t => MOBS[t.obj.mobId]?.passive);
+            const sorted = [...active, ...passive];
+            const target = sorted[0];
+            if (!target) return;
+
+            const mobData = MOBS[target.obj.mobId];
+            if (!mobData) return;
+
+            if (mobData.passive) {
+                let extraWool = 0;
+                if (mobId === 'sheep' && p.equipment.shield === 'shears') {
+                    extraWool = 3;
+                }
+                const drops = mobData.drops || [];
+                let dropMsg = [];
+                for (const drop of drops) {
+                    let count = drop.count || 1;
+                    if (drop.id === 'wool' && extraWool > 0) {
+                        count += extraWool;
+                        extraWool = 0;
+                    }
+                    if (Math.random() < drop.chance) {
+                        addItem(drop.id, drop.count || 1);
+                        const item = getItemDisplay(drop.id);
+                        dropMsg.push(`${item.icon}${item.name}x${drop.count||1}`);
+                    }
+                }
+                p.totalKills++;
+                p.exp += mobData.exp || 5;
+                p.gold += mobData.gold || 0;
+                map.objects[target.y][target.x] = null;
+                const weapon = ITEMS[p.equipment.weapon];
+                const weaponIcon = weapon?.icon || '🏹';
+                const weaponName = weapon?.name || '遠程武器';
+                toast(`${weaponIcon} ${weaponName} 擊殺 ${mobData.name}！獲得 ${mobData.exp}經驗 ${dropMsg.join(' ')}`,
+                'success');
+                checkLevelUp();
+                checkAchievements();
+                render();
+                updateUI();
+                playSound(500, 0.2);
+                saveGameToLocal();
+                return;
+            }
+
+            if (!mobData.passive) {
+                startBattle(target.obj.mobId, target.x, target.y);
+            }
+        }
+
+        function rangedAttackTarget(mobId, x, y) {
+            const p = G.player;
+            const map = G.map;
+            const mobData = MOBS[mobId];
+            if (!mobData) return;
+            const weapon = ITEMS[p.equipment.weapon];
+            const obj = map.objects[y]?.[x];
+            if (!obj || obj.type !== 'mob' || obj.mobId !== mobId) {
+                toast('目標已消失', 'info');
+                return;
+            }
+            if (mobData.passive) {
+                const drops = mobData.drops || [];
+                let dropMsg = [];
+                for (const drop of drops) {
+                    if (Math.random() < drop.chance) {
+                        addItem(drop.id, drop.count || 1);
+                        const item = getItemDisplay(drop.id);
+                        dropMsg.push(`${item.icon}${item.name}x${drop.count||1}`);
+                    }
+                }
+                p.totalKills++;
+                p.exp += mobData.exp || 5;
+                p.gold += mobData.gold || 0;
+                map.objects[y][x] = null;
+                const weaponIcon = weapon?.icon || '🏹';
+                const weaponName = weapon?.name || '遠程武器';
+                toast(`${weaponIcon} ${weaponName} 擊殺 ${mobData.name}！獲得 ${mobData.exp}經驗 ${dropMsg.join(' ')}`,
+                'success');
+                checkLevelUp();
+                checkAchievements();
+                render();
+                updateUI();
+                playSound(500, 0.2);
+                saveGameToLocal();
+                return;
+            }
+            startBattle(mobId, x, y);
+        }
+
         // ===== 戰鬥 =====
         function startBattle(mobId, x, y, initialHp) {
-			const p = G.player;
-			const mobData = MOBS[mobId];
-			if (!mobData) return;
-			if (initialHp !== undefined && initialHp <= 0) {
-				killMobDirect(mobId, x, y);
-				return;
-			}
-			if (mobData.passive) {
-				killMobDirect(mobId, x, y);
-				return;
-			}
-			const hp = (initialHp !== undefined) ? initialHp : mobData.hp;
-			const enemy = { ...mobData, currentHp: hp, maxHp: hp, x, y, mobId };
-            G.battle = { enemy, log: ['⚔️ 戰鬥開始！'], state: 'player_turn', turn: 0, ended: false };
+            const p = G.player;
+            const mobData = MOBS[mobId];
+            if (!mobData) {
+                console.warn('startBattle: 未知怪物', mobId);
+                return;
+            }
+            if (initialHp !== undefined && initialHp <= 0) {
+                killMobDirect(mobId, x, y);
+                return;
+            }
+            if (mobData.passive) {
+                killMobDirect(mobId, x, y);
+                return;
+            }
+            const hp = (initialHp !== undefined) ? initialHp : mobData.hp;
+            const maxHp = mobData.hp;
+            const currentHp = (initialHp !== undefined) ? initialHp : maxHp;
+            const enemy = {
+                ...mobData,
+                currentHp: currentHp,
+                maxHp: maxHp,
+                x,
+                y,
+                mobId
+            };
+            const logMessages = ['⚔️ 戰鬥開始！'];
+            if (initialHp !== undefined && initialHp < maxHp) {
+                const damage = maxHp - initialHp;
+                logMessages.push(`🗡️ 匕首偷襲！造成 ${damage} 點傷害！`);
+            }
+            G.battle = {
+                enemy,
+                log: logMessages,
+                state: 'player_turn',
+                turn: 0,
+                ended: false
+            };
             $('battle-modal').classList.add('active');
             renderBattle();
             updateUI();
@@ -3692,33 +4199,33 @@
         }
 
         function enemyAttack() {
-			const b = G.battle;
-			if (!b || b.ended) return;
-			const p = G.player;
-			const e = b.enemy;
-			animateBattle('enemy', 'player', () => {
-				const atk = e.atk || 5;
-				const def = getPlayerDef(p);
-				let damage = Math.max(1, atk - Math.floor(def / 2) + rand(-2, 3));
-				p.hp = Math.max(0, p.hp - damage);
-				b.log.push(`💢 ${e.name} 對你造成 ${damage} 點傷害！`);
-				playSound(200, 0.2);
-				if (e.mobId === 'cave_spider') {
-					p.poisonTicks = 15;
-					b.log.push(`☠️ 你中毒了！每回合/每步將損失 1 HP，持續15次！`);
-				}
-				if (p.poisonTicks > 0) {
-					p.hp = Math.max(0, p.hp - 1);
-					p.poisonTicks--;
-					b.log.push(`☠️ 毒發，損失 1 HP，剩餘 ${p.poisonTicks} 回合`);
-					if (p.hp <= 0) { battleLose(); return; }
-				}
-				if (p.hp <= 0) { battleLose(); return; }
-				b.state = 'player_turn';
-				renderBattle();
-				updateUI();
-			});
-		}
+            const b = G.battle;
+            if (!b || b.ended) return;
+            const p = G.player;
+            const e = b.enemy;
+            animateBattle('enemy', 'player', () => {
+                const atk = e.atk || 5;
+                const def = getPlayerDef(p);
+                let damage = Math.max(1, atk - Math.floor(def / 2) + rand(-2, 3));
+                p.hp = Math.max(0, p.hp - damage);
+                b.log.push(`💢 ${e.name} 對你造成 ${damage} 點傷害！`);
+                playSound(200, 0.2);
+                if (e.mobId === 'cave_spider') {
+                    p.poisonTicks = 15;
+                    b.log.push(`☠️ 你中毒了！每回合/每步將損失 1 HP，持續15次！`);
+                }
+                if (p.poisonTicks > 0) {
+                    p.hp = Math.max(0, p.hp - 1);
+                    p.poisonTicks--;
+                    b.log.push(`☠️ 毒發，損失 1 HP，剩餘 ${p.poisonTicks} 回合`);
+                    if (p.hp <= 0) { battleLose(); return; }
+                }
+                if (p.hp <= 0) { battleLose(); return; }
+                b.state = 'player_turn';
+                renderBattle();
+                updateUI();
+            });
+        }
 
         function battleWin() {
             const b = G.battle;
@@ -3881,7 +4388,7 @@
                 'toolsmith': '🛠️ 工具匠',
                 'fletcher': '🏹 製箭匠',
                 'shepherd': '👨‍🌾 牧羊人',
-				'butcher': '🍴 屠夫',
+                'butcher': '🍴 屠夫',
                 'farmer': '👨‍🌾 農夫'
             };
             $('shopTitle').textContent = (title[profession] || '🏘️ 村莊商店');
@@ -3893,71 +4400,8 @@
             else if (profession === 'toolsmith') renderToolsmith(content, refreshAll);
             else if (profession === 'fletcher') renderFletcher(content, refreshAll);
             else if (profession === 'shepherd') renderShepherd(content, refreshAll);
-			else if (profession === 'butcher') renderButcher(content, refreshAll);
+            else if (profession === 'butcher') renderButcher(content, refreshAll);
             else if (profession === 'farmer') renderFarmer(content, refreshAll);
-            const buySection = document.createElement('div');
-            buySection.style.marginTop = '12px';
-            buySection.innerHTML = `<h3 style="color:#8ab4f8;font-size:14px;border-bottom:1px solid #2a4a6a;padding-bottom:4px;">💰 出售資源給村民</h3>`;
-
-            const sellable = [
-                { id: 'wood', icon: '🎋', name: '木材', price: 1 },
-                { id: 'wheat', icon: '🌾', name: '小麥', price: 1 },
-                { id: 'flower', icon: '💐', name: '花束', price: 1 },
-				{ id: 'red_mushroom', icon: '🍄', name: '红色蘑菇', price: 2 },
-				{ id: 'brown_mushroom', icon: '🍄', name: '啡色蘑菇', price: 2 },
-                { id: 'sapling', icon: '🌱', name: '樹苗', price: 8 },
-                { id: 'stone', icon: '🗻', name: '石頭', price: 2 },
-                { id: 'coal', icon: '🌑', name: '煤炭', price: 3 },
-                { id: 'leather', icon: '🟫', name: '皮革', price: 4 },
-                { id: 'copper_ore', icon: '🟠', name: '銅礦', price: 8 },
-                { id: 'iron_ore', icon: '🔩', name: '鐵礦', price: 16 },
-                { id: 'gold_ore', icon: '🟡', name: '金礦', price: 32 },
-                { id: 'diamond', icon: '💎', name: '鑽石', price: 64 },
-                { id: 'netherite', icon: '⚫', name: '獄髓', price: 128 },
-                { id: 'wool', icon: '🧶', name: '羊毛', price: 1 },
-                { id: 'string', icon: '🧵', name: '線', price: 1 },
-                { id: 'feather', icon: '🕊️', name: '羽毛', price: 2 },
-                { id: 'rotten_flesh', icon: '🥓', name: '腐肉', price: 6 },
-                { id: 'bone', icon: '🦴', name: '骨頭', price: 2 },
-                { id: 'raw_fish', icon: '🐟', name: '魚肉', price: 2 },
-                { id: 'raw_chicken', icon: '🍗', name: '雞肉', price: 2 },
-                { id: 'raw_duck', icon: '🍗', name: '鴨肉', price: 2 },
-                { id: 'raw_pork', icon: '🥩', name: '生豬排', price: 3 },
-                { id: 'raw_beef', icon: '🥩', name: '生牛肉', price: 3 },
-                { id: 'raw_mutton', icon: '🥩', name: '生羊肉', price: 3 },
-                { id: 'horsemeat', icon: '🥩', name: '馬肉', price: 3 },
-                { id: 'camelmeat', icon: '🥩', name: '駱駝肉', price: 3 },
-                { id: 'honey', icon: '🍯', name: '蜜糖', price: 6 },
-                { id: 'bread', icon: '🍞', name: '麵包', price: 3 },
-                { id: 'apple', icon: '🍎', name: '蘋果', price: 2 },
-                { id: 'carrot', icon: '🥕', name: '胡蘿蔔', price: 2 },
-                { id: 'potato', icon: '🥔', name: '馬鈴薯', price: 2 },
-                { id: 'stone_sword', icon: '🗡️', name: '石劍', price: 17 },
-                { id: 'iron_sword', icon: '🗡️', name: '鐵劍', price: 33 },
-                { id: 'gold_sword', icon: '🗡️', name: '金劍', price: 65 },
-                { id: 'bow', icon: '🏹', name: '弓箭', price: 6 },
-            ];
-            for (const item of sellable) {
-                const count = countItem(item.id);
-                const div = document.createElement('div');
-                div.className = 'shop-item';
-                const canSell = count > 0;
-                div.innerHTML = `
-                        <span>${item.icon} ${item.name} x1 <span class="cost">💰 ${item.price}</span> (持有: ${count})</span>
-                        <button ${canSell ? '' : 'disabled'}>出售</button>
-                    `;
-                div.querySelector('button').addEventListener('click', () => {
-                    if (removeItem(item.id, 1)) {
-                        p.gold += item.price;
-                        toast(`💰 賣出 ${item.name} +${item.price}金`, 'success');
-                        refreshAll();
-                        updateUI();
-                        saveGameToLocal();
-                    } else toast('❌ 材料不足', 'warning');
-                });
-                buySection.appendChild(div);
-            }
-            content.appendChild(buySection);
 
             $('shop-modal').classList.add('active');
         }
@@ -4117,113 +4561,120 @@
             }, refresh);
         }
 
-		function renderButcher(container, refreshFunc) {
-			container.innerHTML = '';
-			const refresh = refreshFunc || (() => renderButcher(container, refreshFunc));
-			renderUpgradeChain(container, {
-				label: '🔪 匕首',
-				ids: ['wood_dagger', 'stone_dagger', 'copper_dagger', 'iron_dagger', 'gold_dagger', 'diamond_dagger', 'netherite_dagger'],
-				baseCost: { gold: 4 },
-				upgradeCosts: [{ gold: 6 }, { gold: 10 }, { gold: 18 }, { gold: 34 }, { gold: 66 }, { gold: 130 }],
-				slot: 'weapon'
-			}, refresh);
-			const shearsDiv = document.createElement('div');
-			shearsDiv.className = 'shop-item';
-			const p = G.player;
-			const canBuy = p.gold >= 32;
-			shearsDiv.innerHTML = `<span>✂️ 剪刀 <span class="cost">💰32</span></span><button ${canBuy ? '' : 'disabled'}>購買</button>`;
-			shearsDiv.querySelector('button').addEventListener('click', () => {
-				if (p.gold >= 32) {
-					p.gold -= 32;
-					addItem('shears', 1);
-					toast('✅ 獲得剪刀', 'success');
-					refresh();
-					updateUI();
-					saveGameToLocal();
-				}
-			});
-			container.appendChild(shearsDiv);
-			const meats = [
-				{ id: 'raw_fish', name: '魚肉', price: 4 },
-				{ id: 'raw_chicken', name: '雞肉', price: 4 },
-				{ id: 'raw_duck', name: '鴨肉', price: 4 },
-				{ id: 'raw_pork', name: '生豬排', price: 6 },
-				{ id: 'raw_beef', name: '生牛肉', price: 6 },
-				{ id: 'raw_mutton', name: '生羊肉', price: 6 },
-				{ id: 'horsemeat', name: '馬肉', price: 6 },
-				{ id: 'camelmeat', name: '駱駝肉', price: 6 },
-				{ id: 'bear_meat', name: '熊肉', price: 6 },
-				{ id: 'rabbit_meat', name: '兔肉', price: 4 },
-			];
-			const meatSection = document.createElement('div');
-			meatSection.style.marginTop = '8px';
-			meatSection.innerHTML = '<h3 style="color:#8ab4f8;font-size:14px;border-bottom:1px solid #2a4a6a;padding-bottom:4px;">🥩 肉類</h3>';
-			for (const m of meats) {
-				const div = document.createElement('div');
-				div.className = 'shop-item';
-				const canBuyMeat = p.gold >= m.price;
-				div.innerHTML = `<span>${getItemDisplay(m.id).icon} ${m.name} <span class="cost">💰${m.price}</span></span><button ${canBuyMeat ? '' : 'disabled'}>購買</button>`;
-				div.querySelector('button').addEventListener('click', () => {
-					if (p.gold >= m.price) {
-						p.gold -= m.price;
-						addItem(m.id, 1);
-						toast(`✅ 購買 ${m.name}`, 'success');
-						refresh();
-						updateUI();
-						saveGameToLocal();
-					}
-				});
-				meatSection.appendChild(div);
-			}
-			container.appendChild(meatSection);
-			const buySection = document.createElement('div');
-			buySection.style.marginTop = '12px';
-			buySection.innerHTML = '<h3 style="color:#8ab4f8;font-size:14px;border-bottom:1px solid #2a4a6a;padding-bottom:4px;">💰 出售給屠夫</h3>';
-			const buyable = [
-				{ id: 'wood', icon: '🎋', name: '木材', price: 1 },
-				{ id: 'stone', icon: '🗻', name: '石頭', price: 2 },
-				{ id: 'coal', icon: '🌑', name: '煤炭', price: 3 },
-				{ id: 'leather', icon: '🟫', name: '皮革', price: 4 },
-				{ id: 'wool', icon: '🧶', name: '羊毛', price: 1 },
-				{ id: 'string', icon: '🧵', name: '線', price: 1 },
-				{ id: 'feather', icon: '🕊️', name: '羽毛', price: 2 },
-				{ id: 'rotten_flesh', icon: '🥓', name: '腐肉', price: 3 },
-				{ id: 'bone', icon: '🦴', name: '骨頭', price: 3 },
-				{ id: 'spider_eye', icon: '👁️', name: '蜘蛛眼', price: 4 },
-				{ id: 'raw_fish', icon: '🐟', name: '魚肉', price: 2 },
-				{ id: 'raw_chicken', icon: '🍗', name: '雞肉', price: 2 },
-				{ id: 'raw_duck', icon: '🍗', name: '鴨肉', price: 2 },
-				{ id: 'raw_pork', icon: '🥩', name: '生豬排', price: 3 },
-				{ id: 'raw_beef', icon: '🥩', name: '生牛肉', price: 3 },
-				{ id: 'raw_mutton', icon: '🥩', name: '生羊肉', price: 3 },
-				{ id: 'horsemeat', icon: '🥩', name: '馬肉', price: 3 },
-				{ id: 'camelmeat', icon: '🥩', name: '駱駝肉', price: 3 },
-				{ id: 'bear_meat', icon: '🥩', name: '熊肉', price: 3 },
-				{ id: 'rabbit_meat', icon: '🥩', name: '兔肉', price: 2 },
-				{ id: 'honey', icon: '🍯', name: '蜜糖', price: 6 },
-			];
-			for (const item of buyable) {
-				const count = countItem(item.id);
-				const div = document.createElement('div');
-				div.className = 'shop-item';
-				const canSell = count > 0;
-				div.innerHTML = `
-						<span>${item.icon} ${item.name} x1 <span class="cost">💰 ${item.price}</span> (持有: ${count})</span>
-						<button ${canSell ? '' : 'disabled'}>出售</button>
-					`;
-				div.querySelector('button').addEventListener('click', () => {
-					if (removeItem(item.id, 1)) {
-						p.gold += item.price;
-						toast(`💰 賣出 ${item.name} +${item.price}金`, 'success');
-						refresh();
-						updateUI();
-						saveGameToLocal();
-					} else toast('❌ 材料不足', 'warning');
-				});
-				buySection.appendChild(div);
-			}
-			container.appendChild(buySection);
-		}
+        function renderButcher(container, refreshFunc) {
+            container.innerHTML = '';
+            const refresh = refreshFunc || (() => renderButcher(container, refreshFunc));
+            renderUpgradeChain(container, {
+                label: '🔪 匕首',
+                ids: ['wood_dagger', 'stone_dagger', 'copper_dagger', 'iron_dagger', 'gold_dagger', 'diamond_dagger',
+                    'netherite_dagger'
+                ],
+                baseCost: { gold: 4 },
+                upgradeCosts: [{ gold: 6 }, { gold: 10 }, { gold: 18 }, { gold: 34 }, { gold: 66 }, { gold: 130 }],
+                slot: 'weapon'
+            }, refresh);
+            const shearsDiv = document.createElement('div');
+            shearsDiv.className = 'shop-item';
+            const p = G.player;
+            const canBuy = p.gold >= 32;
+            shearsDiv.innerHTML =
+            `<span>✂️ 剪刀 <span class="cost">💰32</span></span><button ${canBuy ? '' : 'disabled'}>購買</button>`;
+            shearsDiv.querySelector('button').addEventListener('click', () => {
+                if (p.gold >= 32) {
+                    p.gold -= 32;
+                    addItem('shears', 1);
+                    toast('✅ 獲得剪刀', 'success');
+                    refresh();
+                    updateUI();
+                    saveGameToLocal();
+                }
+            });
+            container.appendChild(shearsDiv);
+            const meats = [
+                { id: 'raw_fish', name: '魚肉', price: 4 },
+                { id: 'raw_chicken', name: '雞肉', price: 4 },
+                { id: 'raw_duck', name: '鴨肉', price: 4 },
+                { id: 'raw_pork', name: '生豬排', price: 6 },
+                { id: 'raw_beef', name: '生牛肉', price: 6 },
+                { id: 'raw_mutton', name: '生羊肉', price: 6 },
+                { id: 'horsemeat', name: '馬肉', price: 6 },
+                { id: 'camelmeat', name: '駱駝肉', price: 6 },
+                { id: 'bear_meat', name: '熊肉', price: 6 },
+                { id: 'rabbit_meat', name: '兔肉', price: 4 },
+            ];
+            const meatSection = document.createElement('div');
+            meatSection.style.marginTop = '8px';
+            meatSection.innerHTML =
+                '<h3 style="color:#8ab4f8;font-size:14px;border-bottom:1px solid #2a4a6a;padding-bottom:4px;">🥩 肉類</h3>';
+            for (const m of meats) {
+                const div = document.createElement('div');
+                div.className = 'shop-item';
+                const canBuyMeat = p.gold >= m.price;
+                div.innerHTML =
+                    `<span>${getItemDisplay(m.id).icon} ${m.name} <span class="cost">💰${m.price}</span></span><button ${canBuyMeat ? '' : 'disabled'}>購買</button>`;
+                div.querySelector('button').addEventListener('click', () => {
+                    if (p.gold >= m.price) {
+                        p.gold -= m.price;
+                        addItem(m.id, 1);
+                        toast(`✅ 購買 ${m.name}`, 'success');
+                        refresh();
+                        updateUI();
+                        saveGameToLocal();
+                    }
+                });
+                meatSection.appendChild(div);
+            }
+            container.appendChild(meatSection);
+            // 出售
+            const buySection = document.createElement('div');
+            buySection.style.marginTop = '12px';
+            buySection.innerHTML =
+                '<h3 style="color:#8ab4f8;font-size:14px;border-bottom:1px solid #2a4a6a;padding-bottom:4px;">💰 出售給屠夫</h3>';
+            const buyable = [
+                { id: 'wood', icon: '🎋', name: '木材', price: 1 },
+                { id: 'stone', icon: '🗻', name: '石頭', price: 2 },
+                { id: 'coal', icon: '🌑', name: '煤炭', price: 3 },
+                { id: 'leather', icon: '🟫', name: '皮革', price: 4 },
+                { id: 'wool', icon: '🧶', name: '羊毛', price: 1 },
+                { id: 'string', icon: '🧵', name: '線', price: 1 },
+                { id: 'feather', icon: '🕊️', name: '羽毛', price: 2 },
+                { id: 'rotten_flesh', icon: '🥓', name: '腐肉', price: 3 },
+                { id: 'bone', icon: '🦴', name: '骨頭', price: 3 },
+                { id: 'spider_eye', icon: '👁️', name: '蜘蛛眼', price: 4 },
+                { id: 'raw_fish', icon: '🐟', name: '魚肉', price: 2 },
+                { id: 'raw_chicken', icon: '🍗', name: '雞肉', price: 2 },
+                { id: 'raw_duck', icon: '🍗', name: '鴨肉', price: 2 },
+                { id: 'raw_pork', icon: '🥩', name: '生豬排', price: 3 },
+                { id: 'raw_beef', icon: '🥩', name: '生牛肉', price: 3 },
+                { id: 'raw_mutton', icon: '🥩', name: '生羊肉', price: 3 },
+                { id: 'horsemeat', icon: '🥩', name: '馬肉', price: 3 },
+                { id: 'camelmeat', icon: '🥩', name: '駱駝肉', price: 3 },
+                { id: 'bear_meat', icon: '🥩', name: '熊肉', price: 3 },
+                { id: 'rabbit_meat', icon: '🥩', name: '兔肉', price: 2 },
+                { id: 'honey', icon: '🍯', name: '蜜糖', price: 6 },
+            ];
+            for (const item of buyable) {
+                const count = countItem(item.id);
+                const div = document.createElement('div');
+                div.className = 'shop-item';
+                const canSell = count > 0;
+                div.innerHTML = `
+                        <span>${item.icon} ${item.name} x1 <span class="cost">💰 ${item.price}</span> (持有: ${count})</span>
+                        <button ${canSell ? '' : 'disabled'}>出售</button>
+                    `;
+                div.querySelector('button').addEventListener('click', () => {
+                    if (removeItem(item.id, 1)) {
+                        p.gold += item.price;
+                        toast(`💰 賣出 ${item.name} +${item.price}金`, 'success');
+                        refresh();
+                        updateUI();
+                        saveGameToLocal();
+                    } else toast('❌ 材料不足', 'warning');
+                });
+                buySection.appendChild(div);
+            }
+            container.appendChild(buySection);
+        }
 
         function renderFarmer(container, refreshFunc) {
             container.innerHTML = '';
@@ -4412,9 +4863,9 @@
             container.innerHTML = '';
             const goods = [
                 { id: 'wood', name: '木材', price: 2 },
-				{ id: 'red_mushroom', name: '红色蘑菇', price: 4 },
-				{ id: 'brown_mushroom', name: '啡色蘑菇', price: 4 },
-				{ id: 'sapling', name: '樹苗', price: 16 },
+                { id: 'red_mushroom', name: '红色蘑菇', price: 4 },
+                { id: 'brown_mushroom', name: '啡色蘑菇', price: 4 },
+                { id: 'sapling', name: '樹苗', price: 16 },
                 { id: 'stone', name: '石頭', price: 4 },
                 { id: 'coal', name: '煤炭', price: 6 },
                 { id: 'leather', name: '皮革', price: 8 },
@@ -4432,8 +4883,8 @@
                 { id: 'wood_axe', name: '木斧', price: 10 },
                 { id: 'wood_katana', name: '木打刀', price: 6 },
                 { id: 'wood_pickaxe', name: '木鎬', price: 10 },
-				{ id: 'torch', name: '火把', price: 8 },
-				{ id: 'shears', name: '剪刀', price: 32 },
+                { id: 'torch', name: '火把', price: 8 },
+                { id: 'shears', name: '剪刀', price: 32 },
                 { id: 'leather_helmet', name: '皮帽', price: 40 },
                 { id: 'leather_chestplate', name: '皮甲', price: 64 },
                 { id: 'leather_gloves', name: '皮手套', price: 32 },
@@ -4442,6 +4893,7 @@
                 { id: 'wood_shield', name: '木盾', price: 14 },
                 { id: 'bow', name: '弓', price: 12 },
                 { id: 'crossbow', name: '弩', price: 26 },
+                { id: 'bucket', name: '鐵桶', price: 48 },
             ];
             for (const g of goods) {
                 const div = document.createElement('div');
@@ -4472,8 +4924,8 @@
                 { id: 'wood', icon: '🎋', name: '木材', price: 1 },
                 { id: 'wheat', icon: '🌾', name: '小麥', price: 1 },
                 { id: 'flower', icon: '💐', name: '花束', price: 1 },
-				{ id: 'red_mushroom', icon: '🍄', name: '红色蘑菇', price: 2 },
-				{ id: 'brown_mushroom', icon: '🍄', name: '啡色蘑菇', price: 2 },
+                { id: 'red_mushroom', icon: '🍄', name: '红色蘑菇', price: 2 },
+                { id: 'brown_mushroom', icon: '🍄', name: '啡色蘑菇', price: 2 },
                 { id: 'sapling', icon: '🌱', name: '樹苗', price: 8 },
                 { id: 'stone', icon: '🗻', name: '石頭', price: 2 },
                 { id: 'coal', icon: '🌑', name: '煤炭', price: 3 },
@@ -4501,8 +4953,8 @@
                 { id: 'apple', icon: '🍎', name: '蘋果', price: 2 },
                 { id: 'carrot', icon: '🥕', name: '胡蘿蔔', price: 2 },
                 { id: 'potato', icon: '🥔', name: '馬鈴薯', price: 2 },
-				{ id: 'torch', icon: '🔦', name: '火把', price: 4 },
-				{ id: 'shears', icon: '✂', name: '剪刀', price: 16 },
+                { id: 'torch', icon: '🔦', name: '火把', price: 4 },
+                { id: 'shears', icon: '✂', name: '剪刀', price: 16 },
                 { id: 'stone_sword', icon: '🗡️', name: '石劍', price: 17 },
                 { id: 'iron_sword', icon: '🗡️', name: '鐵劍', price: 33 },
                 { id: 'gold_sword', icon: '🗡️', name: '金劍', price: 65 },
@@ -4544,45 +4996,47 @@
             container.appendChild(refreshBtn);
             $('trader-modal').classList.add('active');
         }
-		// ===== 匕首擊殺並掉落 =====
+
         function killMobDirect(mobId, x, y) {
-			const p = G.player;
-			const map = G.map;
-			const mobData = MOBS[mobId];
-			if (!mobData) return;
-			const obj = map.objects[y]?.[x];
-			if (!obj || obj.type !== 'mob' || obj.mobId !== mobId) return;
-			const drops = mobData.drops || [];
-			let dropMsg = [];
-			for (const drop of drops) {
-				if (Math.random() < drop.chance) {
-					let count = drop.count || 1;
-					// 剪刀效果：杀羊得3羊毛
-					if (mobId === 'sheep' && p.equipment.shield === 'shears') {
-						if (drop.id === 'wool') count += 3;
-					}
-					addItem(drop.id, count);
-					const item = getItemDisplay(drop.id);
-					dropMsg.push(`${item.icon}${item.name}x${count}`);
-				}
-			}
-			p.totalKills++;
-			p.exp += mobData.exp || 5;
-			p.gold += mobData.gold || 0;
-			map.objects[y][x] = null;
-			toast(`✅ 擊殺 ${mobData.name}！獲得 ${mobData.exp}經驗 ${dropMsg.join(' ')}`, 'success');
-			checkLevelUp();
-			checkAchievements();
-			render();
-			updateUI();
-			saveGameToLocal();
-			playSound(500, 0.2);
-		}
-		// ===== 床 =====
-		function placeBedDirect() {
             const p = G.player;
             const map = G.map;
-            const x = p.x, y = p.y;
+            const mobData = MOBS[mobId];
+            if (!mobData) return;
+
+            p.exp += mobData.exp || 5;
+            p.gold += mobData.gold || 0;
+            p.totalKills++;
+
+            const drops = mobData.drops || [];
+            let dropMsg = [];
+            for (const drop of drops) {
+                if (Math.random() < drop.chance) {
+                    let count = drop.count || 1;
+                    if (mobId === 'sheep' && p.equipment.shield === 'shears') {
+                        if (drop.id === 'wool') count += 2;
+                    }
+                    addItem(drop.id, count);
+                    const item = getItemDisplay(drop.id);
+                    dropMsg.push(`${item.icon}${item.name}x${count}`);
+                }
+            }
+
+            map.objects[y][x] = null;
+            checkLevelUp();
+            checkAchievements();
+            toast(`⚔️ 擊殺 ${mobData.name}！獲得 ${mobData.exp}經驗 ${dropMsg.join(' ')}`, 'success');
+            updateUI();
+            render();
+            playSound(500, 0.2);
+            saveGameToLocal();
+        }
+
+        // ===== 床 =====
+        function placeBedDirect() {
+            const p = G.player;
+            const map = G.map;
+            const x = p.x,
+                y = p.y;
             if (!map.objects[y]?.[x]) {
                 if (removeItem('bed', 1)) {
                     p.bedPlaced = true;
@@ -4634,10 +5088,12 @@
                 toast('🛏️ 你需要一張床，且坐在床上才能休息！', 'warning');
             }
         }
-		function plantSapling() {
+
+        function plantSapling() {
             const p = G.player;
             const map = G.map;
-            const x = p.x, y = p.y;
+            const x = p.x,
+                y = p.y;
             if (!map.objects[y]?.[x]) {
                 if (removeItem('sapling', 1)) {
                     map.objects[y][x] = { type: 'sapling' };
@@ -4650,97 +5106,106 @@
         }
 
         function useBone() {
-			const p = G.player;
-			const map = G.map;
-			const x = p.x, y = p.y;
-			const obj = map.objects[y]?.[x];
-			if (obj && (obj.type === 'sapling' || obj.type === 'red_mushroom' || obj.type === 'brown_mushroom')) {
-				let valid = false;
-				if (obj.type === 'sapling') valid = true;
-				else if (obj.type === 'red_mushroom') valid = true;
-				else if (obj.type === 'brown_mushroom') valid = true;
-				if (!valid) { toast('這裡無法使用骨頭', 'info'); return; }
-				if (!removeItem('bone', 1)) { toast('你沒有骨頭', 'warning'); return; }
+            const p = G.player;
+            const map = G.map;
+            const x = p.x,
+                y = p.y;
+            const obj = map.objects[y]?.[x];
+            if (obj && (obj.type === 'sapling' || obj.type === 'red_mushroom' || obj.type === 'brown_mushroom')) {
+                let valid = false;
+                if (obj.type === 'sapling') valid = true;
+                else if (obj.type === 'red_mushroom') valid = true;
+                else if (obj.type === 'brown_mushroom') valid = true;
+                if (!valid) { toast('這裡無法使用骨頭', 'info'); return; }
+                if (!removeItem('bone', 1)) { toast('你沒有骨頭', 'warning'); return; }
 
-				let success = false;
-				if (obj.type === 'sapling') {
-					if (Math.random() < 0.45) {
-						const variant = Math.random() < 0.5 ? 'oak' : 'birch';
-						map.objects[y][x] = { type: 'tree', variant };
-						toast('🌳 樹苗長成大樹！', 'success');
-						success = true;
-					} else {
-						toast('🦴 骨頭沒能讓樹苗生長', 'info');
-					}
-				} else if (obj.type === 'red_mushroom') {
-					if (Math.random() < 0.40) {
-						map.objects[y][x] = { type: 'giant_red_mushroom' };
-						toast('🍄 紅色蘑菇變成了巨型紅色蘑菇！', 'success');
-						success = true;
-					} else {
-						toast('🦴 骨頭沒能讓蘑菇變大', 'info');
-					}
-				} else if (obj.type === 'brown_mushroom') {
-					if (Math.random() < 0.40) {
-						map.objects[y][x] = { type: 'giant_brown_mushroom' };
-						toast('🍄 啡色蘑菇變成了巨型啡色蘑菇！', 'success');
-						success = true;
-					} else {
-						toast('💀 骨頭沒能讓蘑菇變大', 'info');
-					}
-				}
-				render();
-				updateUI();
-				saveGameToLocal();
-				return;
-			}
-			if (!obj) {
-				const excludeMaps = ['cave', 'nether', 'ice', 'desert', 'river', 'ocean'];
-				if (excludeMaps.includes(p.mapId)) {
-					toast('此地無法使用骨頭生成花草', 'warning');
-					return;
-				}
-				const offsets = [[0,0],[1,0],[-1,0],[0,1],[0,-1]];
-				let available = [];
-				for (const [dx, dy] of offsets) {
-					const nx = x + dx, ny = y + dy;
-					if (nx >= 0 && nx < map.width && ny >= 0 && ny < map.height) {
-						if (!map.objects[ny]?.[nx]) {
-							available.push({x: nx, y: ny});
-						}
-					}
-				}
-				if (available.length === 0) {
-					toast('周圍沒有空地可以生成花草', 'info');
-					return;
-				}
-				if (!removeItem('bone', 1)) {
-					toast('你沒有骨頭', 'warning');
-					return;
-				}
-				let flowerCount = 0, grassCount = 0;
-				for (const spot of available) {
-					const isFlower = Math.random() < 0.3; //
-					if (isFlower) {
-						const variants = ['tulip', 'daisy', 'sunflower'];
-						const variant = variants[rand(0, variants.length - 1)];
-						map.objects[spot.y][spot.x] = { type: 'flower', variant };
-						flowerCount++;
-					} else {
-						map.objects[spot.y][spot.x] = { type: 'grass' };
-						grassCount++;
-					}
-				}
-				toast(`🌸 骨頭催生了 ${flowerCount} 朵花和 ${grassCount} 片草！`, 'success');
-				render();
-				updateUI();
-				saveGameToLocal();
-				return;
-			}
-			toast('這裡無法使用骨頭', 'info');
-		}
+                let success = false;
+                if (obj.type === 'sapling') {
+                    if (Math.random() < 0.45) {
+                        const variant = Math.random() < 0.5 ? 'oak' : 'birch';
+                        map.objects[y][x] = { type: 'tree', variant };
+                        toast('🌳 樹苗長成大樹！', 'success');
+                        success = true;
+                    } else {
+                        toast('🦴 骨頭沒能讓樹苗生長', 'info');
+                    }
+                } else if (obj.type === 'red_mushroom') {
+                    if (Math.random() < 0.40) {
+                        map.objects[y][x] = { type: 'giant_red_mushroom' };
+                        toast('🍄 紅色蘑菇變成了巨型紅色蘑菇！', 'success');
+                        success = true;
+                    } else {
+                        toast('🦴 骨頭沒能讓蘑菇變大', 'info');
+                    }
+                } else if (obj.type === 'brown_mushroom') {
+                    if (Math.random() < 0.40) {
+                        map.objects[y][x] = { type: 'giant_brown_mushroom' };
+                        toast('🍄 啡色蘑菇變成了巨型啡色蘑菇！', 'success');
+                        success = true;
+                    } else {
+                        toast('💀 骨頭沒能讓蘑菇變大', 'info');
+                    }
+                }
+                render();
+                updateUI();
+                saveGameToLocal();
+                return;
+            }
+            if (!obj) {
+                const excludeMaps = ['cave', 'nether', 'ice', 'desert', 'river', 'ocean', 'heaven'];
+                if (excludeMaps.includes(p.mapId)) {
+                    toast('此地無法使用骨頭生成花草', 'warning');
+                    return;
+                }
+                const offsets = [
+                    [0, 0],
+                    [1, 0],
+                    [-1, 0],
+                    [0, 1],
+                    [0, -1]
+                ];
+                let available = [];
+                for (const [dx, dy] of offsets) {
+                    const nx = x + dx,
+                        ny = y + dy;
+                    if (nx >= 0 && nx < map.width && ny >= 0 && ny < map.height) {
+                        if (!map.objects[ny]?.[nx]) {
+                            available.push({ x: nx, y: ny });
+                        }
+                    }
+                }
+                if (available.length === 0) {
+                    toast('周圍沒有空地可以生成花草', 'info');
+                    return;
+                }
+                if (!removeItem('bone', 1)) {
+                    toast('你沒有骨頭', 'warning');
+                    return;
+                }
+                let flowerCount = 0,
+                    grassCount = 0;
+                for (const spot of available) {
+                    const isFlower = Math.random() < 0.3;
+                    if (isFlower) {
+                        const variants = ['tulip', 'daisy', 'sunflower'];
+                        const variant = variants[rand(0, variants.length - 1)];
+                        map.objects[spot.y][spot.x] = { type: 'flower', variant };
+                        flowerCount++;
+                    } else {
+                        map.objects[spot.y][spot.x] = { type: 'grass' };
+                        grassCount++;
+                    }
+                }
+                toast(`🌸 骨頭催生了 ${flowerCount} 朵花和 ${grassCount} 片草！`, 'success');
+                render();
+                updateUI();
+                saveGameToLocal();
+                return;
+            }
+            toast('這裡無法使用骨頭', 'info');
+        }
 
-        // ===== 渲染（新增：冰塊、流浪者藍框、屍殼啡框、沉屍藍框） =====
+        // ===== 渲染（更新：傳送門外框、雪原、天堂） =====
         function render() {
             const map = G.map;
             const p = G.player;
@@ -4759,6 +5224,7 @@
                         'forest': ['#2d6a3a', '#3d7a4a'],
                         'desert': ['#c4a86a', '#d4b87a'],
                         'ice': ['#8ab4d8', '#9ac4e8'],
+                        'snowy_plains': ['#d4e8f0', '#e4f8ff'],
                         'river': ['#3a7aaa', '#4a8aba'],
                         'ocean': ['#1a4a7a', '#2a5a8a'],
                         'cave': ['#3a3a4a', '#4a4a5a'],
@@ -4781,7 +5247,7 @@
                     const cx = tx + size / 2,
                         cy = ty + size / 2;
 
-                    // ==== 新增：冰塊障礙物渲染（有框藍色正方形，1x1/2x2） ====
+                    // 冰塊
                     if (obj.type === 'ice_block') {
                         const blockSize = (obj.size || 1) * size;
                         ctx.fillStyle = '#4a8fc9';
@@ -4789,7 +5255,6 @@
                         ctx.strokeStyle = '#1a4a7a';
                         ctx.lineWidth = 2;
                         ctx.strokeRect(tx, ty, blockSize, blockSize);
-                        // 內部網格線
                         if (obj.size > 1) {
                             ctx.strokeStyle = 'rgba(26,74,122,0.3)';
                             ctx.lineWidth = 1;
@@ -4804,16 +5269,25 @@
                                 ctx.stroke();
                             }
                         }
-                        // 冰塊光澤
                         ctx.fillStyle = 'rgba(255,255,255,0.15)';
                         ctx.fillRect(tx + 2, ty + 2, blockSize * 0.3, blockSize * 0.15);
                         continue;
                     }
 
+                    // 障礙物
                     if (obj.type === 'obstacle') {
                         if (obj.variant === 'water') ctx.fillStyle = '#2196F3';
                         else if (obj.variant === 'lava') ctx.fillStyle = '#FF5722';
-                        else ctx.fillStyle = '#3a3a3a';
+                        else if (obj.variant === 'sky_island') {
+                            ctx.fillStyle = '#6a8a5a';
+                            ctx.fillRect(tx, ty, size, size);
+                            ctx.strokeStyle = '#4a6a3a';
+                            ctx.lineWidth = 1;
+                            ctx.strokeRect(tx, ty, size, size);
+                            ctx.fillStyle = 'rgba(100,180,100,0.15)';
+                            ctx.fillRect(tx + 4, ty + 4, size - 8, size - 8);
+                            continue;
+                        } else ctx.fillStyle = '#3a3a3a';
                         ctx.fillRect(tx, ty, size, size);
                         if (map.id === 'forest' && !obj.variant) {
                             ctx.font = '22px serif';
@@ -4823,14 +5297,18 @@
                         }
                         continue;
                     }
+
                     let icon = '❓',
                         color = '#fff';
                     let isMob = false;
                     let isZombiePigman = false;
                     let mobId = null;
 
-                    if (obj.type === 'tree') { icon = obj.variant === 'oak' ? '🌳' : obj.variant === 'birch' ? '🌲' : '🌵';
-                        color = '#5a8a3a'; } else if (obj.type === 'stone') { icon = '🗻';
+                    if (obj.type === 'tree') {
+                        if (obj.variant === 'snowy') icon = '🎋';
+                        else icon = obj.variant === 'oak' ? '🌳' : obj.variant === 'birch' ? '🌲' : '🌵';
+                        color = '#5a8a3a';
+                    } else if (obj.type === 'stone') { icon = '🗻';
                         color = '#888'; } else if (obj.type === 'ore') { const v = obj.variant || 'copper'; const map2 = {
                             'coal': '🌑', 'copper': '🟠', 'iron': '🔩', 'gold': '🟡', 'diamond': '💎', 'netherite': '⚫'
                         };
@@ -4857,30 +5335,36 @@
                             color = '#ff69b4'; } else { icon = '🌼';
                             color = '#ffd700'; }
                     } else if (obj.type === 'sapling') {
-						icon = '🌱';
-						color = '#4CAF50';
-					} else if (obj.type === 'red_mushroom' || obj.type === 'brown_mushroom') {
-						icon = '🍄';
-						color = '#8B4513';
-					} else if (obj.type === 'giant_red_mushroom') {
-						icon = '🍄';
-						color = '#8B4513';
-						ctx.strokeStyle = '#ff0000';
-						ctx.lineWidth = 3;
-						ctx.strokeRect(tx+2, ty+2, size-4, size-4);
-					} else if (obj.type === 'giant_brown_mushroom') {
-						icon = '🍄';
-						color = '#8D6E63';
-						ctx.strokeStyle = '#8D6E63';
-						ctx.lineWidth = 3;
-						ctx.strokeRect(tx+2, ty+2, size-4, size-4);
-					} else if (obj.type === 'village') { icon = '🏘️';
+                        icon = '🌱';
+                        color = '#4CAF50';
+                    } else if (obj.type === 'red_mushroom' || obj.type === 'brown_mushroom') {
+                        icon = '🍄';
+                        color = '#8B4513';
+                    } else if (obj.type === 'giant_red_mushroom') {
+                        icon = '🍄';
+                        color = '#8B4513';
+                        ctx.strokeStyle = '#ff0000';
+                        ctx.lineWidth = 3;
+                        ctx.strokeRect(tx + 2, ty + 2, size - 4, size - 4);
+                    } else if (obj.type === 'giant_brown_mushroom') {
+                        icon = '🍄';
+                        color = '#8D6E63';
+                        ctx.strokeStyle = '#8D6E63';
+                        ctx.lineWidth = 3;
+                        ctx.strokeRect(tx + 2, ty + 2, size - 4, size - 4);
+                    } else if (obj.type === 'village') { icon = '🏘️';
                         color = '#f1c40f'; } else if (obj.type === 'camp') { icon = '⛺';
                         color = '#e67e22'; } else if (obj.type === 'chest') { icon = '🎁';
                         color = '#f39c12'; } else if (obj.type === 'web') { icon = '🕸️';
                         color = '#aaa'; } else if (obj.type === 'cave_entrance') { icon = '🕳️';
-                        color = '#8a6e4b'; } else if (obj.type === 'portal') { icon = '🚪';
-                        color = '#8B00FF'; if (obj.isExit) { color = '#FF4500'; } }
+                        color = '#8a6e4b'; } else if (obj.type === 'portal') {
+                        if (obj.isHeaven) { icon = '🚪';
+                            color = '#FFD700'; } else if (obj.isNether) { icon = '🚪';
+                            color = '#FF0000'; } else { icon = '🚪';
+                            color = '#8B00FF'; }
+                    } else if (obj.type === 'bucket') { icon = '🗑️';
+                        color = '#aaa'; } else if (obj.type === 'water_bucket') { icon = '🌊';
+                        color = '#2196F3'; }
 
                     ctx.fillStyle = 'rgba(0,0,0,0.3)';
                     ctx.beginPath();
@@ -4892,9 +5376,51 @@
                     ctx.textBaseline = 'middle';
                     ctx.fillText(icon, cx, cy + 1);
 
-                    // ==== 新增：生物邊框 ====
+                    // ==== 傳送門外框 ====
+                    if (obj.type === 'portal') {
+                        if (obj.isNether) {
+                            // 紅色外框（地獄）
+                            ctx.strokeStyle = '#FF0000';
+                            ctx.lineWidth = 3;
+                            ctx.strokeRect(tx + 2, ty + 2, size - 4, size - 4);
+                            ctx.strokeStyle = 'rgba(255,0,0,0.3)';
+                            ctx.lineWidth = 1;
+                            ctx.strokeRect(tx + 6, ty + 6, size - 12, size - 12);
+                            // 火焰粒子
+                            for (let i = 0; i < 3; i++) {
+                                const fx = tx + 4 + rand(0, size - 8);
+                                const fy = ty + 4 + rand(0, size - 8);
+                                ctx.fillStyle = `rgba(255,100,0,${0.3+Math.random()*0.3})`;
+                                ctx.beginPath();
+                                ctx.arc(fx, fy, 2 + Math.random() * 3, 0, Math.PI * 2);
+                                ctx.fill();
+                            }
+                        } else if (obj.isHeaven) {
+                            // 黃色外框（天堂）
+                            ctx.strokeStyle = '#FFD700';
+                            ctx.lineWidth = 3;
+                            ctx.strokeRect(tx + 2, ty + 2, size - 4, size - 4);
+                            ctx.strokeStyle = 'rgba(255,215,0,0.3)';
+                            ctx.lineWidth = 1;
+                            ctx.strokeRect(tx + 6, ty + 6, size - 12, size - 12);
+                            // 光暈
+                            const grad = ctx.createRadialGradient(cx, cy, 2, cx, cy, 14);
+                            grad.addColorStop(0, 'rgba(255,215,0,0.3)');
+                            grad.addColorStop(1, 'rgba(255,215,0,0)');
+                            ctx.fillStyle = grad;
+                            ctx.beginPath();
+                            ctx.arc(cx, cy, 14, 0, Math.PI * 2);
+                            ctx.fill();
+                        } else {
+                            // 普通傳送門（紫色）
+                            ctx.strokeStyle = '#8B00FF';
+                            ctx.lineWidth = 2;
+                            ctx.strokeRect(tx + 2, ty + 2, size - 4, size - 4);
+                        }
+                    }
+
+                    // ==== 生物邊框 ====
                     if (isMob && mobId) {
-                        // 流浪者：藍框
                         if (mobId === 'wanderer') {
                             ctx.strokeStyle = '#2196F3';
                             ctx.lineWidth = 3;
@@ -4903,8 +5429,6 @@
                             ctx.lineWidth = 1;
                             ctx.strokeRect(tx + 6, ty + 6, size - 12, size - 12);
                         }
-                        // 喪屍村民：無特殊邊框（或綠色？）但需求沒說，保持普通
-                        // 屍殼：啡框（棕色）
                         if (mobId === 'husk') {
                             ctx.strokeStyle = '#8D6E63';
                             ctx.lineWidth = 3;
@@ -4913,7 +5437,6 @@
                             ctx.lineWidth = 1;
                             ctx.strokeRect(tx + 6, ty + 6, size - 12, size - 12);
                         }
-                        // 沉屍：藍框
                         if (mobId === 'drowned') {
                             ctx.strokeStyle = '#1a73e8';
                             ctx.lineWidth = 3;
@@ -4922,7 +5445,6 @@
                             ctx.lineWidth = 1;
                             ctx.strokeRect(tx + 6, ty + 6, size - 12, size - 12);
                         }
-                        // 原有特殊邊框
                         if (isZombiePigman) {
                             ctx.strokeStyle = '#00ff00';
                             ctx.lineWidth = 3;
@@ -4939,9 +5461,19 @@
                             ctx.lineWidth = 1;
                             ctx.strokeRect(tx + 6, ty + 6, size - 12, size - 12);
                         }
+                        if (mobId === 'polar_bear') {
+                            ctx.strokeStyle = '#8a9aaa';
+                            ctx.lineWidth = 3;
+                            ctx.strokeRect(tx + 2, ty + 2, size - 4, size - 4);
+                            ctx.strokeStyle = 'rgba(138,154,170,0.3)';
+                            ctx.lineWidth = 1;
+                            ctx.strokeRect(tx + 6, ty + 6, size - 12, size - 12);
+                        }
                     }
                 }
             }
+
+            // 床標記
             if (p.bedPlaced && p.bedMapId === p.mapId) {
                 const bx = p.bedX * size,
                     by = p.bedY * size;
@@ -4953,6 +5485,8 @@
                 ctx.textBaseline = 'middle';
                 ctx.fillText('🛏️', bx + size / 2, by + size / 2);
             }
+
+            // 玩家
             const px = p.x * size,
                 py = p.y * size;
             ctx.shadowColor = 'rgba(255,215,0,0.6)';
@@ -4969,7 +5503,8 @@
             ctx.strokeRect(px, py, size, size);
             ctx.setLineDash([]);
 
-            if (p.equipment.shield === 'torch' && G.isNight && !G.inCave && !G.inNether) {
+            // 火把光照
+            if (p.equipment.shield === 'torch' && G.isNight && !G.inCave && !G.inNether && !G.inHeaven) {
                 const cx = p.x * size + size / 2;
                 const cy = p.y * size + size / 2;
                 const radius = 120;
@@ -4983,7 +5518,7 @@
                 ctx.fill();
             }
 
-            if (G.isNight) {
+            if (G.isNight && !G.inHeaven) {
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
                 ctx.fillRect(0, 0, 608, 608);
             }
@@ -5014,11 +5549,11 @@
             const c = rainCtx;
             c.clearRect(0, 0, 608, 608);
 
-            const isIce = G.player && G.player.mapId === 'ice';
+            const isIce = G.player && (G.player.mapId === 'ice' || G.player.mapId === 'snowy_plains');
             const isRain = G.weather === 'rain';
             const isThunder = G.weather === 'thunder';
 
-            if (G.weather === 'clear') {
+            if (G.weather === 'clear' || G.inHeaven) {
                 rainCtx.clearRect(0, 0, 608, 608);
                 if (rainLoopId) { cancelAnimationFrame(rainLoopId);
                     rainLoopId = null; }
@@ -5094,8 +5629,8 @@
         }
 
         function startRainLoop() {
-            if (G.weather === 'clear') return;
-            const isIce = G.player && G.player.mapId === 'ice';
+            if (G.weather === 'clear' || G.inHeaven) return;
+            const isIce = G.player && (G.player.mapId === 'ice' || G.player.mapId === 'snowy_plains');
             if (isIce && (G.weather === 'rain' || G.weather === 'thunder')) {
                 if (!snowLoopId) drawRain();
                 return;
@@ -5174,13 +5709,40 @@
                             } else toast('HP/MP/SP已滿，不需要進食', 'info');
                             return;
                         }
-						if (entry.id === 'bed') { placeBedDirect(); renderInventory(); updateUI(); render(); saveGameToLocal(); }
-						if (entry.id === 'sapling') { plantSapling(); renderInventory(); updateUI(); render(); saveGameToLocal(); return; }
-						if (entry.id === 'bone') { useBone(); renderInventory(); updateUI(); render(); saveGameToLocal(); return; }
+                        // ==== 鐵桶裝水 ====
+                        if (entry.id === 'bucket') {
+                            if (isPlayerInWater()) {
+                                useBucketInWater();
+                                renderInventory();
+                                updateUI();
+                                render();
+                                saveGameToLocal();
+                            } else {
+                                toast('🗑️ 需要站在水中使用鐵桶', 'warning');
+                            }
+                            return;
+                        }
+                        if (entry.id === 'bed') { placeBedDirect();
+                            renderInventory();
+                            updateUI();
+                            render();
+                            saveGameToLocal(); }
+                        if (entry.id === 'sapling') { plantSapling();
+                            renderInventory();
+                            updateUI();
+                            render();
+                            saveGameToLocal(); return; }
+                        if (entry.id === 'bone') { useBone();
+                            renderInventory();
+                            updateUI();
+                            render();
+                            saveGameToLocal(); return; }
                         if (it.type === 'weapon' || it.type === 'shield' || it.type === 'helmet' || it.type ===
                             'chestplate' || it.type === 'leggings' || it.type === 'boots' || it.type === 'gloves'
                             ) {
-                            equipItem(entry.id); renderInventory(); updateUI();
+                            equipItem(entry.id);
+                            renderInventory();
+                            updateUI();
                         } else toast(`${item.name}: ${item.desc||'普通資源'}`, 'info');
                     }
                 });
@@ -5317,7 +5879,7 @@
             try {
                 const compressedMaps = {};
                 for (const [id, map] of Object.entries(G.maps)) {
-                    if (id === 'cave_temp' || id === 'nether_temp') continue;
+                    if (id === 'cave_temp' || id === 'nether_temp' || id === 'heaven_temp') continue;
                     compressedMaps[id] = compressMap(map);
                 }
                 const data = {
@@ -5359,6 +5921,15 @@
                 } else {
                     data.inNether = false;
                 }
+                if (G.inHeaven && G.tempHeavenMap) {
+                    data.inHeaven = true;
+                    data.heavenOriginMapId = G.heavenOriginMapId;
+                    data.heavenOriginX = G.heavenOriginX;
+                    data.heavenOriginY = G.heavenOriginY;
+                    data.maps['heaven_temp'] = compressMap(G.tempHeavenMap);
+                } else {
+                    data.inHeaven = false;
+                }
                 localStorage.setItem('blockLegendSave', JSON.stringify(data));
             } catch (e) { console.log('自動保存失敗:', e); }
         }
@@ -5371,7 +5942,7 @@
                 if (!data.player || !data.maps) return null;
                 const fullMaps = {};
                 for (const [id, compressed] of Object.entries(data.maps)) {
-                    if (id === 'cave_temp' || id === 'nether_temp') {
+                    if (id === 'cave_temp' || id === 'nether_temp' || id === 'heaven_temp') {
                         fullMaps[id] = compressed;
                     } else {
                         fullMaps[id] = decompressMap(compressed);
@@ -5439,7 +6010,7 @@
                     if (!data.player || !data.maps) { toast('❌ 無效的存檔檔案', 'error'); return; }
                     const fullMaps = {};
                     for (const [id, mapData] of Object.entries(data.maps)) {
-                        if (id === 'cave_temp' || id === 'nether_temp') {
+                        if (id === 'cave_temp' || id === 'nether_temp' || id === 'heaven_temp') {
                             fullMaps[id] = mapData;
                         } else {
                             fullMaps[id] = decompressMap(mapData);
@@ -5520,9 +6091,36 @@
                         if (G.maps['nether_temp']) delete G.maps['nether_temp'];
                     }
 
+                    if (data.inHeaven) {
+                        G.inHeaven = true;
+                        G.heavenOriginMapId = data.heavenOriginMapId || 'plain';
+                        G.heavenOriginX = data.heavenOriginX || 9;
+                        G.heavenOriginY = data.heavenOriginY || 9;
+                        if (data.maps['heaven_temp']) {
+                            const compressed = data.maps['heaven_temp'];
+                            if (compressed.terrainDiff && compressed.objectsDiff) {
+                                G.tempHeavenMap = decompressMap(compressed);
+                            } else {
+                                G.tempHeavenMap = generateMap('heaven');
+                            }
+                            G.maps['heaven_temp'] = G.tempHeavenMap;
+                        } else {
+                            G.tempHeavenMap = generateMap('heaven');
+                            G.maps['heaven_temp'] = G.tempHeavenMap;
+                        }
+                        G.map = G.tempHeavenMap;
+                        G.currentMapId = 'heaven';
+                        if (G.player.x < 0 || G.player.x >= G.map.width) G.player.x = 9;
+                        if (G.player.y < 0 || G.player.y >= G.map.height) G.player.y = 9;
+                    } else {
+                        G.inHeaven = false;
+                        G.tempHeavenMap = null;
+                        if (G.maps['heaven_temp']) delete G.maps['heaven_temp'];
+                    }
+
                     const p = G.player;
                     p.discoveredMaps = data.discoveredMaps || ['plain'];
-                    if (!G.inCave && !G.inNether) {
+                    if (!G.inCave && !G.inNether && !G.inHeaven) {
                         G.map = getMap(p.mapId);
                     }
                     for (const id of G.mapChain) { if (G.maps[id]) setupArrows(id); }
@@ -5550,7 +6148,7 @@
             reader.readAsText(file);
         });
 
-        // ===== 遊戲循環 =====
+        // ===== 遊戲循環（更新：MP回復） =====
         function gameLoop() {
             const p = G.player;
             if (!p || G.gameOver) { requestAnimationFrame(gameLoop); return; }
@@ -5563,8 +6161,14 @@
             if (now - G._spTime > 5000) { G._spTime = now; if (p.sp < p.maxSp) { p.sp = Math.min(p.maxSp, p.sp + 1);
                     updateUI(); } }
             if (!G._mpTime) G._mpTime = now;
-            if (now - G._mpTime > 3000) { G._mpTime = now; if (p.mp < p.maxMp) { p.mp = Math.min(p.maxMp, p.mp + 1);
-                    updateUI(); } }
+            // MP回復：陸地上回復
+            if (now - G._mpTime > 3000) {
+                G._mpTime = now;
+                if (!isPlayerInWater() && p.mp < p.maxMp) {
+                    p.mp = Math.min(p.maxMp, p.mp + 1);
+                    updateUI();
+                }
+            }
             if (!G._mobTime) G._mobTime = now;
             if (now - G._mobTime > 4000) { G._mobTime = now;
                 moveMobs(); }
@@ -5707,7 +6311,7 @@
                 modal.classList.add('active'); }
         }
 
-        // ===== 製作系統配置 =====
+        // ===== 製作系統配置（更新：鐵桶） =====
         const CRAFT_CHAINS = [{
             label: '🗡️ 劍',
             category: 'weapon',
@@ -5739,20 +6343,22 @@
             ],
             slot: 'weapon'
         }, {
-			label: '🔪 匕首',
-			category: 'weapon',
-			ids: ['wood_dagger', 'stone_dagger', 'copper_dagger', 'iron_dagger', 'gold_dagger', 'diamond_dagger', 'netherite_dagger'],
-			baseCost: { wood: 2 },
-			upgradeCosts: [
-				{ wood: 1, stone: 1 },
-				{ wood: 1, copper_ore: 1 },
-				{ wood: 1, iron_ore: 1 },
-				{ wood: 1, gold_ore: 1 },
-				{ wood: 1, diamond: 1 },
-				{ wood: 1, netherite: 1 }
-			],
-			slot: 'weapon'
-		}, {
+            label: '🔪 匕首',
+            category: 'weapon',
+            ids: ['wood_dagger', 'stone_dagger', 'copper_dagger', 'iron_dagger', 'gold_dagger', 'diamond_dagger',
+                'netherite_dagger'
+            ],
+            baseCost: { wood: 2 },
+            upgradeCosts: [
+                { wood: 1, stone: 1 },
+                { wood: 1, copper_ore: 1 },
+                { wood: 1, iron_ore: 1 },
+                { wood: 1, gold_ore: 1 },
+                { wood: 1, diamond: 1 },
+                { wood: 1, netherite: 1 }
+            ],
+            slot: 'weapon'
+        }, {
             label: '🔪 打刀',
             category: 'weapon',
             ids: ['wood_katana', 'stone_katana', 'copper_katana', 'iron_katana', 'gold_katana', 'diamond_katana',
@@ -5836,6 +6442,12 @@
             category: 'tool',
             ids: ['bed'],
             baseCost: { wool: 3, wood: 3 },
+            upgradeCosts: []
+        }, {
+            label: '🗑️ 鐵桶',
+            category: 'tool',
+            ids: ['bucket'],
+            baseCost: { iron_ore: 3 },
             upgradeCosts: []
         }, {
             label: '🛡️ 盾牌',
@@ -6266,6 +6878,11 @@
                 G.netherOriginMapId = '';
                 G.netherOriginX = 0;
                 G.netherOriginY = 0;
+                G.inHeaven = false;
+                G.tempHeavenMap = null;
+                G.heavenOriginMapId = '';
+                G.heavenOriginX = 0;
+                G.heavenOriginY = 0;
                 G.savedWeather = null;
                 gameoverOverlay.classList.add('hidden');
                 initMapChain();
@@ -6302,7 +6919,7 @@
         function loadGameFromLocalData(data) {
             const fullMaps = {};
             for (const [id, mapData] of Object.entries(data.maps || {})) {
-                if (id === 'cave_temp' || id === 'nether_temp') {
+                if (id === 'cave_temp' || id === 'nether_temp' || id === 'heaven_temp') {
                     fullMaps[id] = mapData;
                 } else if (mapData && typeof mapData === 'object') {
                     if (mapData.terrainDiff && mapData.objectsDiff) fullMaps[id] = decompressMap(mapData);
@@ -6386,9 +7003,36 @@
                 if (G.maps['nether_temp']) delete G.maps['nether_temp'];
             }
 
+            if (data.inHeaven) {
+                G.inHeaven = true;
+                G.heavenOriginMapId = data.heavenOriginMapId || 'plain';
+                G.heavenOriginX = data.heavenOriginX || 9;
+                G.heavenOriginY = data.heavenOriginY || 9;
+                if (G.maps['heaven_temp']) {
+                    const compressed = G.maps['heaven_temp'];
+                    if (compressed.terrainDiff && compressed.objectsDiff) {
+                        G.tempHeavenMap = decompressMap(compressed);
+                    } else {
+                        G.tempHeavenMap = generateMap('heaven');
+                    }
+                    G.maps['heaven_temp'] = G.tempHeavenMap;
+                } else {
+                    G.tempHeavenMap = generateMap('heaven');
+                    G.maps['heaven_temp'] = G.tempHeavenMap;
+                }
+                G.map = G.tempHeavenMap;
+                G.currentMapId = 'heaven';
+                if (G.player.x < 0 || G.player.x >= G.map.width) G.player.x = 9;
+                if (G.player.y < 0 || G.player.y >= G.map.height) G.player.y = 9;
+            } else {
+                G.inHeaven = false;
+                G.tempHeavenMap = null;
+                if (G.maps['heaven_temp']) delete G.maps['heaven_temp'];
+            }
+
             const p = G.player;
             p.discoveredMaps = data.discoveredMaps || ['plain'];
-            if (!G.inCave && !G.inNether) {
+            if (!G.inCave && !G.inNether && !G.inHeaven) {
                 G.map = getMap(p.mapId);
             }
             for (const id of G.mapChain) { if (G.maps[id]) setupArrows(id); }
@@ -6450,6 +7094,11 @@
                     netherOriginX: 0,
                     netherOriginY: 0,
                     tempNetherMap: null,
+                    inHeaven: false,
+                    heavenOriginMapId: '',
+                    heavenOriginX: 0,
+                    heavenOriginY: 0,
+                    tempHeavenMap: null,
                     savedWeather: null,
                 };
                 game.style.display = 'none';
@@ -6571,24 +7220,24 @@
             }
             const p = G.player;
             const obj = G.map.objects[gy]?.[gx];
-			if (obj && obj.type === 'mob') {
-				const weaponId = p.equipment.weapon;
-				const weapon = weaponId ? ITEMS[weaponId] : null;
-				const dx = Math.abs(gx - p.x);
-				const dy = Math.abs(gy - p.y);
-				const dist = dx + dy;
-				if (weapon && weapon.range && dist <= weapon.range) {
-					rangedAttackTarget(obj.mobId, gx, gy);
-					return;
-				}
-				if (dist === 1 && (dx + dy) === 1) {
-					movePlayer(gx - p.x, gy - p.y);
-					return;
-				}
-				toast('距離太遠，無法攻擊！', 'warning');
-				return;
-			}
-			if (gx === p.x && gy === p.y) {
+            if (obj && obj.type === 'mob') {
+                const weaponId = p.equipment.weapon;
+                const weapon = weaponId ? ITEMS[weaponId] : null;
+                const dx = Math.abs(gx - p.x);
+                const dy = Math.abs(gy - p.y);
+                const dist = dx + dy;
+                if (weapon && weapon.range && dist <= weapon.range) {
+                    rangedAttackTarget(obj.mobId, gx, gy);
+                    return;
+                }
+                if (dist === 1 && (dx + dy) === 1) {
+                    movePlayer(gx - p.x, gy - p.y);
+                    return;
+                }
+                toast('距離太遠，無法攻擊！', 'warning');
+                return;
+            }
+            if (gx === p.x && gy === p.y) {
                 if (obj) {
                     handleObjectInteraction(obj, p.x, p.y);
                 } else {
@@ -6666,24 +7315,20 @@
         document.addEventListener('DOMContentLoaded', function() {
             const copyright = document.getElementById('copyright');
             if (copyright) {
-                copyright.textContent = `v2.0 © ${new Date().getFullYear()} ☕迪遜咖啡廳，版權所有。`;
+                copyright.textContent = `v3.0 © ${new Date().getFullYear()} ☕迪遜咖啡廳，版權所有。`;
             }
         });
 
-        console.log('⛏️ 方塊傳說 v2.1 已載入！新增蘑菇、树苗、骨頭催熟等');
-        console.log('🎮 操作: 方向鍵移動 | R休息 | I背包 | E裝備 | K製作 | F遠程攻擊');
-        console.log('🔦 火把：1煤+1木製作，裝備盾牌位，夜晚照明並驅逐主動怪物');
-        console.log('🔱 長槍：可遠程攻擊2格內生物');
-        console.log('🏹 弓/弩：可遠程攻擊3格內生物');
-        console.log('❄️ 冰刺之地：下雨→下雪，雷雨→大雪');
-        console.log('🦇 蝙蝠：夜晚生成，被動生物');
-        console.log('🐇 兔：冰刺之地生成，掉落兔肉、皮革、兔腳');
-        console.log('🐻‍❄️ 北極熊：冰刺之地生成，主動生物');
-        console.log('💀 流浪者：冰刺之地生成，藍框，數值同骷髏弓箭手');
-        console.log('🤢 喪屍村民：有喪屍的地方就有，數值同喪屍');
-        console.log('🧟‍♂️ 屍殼：沙漠晚上生成，啡框，數值同喪屍，白天不消失');
-        console.log('🧟‍♂️ 沉屍：海洋/河流晚上生成，藍框，數值同喪屍，白天消失');
-        console.log('🧊 冰刺之地藍色冰塊：有框藍色正方形，1x1或2x2');
+        console.log('⛏️ 方塊傳說 v3.0 已載入！');
+        console.log('🆕 新增：雪原、鐵桶/水桶、天堂、傳送門外框、河流/海洋陸地、水邏輯');
+        console.log('🎮 操作: 方向鍵移動 | R休息 | I背包 | E裝備 | K製作 | F遠程攻擊 | 空格交互');
+        console.log('🌊 鐵桶裝水：站在河流/海洋/湖的水中，打開背包點擊鐵桶 → 獲得水桶');
+        console.log('🚪 天堂：裝備水桶後踩入黃色傳送門進出');
+        console.log('🔥 地獄傳送門：紅色外框，需要火把');
+        console.log('☁️ 天堂：空島地形，只生成樹、石頭、礦物、豬');
+        console.log('🏔️ 雪原：雪地+冰地+草地，冰地旁草地生🎋樹木');
+        console.log('🌊 河流/海洋：新增陸地，魚不上陸地，drowned上');
+        console.log('💧 水中消耗MP，陸地回復MP');
     </script>
 </body>
 </html>
