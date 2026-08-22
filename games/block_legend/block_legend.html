@@ -1149,7 +1149,7 @@
                 <div class="modal-overlay" id="trader-modal">
                     <div class="modal-box">
                         <button class="close-btn" id="traderCloseBtn">✕</button>
-                        <h2>🧳 流浪商人營地</h2>
+                        <h2>⛺ 流浪商人營地</h2>
                         <div style="font-size:12px;color:#aaa;margin-bottom:4px;">💰 金錢: <span id="traderGold">0</span></div>
                         <div id="trader-grid"></div>
                     </div>
@@ -1591,7 +1591,6 @@
             'gold_ore': { id: 'gold_ore', name: '金礦', icon: '🟡', type: 'resource', desc: '金礦石' },
             'diamond': { id: 'diamond', name: '鑽石', icon: '💎', type: 'resource', desc: '珍貴寶石' },
             'netherite': { id: 'netherite', name: '獄髓', icon: '⚫', type: 'resource', desc: '獄髓' },
-            'bed': { id: 'bed', name: '床', icon: '🛏️', type: 'bed', desc: '放置後可在夜晚休息' },
             'wheat': { id: 'wheat', name: '小麥', icon: '🌾', type: 'resource', desc: '農作物' },
 			'red_mushroom': { id: 'red_mushroom', name: '红色蘑菇', icon: '🍄', type: 'resource', desc: '可出售或用于催熟' },
             'brown_mushroom': { id: 'brown_mushroom', name: '啡色蘑菇', icon: '🍄', type: 'resource', desc: '可出售或用于催熟' },
@@ -1623,6 +1622,8 @@
             'carrot': { id: 'carrot', name: '胡蘿蔔', icon: '🥕', type: 'food', heal: 2, desc: '食用恢復2HP' },
             'potato': { id: 'potato', name: '馬鈴薯', icon: '🥔', type: 'food', sp: 2, desc: '食用恢復2SP' },
             'torch': { id: 'torch', name: '火把', icon: '🔦', type: 'shield', def: 0, desc: '照亮夜晚，驅散主動怪物' },
+			'shears': { id: 'shears', name: '剪刀', icon: '✂️', type: 'shield', def: 0, desc: '裝備後殺羊能獲得更多羊毛' },
+			'bed': { id: 'bed', name: '床', icon: '🛏️', type: 'bed', desc: '放置後可在夜晚休息' },
             'rabbit_foot': { id: 'rabbit_foot', name: '兔腳', icon: '🥠', type: 'resource', desc: '幸運兔腳' },
             'bear_meat': { id: 'bear_meat', name: '熊肉', icon: '🥩', type: 'food', heal: 6, sp: 4, desc: '食用恢復6HP+4SP' },
             'rabbit_meat': { id: 'rabbit_meat', name: '兔肉', icon: '🥩', type: 'food', heal: 3, sp: 2, desc: '食用恢復3HP+2SP' },
@@ -1648,6 +1649,13 @@
                 desc: '攻擊+8, 伐木Lv6' },
             'netherite_axe': { id: 'netherite_axe', name: '獄髓斧', icon: '🪓', type: 'weapon', atk: 9, tool: 'axe',
                 level: 7, desc: '攻擊+9, 伐木Lv7' },
+			'wood_dagger': { id: 'wood_dagger', name: '木匕首', icon: '🔪', type: 'weapon', atk: 1, desc: '攻擊+1，可偷襲敵人' },
+			'stone_dagger': { id: 'stone_dagger', name: '石匕首', icon: '🔪', type: 'weapon', atk: 2, desc: '攻擊+2，可偷襲敵人' },
+			'copper_dagger': { id: 'copper_dagger', name: '銅匕首', icon: '🔪', type: 'weapon', atk: 3, desc: '攻擊+3，可偷襲敵人' },
+			'iron_dagger': { id: 'iron_dagger', name: '鐵匕首', icon: '🔪', type: 'weapon', atk: 4, desc: '攻擊+4，可偷襲敵人' },
+			'gold_dagger': { id: 'gold_dagger', name: '金匕首', icon: '🔪', type: 'weapon', atk: 5, desc: '攻擊+5，可偷襲敵人' },
+			'diamond_dagger': { id: 'diamond_dagger', name: '鑽石匕首', icon: '🔪', type: 'weapon', atk: 6, desc: '攻擊+6，可偷襲敵人' },
+			'netherite_dagger': { id: 'netherite_dagger', name: '獄髓匕首', icon: '🔪', type: 'weapon', atk: 7, desc: '攻擊+7，可偷襲敵人' },
             'wood_katana': { id: 'wood_katana', name: '木打刀', icon: '🔪', type: 'weapon', atk: 3, desc: '攻擊+3' },
             'stone_katana': { id: 'stone_katana', name: '石打刀', icon: '🔪', type: 'weapon', atk: 4, desc: '攻擊+4' },
             'copper_katana': { id: 'copper_katana', name: '銅打刀', icon: '🔪', type: 'weapon', atk: 5, desc: '攻擊+5' },
@@ -1808,6 +1816,8 @@
                 drops: [{ id: 'bone', chance: 0.3, count: 1 }, { id: 'bow', chance: 0.085, count: 1 }] },
             'spider': { id: 'spider', name: '🕷️ 蜘蛛', hp: 16, atk: 3, def: 0, exp: 5, gold: 0, passive: false,
                 drops: [{ id: 'string', chance: 0.67, count: 1 }, { id: 'spider_eye', chance: 0.33, count: 1 }] },
+			'cave_spider': { id: 'cave_spider', name: '🕷️ 洞穴蜘蛛', hp: 12, atk: 3, def: 0, exp: 5, gold: 0, passive: false,
+				drops: [{ id: 'string', chance: 0.67, count: 1 }, { id: 'spider_eye', chance: 0.33, count: 1 }] },
             'zombie_pigman': { id: 'zombie_pigman', name: '🐽 喪屍豬人', hp: 20, atk: 12, def: 0, exp: 8, gold: 8,
                 passive: false,
                 drops: [{ id: 'rotten_flesh', chance: 0.5, count: 1 }, { id: 'gold_ore', chance: 0.025, count: 1 },
@@ -1908,6 +1918,7 @@
                 baseAtk: 1,
                 baseDef: 0,
                 gold: 0,
+				poisonTicks: 0,
                 x: 9,
                 y: 9,
                 mapId: 'plain',
@@ -3181,6 +3192,13 @@
                     toast('💧 氧氣耗盡，生命 -1', 'warning', 800);
                 }
             }
+			
+			if (p.poisonTicks > 0) {
+				p.hp = Math.max(0, p.hp - 1);
+				p.poisonTicks--;
+				if (p.hp <= 0) { die(); return; }
+				toast(`☠️ 中毒，剩餘 ${p.poisonTicks+1} 步`, 'warning', 1000);
+			}
 
             if (obj) handleObjectInteraction(obj, nx, ny);
             else { render();
@@ -3229,10 +3247,19 @@
             if (!mobData) return;
 
             if (mobData.passive) {
-                const drops = mobData.drops || [];
+                let extraWool = 0;
+				if (mobId === 'sheep' && p.equipment.shield === 'shears') {
+					extraWool = 3;
+				}
+				const drops = mobData.drops || [];
                 let dropMsg = [];
                 for (const drop of drops) {
-                    if (Math.random() < drop.chance) {
+                    let count = drop.count || 1;
+					if (drop.id === 'wool' && extraWool > 0) {
+						count += extraWool;
+						extraWool = 0;
+					}
+					if (Math.random() < drop.chance) {
                         addItem(drop.id, drop.count || 1);
                         const item = getItemDisplay(drop.id);
                         dropMsg.push(`${item.icon}${item.name}x${drop.count||1}`);
@@ -3458,6 +3485,25 @@
                         return;
                     }
                 }
+				if (weapon && weapon.id && weapon.id.endsWith('_dagger')) {
+					const mobData = MOBS[obj.mobId];
+					if (mobData && !mobData.passive) {
+						const atk = getPlayerAtk(p);
+						const def = mobData.def || 0;
+						let damage = Math.max(1, atk - Math.floor(def / 2) + rand(-2, 4));
+						const remainingHp = mobData.hp - damage;
+						if (remainingHp <= 0) {
+							killMobDirect(obj.mobId, x, y);
+						} else {
+							startBattle(obj.mobId, x, y, remainingHp);
+						}
+						return;
+					}
+					if (mobData && mobData.passive) {
+						killMobDirect(obj.mobId, x, y);
+						return;
+					}
+				}
                 startBattle(obj.mobId, x, y);
                 return;
             }
@@ -3564,35 +3610,20 @@
         }
 
         // ===== 戰鬥 =====
-        function startBattle(mobId, x, y) {
-            const p = G.player;
-            const mobData = MOBS[mobId];
-            if (!mobData) return;
-            if (mobData.passive) {
-                const drops = mobData.drops || [];
-                let dropMsg = [];
-                for (const drop of drops) {
-                    if (Math.random() < drop.chance) {
-                        addItem(drop.id, drop.count || 1);
-                        const item = getItemDisplay(drop.id);
-                        dropMsg.push(`${item.icon}${item.name}x${drop.count||1}`);
-                    }
-                }
-                p.totalKills++;
-                p.exp += mobData.exp || 5;
-                p.gold += mobData.gold || 0;
-                G.map.objects[y][x] = null;
-                toast(`✅ 擊殺 ${mobData.name}！獲得 ${mobData.exp}經驗 ${dropMsg.join(' ')}`, 'success');
-                checkLevelUp();
-                checkAchievements();
-                render();
-                updateUI();
-                playSound(500, 0.2);
-                saveGameToLocal();
-                return;
-            }
-
-            const enemy = { ...mobData, currentHp: mobData.hp, maxHp: mobData.hp, x, y, mobId };
+        function startBattle(mobId, x, y, initialHp) {
+			const p = G.player;
+			const mobData = MOBS[mobId];
+			if (!mobData) return;
+			if (initialHp !== undefined && initialHp <= 0) {
+				killMobDirect(mobId, x, y);
+				return;
+			}
+			if (mobData.passive) {
+				killMobDirect(mobId, x, y);
+				return;
+			}
+			const hp = (initialHp !== undefined) ? initialHp : mobData.hp;
+			const enemy = { ...mobData, currentHp: hp, maxHp: hp, x, y, mobId };
             G.battle = { enemy, log: ['⚔️ 戰鬥開始！'], state: 'player_turn', turn: 0, ended: false };
             $('battle-modal').classList.add('active');
             renderBattle();
@@ -3661,23 +3692,33 @@
         }
 
         function enemyAttack() {
-            const b = G.battle;
-            if (!b || b.ended) return;
-            const p = G.player;
-            const e = b.enemy;
-            animateBattle('enemy', 'player', () => {
-                const atk = e.atk || 5;
-                const def = getPlayerDef(p);
-                let damage = Math.max(1, atk - Math.floor(def / 2) + rand(-2, 3));
-                p.hp = Math.max(0, p.hp - damage);
-                b.log.push(`💢 ${e.name} 對你造成 ${damage} 點傷害！`);
-                playSound(200, 0.2);
-                if (p.hp <= 0) { battleLose(); return; }
-                b.state = 'player_turn';
-                renderBattle();
-                updateUI();
-            });
-        }
+			const b = G.battle;
+			if (!b || b.ended) return;
+			const p = G.player;
+			const e = b.enemy;
+			animateBattle('enemy', 'player', () => {
+				const atk = e.atk || 5;
+				const def = getPlayerDef(p);
+				let damage = Math.max(1, atk - Math.floor(def / 2) + rand(-2, 3));
+				p.hp = Math.max(0, p.hp - damage);
+				b.log.push(`💢 ${e.name} 對你造成 ${damage} 點傷害！`);
+				playSound(200, 0.2);
+				if (e.mobId === 'cave_spider') {
+					p.poisonTicks = 15;
+					b.log.push(`☠️ 你中毒了！每回合/每步將損失 1 HP，持續15次！`);
+				}
+				if (p.poisonTicks > 0) {
+					p.hp = Math.max(0, p.hp - 1);
+					p.poisonTicks--;
+					b.log.push(`☠️ 毒發，損失 1 HP，剩餘 ${p.poisonTicks} 回合`);
+					if (p.hp <= 0) { battleLose(); return; }
+				}
+				if (p.hp <= 0) { battleLose(); return; }
+				b.state = 'player_turn';
+				renderBattle();
+				updateUI();
+			});
+		}
 
         function battleWin() {
             const b = G.battle;
@@ -3840,6 +3881,7 @@
                 'toolsmith': '🛠️ 工具匠',
                 'fletcher': '🏹 製箭匠',
                 'shepherd': '👨‍🌾 牧羊人',
+				'butcher': '🍴 屠夫',
                 'farmer': '👨‍🌾 農夫'
             };
             $('shopTitle').textContent = (title[profession] || '🏘️ 村莊商店');
@@ -3851,6 +3893,7 @@
             else if (profession === 'toolsmith') renderToolsmith(content, refreshAll);
             else if (profession === 'fletcher') renderFletcher(content, refreshAll);
             else if (profession === 'shepherd') renderShepherd(content, refreshAll);
+			else if (profession === 'butcher') renderButcher(content, refreshAll);
             else if (profession === 'farmer') renderFarmer(content, refreshAll);
             const buySection = document.createElement('div');
             buySection.style.marginTop = '12px';
@@ -4074,6 +4117,114 @@
             }, refresh);
         }
 
+		function renderButcher(container, refreshFunc) {
+			container.innerHTML = '';
+			const refresh = refreshFunc || (() => renderButcher(container, refreshFunc));
+			renderUpgradeChain(container, {
+				label: '🔪 匕首',
+				ids: ['wood_dagger', 'stone_dagger', 'copper_dagger', 'iron_dagger', 'gold_dagger', 'diamond_dagger', 'netherite_dagger'],
+				baseCost: { gold: 4 },
+				upgradeCosts: [{ gold: 6 }, { gold: 10 }, { gold: 18 }, { gold: 34 }, { gold: 66 }, { gold: 130 }],
+				slot: 'weapon'
+			}, refresh);
+			const shearsDiv = document.createElement('div');
+			shearsDiv.className = 'shop-item';
+			const p = G.player;
+			const canBuy = p.gold >= 32;
+			shearsDiv.innerHTML = `<span>✂️ 剪刀 <span class="cost">💰32</span></span><button ${canBuy ? '' : 'disabled'}>購買</button>`;
+			shearsDiv.querySelector('button').addEventListener('click', () => {
+				if (p.gold >= 32) {
+					p.gold -= 32;
+					addItem('shears', 1);
+					toast('✅ 獲得剪刀', 'success');
+					refresh();
+					updateUI();
+					saveGameToLocal();
+				}
+			});
+			container.appendChild(shearsDiv);
+			const meats = [
+				{ id: 'raw_fish', name: '魚肉', price: 4 },
+				{ id: 'raw_chicken', name: '雞肉', price: 4 },
+				{ id: 'raw_duck', name: '鴨肉', price: 4 },
+				{ id: 'raw_pork', name: '生豬排', price: 6 },
+				{ id: 'raw_beef', name: '生牛肉', price: 6 },
+				{ id: 'raw_mutton', name: '生羊肉', price: 6 },
+				{ id: 'horsemeat', name: '馬肉', price: 6 },
+				{ id: 'camelmeat', name: '駱駝肉', price: 6 },
+				{ id: 'bear_meat', name: '熊肉', price: 6 },
+				{ id: 'rabbit_meat', name: '兔肉', price: 4 },
+			];
+			const meatSection = document.createElement('div');
+			meatSection.style.marginTop = '8px';
+			meatSection.innerHTML = '<h3 style="color:#8ab4f8;font-size:14px;border-bottom:1px solid #2a4a6a;padding-bottom:4px;">🥩 肉類</h3>';
+			for (const m of meats) {
+				const div = document.createElement('div');
+				div.className = 'shop-item';
+				const canBuyMeat = p.gold >= m.price;
+				div.innerHTML = `<span>${getItemDisplay(m.id).icon} ${m.name} <span class="cost">💰${m.price}</span></span><button ${canBuyMeat ? '' : 'disabled'}>購買</button>`;
+				div.querySelector('button').addEventListener('click', () => {
+					if (p.gold >= m.price) {
+						p.gold -= m.price;
+						addItem(m.id, 1);
+						toast(`✅ 購買 ${m.name}`, 'success');
+						refresh();
+						updateUI();
+						saveGameToLocal();
+					}
+				});
+				meatSection.appendChild(div);
+			}
+			container.appendChild(meatSection);
+			const buySection = document.createElement('div');
+			buySection.style.marginTop = '12px';
+			buySection.innerHTML = '<h3 style="color:#8ab4f8;font-size:14px;border-bottom:1px solid #2a4a6a;padding-bottom:4px;">💰 出售給屠夫</h3>';
+			const buyable = [
+				{ id: 'wood', icon: '🎋', name: '木材', price: 1 },
+				{ id: 'stone', icon: '🗻', name: '石頭', price: 2 },
+				{ id: 'coal', icon: '🌑', name: '煤炭', price: 3 },
+				{ id: 'leather', icon: '🟫', name: '皮革', price: 4 },
+				{ id: 'wool', icon: '🧶', name: '羊毛', price: 1 },
+				{ id: 'string', icon: '🧵', name: '線', price: 1 },
+				{ id: 'feather', icon: '🕊️', name: '羽毛', price: 2 },
+				{ id: 'rotten_flesh', icon: '🥓', name: '腐肉', price: 3 },
+				{ id: 'bone', icon: '🦴', name: '骨頭', price: 3 },
+				{ id: 'spider_eye', icon: '👁️', name: '蜘蛛眼', price: 4 },
+				{ id: 'raw_fish', icon: '🐟', name: '魚肉', price: 2 },
+				{ id: 'raw_chicken', icon: '🍗', name: '雞肉', price: 2 },
+				{ id: 'raw_duck', icon: '🍗', name: '鴨肉', price: 2 },
+				{ id: 'raw_pork', icon: '🥩', name: '生豬排', price: 3 },
+				{ id: 'raw_beef', icon: '🥩', name: '生牛肉', price: 3 },
+				{ id: 'raw_mutton', icon: '🥩', name: '生羊肉', price: 3 },
+				{ id: 'horsemeat', icon: '🥩', name: '馬肉', price: 3 },
+				{ id: 'camelmeat', icon: '🥩', name: '駱駝肉', price: 3 },
+				{ id: 'bear_meat', icon: '🥩', name: '熊肉', price: 3 },
+				{ id: 'rabbit_meat', icon: '🥩', name: '兔肉', price: 2 },
+				{ id: 'honey', icon: '🍯', name: '蜜糖', price: 6 },
+			];
+			for (const item of buyable) {
+				const count = countItem(item.id);
+				const div = document.createElement('div');
+				div.className = 'shop-item';
+				const canSell = count > 0;
+				div.innerHTML = `
+						<span>${item.icon} ${item.name} x1 <span class="cost">💰 ${item.price}</span> (持有: ${count})</span>
+						<button ${canSell ? '' : 'disabled'}>出售</button>
+					`;
+				div.querySelector('button').addEventListener('click', () => {
+					if (removeItem(item.id, 1)) {
+						p.gold += item.price;
+						toast(`💰 賣出 ${item.name} +${item.price}金`, 'success');
+						refresh();
+						updateUI();
+						saveGameToLocal();
+					} else toast('❌ 材料不足', 'warning');
+				});
+				buySection.appendChild(div);
+			}
+			container.appendChild(buySection);
+		}
+
         function renderFarmer(container, refreshFunc) {
             container.innerHTML = '';
             const p = G.player;
@@ -4261,9 +4412,9 @@
             container.innerHTML = '';
             const goods = [
                 { id: 'wood', name: '木材', price: 2 },
-				{ id: 'red_mushroom', icon: '🍄', name: '红色蘑菇', price: 4 },
-				{ id: 'brown_mushroom', icon: '🍄', name: '啡色蘑菇', price: 4 },
-				{ id: 'sapling', icon: '🌱', name: '樹苗', price: 16 },
+				{ id: 'red_mushroom', name: '红色蘑菇', price: 4 },
+				{ id: 'brown_mushroom', name: '啡色蘑菇', price: 4 },
+				{ id: 'sapling', name: '樹苗', price: 16 },
                 { id: 'stone', name: '石頭', price: 4 },
                 { id: 'coal', name: '煤炭', price: 6 },
                 { id: 'leather', name: '皮革', price: 8 },
@@ -4281,6 +4432,8 @@
                 { id: 'wood_axe', name: '木斧', price: 10 },
                 { id: 'wood_katana', name: '木打刀', price: 6 },
                 { id: 'wood_pickaxe', name: '木鎬', price: 10 },
+				{ id: 'torch', name: '火把', price: 8 },
+				{ id: 'shears', name: '剪刀', price: 32 },
                 { id: 'leather_helmet', name: '皮帽', price: 40 },
                 { id: 'leather_chestplate', name: '皮甲', price: 64 },
                 { id: 'leather_gloves', name: '皮手套', price: 32 },
@@ -4348,6 +4501,8 @@
                 { id: 'apple', icon: '🍎', name: '蘋果', price: 2 },
                 { id: 'carrot', icon: '🥕', name: '胡蘿蔔', price: 2 },
                 { id: 'potato', icon: '🥔', name: '馬鈴薯', price: 2 },
+				{ id: 'torch', icon: '🔦', name: '火把', price: 4 },
+				{ id: 'shears', icon: '✂', name: '剪刀', price: 16 },
                 { id: 'stone_sword', icon: '🗡️', name: '石劍', price: 17 },
                 { id: 'iron_sword', icon: '🗡️', name: '鐵劍', price: 33 },
                 { id: 'gold_sword', icon: '🗡️', name: '金劍', price: 65 },
@@ -4389,8 +4544,41 @@
             container.appendChild(refreshBtn);
             $('trader-modal').classList.add('active');
         }
-
-        // ===== 床 =====
+		// ===== 匕首擊殺並掉落 =====
+        function killMobDirect(mobId, x, y) {
+			const p = G.player;
+			const map = G.map;
+			const mobData = MOBS[mobId];
+			if (!mobData) return;
+			const obj = map.objects[y]?.[x];
+			if (!obj || obj.type !== 'mob' || obj.mobId !== mobId) return;
+			const drops = mobData.drops || [];
+			let dropMsg = [];
+			for (const drop of drops) {
+				if (Math.random() < drop.chance) {
+					let count = drop.count || 1;
+					// 剪刀效果：杀羊得3羊毛
+					if (mobId === 'sheep' && p.equipment.shield === 'shears') {
+						if (drop.id === 'wool') count += 3;
+					}
+					addItem(drop.id, count);
+					const item = getItemDisplay(drop.id);
+					dropMsg.push(`${item.icon}${item.name}x${count}`);
+				}
+			}
+			p.totalKills++;
+			p.exp += mobData.exp || 5;
+			p.gold += mobData.gold || 0;
+			map.objects[y][x] = null;
+			toast(`✅ 擊殺 ${mobData.name}！獲得 ${mobData.exp}經驗 ${dropMsg.join(' ')}`, 'success');
+			checkLevelUp();
+			checkAchievements();
+			render();
+			updateUI();
+			saveGameToLocal();
+			playSound(500, 0.2);
+		}
+		// ===== 床 =====
 		function placeBedDirect() {
             const p = G.player;
             const map = G.map;
@@ -5551,6 +5739,20 @@
             ],
             slot: 'weapon'
         }, {
+			label: '🔪 匕首',
+			category: 'weapon',
+			ids: ['wood_dagger', 'stone_dagger', 'copper_dagger', 'iron_dagger', 'gold_dagger', 'diamond_dagger', 'netherite_dagger'],
+			baseCost: { wood: 2 },
+			upgradeCosts: [
+				{ wood: 1, stone: 1 },
+				{ wood: 1, copper_ore: 1 },
+				{ wood: 1, iron_ore: 1 },
+				{ wood: 1, gold_ore: 1 },
+				{ wood: 1, diamond: 1 },
+				{ wood: 1, netherite: 1 }
+			],
+			slot: 'weapon'
+		}, {
             label: '🔪 打刀',
             category: 'weapon',
             ids: ['wood_katana', 'stone_katana', 'copper_katana', 'iron_katana', 'gold_katana', 'diamond_katana',
@@ -6081,7 +6283,7 @@
                 updateUI();
                 render();
                 saveGameToLocal();
-                toast('🌍 歡迎！方向鍵移動 | R休息 | I背包 | E裝備 | K製作 | F遠程攻擊', 'info', 3000);
+                toast('🌍 歡迎！方向鍵移動 | I背包 | E裝備 | K製作 | 空白鍵原地交互 | F遠程攻擊 | R休息', 'info', 3000);
             }
             cover.style.display = 'none';
             game.style.display = 'flex';
