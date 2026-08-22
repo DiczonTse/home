@@ -1560,6 +1560,7 @@
                         stopRainLoop();
                     }
                     refreshMobsOnMap();
+					growSaplings();
                     updateMusic();
                     if (G.weather === 'rain') {
                         if (mapId === 'ice') { startRainSound();
@@ -4461,49 +4462,95 @@
         }
 
         function useBone() {
-            const p = G.player;
-            const map = G.map;
-            const x = p.x, y = p.y;
-            const obj = map.objects[y]?.[x];
-            if (!obj) { toast('這裡沒有可用目標', 'info'); return; }
-            let valid = false;
-            if (obj.type === 'sapling') valid = true;
-            else if (obj.type === 'red_mushroom') valid = true;
-            else if (obj.type === 'brown_mushroom') valid = true;
-            if (!valid) { toast('這裡無法使用骨頭', 'info'); return; }
-            if (!removeItem('bone', 1)) { toast('你沒有骨頭', 'warning'); return; }
+			const p = G.player;
+			const map = G.map;
+			const x = p.x, y = p.y;
+			const obj = map.objects[y]?.[x];
+			if (obj && (obj.type === 'sapling' || obj.type === 'red_mushroom' || obj.type === 'brown_mushroom')) {
+				let valid = false;
+				if (obj.type === 'sapling') valid = true;
+				else if (obj.type === 'red_mushroom') valid = true;
+				else if (obj.type === 'brown_mushroom') valid = true;
+				if (!valid) { toast('這裡無法使用骨頭', 'info'); return; }
+				if (!removeItem('bone', 1)) { toast('你沒有骨頭', 'warning'); return; }
 
-            let success = false;
-            if (obj.type === 'sapling') {
-                if (Math.random() < 0.45) {
-                    const variant = Math.random() < 0.5 ? 'oak' : 'birch';
-                    map.objects[y][x] = { type: 'tree', variant };
-                    toast('🌳 樹苗長成大樹！', 'success');
-                    success = true;
-                } else {
-                    toast('🦴 骨頭沒能讓樹苗生長', 'info');
-                }
-            } else if (obj.type === 'red_mushroom') {
-                if (Math.random() < 0.40) {
-                    map.objects[y][x] = { type: 'giant_red_mushroom' };
-                    toast('🍄 紅色蘑菇變成了巨型紅色蘑菇！', 'success');
-                    success = true;
-                } else {
-                    toast('🦴 骨頭沒能讓蘑菇變大', 'info');
-                }
-            } else if (obj.type === 'brown_mushroom') {
-                if (Math.random() < 0.40) {
-                    map.objects[y][x] = { type: 'giant_brown_mushroom' };
-                    toast('🍄 啡色蘑菇變成了巨型啡色蘑菇！', 'success');
-                    success = true;
-                } else {
-                    toast('💀 骨頭沒能讓蘑菇變大', 'info');
-                }
-            }
-            render();
-            updateUI();
-            saveGameToLocal();
-        }
+				let success = false;
+				if (obj.type === 'sapling') {
+					if (Math.random() < 0.45) {
+						const variant = Math.random() < 0.5 ? 'oak' : 'birch';
+						map.objects[y][x] = { type: 'tree', variant };
+						toast('🌳 樹苗長成大樹！', 'success');
+						success = true;
+					} else {
+						toast('🦴 骨頭沒能讓樹苗生長', 'info');
+					}
+				} else if (obj.type === 'red_mushroom') {
+					if (Math.random() < 0.40) {
+						map.objects[y][x] = { type: 'giant_red_mushroom' };
+						toast('🍄 紅色蘑菇變成了巨型紅色蘑菇！', 'success');
+						success = true;
+					} else {
+						toast('🦴 骨頭沒能讓蘑菇變大', 'info');
+					}
+				} else if (obj.type === 'brown_mushroom') {
+					if (Math.random() < 0.40) {
+						map.objects[y][x] = { type: 'giant_brown_mushroom' };
+						toast('🍄 啡色蘑菇變成了巨型啡色蘑菇！', 'success');
+						success = true;
+					} else {
+						toast('💀 骨頭沒能讓蘑菇變大', 'info');
+					}
+				}
+				render();
+				updateUI();
+				saveGameToLocal();
+				return;
+			}
+			if (!obj) {
+				const excludeMaps = ['cave', 'nether', 'ice', 'desert', 'river', 'ocean'];
+				if (excludeMaps.includes(p.mapId)) {
+					toast('此地無法使用骨頭生成花草', 'warning');
+					return;
+				}
+				const offsets = [[0,0],[1,0],[-1,0],[0,1],[0,-1]];
+				let available = [];
+				for (const [dx, dy] of offsets) {
+					const nx = x + dx, ny = y + dy;
+					if (nx >= 0 && nx < map.width && ny >= 0 && ny < map.height) {
+						if (!map.objects[ny]?.[nx]) {
+							available.push({x: nx, y: ny});
+						}
+					}
+				}
+				if (available.length === 0) {
+					toast('周圍沒有空地可以生成花草', 'info');
+					return;
+				}
+				if (!removeItem('bone', 1)) {
+					toast('你沒有骨頭', 'warning');
+					return;
+				}
+				let flowerCount = 0, grassCount = 0;
+				for (const spot of available) {
+					const isFlower = Math.random() < 0.3; //
+					if (isFlower) {
+						const variants = ['tulip', 'daisy', 'sunflower'];
+						const variant = variants[rand(0, variants.length - 1)];
+						map.objects[spot.y][spot.x] = { type: 'flower', variant };
+						flowerCount++;
+					} else {
+						map.objects[spot.y][spot.x] = { type: 'grass' };
+						grassCount++;
+					}
+				}
+				toast(`🌸 骨頭催生了 ${flowerCount} 朵花和 ${grassCount} 片草！`, 'success');
+				render();
+				updateUI();
+				saveGameToLocal();
+				return;
+			}
+			toast('這裡無法使用骨頭', 'info');
+		}
 
         // ===== 渲染（新增：冰塊、流浪者藍框、屍殼啡框、沉屍藍框） =====
         function render() {
@@ -4622,32 +4669,20 @@
                             color = '#ff69b4'; } else { icon = '🌼';
                             color = '#ffd700'; }
                     } else if (obj.type === 'sapling') {
-						ctx.font = '22px serif';
-						ctx.textAlign = 'center';
-						ctx.textBaseline = 'middle';
-						ctx.fillStyle = '#4CAF50';
-						ctx.fillText('🌱', cx, cy+1);
+						icon = '🌱';
+						color = '#4CAF50';
 					} else if (obj.type === 'red_mushroom' || obj.type === 'brown_mushroom') {
-						ctx.font = '22px serif';
-						ctx.textAlign = 'center';
-						ctx.textBaseline = 'middle';
-						ctx.fillStyle = '#8B4513';
-						ctx.fillText('🍄', cx, cy+1);
+						icon = '🍄';
+						color = '#8B4513';
 					} else if (obj.type === 'giant_red_mushroom') {
-						ctx.font = '28px serif';
-						ctx.textAlign = 'center';
-						ctx.textBaseline = 'middle';
-						ctx.fillStyle = '#ff0000';
-						ctx.fillText('🍄', cx, cy+1);
+						icon = '🍄';
+						color = '#8B4513';
 						ctx.strokeStyle = '#ff0000';
 						ctx.lineWidth = 3;
 						ctx.strokeRect(tx+2, ty+2, size-4, size-4);
 					} else if (obj.type === 'giant_brown_mushroom') {
-						ctx.font = '28px serif';
-						ctx.textAlign = 'center';
-						ctx.textBaseline = 'middle';
-						ctx.fillStyle = '#8D6E63';
-						ctx.fillText('🍄', cx, cy+1);
+						icon = '🍄';
+						color = '#8D6E63';
 						ctx.strokeStyle = '#8D6E63';
 						ctx.lineWidth = 3;
 						ctx.strokeRect(tx+2, ty+2, size-4, size-4);
@@ -4951,13 +4986,13 @@
                             } else toast('HP/MP/SP已滿，不需要進食', 'info');
                             return;
                         }
-						if (entry.id === 'bed') { placeBedDirect(); return; }
-						if (entry.id === 'sapling') { plantSapling(); return; }
-						if (entry.id === 'bone') { useBone(); return; }
+						if (entry.id === 'bed') { placeBedDirect(); renderInventory(); updateUI(); render(); saveGameToLocal(); }
+						if (entry.id === 'sapling') { plantSapling(); renderInventory(); updateUI(); render(); saveGameToLocal(); return; }
+						if (entry.id === 'bone') { useBone(); renderInventory(); updateUI(); render(); saveGameToLocal(); return; }
                         if (it.type === 'weapon' || it.type === 'shield' || it.type === 'helmet' || it.type ===
                             'chestplate' || it.type === 'leggings' || it.type === 'boots' || it.type === 'gloves'
                             ) {
-                            equipItem(entry.id);
+                            equipItem(entry.id); renderInventory(); updateUI();
                         } else toast(`${item.name}: ${item.desc||'普通資源'}`, 'info');
                     }
                 });
