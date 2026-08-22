@@ -1592,6 +1592,8 @@
             'netherite': { id: 'netherite', name: '獄髓', icon: '⚫', type: 'resource', desc: '獄髓' },
             'bed': { id: 'bed', name: '床', icon: '🛏️', type: 'bed', desc: '放置後可在夜晚休息' },
             'wheat': { id: 'wheat', name: '小麥', icon: '🌾', type: 'resource', desc: '農作物' },
+			'red_mushroom': { id: 'red_mushroom', name: '红色蘑菇', icon: '🍄', type: 'resource', desc: '可出售或用于催熟' },
+            'brown_mushroom': { id: 'brown_mushroom', name: '啡色蘑菇', icon: '🍄', type: 'resource', desc: '可出售或用于催熟' },
             'sapling': { id: 'sapling', name: '樹苗', icon: '🌱', type: 'resource', desc: '可以種樹' },
             'flower': { id: 'flower', name: '花束', icon: '💐', type: 'resource', desc: '美麗的花束' },
             'wool': { id: 'wool', name: '羊毛', icon: '🧶', type: 'resource', desc: '從羊掉落' },
@@ -1789,7 +1791,7 @@
             'dolphin': { id: 'dolphin', name: '🐬 海豚', hp: 10, atk: 5, def: 0, exp: 5, gold: 0, passive: false,
                 drops: [{ id: 'raw_fish', chance: 0.6, count: 2 }] },
             'zombie': { id: 'zombie', name: '🧟 喪屍', hp: 20, atk: 5, def: 0, exp: 5, gold: 5, passive: false,
-                drops: [{ id: 'rotten_flesh', chance: 0.67, count: 1 }, { id: 'iron_ore', chance: 0.008, count: 1 }, { id: 'carrot', chance: 0.008, count: 1 }, { id: 'potato', chance: 0.008, count: 1 },
+                drops: [{ id: 'rotten_flesh', chance: 0.67, count: 1 }, { id: 'iron_ore', chance: 0.008, count: 1 }, { id: 'red_mushroom', chance: 0.50, count: 1 }, { id: 'carrot', chance: 0.008, count: 1 }, { id: 'potato', chance: 0.008, count: 1 },
                     { id: 'iron_sword', chance: 0.08, count: 1 }, { id: 'iron_axe', chance: 0.08, count: 1 },
                     { id: 'iron_katana', chance: 0.08, count: 1 }] },
 			'zombie_villager': { id: 'zombie_villager', name: '🤢 喪屍村民', hp: 20, atk: 5, def: 0, exp: 5, gold: 5, passive: false,
@@ -2265,8 +2267,9 @@
                 }
             }
             // 資源(樹、石頭、礦物)
-            if (!is('ocean') && !is('river') && !is('ice') && !is('cave') && !is('nether')) {
-                const treeCount = is('forest') ? 18 : is('plain') ? 4 : is('desert') ? 6 : 4;
+            let treePositions = [];
+			if (!is('ocean') && !is('river') && !is('ice') && !is('cave') && !is('nether')) {
+                const treeCount = is('forest') ? 35 : is('plain') ? 12 : is('desert') ? 6 : is('mountain') ? 12 : 6;
                 for (let i = 0; i < treeCount; i++) {
                     const x = rand(1, w - 2),
                         y = rand(1, h - 2);
@@ -2275,6 +2278,52 @@
                         objects[y][x] = { type: 'tree', variant };
                     }
                 }
+				const saplingCount = Math.min(treePositions.length, 20);
+                for (let i = 0; i < saplingCount; i++) {
+                    if (treePositions.length === 0) break;
+                    const tree = treePositions[rand(0, treePositions.length - 1)];
+                    let placed = false;
+                    for (let attempt = 0; attempt < 10; attempt++) {
+                        const dx = rand(-2, 2), dy = rand(-2, 2);
+                        if (dx === 0 && dy === 0) continue;
+                        const nx = tree.x + dx, ny = tree.y + dy;
+                        if (nx >= 1 && nx < w - 1 && ny >= 1 && ny < h - 1 && !objects[ny][nx]) {
+                            objects[ny][nx] = { type: 'sapling' };
+                            placed = true;
+                            break;
+                        }
+                    }
+                    if (!placed) {
+                        for (let attempt = 0; attempt < 5; attempt++) {
+                            const x = rand(1, w - 2), y = rand(1, h - 2);
+                            if (!objects[y][x]) {
+                                objects[y][x] = { type: 'sapling' };
+                                break;
+                            }
+                        }
+                    }
+				}
+				// === 蘑菇生成 ===
+				if (is('forest') || is('nether')) {
+					const mushroomCount = is('forest') ? 12 : 8;
+					for (let i = 0; i < mushroomCount; i++) {
+						const x = rand(1, w - 2), y = rand(1, h - 2);
+						if (!objects[y][x]) {
+							const type = Math.random() < 0.5 ? 'red_mushroom' : 'brown_mushroom';
+							objects[y][x] = { type: type };
+						}
+					}
+					if (is('forest')) {
+						const giantCount = 4 + rand(0, 3);
+						for (let i = 0; i < giantCount; i++) {
+							const x = rand(1, w - 2), y = rand(1, h - 2);
+							if (!objects[y][x]) {
+								const type = Math.random() < 0.5 ? 'giant_red_mushroom' : 'giant_brown_mushroom';
+								objects[y][x] = { type: type };
+							}
+						}
+					}
+				}
                 const stoneCount = is('cave') ? 12 : is('mountain') ? 10 : 5;
                 for (let i = 0; i < stoneCount; i++) {
                     const x = rand(1, w - 2),
@@ -2452,7 +2501,25 @@
 
             return { id: mapId, width: w, height: h, terrain, objects };
         }
-
+        function growSaplings() {
+            const map = G.map;
+            if (!map) return;
+            let changed = false;
+            for (let y = 0; y < map.height; y++) {
+                for (let x = 0; x < map.width; x++) {
+                    const obj = map.objects[y]?.[x];
+                    if (obj && obj.type === 'sapling') {
+                        const variant = Math.random() < 0.5 ? 'oak' : 'birch';
+                        map.objects[y][x] = { type: 'tree', variant };
+                        changed = true;
+                    }
+                }
+            }
+            if (changed) {
+                render();
+                toast('🌳 樹木生長了！', 'info', 2000);
+            }
+        }
         function addSpecialStructures(map) {
             const w = map.width,
                 h = map.height;
@@ -3298,6 +3365,32 @@
                 saveGameToLocal();
                 return;
             }
+			if (obj.type === 'red_mushroom') {
+				addItem('red_mushroom', 1);
+				toast('🍄 採集到紅色蘑菇', 'success');
+				map.objects[y][x] = null;
+				render(); updateUI(); saveGameToLocal(); return;
+			}
+			if (obj.type === 'brown_mushroom') {
+				addItem('brown_mushroom', 1);
+				toast('🍄 採集到啡色蘑菇', 'success');
+				map.objects[y][x] = null;
+				render(); updateUI(); saveGameToLocal(); return;
+			}
+			if (obj.type === 'giant_red_mushroom') {
+				if (getBestToolLevel('axe') === 0) { toast('🪓 需要斧頭！', 'warning'); return; }
+				addItem('bone', 51);
+				toast('🍄 採集巨型红色蘑菇，獲得51個骨頭！', 'success');
+				map.objects[y][x] = null;
+				render(); updateUI(); saveGameToLocal(); return;
+			}
+			if (obj.type === 'giant_brown_mushroom') {
+				if (getBestToolLevel('axe') === 0) { toast('🪓 需要斧頭！', 'warning'); return; }
+				addItem('bone', 16);
+				toast('🍄 採集巨型啡色蘑菇，獲得16個骨頭！', 'success');
+				map.objects[y][x] = null;
+				render(); updateUI(); saveGameToLocal(); return;
+			}
             if (obj.type === 'stone') {
                 if (!hasTool('pickaxe')) { toast('⛏️ 需要鎬！', 'warning'); return; }
                 addItem('stone', 1);
@@ -3766,6 +3859,8 @@
                 { id: 'wood', icon: '🎋', name: '木材', price: 1 },
                 { id: 'wheat', icon: '🌾', name: '小麥', price: 1 },
                 { id: 'flower', icon: '💐', name: '花束', price: 1 },
+				{ id: 'red_mushroom', icon: '🍄', name: '红色蘑菇', price: 2 },
+				{ id: 'brown_mushroom', icon: '🍄', name: '啡色蘑菇', price: 2 },
                 { id: 'sapling', icon: '🌱', name: '樹苗', price: 8 },
                 { id: 'stone', icon: '🗻', name: '石頭', price: 2 },
                 { id: 'coal', icon: '🌑', name: '煤炭', price: 3 },
@@ -4165,6 +4260,9 @@
             container.innerHTML = '';
             const goods = [
                 { id: 'wood', name: '木材', price: 2 },
+				{ id: 'red_mushroom', icon: '🍄', name: '红色蘑菇', price: 4 },
+				{ id: 'brown_mushroom', icon: '🍄', name: '啡色蘑菇', price: 4 },
+				{ id: 'sapling', icon: '🌱', name: '樹苗', price: 16 },
                 { id: 'stone', name: '石頭', price: 4 },
                 { id: 'coal', name: '煤炭', price: 6 },
                 { id: 'leather', name: '皮革', price: 8 },
@@ -4220,6 +4318,8 @@
                 { id: 'wood', icon: '🎋', name: '木材', price: 1 },
                 { id: 'wheat', icon: '🌾', name: '小麥', price: 1 },
                 { id: 'flower', icon: '💐', name: '花束', price: 1 },
+				{ id: 'red_mushroom', icon: '🍄', name: '红色蘑菇', price: 2 },
+				{ id: 'brown_mushroom', icon: '🍄', name: '啡色蘑菇', price: 2 },
                 { id: 'sapling', icon: '🌱', name: '樹苗', price: 8 },
                 { id: 'stone', icon: '🗻', name: '石頭', price: 2 },
                 { id: 'coal', icon: '🌑', name: '煤炭', price: 3 },
@@ -4290,10 +4390,26 @@
         }
 
         // ===== 床 =====
-        function placeBed() {
-            window._bedPlacement = true;
-            $('bed-modal').classList.add('active');
-            toast('🛏️ 點擊地圖上的空地放置床', 'info', 3000);
+		function placeBedDirect() {
+            const p = G.player;
+            const map = G.map;
+            const x = p.x, y = p.y;
+            if (!map.objects[y]?.[x]) {
+                if (removeItem('bed', 1)) {
+                    p.bedPlaced = true;
+                    p.bedX = x;
+                    p.bedY = y;
+                    p.bedMapId = p.mapId;
+                    G.bedPlaced = true;
+                    G.bedX = x;
+                    G.bedY = y;
+                    G.bedMapId = p.mapId;
+                    toast('🛏️ 床已放置！', 'success');
+                    render();
+                    updateUI();
+                    saveGameToLocal();
+                } else toast('你沒有床！', 'warning');
+            } else toast('該位置已被佔用', 'warning');
         }
 
         function rest() {
@@ -4328,6 +4444,65 @@
             } else {
                 toast('🛏️ 你需要一張床，且坐在床上才能休息！', 'warning');
             }
+        }
+		function plantSapling() {
+            const p = G.player;
+            const map = G.map;
+            const x = p.x, y = p.y;
+            if (!map.objects[y]?.[x]) {
+                if (removeItem('sapling', 1)) {
+                    map.objects[y][x] = { type: 'sapling' };
+                    toast('🌱 種下樹苗！', 'success');
+                    render();
+                    updateUI();
+                    saveGameToLocal();
+                } else toast('你沒有樹苗', 'warning');
+            } else toast('該位置無法種植', 'warning');
+        }
+
+        function useBone() {
+            const p = G.player;
+            const map = G.map;
+            const x = p.x, y = p.y;
+            const obj = map.objects[y]?.[x];
+            if (!obj) { toast('這裡沒有可用目標', 'info'); return; }
+            let valid = false;
+            if (obj.type === 'sapling') valid = true;
+            else if (obj.type === 'red_mushroom') valid = true;
+            else if (obj.type === 'brown_mushroom') valid = true;
+            if (!valid) { toast('這裡無法使用骨頭', 'info'); return; }
+            if (!removeItem('bone', 1)) { toast('你沒有骨頭', 'warning'); return; }
+
+            let success = false;
+            if (obj.type === 'sapling') {
+                if (Math.random() < 0.45) {
+                    const variant = Math.random() < 0.5 ? 'oak' : 'birch';
+                    map.objects[y][x] = { type: 'tree', variant };
+                    toast('🌳 樹苗長成大樹！', 'success');
+                    success = true;
+                } else {
+                    toast('🦴 骨頭沒能讓樹苗生長', 'info');
+                }
+            } else if (obj.type === 'red_mushroom') {
+                if (Math.random() < 0.40) {
+                    map.objects[y][x] = { type: 'giant_red_mushroom' };
+                    toast('🍄 紅色蘑菇變成了巨型紅色蘑菇！', 'success');
+                    success = true;
+                } else {
+                    toast('🦴 骨頭沒能讓蘑菇變大', 'info');
+                }
+            } else if (obj.type === 'brown_mushroom') {
+                if (Math.random() < 0.40) {
+                    map.objects[y][x] = { type: 'giant_brown_mushroom' };
+                    toast('🍄 啡色蘑菇變成了巨型啡色蘑菇！', 'success');
+                    success = true;
+                } else {
+                    toast('💀 骨頭沒能讓蘑菇變大', 'info');
+                }
+            }
+            render();
+            updateUI();
+            saveGameToLocal();
         }
 
         // ===== 渲染（新增：冰塊、流浪者藍框、屍殼啡框、沉屍藍框） =====
@@ -4446,7 +4621,37 @@
                             color = '#FFD700'; } else if (obj.variant === 'tulip') { icon = '🌷';
                             color = '#ff69b4'; } else { icon = '🌼';
                             color = '#ffd700'; }
-                    } else if (obj.type === 'village') { icon = '🏘️';
+                    } else if (obj.type === 'sapling') {
+						ctx.font = '22px serif';
+						ctx.textAlign = 'center';
+						ctx.textBaseline = 'middle';
+						ctx.fillStyle = '#4CAF50';
+						ctx.fillText('🌱', cx, cy+1);
+					} else if (obj.type === 'red_mushroom' || obj.type === 'brown_mushroom') {
+						ctx.font = '22px serif';
+						ctx.textAlign = 'center';
+						ctx.textBaseline = 'middle';
+						ctx.fillStyle = '#8B4513';
+						ctx.fillText('🍄', cx, cy+1);
+					} else if (obj.type === 'giant_red_mushroom') {
+						ctx.font = '28px serif';
+						ctx.textAlign = 'center';
+						ctx.textBaseline = 'middle';
+						ctx.fillStyle = '#ff0000';
+						ctx.fillText('🍄', cx, cy+1);
+						ctx.strokeStyle = '#ff0000';
+						ctx.lineWidth = 3;
+						ctx.strokeRect(tx+2, ty+2, size-4, size-4);
+					} else if (obj.type === 'giant_brown_mushroom') {
+						ctx.font = '28px serif';
+						ctx.textAlign = 'center';
+						ctx.textBaseline = 'middle';
+						ctx.fillStyle = '#8D6E63';
+						ctx.fillText('🍄', cx, cy+1);
+						ctx.strokeStyle = '#8D6E63';
+						ctx.lineWidth = 3;
+						ctx.strokeRect(tx+2, ty+2, size-4, size-4);
+					} else if (obj.type === 'village') { icon = '🏘️';
                         color = '#f1c40f'; } else if (obj.type === 'camp') { icon = '⛺';
                         color = '#e67e22'; } else if (obj.type === 'chest') { icon = '🎁';
                         color = '#f39c12'; } else if (obj.type === 'web') { icon = '🕸️';
@@ -4746,7 +4951,9 @@
                             } else toast('HP/MP/SP已滿，不需要進食', 'info');
                             return;
                         }
-                        if (it.type === 'bed') { placeBed(); return; }
+						if (entry.id === 'bed') { placeBedDirect(); return; }
+						if (entry.id === 'sapling') { plantSapling(); return; }
+						if (entry.id === 'bone') { useBone(); return; }
                         if (it.type === 'weapon' || it.type === 'shield' || it.type === 'helmet' || it.type ===
                             'chestplate' || it.type === 'leggings' || it.type === 'boots' || it.type === 'gloves'
                             ) {
@@ -6226,7 +6433,7 @@
             }
         });
 
-        console.log('⛏️ 方塊傳說已載入！');
+        console.log('⛏️ 方塊傳說 v2.1 已載入！新增蘑菇、树苗、骨頭催熟等');
         console.log('🎮 操作: 方向鍵移動 | R休息 | I背包 | E裝備 | K製作 | F遠程攻擊');
         console.log('🔦 火把：1煤+1木製作，裝備盾牌位，夜晚照明並驅逐主動怪物');
         console.log('🔱 長槍：可遠程攻擊2格內生物');
