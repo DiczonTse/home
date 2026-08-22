@@ -1601,6 +1601,7 @@
             'bone': { id: 'bone', name: '骨頭', icon: '🦴', type: 'resource', desc: '從骷髏掉落' },
             'string': { id: 'string', name: '線', icon: '🧵', type: 'resource', desc: '從蜘蛛掉落' },
             'spider_eye': { id: 'spider_eye', name: '蜘蛛眼', icon: '👁️', type: 'resource', desc: '從蜘蛛掉落' },
+			'gunpowder': { id: 'gunpowder', name: '火藥', icon: '🧨', type: 'resource', desc: '從苦力怕掉落，可出售' },
             'feather': { id: 'feather', name: '羽毛', icon: '🕊️', type: 'resource', desc: '從雞/鴨掉落' },
             'ink_sac': { id: 'ink_sac', name: '墨囊', icon: '✒️', type: 'resource', desc: '從墨魚掉落' },
             'raw_fish': { id: 'raw_fish', name: '魚肉', icon: '🐟', type: 'food', heal: 2, sp: 2, desc: '食用恢復2HP+2SP' },
@@ -1828,6 +1829,8 @@
                 drops: [{ id: 'bone', chance: 0.67, count: 1 }, { id: 'bow', chance: 0.085, count: 1 }] },
             'wanderer': { id: 'wanderer', name: '💀 流浪者', hp: 20, atk: 6, def: 0, exp: 5, gold: 5, passive: false,
                 drops: [{ id: 'bone', chance: 0.3, count: 1 }, { id: 'bow', chance: 0.085, count: 1 }] },
+			'creeper': { id: 'creeper', name: '💣 苦力怕', hp: 20, atk: 65, def: 0, exp: 5, gold: 0, passive: false,
+				drops: [{ id: 'gunpowder', chance: 0.67, count: 1 }] },
             'spider': { id: 'spider', name: '🕷️ 蜘蛛', hp: 16, atk: 3, def: 0, exp: 5, gold: 0, passive: false,
                 drops: [{ id: 'string', chance: 0.67, count: 1 }, { id: 'spider_eye', chance: 0.33, count: 1 }] },
             'cave_spider': { id: 'cave_spider', name: '🕷️ 洞穴蜘蛛', hp: 12, atk: 3, def: 0, exp: 5, gold: 0, passive: false,
@@ -2743,24 +2746,24 @@
                         mobPool = ['chicken', 'duck', 'bee'];
                         if (is('snowy_plains')) mobPool = ['rabbit', 'polar_bear', 'wanderer'];
                         if (isNight && !(G.player && G.player.equipment.shield === 'torch')) {
-                            mobPool.push('bat', 'spider', 'zombie', 'zombie_villager', 'skeleton');
+                            mobPool.push('bat', 'spider', 'zombie', 'zombie_villager', 'skeleton', 'creeper');
                             if (is('snowy_plains')) mobPool.push('wanderer');
                         }
                     }
                     if (is('desert')) {
                         mobPool = ['camel'];
                         if (isNight && !(G.player && G.player.equipment.shield === 'torch')) {
-                            mobPool.push('bat', 'spider', 'zombie', 'zombie_villager', 'skeleton', 'husk');
+                            mobPool.push('bat', 'spider', 'zombie', 'zombie_villager', 'skeleton', 'creeper', 'husk');
                         }
                     }
                     if (is('ice')) {
                         mobPool = ['rabbit', 'polar_bear'];
                         if (isNight && !(G.player && G.player.equipment.shield === 'torch')) {
-                            mobPool.push('bat', 'spider', 'zombie', 'zombie_villager', 'skeleton', 'wanderer');
+                            mobPool.push('bat', 'spider', 'zombie', 'zombie_villager', 'skeleton', 'creeper', 'wanderer');
                         }
                     }
                     if (is('cave')) {
-                        mobPool = ['bat', 'spider', 'cave_spider', 'zombie', 'zombie_villager', 'skeleton'];
+                        mobPool = ['bat', 'spider', 'cave_spider', 'zombie', 'zombie_villager', 'skeleton', 'creeper'];
                     }
                     if (is('plain')) mobPool = mobPool.concat(['cow', 'sheep', 'pig', 'horse']);
                     else if (is('forest')) mobPool = mobPool.concat(['cow', 'sheep', 'pig']);
@@ -4126,7 +4129,7 @@
         }
 
         // ===== 戰鬥 =====
-        function startBattle(mobId, x, y, initialHp) {
+        function startBattle(mobId, x, y, initialHp, fromMove = false) {
             const p = G.player;
             const mobData = MOBS[mobId];
             if (!mobData) {
@@ -4148,10 +4151,13 @@
                 ...mobData,
                 currentHp: currentHp,
                 maxHp: maxHp,
-                x,
-                y,
-                mobId
+                x, y, mobId,
+				creeperTurn: 0,
+				isDirectExplode: false
             };
+			if (fromMove && mobId === 'creeper') {
+				enemy.isDirectExplode = true;
+			}
             const logMessages = ['⚔️ 戰鬥開始！'];
             if (initialHp !== undefined && initialHp < maxHp) {
                 const damage = maxHp - initialHp;
@@ -4235,6 +4241,38 @@
             if (!b || b.ended) return;
             const p = G.player;
             const e = b.enemy;
+			if (e.mobId === 'creeper') {
+				if (e.isDirectExplode) {
+					b.log.push(`💣 苦力怕爆炸！`);
+					p.hp = Math.max(0, p.hp - 65);
+					e.currentHp = 0;
+					if (p.hp <= 0) { battleLose(); return; }
+					battleWin();
+					return;
+				} else {
+					e.creeperTurn = (e.creeperTurn || 0) + 1;
+					if (e.creeperTurn === 1) {
+						b.log.push(`💣 苦力怕發現了你！`);
+						b.state = 'player_turn';
+						renderBattle();
+						updateUI();
+						return;
+					} else if (e.creeperTurn === 2) {
+						b.log.push(`💣 苦力怕蓄能！`);
+						b.state = 'player_turn';
+						renderBattle();
+						updateUI();
+						return;
+					} else if (e.creeperTurn >= 3) {
+						b.log.push(`💣 苦力怕爆炸！`);
+						p.hp = Math.max(0, p.hp - 65);
+						e.currentHp = 0;
+						if (p.hp <= 0) { battleLose(); return; }
+						battleWin();
+						return;
+					}
+				}
+			}
             animateBattle('enemy', 'player', () => {
                 const atk = e.atk || 5;
                 const def = getPlayerDef(p);
@@ -4672,6 +4710,7 @@
                 { id: 'feather', icon: '🕊️', name: '羽毛', price: 2 },
                 { id: 'rotten_flesh', icon: '🥓', name: '腐肉', price: 3 },
                 { id: 'bone', icon: '🦴', name: '骨頭', price: 3 },
+				{ id: 'gunpowder', icon: '🧨', name: '火藥', price: 3 },
                 { id: 'spider_eye', icon: '👁️', name: '蜘蛛眼', price: 4 },
                 { id: 'raw_fish', icon: '🐟', name: '魚肉', price: 2 },
                 { id: 'raw_chicken', icon: '🍗', name: '雞肉', price: 2 },
@@ -6253,9 +6292,9 @@
 								}
 							}
                             if (nx === p.x && ny === p.y) {
-                                startBattle(mob.obj.mobId, mob.x, mob.y);
-                                continue;
-                            }
+								startBattle(mob.obj.mobId, mob.x, mob.y, undefined, true);
+								continue;
+							}
                             if (!target && !(nx === p.x && ny === p.y)) {
                                 map.objects[ny][nx] = mob.obj;
                                 map.objects[mob.y][mob.x] = null;
