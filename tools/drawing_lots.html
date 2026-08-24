@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>黃大仙靈籤</title>
+    <style>
+        /* ===== 全局重置與字體 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: '楷體', 'KaiTi', 'STKaiti', '華文楷體', 'Noto Serif SC', 'Georgia', 'Times New Roman', serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(ellipse at center, #3d1a0e 0%, #1a0a05 100%);
+            padding: 20px;
+        }
+
+        /* ===== 主容器 ===== */
+        .container {
+            max-width: 560px;
+            width: 100%;
+            background: linear-gradient(145deg, #f7efe2 0%, #e8dccc 100%);
+            border-radius: 48px 48px 32px 32px;
+            padding: 30px 28px 40px;
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.8),
+                0 0 0 2px #b8915c,
+                0 0 0 6px #6b3f1e,
+                inset 0 0 30px rgba(180, 120, 60, 0.2);
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        /* ===== 裝飾邊角 ===== */
+        .container::before,
+        .container::after {
+            content: '◆';
+            position: absolute;
+            font-size: 22px;
+            color: #b8915c;
+            text-shadow: 0 0 8px #d4a854;
+        }
+        .container::before {
+            top: 12px;
+            left: 24px;
+        }
+        .container::after {
+            top: 12px;
+            right: 24px;
+        }
+
+        /* ===== 頂部標題 ===== */
+        .header {
+            text-align: center;
+            padding-bottom: 18px;
+            border-bottom: 3px double #b8915c;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #4a1f0e;
+            letter-spacing: 12px;
+            text-shadow: 0 2px 4px rgba(180, 120, 60, 0.3);
+            font-family: inherit;
+        }
+        .header .sub {
+            font-size: 14px;
+            color: #7a5a3a;
+            letter-spacing: 6px;
+            margin-top: 2px;
+            font-style: italic;
+        }
+        .header .deco {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 6px;
+            font-size: 18px;
+            color: #b8915c;
+        }
+
+        /* ===== 籤筒區域 ===== */
+        .lottery-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 0 6px;
+            position: relative;
+        }
+
+        /* 籤筒容器 */
+        .cylinder-wrapper {
+            position: relative;
+            width: 160px;
+            height: 200px;
+            margin: 0 auto 18px;
+            perspective: 600px;
+        }
+
+        /* 籤筒本體 */
+        .cylinder {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transform-origin: bottom center;
+            transition: transform 0.1s;
+        }
+
+        /* 搖晃動畫 */
+        .cylinder.shake {
+            animation: shakeCylinder 0.12s infinite alternate;
+        }
+
+        @keyframes shakeCylinder {
+            0% {
+                transform: rotateZ(-8deg) rotateX(2deg);
+            }
+            100% {
+                transform: rotateZ(8deg) rotateX(-2deg);
+            }
+        }
+
+        /* 籤筒身體 (無蓋，但用 clip-path 讓上部透明) */
+        .cylinder-body {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 130px;
+            height: 170px;
+            background: radial-gradient(ellipse at 30% 20%, #c49a6c, #8b5e3c 70%, #5a341a);
+            border-radius: 8px 8px 40px 40px;
+            box-shadow:
+                inset -8px -12px 30px rgba(0, 0, 0, 0.5),
+                inset 8px 8px 30px rgba(255, 220, 160, 0.3),
+                0 12px 40px rgba(0, 0, 0, 0.6);
+            border: 2px solid #6b3f1e;
+            border-top: 4px solid #a87a4a;
+            overflow: hidden;
+            /* 關鍵：讓頂部透明，露出籤枝 */
+            clip-path: inset(28px 0 0 0 round 0 0 40px 40px);
+            z-index: 4;  /* 覆蓋籤枝 */
+        }
+        /* 籤筒紋理 */
+        .cylinder-body::before {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            width: 80%;
+            height: 80%;
+            background: repeating-linear-gradient(0deg,
+                    transparent,
+                    transparent 18px,
+                    rgba(0, 0, 0, 0.06) 18px,
+                    rgba(0, 0, 0, 0.06) 20px);
+            border-radius: 50%;
+        }
+        .cylinder-body::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70%;
+            height: 10px;
+            background: radial-gradient(ellipse, rgba(255, 200, 120, 0.25), transparent);
+            border-radius: 50%;
+            filter: blur(4px);
+        }
+
+        /* ===== 籤枝 (在筒內，露出上半部) ===== */
+        .sticks-container {
+            position: absolute;
+            top: -20px;  /* 讓籤枝從筒口伸出 */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90px;
+            height: 110px;
+            z-index: 3;  /* 低於 .cylinder-body */
+            pointer-events: none;
+            overflow: visible;
+        }
+
+        .stick {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 10px;
+            height: 80px;
+            background: linear-gradient(180deg, #f5e6c8, #dbb48a 40%, #b8875a);
+            border-radius: 2px 2px 4px 4px;
+            transform-origin: bottom center;
+            box-shadow: 0 0 4px rgba(0, 0, 0, 0.15), inset 0 2px 6px rgba(255, 220, 160, 0.3);
+            border: 1px solid #a87a4a;
+            transition: transform 0.3s;
+        }
+        .stick::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 6px;
+            background: radial-gradient(ellipse, #f5e6c8, #dbb48a);
+            border-radius: 50% 50% 0 0;
+            border: 1px solid #a87a4a;
+            border-bottom: none;
+        }
+        /* 不同籤枝的偏移 */
+        .stick:nth-child(1) {
+            transform: translateX(-32px) rotate(-6deg);
+            height: 76px;
+        }
+        .stick:nth-child(2) {
+            transform: translateX(-18px) rotate(-2deg);
+            height: 82px;
+        }
+        .stick:nth-child(3) {
+            transform: translateX(-4px) rotate(1deg);
+            height: 78px;
+        }
+        .stick:nth-child(4) {
+            transform: translateX(10px) rotate(4deg);
+            height: 84px;
+        }
+        .stick:nth-child(5) {
+            transform: translateX(24px) rotate(7deg);
+            height: 74px;
+        }
+        .stick:nth-child(6) {
+            transform: translateX(-26px) rotate(-9deg);
+            height: 80px;
+        }
+        .stick:nth-child(7) {
+            transform: translateX(16px) rotate(10deg);
+            height: 72px;
+        }
+        .stick:nth-child(8) {
+            transform: translateX(-8px) rotate(-4deg);
+            height: 86px;
+        }
+
+        /* 搖晃時籤枝晃動 */
+        .cylinder.shake .stick {
+            animation: stickWiggle 0.15s infinite alternate;
+        }
+        @keyframes stickWiggle {
+            0% {
+                transform: var(--stick-transform, translateX(0)) rotate(var(--stick-rotate, 0deg));
+            }
+            100% {
+                transform: var(--stick-transform, translateX(0)) rotate(var(--stick-rotate, 0deg) + 3deg);
+            }
+        }
+        .stick:nth-child(1) {
+            --stick-transform: translateX(-32px);
+            --stick-rotate: -6deg;
+        }
+        .stick:nth-child(2) {
+            --stick-transform: translateX(-18px);
+            --stick-rotate: -2deg;
+        }
+        .stick:nth-child(3) {
+            --stick-transform: translateX(-4px);
+            --stick-rotate: 1deg;
+        }
+        .stick:nth-child(4) {
+            --stick-transform: translateX(10px);
+            --stick-rotate: 4deg;
+        }
+        .stick:nth-child(5) {
+            --stick-transform: translateX(24px);
+            --stick-rotate: 7deg;
+        }
+        .stick:nth-child(6) {
+            --stick-transform: translateX(-26px);
+            --stick-rotate: -9deg;
+        }
+        .stick:nth-child(7) {
+            --stick-transform: translateX(16px);
+            --stick-rotate: 10deg;
+        }
+        .stick:nth-child(8) {
+            --stick-transform: translateX(-8px);
+            --stick-rotate: -4deg;
+        }
+
+        /* ===== 飛出的籤枝 ===== */
+        .flying-stick {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%) rotate(0deg) scale(1);
+            width: 14px;
+            height: 100px;
+            background: linear-gradient(180deg, #f5e6c8, #dbb48a 40%, #b8875a);
+            border-radius: 3px 3px 6px 6px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), inset 0 2px 8px rgba(255, 220, 160, 0.3);
+            border: 1px solid #a87a4a;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: none;
+        }
+        .flying-stick::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 8px;
+            background: radial-gradient(ellipse, #f5e6c8, #dbb48a);
+            border-radius: 50% 50% 0 0;
+            border: 1px solid #a87a4a;
+            border-bottom: none;
+        }
+        .flying-stick.show {
+            opacity: 1;
+            animation: flyStick 0.9s cubic-bezier(0.22, 0.68, 0.35, 1.1) forwards;
+        }
+        @keyframes flyStick {
+            0% {
+                top: 10px;
+                transform: translateX(-50%) rotate(0deg) scale(0.6);
+                opacity: 0;
+            }
+            30% {
+                opacity: 1;
+                transform: translateX(-50%) rotate(-15deg) scale(1.1);
+            }
+            60% {
+                transform: translateX(-50%) rotate(8deg) scale(1);
+            }
+            100% {
+                top: -80px;
+                transform: translateX(-50%) rotate(-2deg) scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* ===== 求籤按鈕 ===== */
+        .btn-draw {
+            position: relative;
+            padding: 16px 48px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #f7efe2;
+            background: linear-gradient(145deg, #b53b1a, #7a1f0a);
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            box-shadow:
+                0 6px 0 #4a1206,
+                0 12px 30px rgba(0, 0, 0, 0.4),
+                inset 0 2px 8px rgba(255, 200, 120, 0.3);
+            transition: all 0.08s linear;
+            letter-spacing: 6px;
+            font-family: inherit;
+            margin-top: 6px;
+            z-index: 5;
+        }
+        .btn-draw:hover:not(:disabled) {
+            background: linear-gradient(145deg, #c9451e, #8a2610);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 #4a1206, 0 18px 40px rgba(0, 0, 0, 0.5);
+        }
+        .btn-draw:active:not(:disabled) {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #4a1206, 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+        .btn-draw:disabled {
+            opacity: 0.6;
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #4a1206, 0 8px 20px rgba(0, 0, 0, 0.3);
+            cursor: not-allowed;
+        }
+        .btn-draw .icon {
+            display: inline-block;
+            margin-right: 8px;
+            font-size: 28px;
+        }
+
+        /* ===== 結果顯示區 ===== */
+        .result-area {
+            margin-top: 24px;
+            padding: 0 4px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s cubic-bezier(0.22, 0.68, 0.35, 1.1);
+            max-height: 0;
+            overflow: hidden;
+        }
+        .result-area.show {
+            opacity: 1;
+            transform: translateY(0);
+            max-height: 2000px;
+            padding: 4px 4px 0;
+        }
+
+        .result-card {
+            background: linear-gradient(160deg, #fcf6ed, #efe4d4);
+            border-radius: 24px;
+            padding: 24px 22px 28px;
+            border: 2px solid #b8915c;
+            box-shadow: inset 0 0 30px rgba(180, 120, 60, 0.1), 0 8px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: 20%;
+            right: 20%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #d4a854, transparent);
+            border-radius: 50%;
+            filter: blur(2px);
+        }
+
+        /* 籤號 */
+        .result-number {
+            text-align: center;
+            font-size: 20px;
+            color: #6b3f1e;
+            letter-spacing: 2px;
+        }
+        .result-number .num {
+            font-size: 40px;
+            font-weight: 700;
+            color: #8b1a0a;
+            display: inline-block;
+            margin: 0 8px;
+            font-family: inherit;
+        }
+
+        /* 吉凶 */
+        .result-fortune {
+            text-align: center;
+            font-size: 22px;
+            font-weight: 700;
+            margin: 6px 0 12px;
+            padding: 4px 16px;
+            border-radius: 40px;
+            display: inline-block;
+            background: rgba(180, 120, 60, 0.12);
+            border: 1px solid #d4a854;
+        }
+        .result-fortune.great {
+            color: #c0392b;
+        }
+        .result-fortune.good {
+            color: #d4761a;
+        }
+        .result-fortune.medium {
+            color: #7a7a3a;
+        }
+        .result-fortune.poor {
+            color: #5a6a7a;
+        }
+        .result-fortune.bad {
+            color: #6a4a4a;
+        }
+
+        /* 籤詩 */
+        .result-poem {
+            text-align: center;
+            font-size: 20px;
+            line-height: 1.9;
+            color: #3d1a0e;
+            padding: 14px 8px 10px;
+            margin: 8px 0 12px;
+            background: rgba(255, 248, 235, 0.5);
+            border-radius: 16px;
+            border-left: 4px solid #b8915c;
+            border-right: 4px solid #b8915c;
+            font-style: italic;
+            letter-spacing: 2px;
+        }
+        .result-poem .line {
+            display: block;
+        }
+
+        /* 解籤 */
+        .result-interpretation {
+            margin-top: 14px;
+            padding: 16px 18px;
+            background: rgba(255, 248, 235, 0.6);
+            border-radius: 16px;
+            border: 1px solid #dcc8b0;
+            font-size: 16px;
+            line-height: 1.8;
+            color: #3d2a1a;
+        }
+        .result-interpretation strong {
+            color: #7a3a1a;
+            font-size: 17px;
+            display: block;
+            margin-bottom: 4px;
+            letter-spacing: 2px;
+        }
+        .result-interpretation .label {
+            display: inline-block;
+            background: #b8915c;
+            color: #f7efe2;
+            padding: 0 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            letter-spacing: 2px;
+            margin-right: 6px;
+        }
+
+        /* ===== 底部資訊 ===== */
+        .footer {
+            text-align: center;
+            margin-top: 22px;
+            font-size: 12px;
+            color: #9a8a7a;
+            letter-spacing: 2px;
+            border-top: 1px solid #dcc8b0;
+            padding-top: 16px;
+            line-height: 1.8;
+        }
+        .footer .copyright {
+            font-size: 11px;
+            color: #b09a8a;
+            letter-spacing: 1px;
+        }
+
+        /* ===== 響應式 ===== */
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px 16px 28px;
+                border-radius: 32px 32px 24px 24px;
+            }
+            .header h1 {
+                font-size: 28px;
+                letter-spacing: 6px;
+            }
+            .cylinder-wrapper {
+                width: 130px;
+                height: 170px;
+            }
+            .cylinder-body {
+                width: 110px;
+                height: 145px;
+                clip-path: inset(24px 0 0 0 round 0 0 40px 40px);
+            }
+            .sticks-container {
+                width: 72px;
+                height: 90px;
+                top: -16px;
+            }
+            .stick {
+                width: 8px;
+                height: 66px;
+            }
+            .stick:nth-child(1) {
+                transform: translateX(-26px) rotate(-6deg);
+                height: 62px;
+            }
+            .stick:nth-child(2) {
+                transform: translateX(-14px) rotate(-2deg);
+                height: 68px;
+            }
+            .stick:nth-child(3) {
+                transform: translateX(-2px) rotate(1deg);
+                height: 64px;
+            }
+            .stick:nth-child(4) {
+                transform: translateX(10px) rotate(4deg);
+                height: 70px;
+            }
+            .stick:nth-child(5) {
+                transform: translateX(20px) rotate(7deg);
+                height: 60px;
+            }
+            .stick:nth-child(6) {
+                transform: translateX(-20px) rotate(-9deg);
+                height: 66px;
+            }
+            .stick:nth-child(7) {
+                transform: translateX(14px) rotate(10deg);
+                height: 58px;
+            }
+            .stick:nth-child(8) {
+                transform: translateX(-4px) rotate(-4deg);
+                height: 72px;
+            }
+            .flying-stick {
+                width: 11px;
+                height: 80px;
+            }
+            .btn-draw {
+                padding: 14px 32px;
+                font-size: 20px;
+                letter-spacing: 4px;
+            }
+            .result-poem {
+                font-size: 18px;
+            }
+            .result-interpretation {
+                font-size: 15px;
+                padding: 14px;
+            }
+            .result-number .num {
+                font-size: 32px;
+            }
+            .result-fortune {
+                font-size: 18px;
+            }
+            .container::before,
+            .container::after {
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .container {
+                padding: 14px 10px 20px;
+            }
+            .header h1 {
+                font-size: 22px;
+                letter-spacing: 4px;
+            }
+            .cylinder-wrapper {
+                width: 110px;
+                height: 150px;
+            }
+            .cylinder-body {
+                width: 92px;
+                height: 125px;
+                clip-path: inset(20px 0 0 0 round 0 0 40px 40px);
+            }
+            .sticks-container {
+                width: 60px;
+                height: 76px;
+                top: -14px;
+            }
+            .stick {
+                width: 6px;
+                height: 56px;
+            }
+            .stick:nth-child(1) {
+                transform: translateX(-20px) rotate(-6deg);
+                height: 52px;
+            }
+            .stick:nth-child(2) {
+                transform: translateX(-10px) rotate(-2deg);
+                height: 58px;
+            }
+            .stick:nth-child(3) {
+                transform: translateX(0px) rotate(1deg);
+                height: 54px;
+            }
+            .stick:nth-child(4) {
+                transform: translateX(10px) rotate(4deg);
+                height: 60px;
+            }
+            .stick:nth-child(5) {
+                transform: translateX(18px) rotate(7deg);
+                height: 50px;
+            }
+            .stick:nth-child(6) {
+                transform: translateX(-16px) rotate(-9deg);
+                height: 56px;
+            }
+            .stick:nth-child(7) {
+                transform: translateX(12px) rotate(10deg);
+                height: 48px;
+            }
+            .stick:nth-child(8) {
+                transform: translateX(-2px) rotate(-4deg);
+                height: 62px;
+            }
+            .btn-draw {
+                padding: 12px 24px;
+                font-size: 18px;
+                letter-spacing: 2px;
+            }
+            .result-poem {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="app">
+        <!-- 標題 -->
+        <div class="header">
+            <h1>黃大仙靈籤</h1>
+            <div class="sub">— 誠心所求 · 有求必應 —</div>
+            <div class="deco">
+                <span>✧</span>
+                <span>❀</span>
+                <span>✧</span>
+            </div>
+        </div>
+
+        <!-- 籤筒區域 -->
+        <div class="lottery-area">
+            <div class="cylinder-wrapper">
+                <div class="cylinder" id="cylinder">
+                    <!-- 籤筒身體 (無蓋，clip-path 使上部透明) -->
+                    <div class="cylinder-body"></div>
+                    <!-- 籤枝 (在筒內，上半部露出) -->
+                    <div class="sticks-container" id="sticksContainer">
+                        <div class="stick"></div>
+                        <div class="stick"></div>
+                        <div class="stick"></div>
+                        <div class="stick"></div>
+                        <div class="stick"></div>
+                        <div class="stick"></div>
+                        <div class="stick"></div>
+                        <div class="stick"></div>
+                    </div>
+                    <!-- 飛出的籤 -->
+                    <div class="flying-stick" id="flyingStick"></div>
+                </div>
+            </div>
+
+            <!-- 求籤按鈕 -->
+            <button class="btn-draw" id="drawBtn">
+                <span class="icon">🙏</span> 求 籤
+            </button>
+        </div>
+
+        <!-- 結果顯示 -->
+        <div class="result-area" id="resultArea">
+            <div class="result-card">
+                <div class="result-number" id="resultNumber">
+                    第 <span class="num" id="lotteryNum">--</span> 籤
+                </div>
+                <div style="text-align:center;">
+                    <span class="result-fortune" id="fortuneTag">—</span>
+                </div>
+                <div class="result-poem" id="poemDisplay">
+                    <span class="line">—</span>
+                </div>
+                <div class="result-interpretation" id="interpretationDisplay">
+                    <strong>📖 解籤</strong>
+                    <span id="interpretationText">誠心求籤，靜待佳音。</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div>— 心誠則靈 · 諸事吉祥 —</div>
+            <div class="copyright">v1.0 © <span id="yearSpan">2026</span> ☕迪遜咖啡廳，版權所有。</div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        //  籤詩數據庫 (32支籤)
+        // ============================================================
+        const LOTTERY_DATA = [{
+            id: 1,
+            number: "第一籤",
+            fortune: "上上",
+            poem: "龍潛深淵待時飛，\n鳳棲高梧望朝暉。\n一朝雲雨風雷動，\n萬里鵬程任我歸。",
+            interpretation: "此籤大吉，萬事亨通。時運將至，如龍得水，如鳳翔天。事業可成，姻緣美滿，求財得利，病患康復。宜把握良機，奮發向上。"
+        }, {
+            id: 2,
+            number: "第二籤",
+            fortune: "中平",
+            poem: "山高水遠路漫漫，\n行者遲遲意未闌。\n莫道前途多險阻，\n風雨過後見晴巒。",
+            interpretation: "此籤中平，耐心等待。路途雖遠，堅持可達。事業需穩步前進，感情宜細水長流，財運平穩，健康無大礙。靜心修養，時來運轉。"
+        }, {
+            id: 3,
+            number: "第三籤",
+            fortune: "下下",
+            poem: "月暗星稀夜未央，\n孤舟迷渡水茫茫。\n可憐一片心頭事，\n卻被風波誤此航。",
+            interpretation: "此籤下下，諸事不利。目前運勢低迷，宜守不宜攻。事業恐有阻滯，感情易生波折，財運欠佳，健康需留意。建議沉潛修心，待時而動。"
+        }, {
+            id: 4,
+            number: "第四籤",
+            fortune: "上上",
+            poem: "春風送暖入華堂，\n紫氣東來瑞氣揚。\n百業興隆皆順遂，\n滿門福祿壽而康。",
+            interpretation: "此籤上上，大吉大利。春風得意，萬事順遂。事業蒸蒸日上，感情甜蜜美滿，財運亨通，健康長壽。宜積極進取，廣結善緣。"
+        }, {
+            id: 5,
+            number: "第五籤",
+            fortune: "中上",
+            poem: "松柏青青立歲寒，\n經霜歷雪志彌堅。\n他年若得東風力，\n直上青雲入九天。",
+            interpretation: "此籤中上，漸入佳境。歷經磨練，意志更堅。事業先苦後甘，感情日久見真情，財運穩步上升，健康漸佳。堅持初心，必有成就。"
+        }, {
+            id: 6,
+            number: "第六籤",
+            fortune: "中平",
+            poem: "花開花落兩由之，\n世事浮沉莫強為。\n但得心田常種善，\n何愁明月不來時。",
+            interpretation: "此籤中平，順其自然。萬事皆有定數，不可強求。事業平常心對待，感情隨緣而行，財運平穩，健康安好。積善之家，必有餘慶。"
+        }, {
+            id: 7,
+            number: "第七籤",
+            fortune: "下下",
+            poem: "狂風驟雨打芭蕉，\n滿地殘紅逐水漂。\n可嘆春光留不住，\n空餘惆悵恨難消。",
+            interpretation: "此籤下下，運勢低迷。突遭變故，令人措手不及。事業恐有損失，感情易有變故，財運不濟，健康欠佳。宜冷靜應對，切勿衝動。"
+        }, {
+            id: 8,
+            number: "第八籤",
+            fortune: "上上",
+            poem: "金榜題名天下知，\n春風得意馬蹄遲。\n一朝看盡長安花，\n滿袖清風歸去時。",
+            interpretation: "此籤上上，功名成就。學業事業皆有大成，名聲遠播。感情美滿，財運旺盛，健康強健。宜乘勝追擊，更上一層樓。"
+        }, {
+            id: 9,
+            number: "第九籤",
+            fortune: "中平",
+            poem: "流水潺潺繞石行，\n白雲悠悠伴月明。\n人間萬事皆緣定，\n莫把浮名誤此生。",
+            interpretation: "此籤中平，知足常樂。人生如流水，順其自然。事業平淡是真，感情貴在真誠，財運夠用即可，健康平穩。放下執著，自在安然。"
+        }, {
+            id: 10,
+            number: "第十籤",
+            fortune: "上中",
+            poem: "錦繡文章出妙筆，\n丹青畫卷映朝曦。\n才華橫溢人稱羨，\n他日功成天下知。",
+            interpretation: "此籤上中，才華出眾。學藝有成，才幹受到賞識。事業發展順利，感情和諧美滿，財運漸旺，健康良好。宜發揮所長，造福社會。"
+        }, {
+            id: 11,
+            number: "第十一籤",
+            fortune: "中下",
+            poem: "秋風蕭瑟葉飄零，\n雁過長空留影聲。\n世事滄桑多變幻，\n且將心事付瑤琴。",
+            interpretation: "此籤中下，略感蕭條。運勢稍弱，易感孤寂。事業需穩中求進，感情需多溝通，財運平平，健康要注意情緒。可寄情於藝術，陶冶心性。"
+        }, {
+            id: 12,
+            number: "第十二籤",
+            fortune: "上上",
+            poem: "鳳凰于飛在雲霄，\n百鳥朝賀樂陶陶。\n從此天涯皆坦道，\n功名利祿任逍遙。",
+            interpretation: "此籤上上，萬事如意。如鳳凰展翅，高飛遠翔。事業有成，名利雙收，感情美滿，財運亨通，健康長壽。宜大展宏圖，造福人群。"
+        }, {
+            id: 13,
+            number: "第十三籤",
+            fortune: "中平",
+            poem: "清溪一曲抱村流，\n綠柳垂絲繫晚舟。\n莫問前程多少事，\n且看明月照心頭。",
+            interpretation: "此籤中平，心境平和。生活恬淡，自得其樂。事業平穩發展，感情溫暖如溪，財運平順，健康安好。保持內心的寧靜，便是福氣。"
+        }, {
+            id: 14,
+            number: "第十四籤",
+            fortune: "下下",
+            poem: "驚濤駭浪捲天來，\n一葉扁舟險被摧。\n幸得神明垂護佑，\n終能脫險上瑤臺。",
+            interpretation: "此籤下下，險中求生。面臨巨大挑戰，危機四伏。事業有重大考驗，感情波折重重，財運受損，健康亮紅燈。所幸有貴人相助，終能化險為夷。"
+        }, {
+            id: 15,
+            number: "第十五籤",
+            fortune: "上上",
+            poem: "天降祥雲瑞氣濃，\n龍騰鳳舞慶年豐。\n萬家燈火笙歌起，\n共祝昇平樂無窮。",
+            interpretation: "此籤上上，吉慶祥和。天降祥瑞，萬事吉祥。事業興旺發達，感情幸福美滿，財運滾滾而來，健康強健。宜感恩惜福，回饋社會。"
+        }, {
+            id: 16,
+            number: "第十六籤",
+            fortune: "中上",
+            poem: "寒梅傲雪報春來，\n香氣襲人入玉臺。\n不與群芳爭豔色，\n獨留清韻在塵埃。",
+            interpretation: "此籤中上，品格高潔。如寒梅傲雪，堅韌不拔。事業靠實力取勝，感情真摯動人，財運穩步增長，健康良好。保持高潔品格，必受敬重。"
+        }, {
+            id: 17,
+            number: "第十七籤",
+            fortune: "中平",
+            poem: "山間明月照空林，\n靜聽松風入古琴。\n世事浮雲何足問，\n且將詩酒度光陰。",
+            interpretation: "此籤中平，閒適自在。人生如詩酒，且行且珍惜。事業不必過於強求，感情隨緣而安，財運夠用即可，健康重視養生。享受當下，便是幸福。"
+        }, {
+            id: 18,
+            number: "第十八籤",
+            fortune: "下下",
+            poem: "烏雲蔽日暗無光，\n道路崎嶇行路難。\n莫道前程皆絕境，\n須知否極泰來還。",
+            interpretation: "此籤下下，處境艱難。目前運勢低迷，諸事不順。事業受阻，感情困頓，財運不佳，健康有憂。但須知否極泰來，堅持下去，必見曙光。"
+        }, {
+            id: 19,
+            number: "第十九籤",
+            fortune: "上上",
+            poem: "千祥雲集慶門庭，\n五福臨門喜氣盈。\n從此家園多吉慶，\n兒孫滿堂樂昇平。",
+            interpretation: "此籤上上，福澤深厚。家庭美滿，喜氣洋洋。事業有成，財運亨通，感情甜蜜，健康長壽。宜珍惜當下，感恩惜福，家和萬事興。"
+        }, {
+            id: 20,
+            number: "第二十籤",
+            fortune: "中上",
+            poem: "十年磨劍志未休，\n一朝出鞘耀九州。\n莫道英雄無用處，\n風雲際會展宏猷。",
+            interpretation: "此籤中上，厚積薄發。長期努力，終有回報。事業迎來轉機，感情日漸深厚，財運穩步上升，健康良好。時機成熟，大展拳腳。"
+        }, {
+            id: 21,
+            number: "第二十一籤",
+            fortune: "中平",
+            poem: "細雨斜風潤物華，\n春回大地發新芽。\n莫愁歲月催人老，\n且看庭前又落花。",
+            interpretation: "此籤中平，歲月靜好。時光流轉，萬物更新。事業按部就班，感情溫馨平淡，財運平穩，健康注重保養。順應自然，心態平和。"
+        }, {
+            id: 22,
+            number: "第二十二籤",
+            fortune: "上上",
+            poem: "丹鳳朝陽映碧空，\n祥光萬道照寰中。\n從今四海皆昇平，\n盛世繁華樂未窮。",
+            interpretation: "此籤上上，盛世繁華。大吉大利，萬事亨通。事業如日中天，感情美滿幸福，財運極旺，健康強健。宜把握機遇，造福社會。"
+        }, {
+            id: 23,
+            number: "第二十三籤",
+            fortune: "中下",
+            poem: "孤雁南飛失伴行，\n寒風瑟瑟影伶仃。\n可憐一片相思意，\n寄與長空月與星。",
+            interpretation: "此籤中下，孤寂寥落。運勢偏弱，易感孤單。事業獨撐局面，感情需多主動，財運平平，健康注意情緒。可寄情於自然，排解憂思。"
+        }, {
+            id: 24,
+            number: "第二十四籤",
+            fortune: "上上",
+            poem: "金風送爽桂花香，\n玉露凝珠秋月涼。\n正是豐年好時節，\n家家戶戶慶安康。",
+            interpretation: "此籤上上，豐收安康。秋高氣爽，萬事如意。事業豐收在望，感情甜蜜溫馨，財運興旺，健康安好。宜感恩天地，共享太平。"
+        }, {
+            id: 25,
+            number: "第二十五籤",
+            fortune: "中平",
+            poem: "碧水青山入畫屏，\n白雲深處有人家。\n閒來垂釣清溪上，\n不問人間歲月賒。",
+            interpretation: "此籤中平，悠然自得。生活如詩如畫，心境恬淡。事業隨緣而行，感情平和溫暖，財運平穩，健康安好。享受寧靜，便是福氣。"
+        }, {
+            id: 26,
+            number: "第二十六籤",
+            fortune: "下下",
+            poem: "風雷交加雨傾盆，\n萬木摧折鳥驚魂。\n可嘆天公不作美，\n何時得見日頭溫。",
+            interpretation: "此籤下下，風雨交加。運勢極差，諸事不利。事業遭遇重創，感情岌岌可危，財運慘淡，健康堪憂。宜沉潛待時，不可妄動。"
+        }, {
+            id: 27,
+            number: "第二十七籤",
+            fortune: "上中",
+            poem: "書山有路勤為徑，\n學海無涯苦作舟。\n但得恆心終有報，\n功成名就寫春秋。",
+            interpretation: "此籤上中，學有所成。勤奮刻苦，必有回報。事業靠實力說話，感情真誠相待，財運穩步增長，健康良好。堅持學習，終成大器。"
+        }, {
+            id: 28,
+            number: "第二十八籤",
+            fortune: "中平",
+            poem: "月落烏啼霜滿天，\n江楓漁火對愁眠。\n姑蘇城外寒山寺，\n夜半鐘聲到客船。",
+            interpretation: "此籤中平，愁緒滿懷。運勢平平，易生感傷。事業進展緩慢，感情有相思之苦，財運一般，健康注意睡眠。可尋求精神寄託，化解憂愁。"
+        }, {
+            id: 29,
+            number: "第二十九籤",
+            fortune: "上上",
+            poem: "雲開日出照乾坤，\n萬物生輝氣象新。\n從今四海皆通達，\n福祿雙全到子孫。",
+            interpretation: "此籤上上，光明普照。雲開見日，萬象更新。事業順遂通達，感情幸福美滿，財運興旺，健康長壽。宜行善積德，福澤子孫。"
+        }, {
+            id: 30,
+            number: "第三十籤",
+            fortune: "中上",
+            poem: "竹影橫斜水淺深，\n花香浮動月黃昏。\n不須更問前程事，\n自有春風度玉門。",
+            interpretation: "此籤中上，春風化雨。生活優雅從容，心境平和。事業漸入佳境，感情溫馨浪漫，財運穩中有升，健康良好。保持優雅，自有福來。"
+        }, {
+            id: 31,
+            number: "第三十一籤",
+            fortune: "中下",
+            poem: "落花流水春去也，\n天上人間兩茫茫。\n此情可待成追憶，\n只是當時已惘然。",
+            interpretation: "此籤中下，往事如煙。春光易逝，令人感傷。事業有懷才不遇之感，感情有錯過之憾，財運平平，健康注意情緒。放下執念，面向未來。"
+        }, {
+            id: 32,
+            number: "第三十二籤",
+            fortune: "上上",
+            poem: "龍騰四海慶昇平，\n鳳舞九天瑞氣呈。\n萬事皆隨心願轉，\n滿堂富貴享安寧。",
+            interpretation: "此籤上上，富貴安寧。龍騰鳳舞，萬事如意。事業飛黃騰達，感情美滿和諧，財運極旺，健康長壽。宜感恩惜福，樂善好施。"
+        }];
+
+        // ============================================================
+        //  DOM 參考與狀態
+        // ============================================================
+        const cylinder = document.getElementById('cylinder');
+        const drawBtn = document.getElementById('drawBtn');
+        const resultArea = document.getElementById('resultArea');
+        const lotteryNum = document.getElementById('lotteryNum');
+        const fortuneTag = document.getElementById('fortuneTag');
+        const poemDisplay = document.getElementById('poemDisplay');
+        const interpretationText = document.getElementById('interpretationText');
+        const flyingStick = document.getElementById('flyingStick');
+        const yearSpan = document.getElementById('yearSpan');
+
+        // 動態設定年份
+        yearSpan.textContent = new Date().getFullYear();
+
+        let isDrawing = false;
+        let currentResult = null;
+
+        // ============================================================
+        //  核心功能
+        // ============================================================
+
+        // 取得隨機籤
+        function getRandomLottery() {
+            const idx = Math.floor(Math.random() * LOTTERY_DATA.length);
+            return LOTTERY_DATA[idx];
+        }
+
+        // 顯示結果
+        function displayResult(data) {
+            // 籤號
+            lotteryNum.textContent = data.id;
+
+            // 吉凶
+            fortuneTag.textContent = data.fortune;
+            fortuneTag.className = 'result-fortune';
+            const fortuneMap = {
+                '上上': 'great',
+                '上中': 'good',
+                '中上': 'good',
+                '中平': 'medium',
+                '中下': 'poor',
+                '下下': 'bad'
+            };
+            if (fortuneMap[data.fortune]) {
+                fortuneTag.classList.add(fortuneMap[data.fortune]);
+            }
+
+            // 籤詩 (分行)
+            const lines = data.poem.split('\n').filter(line => line.trim() !== '');
+            poemDisplay.innerHTML = lines.map(line => `<span class="line">${line}</span>`).join('');
+
+            // 解籤
+            interpretationText.textContent = data.interpretation;
+
+            // 顯示結果區
+            resultArea.classList.add('show');
+        }
+
+        // 重置結果
+        function resetResult() {
+            resultArea.classList.remove('show');
+        }
+
+        // ============================================================
+        //  動畫流程
+        // ============================================================
+
+        function startDraw() {
+            if (isDrawing) return;
+            isDrawing = true;
+            drawBtn.disabled = true;
+            resetResult();
+
+            // 重置飛籤
+            flyingStick.classList.remove('show');
+            flyingStick.style.opacity = '0';
+
+            // 1. 搖晃籤筒 (1.8秒)
+            cylinder.classList.add('shake');
+
+            // 2. 震動結束，飛出籤
+            setTimeout(() => {
+                cylinder.classList.remove('shake');
+
+                // 顯示飛籤動畫
+                flyingStick.style.opacity = '1';
+                flyingStick.classList.add('show');
+
+                // 3. 飛籤動畫結束後顯示結果
+                setTimeout(() => {
+                    // 抽籤
+                    const data = getRandomLottery();
+                    currentResult = data;
+
+                    // 顯示結果
+                    displayResult(data);
+
+                    // 隱藏飛籤 (慢慢消失)
+                    setTimeout(() => {
+                        flyingStick.classList.remove('show');
+                        flyingStick.style.opacity = '0';
+                    }, 300);
+
+                    // 恢復按鈕
+                    isDrawing = false;
+                    drawBtn.disabled = false;
+
+                }, 900); // 飛籤動畫時長
+
+            }, 1800); // 搖晃時長
+        }
+
+        // ============================================================
+        //  事件綁定
+        // ============================================================
+
+        drawBtn.addEventListener('click', startDraw);
+
+        // 鍵盤快捷鍵 (空格求籤)
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && !e.repeat) {
+                e.preventDefault();
+                startDraw();
+            }
+        });
+
+        // ============================================================
+        //  初始化 - 不顯示任何範例籤，保持占位狀態
+        // ============================================================
+
+        // 無需額外初始化，結果區已顯示占位內容
+
+        console.log('🙏 黃大仙靈籤已載入，誠心求籤，有求必應！');
+    </script>
+
+</body>
+</html>
