@@ -27,15 +27,18 @@ const urlsToCache = [
 	'/icons/favicon-32x32.png',
 	'/icons/favicon-192x192.png',
 	'/pics/diczon_cafe.jpg',
-    '/tools/bookmarks.html',
+	'/tools/weather.html',
 	'/tools/calculator.html',
-    '/tools/weather.html',
-	'/tools/relatives',
+	'/tools/qr_code_generator.html',
 	'/tools/task_manager',
-    '/tools/qr_code_generator.html',
+	'/tools/process_formulation.html',
+	'/tools/data_viewer.html'
+	'/tools/youtube_thumbnails.html',
+	'/tools/bookmarks.html',
+	'/tools/relatives',
     '/tools/timer.html',
     '/tools/stopper.html',
-    '/tools/youtube_thumbnails.html'
+	'/tools/drawing_lots.html'
 ];
 
 // 安裝 Service Worker
