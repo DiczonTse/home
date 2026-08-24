@@ -1942,9 +1942,12 @@
                 weather: '⛅天氣',
                 calculator: '🧮計算機',
                 qr_code: '📎二維碼',
-                youtube_thumb: '📥YT預覽圖',
-                timer: '⏲️計時器',
-                stopper: '⏱️秒錶',
+                youtube_player: '▶️YouTube 播放器',
+				youtube_thumb: '📥YT預覽圖',
+				data_viewer: '📊CSV 資料檢視器',
+				process_formulation: '📝流程擬定',
+                timer: '⏱️多用途計時器',
+				drawing_lots: '🙏黃大仙靈籤',
                 search_placeholder: '🔍搜尋音樂/遊戲/工具...',
                 bookmark_title: '🔰 新增 / 儲存 / 載入書籤',
                 btn_add: '➕新增',
@@ -2040,9 +2043,12 @@
                 weather: '⛅天气',
                 calculator: '🧮计算机',
                 qr_code: '📎二维码',
-                youtube_thumb: '📥YT预览图',
-                timer: '⏲️计时器',
-                stopper: '⏱️秒表',
+                youtube_player: '▶️YouTube 播放器',
+				youtube_thumb: '📥YT预览图',
+				data_viewer: '📊CSV 数据检视器',
+				process_formulation: '📝流程拟定',
+                timer: '⏱️多用途计时器',
+				drawing_lots: '🙏黄大仙灵签',
                 search_placeholder: '🔍搜寻音乐/游戏/工具...',
                 bookmark_title: '🔰 新增 / 储存 / 载入书签',
                 btn_add: '➕新增',
@@ -2286,9 +2292,12 @@
                 weather: '⛅Weather',
                 calculator: '🧮Calculator',
                 qr_code: '📎QR Code',
-                youtube_thumb: '📥YT Thumbnail',
-                timer: '⏲️Timer',
-                stopper: '⏱️Stopwatch',
+				youtube_player: '▶️YouTube Player',
+				youtube_thumb: '📥YT Thumbnail',
+				data_viewer: '📊CSV Data Viewer',
+				process_formulation: '📝Process Formulation',
+                timer: '⏲️Multi-purpose Timer',
+				drawing_lots: '🙏Wong Tai Sin Drawing Lots',
                 search_placeholder: '🔍Search music/games/tools...',
                 bookmark_title: '🔰 Add / Save / Load Bookmarks',
                 btn_add: '➕Add',
@@ -2533,9 +2542,12 @@
                 weather: '⛅天気',
                 calculator: '🧮電卓',
                 qr_code: '📎QRコード',
-                youtube_thumb: '📥YTサムネイル',
-                timer: '⏲️タイマー',
-                stopper: '⏱️ストップウォッチ',
+				youtube_player: '▶️YouTubeプレーヤー',
+				youtube_thumb: '📥YTサムネイル',
+				data_viewer: 'CSVデータビューア',
+				process_formulation: '📝プロセス策定',
+                timer: '⏲️多目的タイマー',
+				drawing_lots: '🙏黄大仙おみくじ',
                 search_placeholder: '🔍音楽/ゲーム/ツールを検索...',
                 bookmark_title: '🔰 ブックマーク追加 / 保存 / 読み込み',
                 btn_add: '➕追加',
@@ -2780,9 +2792,12 @@
                 weather: '⛅날씨',
                 calculator: '🧮계산기',
                 qr_code: '📎QR 코드',
-                youtube_thumb: '📥YT 썸네일',
-                timer: '⏲️타이머',
-                stopper: '⏱️스톱워치',
+				youtube_player: '▶️YouTube 플레이어',
+				youtube_thumb: '📥YT 썸네일',
+				data_viewer: 'CSV 데이터 뷰어',
+				process_formulation: '📝프로세스 수립',
+                timer: '⏲️다목적 타이머',
+				drawing_lots: '🙏황대선 영험한 제비',
                 search_placeholder: '🔍음악/게임/도구 검색...',
                 bookmark_title: '🔰 북마크 추가 / 저장 / 불러오기',
                 btn_add: '➕추가',
@@ -32519,11 +32534,14 @@
             { value: 'calculator', key: 'calculator' },
             { value: 'qr_code_generator', key: 'qr_code' },
 			{ value: 'task_manager', key: 'task_manager' },
-			{ value: 'bookmark', key: 'bookmark' },
-			{ value: 'relatives', key: 'relatives' },
+			{ value: 'process_formulation', key: 'process_formulation' },
+			{ value: 'data_viewer', key: 'data_viewer' },
+			{ value: 'youtube_player', key: 'youtube_player' },
             { value: 'youtube_thumbnails', key: 'youtube_thumb' },
             { value: 'timer', key: 'timer' },
-            { value: 'stopper', key: 'stopper' }
+			{ value: 'bookmark', key: 'bookmark' },
+			{ value: 'relatives', key: 'relatives' },
+			{ value: 'drawing_lots', key: 'drawing_lots' }
         ];
 
         // ===================================================================
@@ -33903,15 +33921,22 @@
             weather: 'tools/weather.html',
             qr_code_generator: 'tools/qr_code_generator.html',
 			task_manager: 'tools/task_manager.html',
+			process_formulation: 'tools/process_formulation.html',
+			data_viewer: 'tools/data_viewer.html',
+			youtube_player: 'https://diczon.infinityfreeapp.com/',
+            youtube_thumbnails: 'tools/youtube_thumbnails.html',
+			timer: 'tools/timer.html',
 			bookmark: 'tools/bookmarks.html',
 			relatives: 'tools/relatives.html',
-            timer: 'tools/timer.html',
-            stopper: 'tools/stopper.html',
-            youtube_thumbnails: 'tools/youtube_thumbnails.html'
+			drawing_lots: 'tools/drawing_lots.html'
         };
 
         function openToolDialog(type) {
-            const dlg = $('toolDialog');
+            if (type === 'youtube_player') {
+				window.open('https://diczon.infinityfreeapp.com/', '_blank');
+				return;
+			}
+			const dlg = $('toolDialog');
             const iframe = $('toolIframe');
             if (!toolMap[type]) return alert('工具尚未準備好');
             iframe.src = toolMap[type];
