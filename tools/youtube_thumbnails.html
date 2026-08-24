@@ -1,203 +1,844 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-Hant" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>📥 YouTube 預覽圖下載</title>
-    <link rel="stylesheet" href="../style.css">
     <style>
+        /* ===== CSS 變數 & 主題 ===== */
+        :root {
+            --transition: 0.35s ease;
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f0f2f5;
+            --bg-card: #ffffff;
+            --text-color: #1e1e2a;
+            --text-secondary: #555570;
+            --border-color: #dce0e8;
+            --shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+            --shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.10);
+            --button-bg: #3b6ea5;
+            --button-hover: #2a5a8a;
+            --button-text: #ffffff;
+            --accent: #3b6ea5;
+            --accent-soft: #e8edf6;
+            --input-bg: #ffffff;
+            --error-bg: #fde8e8;
+            --error-border: #d9534f;
+            --footer-text: #8888a0;
+            --scrollbar-track: #e8ecf2;
+            --scrollbar-thumb: #c0c8d8;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #181a20;
+            --bg-card: #25282f;
+            --text-color: #e6e8ee;
+            --text-secondary: #a8aec0;
+            --border-color: #3a3e4a;
+            --shadow: 0 6px 24px rgba(0, 0, 0, 0.40);
+            --shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.55);
+            --button-bg: #4a7fb5;
+            --button-hover: #5f92c7;
+            --button-text: #ffffff;
+            --accent: #5f92c7;
+            --accent-soft: #2a3140;
+            --input-bg: #1e2128;
+            --error-bg: #2d1e24;
+            --error-border: #c05a5a;
+            --footer-text: #6a7088;
+            --scrollbar-track: #22262e;
+            --scrollbar-thumb: #3a4050;
+        }
+
+        /* ===== 重置 & 基礎 ===== */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             margin: 0;
-            padding: 20px;
-            background: var(--bg-color);
+            padding: 24px 16px;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .youtube-wrapper {
-            width: 100%;
-            max-width: 800px;
-        }
-        .url-input-container {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        #youtube-url {
-            flex: 1;
-            padding: 12px;
-            background: var(--card-bg);
+            align-items: flex-start;
+            background: var(--bg-color);
             color: var(--text-color);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
+            font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "PingFang TC", "Microsoft YaHei", sans-serif;
+            transition: background var(--transition), color var(--transition);
+            line-height: 1.6;
         }
-        #fetch-btn {
-            padding: 12px 20px;
-            background: var(--button-bg);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.3s;
+
+        /* 捲軸樣式 */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
         }
-        #fetch-btn:hover {
-            background: var(--button-hover);
-        }
-        .examples {
-            font-size: 0.9em;
-            color: var(--text-color);
-            opacity: 0.7;
-            margin-bottom: 15px;
-        }
-        .error-message {
-            display: none;
-            background: rgba(255, 0, 0, 0.1);
-            border-left: 4px solid var(--close-btn-bg);
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 4px;
-            color: var(--text-color);
-        }
-        .thumbnails-section {
-            display: none;
-            margin-top: 20px;
-        }
-        .section-title {
-            font-size: 1.3em;
-            margin-bottom: 15px;
-            color: var(--button-bg);
-            text-align: center;
-        }
-        .thumbnails-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-        .thumbnail-card {
-            background: var(--card-bg);
+        ::-webkit-scrollbar-track {
+            background: var(--scrollbar-track);
             border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px var(--shadow-color);
-            transition: transform 0.2s;
         }
-        .thumbnail-card:hover {
-            transform: translateY(-2px);
+        ::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-thumb);
+            border-radius: 8px;
         }
-        .thumbnail-img {
+
+        /* ===== 容器 ===== */
+        .container {
             width: 100%;
-            height: 120px;
-            object-fit: cover;
-            display: block;
+            max-width: 880px;
+            margin: 0 auto;
+            padding: 0 4px;
         }
-        .thumbnail-info {
-            padding: 10px;
+
+        /* ===== 頭部 ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-bottom: 28px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            transition: border-color var(--transition);
         }
-        .thumbnail-quality {
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: var(--button-bg);
-            font-size: 0.9em;
-        }
-        .thumbnail-dimensions {
-            font-size: 0.8em;
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
             color: var(--text-color);
-            opacity: 0.7;
+            transition: color var(--transition);
+        }
+        .header-title span {
+            background: var(--accent-soft);
+            padding: 4px 10px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--accent);
+            letter-spacing: 0.3px;
+            transition: background var(--transition), color var(--transition);
+        }
+
+        /* 主題切換按鈕 */
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 40px;
+            padding: 6px 14px 6px 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all var(--transition);
+            box-shadow: var(--shadow);
+            user-select: none;
+            white-space: nowrap;
+        }
+        .theme-toggle:hover {
+            box-shadow: var(--shadow-hover);
+            border-color: var(--accent);
+        }
+        .theme-toggle .icon {
+            font-size: 1.2rem;
+            line-height: 1;
+            transition: transform 0.4s ease;
+        }
+        .theme-toggle .label {
+            font-size: 0.8rem;
+            letter-spacing: 0.2px;
+        }
+
+        /* ===== 輸入區 ===== */
+        .input-section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px 22px 22px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: all var(--transition);
             margin-bottom: 10px;
         }
-        .download-btn {
+
+        .input-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .input-row .url-input {
+            flex: 1;
+            min-width: 180px;
+            padding: 14px 18px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all var(--transition);
+            outline: none;
+            font-family: inherit;
+        }
+        .input-row .url-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 110, 165, 0.15);
+        }
+        .input-row .url-input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.6;
+        }
+
+        .input-row .fetch-btn {
+            padding: 14px 28px;
+            background: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            white-space: nowrap;
+            font-family: inherit;
+            letter-spacing: 0.3px;
+            box-shadow: 0 2px 8px rgba(59, 110, 165, 0.20);
+        }
+        .input-row .fetch-btn:hover {
+            background: var(--button-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(59, 110, 165, 0.30);
+        }
+        .input-row .fetch-btn:active {
+            transform: scale(0.97);
+        }
+
+        /* 範例提示 */
+        .examples {
+            margin-top: 14px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            opacity: 0.7;
+            transition: color var(--transition);
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px 12px;
+        }
+        .examples .example-link {
+            color: var(--accent);
+            background: var(--accent-soft);
+            padding: 2px 12px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition);
+            text-decoration: none;
+            border: 1px solid transparent;
+        }
+        .examples .example-link:hover {
+            border-color: var(--accent);
+            background: var(--bg-card);
+        }
+
+        /* ===== 錯誤訊息 ===== */
+        .error-message {
+            display: none;
+            margin-top: 14px;
+            padding: 12px 18px;
+            background: var(--error-bg);
+            border-left: 4px solid var(--error-border);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 0.95rem;
+            transition: all var(--transition);
+            align-items: center;
+            gap: 10px;
+        }
+        .error-message.show {
+            display: flex;
+        }
+        .error-message .error-icon {
+            font-size: 1.2rem;
+        }
+
+        /* ===== 縮圖區 ===== */
+        .thumbnails-section {
+            display: none;
+            margin-top: 28px;
+            animation: fadeUp 0.45s ease forwards;
+        }
+        .thumbnails-section.show {
+            display: block;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 18px;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: color var(--transition);
+        }
+        .section-title .badge {
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 2px 12px;
+            border-radius: 30px;
+            letter-spacing: 0.3px;
+        }
+
+        .thumbnails-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 18px;
+        }
+
+        /* 縮圖卡片 */
+        .thumbnail-card {
+            background: var(--bg-card);
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: all var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+        .thumbnail-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--accent);
+        }
+
+        .thumbnail-card .img-wrap {
+            position: relative;
+            background: var(--bg-color);
+            overflow: hidden;
+            aspect-ratio: 16 / 9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .thumbnail-card .img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+        .thumbnail-card:hover .img-wrap img {
+            transform: scale(1.02);
+        }
+        .thumbnail-card .img-wrap .fallback {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            opacity: 0.5;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .thumbnail-card .card-body {
+            padding: 12px 14px 14px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .thumbnail-card .card-body .quality {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-color);
+            transition: color var(--transition);
+        }
+        .thumbnail-card .card-body .quality .badge-q {
+            font-size: 0.65rem;
+            font-weight: 500;
+            background: var(--accent-soft);
+            color: var(--accent);
+            padding: 1px 10px;
+            border-radius: 30px;
+            margin-left: 6px;
+        }
+        .thumbnail-card .card-body .dimensions {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin: 4px 0 10px;
+            transition: color var(--transition);
+        }
+        .thumbnail-card .card-body .download-btn {
             display: block;
             width: 100%;
-            padding: 8px;
-            background: var(--utility-bg);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 0.9em;
+            padding: 9px 0;
+            background: var(--accent-soft);
+            color: var(--accent);
+            border: 1px solid transparent;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all var(--transition);
             text-decoration: none;
             text-align: center;
+            font-family: inherit;
+            margin-top: auto;
         }
-        .download-btn:hover {
-            background: #1565C0;
+        .thumbnail-card .card-body .download-btn:hover {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+            box-shadow: 0 4px 14px rgba(59, 110, 165, 0.25);
+        }
+
+        /* ===== 底部版權 ===== */
+        .footer {
+            margin-top: 48px;
+            padding: 20px 0 8px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--footer-text);
+            transition: all var(--transition);
+            letter-spacing: 0.3px;
+        }
+        .footer .heart {
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+        .footer .heart:hover {
+            transform: scale(1.2);
+        }
+        .footer .brand {
+            color: var(--accent);
+            font-weight: 500;
+            transition: color var(--transition);
+        }
+
+        /* ===== 響應式 ===== */
+        @media (max-width: 640px) {
+            body {
+                padding: 16px 10px;
+            }
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            .header-title {
+                font-size: 1.2rem;
+                justify-content: center;
+            }
+            .theme-toggle {
+                align-self: center;
+                padding: 5px 14px 5px 10px;
+            }
+            .input-section {
+                padding: 18px 14px 16px;
+            }
+            .input-row {
+                flex-direction: column;
+            }
+            .input-row .fetch-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            .thumbnails-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 12px;
+            }
+            .section-title {
+                font-size: 1.05rem;
+            }
+            .examples {
+                font-size: 0.75rem;
+            }
+            .footer {
+                font-size: 0.75rem;
+                margin-top: 32px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .thumbnails-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .thumbnail-card .card-body {
+                padding: 8px 10px 10px;
+            }
+            .thumbnail-card .card-body .quality {
+                font-size: 0.8rem;
+            }
+            .thumbnail-card .card-body .download-btn {
+                font-size: 0.75rem;
+                padding: 7px 0;
+            }
+        }
+
+        /* ===== 工具類 ===== */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
         }
     </style>
 </head>
 <body>
-    <div class="youtube-wrapper">
-        <h2 style="text-align:center; color: var(--text-color);">📥 YouTube 預覽圖下載</h2>
-        <div class="url-input-container">
-            <input type="text" id="youtube-url" placeholder="貼上 YouTube 影片網址...">
-            <button id="fetch-btn" onclick="fetchYoutubeThumbnails()">預覽圖下載</button>
-        </div>
-        <p class="examples">例子：https://www.youtube.com/watch?v=VIDEO_ID 或 https://youtu.be/VIDEO_ID</p>
-        <div id="error-message" class="error-message">地址有問題！</div>
-        
-        <div id="thumbnails-section" class="thumbnails-section">
-            <h3 class="section-title">可供下載預覽圖</h3>
-            <div id="thumbnails-grid" class="thumbnails-grid"></div>
-        </div>
+
+    <div class="container">
+
+        <!-- ===== 頭部 ===== -->
+        <header class="header">
+            <div class="header-title">
+                📥 YouTube 預覽圖下載
+                <span>工具</span>
+            </div>
+            <button class="theme-toggle" id="themeToggle" aria-label="切換主題">
+                <span class="icon" id="themeIcon">☀️</span>
+                <span class="label" id="themeLabel">亮色</span>
+            </button>
+        </header>
+
+        <!-- ===== 輸入區 ===== -->
+        <section class="input-section">
+            <div class="input-row">
+                <input
+                type="text"
+                id="youtubeUrl"
+                class="url-input"
+                placeholder="貼上 YouTube 影片網址…"
+                autofocus
+                />
+                <button class="fetch-btn" id="fetchBtn">取得預覽圖</button>
+            </div>
+
+            <div class="examples">
+                <span>📌 範例：</span>
+                <span class="example-link" data-url="https://www.youtube.com/watch?v=dQw4w9WgXcQ">watch?v=</span>
+                <span class="example-link" data-url="https://youtu.be/dQw4w9WgXcQ">youtu.be</span>
+                <span class="example-link" data-url="https://www.youtube.com/shorts/dQw4w9WgXcQ">shorts</span>
+                <span style="opacity:0.5; margin-left:4px;">點擊填入</span>
+            </div>
+
+            <!-- 錯誤訊息 -->
+            <div class="error-message" id="errorMessage">
+                <span class="error-icon">⚠️</span>
+                <span id="errorText">無法辨識的網址，請檢查後再試。</span>
+            </div>
+        </section>
+
+        <!-- ===== 縮圖展示區 ===== -->
+        <section class="thumbnails-section" id="thumbnailsSection">
+            <div class="section-title">
+                🖼️ 可供下載預覽圖
+                <span class="badge" id="countBadge">0 張</span>
+            </div>
+            <div class="thumbnails-grid" id="thumbnailsGrid"></div>
+        </section>
+
+        <!-- ===== 底部版權 ===== -->
+        <footer class="footer">
+            v1.0 &copy; <span id="year"></span>
+            <span class="heart">☕</span>
+            <span class="brand">迪遜咖啡廳</span>
+            ，版權所有。
+        </footer>
+
     </div>
 
     <script>
-        // YouTube 缩略图下载逻辑
-        function fetchYoutubeThumbnails() {
-            const youtubeUrl = document.getElementById('youtube-url').value.trim();
-            const videoId = extractVideoId(youtubeUrl);
-            const errorMessage = document.getElementById('error-message');
-            const thumbnailsSection = document.getElementById('thumbnails-section');
-            const thumbnailsGrid = document.getElementById('thumbnails-grid');
+        (function() {
+            'use strict';
 
-            if (videoId) {
-                errorMessage.style.display = 'none';
-                displayThumbnails(videoId);
-            } else {
-                errorMessage.style.display = 'block';
-                thumbnailsSection.style.display = 'none';
+            // =============================================
+            // 1. 主題切換 (localStorage 記憶)
+            // =============================================
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = document.getElementById('themeIcon');
+            const themeLabel = document.getElementById('themeLabel');
+            const htmlEl = document.documentElement;
+
+            // 取得儲存的主題，若無則偵測系統偏好
+            function getPreferredTheme() {
+                const stored = localStorage.getItem('yt-thumb-theme');
+                if (stored === 'dark' || stored === 'light') return stored;
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    return 'dark';
+                }
+                return 'light';
             }
-        }
 
-        function extractVideoId(url) {
-            // 匹配各种 YouTube 链接格式
-            const regExp1 = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-            const regExp2 = /^.*(youtube.com\/shorts\/)([^#\&\?]*).*/;
-            let match = url.match(regExp1);
-            if (match && match[2].length === 11) return match[2];
-            match = url.match(regExp2);
-            if (match && match[2].length === 11) return match[2];
-            return null;
-        }
+            function applyTheme(theme) {
+                htmlEl.setAttribute('data-theme', theme);
+                if (theme === 'dark') {
+                    themeIcon.textContent = '🌙';
+                    themeLabel.textContent = '暗色';
+                } else {
+                    themeIcon.textContent = '☀️';
+                    themeLabel.textContent = '亮色';
+                }
+                localStorage.setItem('yt-thumb-theme', theme);
+            }
 
-        function displayThumbnails(videoId) {
-            const thumbnailsGrid = document.getElementById('thumbnails-grid');
-            thumbnailsGrid.innerHTML = '';
-            
-            const thumbnailQualities = [
-                { quality: 'Max Resolution', suffix: 'maxresdefault', width: 1280, height: 720 },
-                { quality: 'High Quality', suffix: 'hqdefault', width: 480, height: 360 },
-                { quality: 'Medium Quality', suffix: 'mqdefault', width: 320, height: 180 },
-                { quality: 'Standard Definition', suffix: 'sddefault', width: 640, height: 480 },
-                { quality: 'Default', suffix: 'default', width: 120, height: 90 }
-            ];
-            
-            thumbnailQualities.forEach(quality => {
-                const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/${quality.suffix}.jpg`;
-                const card = document.createElement('div');
-                card.className = 'thumbnail-card';
-                card.innerHTML = `
-                    <img src="${thumbnailUrl}" alt="${quality.quality} thumbnail" class="thumbnail-img" onerror="this.style.display='none'">
-                    <div class="thumbnail-info">
-                        <div class="thumbnail-quality">${quality.quality}</div>
-                        <div class="thumbnail-dimensions">${quality.width} × ${quality.height} pixels</div>
-                        <a href="${thumbnailUrl}" target="_blank" class="download-btn">下載</a>
-                    </div>
-                `;
-                thumbnailsGrid.appendChild(card);
+            function toggleTheme() {
+                const current = htmlEl.getAttribute('data-theme') || 'light';
+                const next = current === 'light' ? 'dark' : 'light';
+                applyTheme(next);
+            }
+
+            // 初始化主題
+            const initialTheme = getPreferredTheme();
+            applyTheme(initialTheme);
+
+            themeToggle.addEventListener('click', toggleTheme);
+
+            // 監聽系統主題變化 (可選)
+            if (window.matchMedia) {
+                const media = window.matchMedia('(prefers-color-scheme: dark)');
+                media.addEventListener('change', (e) => {
+                    // 只有當使用者沒有手動儲存過主題時，才跟隨系統
+                    if (!localStorage.getItem('yt-thumb-theme')) {
+                        const newTheme = e.matches ? 'dark' : 'light';
+                        applyTheme(newTheme);
+                    }
+                });
+            }
+
+            // =============================================
+            // 2. YouTube 縮圖核心邏輯
+            // =============================================
+            const urlInput = document.getElementById('youtubeUrl');
+            const fetchBtn = document.getElementById('fetchBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            const thumbnailsSection = document.getElementById('thumbnailsSection');
+            const thumbnailsGrid = document.getElementById('thumbnailsGrid');
+            const countBadge = document.getElementById('countBadge');
+
+            // 提取 Video ID
+            function extractVideoId(url) {
+                if (!url || typeof url !== 'string') return null;
+                const trimmed = url.trim();
+                // 標準格式
+                const patterns = [
+                    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/)([a-zA-Z0-9_-]{11})/,
+                    /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+                    /youtube\.com\/live\/([a-zA-Z0-9_-]{11})/
+                ];
+                for (const pattern of patterns) {
+                    const match = trimmed.match(pattern);
+                    if (match && match[1]) return match[1];
+                }
+                // 若直接是 11 位 ID
+                if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) return trimmed;
+                return null;
+            }
+
+            // 顯示縮圖
+            function displayThumbnails(videoId) {
+                const qualities = [
+                    { quality: '最大解析度', suffix: 'maxresdefault', width: 1280, height: 720 },
+                    { quality: '高畫質', suffix: 'hqdefault', width: 480, height: 360 },
+                    { quality: '標準畫質', suffix: 'sddefault', width: 640, height: 480 },
+                    { quality: '中畫質', suffix: 'mqdefault', width: 320, height: 180 },
+                    { quality: '預設', suffix: 'default', width: 120, height: 90 }
+                ];
+
+                thumbnailsGrid.innerHTML = '';
+                let validCount = 0;
+
+                qualities.forEach((item) => {
+                    const url = `https://img.youtube.com/vi/${videoId}/${item.suffix}.jpg`;
+                    const card = document.createElement('div');
+                    card.className = 'thumbnail-card';
+
+                    const imgWrap = document.createElement('div');
+                    imgWrap.className = 'img-wrap';
+
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.alt = `${item.quality} 縮圖`;
+                    img.loading = 'lazy';
+                    img.onerror = function() {
+                        // 圖片載入失敗時顯示佔位
+                        this.style.display = 'none';
+                        const fallback = document.createElement('span');
+                        fallback.className = 'fallback';
+                        fallback.textContent = '🖼️ 無法載入';
+                        imgWrap.appendChild(fallback);
+                    };
+                    imgWrap.appendChild(img);
+
+                    const body = document.createElement('div');
+                    body.className = 'card-body';
+
+                    const qualityEl = document.createElement('div');
+                    qualityEl.className = 'quality';
+                    qualityEl.innerHTML = `${item.quality} <span class="badge-q">${item.suffix}</span>`;
+
+                    const dims = document.createElement('div');
+                    dims.className = 'dimensions';
+                    dims.textContent = `${item.width} × ${item.height} px`;
+
+                    const downloadBtn = document.createElement('a');
+                    downloadBtn.className = 'download-btn';
+                    downloadBtn.href = url;
+                    downloadBtn.target = '_blank';
+                    downloadBtn.rel = 'noopener noreferrer';
+                    downloadBtn.textContent = '⬇ 下載';
+                    // 點擊下載時做簡單統計 (可選)
+                    downloadBtn.addEventListener('click', function(e) {
+                        // 輕微回饋
+                        this.textContent = '✅ 已開啟';
+                        setTimeout(() => { this.textContent = '⬇ 下載'; }, 1200);
+                    });
+
+                    body.appendChild(qualityEl);
+                    body.appendChild(dims);
+                    body.appendChild(downloadBtn);
+
+                    card.appendChild(imgWrap);
+                    card.appendChild(body);
+                    thumbnailsGrid.appendChild(card);
+
+                    validCount++;
+                });
+
+                countBadge.textContent = `${validCount} 張`;
+                thumbnailsSection.classList.add('show');
+                thumbnailsSection.style.display = 'block';
+                // 滾動到縮圖區 (平滑)
+                setTimeout(() => {
+                    thumbnailsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 120);
+            }
+
+            // 主要取得函數
+            function fetchThumbnails() {
+                const rawUrl = urlInput.value.trim();
+                const videoId = extractVideoId(rawUrl);
+
+                // 隱藏舊錯誤
+                errorMessage.classList.remove('show');
+                errorMessage.style.display = 'none';
+
+                if (!videoId) {
+                    errorText.textContent = '無法辨識的網址，請貼上有效的 YouTube 連結。';
+                    errorMessage.style.display = 'flex';
+                    errorMessage.classList.add('show');
+                    thumbnailsSection.classList.remove('show');
+                    thumbnailsSection.style.display = 'none';
+                    return;
+                }
+
+                // 成功 → 顯示縮圖
+                displayThumbnails(videoId);
+            }
+
+            // =============================================
+            // 3. 事件綁定
+            // =============================================
+            fetchBtn.addEventListener('click', fetchThumbnails);
+
+            urlInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    fetchBtn.click();
+                }
             });
-            
-            document.getElementById('thumbnails-section').style.display = 'block';
-        }
+
+            // 點擊範例連結自動填入
+            document.querySelectorAll('.example-link').forEach((el) => {
+                el.addEventListener('click', function() {
+                    const url = this.getAttribute('data-url');
+                    if (url) {
+                        urlInput.value = url;
+                        // 觸發輸入事件，方便其他監聽
+                        urlInput.dispatchEvent(new Event('input'));
+                        // 自動取得
+                        fetchBtn.click();
+                    }
+                });
+            });
+
+            // 輸入時清除錯誤狀態
+            urlInput.addEventListener('input', function() {
+                if (errorMessage.classList.contains('show')) {
+                    errorMessage.classList.remove('show');
+                    errorMessage.style.display = 'none';
+                }
+            });
+
+            // =============================================
+            // 4. 底部版權年份
+            // =============================================
+            document.getElementById('year').textContent = new Date().getFullYear();
+
+            // =============================================
+            // 5. 如果有 URL 參數 ?v=xxx 自動填入 (可選)
+            // =============================================
+            (function autoFillFromQuery() {
+                const params = new URLSearchParams(window.location.search);
+                const v = params.get('v');
+                if (v && /^[a-zA-Z0-9_-]{11}$/.test(v)) {
+                    urlInput.value = `https://www.youtube.com/watch?v=${v}`;
+                    // 延遲一下自動取得
+                    setTimeout(() => fetchBtn.click(), 400);
+                }
+            })();
+
+            // 小彩蛋：雙擊標題重置主題偏好 (方便測試)
+            document.querySelector('.header-title')?.addEventListener('dblclick', function() {
+                localStorage.removeItem('yt-thumb-theme');
+                const sys = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ?
+                    'dark' : 'light';
+                applyTheme(sys);
+                // 輕提示
+                const label = document.getElementById('themeLabel');
+                const orig = label.textContent;
+                label.textContent = '✅ 已重置';
+                setTimeout(() => { label.textContent = orig; }, 1000);
+            });
+
+        })();
     </script>
+
 </body>
 </html>

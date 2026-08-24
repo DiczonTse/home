@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSV 資料檢視器</title>
+    <style>
+        /* ===== 全域樣式 ===== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', 'PingFang TC', sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 30px 20px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .app {
+            max-width: 1200px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 20, 40, 0.10);
+            padding: 32px 36px 40px;
+            transition: all 0.3s;
+        }
+
+        /* ===== 標題區 ===== */
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #eef2f6;
+            padding-bottom: 18px;
+            transition: border-color 0.3s;
+        }
+
+        .app-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 26px;
+            font-weight: 700;
+            color: #1a2a3a;
+            letter-spacing: 0.5px;
+            transition: color 0.3s;
+        }
+
+        .app-title .icon {
+            font-size: 30px;
+        }
+
+        .app-title small {
+            font-size: 15px;
+            font-weight: 400;
+            color: #6b7a8a;
+            margin-left: 6px;
+            transition: color 0.3s;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* ===== 按鈕 ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s, box-shadow 0.2s, color 0.2s, border-color 0.2s;
+            background: #eef2f6;
+            color: #1a2a3a;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            background: #e2e8ef;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-primary {
+            background: #2d6ff7;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #1a5adf;
+            box-shadow: 0 6px 18px rgba(45, 111, 247, 0.28);
+        }
+
+        .btn-success {
+            background: #1ea86a;
+            color: #fff;
+        }
+
+        .btn-success:hover {
+            background: #16935a;
+            box-shadow: 0 6px 18px rgba(30, 168, 106, 0.28);
+        }
+
+        .btn-danger {
+            background: #f03e4a;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #d92b36;
+            box-shadow: 0 6px 18px rgba(240, 62, 74, 0.25);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #d0d8e0;
+            color: #1a2a3a;
+        }
+
+        .btn-outline:hover {
+            background: #f5f7fa;
+            border-color: #b0bcc8;
+        }
+
+        .btn-file {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-file input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* ===== 工具列 ===== */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 22px;
+            background: #f8fafc;
+            padding: 14px 20px;
+            border-radius: 16px;
+            border: 1px solid #e8edf3;
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        .toolbar .search-box {
+            flex: 1;
+            min-width: 200px;
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border-radius: 12px;
+            border: 1.5px solid #dce3ec;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.3s;
+            padding: 0 14px;
+        }
+
+        .toolbar .search-box:focus-within {
+            border-color: #2d6ff7;
+            box-shadow: 0 0 0 4px rgba(45, 111, 247, 0.12);
+        }
+
+        .toolbar .search-box .search-icon {
+            color: #8899aa;
+            font-size: 18px;
+            margin-right: 10px;
+            flex-shrink: 0;
+            transition: color 0.3s;
+        }
+
+        .toolbar .search-box input {
+            border: none;
+            outline: none;
+            background: transparent;
+            padding: 12px 0;
+            font-size: 15px;
+            width: 100%;
+            color: #1a2a3a;
+            font-family: inherit;
+            transition: color 0.3s;
+        }
+
+        .toolbar .search-box input::placeholder {
+            color: #aab7c6;
+            transition: color 0.3s;
+        }
+
+        .toolbar .status-badge {
+            font-size: 14px;
+            color: #4a5a6a;
+            background: #eef2f6;
+            padding: 6px 16px;
+            border-radius: 30px;
+            white-space: nowrap;
+            font-weight: 500;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .toolbar .status-badge strong {
+            color: #1a2a3a;
+            transition: color 0.3s;
+        }
+
+        .column-indicator {
+            font-size: 13px;
+            color: #6b7a8a;
+            background: #f0f4f8;
+            padding: 4px 14px;
+            border-radius: 30px;
+            white-space: nowrap;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .column-indicator strong {
+            color: #1a2a3a;
+            transition: color 0.3s;
+        }
+
+        /* ===== 訊息提示 ===== */
+        .toast {
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            animation: fadeSlide 0.3s ease;
+            transition: background 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        .toast.show {
+            display: flex;
+        }
+
+        .toast.success {
+            background: #e3f5e9;
+            color: #0e6b3a;
+            border: 1px solid #b8e0c8;
+        }
+
+        .toast.error {
+            background: #fde8ea;
+            color: #b12a34;
+            border: 1px solid #f5cdd0;
+        }
+
+        .toast.info {
+            background: #e3edfb;
+            color: #1a5aad;
+            border: 1px solid #bed3f0;
+        }
+
+        @keyframes fadeSlide {
+            0% {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== 表格容器 ===== */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 14px;
+            border: 1px solid #e8edf3;
+            background: #fff;
+            margin-top: 4px;
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            padding: 0 2px 2px 2px;
+        }
+
+        /* 自訂滾動條 (亮色) */
+        .table-scroll::-webkit-scrollbar {
+            height: 10px;
+            width: 10px;
+        }
+        .table-scroll::-webkit-scrollbar-track {
+            background: #f0f2f5;
+            border-radius: 8px;
+        }
+        .table-scroll::-webkit-scrollbar-thumb {
+            background: #c1c9d4;
+            border-radius: 8px;
+        }
+        .table-scroll::-webkit-scrollbar-thumb:hover {
+            background: #a8b2be;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14.5px;
+            min-width: 640px;
+        }
+
+        thead {
+            background: #f7f9fc;
+            border-bottom: 2px solid #e0e7ef;
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        thead th {
+            padding: 14px 18px;
+            text-align: left;
+            font-weight: 700;
+            color: #1a2a3a;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            background: #f7f9fc;
+            z-index: 2;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        thead th .col-idx {
+            font-weight: 400;
+            color: #8a9aa8;
+            font-size: 12px;
+            margin-left: 6px;
+            transition: color 0.3s;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #edf2f7;
+            transition: background 0.15s, border-color 0.3s;
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: #f6f9ff;
+        }
+
+        tbody td {
+            padding: 12px 18px;
+            color: #1e2e3e;
+            line-height: 1.5;
+            vertical-align: middle;
+            word-break: break-word;
+            transition: color 0.3s;
+        }
+
+        .empty-row td {
+            padding: 40px 20px;
+            text-align: center;
+            color: #8a9aa8;
+            font-size: 15px;
+            background: #fafcfe;
+            transition: color 0.3s, background 0.3s;
+        }
+
+        .highlight {
+            background-color: #ffecb0;
+            border-radius: 4px;
+            padding: 1px 2px;
+            transition: background 0.3s;
+        }
+
+        /* ===== 底部 ===== */
+        .app-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 18px;
+            padding-top: 16px;
+            border-top: 1px solid #eef2f6;
+            font-size: 14px;
+            color: #5a6a7a;
+            transition: border-color 0.3s, color 0.3s;
+        }
+
+        .app-footer .count {
+            font-weight: 500;
+        }
+        .app-footer .count strong {
+            color: #1a2a3a;
+            transition: color 0.3s;
+        }
+
+        .app-footer .hint,
+        .app-footer .copyright {
+            color: #8a9aa8;
+            font-size: 13px;
+            transition: color 0.3s;
+        }
+
+        .app-footer .copyright {
+            font-weight: 400;
+        }
+
+        /* ============================================================
+           黑暗模式 (Dark Mode) — 完整覆蓋所有元素
+           ============================================================ */
+        body.eye-care {
+            background: #0d0d0d;
+        }
+
+        body.eye-care .app {
+            background: #1a1a1a;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+        }
+
+        body.eye-care .app-header {
+            border-bottom-color: #333;
+        }
+
+        body.eye-care .app-title,
+        body.eye-care .app-title small,
+        body.eye-care .toolbar .status-badge strong,
+        body.eye-care .column-indicator strong,
+        body.eye-care .app-footer .count strong {
+            color: #e8e8e8;
+        }
+
+        body.eye-care .app-title small {
+            color: #9a9a9a;
+        }
+
+        body.eye-care .toolbar {
+            background: #262626;
+            border-color: #3a3a3a;
+        }
+
+        body.eye-care .toolbar .search-box {
+            background: #2d2d2d;
+            border-color: #4a4a4a;
+        }
+
+        body.eye-care .toolbar .search-box:focus-within {
+            border-color: #6a8fc0;
+            box-shadow: 0 0 0 4px rgba(106, 143, 192, 0.25);
+        }
+
+        body.eye-care .toolbar .search-box .search-icon {
+            color: #9a9a9a;
+        }
+
+        body.eye-care .toolbar .search-box input {
+            color: #e8e8e8;
+        }
+
+        body.eye-care .toolbar .search-box input::placeholder {
+            color: #777;
+        }
+
+        body.eye-care .toolbar .status-badge {
+            background: #333;
+            color: #c0c0c0;
+        }
+
+        body.eye-care .column-indicator {
+            background: #333;
+            color: #c0c0c0;
+        }
+
+        body.eye-care .table-wrapper {
+            background: #1e1e1e;
+            border-color: #3a3a3a;
+        }
+
+        /* 滾動條深色 */
+        body.eye-care .table-scroll::-webkit-scrollbar-track {
+            background: #2a2a2a;
+        }
+        body.eye-care .table-scroll::-webkit-scrollbar-thumb {
+            background: #555;
+        }
+        body.eye-care .table-scroll::-webkit-scrollbar-thumb:hover {
+            background: #6a6a6a;
+        }
+
+        body.eye-care thead {
+            background: #272727;
+            border-bottom-color: #3a3a3a;
+        }
+
+        body.eye-care thead th {
+            background: #272727;
+            color: #e8e8e8;
+        }
+
+        body.eye-care thead th .col-idx {
+            color: #888;
+        }
+
+        body.eye-care tbody tr {
+            border-bottom-color: #333;
+        }
+
+        body.eye-care tbody tr:hover {
+            background: #2d2d2d;
+        }
+
+        body.eye-care tbody td {
+            color: #d0d0d0;
+        }
+
+        body.eye-care .empty-row td {
+            background: #1e1e1e;
+            color: #777;
+        }
+
+        body.eye-care .highlight {
+            background-color: #b8860b;
+            color: #fff;
+        }
+
+        body.eye-care .app-footer {
+            border-top-color: #333;
+            color: #9a9a9a;
+        }
+
+        body.eye-care .app-footer .count strong {
+            color: #e8e8e8;
+        }
+
+        body.eye-care .app-footer .hint,
+        body.eye-care .app-footer .copyright {
+            color: #777;
+        }
+
+        /* 按鈕深色調整 */
+        body.eye-care .btn {
+            background: #333;
+            color: #e0e0e0;
+        }
+
+        body.eye-care .btn:hover {
+            background: #3d3d3d;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        body.eye-care .btn-primary {
+            background: #3a6a9e;
+            color: #fff;
+        }
+        body.eye-care .btn-primary:hover {
+            background: #2d5a88;
+        }
+
+        body.eye-care .btn-success {
+            background: #2a6a4f;
+            color: #fff;
+        }
+        body.eye-care .btn-success:hover {
+            background: #1f5a3f;
+        }
+
+        body.eye-care .btn-danger {
+            background: #7a3a3a;
+            color: #fff;
+        }
+        body.eye-care .btn-danger:hover {
+            background: #6a2a2a;
+        }
+
+        body.eye-care .btn-outline {
+            background: transparent;
+            border-color: #555;
+            color: #e0e0e0;
+        }
+
+        body.eye-care .btn-outline:hover {
+            background: #3a3a3a;
+            border-color: #777;
+        }
+
+        /* 提示框深色 */
+        body.eye-care .toast.success {
+            background: #1e3a2a;
+            color: #b0d0b0;
+            border-color: #2a5a3a;
+        }
+
+        body.eye-care .toast.error {
+            background: #3a1e1e;
+            color: #d0a0a0;
+            border-color: #5a2a2a;
+        }
+
+        body.eye-care .toast.info {
+            background: #1e2a3a;
+            color: #a0b0d0;
+            border-color: #2a3a5a;
+        }
+
+        /* 額外邊框修正 */
+        body.eye-care .table-wrapper,
+        body.eye-care .toolbar {
+            border-color: #3a3a3a;
+        }
+
+        /* ===== 響應式 ===== */
+        @media (max-width: 700px) {
+            .app {
+                padding: 18px 14px 28px;
+                border-radius: 18px;
+            }
+
+            .app-title {
+                font-size: 20px;
+            }
+            .app-title small {
+                font-size: 13px;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+                padding: 14px 16px;
+            }
+
+            .toolbar .search-box {
+                min-width: unset;
+            }
+
+            .header-actions {
+                width: 100%;
+            }
+            .header-actions .btn {
+                flex: 1;
+                justify-content: center;
+                font-size: 13px;
+                padding: 8px 12px;
+            }
+
+            .app-footer {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+
+            table {
+                font-size: 13px;
+                min-width: 480px;
+            }
+            thead th,
+            tbody td {
+                padding: 10px 12px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .app-title {
+                font-size: 17px;
+                flex-wrap: wrap;
+            }
+            .app-title .icon {
+                font-size: 22px;
+            }
+            .btn {
+                font-size: 12px;
+                padding: 6px 10px;
+                gap: 4px;
+            }
+            table {
+                font-size: 12px;
+                min-width: 360px;
+            }
+            thead th,
+            tbody td {
+                padding: 8px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app" id="app">
+
+        <!-- 標題 -->
+        <header class="app-header">
+            <div class="app-title">
+                <span class="icon">📊</span>
+                CSV 資料檢視器
+                <small>匯入 · 篩選 · 儲存</small>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-success" id="downloadSampleBtn">
+                    ⬇️ 下載範例 CSV
+                </button>
+                <button class="btn btn-file btn-primary" id="uploadBtn">
+                    📤 上傳 CSV
+                    <input type="file" id="fileInput" accept=".csv,.tsv,.txt" />
+                </button>
+                <button class="btn btn-outline" id="toggleEyeCareBtn">🌙 護眼模式</button>
+                <button class="btn btn-danger" id="resetBtn">
+                    🔄 重設
+                </button>
+            </div>
+        </header>
+
+        <!-- 提示訊息 -->
+        <div class="toast" id="toast"></div>
+
+        <!-- 工具列 -->
+        <div class="toolbar">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="輸入關鍵字搜尋所有欄位…" autocomplete="off" />
+            </div>
+            <span class="status-badge" id="statusBadge">
+                顯示 <strong id="visibleCount">0</strong> 筆
+                （共 <strong id="totalCount">0</strong> 筆）
+            </span>
+            <span class="column-indicator" id="columnIndicator">
+                📋 <strong id="colCount">0</strong> 個欄位
+            </span>
+        </div>
+
+        <!-- 表格 -->
+        <div class="table-wrapper">
+            <div class="table-scroll">
+                <table id="dataTable">
+                    <thead id="tableHead">
+                        <tr id="headerRow"></tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr class="empty-row">
+                            <td colspan="6">📭 尚無資料，請上傳 CSV 或使用內建範例</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 底部 -->
+        <footer class="app-footer">
+            <span class="count">
+                📋 資料筆數：<strong id="footerTotal">0</strong>
+                <span id="footerFilterInfo" style="display:none;">
+                    ｜ 篩選後：<strong id="footerVisible">0</strong>
+                </span>
+            </span>
+            <span class="hint">
+                💡 內建範例資料 · 上傳 CSV 後自動儲存於瀏覽器 · 支援任意欄數
+            </span>
+            <span class="copyright">
+                v1.0  © <span id="yearSpan"></span> ☕迪遜咖啡廳，版權所有。
+            </span>
+        </footer>
+    </div>
+
+    <script>
+        // ============================================================
+        //  1. 內建範例資料
+        // ============================================================
+        const DEFAULT_HEADERS = ['部門', '職業', '人名', '電話', '內線', '傳真'];
+
+        const DEFAULT_ROWS = [
+            { '部門': '業務部', '職業': '經理', '人名': '張志明', '電話': '02-12345678', '內線': '101', '傳真': '02-12345679' },
+            { '部門': '業務部', '職業': '專員', '人名': '陳美玲', '電話': '02-12345680', '內線': '102', '傳真': '02-12345681' },
+            { '部門': '研發部', '職業': '工程師', '人名': '王建國', '電話': '02-23456789', '內線': '201', '傳真': '02-23456790' },
+            { '部門': '研發部', '職業': '技術員', '人名': '林淑惠', '電話': '02-23456791', '內線': '202', '傳真': '02-23456792' },
+            { '部門': '人事部', '職業': '專員', '人名': '黃偉翔', '電話': '02-34567890', '內線': '301', '傳真': '02-34567891' },
+            { '部門': '財務部', '職業': '會計', '人名': '李雅婷', '電話': '02-45678901', '內線': '401', '傳真': '02-45678902' },
+            { '部門': '行銷部', '職業': '設計師', '人名': '劉俊宏', '電話': '02-56789012', '內線': '501', '傳真': '02-56789013' },
+            { '部門': '行銷部', '職業': '經理', '人名': '吳美華', '電話': '02-56789014', '內線': '502', '傳真': '02-56789015' },
+            { '部門': '生產部', '職業': '課長', '人名': '鄭文彬', '電話': '02-67890123', '內線': '601', '傳真': '02-67890124' },
+            { '部門': '品管部', '職業': '工程師', '人名': '許淑芬', '電話': '02-78901234', '內線': '701', '傳真': '02-78901235' },
+        ];
+
+        // ============================================================
+        //  2. 狀態
+        // ============================================================
+        const STORAGE_KEY = 'csvViewerData';
+        const EYE_CARE_KEY = 'eyeCareMode';
+
+        let currentHeaders = [];
+        let currentRows = [];
+        let searchKeyword = '';
+
+        // DOM 參考
+        const $ = (s) => document.querySelector(s);
+        const $$ = (s) => document.querySelectorAll(s);
+
+        const app = $('#app');
+        const tableHead = $('#tableHead');
+        const tableBody = $('#tableBody');
+        const searchInput = $('#searchInput');
+        const fileInput = $('#fileInput');
+        const uploadBtn = $('#uploadBtn');
+        const resetBtn = $('#resetBtn');
+        const downloadSampleBtn = $('#downloadSampleBtn');
+        const toggleEyeCareBtn = $('#toggleEyeCareBtn');
+        const toast = $('#toast');
+        const visibleCount = $('#visibleCount');
+        const totalCount = $('#totalCount');
+        const footerTotal = $('#footerTotal');
+        const footerVisible = $('#footerVisible');
+        const footerFilterInfo = $('#footerFilterInfo');
+        const colCount = $('#colCount');
+        const yearSpan = $('#yearSpan');
+
+        // ============================================================
+        //  3. 工具函式
+        // ============================================================
+        function showToast(message, type = 'info', duration = 3000) {
+            toast.className = 'toast show ' + type;
+            toast.textContent = message;
+            clearTimeout(toast._timer);
+            toast._timer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
+        // 簡易 CSV 解析器（支援引號、換行）
+        function parseCSV(text) {
+            const lines = [];
+            let current = [];
+            let field = '';
+            let inQuotes = false;
+            let i = 0;
+
+            while (i < text.length) {
+                const ch = text[i];
+                if (inQuotes) {
+                    if (ch === '"') {
+                        if (i + 1 < text.length && text[i + 1] === '"') {
+                            field += '"';
+                            i++;
+                        } else {
+                            inQuotes = false;
+                        }
+                    } else {
+                        field += ch;
+                    }
+                } else {
+                    if (ch === '"') {
+                        inQuotes = true;
+                    } else if (ch === ',') {
+                        current.push(field.trim());
+                        field = '';
+                    } else if (ch === '\r' || ch === '\n') {
+                        if (ch === '\r' && i + 1 < text.length && text[i + 1] === '\n') {
+                            i++;
+                        }
+                        current.push(field.trim());
+                        if (current.some(v => v !== '')) {
+                            lines.push(current);
+                        }
+                        current = [];
+                        field = '';
+                    } else {
+                        field += ch;
+                    }
+                }
+                i++;
+            }
+            if (field || current.length > 0) {
+                current.push(field.trim());
+                if (current.some(v => v !== '')) {
+                    lines.push(current);
+                }
+            }
+            return lines;
+        }
+
+        function csvLinesToData(lines) {
+            if (!lines || lines.length === 0) {
+                return { headers: [], rows: [] };
+            }
+            const headers = lines[0].map(h => h.trim());
+            const rows = [];
+            for (let i = 1; i < lines.length; i++) {
+                const row = lines[i];
+                const obj = {};
+                headers.forEach((h, idx) => {
+                    obj[h] = (idx < row.length) ? row[idx] : '';
+                });
+                rows.push(obj);
+            }
+            return { headers, rows };
+        }
+
+        function saveToStorage(headers, rows) {
+            try {
+                const payload = { headers, rows };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+            } catch (e) {
+                console.warn('儲存失敗:', e);
+            }
+        }
+
+        function loadFromStorage() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                if (parsed && Array.isArray(parsed.headers) && Array.isArray(parsed.rows)) {
+                    return parsed;
+                }
+                return null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function clearStorage() {
+            localStorage.removeItem(STORAGE_KEY);
+        }
+
+        // ============================================================
+        //  4. 渲染表格
+        // ============================================================
+        function render(headers, rows, keyword = '') {
+            currentHeaders = headers || [];
+            currentRows = rows || [];
+            searchKeyword = keyword || '';
+
+            const filtered = filterRows(currentRows, currentHeaders, searchKeyword);
+            const total = currentRows.length;
+            const visible = filtered.length;
+
+            totalCount.textContent = total;
+            visibleCount.textContent = visible;
+            footerTotal.textContent = total;
+            colCount.textContent = currentHeaders.length;
+
+            if (total > 0 && visible !== total) {
+                footerFilterInfo.style.display = 'inline';
+                footerVisible.textContent = visible;
+            } else {
+                footerFilterInfo.style.display = 'none';
+            }
+
+            renderHeaders(currentHeaders);
+
+            if (currentHeaders.length === 0 || currentRows.length === 0) {
+                const colspan = Math.max(currentHeaders.length || 1, 1);
+                tableBody.innerHTML = `
+                        <tr class="empty-row">
+                            <td colspan="${colspan}">📭 尚無資料，請上傳 CSV 或使用內建範例</td>
+                        </tr>
+                    `;
+                return;
+            }
+
+            if (visible === 0) {
+                const colspan = currentHeaders.length || 1;
+                tableBody.innerHTML = `
+                        <tr class="empty-row">
+                            <td colspan="${colspan}">🔍 沒有符合「${searchKeyword}」的資料</td>
+                        </tr>
+                    `;
+                return;
+            }
+
+            let html = '';
+            const lowerKeyword = searchKeyword.toLowerCase().trim();
+            const hasKeyword = lowerKeyword.length > 0;
+
+            filtered.forEach((row, idx) => {
+                html += '<tr>';
+                currentHeaders.forEach((header) => {
+                    let cellValue = (row[header] !== undefined && row[header] !== null) ? String(row[header]) : '';
+                    let displayValue = cellValue;
+
+                    if (hasKeyword && cellValue.toLowerCase().includes(lowerKeyword)) {
+                        const regex = new RegExp(`(${lowerKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                        displayValue = cellValue.split(regex).map(p => {
+                            if (p && p.toLowerCase() === lowerKeyword) {
+                                return `<span class="highlight">${p}</span>`;
+                            }
+                            return p;
+                        }).join('');
+                    }
+
+                    html += `<td>${displayValue}</td>`;
+                });
+                html += '</tr>';
+            });
+
+            tableBody.innerHTML = html;
+        }
+
+        function renderHeaders(headers) {
+            const headerRow = document.getElementById('headerRow');
+            if (!headerRow) return;
+            if (!headers || headers.length === 0) {
+                headerRow.innerHTML = `<th colspan="1">欄位</th>`;
+                return;
+            }
+            headerRow.innerHTML = headers.map((h, idx) =>
+                `<th>${h} <span class="col-idx">#${idx + 1}</span></th>`
+            ).join('');
+        }
+
+        function filterRows(rows, headers, keyword) {
+            const kw = keyword.trim().toLowerCase();
+            if (!kw) return rows.slice();
+            return rows.filter(row => {
+                for (const header of headers) {
+                    const val = (row[header] !== undefined && row[header] !== null) ? String(row[header]) : '';
+                    if (val.toLowerCase().includes(kw)) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+        }
+
+        // ============================================================
+        //  5. 載入資料
+        // ============================================================
+        function loadData(headers, rows, save = true) {
+            if (save) {
+                saveToStorage(headers, rows);
+            }
+            render(headers, rows, searchInput.value);
+        }
+
+        function loadDefaultData() {
+            loadData(DEFAULT_HEADERS.slice(), DEFAULT_ROWS.map(r => ({ ...r })), true);
+            showToast('✅ 已載入內建範例資料', 'success', 2000);
+        }
+
+        function loadStoredData() {
+            const stored = loadFromStorage();
+            if (stored && stored.headers && stored.headers.length > 0 && stored.rows && stored.rows.length > 0) {
+                loadData(stored.headers, stored.rows, false);
+                showToast(`📂 已載入儲存的資料（${stored.rows.length} 筆，${stored.headers.length} 個欄位）`, 'info', 2000);
+                return true;
+            }
+            return false;
+        }
+
+        // ============================================================
+        //  6. 處理 CSV 上傳
+        // ============================================================
+        function handleFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const text = e.target.result;
+                    const lines = parseCSV(text);
+                    if (lines.length < 2) {
+                        showToast('⚠️ CSV 格式錯誤：至少需要標題列 + 一筆資料', 'error', 3000);
+                        return;
+                    }
+                    const { headers, rows } = csvLinesToData(lines);
+                    if (headers.length === 0) {
+                        showToast('⚠️ 無法讀取欄位名稱', 'error', 3000);
+                        return;
+                    }
+                    if (rows.length === 0) {
+                        showToast('⚠️ CSV 沒有資料列', 'error', 3000);
+                        return;
+                    }
+                    loadData(headers, rows, true);
+                    showToast(`✅ 成功匯入 ${rows.length} 筆資料（${headers.length} 個欄位）`, 'success', 3000);
+                    fileInput.value = '';
+                } catch (err) {
+                    showToast('⚠️ 解析 CSV 失敗：' + err.message, 'error', 3000);
+                    fileInput.value = '';
+                }
+            };
+            reader.onerror = () => {
+                showToast('⚠️ 讀取檔案失敗', 'error', 3000);
+                fileInput.value = '';
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        // ============================================================
+        //  7. 下載範例 CSV
+        // ============================================================
+        function downloadSampleCSV() {
+            const headers = DEFAULT_HEADERS;
+            const rows = DEFAULT_ROWS;
+
+            let csvContent = '';
+            csvContent += headers.join(',') + '\n';
+            rows.forEach(row => {
+                const rowData = headers.map(h => {
+                    let val = row[h] || '';
+                    if (val.includes(',') || val.includes('"') || val.includes('\n')) {
+                        val = '"' + val.replace(/"/g, '""') + '"';
+                    }
+                    return val;
+                });
+                csvContent += rowData.join(',') + '\n';
+            });
+
+            const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = '範例資料.csv';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            showToast('⬇️ 範例 CSV 已下載', 'success', 2000);
+        }
+
+        // ============================================================
+        //  8. 護眼模式 (黑暗模式)
+        // ============================================================
+        function toggleEyeCare() {
+            const isActive = document.body.classList.toggle('eye-care');
+            localStorage.setItem(EYE_CARE_KEY, String(isActive));
+            updateEyeCareButton(isActive);
+        }
+
+        function updateEyeCareButton(isActive) {
+            toggleEyeCareBtn.textContent = isActive ? '☀️ 明亮模式' : '🌙 護眼模式';
+        }
+
+        function loadEyeCarePreference() {
+            const stored = localStorage.getItem(EYE_CARE_KEY);
+            if (stored === 'true') {
+                document.body.classList.add('eye-care');
+                updateEyeCareButton(true);
+            } else {
+                document.body.classList.remove('eye-care');
+                updateEyeCareButton(false);
+            }
+        }
+
+        // ============================================================
+        //  9. 初始化 & 事件綁定
+        // ============================================================
+        function init() {
+            // 年份
+            yearSpan.textContent = new Date().getFullYear();
+
+            // 載入資料
+            const hasStored = loadStoredData();
+            if (!hasStored) {
+                loadDefaultData();
+            }
+
+            // 載入護眼模式偏好
+            loadEyeCarePreference();
+
+            // ---- 搜尋事件 ----
+            searchInput.addEventListener('input', () => {
+                render(currentHeaders, currentRows, searchInput.value);
+            });
+
+            // ---- 上傳事件 ----
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const ext = file.name.split('.').pop().toLowerCase();
+                if (!['csv', 'tsv', 'txt'].includes(ext)) {
+                    showToast('⚠️ 請上傳 .csv 或 .tsv 檔案', 'error', 2500);
+                    fileInput.value = '';
+                    return;
+                }
+                handleFile(file);
+            });
+
+            uploadBtn.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // ---- 重設事件 ----
+            resetBtn.addEventListener('click', () => {
+                if (confirm('確定要清除所有儲存資料，並恢復為內建範例嗎？')) {
+                    clearStorage();
+                    searchInput.value = '';
+                    loadDefaultData();
+                    showToast('🔄 已重設為內建範例', 'info', 2000);
+                }
+            });
+
+            // ---- 下載範例 CSV ----
+            downloadSampleBtn.addEventListener('click', downloadSampleCSV);
+
+            // ---- 護眼模式切換 ----
+            toggleEyeCareBtn.addEventListener('click', toggleEyeCare);
+
+            // ---- 鍵盤快捷鍵：Ctrl+F 聚焦搜尋 ----
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                    e.preventDefault();
+                    searchInput.focus();
+                    searchInput.select();
+                }
+                if (e.key === 'Escape') {
+                    if (document.activeElement === searchInput) {
+                        searchInput.blur();
+                    }
+                }
+            });
+
+            console.log('📊 CSV 資料檢視器 v1.0 已啟動');
+            console.log(`📋 目前 ${currentRows.length} 筆資料，${currentHeaders.length} 個欄位`);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+
+</body>
+</html>

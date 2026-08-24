@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>流程擬定</title>
+    <style>
+        /* ===== CSS 變數 (淺色預設) ===== */
+        :root {
+            --bg-body: #f0f2f5;
+            --bg-card: #ffffff;
+            --bg-header: #ffffff;
+            --bg-input: #fafbff;
+            --bg-step: #f7f9fc;
+            --bg-step-hover: #eef2f9;
+            --border-light: #e2e8f0;
+            --border-card: #edf2f7;
+            --text-primary: #1a1a2e;
+            --text-secondary: #4a5568;
+            --text-muted: #a0aec0;
+            --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.04);
+            --shadow-header: 0 8px 30px rgba(74, 108, 247, 0.10);
+            --btn-primary-bg: #4a6cf7;
+            --btn-primary-hover: #3b5de7;
+            --btn-add-bg: #eef2f9;
+            --btn-add-border: #e2e8f0;
+            --step-completed-bg: #22c55e;
+            --step-completed-border: #16a34a;
+            --danger-hover: #fee2e2;
+            --danger-color: #ef4444;
+            --transition: 0.25s ease;
+        }
+
+        /* ===== 黑暗模式 ===== */
+        body.dark {
+            --bg-body: #121212;
+            --bg-card: #1e1e2a;
+            --bg-header: #1a1a2a;
+            --bg-input: #2a2a3a;
+            --bg-step: #2a2a3a;
+            --bg-step-hover: #3a3a4a;
+            --border-light: #3a3a4a;
+            --border-card: #2a2a3a;
+            --text-primary: #e8e8f0;
+            --text-secondary: #b0b0c8;
+            --text-muted: #6a6a80;
+            --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.5);
+            --shadow-header: 0 8px 30px rgba(0, 0, 0, 0.6);
+            --btn-primary-bg: #5a7cf7;
+            --btn-primary-hover: #4a6cf7;
+            --btn-add-bg: #2a2a3a;
+            --btn-add-border: #3a3a4a;
+            --step-completed-bg: #2a8a4a;
+            --step-completed-border: #1a7a3a;
+            --danger-hover: #4a2a2a;
+            --danger-color: #ef6a6a;
+        }
+
+        /* ===== 全域重設 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'PingFang TC', Roboto, system-ui, sans-serif;
+            background: var(--bg-body);
+            min-height: 100vh;
+            padding: 24px 16px 60px;
+            color: var(--text-primary);
+            transition: background var(--transition), color var(--transition);
+        }
+
+        #app {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* ===== 頂部標題 + 工具列 ===== */
+        .app-header {
+            background: var(--bg-header);
+            border-radius: 20px;
+            padding: 24px 28px 20px;
+            box-shadow: var(--shadow-header);
+            margin-bottom: 32px;
+            border: 1px solid var(--border-light);
+            transition: background var(--transition), border var(--transition), box-shadow var(--transition);
+        }
+
+        .app-header .top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px 16px;
+            margin-bottom: 18px;
+        }
+
+        .app-header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-primary);
+        }
+
+        .app-header h1 span {
+            background: var(--btn-primary-bg);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 2px 14px;
+            border-radius: 40px;
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px 12px;
+        }
+
+        .toolbar button,
+        .toolbar label {
+            background: var(--bg-step);
+            border: 2px solid var(--border-light);
+            color: var(--text-secondary);
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .toolbar button:hover,
+        .toolbar label:hover {
+            background: var(--bg-step-hover);
+            border-color: var(--text-muted);
+            transform: translateY(-2px);
+        }
+
+        .toolbar .btn-danger {
+            color: var(--danger-color);
+        }
+
+        .toolbar .btn-danger:hover {
+            background: var(--danger-hover);
+            border-color: var(--danger-color);
+        }
+
+        /* 黑暗模式切換開關 (滑桿) */
+        .dark-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .dark-toggle input {
+            display: none;
+        }
+
+        .dark-toggle .slider {
+            width: 44px;
+            height: 24px;
+            background: #cbd5e0;
+            border-radius: 40px;
+            position: relative;
+            transition: background 0.3s;
+            flex-shrink: 0;
+            border: 2px solid var(--border-light);
+        }
+
+        .dark-toggle .slider::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        }
+
+        .dark-toggle input:checked+.slider {
+            background: var(--btn-primary-bg);
+        }
+
+        .dark-toggle input:checked+.slider::after {
+            transform: translateX(20px);
+        }
+
+        .dark-toggle .label-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        /* 上傳 input 隱藏 */
+        #fileInput {
+            display: none;
+        }
+
+        /* ===== 新增標題列 ===== */
+        .add-title-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .add-title-row input {
+            flex: 1;
+            min-width: 180px;
+            padding: 12px 18px;
+            border: 2px solid var(--border-light);
+            border-radius: 14px;
+            font-size: 16px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            transition: all var(--transition);
+            outline: none;
+        }
+
+        .add-title-row input:focus {
+            border-color: var(--btn-primary-bg);
+            box-shadow: 0 0 0 4px rgba(74, 108, 247, 0.12);
+            background: var(--bg-card);
+        }
+
+        .add-title-row input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .btn-primary {
+            background: var(--btn-primary-bg);
+            color: #fff;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .btn-primary:hover {
+            background: var(--btn-primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 108, 247, 0.30);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* ===== 流程列表 ===== */
+        .flow-list {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* ===== 流程卡片 ===== */
+        .flow-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 24px 28px 26px;
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-card);
+            transition: all var(--transition);
+        }
+
+        .flow-card:hover {
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.07);
+        }
+
+        .flow-card.completed {
+            border-left: 6px solid var(--step-completed-bg);
+        }
+
+        /* ===== 標題列 ===== */
+        .flow-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .flow-title {
+            flex: 1;
+            font-size: 22px;
+            font-weight: 700;
+            padding: 8px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all var(--transition);
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 120px;
+            border: 2px solid transparent;
+            background: var(--bg-step);
+            color: var(--text-primary);
+        }
+
+        .flow-title:hover {
+            background: var(--bg-step-hover);
+            border-color: var(--border-light);
+        }
+
+        .flow-title:active {
+            transform: scale(0.98);
+        }
+
+        .flow-title .icon {
+            font-size: 20px;
+            opacity: 0.6;
+            transition: 0.3s;
+        }
+
+        .flow-title.completed .icon {
+            opacity: 1;
+        }
+
+        .flow-title .title-text {
+            flex: 1;
+            word-break: break-word;
+        }
+
+        .flow-title .badge {
+            font-size: 13px;
+            font-weight: 600;
+            padding: 2px 14px;
+            border-radius: 40px;
+            background: var(--border-light);
+            color: var(--text-secondary);
+            transition: 0.3s;
+        }
+
+        .flow-title.completed .badge {
+            background: var(--step-completed-bg);
+            color: #fff;
+        }
+
+        .flow-title.completed .title-text {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        .btn-delete-flow {
+            background: transparent;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 8px 10px;
+            border-radius: 10px;
+            transition: all 0.2s;
+            color: var(--text-muted);
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-delete-flow:hover {
+            background: var(--danger-hover);
+            color: var(--danger-color);
+            transform: scale(1.05);
+        }
+
+        /* ===== 步驟容器 ===== */
+        .steps-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 6px 0 14px 0;
+            min-height: 52px;
+            align-items: flex-start;
+        }
+
+        /* ===== 單個步驟 ===== */
+        .step-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px 10px 20px;
+            background: var(--bg-step);
+            border: 2px solid var(--border-light);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all var(--transition);
+            user-select: none;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        .step-item:hover {
+            background: var(--bg-step-hover);
+            border-color: var(--text-muted);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+        }
+
+        .step-item:active {
+            transform: scale(0.96);
+        }
+
+        .step-item.completed {
+            background: var(--step-completed-bg);
+            border-color: var(--step-completed-border);
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(34, 197, 94, 0.25);
+        }
+
+        .step-item.completed:hover {
+            background: var(--step-completed-bg);
+            border-color: var(--step-completed-border);
+        }
+
+        .step-item .step-text {
+            word-break: break-word;
+            max-width: 300px;
+        }
+
+        .step-item .step-check {
+            font-size: 16px;
+            opacity: 0.5;
+            transition: 0.3s;
+        }
+
+        .step-item.completed .step-check {
+            opacity: 1;
+        }
+
+        .btn-delete-step {
+            background: transparent;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 2px 4px 2px 8px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            color: var(--text-muted);
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .step-item .btn-delete-step:hover {
+            background: var(--danger-hover);
+            color: var(--danger-color);
+            transform: scale(1.15);
+        }
+
+        .step-item.completed .btn-delete-step {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .step-item.completed .btn-delete-step:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        /* ===== 新增步驟列 ===== */
+        .add-step-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding-top: 6px;
+            border-top: 1px dashed var(--border-light);
+            margin-top: 4px;
+        }
+
+        .add-step-row input {
+            flex: 1;
+            min-width: 140px;
+            padding: 10px 16px;
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            font-size: 15px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            transition: all var(--transition);
+            outline: none;
+        }
+
+        .add-step-row input:focus {
+            border-color: var(--btn-primary-bg);
+            box-shadow: 0 0 0 4px rgba(74, 108, 247, 0.10);
+            background: var(--bg-card);
+        }
+
+        .add-step-row input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .btn-add-step {
+            background: var(--btn-add-bg);
+            color: var(--text-secondary);
+            border: 2px solid var(--btn-add-border);
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+
+        .btn-add-step:hover {
+            background: var(--bg-step-hover);
+            border-color: var(--text-muted);
+            transform: translateY(-2px);
+        }
+
+        .btn-add-step:active {
+            transform: translateY(0);
+        }
+
+        /* ===== 空狀態 ===== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px 40px;
+            color: var(--text-muted);
+        }
+
+        .empty-state .big-icon {
+            font-size: 56px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .empty-state p {
+            font-size: 15px;
+        }
+
+        /* ===== 步驟計數 ===== */
+        .step-count {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-left: 4px;
+        }
+
+        .flow-title.completed .step-count {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* ===== 底部版權 ===== */
+        .app-footer {
+            margin-top: 48px;
+            padding: 20px 0 6px;
+            border-top: 2px solid var(--border-light);
+            text-align: center;
+            font-size: 15px;
+            color: var(--text-muted);
+            transition: border var(--transition), color var(--transition);
+        }
+
+        .app-footer a {
+            color: var(--btn-primary-bg);
+            text-decoration: none;
+        }
+
+        .app-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* ===== 動畫 ===== */
+        @keyframes fadeSlideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-12px) scale(0.96);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .flow-card {
+            animation: fadeSlideIn 0.35s ease forwards;
+        }
+
+        .step-item {
+            animation: fadeSlideIn 0.25s ease forwards;
+        }
+
+        /* ===== 滾動條 ===== */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-step);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--text-muted);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        /* ===== 響應式 ===== */
+        @media (max-width: 640px) {
+            body {
+                padding: 16px 10px 40px;
+            }
+            .app-header {
+                padding: 18px 16px 16px;
+            }
+            .app-header .top-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            .app-header h1 {
+                font-size: 22px;
+                justify-content: center;
+            }
+            .toolbar {
+                justify-content: center;
+            }
+            .add-title-row input {
+                min-width: 120px;
+                font-size: 15px;
+                padding: 10px 14px;
+            }
+            .btn-primary {
+                padding: 10px 20px;
+                font-size: 15px;
+            }
+            .flow-card {
+                padding: 18px 16px 20px;
+            }
+            .flow-title {
+                font-size: 18px;
+                padding: 6px 12px;
+            }
+            .step-item {
+                padding: 8px 12px 8px 16px;
+                font-size: 14px;
+            }
+            .step-item .step-text {
+                max-width: 160px;
+            }
+            .add-step-row input {
+                min-width: 100px;
+                font-size: 14px;
+                padding: 8px 14px;
+            }
+            .btn-add-step {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+            .flow-header {
+                gap: 8px;
+            }
+            .btn-delete-flow {
+                font-size: 18px;
+                padding: 4px 8px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .step-item .step-text {
+                max-width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <!-- ===== 頂部標題 + 工具列 ===== -->
+        <header class="app-header">
+            <div class="top-row">
+                <h1>
+                    📝 流程擬定
+                    <span>v1.0</span>
+                </h1>
+                <div class="toolbar">
+                    <!-- 黑暗模式開關 -->
+                    <label class="dark-toggle" title="切換護眼黑暗模式">
+                        <input type="checkbox" id="darkModeToggle" />
+                        <span class="slider"></span>
+                        <span class="label-text">🌙 護眼</span>
+                    </label>
+
+                    <!-- 下載 .txt -->
+                    <button id="exportBtn" title="下載所有流程為 .txt 檔案">⬇️ 下載</button>
+
+                    <!-- 上傳 .txt -->
+                    <label for="fileInput" title="從 .txt 檔案匯入流程">⬆️ 上傳</label>
+                    <input type="file" id="fileInput" accept=".txt" />
+
+                    <!-- 清空記錄 -->
+                    <button id="clearBtn" class="btn-danger" title="清除瀏覽器中的所有流程資料">🗑️ 清空</button>
+                </div>
+            </div>
+
+            <div class="add-title-row">
+                <input type="text" id="titleInput" placeholder="輸入新標題…" autocomplete="off" />
+                <button class="btn-primary" id="addTitleBtn">＋ 新增標題</button>
+            </div>
+        </header>
+
+        <!-- ===== 流程列表 ===== -->
+        <main class="flow-list" id="flowList">
+            <!-- 由 JavaScript 動態渲染 -->
+        </main>
+
+        <!-- ===== 底部版權 ===== -->
+        <footer class="app-footer" id="appFooter">
+            v1.0 &copy; <span id="yearSpan"></span> ☕ 迪遜咖啡廳，版權所有。
+        </footer>
+    </div>
+
+    <script>
+        // ============================================================
+        //  資料管理
+        // ============================================================
+
+        const STORAGE_KEY = 'teaching_maker_data';
+        const DARK_KEY = 'teaching_maker_dark';
+
+        /** 取得儲存資料，若無則回傳空陣列 */
+        function loadData() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) return parsed;
+                }
+            } catch (_) { /* ignore */ }
+            return [];
+        }
+
+        /** 儲存資料到 localStorage */
+        function saveData(data) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        /** 產生短唯一 ID */
+        function uid() {
+            return Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7);
+        }
+
+        // ============================================================
+        //  主要資料
+        // ============================================================
+
+        let flows = loadData();
+
+        // ============================================================
+        //  黑暗模式
+        // ============================================================
+
+        const darkToggle = document.getElementById('darkModeToggle');
+
+        function loadDarkMode() {
+            const saved = localStorage.getItem(DARK_KEY);
+            const isDark = saved === 'true';
+            darkToggle.checked = isDark;
+            document.body.classList.toggle('dark', isDark);
+        }
+
+        function saveDarkMode(isDark) {
+            localStorage.setItem(DARK_KEY, String(isDark));
+        }
+
+        darkToggle.addEventListener('change', function() {
+            const isDark = this.checked;
+            document.body.classList.toggle('dark', isDark);
+            saveDarkMode(isDark);
+        });
+
+        // 初始化黑暗模式
+        loadDarkMode();
+
+        // ============================================================
+        //  渲染引擎
+        // ============================================================
+
+        const flowListEl = document.getElementById('flowList');
+
+        /** 渲染所有流程 */
+        function render() {
+            if (flows.length === 0) {
+                flowListEl.innerHTML = `
+                    <div class="empty-state">
+                        <div class="big-icon">📋</div>
+                        <h3>還沒有任何教學流程</h3>
+                        <p>在上方輸入標題，開始建立你的第一步！</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            for (const flow of flows) {
+                const flowCompleted = flow.completed || false;
+                const steps = flow.steps || [];
+
+                let cardClass = 'flow-card';
+                if (flowCompleted) cardClass += ' completed';
+
+                let titleClass = 'flow-title';
+                if (flowCompleted) titleClass += ' completed';
+
+                let stepsHtml = '';
+                if (steps.length === 0) {
+                    stepsHtml = `
+                        <div style="width:100%; color:var(--text-muted); font-size:14px; padding:6px 0 2px;">
+                            ⚡ 尚未加入步驟
+                        </div>
+                    `;
+                } else {
+                    for (const step of steps) {
+                        const stepCompleted = step.completed || false;
+                        let stepClass = 'step-item';
+                        if (stepCompleted) stepClass += ' completed';
+
+                        const checkMark = stepCompleted ? '✅' : '⬜';
+
+                        stepsHtml += `
+                            <div class="${stepClass}" data-flow-id="${flow.id}" data-step-id="${step.id}">
+                                <span class="step-check">${checkMark}</span>
+                                <span class="step-text">${escapeHtml(step.text)}</span>
+                                <button class="btn-delete-step" data-flow-id="${flow.id}" data-step-id="${step.id}" title="刪除此步驟">🗑️</button>
+                            </div>
+                        `;
+                    }
+                }
+
+                const totalSteps = steps.length;
+                const doneSteps = steps.filter(s => s.completed).length;
+                const countLabel = totalSteps > 0 ? `${doneSteps}/${totalSteps}` : '0';
+
+                html += `
+                    <div class="${cardClass}" data-flow-id="${flow.id}">
+                        <div class="flow-header">
+                            <div class="${titleClass}" data-flow-id="${flow.id}">
+                                <span class="icon">${flowCompleted ? '✅' : '📌'}</span>
+                                <span class="title-text">${escapeHtml(flow.title)}</span>
+                                <span class="badge">${countLabel}</span>
+                                <span class="step-count">步驟</span>
+                            </div>
+                            <button class="btn-delete-flow" data-flow-id="${flow.id}" title="刪除整個流程">🗑️</button>
+                        </div>
+
+                        <div class="steps-container" data-flow-id="${flow.id}">
+                            ${stepsHtml}
+                        </div>
+
+                        <div class="add-step-row" data-flow-id="${flow.id}">
+                            <input type="text" class="step-input" placeholder="輸入新步驟…" autocomplete="off" />
+                            <button class="btn-add-step" data-flow-id="${flow.id}">＋ 新增步驟</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            flowListEl.innerHTML = html;
+        }
+
+        /** 簡易防 XSS */
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ============================================================
+        //  核心操作函數
+        // ============================================================
+
+        function addFlow(title) {
+            const trimmed = title.trim();
+            if (!trimmed) return false;
+
+            const newFlow = {
+                id: uid(),
+                title: trimmed,
+                completed: false,
+                steps: []
+            };
+
+            flows.push(newFlow);
+            saveData(flows);
+            render();
+            return true;
+        }
+
+        function deleteFlow(flowId) {
+            flows = flows.filter(f => f.id !== flowId);
+            saveData(flows);
+            render();
+        }
+
+        function toggleFlowComplete(flowId) {
+            const flow = flows.find(f => f.id === flowId);
+            if (!flow) return;
+
+            const newCompleted = !flow.completed;
+            flow.completed = newCompleted;
+
+            for (const step of flow.steps) {
+                step.completed = newCompleted;
+            }
+
+            saveData(flows);
+            render();
+        }
+
+        function addStep(flowId, text) {
+            const trimmed = text.trim();
+            if (!trimmed) return false;
+
+            const flow = flows.find(f => f.id === flowId);
+            if (!flow) return false;
+
+            const newStep = {
+                id: uid(),
+                text: trimmed,
+                completed: flow.completed || false
+            };
+
+            flow.steps.push(newStep);
+            saveData(flows);
+            render();
+            return true;
+        }
+
+        function deleteStep(flowId, stepId) {
+            const flow = flows.find(f => f.id === flowId);
+            if (!flow) return;
+
+            flow.steps = flow.steps.filter(s => s.id !== stepId);
+            updateFlowCompletionFromSteps(flow);
+            saveData(flows);
+            render();
+        }
+
+        function toggleStepComplete(flowId, stepId) {
+            const flow = flows.find(f => f.id === flowId);
+            if (!flow) return;
+
+            const step = flow.steps.find(s => s.id === stepId);
+            if (!step) return;
+
+            step.completed = !step.completed;
+            updateFlowCompletionFromSteps(flow);
+            saveData(flows);
+            render();
+        }
+
+        function updateFlowCompletionFromSteps(flow) {
+            const steps = flow.steps || [];
+            if (steps.length === 0) {
+                flow.completed = false;
+                return;
+            }
+            flow.completed = steps.every(s => s.completed === true);
+        }
+
+        // ============================================================
+        //  匯出 / 匯入 / 清空
+        // ============================================================
+
+        /** 匯出為 .txt (JSON) */
+        function exportData() {
+            if (flows.length === 0) {
+                alert('目前沒有資料可匯出。');
+                return;
+            }
+            const json = JSON.stringify(flows, null, 2);
+            const blob = new Blob([json], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `教學製作器_${new Date().toISOString().slice(0,10)}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        /** 匯入 .txt (JSON) */
+        function importData(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const content = e.target.result;
+                    const imported = JSON.parse(content);
+                    if (!Array.isArray(imported)) {
+                        throw new Error('資料格式錯誤：須為陣列');
+                    }
+                    // 簡單驗證每個元素是否有 id, title, steps
+                    for (const item of imported) {
+                        if (!item.id || typeof item.title !== 'string' || !Array.isArray(item.steps)) {
+                            throw new Error('資料結構不完整');
+                        }
+                    }
+                    if (imported.length === 0) {
+                        if (confirm('匯入的檔案為空，將清除所有流程。確定嗎？')) {
+                            flows = [];
+                            saveData(flows);
+                            render();
+                        }
+                        return;
+                    }
+                    if (confirm(`即將匯入 ${imported.length} 個流程，目前資料將被取代。確定嗎？`)) {
+                        flows = imported;
+                        saveData(flows);
+                        render();
+                        alert('匯入成功！');
+                    }
+                } catch (err) {
+                    alert('匯入失敗：' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        /** 清空瀏覽器記錄 (localStorage) */
+        function clearAllData() {
+            if (flows.length === 0) {
+                alert('目前沒有資料可清空。');
+                return;
+            }
+            if (confirm('⚠️ 確定要清除瀏覽器中的所有流程資料嗎？此操作無法復原！')) {
+                localStorage.removeItem(STORAGE_KEY);
+                flows = [];
+                render();
+                alert('已清空所有記錄。');
+            }
+        }
+
+        // ============================================================
+        //  事件綁定 (委託 + 工具列)
+        // ============================================================
+
+        function bindEvents() {
+            // ---- 新增標題 ----
+            const titleInput = document.getElementById('titleInput');
+            const addTitleBtn = document.getElementById('addTitleBtn');
+
+            function handleAddTitle() {
+                const val = titleInput.value;
+                if (addFlow(val)) {
+                    titleInput.value = '';
+                    titleInput.focus();
+                }
+            }
+
+            addTitleBtn.addEventListener('click', handleAddTitle);
+            titleInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddTitle();
+                }
+            });
+
+            // ---- 匯出按鈕 ----
+            document.getElementById('exportBtn').addEventListener('click', exportData);
+
+            // ---- 匯入檔案 ----
+            const fileInput = document.getElementById('fileInput');
+            fileInput.addEventListener('change', function(e) {
+                if (this.files.length > 0) {
+                    importData(this.files[0]);
+                    this.value = ''; // 允許重複選取同檔案
+                }
+            });
+
+            // ---- 清空按鈕 ----
+            document.getElementById('clearBtn').addEventListener('click', clearAllData);
+
+            // ---- 事件委託：流程列表 ----
+            flowListEl.addEventListener('click', (e) => {
+                const target = e.target.closest('button, .flow-title, .step-item');
+                if (!target) return;
+
+                // 刪除流程
+                if (target.classList.contains('btn-delete-flow')) {
+                    const flowId = target.dataset.flowId;
+                    if (flowId && confirm('確定要刪除整個「' + getFlowTitle(flowId) + '」流程嗎？')) {
+                        deleteFlow(flowId);
+                    }
+                    return;
+                }
+
+                // 刪除步驟
+                if (target.classList.contains('btn-delete-step')) {
+                    const flowId = target.dataset.flowId;
+                    const stepId = target.dataset.stepId;
+                    if (flowId && stepId) {
+                        const stepText = getStepText(flowId, stepId);
+                        if (confirm('確定要刪除步驟「' + stepText + '」嗎？')) {
+                            deleteStep(flowId, stepId);
+                        }
+                    }
+                    return;
+                }
+
+                // 點擊標題
+                if (target.classList.contains('flow-title')) {
+                    const flowId = target.dataset.flowId;
+                    if (flowId) {
+                        toggleFlowComplete(flowId);
+                    }
+                    return;
+                }
+
+                // 點擊步驟
+                if (target.classList.contains('step-item')) {
+                    const flowId = target.dataset.flowId;
+                    const stepId = target.dataset.stepId;
+                    if (flowId && stepId) {
+                        toggleStepComplete(flowId, stepId);
+                    }
+                    return;
+                }
+
+                // 點擊「新增步驟」按鈕
+                if (target.classList.contains('btn-add-step')) {
+                    const flowId = target.dataset.flowId;
+                    const container = target.closest('.add-step-row');
+                    const input = container ? container.querySelector('.step-input') : null;
+                    if (flowId && input) {
+                        const val = input.value;
+                        if (addStep(flowId, val)) {
+                            input.value = '';
+                            input.focus();
+                        }
+                    }
+                    return;
+                }
+            });
+
+            // ---- 步驟輸入框 Enter ----
+            flowListEl.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const input = e.target.closest('.step-input');
+                    if (input) {
+                        e.preventDefault();
+                        const container = input.closest('.add-step-row');
+                        const btn = container ? container.querySelector('.btn-add-step') : null;
+                        if (btn) {
+                            btn.click();
+                        }
+                    }
+                }
+            });
+
+            // ---- 聚焦選取文字 ----
+            flowListEl.addEventListener('focusin', (e) => {
+                if (e.target.classList.contains('step-input') || e.target.id === 'titleInput') {
+                    e.target.select();
+                }
+            });
+        }
+
+        // ============================================================
+        //  輔助函數
+        // ============================================================
+
+        function getFlowTitle(flowId) {
+            const flow = flows.find(f => f.id === flowId);
+            return flow ? flow.title : '(未知)';
+        }
+
+        function getStepText(flowId, stepId) {
+            const flow = flows.find(f => f.id === flowId);
+            if (!flow) return '(未知)';
+            const step = flow.steps.find(s => s.id === stepId);
+            return step ? step.text : '(未知)';
+        }
+
+        // ============================================================
+        //  版權年份
+        // ============================================================
+
+        document.getElementById('yearSpan').textContent = new Date().getFullYear();
+
+        // ============================================================
+        //  初始化
+        // ============================================================
+
+        render();
+        bindEvents();
+
+        if (flows.length === 0) {
+            document.getElementById('titleInput').focus();
+        }
+
+        window.addEventListener('beforeunload', () => {
+            saveData(flows);
+        });
+
+        console.log('📝 教學製作器 v1.0 已啟動 · 迪遜咖啡廳');
+    </script>
+
+</body>
+</html>
