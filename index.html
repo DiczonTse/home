@@ -1941,6 +1941,7 @@
                 weather: '⛅天氣',
                 calculator: '🧮計算機',
                 qr_code: '📎二維碼',
+				google_translate: '✒️Google 翻譯',
                 youtube_player: '▶️YouTube 播放器',
 				youtube_thumb: '📥YT預覽圖',
 				data_viewer: '📊CSV 資料檢視器',
@@ -2042,6 +2043,7 @@
                 weather: '⛅天气',
                 calculator: '🧮计算机',
                 qr_code: '📎二维码',
+				google_translate: '✒️Google 翻译',
                 youtube_player: '▶️YouTube 播放器',
 				youtube_thumb: '📥YT预览图',
 				data_viewer: '📊CSV 数据检视器',
@@ -2291,6 +2293,7 @@
                 weather: '⛅Weather',
                 calculator: '🧮Calculator',
                 qr_code: '📎QR Code',
+				google_translate: '✒️Google Translate',
 				youtube_player: '▶️YouTube Player',
 				youtube_thumb: '📥YT Thumbnail',
 				data_viewer: '📊CSV Data Viewer',
@@ -2541,6 +2544,7 @@
                 weather: '⛅天気',
                 calculator: '🧮電卓',
                 qr_code: '📎QRコード',
+				google_translate: '✒️Google翻訳',
 				youtube_player: '▶️YouTubeプレーヤー',
 				youtube_thumb: '📥YTサムネイル',
 				data_viewer: 'CSVデータビューア',
@@ -2791,6 +2795,7 @@
                 weather: '⛅날씨',
                 calculator: '🧮계산기',
                 qr_code: '📎QR 코드',
+				google_translate: '✒️구글 번역',
 				youtube_player: '▶️YouTube 플레이어',
 				youtube_thumb: '📥YT 썸네일',
 				data_viewer: 'CSV 데이터 뷰어',
@@ -32535,6 +32540,7 @@
 			{ value: 'task_manager', key: 'task_manager' },
 			{ value: 'process_formulation', key: 'process_formulation' },
 			{ value: 'data_viewer', key: 'data_viewer' },
+			{ value: 'google_translate', key: 'google_translate' },
 			{ value: 'youtube_player', key: 'youtube_player' },
             { value: 'youtube_thumbnails', key: 'youtube_thumb' },
             { value: 'timer', key: 'timer' },
@@ -32556,7 +32562,7 @@
         let stealthEnabled = false;
         let stealthType = 'vscode';
         let contentSettings = { showNews: false, showAdult: false, showLGBTQ: false };
-        let hitCount = 23645;
+        let hitCount = 24635;
         let currentFilter = 'All';
         let currentFilterDisplay = 'All';
         let initialHashProcessed = false;
@@ -32732,6 +32738,7 @@
 
             currentPage = 1;
             renderAll();
+			localStorage.setItem('diczonCafeFilter', filter);
 
             // ===== 修改點：當 filter 變化時，如果 hash 對應的卡片不在篩選結果中，移除 hash =====
             const hash = location.hash.substring(1);
@@ -33922,6 +33929,7 @@
 			task_manager: 'tools/task_manager.html',
 			process_formulation: 'tools/process_formulation.html',
 			data_viewer: 'tools/data_viewer.html',
+			google_translate: 'https://translate.google.com/',
 			youtube_player: 'https://diczon.infinityfreeapp.com/',
             youtube_thumbnails: 'tools/youtube_thumbnails.html',
 			timer: 'tools/timer.html',
@@ -33933,6 +33941,10 @@
         function openToolDialog(type) {
             if (type === 'youtube_player') {
 				window.open('https://diczon.infinityfreeapp.com/', '_blank');
+				return;
+			}
+			if (type === 'google_translate') {
+				window.open('https://translate.google.com/', '_blank');
 				return;
 			}
 			const dlg = $('toolDialog');
@@ -33978,7 +33990,7 @@
         // 19. 訪問計數器
         // ===================================================================
         function initHitCounter() {
-            const BASE = 23645;
+            const BASE = 24635;
             let saved = parseInt(localStorage.getItem('diczonCafeHitCount')) || BASE;
             if (saved < BASE) saved = BASE;
             hitCount = saved + 1;
@@ -34158,12 +34170,18 @@
         if (defaultLink) defaultLink.classList.add('active');
 
         currentLanguage = $('languageSelect').value || 'trd_chi';
-        currentFilter = 'All';
-        currentFilterDisplay = 'All';
+		const savedFilter = localStorage.getItem('diczonCafeFilter');
+		if (savedFilter && savedFilter !== 'undefined') {
+			currentFilter = savedFilter;
+			currentFilterDisplay = savedFilter;
+		} else {
+			currentFilter = 'All';
+			currentFilterDisplay = 'All';
+		}
 
         buildChannelSelect();
         buildUtilitySelect();
-        buildFilterSelect();
+        
         const tagFilter = $('tagFilter');
         let found = false;
         for (let opt of tagFilter.options) {
@@ -34178,9 +34196,7 @@
         }
         if (!found) tagFilter.value = 'All';
 
-        updateUItexts();
-
-        renderAll();
+        setFilter(currentFilter);
 
         setTimeout(() => {
             const h = location.hash.substring(1);
