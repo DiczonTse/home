@@ -2218,6 +2218,84 @@
 		"description": "《☕迪遜咖啡廳》現在記住你的預設篩選了！",
 		"tags": ["feature", "tool", "cafe"],
 		"milestone": "新增功能"
+	  }, {
+		"date": "2026年8月31日",
+		"title": "《🎲 離線骰子》遊戲更新。",
+		"description": "《🎲 離線骰子》新增動態標題封面。",
+		"tags": ["feature", "game", "dice"],
+		"milestone": "新增功能"
+	  }, {
+		"date": "2026年9月1日",
+		"title": "《⛏️ 方塊傳說》遊戲更新。",
+		"description": "《⛏️ 方塊傳說》新增動態標題封面。",
+		"tags": ["feature", "game", "block_legend"],
+		"milestone": "新增功能"
+	  }, {
+		"date": "2026年9月2日",
+		"title": "《🌼 ICQ 包剪揼》遊戲更新。",
+		"description": "《🌼 ICQ 包剪揼》新增動態標題封面。",
+		"tags": ["feature", "game", "icq_rps"],
+		"milestone": "新增功能"
+	  }, {
+		"date": "2026年9月3日",
+		"title": "《⭕❌井字棋》遊戲更新。",
+		"description": "《⭕❌井字棋》新增動態標題封面。",
+		"tags": ["feature", "game", "tic_tac_toe"],
+		"milestone": "新增功能"
+	  }, {
+		"date": "2026年9月4日",
+		"title": "《⛏️ 方塊傳說》新增地形。",
+		"description": "新增各種地形並能記住，玩家能向4個方向擴展地圖。",
+		"tags": ["feature", "game", "block_legend"],
+		"milestone": "新增功能"
+	  }, {
+		"date": "2026年9月5日",
+		"title": "《⛏️ 方塊傳說》解決記憶體不足問題。",
+		"description": "地圖由四方向改為單方向擴展以解決記憶體不足問題。",
+		"tags": ["design", "game", "block_legend"],
+		"milestone": "設計更新"
+	  }, {
+		"date": "2026年9月6日",
+		"title": "《⛏️ 方塊傳說》增加晝夜與天氣系統。",
+		"description": "增加晝夜功能，日間較安全，晚上會有怪物生成；晴天正常，雨天多魚，雷雨天會有怪物出現。",
+		"tags": ["feature", "game", "block_legend"],
+		"milestone": "新增功能"
+	  }, {
+		"date": "2026年9月7日",
+		"title": "《⛏️ 方塊傳說》平原增加湖及熔岩池。",
+		"description": "平原增加湖及熔岩池，湖中有魚。",
+		"tags": ["feature", "game", "block_legend"],
+		"milestone": "新增功能"
+	  }, {
+		"date": "2026年9月8日",
+		"title": "《⛏️ 方塊傳說》增加各種生物及怪物。",
+		"description": "增加牛、羊、馬、駱駝、豬、北極熊、兔、蝙蝠、雞、鴨、蜜蜂、三文魚、熱帶魚、河豚、海豚、鯊魚、墨魚、八爪魚、喪屍、沉屍、屍殼、喪屍村民、喪屍豬人、骷髏弓箭手、流浪者、苦力怕、蜘蛛、洞穴蜘蛛。",
+		"tags": ["feature", "game", "block_legend"],
+		"milestone": "新增功能"
+	  }, {
+		"date": "2026年9月9日",
+		"title": "《⛏️ 方塊傳說》增加各種資源、裝備、工具和武器。",
+		"description": "增加資源：木材、石頭、各種礦物、植物和食物。增加裝備：各級頭盔、護甲、手套、盾牌、護腿和靴子。增加工具：各級斧、剪刀、火把和床。增加武器：各種劍、打刀、匕首、長槍。",
+		"tags": ["feature", "game", "block_legend"],
+		"milestone": "新增功能"
+	  }, {
+		"date": "2026年9月10日",
+		"title": "《⛏️ 方塊傳說》增加各種村莊及村民。",
+		"description": "增加村莊、各村民職業、流浪商人。",
+		"tags": ["feature", "game", "block_legend"],
+		"milestone": "新增功能"
+	  }, {
+		"date": "2026年9月11日",
+		"title": "《⛏️ 方塊傳說》增加山洞、地獄與天堂。",
+		"description": "增加山洞、地獄與天堂。山洞入口、地獄傳送門及天堂傳送門全部機率在地圖內出現，地獄傳送門需玩家裝備火把才能進出，天堂傳送門需要玩家裝備水桶才能進出。",
+		"tags": ["feature", "game", "block_legend"],
+		"milestone": "新增功能"
+	  }, {
+		"date": "2026年9月12日",
+		"title": "《⛏️ 方塊傳說》增加鐵桶、水桶及熔岩桶。",
+		"description": "增加鐵桶、水桶及熔岩桶製作方法。",
+		"tags": ["feature", "game", "block_legend"],
+		"milestone": "新增功能"
 	  }];
 
     // ============================================================
@@ -2237,30 +2315,52 @@
 	}
 
     function loadData() {
-        try {
-            const raw = localStorage.getItem(STORAGE_KEY);
-            if (raw) {
-                const parsed = JSON.parse(raw);
-                if (Array.isArray(parsed) && parsed.length > 0) {
-                    // 資料遷移：若舊格式只有 category，轉為 tags 陣列
-                    const migrated = parsed.map(item => {
-                        if (item.category && !item.tags) {
-                            return { ...item, tags: [item.category], category: undefined };
-                        }
-                        if (!item.tags || !Array.isArray(item.tags)) {
-                            return { ...item, tags: [] };
-                        }
-                        return { ...item };
-                    });
-                    return migrated;
-                }
-            }
-        } catch (_) { /* ignore */ }
+		function parseDateToNumber(dateStr) {
+			const match = dateStr.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
+			if (match) {
+				const y = parseInt(match[1]);
+				const m = String(parseInt(match[2])).padStart(2, '0');
+				const d = String(parseInt(match[3])).padStart(2, '0');
+				return parseInt(`${y}${m}${d}`);
+			}
+			return 0;
+		}
 
-        // 首次使用，保存預設數據
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_DATA));
-        return DEFAULT_DATA.map(item => ({ ...item }));
-    }
+		let storedData = null;
+		try {
+			const raw = localStorage.getItem(STORAGE_KEY);
+			if (raw) {
+				const parsed = JSON.parse(raw);
+				if (Array.isArray(parsed) && parsed.length > 0) {
+					storedData = parsed.map(item => {
+						if (item.category && !item.tags) {
+							return { ...item, tags: [item.category], category: undefined };
+						}
+						if (!item.tags || !Array.isArray(item.tags)) {
+							return { ...item, tags: [] };
+						}
+						return { ...item };
+					});
+				}
+			}
+		} catch (_) {}
+		const defaultLatest = DEFAULT_DATA.reduce((max, item) => {
+			const d = parseDateToNumber(item.date);
+			return d > max ? d : max;
+		}, 0);
+		let storedLatest = 0;
+		if (storedData) {
+			storedLatest = storedData.reduce((max, item) => {
+				const d = parseDateToNumber(item.date);
+				return d > max ? d : max;
+			}, 0);
+		}
+		if (!storedData || defaultLatest > storedLatest) {
+			localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_DATA));
+			return DEFAULT_DATA.map(item => ({ ...item })); // 返回副本
+		}
+		return storedData;
+	}
 
     function saveData(data) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
