@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>流程擬定</title>
+    <title>流程擬定 · 步驟編輯器</title>
     <style>
         /* ===== CSS 變數 (淺色預設) ===== */
         :root {
@@ -13,6 +13,7 @@
             --bg-input: #fafbff;
             --bg-step: #f7f9fc;
             --bg-step-hover: #eef2f9;
+            --bg-drag-over: #e0e7ff;
             --border-light: #e2e8f0;
             --border-card: #edf2f7;
             --text-primary: #1a1a2e;
@@ -29,6 +30,8 @@
             --danger-hover: #fee2e2;
             --danger-color: #ef4444;
             --transition: 0.25s ease;
+            --drag-handle-color: #cbd5e0;
+            --arrow-color: #94a3b8;
         }
 
         /* ===== 黑暗模式 ===== */
@@ -39,6 +42,7 @@
             --bg-input: #2a2a3a;
             --bg-step: #2a2a3a;
             --bg-step-hover: #3a3a4a;
+            --bg-drag-over: #2a3a5a;
             --border-light: #3a3a4a;
             --border-card: #2a2a3a;
             --text-primary: #e8e8f0;
@@ -54,6 +58,8 @@
             --step-completed-border: #1a7a3a;
             --danger-hover: #4a2a2a;
             --danger-color: #ef6a6a;
+            --drag-handle-color: #5a5a72;
+            --arrow-color: #5a5a72;
         }
 
         /* ===== 全域重設 ===== */
@@ -73,7 +79,7 @@
         }
 
         #app {
-            max-width: 1000px;
+            max-width: 820px;
             margin: 0 auto;
         }
 
@@ -155,7 +161,6 @@
             border-color: var(--danger-color);
         }
 
-        /* 黑暗模式切換開關 (滑桿) */
         .dark-toggle {
             display: flex;
             align-items: center;
@@ -206,7 +211,6 @@
             color: var(--text-secondary);
         }
 
-        /* 上傳 input 隱藏 */
         #fileInput {
             display: none;
         }
@@ -271,17 +275,18 @@
         .flow-list {
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 20px;
         }
 
         /* ===== 流程卡片 ===== */
         .flow-card {
             background: var(--bg-card);
             border-radius: 20px;
-            padding: 24px 28px 26px;
+            padding: 18px 22px 22px;
             box-shadow: var(--shadow-card);
             border: 1px solid var(--border-card);
             transition: all var(--transition);
+            position: relative;
         }
 
         .flow-card:hover {
@@ -292,58 +297,109 @@
             border-left: 6px solid var(--step-completed-bg);
         }
 
-        /* ===== 標題列 ===== */
+        .flow-card.dragging {
+            opacity: 0.4;
+            transform: scale(0.97);
+        }
+
+        .flow-card.drag-over {
+            border-color: var(--btn-primary-bg);
+            box-shadow: 0 0 0 3px var(--btn-primary-bg);
+        }
+
+        /* ===== 流程標題列 ===== */
         .flow-header {
             display: flex;
             align-items: center;
-            gap: 14px;
-            margin-bottom: 18px;
-            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 14px;
+            padding: 4px 0;
+            cursor: grab;
+            user-select: none;
+            border-radius: 10px;
+            padding: 4px 6px;
+            transition: background 0.2s;
         }
 
-        .flow-title {
+        .flow-header:hover {
+            background: var(--bg-step-hover);
+        }
+
+        .flow-header:active {
+            cursor: grabbing;
+        }
+
+        .drag-handle {
+            font-size: 20px;
+            color: var(--drag-handle-color);
+            cursor: grab;
+            padding: 0 4px;
+            line-height: 1;
+            transition: color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .drag-handle:hover {
+            color: var(--text-secondary);
+        }
+
+        .flow-header:active .drag-handle {
+            cursor: grabbing;
+        }
+
+        /* ===== ★ 修復：擴大標題點擊區域 + 視覺反饋 ===== */
+        .flow-title-click {
             flex: 1;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
-            padding: 8px 16px;
-            border-radius: 12px;
+            padding: 8px 14px;
+            /* ↑ 加大 padding 提升點擊範圍 */
+            border-radius: 10px;
             cursor: pointer;
             transition: all var(--transition);
-            user-select: none;
             display: flex;
             align-items: center;
             gap: 10px;
-            min-width: 120px;
+            min-width: 80px;
             border: 2px solid transparent;
-            background: var(--bg-step);
+            background: transparent;
             color: var(--text-primary);
+            position: relative;
         }
 
-        .flow-title:hover {
-            background: var(--bg-step-hover);
+        .flow-title-click:hover {
+            background: var(--bg-step);
             border-color: var(--border-light);
+            transform: scale(1.01);
         }
 
-        .flow-title:active {
-            transform: scale(0.98);
+        .flow-title-click:active {
+            transform: scale(0.97);
+            background: var(--bg-step-hover);
+            border-color: var(--btn-primary-bg);
         }
 
-        .flow-title .icon {
-            font-size: 20px;
-            opacity: 0.6;
-            transition: 0.3s;
+        .flow-title-click .icon {
+            font-size: 22px;
+            /* ↑ 放大圖標更容易點擊 */
+            opacity: 0.7;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            flex-shrink: 0;
+            width: 30px;
+            text-align: center;
         }
 
-        .flow-title.completed .icon {
+        .flow-title-click.completed .icon {
             opacity: 1;
+            transform: scale(1.05);
         }
 
-        .flow-title .title-text {
+        .flow-title-click .title-text {
             flex: 1;
             word-break: break-word;
         }
 
-        .flow-title .badge {
+        .flow-title-click .badge {
             font-size: 13px;
             font-weight: 600;
             padding: 2px 14px;
@@ -351,14 +407,15 @@
             background: var(--border-light);
             color: var(--text-secondary);
             transition: 0.3s;
+            white-space: nowrap;
         }
 
-        .flow-title.completed .badge {
+        .flow-title-click.completed .badge {
             background: var(--step-completed-bg);
             color: #fff;
         }
 
-        .flow-title.completed .title-text {
+        .flow-title-click.completed .title-text {
             text-decoration: line-through;
             opacity: 0.7;
         }
@@ -366,9 +423,9 @@
         .btn-delete-flow {
             background: transparent;
             border: none;
-            font-size: 22px;
+            font-size: 20px;
             cursor: pointer;
-            padding: 8px 10px;
+            padding: 6px 8px;
             border-radius: 10px;
             transition: all 0.2s;
             color: var(--text-muted);
@@ -376,6 +433,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
         }
 
         .btn-delete-flow:hover {
@@ -387,68 +445,153 @@
         /* ===== 步驟容器 ===== */
         .steps-container {
             display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            padding: 6px 0 14px 0;
-            min-height: 52px;
-            align-items: flex-start;
+            flex-direction: column;
+            gap: 0;
+            padding: 4px 0 8px 0;
+            min-height: 40px;
         }
 
-        /* ===== 單個步驟 ===== */
-        .step-item {
-            display: inline-flex;
+        /* ===== 步驟行 ===== */
+        .step-row {
+            display: flex;
             align-items: center;
             gap: 8px;
-            padding: 10px 16px 10px 20px;
-            background: var(--bg-step);
-            border: 2px solid var(--border-light);
-            border-radius: 14px;
-            cursor: pointer;
+            padding: 8px 10px 8px 6px;
+            border-radius: 12px;
             transition: all var(--transition);
+            cursor: default;
+            position: relative;
+            background: transparent;
+        }
+
+        .step-row:hover {
+            background: var(--bg-step-hover);
+        }
+
+        .step-row.dragging {
+            opacity: 0.3;
+            transform: scale(0.97);
+        }
+
+        .step-row.drag-over {
+            background: var(--bg-drag-over);
+            border-radius: 12px;
+        }
+
+        .step-row .drag-handle-step {
+            font-size: 18px;
+            color: var(--drag-handle-color);
+            cursor: grab;
+            padding: 0 2px;
+            line-height: 1;
+            transition: color 0.2s;
+            flex-shrink: 0;
+            opacity: 0.4;
+        }
+
+        .step-row:hover .drag-handle-step {
+            opacity: 1;
+        }
+
+        .step-row .drag-handle-step:hover {
+            color: var(--text-secondary);
+        }
+
+        .step-row:active .drag-handle-step {
+            cursor: grabbing;
+        }
+
+        /* ===== ★ 修復：步驟勾選框 — 擴大點擊區域 + 明顯反饋 ===== */
+        .step-check {
+            font-size: 22px;
+            /* ↑ 放大 */
+            cursor: pointer;
+            flex-shrink: 0;
+            opacity: 0.5;
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
             user-select: none;
+            line-height: 1;
+            display: inline-flex;
+            /* 改為 flex 方便置中 */
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            /* 固定寬度，加大點擊熱區 */
+            height: 38px;
+            /* 固定高度 */
+            border-radius: 10px;
+            background: transparent;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .step-check:hover {
+            opacity: 1;
+            background: var(--bg-step-hover);
+            border-color: var(--border-light);
+            transform: scale(1.12);
+        }
+
+        .step-check:active {
+            transform: scale(0.88);
+            background: var(--bg-drag-over);
+            border-color: var(--btn-primary-bg);
+        }
+
+        .step-row.completed .step-check {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .step-row.completed .step-check:hover {
+            transform: scale(1.08);
+        }
+
+        .step-text {
+            flex: 1;
             font-size: 15px;
             font-weight: 500;
             color: var(--text-primary);
-            position: relative;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-        }
-
-        .step-item:hover {
-            background: var(--bg-step-hover);
-            border-color: var(--text-muted);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
-        }
-
-        .step-item:active {
-            transform: scale(0.96);
-        }
-
-        .step-item.completed {
-            background: var(--step-completed-bg);
-            border-color: var(--step-completed-border);
-            color: #ffffff;
-            box-shadow: 0 4px 14px rgba(34, 197, 94, 0.25);
-        }
-
-        .step-item.completed:hover {
-            background: var(--step-completed-bg);
-            border-color: var(--step-completed-border);
-        }
-
-        .step-item .step-text {
+            padding: 4px 8px;
+            /* 增加內距 */
+            border-radius: 6px;
+            cursor: text;
+            transition: background 0.15s;
             word-break: break-word;
-            max-width: 300px;
+            min-height: 32px;
+            line-height: 1.5;
+            border: 2px solid transparent;
         }
 
-        .step-item .step-check {
-            font-size: 16px;
-            opacity: 0.5;
-            transition: 0.3s;
+        .step-text:hover {
+            background: var(--bg-input);
         }
 
-        .step-item.completed .step-check {
-            opacity: 1;
+        .step-text.editing {
+            border-color: var(--btn-primary-bg);
+            background: var(--bg-card);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.12);
+        }
+
+        .step-row.completed .step-text {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        .step-text-input {
+            flex: 1;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+            padding: 4px 8px;
+            border: 2px solid var(--btn-primary-bg);
+            border-radius: 6px;
+            background: var(--bg-card);
+            outline: none;
+            font-family: inherit;
+            min-height: 36px;
+            box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.12);
         }
 
         .btn-delete-step {
@@ -456,7 +599,7 @@
             border: none;
             font-size: 16px;
             cursor: pointer;
-            padding: 2px 4px 2px 8px;
+            padding: 4px 8px;
             border-radius: 6px;
             transition: all 0.2s;
             color: var(--text-muted);
@@ -464,21 +607,45 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
+            opacity: 0.3;
+            min-width: 32px;
+            min-height: 32px;
         }
 
-        .step-item .btn-delete-step:hover {
+        .step-row:hover .btn-delete-step {
+            opacity: 1;
+        }
+
+        .btn-delete-step:hover {
             background: var(--danger-hover);
             color: var(--danger-color);
             transform: scale(1.15);
+            opacity: 1;
         }
 
-        .step-item.completed .btn-delete-step {
-            color: rgba(255, 255, 255, 0.6);
+        .step-row.completed .btn-delete-step {
+            opacity: 0.3;
         }
 
-        .step-item.completed .btn-delete-step:hover {
-            background: rgba(255, 255, 255, 0.2);
-            color: #fff;
+        .step-row.completed .btn-delete-step:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--danger-color);
+            opacity: 1;
+        }
+
+        /* ===== 步驟箭頭 ===== */
+        .step-arrow {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0 0 2px 0;
+            color: var(--arrow-color);
+            font-size: 22px;
+            line-height: 1;
+            user-select: none;
+            opacity: 0.5;
+            letter-spacing: 2px;
         }
 
         /* ===== 新增步驟列 ===== */
@@ -486,14 +653,14 @@
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
-            padding-top: 6px;
-            border-top: 1px dashed var(--border-light);
+            padding-top: 12px;
             margin-top: 4px;
+            border-top: 1px dashed var(--border-light);
         }
 
         .add-step-row input {
             flex: 1;
-            min-width: 140px;
+            min-width: 120px;
             padding: 10px 16px;
             border: 2px solid var(--border-light);
             border-radius: 12px;
@@ -563,18 +730,6 @@
             font-size: 15px;
         }
 
-        /* ===== 步驟計數 ===== */
-        .step-count {
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-muted);
-            margin-left: 4px;
-        }
-
-        .flow-title.completed .step-count {
-            color: rgba(255, 255, 255, 0.7);
-        }
-
         /* ===== 底部版權 ===== */
         .app-footer {
             margin-top: 48px;
@@ -599,7 +754,7 @@
         @keyframes fadeSlideIn {
             0% {
                 opacity: 0;
-                transform: translateY(-12px) scale(0.96);
+                transform: translateY(-10px) scale(0.97);
             }
             100% {
                 opacity: 1;
@@ -608,11 +763,36 @@
         }
 
         .flow-card {
-            animation: fadeSlideIn 0.35s ease forwards;
+            animation: fadeSlideIn 0.3s ease forwards;
         }
 
-        .step-item {
-            animation: fadeSlideIn 0.25s ease forwards;
+        .step-row {
+            animation: fadeSlideIn 0.2s ease forwards;
+        }
+
+        /* ===== ★ 新增：點擊閃爍反饋 ===== */
+        @keyframes tickFlash {
+            0% {
+                transform: scale(1);
+            }
+            30% {
+                transform: scale(1.3);
+                opacity: 1;
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .step-check.flash {
+            animation: tickFlash 0.35s ease forwards;
+        }
+
+        .flow-title-click .icon.flash {
+            animation: tickFlash 0.35s ease forwards;
         }
 
         /* ===== 滾動條 ===== */
@@ -656,7 +836,7 @@
                 justify-content: center;
             }
             .add-title-row input {
-                min-width: 120px;
+                min-width: 100px;
                 font-size: 15px;
                 padding: 10px 14px;
             }
@@ -665,21 +845,20 @@
                 font-size: 15px;
             }
             .flow-card {
-                padding: 18px 16px 20px;
+                padding: 14px 14px 18px;
             }
-            .flow-title {
-                font-size: 18px;
-                padding: 6px 12px;
+            .flow-title-click {
+                font-size: 17px;
+                padding: 6px 10px;
             }
-            .step-item {
-                padding: 8px 12px 8px 16px;
+            .step-text {
                 font-size: 14px;
             }
-            .step-item .step-text {
-                max-width: 160px;
+            .step-text-input {
+                font-size: 14px;
             }
             .add-step-row input {
-                min-width: 100px;
+                min-width: 80px;
                 font-size: 14px;
                 padding: 8px 14px;
             }
@@ -688,17 +867,43 @@
                 font-size: 14px;
             }
             .flow-header {
-                gap: 8px;
+                gap: 6px;
             }
             .btn-delete-flow {
-                font-size: 18px;
-                padding: 4px 8px;
+                font-size: 17px;
+                padding: 4px 6px;
+            }
+            .drag-handle {
+                font-size: 17px;
+            }
+            .step-row .drag-handle-step {
+                font-size: 15px;
+            }
+            .step-check {
+                font-size: 20px;
+                width: 34px;
+                height: 34px;
+            }
+            .flow-title-click .icon {
+                font-size: 20px;
+                width: 26px;
             }
         }
 
         @media (max-width: 400px) {
-            .step-item .step-text {
-                max-width: 100px;
+            .step-text {
+                font-size: 13px;
+            }
+            .step-text-input {
+                font-size: 13px;
+            }
+            .flow-title-click {
+                font-size: 15px;
+            }
+            .step-check {
+                font-size: 18px;
+                width: 30px;
+                height: 30px;
             }
         }
     </style>
@@ -711,31 +916,24 @@
             <div class="top-row">
                 <h1>
                     📝 流程擬定
-                    <span>v1.0</span>
+                    <span>v2.0</span>
                 </h1>
                 <div class="toolbar">
-                    <!-- 黑暗模式開關 -->
                     <label class="dark-toggle" title="切換護眼黑暗模式">
                         <input type="checkbox" id="darkModeToggle" />
                         <span class="slider"></span>
                         <span class="label-text">🌙 護眼</span>
                     </label>
-
-                    <!-- 下載 .txt -->
                     <button id="exportBtn" title="下載所有流程為 .txt 檔案">⬇️ 下載</button>
-
-                    <!-- 上傳 .txt -->
                     <label for="fileInput" title="從 .txt 檔案匯入流程">⬆️ 上傳</label>
                     <input type="file" id="fileInput" accept=".txt" />
-
-                    <!-- 清空記錄 -->
                     <button id="clearBtn" class="btn-danger" title="清除瀏覽器中的所有流程資料">🗑️ 清空</button>
                 </div>
             </div>
 
             <div class="add-title-row">
                 <input type="text" id="titleInput" placeholder="輸入新標題…" autocomplete="off" />
-                <button class="btn-primary" id="addTitleBtn">＋ 新增標題</button>
+                <button class="btn-primary" id="addTitleBtn" onclick="handleAddTitleClick()">＋ 新增標題</button>
             </div>
         </header>
 
@@ -746,7 +944,7 @@
 
         <!-- ===== 底部版權 ===== -->
         <footer class="app-footer" id="appFooter">
-            v1.0 &copy; <span id="yearSpan"></span> ☕ 迪遜咖啡廳，版權所有。
+            v2.0 &copy; <span id="yearSpan"></span> ☕ 迪遜咖啡廳，版權所有。
         </footer>
     </div>
 
@@ -758,7 +956,6 @@
         const STORAGE_KEY = 'teaching_maker_data';
         const DARK_KEY = 'teaching_maker_dark';
 
-        /** 取得儲存資料，若無則回傳空陣列 */
         function loadData() {
             try {
                 const raw = localStorage.getItem(STORAGE_KEY);
@@ -770,12 +967,10 @@
             return [];
         }
 
-        /** 儲存資料到 localStorage */
         function saveData(data) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         }
 
-        /** 產生短唯一 ID */
         function uid() {
             return Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7);
         }
@@ -809,7 +1004,6 @@
             saveDarkMode(isDark);
         });
 
-        // 初始化黑暗模式
         loadDarkMode();
 
         // ============================================================
@@ -818,7 +1012,6 @@
 
         const flowListEl = document.getElementById('flowList');
 
-        /** 渲染所有流程 */
         function render() {
             if (flows.length === 0) {
                 flowListEl.innerHTML = `
@@ -836,34 +1029,37 @@
                 const flowCompleted = flow.completed || false;
                 const steps = flow.steps || [];
 
-                let cardClass = 'flow-card';
-                if (flowCompleted) cardClass += ' completed';
-
-                let titleClass = 'flow-title';
-                if (flowCompleted) titleClass += ' completed';
+                const cardClass = 'flow-card' + (flowCompleted ? ' completed' : '');
+                const titleClass = 'flow-title-click' + (flowCompleted ? ' completed' : '');
 
                 let stepsHtml = '';
                 if (steps.length === 0) {
                     stepsHtml = `
-                        <div style="width:100%; color:var(--text-muted); font-size:14px; padding:6px 0 2px;">
+                        <div style="width:100%; color:var(--text-muted); font-size:14px; padding:8px 0 4px 10px;">
                             ⚡ 尚未加入步驟
                         </div>
                     `;
                 } else {
-                    for (const step of steps) {
+                    for (let i = 0; i < steps.length; i++) {
+                        const step = steps[i];
                         const stepCompleted = step.completed || false;
-                        let stepClass = 'step-item';
-                        if (stepCompleted) stepClass += ' completed';
-
+                        const stepClass = 'step-row' + (stepCompleted ? ' completed' : '');
                         const checkMark = stepCompleted ? '✅' : '⬜';
 
                         stepsHtml += `
-                            <div class="${stepClass}" data-flow-id="${flow.id}" data-step-id="${step.id}">
-                                <span class="step-check">${checkMark}</span>
-                                <span class="step-text">${escapeHtml(step.text)}</span>
-                                <button class="btn-delete-step" data-flow-id="${flow.id}" data-step-id="${step.id}" title="刪除此步驟">🗑️</button>
+                            <div class="step-row ${stepClass}" data-flow-id="${flow.id}" data-step-id="${step.id}" draggable="false">
+                                <span class="drag-handle-step" title="拖曳調整順序">☰</span>
+                                <span class="step-check" data-action="toggle-step" title="點擊切換完成狀態">${checkMark}</span>
+                                <span class="step-text" data-action="edit-step">${escapeHtml(step.text)}</span>
+                                <button class="btn-delete-step" data-action="delete-step" title="刪除此步驟">🗑️</button>
                             </div>
                         `;
+
+                        if (i < steps.length - 1) {
+                            stepsHtml += `
+                                <div class="step-arrow">↓</div>
+                            `;
+                        }
                     }
                 }
 
@@ -872,15 +1068,15 @@
                 const countLabel = totalSteps > 0 ? `${doneSteps}/${totalSteps}` : '0';
 
                 html += `
-                    <div class="${cardClass}" data-flow-id="${flow.id}">
-                        <div class="flow-header">
-                            <div class="${titleClass}" data-flow-id="${flow.id}">
+                    <div class="${cardClass}" data-flow-id="${flow.id}" draggable="false">
+                        <div class="flow-header" data-flow-id="${flow.id}" draggable="false">
+                            <span class="drag-handle" title="拖曳調整順序">☰</span>
+                            <div class="${titleClass}" data-flow-id="${flow.id}" data-action="toggle-flow" title="點擊切換整個流程的完成狀態">
                                 <span class="icon">${flowCompleted ? '✅' : '📌'}</span>
                                 <span class="title-text">${escapeHtml(flow.title)}</span>
                                 <span class="badge">${countLabel}</span>
-                                <span class="step-count">步驟</span>
                             </div>
-                            <button class="btn-delete-flow" data-flow-id="${flow.id}" title="刪除整個流程">🗑️</button>
+                            <button class="btn-delete-flow" data-action="delete-flow" title="刪除整個流程">🗑️</button>
                         </div>
 
                         <div class="steps-container" data-flow-id="${flow.id}">
@@ -889,16 +1085,16 @@
 
                         <div class="add-step-row" data-flow-id="${flow.id}">
                             <input type="text" class="step-input" placeholder="輸入新步驟…" autocomplete="off" />
-                            <button class="btn-add-step" data-flow-id="${flow.id}">＋ 新增步驟</button>
+                            <button class="btn-add-step" data-action="add-step">＋ 新增步驟</button>
                         </div>
                     </div>
                 `;
             }
 
             flowListEl.innerHTML = html;
+            initDragDrop();
         }
 
-        /** 簡易防 XSS */
         function escapeHtml(text) {
             if (!text) return '';
             const div = document.createElement('div');
@@ -913,14 +1109,12 @@
         function addFlow(title) {
             const trimmed = title.trim();
             if (!trimmed) return false;
-
             const newFlow = {
                 id: uid(),
                 title: trimmed,
                 completed: false,
                 steps: []
             };
-
             flows.push(newFlow);
             saveData(flows);
             render();
@@ -936,31 +1130,37 @@
         function toggleFlowComplete(flowId) {
             const flow = flows.find(f => f.id === flowId);
             if (!flow) return;
-
             const newCompleted = !flow.completed;
             flow.completed = newCompleted;
-
             for (const step of flow.steps) {
                 step.completed = newCompleted;
             }
-
             saveData(flows);
             render();
+
+            // ★ 閃爍反饋：在重新渲染後找到對應的 icon 加上 flash 類
+            requestAnimationFrame(() => {
+                const icon = document.querySelector(`.flow-title-click[data-flow-id="${flowId}"] .icon`);
+                if (icon) {
+                    icon.classList.remove('flash');
+                    // 強制 reflow 觸發動畫
+                    void icon.offsetWidth;
+                    icon.classList.add('flash');
+                    setTimeout(() => icon.classList.remove('flash'), 400);
+                }
+            });
         }
 
         function addStep(flowId, text) {
             const trimmed = text.trim();
             if (!trimmed) return false;
-
             const flow = flows.find(f => f.id === flowId);
             if (!flow) return false;
-
             const newStep = {
                 id: uid(),
                 text: trimmed,
                 completed: flow.completed || false
             };
-
             flow.steps.push(newStep);
             saveData(flows);
             render();
@@ -970,7 +1170,6 @@
         function deleteStep(flowId, stepId) {
             const flow = flows.find(f => f.id === flowId);
             if (!flow) return;
-
             flow.steps = flow.steps.filter(s => s.id !== stepId);
             updateFlowCompletionFromSteps(flow);
             saveData(flows);
@@ -980,14 +1179,25 @@
         function toggleStepComplete(flowId, stepId) {
             const flow = flows.find(f => f.id === flowId);
             if (!flow) return;
-
             const step = flow.steps.find(s => s.id === stepId);
             if (!step) return;
-
             step.completed = !step.completed;
             updateFlowCompletionFromSteps(flow);
             saveData(flows);
             render();
+
+            // ★ 閃爍反饋
+            requestAnimationFrame(() => {
+                const checkEl = document.querySelector(
+                    `.step-row[data-flow-id="${flowId}"][data-step-id="${stepId}"] .step-check`
+                );
+                if (checkEl) {
+                    checkEl.classList.remove('flash');
+                    void checkEl.offsetWidth;
+                    checkEl.classList.add('flash');
+                    setTimeout(() => checkEl.classList.remove('flash'), 400);
+                }
+            });
         }
 
         function updateFlowCompletionFromSteps(flow) {
@@ -1000,10 +1210,412 @@
         }
 
         // ============================================================
+        //  步驟編輯 (雙擊)
+        // ============================================================
+
+        let editingStepId = null;
+        let editingFlowId = null;
+
+        function startEditStep(flowId, stepId, textEl) {
+            const flow = flows.find(f => f.id === flowId);
+            if (!flow) return;
+            const step = flow.steps.find(s => s.id === stepId);
+            if (!step) return;
+
+            if (editingStepId) {
+                finishEditStep(true);
+            }
+
+            editingFlowId = flowId;
+            editingStepId = stepId;
+
+            const input = document.createElement('input');
+            input.className = 'step-text-input';
+            input.type = 'text';
+            input.value = step.text;
+            input.setAttribute('data-flow-id', flowId);
+            input.setAttribute('data-step-id', stepId);
+
+            textEl.replaceWith(input);
+            input.focus();
+            input.select();
+
+            const saveHandler = () => finishEditStep(true);
+            const cancelHandler = (e) => {
+                if (e.key === 'Escape') {
+                    finishEditStep(false);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    finishEditStep(true);
+                }
+            };
+
+            input.addEventListener('blur', saveHandler);
+            input.addEventListener('keydown', cancelHandler);
+            input._saveHandler = saveHandler;
+            input._cancelHandler = cancelHandler;
+        }
+
+        function finishEditStep(save) {
+            if (!editingFlowId || !editingStepId) return;
+
+            const flow = flows.find(f => f.id === editingFlowId);
+            if (flow) {
+                const step = flow.steps.find(s => s.id === editingStepId);
+                if (step) {
+                    const input = document.querySelector(
+                        `.step-text-input[data-flow-id="${editingFlowId}"][data-step-id="${editingStepId}"]`
+                    );
+                    if (input) {
+                        if (save) {
+                            const val = input.value.trim();
+                            if (val) {
+                                step.text = val;
+                                saveData(flows);
+                            } else {
+                                deleteStep(editingFlowId, editingStepId);
+                                editingFlowId = null;
+                                editingStepId = null;
+                                return;
+                            }
+                        }
+                        const span = document.createElement('span');
+                        span.className = 'step-text';
+                        span.setAttribute('data-action', 'edit-step');
+                        span.textContent = step ? step.text : '';
+                        input.replaceWith(span);
+                    }
+                }
+            }
+
+            editingFlowId = null;
+            editingStepId = null;
+            saveData(flows);
+            render();
+        }
+
+        // ============================================================
+        //  拖拽排序 (HTML5 Drag & Drop)
+        // ============================================================
+
+        let dragData = null;
+
+        function initDragDrop() {
+            // ---- 流程拖拽 ----
+            const flowCards = document.querySelectorAll('.flow-card');
+            flowCards.forEach(card => {
+                card.setAttribute('draggable', 'true');
+                card.addEventListener('dragstart', onFlowDragStart);
+                card.addEventListener('dragend', onFlowDragEnd);
+                card.addEventListener('dragover', onFlowDragOver);
+                card.addEventListener('dragenter', onFlowDragEnter);
+                card.addEventListener('dragleave', onFlowDragLeave);
+                card.addEventListener('drop', onFlowDrop);
+            });
+
+            // ---- 步驟拖拽 ----
+            const stepRows = document.querySelectorAll('.step-row');
+            stepRows.forEach(row => {
+                row.setAttribute('draggable', 'true');
+                row.addEventListener('dragstart', onStepDragStart);
+                row.addEventListener('dragend', onStepDragEnd);
+                row.addEventListener('dragover', onStepDragOver);
+                row.addEventListener('dragenter', onStepDragEnter);
+                row.addEventListener('dragleave', onStepDragLeave);
+                row.addEventListener('drop', onStepDrop);
+            });
+
+            // ---- 點擊/雙擊事件委託 ----
+            // ★ 移除舊監聽避免重複綁定，使用新監聽
+            flowListEl.removeEventListener('click', handleClick);
+            flowListEl.removeEventListener('dblclick', handleDblClick);
+            flowListEl.removeEventListener('keydown', handleKeydown);
+            flowListEl.addEventListener('click', handleClick);
+            flowListEl.addEventListener('dblclick', handleDblClick);
+            flowListEl.addEventListener('keydown', handleKeydown);
+        }
+
+        // ---- 事件處理函數 (分離出來方便移除) ----
+        function handleClick(e) {
+            const target = e.target.closest('[data-action]');
+            if (!target) return;
+
+            const action = target.dataset.action;
+
+            // ★ 如果正在編輯步驟，先完成編輯再執行操作
+            if (editingStepId && (action === 'toggle-step' || action === 'delete-step')) {
+                finishEditStep(true);
+                // 延遲執行，等待 render 完成
+                setTimeout(() => {
+                    // 重新觸發點擊（但為了避免遞歸，直接調用對應函數）
+                    const flowId = target.closest('.step-row')?.dataset.flowId;
+                    const stepId = target.closest('.step-row')?.dataset.stepId;
+                    if (flowId && stepId) {
+                        if (action === 'toggle-step') toggleStepComplete(flowId, stepId);
+                        if (action === 'delete-step') {
+                            const flow = flows.find(f => f.id === flowId);
+                            const step = flow ? flow.steps.find(s => s.id === stepId) : null;
+                            if (step && confirm(`確定要刪除步驟「${step.text}」嗎？`)) {
+                                deleteStep(flowId, stepId);
+                            }
+                        }
+                    }
+                }, 50);
+                return;
+            }
+
+            if (action === 'toggle-flow') {
+                const flowId = target.dataset.flowId;
+                if (flowId) toggleFlowComplete(flowId);
+                return;
+            }
+
+            if (action === 'toggle-step') {
+                const row = target.closest('.step-row');
+                if (row) {
+                    const flowId = row.dataset.flowId;
+                    const stepId = row.dataset.stepId;
+                    if (flowId && stepId) toggleStepComplete(flowId, stepId);
+                }
+                return;
+            }
+
+            if (action === 'delete-step') {
+                const row = target.closest('.step-row');
+                if (row) {
+                    const flowId = row.dataset.flowId;
+                    const stepId = row.dataset.stepId;
+                    if (flowId && stepId) {
+                        const flow = flows.find(f => f.id === flowId);
+                        const step = flow ? flow.steps.find(s => s.id === stepId) : null;
+                        if (step && confirm(`確定要刪除步驟「${step.text}」嗎？`)) {
+                            deleteStep(flowId, stepId);
+                        }
+                    }
+                }
+                return;
+            }
+
+            if (action === 'delete-flow') {
+                const card = target.closest('.flow-card');
+                if (card) {
+                    const flowId = card.dataset.flowId;
+                    const flow = flows.find(f => f.id === flowId);
+                    if (flow && confirm(`確定要刪除整個「${flow.title}」流程嗎？`)) {
+                        deleteFlow(flowId);
+                    }
+                }
+                return;
+            }
+
+            if (action === 'add-step') {
+                const container = target.closest('.add-step-row');
+                if (container) {
+                    const flowId = container.dataset.flowId;
+                    const input = container.querySelector('.step-input');
+                    if (flowId && input) {
+                        const val = input.value;
+                        if (addStep(flowId, val)) {
+                            input.value = '';
+                            input.focus();
+                        }
+                    }
+                }
+                return;
+            }
+
+            // ★ 點擊 step-text 但不在編輯狀態時，切換步驟狀態（方便用戶點擊文字也能切換）
+            if (action === 'edit-step') {
+                const row = target.closest('.step-row');
+                if (row) {
+                    const flowId = row.dataset.flowId;
+                    const stepId = row.dataset.stepId;
+                    if (flowId && stepId) {
+                        // 如果沒有在編輯，切換完成狀態
+                        if (!editingStepId) {
+                            toggleStepComplete(flowId, stepId);
+                        }
+                    }
+                }
+                return;
+            }
+        }
+
+        function handleDblClick(e) {
+            const textEl = e.target.closest('.step-text');
+            if (textEl && !textEl.classList.contains('editing')) {
+                const row = textEl.closest('.step-row');
+                if (row) {
+                    const flowId = row.dataset.flowId;
+                    const stepId = row.dataset.stepId;
+                    if (flowId && stepId) {
+                        if (editingStepId) {
+                            finishEditStep(true);
+                        }
+                        startEditStep(flowId, stepId, textEl);
+                    }
+                }
+            }
+        }
+
+        function handleKeydown(e) {
+            if (e.key === 'Enter') {
+                const input = e.target.closest('.step-input');
+                if (input) {
+                    e.preventDefault();
+                    const container = input.closest('.add-step-row');
+                    const btn = container ? container.querySelector('[data-action="add-step"]') : null;
+                    if (btn) btn.click();
+                }
+            }
+            // ESC 取消編輯
+            if (e.key === 'Escape' && editingStepId) {
+                finishEditStep(false);
+                e.preventDefault();
+            }
+        }
+
+        // ---- 流程拖拽事件 ----
+        function onFlowDragStart(e) {
+            const card = e.target.closest('.flow-card');
+            if (!card) return;
+            const flowId = card.dataset.flowId;
+            dragData = { type: 'flow', id: flowId };
+            e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
+            e.dataTransfer.effectAllowed = 'move';
+            card.classList.add('dragging');
+        }
+
+        function onFlowDragEnd(e) {
+            const card = e.target.closest('.flow-card');
+            if (card) card.classList.remove('dragging');
+            document.querySelectorAll('.flow-card.drag-over').forEach(el => el.classList.remove('drag-over'));
+        }
+
+        function onFlowDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        function onFlowDragEnter(e) {
+            e.preventDefault();
+            const card = e.target.closest('.flow-card');
+            if (card) {
+                const srcId = dragData && dragData.type === 'flow' ? dragData.id : null;
+                const targetId = card.dataset.flowId;
+                if (srcId && targetId && srcId !== targetId) {
+                    card.classList.add('drag-over');
+                }
+            }
+        }
+
+        function onFlowDragLeave(e) {
+            const card = e.target.closest('.flow-card');
+            if (card) card.classList.remove('drag-over');
+        }
+
+        function onFlowDrop(e) {
+            e.preventDefault();
+            const targetCard = e.target.closest('.flow-card');
+            if (!targetCard) return;
+            targetCard.classList.remove('drag-over');
+
+            if (!dragData || dragData.type !== 'flow') return;
+            const srcId = dragData.id;
+            const targetId = targetCard.dataset.flowId;
+            if (!srcId || !targetId || srcId === targetId) return;
+
+            const srcIndex = flows.findIndex(f => f.id === srcId);
+            const targetIndex = flows.findIndex(f => f.id === targetId);
+            if (srcIndex === -1 || targetIndex === -1) return;
+
+            const [removed] = flows.splice(srcIndex, 1);
+            const newTargetIndex = flows.findIndex(f => f.id === targetId);
+            flows.splice(newTargetIndex, 0, removed);
+
+            saveData(flows);
+            render();
+        }
+
+        // ---- 步驟拖拽事件 ----
+        function onStepDragStart(e) {
+            const row = e.target.closest('.step-row');
+            if (!row) return;
+            const flowId = row.dataset.flowId;
+            const stepId = row.dataset.stepId;
+            if (!flowId || !stepId) return;
+            dragData = { type: 'step', id: stepId, flowId: flowId };
+            e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
+            e.dataTransfer.effectAllowed = 'move';
+            row.classList.add('dragging');
+        }
+
+        function onStepDragEnd(e) {
+            const row = e.target.closest('.step-row');
+            if (row) row.classList.remove('dragging');
+            document.querySelectorAll('.step-row.drag-over').forEach(el => el.classList.remove('drag-over'));
+        }
+
+        function onStepDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        function onStepDragEnter(e) {
+            e.preventDefault();
+            const row = e.target.closest('.step-row');
+            if (row) {
+                const srcData = dragData;
+                if (srcData && srcData.type === 'step') {
+                    const srcFlowId = srcData.flowId;
+                    const targetFlowId = row.dataset.flowId;
+                    const srcStepId = srcData.id;
+                    const targetStepId = row.dataset.stepId;
+                    if (srcFlowId === targetFlowId && srcStepId !== targetStepId) {
+                        row.classList.add('drag-over');
+                    }
+                }
+            }
+        }
+
+        function onStepDragLeave(e) {
+            const row = e.target.closest('.step-row');
+            if (row) row.classList.remove('drag-over');
+        }
+
+        function onStepDrop(e) {
+            e.preventDefault();
+            const targetRow = e.target.closest('.step-row');
+            if (!targetRow) return;
+            targetRow.classList.remove('drag-over');
+
+            if (!dragData || dragData.type !== 'step') return;
+            const srcId = dragData.id;
+            const srcFlowId = dragData.flowId;
+            const targetId = targetRow.dataset.stepId;
+            const targetFlowId = targetRow.dataset.flowId;
+            if (!srcId || !targetId || srcId === targetId) return;
+            if (srcFlowId !== targetFlowId) return;
+
+            const flow = flows.find(f => f.id === srcFlowId);
+            if (!flow) return;
+            const steps = flow.steps;
+            const srcIndex = steps.findIndex(s => s.id === srcId);
+            const targetIndex = steps.findIndex(s => s.id === targetId);
+            if (srcIndex === -1 || targetIndex === -1) return;
+
+            const [removed] = steps.splice(srcIndex, 1);
+            const newTargetIndex = steps.findIndex(s => s.id === targetId);
+            steps.splice(newTargetIndex, 0, removed);
+
+            saveData(flows);
+            render();
+        }
+
+        // ============================================================
         //  匯出 / 匯入 / 清空
         // ============================================================
 
-        /** 匯出為 .txt (JSON) */
         function exportData() {
             if (flows.length === 0) {
                 alert('目前沒有資料可匯出。');
@@ -1014,14 +1626,13 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `教學製作器_${new Date().toISOString().slice(0,10)}.txt`;
+            a.download = `教學製作器_${new Date().toISOString().slice(0, 10)}.txt`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
 
-        /** 匯入 .txt (JSON) */
         function importData(file) {
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -1031,7 +1642,6 @@
                     if (!Array.isArray(imported)) {
                         throw new Error('資料格式錯誤：須為陣列');
                     }
-                    // 簡單驗證每個元素是否有 id, title, steps
                     for (const item of imported) {
                         if (!item.id || typeof item.title !== 'string' || !Array.isArray(item.steps)) {
                             throw new Error('資料結構不完整');
@@ -1058,7 +1668,6 @@
             reader.readAsText(file);
         }
 
-        /** 清空瀏覽器記錄 (localStorage) */
         function clearAllData() {
             if (flows.length === 0) {
                 alert('目前沒有資料可清空。');
@@ -1073,145 +1682,20 @@
         }
 
         // ============================================================
-        //  事件綁定 (委託 + 工具列)
+        //  工具列事件綁定
         // ============================================================
 
-        function bindEvents() {
-            // ---- 新增標題 ----
-            const titleInput = document.getElementById('titleInput');
-            const addTitleBtn = document.getElementById('addTitleBtn');
+        document.getElementById('exportBtn').addEventListener('click', exportData);
 
-            function handleAddTitle() {
-                const val = titleInput.value;
-                if (addFlow(val)) {
-                    titleInput.value = '';
-                    titleInput.focus();
-                }
+        const fileInput = document.getElementById('fileInput');
+        fileInput.addEventListener('change', function(e) {
+            if (this.files.length > 0) {
+                importData(this.files[0]);
+                this.value = '';
             }
+        });
 
-            addTitleBtn.addEventListener('click', handleAddTitle);
-            titleInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleAddTitle();
-                }
-            });
-
-            // ---- 匯出按鈕 ----
-            document.getElementById('exportBtn').addEventListener('click', exportData);
-
-            // ---- 匯入檔案 ----
-            const fileInput = document.getElementById('fileInput');
-            fileInput.addEventListener('change', function(e) {
-                if (this.files.length > 0) {
-                    importData(this.files[0]);
-                    this.value = ''; // 允許重複選取同檔案
-                }
-            });
-
-            // ---- 清空按鈕 ----
-            document.getElementById('clearBtn').addEventListener('click', clearAllData);
-
-            // ---- 事件委託：流程列表 ----
-            flowListEl.addEventListener('click', (e) => {
-                const target = e.target.closest('button, .flow-title, .step-item');
-                if (!target) return;
-
-                // 刪除流程
-                if (target.classList.contains('btn-delete-flow')) {
-                    const flowId = target.dataset.flowId;
-                    if (flowId && confirm('確定要刪除整個「' + getFlowTitle(flowId) + '」流程嗎？')) {
-                        deleteFlow(flowId);
-                    }
-                    return;
-                }
-
-                // 刪除步驟
-                if (target.classList.contains('btn-delete-step')) {
-                    const flowId = target.dataset.flowId;
-                    const stepId = target.dataset.stepId;
-                    if (flowId && stepId) {
-                        const stepText = getStepText(flowId, stepId);
-                        if (confirm('確定要刪除步驟「' + stepText + '」嗎？')) {
-                            deleteStep(flowId, stepId);
-                        }
-                    }
-                    return;
-                }
-
-                // 點擊標題
-                if (target.classList.contains('flow-title')) {
-                    const flowId = target.dataset.flowId;
-                    if (flowId) {
-                        toggleFlowComplete(flowId);
-                    }
-                    return;
-                }
-
-                // 點擊步驟
-                if (target.classList.contains('step-item')) {
-                    const flowId = target.dataset.flowId;
-                    const stepId = target.dataset.stepId;
-                    if (flowId && stepId) {
-                        toggleStepComplete(flowId, stepId);
-                    }
-                    return;
-                }
-
-                // 點擊「新增步驟」按鈕
-                if (target.classList.contains('btn-add-step')) {
-                    const flowId = target.dataset.flowId;
-                    const container = target.closest('.add-step-row');
-                    const input = container ? container.querySelector('.step-input') : null;
-                    if (flowId && input) {
-                        const val = input.value;
-                        if (addStep(flowId, val)) {
-                            input.value = '';
-                            input.focus();
-                        }
-                    }
-                    return;
-                }
-            });
-
-            // ---- 步驟輸入框 Enter ----
-            flowListEl.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    const input = e.target.closest('.step-input');
-                    if (input) {
-                        e.preventDefault();
-                        const container = input.closest('.add-step-row');
-                        const btn = container ? container.querySelector('.btn-add-step') : null;
-                        if (btn) {
-                            btn.click();
-                        }
-                    }
-                }
-            });
-
-            // ---- 聚焦選取文字 ----
-            flowListEl.addEventListener('focusin', (e) => {
-                if (e.target.classList.contains('step-input') || e.target.id === 'titleInput') {
-                    e.target.select();
-                }
-            });
-        }
-
-        // ============================================================
-        //  輔助函數
-        // ============================================================
-
-        function getFlowTitle(flowId) {
-            const flow = flows.find(f => f.id === flowId);
-            return flow ? flow.title : '(未知)';
-        }
-
-        function getStepText(flowId, stepId) {
-            const flow = flows.find(f => f.id === flowId);
-            if (!flow) return '(未知)';
-            const step = flow.steps.find(s => s.id === stepId);
-            return step ? step.text : '(未知)';
-        }
+        document.getElementById('clearBtn').addEventListener('click', clearAllData);
 
         // ============================================================
         //  版權年份
@@ -1224,7 +1708,6 @@
         // ============================================================
 
         render();
-        bindEvents();
 
         if (flows.length === 0) {
             document.getElementById('titleInput').focus();
@@ -1234,7 +1717,20 @@
             saveData(flows);
         });
 
-        console.log('📝 教學製作器 v1.0 已啟動 · 迪遜咖啡廳');
+        function handleAddTitleClick() {
+            const input = document.getElementById('titleInput');
+            const val = input.value;
+            if (!addFlow(val)) {
+                alert('⚠️ 請輸入有效的標題（不能為空或僅含空格）');
+            } else {
+                input.value = '';
+                input.focus();
+            }
+        }
+
+        console.log('📝 流程擬定 v2.0 已啟動 · 迪遜咖啡廳');
+        console.log('💡 雙擊步驟文字可編輯內容 · 拖曳 ☰ 可調整順序');
+        console.log('✨ 點擊 ✅ / ⬜ 或點擊步驟文字即可切換完成狀態');
     </script>
 
 </body>
