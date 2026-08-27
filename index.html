@@ -1906,7 +1906,7 @@
             trd_chi: {
                 cafe: '☕迪遜咖啡廳',
                 cafe_old: '☕迪遜咖啡廳(舊)',
-                cafe_full: '☕迪遜咖啡廳(完整版)',           // 新增
+                cafe_full: '☕迪遜咖啡廳(完整版)',
                 bookmark_manager: '🔰網頁書籤管理工具',
                 game_trailer: '🕹迪遜遊戲預告片',
                 portal: '🚪迪遜傳送門',
@@ -2010,7 +2010,7 @@
             sim_chi: {
                 cafe: '☕迪逊咖啡厅',
                 cafe_old: '☕迪逊咖啡厅(旧)',
-                cafe_full: '☕迪逊咖啡厅(完整版)',           // 新增
+                cafe_full: '☕迪逊咖啡厅(完整版)',
                 bookmark_manager: '🔰网页书签管理工具',
                 game_trailer: '🕹迪逊游戏预告片',
                 portal: '🚪迪逊传送门',
@@ -2113,7 +2113,6 @@
                 filter_options: {
                     'All': '💯全部',
                     'bookmark': '⭐我的最爱',
-                    'bookmark_manager': '🔰网页书签管理工具',
                     'music': '全部音乐',
                     'music_rip': '☠️R.I.P.',
                     'song': '全部歌曲',
@@ -2262,7 +2261,7 @@
             eng: {
                 cafe: '☕Diczon\'s Cafe',
                 cafe_old: '☕Diczon\'s Cafe (Old)',
-                cafe_full: '☕Diczon\'s Cafe (Full)',           // 新增
+                cafe_full: '☕Diczon\'s Cafe (Full)',
                 bookmark_manager: '🔰Web Bookmark Manager',
                 game_trailer: '🕹Diczon Game Trailers',
                 portal: '🚪Diczon\'s Portal',
@@ -2366,7 +2365,6 @@
                 filter_options: {
                     'All': '💯All',
                     'bookmark': '⭐Favorites',
-                    'bookmark_manager': '🔰Web Bookmark Manager',
                     'music': 'All Music',
                     'music_rip': '☠️R.I.P.',
                     'song': 'All Songs',
@@ -2515,7 +2513,7 @@
             jap: {
                 cafe: '☕ディソンカフェ',
                 cafe_old: '☕ディソンカフェ(旧)',
-                cafe_full: '☕ディソンカフェ(完全版)',           // 新增
+                cafe_full: '☕ディソンカフェ(完全版)',
                 bookmark_manager: '🔰ブックマーク管理ツール',
                 game_trailer: '🕹ディソンゲーム予告編',
                 portal: '🚪ディソンポータル',
@@ -2619,7 +2617,6 @@
                 filter_options: {
                     'All': '💯すべて',
                     'bookmark': '⭐お気に入り',
-                    'bookmark_manager': '🔰ウェブブックマーク管理',
                     'music': 'すべての音楽',
                     'music_rip': '☠️R.I.P.',
                     'song': 'すべての歌',
@@ -2768,7 +2765,7 @@
             kor: {
                 cafe: '☕디슨카페',
                 cafe_old: '☕디슨카페(구)',
-                cafe_full: '☕디슨카페(완전판)',           // 新增
+                cafe_full: '☕디슨카페(완전판)',
                 bookmark_manager: '🔰웹 북마크 관리 도구',
                 game_trailer: '🕹디슨 게임 예고편',
                 portal: '🚪디슨 포털',
@@ -2872,7 +2869,6 @@
                 filter_options: {
                     'All': '💯전체',
                     'bookmark': '⭐즐겨찾기',
-                    'bookmark_manager': '🔰웹 북마크 관리',
                     'music': '모든 음악',
                     'music_rip': '☠️R.I.P.',
                     'song': '모든 노래',
@@ -32603,7 +32599,6 @@
         const CHANNEL_DATA = [
             { value: 'index.html', key: 'cafe' },
             { value: 'index3.html', key: 'cafe_old' },
-            { value: 'bookmarks_manager.html', key: 'bookmark_manager' },
             { value: 'video.html', key: 'game_trailer' },
             { value: 'https://sites.google.com/view/diczon/diczons-portal', key: 'portal' },
             { value: 'https://www.youtube.com/c/DiczonTse', key: 'youtube' },
@@ -32699,8 +32694,8 @@
         // ===================================================================
         // 修改：新增 "完整版" 項目
         const MEGA_ITEMS = [
-            { filter: 'AllFilter', key: 'cafe_full', label: '☕迪遜咖啡廳(完整版)' },   // 新增
             { filter: 'music', key: 'cafe', label: '☕迪遜咖啡廳' },
+			{ filter: 'AllFilter', key: 'cafe_full', label: '☕迪遜咖啡廳(完整版)' },
             { filter: 'bookmark_manager', key: 'bookmark_manager', label: '🔰網頁書籤管理工具' },
             { filter: 'bookmark', key: 'bookmark', label: '⭐我的最愛' },
             { filter: 'song', key: 'song', label: '🎤迪遜K房' },
@@ -32790,7 +32785,10 @@
         // 9. 核心篩選邏輯 (修改：支援 AllFilter，並在末尾處理無效 hash)
         // ===================================================================
         function setFilter(filter, key) {
-            if (filter === 'All' || filter === 'AllFilter') {
+            if (filter === 'AllFilter') {
+				filter = 'All';
+			}
+			if (filter === 'All' || filter === 'AllFilter') {
                 currentFilterDisplay = filter;
                 currentFilter = filter;
             } else {

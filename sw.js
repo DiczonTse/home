@@ -37,7 +37,6 @@ const urlsToCache = [
 	'/tools/bookmarks.html',
 	'/tools/relatives.html',
     '/tools/timer.html',
-    '/tools/stopper.html',
 	'/tools/drawing_lots.html'
 ];
 
