@@ -917,6 +917,9 @@
             }, 10);
 
             window.__qrDebug = { updateQRCodes, splitTextIntoChunks, countBytes, BYTE_LIMIT, setLanguage };
+			if ('serviceWorker' in navigator) {
+				navigator.serviceWorker.register('/sw.js').catch(() => {});
+			}
         })();
     </script>
 </body>

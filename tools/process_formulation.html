@@ -1708,6 +1708,10 @@
         // ============================================================
 
         render();
+		
+		if ('serviceWorker' in navigator) {
+			navigator.serviceWorker.register('/sw.js').catch(() => {});
+		}
 
         if (flows.length === 0) {
             document.getElementById('titleInput').focus();

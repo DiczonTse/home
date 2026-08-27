@@ -2384,6 +2384,9 @@
         footer.textContent = `v1.0 ${year} ☕ 迪遜咖啡廳，版權所有。`;
 
         console.log('⏱️ 多用途計時器 v1.0 已載入 (沙漏採用全新繪製)');
+		if ('serviceWorker' in navigator) {
+			navigator.serviceWorker.register('/sw.js').catch(() => {});
+		}
     </script>
 </body>
 </html>

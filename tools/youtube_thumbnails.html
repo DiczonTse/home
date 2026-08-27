@@ -836,7 +836,9 @@
                 label.textContent = '✅ 已重置';
                 setTimeout(() => { label.textContent = orig; }, 1000);
             });
-
+			if ('serviceWorker' in navigator) {
+				navigator.serviceWorker.register('/sw.js').catch(() => {});
+			}
         })();
     </script>
 

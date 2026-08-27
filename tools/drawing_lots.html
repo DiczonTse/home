@@ -1096,6 +1096,9 @@
         // 無需額外初始化，結果區已顯示占位內容
 
         console.log('🙏 黃大仙靈籤已載入，誠心求籤，有求必應！');
+		if ('serviceWorker' in navigator) {
+			navigator.serviceWorker.register('/sw.js').catch(() => {});
+		}
     </script>
 
 </body>
