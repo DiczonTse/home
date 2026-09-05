@@ -2296,6 +2296,18 @@
 		"description": "增加鐵桶、水桶及熔岩桶製作方法。",
 		"tags": ["feature", "game", "block_legend"],
 		"milestone": "新增功能"
+	  }, {
+		"date": "2026年9月13日",
+		"title": "《▶ YouTube 播放器》增加《📄 貼上》按鈕。",
+		"description": "增加《📄 貼上》按鈕讓用家直接貼上播放列表連結。",
+		"tags": ["feature", "cafe", "tool"],
+		"milestone": "新增功能"
+	  }, {
+		"date": "2026年9月14日",
+		"title": "《📝 流程擬定》工具更新。",
+		"description": "增加拖曳換位功能。",
+		"tags": ["feature", "cafe", "tool"],
+		"milestone": "新增功能"
 	  }];
 
     // ============================================================
@@ -2831,6 +2843,9 @@
     updates.forEach(item => { if (item.tags) item.tags.forEach(t => allTags.add(t)); });
     console.log('🏷️ 標籤種類:', [...allTags].join(', '));
     console.log('💡 每筆資料可選擇多個標籤，點擊過濾按鈕可篩選。');
+	if ('serviceWorker' in navigator) {
+		navigator.serviceWorker.register('/sw.js').catch(() => {});
+	}
 </script>
 </body>
 </html>
