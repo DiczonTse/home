@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>流程擬定 · 步驟編輯器</title>
+    <title>📝 流程擬定</title>
     <style>
         /* ===== CSS 變數 (淺色預設) ===== */
         :root {
@@ -32,6 +32,13 @@
             --transition: 0.25s ease;
             --drag-handle-color: #cbd5e0;
             --arrow-color: #94a3b8;
+            --reset-btn-bg: #f59e0b;
+            --reset-btn-hover: #d97706;
+            --filter-bg: #ffffff;
+            --filter-text: #4a5568;
+            --filter-active-bg: #4a6cf7;
+            --filter-active-text: #ffffff;
+            --filter-border: #e2e8f0;
         }
 
         /* ===== 黑暗模式 ===== */
@@ -60,9 +67,15 @@
             --danger-color: #ef6a6a;
             --drag-handle-color: #5a5a72;
             --arrow-color: #5a5a72;
+            --reset-btn-bg: #b45309;
+            --reset-btn-hover: #92400e;
+            --filter-bg: #2a2a3a;
+            --filter-text: #b0b0c8;
+            --filter-active-bg: #5a7cf7;
+            --filter-active-text: #ffffff;
+            --filter-border: #3a3a4a;
         }
 
-        /* ===== 全域重設 ===== */
         * {
             margin: 0;
             padding: 0;
@@ -83,7 +96,6 @@
             margin: 0 auto;
         }
 
-        /* ===== 頂部標題 + 工具列 ===== */
         .app-header {
             background: var(--bg-header);
             border-radius: 20px;
@@ -161,6 +173,17 @@
             border-color: var(--danger-color);
         }
 
+        .toolbar .btn-reset {
+            color: #fff;
+            background: var(--reset-btn-bg);
+            border-color: var(--reset-btn-bg);
+        }
+
+        .toolbar .btn-reset:hover {
+            background: var(--reset-btn-hover);
+            border-color: var(--reset-btn-hover);
+        }
+
         .dark-toggle {
             display: flex;
             align-items: center;
@@ -215,7 +238,63 @@
             display: none;
         }
 
-        /* ===== 新增標題列 ===== */
+        .filter-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px 20px;
+            margin-bottom: 16px;
+            padding: 4px 0;
+        }
+
+        .date-display {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+
+        .task-filters {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding: 2px 0;
+            flex: 1;
+        }
+        .task-filters::-webkit-scrollbar {
+            display: none;
+        }
+
+        .filter-btn {
+            padding: 6px 16px;
+            border: 2px solid var(--filter-border);
+            border-radius: 30px;
+            background: var(--filter-bg);
+            color: var(--filter-text);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all var(--transition);
+            white-space: nowrap;
+            flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+        .filter-btn:hover {
+            background: var(--bg-step-hover);
+            border-color: var(--text-muted);
+            transform: translateY(-1px);
+        }
+        .filter-btn.active {
+            background: var(--filter-active-bg);
+            color: var(--filter-active-text);
+            border-color: var(--filter-active-bg);
+            box-shadow: 0 4px 12px rgba(74, 108, 247, 0.25);
+        }
+
         .add-title-row {
             display: flex;
             gap: 12px;
@@ -271,14 +350,12 @@
             transform: translateY(0);
         }
 
-        /* ===== 流程列表 ===== */
         .flow-list {
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
 
-        /* ===== 流程卡片 ===== */
         .flow-card {
             background: var(--bg-card);
             border-radius: 20px;
@@ -307,7 +384,6 @@
             box-shadow: 0 0 0 3px var(--btn-primary-bg);
         }
 
-        /* ===== 流程標題列 ===== */
         .flow-header {
             display: flex;
             align-items: center;
@@ -347,59 +423,107 @@
             cursor: grabbing;
         }
 
-        /* ===== ★ 修復：擴大標題點擊區域 + 視覺反饋 ===== */
-        .flow-title-click {
+        .flow-title-wrap {
             flex: 1;
-            font-size: 20px;
-            font-weight: 700;
-            padding: 8px 14px;
-            /* ↑ 加大 padding 提升點擊範圍 */
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all var(--transition);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             min-width: 80px;
-            border: 2px solid transparent;
+            border-radius: 10px;
+            padding: 4px 4px 4px 6px;
+            transition: all var(--transition);
+        }
+
+        .flow-title-icon {
+            font-size: 22px;
+            cursor: pointer;
+            flex-shrink: 0;
+            opacity: 0.7;
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            user-select: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
             background: transparent;
-            color: var(--text-primary);
-            position: relative;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
         }
 
-        .flow-title-click:hover {
-            background: var(--bg-step);
-            border-color: var(--border-light);
-            transform: scale(1.01);
-        }
-
-        .flow-title-click:active {
-            transform: scale(0.97);
+        .flow-title-icon:hover {
+            opacity: 1;
             background: var(--bg-step-hover);
+            border-color: var(--border-light);
+            transform: scale(1.10);
+        }
+
+        .flow-title-icon:active {
+            transform: scale(0.88);
+            background: var(--bg-drag-over);
             border-color: var(--btn-primary-bg);
         }
 
-        .flow-title-click .icon {
-            font-size: 22px;
-            /* ↑ 放大圖標更容易點擊 */
-            opacity: 0.7;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            flex-shrink: 0;
-            width: 30px;
-            text-align: center;
+        .flow-title-icon.flash {
+            animation: tickFlash 0.35s ease forwards;
         }
 
-        .flow-title-click.completed .icon {
+        .flow-title-wrap.completed .flow-title-icon {
             opacity: 1;
-            transform: scale(1.05);
         }
 
-        .flow-title-click .title-text {
+        .flow-title-text {
+            font-size: 20px;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: text;
+            transition: all var(--transition);
             flex: 1;
             word-break: break-word;
+            border: 2px solid transparent;
+            background: transparent;
+            color: var(--text-primary);
+            min-height: 40px;
+            display: flex;
+            align-items: center;
         }
 
-        .flow-title-click .badge {
+        .flow-title-text:hover {
+            background: var(--bg-input);
+            border-color: var(--border-light);
+        }
+
+        .flow-title-text.editing {
+            border-color: var(--btn-primary-bg);
+            background: var(--bg-card);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.12);
+            cursor: text;
+        }
+
+        .flow-title-wrap.completed .flow-title-text {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        .flow-title-input {
+            flex: 1;
+            font-size: 20px;
+            font-weight: 700;
+            padding: 6px 12px;
+            border: 2px solid var(--btn-primary-bg);
+            border-radius: 8px;
+            background: var(--bg-card);
+            outline: none;
+            font-family: inherit;
+            color: var(--text-primary);
+            min-height: 44px;
+            box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.12);
+        }
+
+        .flow-title-badge {
             font-size: 13px;
             font-weight: 600;
             padding: 2px 14px;
@@ -408,16 +532,12 @@
             color: var(--text-secondary);
             transition: 0.3s;
             white-space: nowrap;
+            flex-shrink: 0;
         }
 
-        .flow-title-click.completed .badge {
+        .flow-title-wrap.completed .flow-title-badge {
             background: var(--step-completed-bg);
             color: #fff;
-        }
-
-        .flow-title-click.completed .title-text {
-            text-decoration: line-through;
-            opacity: 0.7;
         }
 
         .btn-delete-flow {
@@ -442,7 +562,6 @@
             transform: scale(1.05);
         }
 
-        /* ===== 步驟容器 ===== */
         .steps-container {
             display: flex;
             flex-direction: column;
@@ -451,7 +570,6 @@
             min-height: 40px;
         }
 
-        /* ===== 步驟行 ===== */
         .step-row {
             display: flex;
             align-items: center;
@@ -501,10 +619,8 @@
             cursor: grabbing;
         }
 
-        /* ===== ★ 修復：步驟勾選框 — 擴大點擊區域 + 明顯反饋 ===== */
         .step-check {
             font-size: 22px;
-            /* ↑ 放大 */
             cursor: pointer;
             flex-shrink: 0;
             opacity: 0.5;
@@ -512,13 +628,10 @@
             user-select: none;
             line-height: 1;
             display: inline-flex;
-            /* 改為 flex 方便置中 */
             align-items: center;
             justify-content: center;
             width: 38px;
-            /* 固定寬度，加大點擊熱區 */
             height: 38px;
-            /* 固定高度 */
             border-radius: 10px;
             background: transparent;
             border: 2px solid transparent;
@@ -552,19 +665,22 @@
             font-size: 15px;
             font-weight: 500;
             color: var(--text-primary);
-            padding: 4px 8px;
-            /* 增加內距 */
-            border-radius: 6px;
+            padding: 4px 12px;
+            border-radius: 8px;
             cursor: text;
-            transition: background 0.15s;
+            transition: all 0.15s;
             word-break: break-word;
-            min-height: 32px;
+            min-height: 36px;
             line-height: 1.5;
             border: 2px solid transparent;
+            background: transparent;
+            display: flex;
+            align-items: center;
         }
 
         .step-text:hover {
             background: var(--bg-input);
+            border-color: var(--border-light);
         }
 
         .step-text.editing {
@@ -584,13 +700,13 @@
             font-size: 15px;
             font-weight: 500;
             color: var(--text-primary);
-            padding: 4px 8px;
+            padding: 4px 12px;
             border: 2px solid var(--btn-primary-bg);
-            border-radius: 6px;
+            border-radius: 8px;
             background: var(--bg-card);
             outline: none;
             font-family: inherit;
-            min-height: 36px;
+            min-height: 38px;
             box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.12);
         }
 
@@ -634,7 +750,6 @@
             opacity: 1;
         }
 
-        /* ===== 步驟箭頭 ===== */
         .step-arrow {
             display: flex;
             justify-content: center;
@@ -648,7 +763,6 @@
             letter-spacing: 2px;
         }
 
-        /* ===== 新增步驟列 ===== */
         .add-step-row {
             display: flex;
             gap: 10px;
@@ -707,7 +821,6 @@
             transform: translateY(0);
         }
 
-        /* ===== 空狀態 ===== */
         .empty-state {
             text-align: center;
             padding: 60px 20px 40px;
@@ -730,7 +843,6 @@
             font-size: 15px;
         }
 
-        /* ===== 底部版權 ===== */
         .app-footer {
             margin-top: 48px;
             padding: 20px 0 6px;
@@ -750,7 +862,6 @@
             text-decoration: underline;
         }
 
-        /* ===== 動畫 ===== */
         @keyframes fadeSlideIn {
             0% {
                 opacity: 0;
@@ -770,7 +881,6 @@
             animation: fadeSlideIn 0.2s ease forwards;
         }
 
-        /* ===== ★ 新增：點擊閃爍反饋 ===== */
         @keyframes tickFlash {
             0% {
                 transform: scale(1);
@@ -791,11 +901,10 @@
             animation: tickFlash 0.35s ease forwards;
         }
 
-        .flow-title-click .icon.flash {
+        .flow-title-icon.flash {
             animation: tickFlash 0.35s ease forwards;
         }
 
-        /* ===== 滾動條 ===== */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -815,7 +924,6 @@
             background: var(--text-secondary);
         }
 
-        /* ===== 響應式 ===== */
         @media (max-width: 640px) {
             body {
                 padding: 16px 10px 40px;
@@ -835,6 +943,17 @@
             .toolbar {
                 justify-content: center;
             }
+            .filter-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+            .date-display {
+                text-align: center;
+            }
+            .task-filters {
+                justify-content: center;
+            }
             .add-title-row input {
                 min-width: 100px;
                 font-size: 15px;
@@ -847,15 +966,26 @@
             .flow-card {
                 padding: 14px 14px 18px;
             }
-            .flow-title-click {
+            .flow-title-text {
                 font-size: 17px;
-                padding: 6px 10px;
+                padding: 4px 10px;
+            }
+            .flow-title-input {
+                font-size: 17px;
+                padding: 4px 10px;
+            }
+            .flow-title-icon {
+                font-size: 20px;
+                width: 32px;
+                height: 32px;
             }
             .step-text {
                 font-size: 14px;
+                padding: 4px 10px;
             }
             .step-text-input {
                 font-size: 14px;
+                padding: 4px 10px;
             }
             .add-step-row input {
                 min-width: 80px;
@@ -884,10 +1014,6 @@
                 width: 34px;
                 height: 34px;
             }
-            .flow-title-click .icon {
-                font-size: 20px;
-                width: 26px;
-            }
         }
 
         @media (max-width: 400px) {
@@ -897,7 +1023,10 @@
             .step-text-input {
                 font-size: 13px;
             }
-            .flow-title-click {
+            .flow-title-text {
+                font-size: 15px;
+            }
+            .flow-title-input {
                 font-size: 15px;
             }
             .step-check {
@@ -905,18 +1034,22 @@
                 width: 30px;
                 height: 30px;
             }
+            .flow-title-icon {
+                font-size: 18px;
+                width: 28px;
+                height: 28px;
+            }
         }
     </style>
 </head>
 <body>
 
     <div id="app">
-        <!-- ===== 頂部標題 + 工具列 ===== -->
         <header class="app-header">
             <div class="top-row">
                 <h1>
                     📝 流程擬定
-                    <span>v2.0</span>
+                    <span>v2.2</span>
                 </h1>
                 <div class="toolbar">
                     <label class="dark-toggle" title="切換護眼黑暗模式">
@@ -924,10 +1057,20 @@
                         <span class="slider"></span>
                         <span class="label-text">🌙 護眼</span>
                     </label>
+                    <button id="resetDailyBtn" class="btn-reset" title="重置所有完成狀態為未完成，方便每日重新開始">🔄 每日重置</button>
                     <button id="exportBtn" title="下載所有流程為 .txt 檔案">⬇️ 下載</button>
                     <label for="fileInput" title="從 .txt 檔案匯入流程">⬆️ 上傳</label>
                     <input type="file" id="fileInput" accept=".txt" />
                     <button id="clearBtn" class="btn-danger" title="清除瀏覽器中的所有流程資料">🗑️ 清空</button>
+                </div>
+            </div>
+
+            <div class="filter-row">
+                <div class="date-display" id="currentDate"></div>
+                <div class="task-filters" id="filterContainer">
+                    <button class="filter-btn active" data-filter="all">📋 所有</button>
+                    <button class="filter-btn" data-filter="active">⏳ 未完成</button>
+                    <button class="filter-btn" data-filter="completed">✅ 已完成</button>
                 </div>
             </div>
 
@@ -937,14 +1080,12 @@
             </div>
         </header>
 
-        <!-- ===== 流程列表 ===== -->
         <main class="flow-list" id="flowList">
             <!-- 由 JavaScript 動態渲染 -->
         </main>
 
-        <!-- ===== 底部版權 ===== -->
         <footer class="app-footer" id="appFooter">
-            v2.0 &copy; <span id="yearSpan"></span> ☕ 迪遜咖啡廳，版權所有。
+            v2.2 &copy; <span id="yearSpan"></span> ☕ 迪遜咖啡廳，版權所有。
         </footer>
     </div>
 
@@ -980,6 +1121,8 @@
         // ============================================================
 
         let flows = loadData();
+        let currentFilter = 'all';
+        let dragData = null; // 拖拽狀態
 
         // ============================================================
         //  黑暗模式
@@ -1007,38 +1150,58 @@
         loadDarkMode();
 
         // ============================================================
-        //  渲染引擎
+        //  日期更新
+        // ============================================================
+
+        function updateDate() {
+            const now = new Date();
+            const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            const el = document.getElementById('currentDate');
+            el.textContent =
+                `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 ${weekdays[now.getDay()]}`;
+        }
+        updateDate();
+
+        // ============================================================
+        //  渲染引擎（含過濾）
         // ============================================================
 
         const flowListEl = document.getElementById('flowList');
 
         function render() {
-            if (flows.length === 0) {
+            let filteredFlows = flows;
+            if (currentFilter === 'active') {
+                filteredFlows = flows.filter(f => !f.completed);
+            } else if (currentFilter === 'completed') {
+                filteredFlows = flows.filter(f => f.completed);
+            }
+
+            if (filteredFlows.length === 0) {
                 flowListEl.innerHTML = `
-                    <div class="empty-state">
-                        <div class="big-icon">📋</div>
-                        <h3>還沒有任何教學流程</h3>
-                        <p>在上方輸入標題，開始建立你的第一步！</p>
-                    </div>
-                `;
+                        <div class="empty-state">
+                            <div class="big-icon">📋</div>
+                            <h3>${flows.length === 0 ? '還沒有任何教學流程' : '沒有符合條件的流程'}</h3>
+                            <p>${flows.length === 0 ? '在上方輸入標題，開始建立你的第一步！' : '試試切換其他過濾條件'}</p>
+                        </div>
+                    `;
                 return;
             }
 
             let html = '';
-            for (const flow of flows) {
+            for (const flow of filteredFlows) {
                 const flowCompleted = flow.completed || false;
                 const steps = flow.steps || [];
 
                 const cardClass = 'flow-card' + (flowCompleted ? ' completed' : '');
-                const titleClass = 'flow-title-click' + (flowCompleted ? ' completed' : '');
+                const icon = flowCompleted ? '✅' : '⬜';
 
                 let stepsHtml = '';
                 if (steps.length === 0) {
                     stepsHtml = `
-                        <div style="width:100%; color:var(--text-muted); font-size:14px; padding:8px 0 4px 10px;">
-                            ⚡ 尚未加入步驟
-                        </div>
-                    `;
+                            <div style="width:100%; color:var(--text-muted); font-size:14px; padding:8px 0 4px 10px;">
+                                ⚡ 尚未加入步驟
+                            </div>
+                        `;
                 } else {
                     for (let i = 0; i < steps.length; i++) {
                         const step = steps[i];
@@ -1047,18 +1210,18 @@
                         const checkMark = stepCompleted ? '✅' : '⬜';
 
                         stepsHtml += `
-                            <div class="step-row ${stepClass}" data-flow-id="${flow.id}" data-step-id="${step.id}" draggable="false">
-                                <span class="drag-handle-step" title="拖曳調整順序">☰</span>
-                                <span class="step-check" data-action="toggle-step" title="點擊切換完成狀態">${checkMark}</span>
-                                <span class="step-text" data-action="edit-step">${escapeHtml(step.text)}</span>
-                                <button class="btn-delete-step" data-action="delete-step" title="刪除此步驟">🗑️</button>
-                            </div>
-                        `;
+                                <div class="step-row ${stepClass}" data-flow-id="${flow.id}" data-step-id="${step.id}" draggable="true">
+                                    <span class="drag-handle-step" title="拖曳調整順序">☰</span>
+                                    <span class="step-check" data-action="toggle-step" title="點擊切換完成狀態">${checkMark}</span>
+                                    <span class="step-text" data-action="edit-step">${escapeHtml(step.text)}</span>
+                                    <button class="btn-delete-step" data-action="delete-step" title="刪除此步驟">🗑️</button>
+                                </div>
+                            `;
 
                         if (i < steps.length - 1) {
                             stepsHtml += `
-                                <div class="step-arrow">↓</div>
-                            `;
+                                    <div class="step-arrow">↓</div>
+                                `;
                         }
                     }
                 }
@@ -1068,31 +1231,34 @@
                 const countLabel = totalSteps > 0 ? `${doneSteps}/${totalSteps}` : '0';
 
                 html += `
-                    <div class="${cardClass}" data-flow-id="${flow.id}" draggable="false">
-                        <div class="flow-header" data-flow-id="${flow.id}" draggable="false">
-                            <span class="drag-handle" title="拖曳調整順序">☰</span>
-                            <div class="${titleClass}" data-flow-id="${flow.id}" data-action="toggle-flow" title="點擊切換整個流程的完成狀態">
-                                <span class="icon">${flowCompleted ? '✅' : '📌'}</span>
-                                <span class="title-text">${escapeHtml(flow.title)}</span>
-                                <span class="badge">${countLabel}</span>
+                        <div class="${cardClass}" data-flow-id="${flow.id}" draggable="true">
+                            <div class="flow-header" data-flow-id="${flow.id}">
+                                <span class="drag-handle" title="拖曳調整順序">☰</span>
+                                <div class="flow-title-wrap${flowCompleted ? ' completed' : ''}" data-flow-id="${flow.id}">
+                                    <span class="flow-title-icon" data-action="toggle-flow" data-flow-id="${flow.id}" title="點擊切換整個流程的完成狀態">${icon}</span>
+                                    <span class="flow-title-text" data-action="edit-title">${escapeHtml(flow.title)}</span>
+                                    <span class="flow-title-badge">${countLabel}</span>
+                                </div>
+                                <button class="btn-delete-flow" data-action="delete-flow" title="刪除整個流程">🗑️</button>
                             </div>
-                            <button class="btn-delete-flow" data-action="delete-flow" title="刪除整個流程">🗑️</button>
-                        </div>
 
-                        <div class="steps-container" data-flow-id="${flow.id}">
-                            ${stepsHtml}
-                        </div>
+                            <div class="steps-container" data-flow-id="${flow.id}">
+                                ${stepsHtml}
+                            </div>
 
-                        <div class="add-step-row" data-flow-id="${flow.id}">
-                            <input type="text" class="step-input" placeholder="輸入新步驟…" autocomplete="off" />
-                            <button class="btn-add-step" data-action="add-step">＋ 新增步驟</button>
+                            <div class="add-step-row" data-flow-id="${flow.id}">
+                                <input type="text" class="step-input" placeholder="輸入新步驟…" autocomplete="off" />
+                                <button class="btn-add-step" data-action="add-step">＋ 新增步驟</button>
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
             }
 
             flowListEl.innerHTML = html;
-            initDragDrop();
+            // 更新過濾按鈕狀態
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.filter === currentFilter);
+            });
         }
 
         function escapeHtml(text) {
@@ -1138,12 +1304,10 @@
             saveData(flows);
             render();
 
-            // ★ 閃爍反饋：在重新渲染後找到對應的 icon 加上 flash 類
             requestAnimationFrame(() => {
-                const icon = document.querySelector(`.flow-title-click[data-flow-id="${flowId}"] .icon`);
+                const icon = document.querySelector(`.flow-title-icon[data-flow-id="${flowId}"]`);
                 if (icon) {
                     icon.classList.remove('flash');
-                    // 強制 reflow 觸發動畫
                     void icon.offsetWidth;
                     icon.classList.add('flash');
                     setTimeout(() => icon.classList.remove('flash'), 400);
@@ -1186,7 +1350,6 @@
             saveData(flows);
             render();
 
-            // ★ 閃爍反饋
             requestAnimationFrame(() => {
                 const checkEl = document.querySelector(
                     `.step-row[data-flow-id="${flowId}"][data-step-id="${stepId}"] .step-check`
@@ -1210,7 +1373,7 @@
         }
 
         // ============================================================
-        //  步驟編輯 (雙擊)
+        //  步驟編輯 (單擊)
         // ============================================================
 
         let editingStepId = null;
@@ -1295,59 +1458,287 @@
         }
 
         // ============================================================
-        //  拖拽排序 (HTML5 Drag & Drop)
+        //  標題編輯 (雙擊)
         // ============================================================
 
-        let dragData = null;
+        let editingTitleFlowId = null;
 
-        function initDragDrop() {
-            // ---- 流程拖拽 ----
-            const flowCards = document.querySelectorAll('.flow-card');
-            flowCards.forEach(card => {
-                card.setAttribute('draggable', 'true');
-                card.addEventListener('dragstart', onFlowDragStart);
-                card.addEventListener('dragend', onFlowDragEnd);
-                card.addEventListener('dragover', onFlowDragOver);
-                card.addEventListener('dragenter', onFlowDragEnter);
-                card.addEventListener('dragleave', onFlowDragLeave);
-                card.addEventListener('drop', onFlowDrop);
-            });
+        function startEditTitle(flowId, textEl) {
+            const flow = flows.find(f => f.id === flowId);
+            if (!flow) return;
 
-            // ---- 步驟拖拽 ----
-            const stepRows = document.querySelectorAll('.step-row');
-            stepRows.forEach(row => {
-                row.setAttribute('draggable', 'true');
-                row.addEventListener('dragstart', onStepDragStart);
-                row.addEventListener('dragend', onStepDragEnd);
-                row.addEventListener('dragover', onStepDragOver);
-                row.addEventListener('dragenter', onStepDragEnter);
-                row.addEventListener('dragleave', onStepDragLeave);
-                row.addEventListener('drop', onStepDrop);
-            });
+            if (editingTitleFlowId) {
+                finishEditTitle(true);
+            }
 
-            // ---- 點擊/雙擊事件委託 ----
-            // ★ 移除舊監聽避免重複綁定，使用新監聽
-            flowListEl.removeEventListener('click', handleClick);
-            flowListEl.removeEventListener('dblclick', handleDblClick);
-            flowListEl.removeEventListener('keydown', handleKeydown);
-            flowListEl.addEventListener('click', handleClick);
-            flowListEl.addEventListener('dblclick', handleDblClick);
-            flowListEl.addEventListener('keydown', handleKeydown);
+            editingTitleFlowId = flowId;
+
+            const input = document.createElement('input');
+            input.className = 'flow-title-input';
+            input.type = 'text';
+            input.value = flow.title;
+            input.setAttribute('data-flow-id', flowId);
+
+            textEl.replaceWith(input);
+            input.focus();
+            input.select();
+
+            const saveHandler = () => finishEditTitle(true);
+            const cancelHandler = (e) => {
+                if (e.key === 'Escape') {
+                    finishEditTitle(false);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    finishEditTitle(true);
+                }
+            };
+
+            input.addEventListener('blur', saveHandler);
+            input.addEventListener('keydown', cancelHandler);
+            input._saveHandler = saveHandler;
+            input._cancelHandler = cancelHandler;
         }
 
-        // ---- 事件處理函數 (分離出來方便移除) ----
+        function finishEditTitle(save) {
+            if (!editingTitleFlowId) return;
+
+            const flow = flows.find(f => f.id === editingTitleFlowId);
+            if (flow) {
+                const input = document.querySelector(
+                    `.flow-title-input[data-flow-id="${editingTitleFlowId}"]`
+                );
+                if (input) {
+                    if (save) {
+                        const val = input.value.trim();
+                        if (val) {
+                            flow.title = val;
+                            saveData(flows);
+                        } else {
+                            save = false;
+                        }
+                    }
+                    const span = document.createElement('span');
+                    span.className = 'flow-title-text';
+                    span.setAttribute('data-action', 'edit-title');
+                    span.textContent = flow.title;
+                    input.replaceWith(span);
+                }
+            }
+
+            editingTitleFlowId = null;
+            saveData(flows);
+            render();
+        }
+
+        // ============================================================
+        //  每日重置
+        // ============================================================
+
+        function resetDaily() {
+            if (flows.length === 0) {
+                alert('目前沒有流程需要重置。');
+                return;
+            }
+
+            let totalSteps = 0;
+            let completedSteps = 0;
+            for (const flow of flows) {
+                for (const step of flow.steps) {
+                    totalSteps++;
+                    if (step.completed) completedSteps++;
+                }
+            }
+
+            if (completedSteps === 0) {
+                alert('所有步驟都已經是「未完成」狀態，無需重置。');
+                return;
+            }
+
+            if (!confirm(`🔄 每日重置\n\n將把所有 ${totalSteps} 個步驟的完成狀態設為「未完成」\n（其中 ${completedSteps} 個目前為「已完成」）\n\n確定要重置嗎？`)) {
+                return;
+            }
+
+            for (const flow of flows) {
+                flow.completed = false;
+                for (const step of flow.steps) {
+                    step.completed = false;
+                }
+            }
+
+            saveData(flows);
+            render();
+            alert('✅ 已重置所有完成狀態，可以重新開始了！');
+        }
+
+        // ============================================================
+        //  拖拽系統（事件委託）
+        // ============================================================
+
+        function initDragDrop() {
+            const list = document.getElementById('flowList');
+
+            // 移除舊的監聽器避免重複綁定（但因為只用一次，也可以留空）
+            // 為安全，先移除可能存在的監聽器（實際應用中需要保留參考，此處簡化）
+            // 但為了乾淨，我們使用一個標誌確保只綁定一次
+            if (list._dragInited) return;
+            list._dragInited = true;
+
+            // ----- 拖拽開始 -----
+            list.addEventListener('dragstart', function(e) {
+                const stepRow = e.target.closest('.step-row');
+                const flowCard = e.target.closest('.flow-card');
+
+                if (stepRow) {
+                    const flowId = stepRow.dataset.flowId;
+                    const stepId = stepRow.dataset.stepId;
+                    if (!flowId || !stepId) return;
+                    dragData = { type: 'step', id: stepId, flowId: flowId };
+                    e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
+                    e.dataTransfer.effectAllowed = 'move';
+                    stepRow.classList.add('dragging');
+                    e.stopPropagation();
+                } else if (flowCard && !stepRow) {
+                    const flowId = flowCard.dataset.flowId;
+                    if (!flowId) return;
+                    dragData = { type: 'flow', id: flowId };
+                    e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
+                    e.dataTransfer.effectAllowed = 'move';
+                    flowCard.classList.add('dragging');
+                }
+            });
+
+            // ----- 拖拽結束 -----
+            list.addEventListener('dragend', function(e) {
+                document.querySelectorAll('.step-row.dragging, .flow-card.dragging')
+                    .forEach(el => el.classList.remove('dragging'));
+                document.querySelectorAll('.step-row.drag-over, .flow-card.drag-over')
+                    .forEach(el => el.classList.remove('drag-over'));
+                dragData = null;
+            });
+
+            // ----- 拖拽經過（允許放置）-----
+            list.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+            });
+
+            // ----- 進入目標（視覺回饋）-----
+            list.addEventListener('dragenter', function(e) {
+                e.preventDefault();
+                const target = e.target.closest('.step-row, .flow-card');
+                if (!target) return;
+
+                // 清除其他高亮
+                document.querySelectorAll('.step-row.drag-over, .flow-card.drag-over')
+                    .forEach(el => el.classList.remove('drag-over'));
+
+                if (!dragData) return;
+
+                if (dragData.type === 'step') {
+                    const row = target.closest('.step-row');
+                    if (row) {
+                        const srcFlow = dragData.flowId;
+                        const tgtFlow = row.dataset.flowId;
+                        const srcId = dragData.id;
+                        const tgtId = row.dataset.stepId;
+                        if (srcFlow === tgtFlow && srcId !== tgtId) {
+                            row.classList.add('drag-over');
+                        }
+                    }
+                } else if (dragData.type === 'flow') {
+                    const card = target.closest('.flow-card');
+                    if (card) {
+                        const srcId = dragData.id;
+                        const tgtId = card.dataset.flowId;
+                        if (srcId !== tgtId) {
+                            card.classList.add('drag-over');
+                        }
+                    }
+                }
+            });
+
+            // ----- 離開目標（移除高亮）-----
+            list.addEventListener('dragleave', function(e) {
+                const target = e.target.closest('.step-row, .flow-card');
+                if (target) {
+                    target.classList.remove('drag-over');
+                }
+            });
+
+            // ----- 放置（實際排序）-----
+            list.addEventListener('drop', function(e) {
+                e.preventDefault();
+                const target = e.target.closest('.step-row, .flow-card');
+                if (!target) return;
+                target.classList.remove('drag-over');
+
+                if (!dragData) return;
+
+                // ---- 步驟排序 ----
+                if (dragData.type === 'step') {
+                    const row = target.closest('.step-row');
+                    if (!row) return;
+                    const srcId = dragData.id;
+                    const srcFlowId = dragData.flowId;
+                    const tgtId = row.dataset.stepId;
+                    const tgtFlowId = row.dataset.flowId;
+                    if (srcFlowId !== tgtFlowId || srcId === tgtId) return;
+
+                    const flow = flows.find(f => f.id === srcFlowId);
+                    if (!flow) return;
+                    const steps = flow.steps;
+                    const srcIndex = steps.findIndex(s => s.id === srcId);
+                    const tgtIndex = steps.findIndex(s => s.id === tgtId);
+                    if (srcIndex === -1 || tgtIndex === -1) return;
+
+                    const [removed] = steps.splice(srcIndex, 1);
+                    let newIndex = steps.findIndex(s => s.id === tgtId);
+                    if (srcIndex < tgtIndex) newIndex += 1;
+                    steps.splice(newIndex, 0, removed);
+
+                    saveData(flows);
+                    render();
+                    dragData = null;
+                    return;
+                }
+
+                // ---- 流程排序 ----
+                if (dragData.type === 'flow') {
+                    const card = target.closest('.flow-card');
+                    if (!card) return;
+                    const srcId = dragData.id;
+                    const tgtId = card.dataset.flowId;
+                    if (srcId === tgtId) return;
+
+                    const srcIndex = flows.findIndex(f => f.id === srcId);
+                    const tgtIndex = flows.findIndex(f => f.id === tgtId);
+                    if (srcIndex === -1 || tgtIndex === -1) return;
+
+                    const [removed] = flows.splice(srcIndex, 1);
+                    let newIndex = flows.findIndex(f => f.id === tgtId);
+                    if (srcIndex < tgtIndex) newIndex += 1;
+                    flows.splice(newIndex, 0, removed);
+
+                    saveData(flows);
+                    render();
+                    dragData = null;
+                }
+            });
+        }
+
+        // ============================================================
+        //  事件處理（點擊、雙擊、鍵盤）
+        // ============================================================
+
         function handleClick(e) {
             const target = e.target.closest('[data-action]');
             if (!target) return;
 
             const action = target.dataset.action;
 
-            // ★ 如果正在編輯步驟，先完成編輯再執行操作
-            if (editingStepId && (action === 'toggle-step' || action === 'delete-step')) {
+            if (editingStepId && (action === 'toggle-step' || action === 'delete-step' || action === 'edit-step')) {
                 finishEditStep(true);
-                // 延遲執行，等待 render 完成
                 setTimeout(() => {
-                    // 重新觸發點擊（但為了避免遞歸，直接調用對應函數）
                     const flowId = target.closest('.step-row')?.dataset.flowId;
                     const stepId = target.closest('.step-row')?.dataset.stepId;
                     if (flowId && stepId) {
@@ -1359,14 +1750,33 @@
                                 deleteStep(flowId, stepId);
                             }
                         }
+                        if (action === 'edit-step') {
+                            const textEl = document.querySelector(
+                                `.step-row[data-flow-id="${flowId}"][data-step-id="${stepId}"] .step-text`
+                            );
+                            if (textEl) startEditStep(flowId, stepId, textEl);
+                        }
                     }
+                }, 50);
+                return;
+            }
+
+            if (editingTitleFlowId && action !== 'edit-title') {
+                finishEditTitle(true);
+                setTimeout(() => {
+                    handleClick(e);
                 }, 50);
                 return;
             }
 
             if (action === 'toggle-flow') {
                 const flowId = target.dataset.flowId;
-                if (flowId) toggleFlowComplete(flowId);
+                if (flowId) {
+                    if (editingTitleFlowId) {
+                        finishEditTitle(true);
+                    }
+                    toggleFlowComplete(flowId);
+                }
                 return;
             }
 
@@ -1424,16 +1834,18 @@
                 return;
             }
 
-            // ★ 點擊 step-text 但不在編輯狀態時，切換步驟狀態（方便用戶點擊文字也能切換）
             if (action === 'edit-step') {
                 const row = target.closest('.step-row');
                 if (row) {
                     const flowId = row.dataset.flowId;
                     const stepId = row.dataset.stepId;
                     if (flowId && stepId) {
-                        // 如果沒有在編輯，切換完成狀態
-                        if (!editingStepId) {
-                            toggleStepComplete(flowId, stepId);
+                        if (editingStepId) {
+                            finishEditStep(true);
+                        }
+                        const textEl = target.closest('.step-text');
+                        if (textEl) {
+                            startEditStep(flowId, stepId, textEl);
                         }
                     }
                 }
@@ -1443,7 +1855,7 @@
 
         function handleDblClick(e) {
             const textEl = e.target.closest('.step-text');
-            if (textEl && !textEl.classList.contains('editing')) {
+            if (textEl) {
                 const row = textEl.closest('.step-row');
                 if (row) {
                     const flowId = row.dataset.flowId;
@@ -1453,8 +1865,26 @@
                             finishEditStep(true);
                         }
                         startEditStep(flowId, stepId, textEl);
+                        e.preventDefault();
+                        return;
                     }
                 }
+            }
+
+            const titleEl = e.target.closest('.flow-title-text');
+            if (titleEl) {
+                const wrap = titleEl.closest('.flow-title-wrap');
+                if (wrap) {
+                    const flowId = wrap.dataset.flowId;
+                    if (flowId) {
+                        if (editingTitleFlowId) {
+                            finishEditTitle(true);
+                        }
+                        startEditTitle(flowId, titleEl);
+                        e.preventDefault();
+                    }
+                }
+                return;
             }
         }
 
@@ -1468,147 +1898,27 @@
                     if (btn) btn.click();
                 }
             }
-            // ESC 取消編輯
-            if (e.key === 'Escape' && editingStepId) {
-                finishEditStep(false);
-                e.preventDefault();
-            }
-        }
-
-        // ---- 流程拖拽事件 ----
-        function onFlowDragStart(e) {
-            const card = e.target.closest('.flow-card');
-            if (!card) return;
-            const flowId = card.dataset.flowId;
-            dragData = { type: 'flow', id: flowId };
-            e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
-            e.dataTransfer.effectAllowed = 'move';
-            card.classList.add('dragging');
-        }
-
-        function onFlowDragEnd(e) {
-            const card = e.target.closest('.flow-card');
-            if (card) card.classList.remove('dragging');
-            document.querySelectorAll('.flow-card.drag-over').forEach(el => el.classList.remove('drag-over'));
-        }
-
-        function onFlowDragOver(e) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-        }
-
-        function onFlowDragEnter(e) {
-            e.preventDefault();
-            const card = e.target.closest('.flow-card');
-            if (card) {
-                const srcId = dragData && dragData.type === 'flow' ? dragData.id : null;
-                const targetId = card.dataset.flowId;
-                if (srcId && targetId && srcId !== targetId) {
-                    card.classList.add('drag-over');
+            if (e.key === 'Escape') {
+                if (editingStepId) {
+                    finishEditStep(false);
+                    e.preventDefault();
+                }
+                if (editingTitleFlowId) {
+                    finishEditTitle(false);
+                    e.preventDefault();
                 }
             }
         }
 
-        function onFlowDragLeave(e) {
-            const card = e.target.closest('.flow-card');
-            if (card) card.classList.remove('drag-over');
-        }
+        // ============================================================
+        //  過濾器事件
+        // ============================================================
 
-        function onFlowDrop(e) {
-            e.preventDefault();
-            const targetCard = e.target.closest('.flow-card');
-            if (!targetCard) return;
-            targetCard.classList.remove('drag-over');
-
-            if (!dragData || dragData.type !== 'flow') return;
-            const srcId = dragData.id;
-            const targetId = targetCard.dataset.flowId;
-            if (!srcId || !targetId || srcId === targetId) return;
-
-            const srcIndex = flows.findIndex(f => f.id === srcId);
-            const targetIndex = flows.findIndex(f => f.id === targetId);
-            if (srcIndex === -1 || targetIndex === -1) return;
-
-            const [removed] = flows.splice(srcIndex, 1);
-            const newTargetIndex = flows.findIndex(f => f.id === targetId);
-            flows.splice(newTargetIndex, 0, removed);
-
-            saveData(flows);
-            render();
-        }
-
-        // ---- 步驟拖拽事件 ----
-        function onStepDragStart(e) {
-            const row = e.target.closest('.step-row');
-            if (!row) return;
-            const flowId = row.dataset.flowId;
-            const stepId = row.dataset.stepId;
-            if (!flowId || !stepId) return;
-            dragData = { type: 'step', id: stepId, flowId: flowId };
-            e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
-            e.dataTransfer.effectAllowed = 'move';
-            row.classList.add('dragging');
-        }
-
-        function onStepDragEnd(e) {
-            const row = e.target.closest('.step-row');
-            if (row) row.classList.remove('dragging');
-            document.querySelectorAll('.step-row.drag-over').forEach(el => el.classList.remove('drag-over'));
-        }
-
-        function onStepDragOver(e) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-        }
-
-        function onStepDragEnter(e) {
-            e.preventDefault();
-            const row = e.target.closest('.step-row');
-            if (row) {
-                const srcData = dragData;
-                if (srcData && srcData.type === 'step') {
-                    const srcFlowId = srcData.flowId;
-                    const targetFlowId = row.dataset.flowId;
-                    const srcStepId = srcData.id;
-                    const targetStepId = row.dataset.stepId;
-                    if (srcFlowId === targetFlowId && srcStepId !== targetStepId) {
-                        row.classList.add('drag-over');
-                    }
-                }
-            }
-        }
-
-        function onStepDragLeave(e) {
-            const row = e.target.closest('.step-row');
-            if (row) row.classList.remove('drag-over');
-        }
-
-        function onStepDrop(e) {
-            e.preventDefault();
-            const targetRow = e.target.closest('.step-row');
-            if (!targetRow) return;
-            targetRow.classList.remove('drag-over');
-
-            if (!dragData || dragData.type !== 'step') return;
-            const srcId = dragData.id;
-            const srcFlowId = dragData.flowId;
-            const targetId = targetRow.dataset.stepId;
-            const targetFlowId = targetRow.dataset.flowId;
-            if (!srcId || !targetId || srcId === targetId) return;
-            if (srcFlowId !== targetFlowId) return;
-
-            const flow = flows.find(f => f.id === srcFlowId);
-            if (!flow) return;
-            const steps = flow.steps;
-            const srcIndex = steps.findIndex(s => s.id === srcId);
-            const targetIndex = steps.findIndex(s => s.id === targetId);
-            if (srcIndex === -1 || targetIndex === -1) return;
-
-            const [removed] = steps.splice(srcIndex, 1);
-            const newTargetIndex = steps.findIndex(s => s.id === targetId);
-            steps.splice(newTargetIndex, 0, removed);
-
-            saveData(flows);
+        function onFilterClick(e) {
+            const btn = e.currentTarget;
+            const filter = btn.dataset.filter;
+            if (filter === currentFilter) return;
+            currentFilter = filter;
             render();
         }
 
@@ -1686,6 +1996,7 @@
         // ============================================================
 
         document.getElementById('exportBtn').addEventListener('click', exportData);
+        document.getElementById('resetDailyBtn').addEventListener('click', resetDaily);
 
         const fileInput = document.getElementById('fileInput');
         fileInput.addEventListener('change', function(e) {
@@ -1697,21 +2008,25 @@
 
         document.getElementById('clearBtn').addEventListener('click', clearAllData);
 
-        // ============================================================
-        //  版權年份
-        // ============================================================
+        // 過濾器綁定
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', onFilterClick);
+        });
 
-        document.getElementById('yearSpan').textContent = new Date().getFullYear();
+        // 事件委託綁定點擊/雙擊/鍵盤
+        flowListEl.addEventListener('click', handleClick);
+        flowListEl.addEventListener('dblclick', handleDblClick);
+        flowListEl.addEventListener('keydown', handleKeydown);
 
         // ============================================================
         //  初始化
         // ============================================================
 
         render();
-		
-		if ('serviceWorker' in navigator) {
-			navigator.serviceWorker.register('/sw.js').catch(() => {});
-		}
+        initDragDrop();
+
+        // 版權年份
+        document.getElementById('yearSpan').textContent = new Date().getFullYear();
 
         if (flows.length === 0) {
             document.getElementById('titleInput').focus();
@@ -1732,9 +2047,11 @@
             }
         }
 
-        console.log('📝 流程擬定 v2.0 已啟動 · 迪遜咖啡廳');
-        console.log('💡 雙擊步驟文字可編輯內容 · 拖曳 ☰ 可調整順序');
-        console.log('✨ 點擊 ✅ / ⬜ 或點擊步驟文字即可切換完成狀態');
+        console.log('📝 流程擬定 v2.2 已啟動 · 迪遜咖啡廳');
+        console.log('💡 單擊步驟文字可編輯內容 · 雙擊標題可更改標題');
+        console.log('✨ 點擊 ⬜/✅ 可切換完成狀態 · 拖曳 ☰ 可調整順序');
+        console.log('🔄 使用「每日重置」可一鍵清空所有勾選狀態');
+        console.log('📅 今日日期與過濾器已加入');
     </script>
 
 </body>
