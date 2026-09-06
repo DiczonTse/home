@@ -5,7 +5,6 @@ const MEDIA_CACHE_NAME = 'diczon-cafe-media-v1'; // 獨立管理影音快取，�
 
 // 核心網頁與圖片靜態資源（移除了所有的 MP3 檔案）
 const urlsToCache = [
-    '/home/',
     '/home/index.html',
     '/home/style.css',
     '/home/main.js',
