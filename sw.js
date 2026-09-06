@@ -80,31 +80,30 @@ self.addEventListener('fetch', event => {
 
     // ✨ 核心改動：針對 MP3 檔案採取「快取優先，首次播放才下載並快取」策略
     if (url.pathname.endsWith('.mp3')) {
-        event.respondWith(
-            caches.open(MEDIA_CACHE_NAME).then(cache => {
-                return cache.match(event.request).then(cachedResponse => {
-                    // 1. 如果快取已有此 MP3，直接讀取快取，不再浪費網絡流量
-                    if (cachedResponse) {
-                        return cachedResponse;
-                    }
+		event.respondWith(
+			caches.open(MEDIA_CACHE_NAME).then(cache => {
+				return cache.match(event.request).then(cachedResponse => {
+					// 1. 如果快取已有此 MP3，直接讀取快取
+					if (cachedResponse) {
+						return cachedResponse;
+					}
 
-                    // 2. 如果快取沒有，發送網絡請求下載
-                    return fetch(event.request).then(networkResponse => {
-                        // 處理 Safari/Chrome 的音訊分段請求 (206 Partial Content) 
-                        // 基本快取 API 只能完美存儲 200 OK，如果是一般播放請求則寫入快取
-                        if (networkResponse && (networkResponse.status === 200 || networkResponse.status === 206)) {
-                            cache.put(event.request, networkResponse.clone());
-                        }
-                        return networkResponse;
-                    }).catch(() => {
-                        // 沒網網絡且沒快取時的降級提示
-                        return new Response('離線狀態且音訊未快取', { status: 404 });
-                    });
-                });
-            })
-        );
-        return; // 跳出，其餘一般網頁資源走下面的「網路優先」邏輯
-    }
+					// 2. 如果快取沒有，發送網絡請求下載
+					return fetch(event.request).then(networkResponse => {
+						// 僅當響應為完整 200 時才寫入快取（206 不儲存）
+						if (networkResponse && networkResponse.status === 200) {
+							cache.put(event.request, networkResponse.clone());
+						}
+						return networkResponse;
+					}).catch(() => {
+						// 沒網路且沒快取時的降級提示
+						return new Response('離線狀態且音訊未快取', { status: 404 });
+					});
+				});
+			})
+		);
+		return; // 跳出，其餘一般網頁資源走下面的「網路優先」邏輯
+	}
 
     // 🌐 一般網頁資源：維持您原本的「網路優先」策略
     event.respondWith(
