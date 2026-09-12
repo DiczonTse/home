@@ -132,21 +132,33 @@
             text-shadow: 0 2px 8px rgba(0,0,0,0.9);
         }
         .difficulty-section {
-            display: flex; align-items: center; gap: 8px;
+            display: flex; align-items: center; justify-content: center;
+            gap: 6px; flex-wrap: wrap;
             background: rgba(61, 32, 22, 0.85);
-            padding: 6px 16px; border-radius: 30px;
+            padding: 8px 16px; border-radius: 30px;
             border: 2px solid #b8893e;
             margin-bottom: 8px;
+            max-width: 92%;
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
             font-size: 15px; color: #f5e6c8; font-weight: bold;
         }
         .diff-btn {
             background: #5a3224; border: 2px solid #b8893e; color: #f5e6c8;
-            padding: 4px 14px; border-radius: 20px; font-size: 14px;
+            padding: 4px 12px; border-radius: 20px; font-size: 14px;
             font-weight: bold; cursor: pointer; transition: all 0.2s;
         }
         .diff-btn:hover { background: #7a4a3a; }
         .diff-btn.active { background: #d4a054; color: #2c1810; border-color: #f5e6c8; }
+        .diff-btn[data-level="expert"].active { background: #e67e22; color: #fff; border-color: #ffd699; }
+        .diff-btn[data-level="hell"].active {
+            background: #8b0000; color: #ffe0e0; border-color: #ff6b6b;
+            box-shadow: 0 0 12px rgba(255,60,60,0.9);
+            animation: hellPulse 1.2s ease-in-out infinite;
+        }
+        @keyframes hellPulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(255,60,60,0.7); }
+            50% { box-shadow: 0 0 20px rgba(255,60,60,1); }
+        }
         .cover-buttons { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
         .cover-btn {
             background: #3d2016; border: 3px solid #b8893e; color: #f5e6c8;
@@ -289,8 +301,8 @@
             .modal-box { padding: 24px 20px; }
             .modal-box h2 { font-size: 26px; }
             .modal-box p { font-size: 16px; }
-            .difficulty-section { font-size: 13px; padding: 4px 10px; }
-            .diff-btn { font-size: 12px; padding: 3px 10px; }
+            .difficulty-section { font-size: 13px; padding: 5px 10px; gap: 4px; }
+            .diff-btn { font-size: 12px; padding: 3px 9px; }
             .trophy-display { font-size: 14px; padding: 4px 14px; bottom: 50px; }
             .trophy-display #trophyCount { font-size: 16px; }
             .cover-footer { font-size: 10px; }
@@ -324,6 +336,8 @@
                 <button class="diff-btn" data-level="easy">容易</button>
                 <button class="diff-btn" data-level="medium">中等</button>
                 <button class="diff-btn" data-level="hard">困難</button>
+                <button class="diff-btn" data-level="expert">達人</button>
+                <button class="diff-btn" data-level="hell">地獄</button>
             </div>
 
             <div class="cover-buttons">
@@ -339,7 +353,7 @@
         </div>
 
         <div class="trophy-display">🏆 已獲獎盃：<span id="trophyCount">0</span></div>
-        <div class="cover-footer">v1.0 © <span id="yearSpan">2026</span> ☕迪遜咖啡廳，版權所有。</div>
+        <div class="cover-footer">v1.1 © <span id="yearSpan">2026</span> ☕迪遜咖啡廳，版權所有。</div>
     </div>
 
     <!-- ===== 常駐控制鈕 ===== -->
@@ -750,7 +764,7 @@ function findKing(board, color) {
     return null;
 }
 
-// 舊版：完整掃描，用於 makeMove / getAllLegalMoves（人類走子用，慢一點沒關係）
+// 完整掃描版（人類走子用，慢一點沒關係）
 function isInCheck(board, color) {
     const king = findKing(board, color);
     if (!king) return true;
@@ -817,15 +831,51 @@ function checkGameEnd(board, color) {
 }
 
 // ============================================================
-//  AI 評估與走法
+//  AI 評估
 // ============================================================
 
 // 基礎子力價值
 const PIECE_VALUES = { 1:10000, 2:200, 3:200, 4:400, 5:900, 6:450, 7:100 };
 
-// 位置價值表（紅方視角：行0 = 黑方底線，行9 = 紅方底線）
+// 位置價值表（紅方視角：行9 = 己方底線，行0 = 敵方底線）
 // 黑方使用時將行做 9-r 鏡像
 const PST = {
+    1: [ // 帥 / 將（僅九宮內有意義）
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0, 2, 4, 2, 0,0,0],
+        [0,0,0, 4, 8, 4, 0,0,0],
+        [0,0,0, 2, 6, 2, 0,0,0]
+    ],
+    2: [ // 仕 / 士
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0, 4, 0, 4, 0,0,0],
+        [0,0,0, 0, 8, 0, 0,0,0],
+        [0,0,0, 4, 0, 4, 0,0,0]
+    ],
+    3: [ // 相 / 象
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,4,0,0,0,4,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,4,0,0,0,4,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,2,0,0,0,2,0,0]
+    ],
     4: [ // 馬
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -862,7 +912,7 @@ const PST = {
         [ 4, 8, 8,10,10,10, 8, 8, 4],
         [ 4, 4, 4, 6, 6, 6, 4, 4, 4]
     ],
-    7: [ // 兵/卒（紅方視角：越靠近行0（黑方底線）越有價值）
+    7: [ // 兵 / 卒
         [48,50,52,54,56,54,52,50,48],  // 行0 深入敵陣
         [40,42,44,46,48,46,44,42,40],  // 行1
         [32,34,36,38,40,38,36,34,32],  // 行2
@@ -876,7 +926,7 @@ const PST = {
     ]
 };
 
-// 評估盤面（紅方為正、黑方為負）
+// 評估盤面（以 color 為正）
 function evaluateBoard(board, color) {
     let score = 0;
     for (let r = 0; r < ROWS; r++) {
@@ -899,7 +949,7 @@ function evaluateBoard(board, color) {
     return score;
 }
 
-// 快速檢查將帥是否被將軍（從將帥位置反向掃描，比舊版快很多）
+// 快速檢查將帥是否被將軍（從將帥位置反向掃描）
 function isInCheckFast(board, color) {
     const king = findKing(board, color);
     if (!king) return true;
@@ -1005,7 +1055,7 @@ function generatePseudoMoves(board, color) {
     return result;
 }
 
-// 走法排序：吃子優先，提升 Alpha-Beta 剪枝效率
+// 走法排序：吃子優先（MVV-LVA），提升 Alpha-Beta 剪枝效率
 function sortMovesByCapture(board, moves) {
     moves.sort((a, b) => {
         const ta = board[a.toRow][a.toCol];
@@ -1014,17 +1064,106 @@ function sortMovesByCapture(board, moves) {
         const vb = tb === EMPTY ? -1 : (PIECE_VALUES[typeOf(tb)] || 0);
         return vb - va;
     });
+    return moves;
 }
 
-// 遞迴 Alpha-Beta
-function minimax(board, depth, alpha, beta, maximizing, aiColor) {
-    const opponent = aiColor === RED ? BLACK : RED;
-    const toMove = maximizing ? aiColor : opponent;
+// 更精細的排序分數（MVV-LVA）
+function scoreMoveForOrder(board, m) {
+    const target = board[m.toRow][m.toCol];
+    if (target === EMPTY) return 0;
+    const tv = PIECE_VALUES[typeOf(target)] || 0;
+    const mv = PIECE_VALUES[typeOf(board[m.fromRow][m.fromCol])] || 0;
+    return 100000 + tv * 10 - mv;
+}
+function sortMovesAdvanced(board, moves) {
+    const n = moves.length;
+    if (n < 2) return moves;
+    const scores = new Array(n);
+    for (let i = 0; i < n; i++) scores[i] = scoreMoveForOrder(board, moves[i]);
+    // 插入排序：走法陣列通常不長，且大多接近有序
+    for (let i = 1; i < n; i++) {
+        const m = moves[i], s = scores[i];
+        let j = i - 1;
+        while (j >= 0 && scores[j] < s) {
+            moves[j + 1] = moves[j];
+            scores[j + 1] = scores[j];
+            j--;
+        }
+        moves[j + 1] = m;
+        scores[j + 1] = s;
+    }
+    return moves;
+}
 
-    if (depth === 0) return evaluateBoard(board, aiColor);
+// ============================================================
+//  進階搜尋引擎（達人 / 地獄）
+// ============================================================
+const MATE_SCORE = 100000;
 
+let nodesSearched = 0;
+let searchDeadline = 0;
+let searchAborted = false;
+
+function outOfTime() {
+    return performance.now() > searchDeadline;
+}
+
+// 靜態搜尋（吃子延伸）——消除地平線效應
+function quiescence(board, alpha, beta, maximizing, aiColor, qDepth) {
+    nodesSearched++;
+    if ((nodesSearched & 255) === 0 && outOfTime()) searchAborted = true;
+    if (searchAborted) return evaluateBoard(board, aiColor);
+
+    const standPat = evaluateBoard(board, aiColor);
+    if (qDepth <= 0) return standPat;
+
+    const toMove = maximizing ? aiColor : (aiColor === RED ? BLACK : RED);
+    const caps = generatePseudoMoves(board, toMove).filter(m => board[m.toRow][m.toCol] !== EMPTY);
+    if (caps.length === 0) return standPat;
+    sortMovesAdvanced(board, caps);
+
+    if (maximizing) {
+        if (standPat >= beta) return beta;
+        if (standPat > alpha) alpha = standPat;
+        for (const m of caps) {
+            const captured = applyMoveFast(board, m);
+            if (isInCheckFast(board, toMove)) { undoMoveFast(board, m, captured); continue; }
+            const sc = quiescence(board, alpha, beta, false, aiColor, qDepth - 1);
+            undoMoveFast(board, m, captured);
+            if (searchAborted) return alpha;
+            if (sc >= beta) return beta;
+            if (sc > alpha) alpha = sc;
+        }
+        return alpha;
+    } else {
+        if (standPat <= alpha) return alpha;
+        if (standPat < beta) beta = standPat;
+        for (const m of caps) {
+            const captured = applyMoveFast(board, m);
+            if (isInCheckFast(board, toMove)) { undoMoveFast(board, m, captured); continue; }
+            const sc = quiescence(board, alpha, beta, true, aiColor, qDepth - 1);
+            undoMoveFast(board, m, captured);
+            if (searchAborted) return beta;
+            if (sc <= alpha) return alpha;
+            if (sc < beta) beta = sc;
+        }
+        return beta;
+    }
+}
+
+// Alpha-Beta 主搜尋
+function minimaxAB(board, depth, alpha, beta, maximizing, aiColor, ply) {
+    nodesSearched++;
+    if ((nodesSearched & 255) === 0 && outOfTime()) searchAborted = true;
+    if (searchAborted) return evaluateBoard(board, aiColor);
+
+    if (depth <= 0) {
+        return quiescence(board, alpha, beta, maximizing, aiColor, 4);
+    }
+
+    const toMove = maximizing ? aiColor : (aiColor === RED ? BLACK : RED);
     const pseudo = generatePseudoMoves(board, toMove);
-    sortMovesByCapture(board, pseudo);
+    sortMovesAdvanced(board, pseudo);
 
     let hasLegal = false;
     let bestEval = maximizing ? -Infinity : Infinity;
@@ -1036,8 +1175,10 @@ function minimax(board, depth, alpha, beta, maximizing, aiColor) {
             continue;
         }
         hasLegal = true;
-        const ev = minimax(board, depth - 1, alpha, beta, !maximizing, aiColor);
+        const ev = minimaxAB(board, depth - 1, alpha, beta, !maximizing, aiColor, ply + 1);
         undoMoveFast(board, m, captured);
+
+        if (searchAborted) return bestEval === -Infinity || bestEval === Infinity ? ev : bestEval;
 
         if (maximizing) {
             if (ev > bestEval) bestEval = ev;
@@ -1051,12 +1192,71 @@ function minimax(board, depth, alpha, beta, maximizing, aiColor) {
 
     if (!hasLegal) {
         // 無棋可走 = 負（將殺或困斃，象棋中困斃同樣算輸）
-        return maximizing ? (-100000 - depth) : (100000 + depth);
+        return maximizing ? (-MATE_SCORE + ply) : (MATE_SCORE - ply);
     }
     return bestEval;
 }
 
-// 簡單：隨機
+// 迭代加深 + 時間控制的根搜尋
+function searchBestMove(board, aiColor, maxDepth, timeLimitMs) {
+    searchDeadline = performance.now() + timeLimitMs;
+    searchAborted = false;
+    nodesSearched = 0;
+
+    // 產生合法根走法
+    const pseudo = generatePseudoMoves(board, aiColor);
+    const legal = [];
+    for (const m of pseudo) {
+        const captured = applyMoveFast(board, m);
+        const bad = isInCheckFast(board, aiColor);
+        undoMoveFast(board, m, captured);
+        if (!bad) legal.push(m);
+    }
+    if (legal.length === 0) return null;
+    if (legal.length === 1) return legal[0];
+
+    sortMovesAdvanced(board, legal);
+
+    let bestMove = legal[0];
+    let bestScore = -Infinity;
+
+    for (let depth = 1; depth <= maxDepth; depth++) {
+        let alpha = -Infinity;
+        let localBest = null;
+        let localBestScore = -Infinity;
+
+        // 上一層的最佳走法優先搜尋
+        const ordered = [bestMove];
+        for (const m of legal) if (m !== bestMove) ordered.push(m);
+
+        for (const m of ordered) {
+            const captured = applyMoveFast(board, m);
+            const score = minimaxAB(board, depth - 1, alpha, Infinity, false, aiColor, 1);
+            undoMoveFast(board, m, captured);
+
+            if (searchAborted) break;
+            if (score > localBestScore) {
+                localBestScore = score;
+                localBest = m;
+            }
+            if (score > alpha) alpha = score;
+        }
+
+        if (localBest) {
+            bestMove = localBest;
+            bestScore = localBestScore;
+        }
+        if (searchAborted) break;
+        if (bestScore >= MATE_SCORE - 200) break;  // 已找到殺棋
+    }
+    return bestMove;
+}
+
+// ============================================================
+//  AI 等級介面
+// ============================================================
+
+// 容易：隨機
 function aiMoveEasy(board, aiColor) {
     const moves = getAllLegalMoves(board, aiColor);
     if (moves.length === 0) return null;
@@ -1077,38 +1277,18 @@ function aiMoveMedium(board, aiColor) {
     return best;
 }
 
-// 困難：Alpha-Beta 深搜
-function aiMoveHard(board, aiColor) {
-    const pseudo = generatePseudoMoves(board, aiColor);
-    if (pseudo.length === 0) return null;
-    sortMovesByCapture(board, pseudo);
-
-    const DEPTH = 3; // ← 想更強可改成 4（會明顯變慢）
-    let best = null, bestScore = -Infinity;
-    let alpha = -Infinity;
-
-    for (const m of pseudo) {
-        const captured = applyMoveFast(board, m);
-        if (isInCheckFast(board, aiColor)) {
-            undoMoveFast(board, m, captured);
-            continue;
-        }
-        const sc = minimax(board, DEPTH - 1, alpha, Infinity, false, aiColor);
-        undoMoveFast(board, m, captured);
-
-        if (sc > bestScore || best === null) {
-            bestScore = sc;
-            best = m;
-        }
-        if (sc > alpha) alpha = sc;
-    }
-    return best;
-}
+// 難度參數表
+const DIFFICULTY_PARAMS = {
+    hard:   { maxDepth: 3, timeLimit: 700  },
+    expert: { maxDepth: 5, timeLimit: 1800 },
+    hell:   { maxDepth: 8, timeLimit: 3000 }
+};
 
 function aiMove(board, aiColor) {
     if (difficulty === 'easy') return aiMoveEasy(board, aiColor);
-    if (difficulty === 'hard') return aiMoveHard(board, aiColor);
-    return aiMoveMedium(board, aiColor);
+    if (difficulty === 'medium') return aiMoveMedium(board, aiColor);
+    const p = DIFFICULTY_PARAMS[difficulty] || DIFFICULTY_PARAMS.hard;
+    return searchBestMove(board, aiColor, p.maxDepth, p.timeLimit);
 }
 
 // ============================================================
@@ -1468,14 +1648,18 @@ function checkAndHandleGameEnd() {
             if (result.winner === '紅方') {
                 if (difficulty === 'easy') reward = 30;
                 else if (difficulty === 'medium') reward = 50;
-                else reward = 300;
+                else if (difficulty === 'hard') reward = 100;
+                else if (difficulty === 'expert') reward = 150;
+                else reward = 300;   // 地獄
                 addTrophies(reward);
                 pendingReward = reward;
-                title = '🏆 恭喜勝利！';
+                title = (difficulty === 'hell') ? '👑 神蹟！擊敗地獄！' : '🏆 恭喜勝利！';
                 msg = `獲得 <span class="trophy-earned">+${reward} 獎盃</span><br>目前總計：${trophies}`;
             } else {
-                title = '😢 惜敗';
-                msg = '再接再厲，下次一定會贏！';
+                title = (difficulty === 'hell') ? '💀 地獄的洗禮' : '😢 惜敗';
+                msg = (difficulty === 'hell')
+                    ? '地獄難度本就非人力可勝……<br>再試一次吧！'
+                    : '再接再厲，下次一定會贏！';
             }
         } else {
             title = '🏆 遊戲結束';
@@ -1499,19 +1683,28 @@ function checkAndHandleGameEnd() {
 function scheduleAI() {
     if (aiThinking || gameOver) return;
     aiThinking = true;
-    // 困難模式需要思考時間，稍微延遲讓 UI 有反應
-    const delay = (difficulty === 'hard') ? 120 : 200;
+
+    const isDeep = (difficulty === 'expert' || difficulty === 'hell');
+    statusMsg.textContent = (difficulty === 'hell') ? '💀 地獄思考中…'
+                          : (difficulty === 'expert' ? '🔥 AI 深思中…' : '🤖 AI 思考中…');
+
+    // 先讓瀏覽器把「思考中」畫出來，再進行同步運算
+    const delay = isDeep ? 80 : 180;
+
     setTimeout(() => {
-        if (gameOver || gameMode !== 'pve' || currentTurn !== BLACK) { aiThinking = false; return; }
+        if (gameOver || gameMode !== 'pve' || currentTurn !== BLACK) {
+            aiThinking = false;
+            updateStatus();
+            return;
+        }
         const move = aiMove(board, BLACK);
         if (!move) {
             aiThinking = false;
             checkAndHandleGameEnd();
             return;
         }
-        executeMoveWithAnim(move.fromRow, move.fromCol, move.toRow, move.toCol, () => {
-            aiThinking = false;
-        });
+        aiThinking = false;
+        executeMoveWithAnim(move.fromRow, move.fromCol, move.toRow, move.toCol, null);
     }, delay);
 }
 
@@ -1618,7 +1811,7 @@ window.addEventListener('resize', () => {
     resizeTimer = setTimeout(() => drawBoard(board, selected, legalTargets, lastMove, anim), 100);
 });
 
-console.log('🐘 中國象棋 v1.0 © ☕迪遜咖啡廳');
+console.log('🐘 中國象棋 v1.1 © ☕迪遜咖啡廳｜難度：容易/中等/困難/達人/地獄');
 </script>
 </body>
 </html>
