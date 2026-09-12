@@ -353,7 +353,7 @@
         </div>
 
         <div class="trophy-display">🏆 已獲獎盃：<span id="trophyCount">0</span></div>
-        <div class="cover-footer">v1.1 © <span id="yearSpan">2026</span> ☕迪遜咖啡廳，版權所有。</div>
+        <div class="cover-footer">v1.2 © <span id="yearSpan">2026</span> ☕迪遜咖啡廳，版權所有。</div>
     </div>
 
     <!-- ===== 常駐控制鈕 ===== -->
@@ -764,7 +764,6 @@ function findKing(board, color) {
     return null;
 }
 
-// 完整掃描版（人類走子用，慢一點沒關係）
 function isInCheck(board, color) {
     const king = findKing(board, color);
     if (!king) return true;
@@ -822,7 +821,6 @@ function getAllLegalMoves(board, color) {
     return result;
 }
 
-// 無和棋：無合法走法即判該方負
 function checkGameEnd(board, color) {
     const moves = getAllLegalMoves(board, color);
     if (moves.length > 0) return null;
@@ -831,16 +829,15 @@ function checkGameEnd(board, color) {
 }
 
 // ============================================================
-//  AI 評估
+//  ★ AI 評估（強化版）
 // ============================================================
 
 // 基礎子力價值
-const PIECE_VALUES = { 1:10000, 2:200, 3:200, 4:400, 5:900, 6:450, 7:100 };
+const PIECE_VALUES = { 1: 10000, 2: 250, 3: 250, 4: 450, 5: 1000, 6: 500, 7: 100 };
 
 // 位置價值表（紅方視角：行9 = 己方底線，行0 = 敵方底線）
-// 黑方使用時將行做 9-r 鏡像
 const PST = {
-    1: [ // 帥 / 將（僅九宮內有意義）
+    1: [
         [0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0],
@@ -850,9 +847,9 @@ const PST = {
         [0,0,0,0,0,0,0,0,0],
         [0,0,0, 2, 4, 2, 0,0,0],
         [0,0,0, 4, 8, 4, 0,0,0],
-        [0,0,0, 2, 6, 2, 0,0,0]
+        [0,0,0, 6,10, 6, 0,0,0]
     ],
-    2: [ // 仕 / 士
+    2: [
         [0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0],
@@ -860,73 +857,72 @@ const PST = {
         [0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0],
-        [0,0,0, 4, 0, 4, 0,0,0],
-        [0,0,0, 0, 8, 0, 0,0,0],
-        [0,0,0, 4, 0, 4, 0,0,0]
+        [0,0,0, 6, 0, 6, 0,0,0],
+        [0,0,0, 0,10, 0, 0,0,0],
+        [0,0,0, 6, 0, 6, 0,0,0]
     ],
-    3: [ // 相 / 象
+    3: [
         [0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0],
-        [0,0,4,0,0,0,4,0,0],
+        [0,0,6,0,0,0,6,0,0],
         [0,0,0,0,0,0,0,0,0],
-        [0,0,4,0,0,0,4,0,0],
+        [0,0,6,0,0,0,6,0,0],
         [0,0,0,0,0,0,0,0,0],
-        [0,0,2,0,0,0,2,0,0]
+        [0,0,4,0,0,0,4,0,0]
     ],
-    4: [ // 馬
+    4: [
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [ 0, 4, 6, 6, 6, 6, 6, 4, 0],
-        [ 4,10,14,14,14,14,14,10, 4],
-        [ 6,14,18,20,20,20,18,14, 6],
-        [ 6,14,18,20,20,20,18,14, 6],
-        [ 4,10,14,16,16,16,14,10, 4],
-        [ 0, 4, 8,12,12,12, 8, 4, 0],
-        [ 0, 0, 4, 6, 6, 6, 4, 0, 0],
+        [ 0, 6, 8,10,10,10, 8, 6, 0],
+        [ 6,12,16,18,18,18,16,12, 6],
+        [ 8,16,20,22,22,22,20,16, 8],
+        [ 8,16,20,22,22,22,20,16, 8],
+        [ 6,12,16,18,18,18,16,12, 6],
+        [ 0, 6,10,14,14,14,10, 6, 0],
+        [ 0, 0, 6, 8, 8, 8, 6, 0, 0],
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0]
     ],
-    5: [ // 車
-        [ 6, 8,10,12,12,12,10, 8, 6],
-        [ 8,12,16,18,18,18,16,12, 8],
-        [10,16,20,22,22,22,20,16,10],
-        [12,18,22,24,24,24,22,18,12],
-        [12,18,22,24,24,24,22,18,12],
-        [12,18,22,24,24,24,22,18,12],
-        [10,16,20,22,22,22,20,16,10],
-        [ 8,12,16,18,18,18,16,12, 8],
-        [ 6, 8,10,12,12,12,10, 8, 6],
-        [ 4, 6, 8,10,10,10, 8, 6, 4]
+    5: [
+        [ 14,16,18,20,20,20,18,16,14],
+        [ 16,18,20,22,22,22,20,18,16],
+        [ 16,20,22,24,24,24,22,20,16],
+        [ 16,20,22,24,24,24,22,20,16],
+        [ 16,20,22,24,24,24,22,20,16],
+        [ 16,20,22,24,24,24,22,20,16],
+        [ 16,20,22,24,24,24,22,20,16],
+        [ 14,18,20,22,22,22,20,18,14],
+        [ 10,14,16,18,18,18,16,14,10],
+        [ 10,12,14,16,16,16,14,12,10]
     ],
-    6: [ // 炮
-        [ 4, 4, 4, 6, 6, 6, 4, 4, 4],
-        [ 4, 8, 8,10,10,10, 8, 8, 4],
-        [ 4, 8,10,12,14,12,10, 8, 4],
-        [ 6,10,12,16,18,16,12,10, 6],
-        [ 6,10,14,18,20,18,14,10, 6],
-        [ 6,10,14,18,20,18,14,10, 6],
-        [ 6,10,12,16,18,16,12,10, 6],
-        [ 4, 8,10,12,14,12,10, 8, 4],
-        [ 4, 8, 8,10,10,10, 8, 8, 4],
-        [ 4, 4, 4, 6, 6, 6, 4, 4, 4]
+    6: [
+        [  6, 6, 8,10,10,10, 8, 6, 6],
+        [  6,10,12,14,14,14,12,10, 6],
+        [  6,10,14,16,18,16,14,10, 6],
+        [  8,12,16,20,22,20,16,12, 8],
+        [  8,12,16,20,22,20,16,12, 8],
+        [  8,12,16,20,22,20,16,12, 8],
+        [  8,12,16,20,22,20,16,12, 8],
+        [  6,10,14,16,18,16,14,10, 6],
+        [  6,10,12,14,14,14,12,10, 6],
+        [  6, 6, 8,10,10,10, 8, 6, 6]
     ],
-    7: [ // 兵 / 卒
-        [48,50,52,54,56,54,52,50,48],  // 行0 深入敵陣
-        [40,42,44,46,48,46,44,42,40],  // 行1
-        [32,34,36,38,40,38,36,34,32],  // 行2
-        [24,26,28,30,32,30,28,26,24],  // 行3
-        [16,18,20,22,24,22,20,18,16],  // 行4 剛過河
-        [ 4, 6, 8,10,12,10, 8, 6, 4],  // 行5 己方一側
-        [ 0, 0, 0, 0, 0, 0, 0, 0, 0],  // 行6 起始行
-        [ 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [ 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [ 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    7: [
+        [ 10,12,14,16,18,16,14,12,10],
+        [ 30,32,34,36,38,36,34,32,30],
+        [ 45,48,50,52,55,52,50,48,45],
+        [ 40,43,45,48,50,48,45,43,40],
+        [ 20,24,28,32,36,32,28,24,20],
+        [  4, 6, 8,10,12,10, 8, 6, 4],
+        [  0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [  0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [  0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [  0, 0, 0, 0, 0, 0, 0, 0, 0]
     ]
 };
 
-// 評估盤面（以 color 為正）
 function evaluateBoard(board, color) {
     let score = 0;
     for (let r = 0; r < ROWS; r++) {
@@ -943,20 +939,20 @@ function evaluateBoard(board, color) {
                 posVal = table[row][c];
             }
             const total = base + posVal;
-            score += (pc === color) ? total : -total;
+            if (pc === color) score += total;
+            else score -= total;
         }
     }
     return score;
 }
 
-// 快速檢查將帥是否被將軍（從將帥位置反向掃描）
+// 快速檢查將帥是否被將軍
 function isInCheckFast(board, color) {
     const king = findKing(board, color);
     if (!king) return true;
     const kr = king.row, kc = king.col;
     const enemy = color === RED ? BLACK : RED;
 
-    // 車 / 炮 / 將帥照面
     const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
     for (const d of dirs) {
         let r = kr + d[0], c = kc + d[1];
@@ -979,7 +975,6 @@ function isInCheckFast(board, color) {
         }
     }
 
-    // 馬
     const horseChecks = [[-2,-1],[-2,1],[2,-1],[2,1],[-1,-2],[-1,2],[1,-2],[1,2]];
     for (const h of horseChecks) {
         const nr = kr + h[0], nc = kc + h[1];
@@ -993,7 +988,6 @@ function isInCheckFast(board, color) {
         }
     }
 
-    // 兵 / 卒
     if (color === RED) {
         if (kr > 0 && board[kr-1][kc] !== EMPTY) {
             const p = board[kr-1][kc];
@@ -1025,23 +1019,106 @@ function isInCheckFast(board, color) {
             }
         }
     }
-
     return false;
 }
 
-// 就地走子 / 還原（搜尋時避免複製整個盤面）
+// ============================================================
+//  ★ Zobrist 雜湊 & 置換表
+// ============================================================
+const ZOBRIST_PIECE = [];
+let ZOBRIST_SIDE = 0;
+
+(function initZobrist() {
+    function rnd32() { return (Math.random() * 4294967296) >>> 0; }
+    for (let p = 0; p < 20; p++) {
+        ZOBRIST_PIECE[p] = [];
+        for (let r = 0; r < ROWS; r++) {
+            ZOBRIST_PIECE[p][r] = [];
+            for (let c = 0; c < COLS; c++) ZOBRIST_PIECE[p][r][c] = rnd32();
+        }
+    }
+    ZOBRIST_SIDE = rnd32();
+})();
+
+let curHash = 0;
+
+function recomputeHash(board, side) {
+    let h = 0;
+    for (let r = 0; r < ROWS; r++)
+        for (let c = 0; c < COLS; c++) {
+            const p = board[r][c];
+            if (p !== EMPTY) h ^= ZOBRIST_PIECE[p][r][c];
+        }
+    if (side === BLACK) h ^= ZOBRIST_SIDE;
+    return h | 0;
+}
+
+const TT_BITS = 19;
+const TT_SIZE = 1 << TT_BITS;
+const TT_MASK = TT_SIZE - 1;
+const ttKeys  = new Int32Array(TT_SIZE);
+const ttDepth = new Int8Array(TT_SIZE);
+const ttFlag  = new Int8Array(TT_SIZE);
+const ttScore = new Int32Array(TT_SIZE);
+const ttFromR = new Int8Array(TT_SIZE);
+const ttFromC = new Int8Array(TT_SIZE);
+const ttToR   = new Int8Array(TT_SIZE);
+const ttToC   = new Int8Array(TT_SIZE);
+
+function ttStore(idx, key, depth, flag, score, move) {
+    if (ttFlag[idx] !== 0 && ttKeys[idx] === key && ttDepth[idx] > depth + 2) return;
+    ttKeys[idx]  = key;
+    ttDepth[idx] = depth;
+    ttFlag[idx]  = flag;
+    ttScore[idx] = score;
+    if (move) {
+        ttFromR[idx] = move.fromRow;
+        ttFromC[idx] = move.fromCol;
+        ttToR[idx]   = move.toRow;
+        ttToC[idx]   = move.toCol;
+    } else {
+        ttFromR[idx] = -1;
+    }
+}
+
+// ============================================================
+//  ★ 殺手著法 / 歷史啟發
+// ============================================================
+const MAX_PLY = 64;
+const killerMoves = [];
+for (let i = 0; i < MAX_PLY; i++) killerMoves.push([null, null]);
+const historyTable = new Int32Array(90 * 90);
+
+// ============================================================
+//  ★ 進階搜尋引擎 v2
+// ============================================================
+const MATE_SCORE = 1000000;
+
+let nodesSearched = 0;
+let searchDeadline = 0;
+let searchAborted = false;
+
 function applyMoveFast(board, m) {
     const captured = board[m.toRow][m.toCol];
-    board[m.toRow][m.toCol] = board[m.fromRow][m.fromCol];
+    const piece = board[m.fromRow][m.fromCol];
+    curHash ^= ZOBRIST_PIECE[piece][m.fromRow][m.fromCol];
+    curHash ^= ZOBRIST_PIECE[piece][m.toRow][m.toCol];
+    if (captured !== EMPTY) curHash ^= ZOBRIST_PIECE[captured][m.toRow][m.toCol];
+    curHash ^= ZOBRIST_SIDE;
+    board[m.toRow][m.toCol] = piece;
     board[m.fromRow][m.fromCol] = EMPTY;
     return captured;
 }
 function undoMoveFast(board, m, captured) {
-    board[m.fromRow][m.fromCol] = board[m.toRow][m.toCol];
+    const piece = board[m.toRow][m.toCol];
+    board[m.fromRow][m.fromCol] = piece;
     board[m.toRow][m.toCol] = captured;
+    curHash ^= ZOBRIST_PIECE[piece][m.fromRow][m.fromCol];
+    curHash ^= ZOBRIST_PIECE[piece][m.toRow][m.toCol];
+    if (captured !== EMPTY) curHash ^= ZOBRIST_PIECE[captured][m.toRow][m.toCol];
+    curHash ^= ZOBRIST_SIDE;
 }
 
-// 產生偽合法走法（不檢查己方將帥安全，由搜尋逐一驗證）
 function generatePseudoMoves(board, color) {
     const result = [];
     for (let r = 0; r < ROWS; r++) {
@@ -1055,32 +1132,28 @@ function generatePseudoMoves(board, color) {
     return result;
 }
 
-// 走法排序：吃子優先（MVV-LVA），提升 Alpha-Beta 剪枝效率
-function sortMovesByCapture(board, moves) {
-    moves.sort((a, b) => {
-        const ta = board[a.toRow][a.toCol];
-        const tb = board[b.toRow][b.toCol];
-        const va = ta === EMPTY ? -1 : (PIECE_VALUES[typeOf(ta)] || 0);
-        const vb = tb === EMPTY ? -1 : (PIECE_VALUES[typeOf(tb)] || 0);
-        return vb - va;
-    });
-    return moves;
+function scoreMoveForOrder(board, m, ply, ttMove) {
+    if (ttMove && m.fromRow === ttMove.fromRow && m.fromCol === ttMove.fromCol
+        && m.toRow === ttMove.toRow && m.toCol === ttMove.toCol) return 1000000;
+    const target = board[m.toRow][m.toCol];
+    if (target !== EMPTY) {
+        const tv = PIECE_VALUES[typeOf(target)] || 0;
+        const mv = PIECE_VALUES[typeOf(board[m.fromRow][m.fromCol])] || 0;
+        return 100000 + tv * 16 - mv;
+    }
+    const km = killerMoves[ply] || [null, null];
+    if (km[0] && m.fromRow === km[0].fromRow && m.fromCol === km[0].fromCol
+        && m.toRow === km[0].toRow && m.toCol === km[0].toCol) return 90000;
+    if (km[1] && m.fromRow === km[1].fromRow && m.fromCol === km[1].fromCol
+        && m.toRow === km[1].toRow && m.toCol === km[1].toCol) return 89000;
+    return historyTable[(m.fromRow * 9 + m.fromCol) * 90 + (m.toRow * 9 + m.toCol)];
 }
 
-// 更精細的排序分數（MVV-LVA）
-function scoreMoveForOrder(board, m) {
-    const target = board[m.toRow][m.toCol];
-    if (target === EMPTY) return 0;
-    const tv = PIECE_VALUES[typeOf(target)] || 0;
-    const mv = PIECE_VALUES[typeOf(board[m.fromRow][m.fromCol])] || 0;
-    return 100000 + tv * 10 - mv;
-}
-function sortMovesAdvanced(board, moves) {
+function sortMovesAdvanced(board, moves, ply, ttMove) {
     const n = moves.length;
     if (n < 2) return moves;
     const scores = new Array(n);
-    for (let i = 0; i < n; i++) scores[i] = scoreMoveForOrder(board, moves[i]);
-    // 插入排序：走法陣列通常不長，且大多接近有序
+    for (let i = 0; i < n; i++) scores[i] = scoreMoveForOrder(board, moves[i], ply, ttMove);
     for (let i = 1; i < n; i++) {
         const m = moves[i], s = scores[i];
         let j = i - 1;
@@ -1095,104 +1168,171 @@ function sortMovesAdvanced(board, moves) {
     return moves;
 }
 
-// ============================================================
-//  進階搜尋引擎（達人 / 地獄）
-// ============================================================
-const MATE_SCORE = 100000;
-
-let nodesSearched = 0;
-let searchDeadline = 0;
-let searchAborted = false;
-
-function outOfTime() {
-    return performance.now() > searchDeadline;
-}
-
-// 靜態搜尋（吃子延伸）——消除地平線效應
-function quiescence(board, alpha, beta, maximizing, aiColor, qDepth) {
+// 靜態搜尋（吃子延伸）
+function quiescence(board, alpha, beta, maximizing, aiColor, ply, qDepth) {
     nodesSearched++;
-    if ((nodesSearched & 255) === 0 && outOfTime()) searchAborted = true;
+    if ((nodesSearched & 1023) === 0 && performance.now() > searchDeadline) searchAborted = true;
     if (searchAborted) return evaluateBoard(board, aiColor);
 
-    const standPat = evaluateBoard(board, aiColor);
-    if (qDepth <= 0) return standPat;
-
     const toMove = maximizing ? aiColor : (aiColor === RED ? BLACK : RED);
-    const caps = generatePseudoMoves(board, toMove).filter(m => board[m.toRow][m.toCol] !== EMPTY);
-    if (caps.length === 0) return standPat;
-    sortMovesAdvanced(board, caps);
+    const standPat = evaluateBoard(board, aiColor);
+    let best = standPat;
 
     if (maximizing) {
-        if (standPat >= beta) return beta;
-        if (standPat > alpha) alpha = standPat;
-        for (const m of caps) {
-            const captured = applyMoveFast(board, m);
-            if (isInCheckFast(board, toMove)) { undoMoveFast(board, m, captured); continue; }
-            const sc = quiescence(board, alpha, beta, false, aiColor, qDepth - 1);
-            undoMoveFast(board, m, captured);
-            if (searchAborted) return alpha;
-            if (sc >= beta) return beta;
-            if (sc > alpha) alpha = sc;
-        }
-        return alpha;
+        if (best >= beta) return best;
+        if (best > alpha) alpha = best;
     } else {
-        if (standPat <= alpha) return alpha;
-        if (standPat < beta) beta = standPat;
-        for (const m of caps) {
-            const captured = applyMoveFast(board, m);
-            if (isInCheckFast(board, toMove)) { undoMoveFast(board, m, captured); continue; }
-            const sc = quiescence(board, alpha, beta, true, aiColor, qDepth - 1);
-            undoMoveFast(board, m, captured);
-            if (searchAborted) return beta;
-            if (sc <= alpha) return alpha;
-            if (sc < beta) beta = sc;
-        }
-        return beta;
+        if (best <= alpha) return best;
+        if (best < beta) beta = best;
     }
+
+    if (qDepth <= 0) return best;
+
+    const all = generatePseudoMoves(board, toMove);
+    const caps = [];
+    for (const m of all) if (board[m.toRow][m.toCol] !== EMPTY) caps.push(m);
+    if (caps.length === 0) return best;
+
+    sortMovesAdvanced(board, caps, ply, null);
+
+    for (const m of caps) {
+        const captured = applyMoveFast(board, m);
+        if (isInCheckFast(board, toMove)) {
+            undoMoveFast(board, m, captured);
+            continue;
+        }
+        const sc = quiescence(board, alpha, beta, !maximizing, aiColor, ply + 1, qDepth - 1);
+        undoMoveFast(board, m, captured);
+        if (searchAborted) return best;
+
+        if (maximizing) {
+            if (sc > best) best = sc;
+            if (best >= beta) return best;
+            if (best > alpha) alpha = best;
+        } else {
+            if (sc < best) best = sc;
+            if (best <= alpha) return best;
+            if (best < beta) beta = best;
+        }
+    }
+    return best;
 }
 
-// Alpha-Beta 主搜尋
-function minimaxAB(board, depth, alpha, beta, maximizing, aiColor, ply) {
+// Alpha-Beta 主搜尋（含 TT / Null-move / LMR）
+function alphaBeta(board, depth, alpha, beta, ply, aiColor, maximizing, allowNull) {
     nodesSearched++;
-    if ((nodesSearched & 255) === 0 && outOfTime()) searchAborted = true;
+    if ((nodesSearched & 1023) === 0 && performance.now() > searchDeadline) searchAborted = true;
     if (searchAborted) return evaluateBoard(board, aiColor);
 
-    if (depth <= 0) {
-        return quiescence(board, alpha, beta, maximizing, aiColor, 4);
+    const key = curHash | 0;
+    const ttIdx = (curHash >>> 0) & TT_MASK;
+
+    let ttMove = null;
+    if (ttFlag[ttIdx] !== 0 && ttKeys[ttIdx] === key) {
+        if (ttFromR[ttIdx] >= 0) {
+            ttMove = { fromRow: ttFromR[ttIdx], fromCol: ttFromC[ttIdx], toRow: ttToR[ttIdx], toCol: ttToC[ttIdx] };
+        }
+        if (ttDepth[ttIdx] >= depth) {
+            const sc = ttScore[ttIdx];
+            const f = ttFlag[ttIdx];
+            if (f === 1) return sc;
+            if (f === 2 && sc >= beta) return sc;
+            if (f === 3 && sc <= alpha) return sc;
+        }
     }
 
+    if (depth <= 0) return quiescence(board, alpha, beta, maximizing, aiColor, ply, 4);
+
     const toMove = maximizing ? aiColor : (aiColor === RED ? BLACK : RED);
+    const inCheck = isInCheckFast(board, toMove);
+
+    // Null Move Pruning
+    if (allowNull && !inCheck && depth >= 3 && ply > 0) {
+        const R = depth >= 6 ? 3 : 2;
+        curHash ^= ZOBRIST_SIDE;
+        const nm = alphaBeta(board, depth - 1 - R, alpha, beta, ply + 1, aiColor, !maximizing, false);
+        curHash ^= ZOBRIST_SIDE;
+        if (searchAborted) return nm;
+        if (maximizing ? nm >= beta : nm <= alpha) {
+            return maximizing ? nm : nm;
+        }
+    }
+
     const pseudo = generatePseudoMoves(board, toMove);
-    sortMovesAdvanced(board, pseudo);
+    sortMovesAdvanced(board, pseudo, ply, ttMove);
 
     let hasLegal = false;
     let bestEval = maximizing ? -Infinity : Infinity;
+    let bestMove = null;
+    const origAlpha = alpha;
+    const origBeta = beta;
 
-    for (const m of pseudo) {
+    for (let i = 0; i < pseudo.length; i++) {
+        const m = pseudo[i];
         const captured = applyMoveFast(board, m);
         if (isInCheckFast(board, toMove)) {
             undoMoveFast(board, m, captured);
             continue;
         }
         hasLegal = true;
-        const ev = minimaxAB(board, depth - 1, alpha, beta, !maximizing, aiColor, ply + 1);
+
+        let reduction = 0;
+        if (depth >= 3 && captured === EMPTY && i >= 4 && !inCheck) {
+            reduction = i >= 12 ? 2 : 1;
+            if (depth >= 6 && i >= 24) reduction = 3;
+        }
+
+        let ev;
+        if (reduction > 0) {
+            ev = alphaBeta(board, depth - 1 - reduction, alpha, beta, ply + 1, aiColor, !maximizing, true);
+            const needRe = maximizing ? (ev > alpha) : (ev < beta);
+            if (needRe) {
+                ev = alphaBeta(board, depth - 1, alpha, beta, ply + 1, aiColor, !maximizing, true);
+            }
+        } else {
+            ev = alphaBeta(board, depth - 1, alpha, beta, ply + 1, aiColor, !maximizing, true);
+        }
+
         undoMoveFast(board, m, captured);
 
-        if (searchAborted) return bestEval === -Infinity || bestEval === Infinity ? ev : bestEval;
+        if (searchAborted) {
+            if (bestEval === -Infinity || bestEval === Infinity) return ev;
+            return bestEval;
+        }
 
         if (maximizing) {
-            if (ev > bestEval) bestEval = ev;
+            if (ev > bestEval) { bestEval = ev; bestMove = m; }
             if (ev > alpha) alpha = ev;
         } else {
-            if (ev < bestEval) bestEval = ev;
+            if (ev < bestEval) { bestEval = ev; bestMove = m; }
             if (ev < beta) beta = ev;
         }
-        if (beta <= alpha) break;
+
+        if (alpha >= beta) {
+            if (captured === EMPTY) {
+                const km = killerMoves[ply];
+                if (!km[0] || km[0].fromRow !== m.fromRow || km[0].fromCol !== m.fromCol ||
+                    km[0].toRow !== m.toRow || km[0].toCol !== m.toCol) {
+                    km[1] = km[0];
+                    km[0] = m;
+                }
+                historyTable[(m.fromRow * 9 + m.fromCol) * 90 + (m.toRow * 9 + m.toCol)] += depth * depth;
+            }
+            break;
+        }
     }
 
     if (!hasLegal) {
-        // 無棋可走 = 負（將殺或困斃，象棋中困斃同樣算輸）
         return maximizing ? (-MATE_SCORE + ply) : (MATE_SCORE - ply);
+    }
+
+    let flag;
+    if (bestEval <= origAlpha) flag = 3;
+    else if (bestEval >= origBeta) flag = 2;
+    else flag = 1;
+
+    if (Math.abs(bestEval) < MATE_SCORE - 1000) {
+        ttStore(ttIdx, key, depth, flag, bestEval, bestMove);
     }
     return bestEval;
 }
@@ -1202,8 +1342,11 @@ function searchBestMove(board, aiColor, maxDepth, timeLimitMs) {
     searchDeadline = performance.now() + timeLimitMs;
     searchAborted = false;
     nodesSearched = 0;
+    curHash = recomputeHash(board, aiColor);
 
-    // 產生合法根走法
+    for (let i = 0; i < MAX_PLY; i++) { killerMoves[i][0] = null; killerMoves[i][1] = null; }
+    historyTable.fill(0);
+
     const pseudo = generatePseudoMoves(board, aiColor);
     const legal = [];
     for (const m of pseudo) {
@@ -1215,8 +1358,6 @@ function searchBestMove(board, aiColor, maxDepth, timeLimitMs) {
     if (legal.length === 0) return null;
     if (legal.length === 1) return legal[0];
 
-    sortMovesAdvanced(board, legal);
-
     let bestMove = legal[0];
     let bestScore = -Infinity;
 
@@ -1225,35 +1366,29 @@ function searchBestMove(board, aiColor, maxDepth, timeLimitMs) {
         let localBest = null;
         let localBestScore = -Infinity;
 
-        // 上一層的最佳走法優先搜尋
-        const ordered = [bestMove];
-        for (const m of legal) if (m !== bestMove) ordered.push(m);
+        sortMovesAdvanced(board, legal, 0, bestMove);
 
-        for (const m of ordered) {
+        for (const m of legal) {
             const captured = applyMoveFast(board, m);
-            const score = minimaxAB(board, depth - 1, alpha, Infinity, false, aiColor, 1);
+            const score = alphaBeta(board, depth - 1, alpha, Infinity, 1, aiColor, false, true);
             undoMoveFast(board, m, captured);
-
             if (searchAborted) break;
-            if (score > localBestScore) {
-                localBestScore = score;
-                localBest = m;
-            }
+            if (score > localBestScore) { localBestScore = score; localBest = m; }
             if (score > alpha) alpha = score;
         }
 
-        if (localBest) {
+        if (localBest && !searchAborted) {
             bestMove = localBest;
             bestScore = localBestScore;
         }
         if (searchAborted) break;
-        if (bestScore >= MATE_SCORE - 200) break;  // 已找到殺棋
+        if (bestScore >= MATE_SCORE - 100) break;
     }
     return bestMove;
 }
 
 // ============================================================
-//  AI 等級介面
+//  ★ AI 等級介面
 // ============================================================
 
 // 容易：隨機
@@ -1277,11 +1412,11 @@ function aiMoveMedium(board, aiColor) {
     return best;
 }
 
-// 難度參數表
+// 難度參數（地獄：深度 12、時間 8 秒）
 const DIFFICULTY_PARAMS = {
-    hard:   { maxDepth: 3, timeLimit: 700  },
-    expert: { maxDepth: 5, timeLimit: 1800 },
-    hell:   { maxDepth: 8, timeLimit: 3000 }
+    hard:   { maxDepth: 4,  timeLimit: 800  },
+    expert: { maxDepth: 6,  timeLimit: 2500 },
+    hell:   { maxDepth: 12, timeLimit: 8000 }
 };
 
 function aiMove(board, aiColor) {
@@ -1648,9 +1783,9 @@ function checkAndHandleGameEnd() {
             if (result.winner === '紅方') {
                 if (difficulty === 'easy') reward = 30;
                 else if (difficulty === 'medium') reward = 50;
-                else if (difficulty === 'hard') reward = 100;
-                else if (difficulty === 'expert') reward = 300;
-                else reward = 500;
+                else if (difficulty === 'hard') reward = 300;
+                else if (difficulty === 'expert') reward = 500;
+                else reward = 800;
                 addTrophies(reward);
                 pendingReward = reward;
                 title = (difficulty === 'hell') ? '👑 神蹟！擊敗地獄！' : '🏆 恭喜勝利！';
@@ -1688,8 +1823,8 @@ function scheduleAI() {
     statusMsg.textContent = (difficulty === 'hell') ? '💀 地獄思考中…'
                           : (difficulty === 'expert' ? '🔥 AI 深思中…' : '🤖 AI 思考中…');
 
-    // 先讓瀏覽器把「思考中」畫出來，再進行同步運算
-    const delay = isDeep ? 80 : 180;
+    // 地獄難度需要較長思考時間，先讓瀏覽器渲染狀態
+    const delay = isDeep ? 60 : 180;
 
     setTimeout(() => {
         if (gameOver || gameMode !== 'pve' || currentTurn !== BLACK) {
@@ -1811,7 +1946,7 @@ window.addEventListener('resize', () => {
     resizeTimer = setTimeout(() => drawBoard(board, selected, legalTargets, lastMove, anim), 100);
 });
 
-console.log('🐘 中國象棋 v1.1 © ☕迪遜咖啡廳｜難度：容易/中等/困難/達人/地獄');
+console.log('🐘 中國象棋 v1.2 © ☕迪遜咖啡廳｜地獄難度：8秒思考 × 12層深度 × 置換表引擎');
 </script>
 </body>
 </html>
