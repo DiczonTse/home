@@ -4,8 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>🧮 精準計算機</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bignumber.js/9.1.2/bignumber.min.js">
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bignumber.js/9.1.2/bignumber.min.js"></script>
     <style>
         /* ================================================================
            全域 CSS 變數 (淺色 & 深色)
@@ -426,8 +425,8 @@
         </div>
 
         <div class="calculator-footer">
-			<span style="margin-left:10px;font-size:0.7rem;opacity:0.7;">v2.0 © {year} ☕迪遜咖啡廳，版權所有。</span>
-		</div>
+            <span style="margin-left:10px;font-size:0.7rem;opacity:0.7;">v2.0 © {year} ☕迪遜咖啡廳，版權所有。</span>
+        </div>
     </div>
 
     <script>
@@ -483,7 +482,7 @@
                 }
             }
 
-            // -------- 【重點修正】取得當前操作數（最後一個數字） --------
+            // -------- 取得當前操作數（最後一個數字） --------
             function getCurrentNumber() {
                 // 注意：顯示中使用的減號是 − (U+2212)，必須正確切割！
                 const parts = displayValue.split(/[\+\−\×\÷\(\)]/);
@@ -582,6 +581,13 @@
 
                     if (!sanitized || sanitized.trim() === '') return;
 
+                    // 自動補齊右括號（貼心小功能）
+                    const openCount = (sanitized.match(/\(/g) || []).length;
+                    const closeCount = (sanitized.match(/\)/g) || []).length;
+                    if (openCount > closeCount) {
+                        sanitized += ')'.repeat(openCount - closeCount);
+                    }
+
                     function parseAndEval(expr) {
                         expr = expr.replace(/\s/g, '');
                         let pos = 0;
@@ -641,8 +647,17 @@
                             return left;
                         }
 
+                        // ★★★ 修正重點：支援一元正負號 ★★★
                         function parseFactor() {
                             let tok = peek();
+
+                            // 一元負號 / 正號：支援 -5、( −5 )、2×−3、-(3+2)
+                            if (tok && tok.type === 'op' && (tok.value === '-' || tok.value === '+')) {
+                                next(); // 吃掉 + 或 -
+                                let val = parseFactor();
+                                return tok.value === '-' ? val.negated() : val;
+                            }
+
                             if (tok && tok.type === 'num') {
                                 next();
                                 return new BigNumber(tok.value);
@@ -673,7 +688,8 @@
                     }
 
                     let resultStr = formatBigNumber(resultBN);
-                    displayValue = resultStr;
+                    // ★★★ 修正重點：結果負號統一顯示為 − (U+2212) ★★★
+                    displayValue = resultStr.replace(/-/g, '−');
                     justCalculated = true;
                     updateDisplay(displayValue);
                 } catch (error) {
@@ -786,18 +802,18 @@
 
             // 初始化
             updateDisplay(displayValue);
-			// 在頁面載入後執行
-			document.addEventListener('DOMContentLoaded', function() {
-				const footerSpan = document.querySelector('.calculator-footer span:first-child');
-				if (footerSpan) {
-					footerSpan.innerHTML = footerSpan.innerHTML.replace(/\{year\}/g, new Date().getFullYear());
-				}
-			});
-            console.log('🧮 精準計算機 v2.2 已啟動 (修正減號小數點 Bug)');
-            console.log('✅ 測試案例 66.33−33.33 現在可以順利輸入小數點');
-			if ('serviceWorker' in navigator) {
-				navigator.serviceWorker.register('/sw.js').catch(() => {});
-			}
+            // 在頁面載入後執行
+            document.addEventListener('DOMContentLoaded', function() {
+                const footerSpan = document.querySelector('.calculator-footer span:first-child');
+                if (footerSpan) {
+                    footerSpan.innerHTML = footerSpan.innerHTML.replace(/\{year\}/g, new Date().getFullYear());
+                }
+            });
+            console.log('🧮 精準計算機 v2.3 已啟動 (支援一元負號運算)');
+            console.log('✅ 測試案例 -5、2×−3、( −5 ) 現在都能正確計算');
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js').catch(() => {});
+            }
         })();
     </script>
 </body>
