@@ -406,19 +406,49 @@ bgMusic.volume = 1.0;
 bgMusic.preload = 'auto';
 bgMusic.addEventListener('error', () => { console.warn('無法載入 Xiangqi - 楚河漢界.mp3'); });
 
+let musicUnlocked = false;
+
+// ① 正常播放（有聲）
 function tryPlayMusic() {
     if (!soundEnabled) return;
+    bgMusic.muted = false;
     const p = bgMusic.play();
-    if (p && p.catch) p.catch(() => { /* 等待用户手势 */ });
+    if (p && p.catch) {
+        p.catch(() => {
+            tryMutedAutoplay();
+        });
+    }
+}
+function tryMutedAutoplay() {
+    if (!soundEnabled || musicUnlocked) return;
+    bgMusic.muted = true;
+    const p = bgMusic.play();
+    if (p && p.catch) p.catch(() => { /* 連靜音都被擋，只能等手勢 */ });
+}
+function unlockMusic() {
+    if (musicUnlocked) return;
+    musicUnlocked = true;
+    removeUnlockListeners();
+    if (!soundEnabled) return;
+    bgMusic.muted = false;
+    if (bgMusic.paused) {
+        const p = bgMusic.play();
+        if (p && p.catch) p.catch(() => {});
+    }
 }
 
-function firstInteraction() {
-    tryPlayMusic();
-    document.removeEventListener('click', firstInteraction);
-    document.removeEventListener('keydown', firstInteraction);
+const UNLOCK_EVENTS = ['click', 'pointerdown', 'touchstart', 'touchend', 'keydown', 'mousemove', 'wheel', 'scroll'];
+function removeUnlockListeners() {
+    UNLOCK_EVENTS.forEach(ev => document.removeEventListener(ev, unlockMusic, true));
 }
-document.addEventListener('click', firstInteraction);
-document.addEventListener('keydown', firstInteraction);
+UNLOCK_EVENTS.forEach(ev => document.addEventListener(ev, unlockMusic, true));
+tryPlayMusic();
+window.addEventListener('load', () => {
+    if (soundEnabled && bgMusic.paused) tryMutedAutoplay();
+});
+document.addEventListener('DOMContentLoaded', () => {
+    if (soundEnabled && bgMusic.paused) tryPlayMusic();
+});
 
 // ============================================================
 //  音效（Web Audio）
