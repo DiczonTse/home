@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>中國象棋 - 雙人 / 人機對戰</title>
+    <title>🐘中國象棋 - 雙人 / 人機對戰</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
         html, body { height: 100%; min-height: 100vh; overflow-y: auto; }
@@ -1023,6 +1023,165 @@ function isInCheckFast(board, color) {
 }
 
 // ============================================================
+//  ★ 循環局面規則（長將 / 長捉 / 閒著）
+//     依中國象棋規則：
+//       長將、長捉者判負；閒著循環則判和。
+// ============================================================
+
+const repHistory = [];       // 走子後的局面紀錄（含著法性質）
+const REP_LIMIT = 3;         // 同一局面出現三次即觸發判定
+
+// 局面雜湊（含輪走方）
+function boardHashFor(bd, sideToMove) {
+    let h = 0;
+    for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+            const p = bd[r][c];
+            if (p !== EMPTY) h ^= ZOBRIST_PIECE[p][r][c];
+        }
+    }
+    if (sideToMove === BLACK) h ^= ZOBRIST_SIDE;
+    return h >>> 0;
+}
+
+function resetRepetitionHistory() {
+    repHistory.length = 0;
+    repHistory.push({
+        key: boardHashFor(board, currentTurn),
+        move: null,
+        isCheck: false,
+        chases: []
+    });
+}
+
+// 收集某方所有走法可攻擊到的格子（值為最小攻擊子力價值）
+function collectAttackMap(bd, color) {
+    const map = new Map();
+    for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+            const p = bd[r][c];
+            if (p === EMPTY || colorOf(p) !== color) continue;
+            const val = PIECE_VALUES[typeOf(p)] || 0;
+            const raw = generateRawMoves(bd, r, c);
+            for (let i = 0; i < raw.length; i++) {
+                const k = raw[i].toRow * 9 + raw[i].toCol;
+                const cur = map.get(k);
+                if (cur === undefined || val < cur) map.set(k, val);
+            }
+        }
+    }
+    return map;
+}
+
+// 收集某方「有根」的格子集合
+function collectDefendSet(bd, color) {
+    const set = new Set();
+    for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+            const p = bd[r][c];
+            if (p === EMPTY || colorOf(p) !== color) continue;
+            const raw = generateRawMoves(bd, r, c);
+            for (let i = 0; i < raw.length; i++) {
+                if (raw[i].toRow === r && raw[i].toCol === c) continue;
+                set.add(raw[i].toRow * 9 + raw[i].toCol);
+            }
+        }
+    }
+    return set;
+}
+
+// 偵測 moverColor 走完此手後「正在捉」的敵方棋子清單
+function detectChases(bd, moverColor) {
+    const oppColor = moverColor === RED ? BLACK : RED;
+    const attackMap = collectAttackMap(bd, moverColor);
+    const defendSet = collectDefendSet(bd, oppColor);
+    const list = [];
+
+    for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+            const p = bd[r][c];
+            if (p === EMPTY || colorOf(p) !== oppColor) continue;
+            const t = typeOf(p);
+            if (t === KING) continue;                 // 將軍另行判定
+            const idx = r * 9 + c;
+            const minAtk = attackMap.get(idx);
+            if (minAtk === undefined) continue;       // 未被攻擊
+            const tVal = PIECE_VALUES[t] || 0;
+            // 有根且攻擊子力不佔優 → 不算「捉」
+            if (defendSet.has(idx) && minAtk >= tVal) continue;
+            list.push(idx * 20 + p);
+        }
+    }
+    return list;
+}
+
+// 每走一步就記錄局面的性質
+function pushRepetitionRecord(mv, mover) {
+    const opp = mover === RED ? BLACK : RED;
+    const isCheck = isInCheckFast(board, opp);
+    let chases = [];
+    if (!isCheck) chases = detectChases(board, mover);
+    repHistory.push({
+        key: boardHashFor(board, currentTurn),
+        move: { fromRow: mv.fromRow, fromCol: mv.fromCol, toRow: mv.toRow, toCol: mv.toCol, mover },
+        isCheck,
+        chases
+    });
+}
+
+// 判定是否出現三次重複，並回傳裁決
+function checkRepetitionRule() {
+    const n = repHistory.length;
+    if (n < 5) return null;
+
+    const lastKey = repHistory[n - 1].key;
+    const occ = [];
+    for (let i = 0; i < n; i++) {
+        if (repHistory[i].key === lastKey) occ.push(i);
+    }
+    if (occ.length < REP_LIMIT) return null;
+
+    const startIdx = occ[0];
+
+    let redMoves = 0, blackMoves = 0;
+    let redAllCheck = true, blackAllCheck = true;
+    let redAllChase = true, blackAllChase = true;
+
+    for (let i = startIdx + 1; i < n; i++) {
+        const rec = repHistory[i];
+        if (!rec.move) continue;
+        const isRed = rec.move.mover === RED;
+        const hasChase = rec.chases && rec.chases.length > 0;
+        if (isRed) {
+            redMoves++;
+            if (!rec.isCheck) redAllCheck = false;
+            if (!hasChase) redAllChase = false;
+        } else {
+            blackMoves++;
+            if (!rec.isCheck) blackAllCheck = false;
+            if (!hasChase) blackAllChase = false;
+        }
+    }
+
+    const redPC = redMoves > 0 && redAllCheck;
+    const blackPC = blackMoves > 0 && blackAllCheck;
+    const redPX = redMoves > 0 && redAllChase;
+    const blackPX = blackMoves > 0 && blackAllChase;
+
+    // 長將優先於長捉
+    if (redPC && blackPC) return { result: 'draw', reason: '雙方長將' };
+    if (redPC)            return { result: 'loss', loser: RED,   reason: '長將' };
+    if (blackPC)          return { result: 'loss', loser: BLACK, reason: '長將' };
+
+    if (redPX && blackPX) return { result: 'draw', reason: '雙方長捉' };
+    if (redPX)            return { result: 'loss', loser: RED,   reason: '長捉' };
+    if (blackPX)          return { result: 'loss', loser: BLACK, reason: '長捉' };
+
+    // 其餘（閒著、長殺）→ 和局
+    return { result: 'draw', reason: '閒著重複' };
+}
+
+// ============================================================
 //  ★ Zobrist 雜湊 & 置換表
 // ============================================================
 const ZOBRIST_PIECE = [];
@@ -1718,6 +1877,14 @@ function goToCover() {
     updateTrophyDisplay();
 }
 
+function getWinReward() {
+    if (difficulty === 'easy') return 30;
+    if (difficulty === 'medium') return 50;
+    if (difficulty === 'hard') return 300;
+    if (difficulty === 'expert') return 500;
+    return 800;
+}
+
 function resetGame() {
     board = createInitBoard();
     currentTurn = RED;
@@ -1728,6 +1895,7 @@ function resetGame() {
     hideModal();
     updateStatus();
     initBackground();
+    resetRepetitionHistory();          // ★ 重置循環紀錄
     drawBoard(board, null, null, null, null);
     if (gameMode === 'pve' && currentTurn === BLACK && !gameOver) scheduleAI();
 }
@@ -1737,11 +1905,15 @@ function executeMoveWithAnim(fromRow, fromCol, toRow, toCol, callback) {
     if (!nb) return false;
     board = nb;
     lastMove = { from:{row:fromRow,col:fromCol}, to:{row:toRow,col:toCol} };
-    const opponent = currentTurn === RED ? BLACK : RED;
+    const mover = currentTurn;
+    const opponent = mover === RED ? BLACK : RED;
     currentTurn = opponent;
     selected = null; legalTargets = [];
 
     playMoveSound();
+
+    // ★ 記錄本手局面的性質（將軍 / 捉子）
+    pushRepetitionRecord({ fromRow, fromCol, toRow, toCol }, mover);
 
     if (anim) cancelAnimationFrame(animFrame);
     anim = {
@@ -1768,8 +1940,46 @@ function executeMoveWithAnim(fromRow, fromCol, toRow, toCol, callback) {
     return true;
 }
 
+// ★ 依循環規則裁決
+function endByRepetition(rep) {
+    gameOver = true;
+    playGameOverSound();
+
+    let title, msg;
+
+    if (rep.result === 'draw') {
+        title = '⚖️ 循環和局';
+        msg = `雙方形成「${rep.reason}」，<br>依中國象棋規則判為 <b>和局</b>。`;
+        turnIndicator.innerHTML = '⏳ 已結束';
+        statusMsg.textContent = '和局';
+    } else {
+        const loser = rep.loser;
+        const winner = loser === RED ? BLACK : RED;
+        const loserName = loser === RED ? '紅方' : '黑方';
+        const winnerName = winner === RED ? '紅方' : '黑方';
+
+        title = `⚖️ ${loserName}犯規判負`;
+        msg = `${loserName}違反「${rep.reason}」規則，<br>依規則判負，${winnerName}勝！`;
+
+        if (gameMode === 'pve' && winner === RED) {
+            const reward = getWinReward();
+            addTrophies(reward);
+            pendingReward = reward;
+            msg += `<br>獲得 <span class="trophy-earned">+${reward} 獎盃</span><br>目前總計：${trophies}`;
+        }
+
+        turnIndicator.innerHTML = '⏳ 已結束';
+        statusMsg.textContent = `${loserName}犯規負`;
+    }
+
+    showModal(title, msg);
+    drawBoard(board, null, null, lastMove, null);
+}
+
 function checkAndHandleGameEnd() {
-    if (gameOver) return;
+    if (gameOver) return false;
+
+    // ① 將死 / 困斃
     const result = checkGameEnd(board, currentTurn);
     if (result) {
         gameOver = true;
@@ -1781,11 +1991,7 @@ function checkAndHandleGameEnd() {
 
         if (gameMode === 'pve') {
             if (result.winner === '紅方') {
-                if (difficulty === 'easy') reward = 30;
-                else if (difficulty === 'medium') reward = 50;
-                else if (difficulty === 'hard') reward = 300;
-                else if (difficulty === 'expert') reward = 500;
-                else reward = 800;
+                reward = getWinReward();
                 addTrophies(reward);
                 pendingReward = reward;
                 title = (difficulty === 'hell') ? '👑 神蹟！擊敗地獄！' : '🏆 恭喜勝利！';
@@ -1797,7 +2003,6 @@ function checkAndHandleGameEnd() {
                     : '再接再厲，下次一定會贏！';
             }
         } else {
-            title = '🏆 遊戲結束';
             msg = `${result.winner} 勝！`;
         }
 
@@ -1807,6 +2012,14 @@ function checkAndHandleGameEnd() {
         drawBoard(board, null, null, lastMove, null);
         return true;
     }
+
+    // ② 循環局面（長將 / 長捉 / 閒著）
+    const rep = checkRepetitionRule();
+    if (rep) {
+        endByRepetition(rep);
+        return true;
+    }
+
     updateStatus();
     drawBoard(board, null, null, lastMove, null);
     if (gameMode === 'pve' && currentTurn === BLACK && !gameOver) {
@@ -1823,7 +2036,6 @@ function scheduleAI() {
     statusMsg.textContent = (difficulty === 'hell') ? '💀 地獄思考中…'
                           : (difficulty === 'expert' ? '🔥 AI 深思中…' : '🤖 AI 思考中…');
 
-    // 地獄難度需要較長思考時間，先讓瀏覽器渲染狀態
     const delay = isDeep ? 60 : 180;
 
     setTimeout(() => {
@@ -1937,6 +2149,7 @@ updateTrophyDisplay();
 initBackground();
 coverOverlay.classList.remove('hidden');
 board = createInitBoard();
+resetRepetitionHistory();          // ★ 初始化循環紀錄
 drawBoard(board, null, null, null, null);
 updateStatus();
 
@@ -1946,7 +2159,7 @@ window.addEventListener('resize', () => {
     resizeTimer = setTimeout(() => drawBoard(board, selected, legalTargets, lastMove, anim), 100);
 });
 
-console.log('🐘 中國象棋 v1.2 © ☕迪遜咖啡廳｜地獄難度：8秒思考 × 12層深度 × 置換表引擎');
+console.log('🐘 中國象棋 v1.2 © ☕迪遜咖啡廳｜地獄難度：8秒思考 × 12層深度 × 置換表引擎｜循環局面判定已啟用');
 </script>
 </body>
 </html>
