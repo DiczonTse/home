@@ -1195,9 +1195,11 @@
 
     <script>
         // ================================================================
-        //  🌼 ICQ 包剪揼 · 紅藍對決版 (v2.5.1)
-        //  修復：君主 → 旗手 術語統一
-        //  增強：AI 攻擊前嚴格預判，絕不犯蠢送頭
+        //  🌼 ICQ 包剪揼 · 紅藍對決版 (v2.6.0)
+        //  修復：手機 / 電腦移動動畫不一致
+        //  新增：真正的 A 點 → B 點 平滑滑行動畫（WAAPI 實作，跨平台一致）
+        //  術語統一：君主 → 旗手
+        //  核心：AI 攻擊前嚴格預判，絕不犯蠢送頭
         // ================================================================
 
         (function() {
@@ -1210,6 +1212,9 @@
             const EMOJI = { rock: '🗻', scissors: '✂️', paper: '📄', king: '🚩', trap: '⚠️' };
             const BEATS = { rock: 'scissors', scissors: 'paper', paper: 'rock' };
             const BEAT_BY = { rock: 'paper', scissors: 'rock', paper: 'scissors' };
+
+            // ★ 移動動畫時長（桌面 / 手機完全一致）
+            const MOVE_ANIM_MS = 340;
 
             // ---- DOM ----
             const boardEl = document.getElementById('board');
@@ -1266,6 +1271,9 @@
             let trapPos = null;
             let kingPos = null;
             let normalPieces = [];
+
+            // ★ 待播放的移動動畫 { fromR, fromC, toR, toC }
+            let pendingMoveAnim = null;
 
             // ---- 獎盃 ----
             let trophyCount = 0;
@@ -1549,6 +1557,7 @@
                 return piece;
             }
 
+            // ★ 移動棋子：同時登記「A→B 動畫」
             function movePiece(fromR, fromC, toR, toC) {
                 const piece = board[fromR][fromC];
                 if (!piece) return null;
@@ -1556,7 +1565,7 @@
                 piece.row = toR;
                 piece.col = toC;
                 board[toR][toC] = piece;
-                _moveTarget = { r: toR, c: toC };
+                pendingMoveAnim = { fromR: fromR, fromC: fromC, toR: toR, toC: toC };
                 return piece;
             }
 
@@ -1575,6 +1584,96 @@
                     }
                 }
                 return result;
+            }
+
+            // ================================================================
+            //  ★★ 棋子移動動畫：A 點 → B 點平滑滑行（桌面 / 手機完全一致）
+            // ================================================================
+
+            /** 取得某格的 DOM 元素 */
+            function getCellElement(r, c) {
+                return boardEl.querySelector('.cell[data-r="' + r + '"][data-c="' + c + '"]');
+            }
+
+            /**
+             * 在已渲染的棋盤上播放「從 A 滑到 B」的動畫。
+             * 棋子本身已經被渲染在目標格，我們先把它瞬移到出發格的位置，
+             * 再用 Web Animations API 滑回目標格 —— 手機與桌面行為一致。
+             */
+            function playMoveSlide(anim) {
+                const fromCell = getCellElement(anim.fromR, anim.fromC);
+                const toCell = getCellElement(anim.toR, anim.toC);
+                if (!fromCell || !toCell) return;
+
+                const pieceEl = toCell.querySelector('.piece');
+                if (!pieceEl) return;
+
+                const fr = fromCell.getBoundingClientRect();
+                const tr = toCell.getBoundingClientRect();
+                const dx = fr.left - tr.left;
+                const dy = fr.top - tr.top;
+
+                // 太近就不用播了（例如原地）
+                if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return;
+
+                const prevZ = pieceEl.style.zIndex;
+                pieceEl.style.zIndex = '30';
+
+                const midX = dx * 0.5;
+                const midY = dy * 0.5 - Math.min(14, Math.abs(dy) * 0.25 + 6);
+
+                let finished = false;
+                const done = () => {
+                    if (finished) return;
+                    finished = true;
+                    pieceEl.style.zIndex = prevZ;
+                };
+
+                // 優先使用 Web Animations API（跨平台一致）
+                if (typeof pieceEl.animate === 'function') {
+                    const animObj = pieceEl.animate([{
+                            transform: 'translate(' + dx + 'px, ' + dy + 'px) scale(1.06)',
+                            filter: 'drop-shadow(0 10px 12px rgba(0,0,0,0.55))'
+                        },
+                        {
+                            transform: 'translate(' + midX + 'px, ' + midY + 'px) scale(1.10)',
+                            filter: 'drop-shadow(0 14px 16px rgba(0,0,0,0.45))'
+                        },
+                        {
+                            transform: 'translate(0px, 0px) scale(1)',
+                            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.35))'
+                        }
+                    ], {
+                        duration: MOVE_ANIM_MS,
+                        easing: 'cubic-bezier(0.33, 1.05, 0.68, 1)',
+                        fill: 'none'
+                    });
+                    animObj.onfinish = done;
+                    animObj.oncancel = done;
+                    setTimeout(done, MOVE_ANIM_MS + 120);
+                    return;
+                }
+
+                // ---- 後備方案：CSS transition ----
+                pieceEl.style.transition = 'none';
+                pieceEl.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(1.06)';
+                void pieceEl.offsetWidth;
+                pieceEl.style.transition = 'transform ' + MOVE_ANIM_MS +
+                    'ms cubic-bezier(0.33, 1.05, 0.68, 1)';
+                pieceEl.style.transform = 'translate(0px, 0px) scale(1)';
+                setTimeout(() => {
+                    pieceEl.style.transition = '';
+                    pieceEl.style.transform = '';
+                    done();
+                }, MOVE_ANIM_MS + 60);
+            }
+
+            /** 棋盤重建完成後，播放排隊中的移動動畫 */
+            function flushPendingMoveAnim() {
+                if (!pendingMoveAnim) return;
+                const anim = pendingMoveAnim;
+                pendingMoveAnim = null;
+                requestAnimationFrame(() => playMoveSlide(anim));
             }
 
             // ---- ★ 戰鬥解析 ----
@@ -1659,7 +1758,9 @@
                 return battle;
             }
 
-            // ---- 執行戰鬥 ----
+            // ================================================================
+            //  ★ 執行戰鬥（重構：動畫時序統一，桌面/手機一致）
+            // ================================================================
             async function executeBattleWithAnimation(attacker, defender, callback) {
                 if (animating) return;
                 animating = true;
@@ -1673,6 +1774,9 @@
                     fromC = attacker.col;
                 const toR = defender.row,
                     toC = defender.col;
+
+                // 先揭曉雙方棋子
+                renderBoard(true);
 
                 const battle = await resolveBattleWithRematch(attacker, defender);
 
@@ -1689,30 +1793,24 @@
                 else if (result === 'king') attackerWins = true;
                 else if (result === 'disarm') disarm = true;
 
-                if (attackerWins) {
+                // ---------- 攻擊方勝 / 拆陷阱：滑行到目標格 ----------
+                if (attackerWins || disarm) {
                     removePiece(toR, toC);
                     movePiece(fromR, fromC, toR, toC);
-                    _moveAnimPending = true;
                     playSound('levelUp');
-                    renderBoard();
-                    if (_moveTarget && _moveAnimPending) {
-                        playMoveAnimationOnBoard();
-                    }
-                    animating = false;
-                    callback(battle);
+                    // 強制重建 DOM → 自動播放 A→B 滑行動畫
+                    renderBoard(true);
+                    setTimeout(() => {
+                        animating = false;
+                        callback(battle);
+                    }, MOVE_ANIM_MS + 60);
                     return;
+                }
 
-                } else if (defenderWins) {
+                // ---------- 防守方勝：攻擊方被消滅 ----------
+                if (defenderWins) {
                     playSound('levelDown');
-                    const cells = boardEl.querySelectorAll('.cell');
-                    let targetCell = null;
-                    for (const cell of cells) {
-                        if (parseInt(cell.dataset.r) === fromR && parseInt(cell.dataset.c) === fromC) {
-                            targetCell = cell;
-                            break;
-                        }
-                    }
-
+                    const targetCell = getCellElement(fromR, fromC);
                     let hasAnim = false;
                     if (targetCell) {
                         const pieceEl = targetCell.querySelector('.piece');
@@ -1721,42 +1819,22 @@
                             hasAnim = true;
                         }
                     }
-
-                    if (hasAnim) {
-                        setTimeout(() => {
-                            removePiece(fromR, fromC);
-                            animating = false;
-                            renderBoard();
-                            if (_moveTarget && _moveAnimPending) {
-                                playMoveAnimationOnBoard();
-                            }
-                            callback(battle);
-                        }, 500);
-                        return;
-                    } else {
+                    const finish = () => {
                         removePiece(fromR, fromC);
                         animating = false;
-                        renderBoard();
-                        if (_moveTarget && _moveAnimPending) {
-                            playMoveAnimationOnBoard();
-                        }
+                        renderBoard(true);
                         callback(battle);
-                        return;
-                    }
+                    };
+                    if (hasAnim) setTimeout(finish, 500);
+                    else finish();
+                    return;
+                }
 
-                } else if (bothDie) {
+                // ---------- 同歸於盡 ----------
+                if (bothDie) {
                     playSound('levelDown');
-
-                    const cells = boardEl.querySelectorAll('.cell');
-                    let attackerCell = null,
-                        defenderCell = null;
-                    for (const cell of cells) {
-                        const r = parseInt(cell.dataset.r);
-                        const c = parseInt(cell.dataset.c);
-                        if (r === fromR && c === fromC) attackerCell = cell;
-                        if (r === toR && c === toC) defenderCell = cell;
-                    }
-
+                    const attackerCell = getCellElement(fromR, fromC);
+                    const defenderCell = getCellElement(toR, toC);
                     let hasAnim = false;
                     if (attackerCell) {
                         const el = attackerCell.querySelector('.piece');
@@ -1768,89 +1846,21 @@
                         if (el) { el.classList.add('defeated');
                             hasAnim = true; }
                     }
-
-                    if (hasAnim) {
-                        setTimeout(() => {
-                            removePiece(fromR, fromC);
-                            removePiece(toR, toC);
-                            animating = false;
-                            renderBoard();
-                            if (_moveTarget && _moveAnimPending) {
-                                playMoveAnimationOnBoard();
-                            }
-                            callback(battle);
-                        }, 500);
-                        return;
-                    } else {
+                    const finish = () => {
                         removePiece(fromR, fromC);
                         removePiece(toR, toC);
                         animating = false;
-                        renderBoard();
-                        if (_moveTarget && _moveAnimPending) {
-                            playMoveAnimationOnBoard();
-                        }
+                        renderBoard(true);
                         callback(battle);
-                        return;
-                    }
-
-                } else if (disarm) {
-                    removePiece(toR, toC);
-                    movePiece(fromR, fromC, toR, toC);
-                    _moveAnimPending = true;
-                    playSound('levelUp');
-                    renderBoard();
-                    if (_moveTarget && _moveAnimPending) {
-                        playMoveAnimationOnBoard();
-                    }
-                    animating = false;
-                    callback(battle);
+                    };
+                    if (hasAnim) setTimeout(finish, 500);
+                    else finish();
                     return;
                 }
 
                 animating = false;
-                renderBoard();
+                renderBoard(true);
                 callback(battle);
-            }
-
-            // ---- 移動動畫 ----
-            let _moveTarget = null;
-            let _moveAnimPending = false;
-
-            function playMoveAnimationOnBoard() {
-                if (!_moveTarget || _moveAnimPending === false) return;
-                _moveAnimPending = false;
-                const r = _moveTarget.r,
-                    c = _moveTarget.c;
-                requestAnimationFrame(() => {
-                    const cells = boardEl.querySelectorAll('.cell');
-                    for (const cell of cells) {
-                        if (parseInt(cell.dataset.r) === r && parseInt(cell.dataset.c) === c) {
-                            const piece = cell.querySelector('.piece');
-                            if (piece) {
-                                piece.style.opacity = '0';
-                                piece.classList.add('moving');
-                                void piece.offsetWidth;
-                                piece.style.opacity = '';
-                                const onAnimEnd = () => {
-                                    piece.classList.remove('moving');
-                                    piece.removeEventListener('animationend', onAnimEnd);
-                                    _moveTarget = null;
-                                };
-                                piece.addEventListener('animationend', onAnimEnd);
-                                setTimeout(() => {
-                                    if (_moveTarget) {
-                                        piece.classList.remove('moving');
-                                        piece.style.opacity = '';
-                                        _moveTarget = null;
-                                    }
-                                }, 2000);
-                            } else {
-                                _moveTarget = null;
-                            }
-                            break;
-                        }
-                    }
-                });
             }
 
             // ---- 玩家移動 ----
@@ -1868,7 +1878,6 @@
                 if (target.action === 'move') {
                     movePiece(fromR, fromC, toR, toC);
                     playSound('wind');
-                    _moveAnimPending = true;
                     afterPlayerAction();
                     return true;
                 } else {
@@ -1885,27 +1894,17 @@
 
             function afterPlayerAction() {
                 updateUI();
-                if (_moveAnimPending) {
-                    playMoveAnimationOnBoard();
-                }
                 if (checkGameOver()) { isProcessing = false; return; }
                 currentTurn = 'computer';
                 updateTurnUI();
                 isProcessing = false;
-                setTimeout(() => computerTurn(), 400);
+                setTimeout(() => computerTurn(), 480);
             }
 
             // ================================================================
-            //  ★ 核心修復：AI 安全性評估 + 分層權重 + 攻擊前預判（絕不送頭）
+            //  ★ 核心：AI 安全性評估 + 分層權重 + 攻擊前預判（絕不送頭）
             // ================================================================
 
-            /**
-             * 評估某個位置對 AI 棋子的安全程度
-             * @param {number} r - 行
-             * @param {number} c - 列
-             * @param {object} piece - AI 棋子
-             * @returns {number} 安全分數（越高越安全，0 表示極度危險）
-             */
             function evaluateSafetyForAI(r, c, piece) {
                 let safety = 1.0;
                 const playerPiecesList = playerPieces;
@@ -1938,19 +1937,12 @@
                 return Math.max(0.05, Math.min(1.0, safety));
             }
 
-            /**
-             * 評估 AI 移動後是否會被玩家反擊殺死
-             * @param {number} r - 目標行
-             * @param {number} c - 目標列
-             * @param {object} piece - AI 棋子
-             * @returns {boolean} 是否安全
-             */
             function isMoveSafeForAI(r, c, piece) {
                 const safety = evaluateSafetyForAI(r, c, piece);
                 return safety > 0.3;
             }
 
-            // ---- ★ 重構後的 AI 回合（絕不送頭） ----
+            // ---- ★ AI 回合 ----
             async function computerTurn() {
                 if (gameOver || !gameStarted || currentTurn !== 'computer' || animating) return;
                 if (isProcessing) return;
@@ -1995,44 +1987,38 @@
                     for (const m of moves) {
                         let weight = 1.0;
 
-                        // ---- 1. 基礎安全性評估 ----
+                        // 1. 基礎安全性評估
                         const safety = evaluateSafetyForAI(m.toR, m.toC, m.piece);
                         weight *= safety;
 
-                        // ---- 2. ★ 核心：攻擊前嚴格預判（絕不送頭） ----
+                        // 2. ★ 攻擊前嚴格預判
                         if (m.action === 'battle' && m.target) {
                             const battle = resolveBattleBasic(m.piece, m.target);
                             if (battle.result === 'win' || battle.result === 'king') {
-                                weight += 12; // 能贏，高權重
+                                weight += 12;
                             } else if (battle.result === 'draw') {
-                                weight += 2; // 平手，低權重（避免拖入重猜）
+                                weight += 2;
                             } else if (battle.result === 'lose' || battle.result === 'trap') {
-                                // ★ 會輸 → 極低權重，幾乎不選擇
                                 weight *= 0.01;
-                                // 旗手拆陷阱是例外，稍微給一點機會
                                 if (m.piece.type === 'king' && m.target.type === 'trap') {
                                     weight += 3;
                                 }
                             }
                         }
 
-                        // ---- 3. 針對玩家旗手的策略（僅在安全時靠近/攻擊） ----
-                        let hasKingTarget = false;
+                        // 3. 針對玩家旗手的策略
                         for (const known of knownPlayer) {
                             if (known.type === 'king') {
-                                hasKingTarget = true;
                                 if (m.piece.type !== 'king') {
                                     if (m.action === 'battle' && m.target === known) {
-                                        // 攻擊旗手：必須安全且能贏
                                         const battle = resolveBattleBasic(m.piece, known);
                                         if (battle.result === 'win' || battle.result === 'king') {
                                             if (safety > 0.5) weight += 10;
                                             else weight += 1;
                                         } else {
-                                            weight *= 0.01; // 打不贏旗手就放棄
+                                            weight *= 0.01;
                                         }
                                     } else {
-                                        // 靠近旗手
                                         const adj = getAdjacent(known.row, known.col);
                                         const isNear = adj.some(pos => pos.r === m.toR && pos.c === m.toC);
                                         if (isNear) {
@@ -2044,7 +2030,7 @@
                             }
                         }
 
-                        // ---- 4. 克制關係（針對非旗手玩家棋子） ----
+                        // 4. 克制關係
                         for (const known of knownPlayer) {
                             if (known.type === 'king' || known.type === 'trap') continue;
                             const counterType = BEAT_BY[known.type];
@@ -2057,7 +2043,7 @@
                                 } else if (battle.result === 'draw') {
                                     weight += 2;
                                 } else {
-                                    weight *= 0.05; // 會輸就放棄
+                                    weight *= 0.05;
                                 }
                             } else {
                                 const adj = getAdjacent(known.row, known.col);
@@ -2070,14 +2056,13 @@
                             }
                         }
 
-                        // ---- 5. ★ 旗手極度保守 ----
+                        // 5. ★ 旗手極度保守
                         if (m.piece.type === 'king') {
                             if (safety < 0.5) {
                                 weight *= 0.01;
                             } else {
                                 weight *= 0.2;
                             }
-                            // 如果旗手正被攻擊，允許逃跑
                             const underAttack = playerPieces.some(p => {
                                 const moves = getValidMoves(p.row, p.col);
                                 return moves.some(mv => mv.r === m.fromR && mv.c === m.fromC);
@@ -2087,19 +2072,18 @@
                             }
                         }
 
-                        // ---- 6. 隨機性 ----
+                        // 6. 隨機性
                         weight *= (0.9 + Math.random() * 0.2);
 
                         weightedMoves.push({ ...m, weight });
                     }
                 } else {
-                    // ---- 誘餌模式：依然保護旗手，且攻擊前預判 ----
+                    // ---- 誘餌模式 ----
                     for (const m of moves) {
                         let weight = 1.0;
                         const safety = evaluateSafetyForAI(m.toR, m.toC, m.piece);
                         weight *= safety;
 
-                        // ★ 攻擊前預判（誘餌模式也執行）
                         if (m.action === 'battle' && m.target) {
                             const battle = resolveBattleBasic(m.piece, m.target);
                             if (battle.result === 'win' || battle.result === 'king') {
@@ -2151,7 +2135,6 @@
                         if (fallback.action === 'move') {
                             movePiece(fallback.fromR, fallback.fromC, fallback.toR, fallback.toC);
                             playSound('wind');
-                            _moveAnimPending = true;
                             afterComputerAction();
                         } else {
                             const defender = board[fallback.toR][fallback.toC];
@@ -2194,7 +2177,6 @@
                 if (pick.action === 'move') {
                     movePiece(pick.fromR, pick.fromC, pick.toR, pick.toC);
                     playSound('wind');
-                    _moveAnimPending = true;
                     afterComputerAction();
                 } else {
                     const defender = board[pick.toR][pick.toC];
@@ -2209,9 +2191,6 @@
 
             function afterComputerAction() {
                 updateUI();
-                if (_moveAnimPending) {
-                    playMoveAnimationOnBoard();
-                }
                 if (checkGameOver()) { isProcessing = false; return; }
                 currentTurn = 'player';
                 updateTurnUI();
@@ -2312,8 +2291,9 @@
                 document.getElementById('computerScore').textContent = computerPieces.length;
             }
 
-            function renderBoard() {
-                if (animating) return;
+            // ★ renderBoard 支援 force 參數（戰鬥流程中強制重建）
+            function renderBoard(force) {
+                if (animating && !force) return;
 
                 boardEl.innerHTML = '';
                 for (let r = 0; r < ROWS; r++) {
@@ -2377,13 +2357,7 @@
                                 div.classList.add('selected');
                             }
 
-                            if (_moveTarget && _moveTarget.r === r && _moveTarget.c === c && _moveAnimPending) {
-                                div.style.opacity = '0';
-                                div.dataset.moveTarget = '1';
-                            }
-
                             cell.appendChild(div);
-
                             cell.addEventListener('click', () => onCellClick(r, c));
                         } else {
                             cell.classList.add('empty');
@@ -2399,9 +2373,9 @@
                         boardEl.appendChild(cell);
                     }
                 }
-                if (_moveTarget && _moveAnimPending) {
-                    playMoveAnimationOnBoard();
-                }
+
+                // ★ DOM 建立完成 → 播放排隊中的 A→B 移動動畫
+                flushPendingMoveAnim();
             }
 
             // ---- 點擊 ----
@@ -2613,6 +2587,7 @@
                 gameOver = false;
                 isProcessing = false;
                 selectedPos = null;
+                pendingMoveAnim = null;
 
                 for (const p of computerPieces) {
                     p.revealed = false;
@@ -2713,8 +2688,7 @@
                 kingPos = null;
                 normalPieces = [];
                 selectPhase = 'trap';
-                _moveTarget = null;
-                _moveAnimPending = false;
+                pendingMoveAnim = null;
 
                 const playerList = [];
                 for (let i = 0; i < 14; i++) {
@@ -2854,8 +2828,7 @@
                 kingPos = null;
                 normalPieces = [];
                 selectPhase = 'trap';
-                _moveTarget = null;
-                _moveAnimPending = false;
+                pendingMoveAnim = null;
                 setMusicPhase('TITLE');
                 updateUI();
                 updateTurnUI();
@@ -3003,8 +2976,7 @@
                 kingPos = null;
                 normalPieces = [];
                 selectPhase = 'trap';
-                _moveTarget = null;
-                _moveAnimPending = false;
+                pendingMoveAnim = null;
                 btnStartReset.textContent = '🎮 開始';
                 btnStartReset.className = 'btn btn-primary';
                 btnReroll.style.display = 'none';
@@ -3103,7 +3075,7 @@
             // ---- 版權 ----
             function setCopyright() {
                 const year = new Date().getFullYear();
-                copyrightEl.textContent = 'v2.5.1 © ' + year + ' ☕迪遜咖啡廳，版權所有。';
+                copyrightEl.textContent = 'v2.6.0 © ' + year + ' ☕迪遜咖啡廳，版權所有。';
                 if (copyrightYearEl) {
                     copyrightYearEl.textContent = year;
                 }
@@ -3138,10 +3110,9 @@
                         'PLAYING' || gamePhase === 'TITLE') && bgAudio.paused) startBackgroundMusic();
             });
 
-            console.log('🌼 ICQ 包剪揼 · 紅藍對決版 (v2.5.1) 已載入');
-            console.log('✅ 術語統一：君主 → 旗手');
-            console.log('✅ 核心增強：AI 攻擊前嚴格預判，絕不犯蠢送頭');
-            console.log('✅ AI 旗手極度保守，普通棋子只在安全時靠近/攻擊旗手');
+            console.log('🌼 ICQ 包剪揼 · 紅藍對決版 (v2.6.0) 已載入');
+            console.log('✅ 移動動畫：桌面 / 手機統一使用 Web Animations API（A → B 平滑滑行）');
+            console.log('✅ 動畫時序：DOM 重建完成後才播動畫，不再被覆蓋或搶先執行');
             console.log('🏆 當前獎盃: ' + trophyCount);
             console.log('🎨 當前選色: ' + playerColor);
 
@@ -3160,8 +3131,12 @@
                 reroll: rerollNormalPieces,
                 getState: function() { return { phase: gamePhase, color: playerColor, musicPhase: currentMusicPhase }; }
             };
-
         })();
+        window.addEventListener('load', function() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js').catch(() => {});
+            }
+        });
     </script>
 </body>
 </html>
