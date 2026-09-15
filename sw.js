@@ -18,6 +18,8 @@ const urlsToCache = [
 	'/home/games/block_legend/block_legend.jpg',
 	'/home/games/xiangqi/xiangqi.html',
 	'/home/games/xiangqi/xiangqi.jpg',
+	'/home/games/animal_chess/animal_chess.html',
+	'/home/games/animal_chess/animal_chess.jpg',
     '/home/games/tic_tac_toe/tic_tac_toe.html',
 	'/home/games/tic_tac_toe/tic_tac_toe.jpg',
     '/home/icons/favicon.ico',
