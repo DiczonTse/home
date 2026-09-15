@@ -1,1 +1,1788 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🐾 鬥獸棋 · 森林之戰</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
+    body {
+        font-family: 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
+        min-height: 100vh;
+        background: radial-gradient(circle at 20% 10%, #1b4332 0%, #0b2e1a 55%, #071a10 100%);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 14px 12px 90px;
+        color: #e8f5e9;
+        overflow-x: hidden;
+    }
+
+    .screen { width: 100%; max-width: 560px; }
+
+    /* ============ 封面 ============ */
+    .cover-content {
+        background:
+            linear-gradient(165deg, rgba(45,106,79,0.45) 0%, rgba(27,67,50,0.58) 70%, rgba(18,48,36,0.70) 100%),
+            url('animal_chess.jpg') center/cover no-repeat,
+            linear-gradient(165deg, #2d6a4f, #1b4332, #123024);
+        border: 2px solid #52b788;
+        border-radius: 26px;
+        padding: 28px 22px 22px;
+        text-align: center;
+        box-shadow: 0 26px 70px rgba(0,0,0,0.6),
+                    inset 0 1px 0 rgba(255,255,255,0.12),
+                    inset 0 -20px 40px rgba(0,0,0,0.25);
+        position: relative;
+        overflow: hidden;
+    }
+    .cover-content::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(circle at 10% 0%, rgba(149,213,178,0.18), transparent 45%),
+            radial-gradient(circle at 90% 100%, rgba(82,183,136,0.15), transparent 45%);
+        pointer-events: none;
+    }
+    .cover-icon {
+        font-size: 2.3em;
+        line-height: 1;
+        margin-bottom: 4px;
+        filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+        animation: floaty 3s ease-in-out infinite;
+    }
+    @keyframes floaty {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+    }
+
+    .cover-content h1 {
+        font-size: clamp(1.8em, 7vw, 2.7em);
+        color: #d8f3dc;
+        letter-spacing: 8px;
+        text-indent: 8px;
+        text-shadow: 0 4px 18px rgba(0,0,0,0.55), 0 0 30px rgba(82,183,136,0.4);
+        margin-bottom: 3px;
+        position: relative;
+    }
+    .subtitle {
+        color: #95d5b2;
+        font-size: 0.8em;
+        letter-spacing: 9px;
+        text-indent: 9px;
+        margin-bottom: 14px;
+        opacity: 0.9;
+        position: relative;
+    }
+
+    /* 獎盃顯示 */
+    .trophy-bar {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 18px;
+        margin-bottom: 20px;
+        border-radius: 30px;
+        background: linear-gradient(140deg, rgba(246,189,96,0.22), rgba(231,111,81,0.18));
+        border: 2px solid rgba(246,189,96,0.6);
+        box-shadow: 0 4px 16px rgba(246,189,96,0.25), inset 0 1px 0 rgba(255,255,255,0.2);
+        position: relative;
+        font-weight: 800;
+        color: #ffe082;
+        font-size: 1.05em;
+        letter-spacing: 1px;
+    }
+    .trophy-bar .t-icon { font-size: 1.15em; filter: drop-shadow(0 0 6px rgba(255,215,120,0.7)); }
+    .trophy-bar .t-num {
+        min-width: 42px;
+        text-align: center;
+        text-shadow: 0 0 10px rgba(255,215,120,0.7);
+        transition: transform 0.3s ease;
+    }
+    .trophy-bar.bump .t-num { animation: bump 0.5s ease; }
+    @keyframes bump {
+        0% { transform: scale(1); }
+        40% { transform: scale(1.4); color: #fff; }
+        100% { transform: scale(1); }
+    }
+
+    .option-group { margin-bottom: 18px; position: relative; }
+    .option-label {
+        color: #95d5b2;
+        font-size: 0.76em;
+        letter-spacing: 4px;
+        margin-bottom: 9px;
+        opacity: 0.85;
+    }
+    .option-buttons {
+        display: flex;
+        gap: 9px;
+        justify-content: center;
+    }
+    .opt-btn {
+        flex: 1;
+        min-width: 0;
+        padding: 12px 6px;
+        border-radius: 14px;
+        border: 2px solid rgba(82,183,136,0.55);
+        background: rgba(82,183,136,0.10);
+        color: #c9e8d3;
+        font-size: 0.88em;
+        font-weight: 700;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all 0.22s ease;
+        white-space: nowrap;
+    }
+    .opt-btn:hover { background: rgba(82,183,136,0.24); border-color: #95d5b2; }
+    .opt-btn:active { transform: scale(0.97); }
+    .opt-btn.active {
+        background: linear-gradient(140deg, #74c69d, #40916c);
+        border-color: #b7e4c7;
+        color: #fff;
+        box-shadow: 0 6px 20px rgba(82,183,136,0.5), inset 0 1px 0 rgba(255,255,255,0.3);
+    }
+
+    .start-btn {
+        width: 100%;
+        padding: 16px;
+        margin-top: 4px;
+        border: none;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #f6bd60 0%, #e76f51 100%);
+        color: #fff;
+        font-family: inherit;
+        font-size: 1.08em;
+        font-weight: 800;
+        letter-spacing: 8px;
+        text-indent: 8px;
+        cursor: pointer;
+        transition: all 0.22s ease;
+        box-shadow: 0 10px 28px rgba(231,111,81,0.42), inset 0 1px 0 rgba(255,255,255,0.35);
+        position: relative;
+    }
+    .start-btn:hover { transform: translateY(-3px); box-shadow: 0 14px 36px rgba(231,111,81,0.6); }
+    .start-btn:active { transform: translateY(-1px) scale(0.99); }
+
+    .rules {
+        margin-top: 18px;
+        padding: 12px 14px;
+        background: rgba(0,0,0,0.30);
+        border: 1px solid rgba(82,183,136,0.25);
+        border-radius: 13px;
+        font-size: 0.72em;
+        line-height: 1.8;
+        color: #a8d5b5;
+        text-align: left;
+        position: relative;
+    }
+    .rules strong { color: #d8f3dc; letter-spacing: 2px; }
+
+    /* 存檔按鈕列（3 個並排） */
+    .save-bar {
+        display: flex;
+        gap: 8px;
+        margin-top: 14px;
+        position: relative;
+    }
+    .save-btn {
+        flex: 1;
+        min-width: 0;
+        padding: 10px 4px;
+        border-radius: 12px;
+        border: 2px solid rgba(82,183,136,0.5);
+        background: rgba(82,183,136,0.10);
+        color: #c9e8d3;
+        font-family: inherit;
+        font-size: 0.78em;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        line-height: 1.15;
+    }
+    .save-btn .s-icon { font-size: 1.15em; }
+    .save-btn .s-label { white-space: nowrap; }
+    .save-btn:hover { background: rgba(82,183,136,0.25); border-color: #95d5b2; }
+    .save-btn:active { transform: scale(0.97); }
+    .save-btn.reset-btn {
+        border-color: rgba(231,111,81,0.55);
+        color: #ffb3a0;
+        background: rgba(231,111,81,0.10);
+    }
+    .save-btn.reset-btn:hover {
+        background: rgba(231,111,81,0.25);
+        border-color: #ff8a80;
+    }
+
+    .copyright {
+        margin-top: 12px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(82,183,136,0.2);
+        text-align: center;
+        font-size: 0.66em;
+        color: #95d5b2;
+        opacity: 0.75;
+        letter-spacing: 0.5px;
+        position: relative;
+    }
+
+    /* ============ 遊戲介面 ============ */
+    .game-header {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 10px;
+        background: linear-gradient(140deg, rgba(45,106,79,0.95), rgba(27,67,50,0.95));
+        border: 2px solid #40916c;
+        border-radius: 15px;
+        padding: 8px 10px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+    .back-btn, .restart-icon-btn {
+        padding: 7px 11px;
+        border-radius: 10px;
+        border: 2px solid rgba(82,183,136,0.6);
+        background: rgba(82,183,136,0.12);
+        color: #d8f3dc;
+        font-family: inherit;
+        font-size: 0.78em;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+    }
+    .back-btn:hover, .restart-icon-btn:hover { background: rgba(82,183,136,0.3); }
+    .back-btn:active, .restart-icon-btn:active { transform: scale(0.95); }
+
+    .restart-icon-btn {
+        border-color: rgba(246,189,96,0.65);
+        background: rgba(246,189,96,0.14);
+        color: #ffe082;
+    }
+    .restart-icon-btn:hover {
+        background: rgba(246,189,96,0.3);
+        border-color: #ffd166;
+    }
+
+    .status {
+        flex: 1;
+        text-align: center;
+        font-size: 0.92em;
+        font-weight: 800;
+        color: #d8f3dc;
+        letter-spacing: 1px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0;
+    }
+    .status.win { color: #f6bd60; }
+
+    .mode-tag {
+        padding: 5px 9px;
+        border-radius: 9px;
+        background: rgba(0,0,0,0.25);
+        border: 1px solid rgba(82,183,136,0.35);
+        font-size: 0.7em;
+        font-weight: 700;
+        color: #95d5b2;
+        white-space: nowrap;
+    }
+
+    .board-wrapper {
+        height: min(66vh, calc(100vw * 9 / 7));
+        aspect-ratio: 7 / 9;
+        margin: 0 auto 30px;
+        background: linear-gradient(160deg, #2d6a4f, #1b4332);
+        border: 4px solid #3a5a40;
+        border-radius: 16px;
+        padding: 6px;
+        box-shadow: 0 22px 55px rgba(0,0,0,0.6),
+                    inset 0 3px 14px rgba(0,0,0,0.4),
+                    0 0 0 1px rgba(82,183,136,0.3);
+    }
+
+    .board-grid {
+        width: 100%;
+        height: 100%;
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        grid-template-rows: repeat(9, 1fr);
+        gap: 3px;
+        border-radius: 9px;
+        overflow: hidden;
+    }
+
+    .cell {
+        position: relative;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: filter 0.15s ease, box-shadow 0.15s ease;
+        box-shadow: inset 0 1px 2px rgba(255,255,255,0.28),
+                    inset 0 -2px 3px rgba(0,0,0,0.14);
+        overflow: hidden;
+    }
+    .cell:hover { filter: brightness(1.12); }
+
+    .grass-light { background: linear-gradient(160deg, #b0dd85, #9ccf6e); }
+    .grass-dark  { background: linear-gradient(160deg, #8fc061, #79ab4e); }
+    .river-light { background: linear-gradient(160deg, #6fd0f0, #4bb8e0); }
+    .river-dark  { background: linear-gradient(160deg, #4bb0dd, #3296c9); }
+
+    .den-circle {
+        position: absolute;
+        width: 74%;
+        height: 74%;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: clamp(9px, 3vmin, 18px);
+        font-weight: 900;
+        color: #fff;
+        border: 2px solid;
+        text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        z-index: 1;
+    }
+    .den-red {
+        background: radial-gradient(circle at 34% 28%, #ff8a80, #c62828 72%);
+        border-color: #ffcdd2;
+        box-shadow: 0 0 10px rgba(198,40,40,0.6), inset 0 2px 6px rgba(0,0,0,0.35);
+    }
+    .den-blue {
+        background: radial-gradient(circle at 34% 28%, #82b1ff, #1565c0 72%);
+        border-color: #bbdefb;
+        box-shadow: 0 0 10px rgba(21,101,192,0.6), inset 0 2px 6px rgba(0,0,0,0.35);
+    }
+
+    .trap-mark {
+        position: absolute;
+        font-size: clamp(12px, 4vmin, 22px);
+        line-height: 1;
+        opacity: 0.92;
+        filter: drop-shadow(0 2px 3px rgba(0,0,0,0.45));
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    .piece {
+        position: relative;
+        width: 82%;
+        height: 82%;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: clamp(14px, 5vmin, 26px);
+        line-height: 1;
+        z-index: 3;
+        transition: transform 0.2s ease;
+        pointer-events: none;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5),
+                    inset 0 -4px 8px rgba(0,0,0,0.3),
+                    inset 0 4px 8px rgba(255,255,255,0.35);
+    }
+    .piece.red {
+        background: radial-gradient(circle at 32% 26%, #ff8a7a, #d32f2f 68%, #a01818);
+        border: 2px solid #ffcdd2;
+    }
+    .piece.blue {
+        background: radial-gradient(circle at 32% 26%, #74b9ff, #1976d2 68%, #0d47a1);
+        border: 2px solid #bbdefb;
+    }
+
+    .cell.selected {
+        box-shadow: 0 0 0 3px #ffd166,
+                    0 0 18px rgba(255,209,102,0.85),
+                    inset 0 0 12px rgba(255,209,102,0.4);
+        z-index: 6;
+    }
+    .cell.selected .piece { transform: scale(1.08); }
+
+    .cell.valid-move::after {
+        content: '';
+        position: absolute;
+        width: 30%;
+        height: 30%;
+        border-radius: 50%;
+        background: rgba(255, 209, 102, 0.9);
+        box-shadow: 0 0 14px rgba(255,209,102,0.95);
+        z-index: 4;
+        animation: dotPulse 1.1s ease-in-out infinite;
+        pointer-events: none;
+    }
+    .cell.valid-move.has-piece::after {
+        width: 76%;
+        height: 76%;
+        background: transparent;
+        border: 3px solid rgba(255, 209, 102, 0.95);
+        box-shadow: 0 0 14px rgba(255,209,102,0.9), inset 0 0 10px rgba(255,209,102,0.5);
+        animation: ringPulse 1.1s ease-in-out infinite;
+    }
+    @keyframes dotPulse {
+        0%, 100% { transform: scale(1); opacity: 0.9; }
+        50% { transform: scale(1.35); opacity: 0.55; }
+    }
+    @keyframes ringPulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.06); opacity: 0.65; }
+    }
+
+    /* ============ 浮動按鈕 ============ */
+    .float-btn {
+        position: fixed;
+        bottom: 18px;
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        border: 2px solid rgba(82,183,136,0.55);
+        background: linear-gradient(140deg, rgba(45,106,79,0.95), rgba(27,67,50,0.95));
+        color: #d8f3dc;
+        font-size: 1.35em;
+        cursor: pointer;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.5),
+                    inset 0 1px 0 rgba(255,255,255,0.12);
+        transition: all 0.22s ease;
+        font-family: inherit;
+    }
+    .float-btn:hover { transform: scale(1.08); border-color: #95d5b2; }
+    .float-btn:active { transform: scale(0.95); }
+    .float-btn.left { left: 18px; }
+    .float-btn.right { right: 18px; }
+
+    /* ============ 彈窗 ============ */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(4, 16, 10, 0.82);
+        backdrop-filter: blur(5px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+        padding: 20px;
+        animation: fadeIn 0.25s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .modal-box {
+        background: linear-gradient(165deg, #2d6a4f, #1b4332);
+        border: 2px solid #52b788;
+        border-radius: 24px;
+        padding: 30px 24px 22px;
+        text-align: center;
+        max-width: 340px;
+        width: 100%;
+        box-shadow: 0 26px 70px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.15);
+        animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes popIn {
+        from { transform: scale(0.82); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+    .modal-emoji {
+        font-size: 2.9em;
+        line-height: 1;
+        margin-bottom: 10px;
+        filter: drop-shadow(0 6px 16px rgba(0,0,0,0.5));
+    }
+    .modal-title {
+        font-size: 1.6em;
+        font-weight: 900;
+        letter-spacing: 3px;
+        margin-bottom: 6px;
+    }
+    .modal-title.red { color: #ff8a80; text-shadow: 0 0 22px rgba(255,138,128,0.6); }
+    .modal-title.blue { color: #82b1ff; text-shadow: 0 0 22px rgba(130,177,255,0.6); }
+    .modal-sub {
+        color: #95d5b2;
+        font-size: 0.84em;
+        letter-spacing: 2px;
+        margin-bottom: 14px;
+    }
+    .modal-reward {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 16px;
+        margin-bottom: 18px;
+        border-radius: 20px;
+        background: linear-gradient(140deg, rgba(246,189,96,0.25), rgba(231,111,81,0.2));
+        border: 1.5px solid rgba(246,189,96,0.65);
+        color: #ffe082;
+        font-weight: 800;
+        font-size: 1.05em;
+        letter-spacing: 1px;
+        animation: rewardPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+    }
+    @keyframes rewardPop {
+        from { transform: scale(0.5); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+    .modal-actions { display: flex; gap: 10px; }
+    .modal-btn {
+        flex: 1;
+        padding: 13px 8px;
+        border-radius: 13px;
+        font-family: inherit;
+        font-size: 0.9em;
+        font-weight: 800;
+        letter-spacing: 2px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 2px solid transparent;
+    }
+    .modal-btn.primary {
+        background: linear-gradient(135deg, #f6bd60, #e76f51);
+        color: #fff;
+        box-shadow: 0 8px 22px rgba(231,111,81,0.45);
+    }
+    .modal-btn.primary:hover { transform: translateY(-2px); }
+    .modal-btn.secondary {
+        background: rgba(82,183,136,0.14);
+        border-color: rgba(82,183,136,0.6);
+        color: #d8f3dc;
+    }
+    .modal-btn.secondary:hover { background: rgba(82,183,136,0.3); }
+    .modal-btn:active { transform: scale(0.97); }
+</style>
+</head>
+<body>
+
+<div class="screen" id="coverScreen">
+    <div class="cover-content">
+        <div class="cover-icon">🐾</div>
+        <h1>鬥獸棋</h1>
+        <p class="subtitle">森林之戰</p>
+
+        <div class="trophy-bar" id="trophyBar">
+            <span class="t-icon">🏆</span>
+            <span class="t-num" id="trophyNum">0</span>
+        </div>
+
+        <div class="option-group">
+            <div class="option-label">遊 戲 模 式</div>
+            <div class="option-buttons" id="modeOptions">
+                <button class="opt-btn active" data-mode="pvp">👥 PvP</button>
+                <button class="opt-btn" data-mode="pve">🤖 PvAI</button>
+            </div>
+        </div>
+
+        <div class="option-group" id="difficultyGroup" style="display:none">
+            <div class="option-label">A I 難 度</div>
+            <div class="option-buttons" id="difficultyOptions">
+                <button class="opt-btn" data-diff="easy">🌱 簡單 +10</button>
+                <button class="opt-btn active" data-diff="normal">🌿 普通 +20</button>
+                <button class="opt-btn" data-diff="hard">🌳 困難 +50</button>
+            </div>
+        </div>
+
+        <button class="start-btn" id="startBtn">開始遊戲</button>
+
+        <div class="save-bar">
+            <button class="save-btn" id="saveBtn">
+                <span class="s-icon">💾</span>
+                <span class="s-label">儲存</span>
+            </button>
+            <button class="save-btn" id="loadBtn">
+                <span class="s-icon">📂</span>
+                <span class="s-label">載入</span>
+            </button>
+            <button class="save-btn reset-btn" id="resetBtn">
+                <span class="s-icon">🔄</span>
+                <span class="s-label">重設</span>
+            </button>
+        </div>
+
+        <div class="rules">
+            <strong>規則</strong>　象＞獅＞虎＞豹＞狼＞狗＞貓＞鼠，鼠可吃象<br>
+            僅鼠可入河 · 獅虎可跳河吃子 · 大象不能吃鼠<br>
+            水中鼠只能吃水中鼠 · 對方陷阱內可被任意吃<br>
+            進入對方獸穴 或 吃光對方棋子 即獲勝
+        </div>
+
+        <div class="copyright" id="copyrightText"></div>
+    </div>
+</div>
+
+<div class="screen" id="gameScreen" style="display:none">
+    <div class="game-header">
+        <button class="back-btn" id="backBtn">‹ 封面</button>
+        <button class="restart-icon-btn" id="restartBtn" title="重新開局">🔄</button>
+        <div class="status" id="gameStatus">紅方回合</div>
+        <div class="mode-tag" id="modeTag">PvP</div>
+    </div>
+    <div class="board-wrapper">
+        <div class="board-grid" id="gameBoard"></div>
+    </div>
+</div>
+
+<button class="float-btn left" id="muteBtn" title="靜音 / 播放">🔊</button>
+<button class="float-btn right" id="fsBtn" title="全屏">⛶</button>
+
+<input type="file" id="fileInput" accept=".txt" style="display:none">
+
+<script>
+/* =========================================================
+   localStorage 鍵
+   ========================================================= */
+const LS_TROPHY = 'animal_chess_trophies';
+const LS_MUTED  = 'animal_chess_muted';
+
+let trophies = parseInt(localStorage.getItem(LS_TROPHY) || '0', 10) || 0;
+let muted = localStorage.getItem(LS_MUTED) === 'true';
+
+/* =========================================================
+   音效系統
+   ========================================================= */
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function getAudioCtx() {
+    if (!audioCtx) {
+        try { audioCtx = new AudioCtx(); } catch (e) { audioCtx = null; }
+    }
+    return audioCtx;
+}
+
+function playTone(freq, duration, type, volume, delay) {
+    if (muted) return;
+    const ctx = getAudioCtx();
+    if (!ctx) return;
+    if (ctx.state === 'suspended') ctx.resume();
+
+    const startAt = ctx.currentTime + (delay || 0);
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.setValueAtTime(freq, startAt);
+    gain.gain.setValueAtTime(volume || 0.1, startAt);
+    gain.gain.exponentialRampToValueAtTime(0.001, startAt + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(startAt);
+    osc.stop(startAt + duration + 0.02);
+}
+
+const SFX = {
+    select: () => playTone(520, 0.07, 'sine', 0.12),
+    move: () => {
+        playTone(380, 0.10, 'triangle', 0.22);
+        playTone(520, 0.10, 'triangle', 0.18, 0.06);
+    },
+    capture: () => {
+        playTone(240, 0.14, 'square', 0.24);
+        playTone(170, 0.20, 'square', 0.22, 0.08);
+    },
+    jump: () => {
+        playTone(440, 0.10, 'sine', 0.22);
+        playTone(660, 0.10, 'sine', 0.20, 0.07);
+        playTone(880, 0.12, 'sine', 0.18, 0.14);
+    },
+    win: () => {
+        [523, 659, 784, 1047].forEach((f, i) =>
+            playTone(f, 0.22, 'sine', 0.12, i * 0.1));
+    },
+    lose: () => {
+        [440, 370, 300, 240].forEach((f, i) =>
+            playTone(f, 0.28, 'sine', 0.10, i * 0.13));
+    },
+    trophy: () => {
+        [880, 1175, 1568].forEach((f, i) =>
+            playTone(f, 0.18, 'sine', 0.10, i * 0.09));
+    },
+    click: () => playTone(380, 0.05, 'sine', 0.06)
+};
+
+/* ---------- 背景音樂 ---------- */
+let bgMusic = null;
+
+function initBgMusic() {
+    try {
+        bgMusic = new Audio('Aniaml Chess - Jungle Animals.mp3');
+        bgMusic.loop = true;
+        bgMusic.volume = 1.0;
+        bgMusic.preload = 'auto';
+        if (!muted) attemptPlayMusic();
+    } catch (e) { bgMusic = null; }
+}
+
+function attemptPlayMusic() {
+    if (!bgMusic || muted) return;
+    const p = bgMusic.play();
+    if (p && p.catch) {
+        p.catch(() => {
+            const unlock = () => {
+                if (bgMusic && !muted) bgMusic.play().catch(() => {});
+                document.removeEventListener('click', unlock);
+                document.removeEventListener('touchstart', unlock);
+            };
+            document.addEventListener('click', unlock);
+            document.addEventListener('touchstart', unlock);
+        });
+    }
+}
+
+function updateMuteBtn() {
+    document.getElementById('muteBtn').textContent = muted ? '🔇' : '🔊';
+}
+
+function toggleMute() {
+    muted = !muted;
+    localStorage.setItem(LS_MUTED, muted ? 'true' : 'false');
+    if (muted) {
+        if (bgMusic) bgMusic.pause();
+    } else {
+        if (bgMusic) bgMusic.play().catch(() => {});
+        SFX.click();
+    }
+    updateMuteBtn();
+}
+
+/* =========================================================
+   獎盃系統
+   ========================================================= */
+function updateTrophyDisplay(animate) {
+    document.getElementById('trophyNum').textContent = trophies;
+    if (animate) {
+        const bar = document.getElementById('trophyBar');
+        bar.classList.remove('bump');
+        void bar.offsetWidth;
+        bar.classList.add('bump');
+    }
+}
+
+function addTrophies(amount) {
+    trophies += amount;
+    localStorage.setItem(LS_TROPHY, String(trophies));
+    updateTrophyDisplay(true);
+}
+
+/* =========================================================
+   存檔 / 載入 / 重設
+   ========================================================= */
+function saveProgress() {
+    SFX.click();
+    const content =
+        '=== Animal Chess Save ===\n' +
+        'Version: 1.0\n' +
+        'Trophies: ' + trophies + '\n' +
+        'Muted: ' + muted + '\n' +
+        'SavedAt: ' + new Date().toLocaleString() + '\n';
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'animal_chess_save.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    showToast('💾 存檔已下載');
+}
+
+function loadProgress() {
+    SFX.click();
+    document.getElementById('fileInput').click();
+}
+
+function handleFileLoad(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const text = e.target.result;
+            const tMatch = text.match(/Trophies:\s*(-?\d+)/);
+            const mMatch = text.match(/Muted:\s*(true|false)/i);
+
+            if (tMatch) {
+                trophies = Math.max(0, parseInt(tMatch[1], 10) || 0);
+                localStorage.setItem(LS_TROPHY, String(trophies));
+                updateTrophyDisplay(true);
+            }
+            if (mMatch) {
+                muted = mMatch[1].toLowerCase() === 'true';
+                localStorage.setItem(LS_MUTED, muted ? 'true' : 'false');
+                updateMuteBtn();
+                if (muted && bgMusic) bgMusic.pause();
+                else if (!muted && bgMusic) bgMusic.play().catch(() => {});
+            }
+            showToast('✅ 載入成功！');
+        } catch (err) {
+            showToast('❌ 載入失敗：檔案格式錯誤');
+        }
+    };
+    reader.onerror = () => showToast('❌ 讀取檔案失敗');
+    reader.readAsText(file);
+}
+
+/* ---------- 重設進度 ---------- */
+function resetProgress() {
+    SFX.click();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.id = 'resetModal';
+    overlay.innerHTML = `
+        <div class="modal-box">
+            <div class="modal-emoji">⚠️</div>
+            <h2 class="modal-title" style="color:#ffb3a0; font-size:1.35em;">重設進度？</h2>
+            <p class="modal-sub">獎盃將歸零、音效恢復預設<br>此操作無法復原</p>
+            <div class="modal-actions">
+                <button class="modal-btn secondary" id="resetCancel">取消</button>
+                <button class="modal-btn primary" id="resetConfirm" style="background:linear-gradient(135deg,#e76f51,#c62828); box-shadow:0 8px 22px rgba(198,40,40,0.5);">確認重設</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
+    document.getElementById('resetCancel').addEventListener('click', () => {
+        overlay.remove();
+        SFX.click();
+    });
+    document.getElementById('resetConfirm').addEventListener('click', () => {
+        // 重設獎盃
+        trophies = 0;
+        localStorage.setItem(LS_TROPHY, '0');
+        updateTrophyDisplay(true);
+
+        // 重設音效（預設為開啟）
+        muted = false;
+        localStorage.setItem(LS_MUTED, 'false');
+        updateMuteBtn();
+        if (bgMusic) bgMusic.play().catch(() => {});
+
+        overlay.remove();
+        SFX.trophy();
+        showToast('🔄 進度已重設');
+    });
+}
+
+/* ---------- 輕量提示 ---------- */
+function showToast(msg) {
+    const toast = document.createElement('div');
+    toast.textContent = msg;
+    toast.style.cssText = `
+        position: fixed; left: 50%; top: 30px; transform: translateX(-50%);
+        background: linear-gradient(140deg, #2d6a4f, #1b4332);
+        color: #d8f3dc; padding: 12px 22px; border-radius: 12px;
+        border: 2px solid #52b788; font-weight: 700; font-size: 0.9em;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.5); z-index: 99999;
+        animation: fadeIn 0.25s ease; letter-spacing: 1px;
+        white-space: nowrap;
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+        toast.style.transition = 'opacity 0.4s, transform 0.4s';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(-50%) translateY(-12px)';
+        setTimeout(() => toast.remove(), 450);
+    }, 1600);
+}
+
+/* =========================================================
+   全屏
+   ========================================================= */
+function toggleFullscreen() {
+    SFX.click();
+    const el = document.documentElement;
+    if (!document.fullscreenElement) {
+        (el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen || function(){}).call(el);
+    } else {
+        (document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen || function(){}).call(document);
+    }
+}
+
+/* =========================================================
+   常數
+   ========================================================= */
+const RIVER = new Set([
+    '3,1','3,2','3,4','3,5',
+    '4,1','4,2','4,4','4,5',
+    '5,1','5,2','5,4','5,5'
+]);
+
+const DENS = { red: [8, 3], blue: [0, 3] };
+
+const TRAPS = {
+    red:  [[8,2],[8,4],[7,3]],
+    blue: [[0,2],[0,4],[1,3]]
+};
+
+const GUARD_CELLS = {
+    red:  [[7,2],[7,4]],
+    blue: [[1,2],[1,4]]
+};
+
+const ICONS = {
+    '象':'🐘', '獅':'🦁', '虎':'🐯', '豹':'🐆',
+    '狼':'🐺', '狗':'🐕', '貓':'🐈', '鼠':'🐭'
+};
+
+const DIFFICULTY = {
+    easy:   { randomness: 0.70, name: '簡單', reward: 10 },
+    normal: { randomness: 0.22, name: '普通', reward: 20 },
+    hard:   { randomness: 0.03, name: '困難', reward: 50 }
+};
+
+/* =========================================================
+   地形工具
+   ========================================================= */
+const isRiver = (r, c) => RIVER.has(r + ',' + c);
+const isDen   = (r, c, p) => DENS[p][0] === r && DENS[p][1] === c;
+const isTrapFor = (r, c, p) => TRAPS[p].some(t => t[0] === r && t[1] === c);
+const isAnyTrap = (r, c) => isTrapFor(r, c, 'red') || isTrapFor(r, c, 'blue');
+const isInOpponentTrap = (r, c, owner) =>
+    isTrapFor(r, c, owner === 'red' ? 'blue' : 'red');
+
+/* =========================================================
+   棋子
+   ========================================================= */
+class Piece {
+    constructor(name, rank, player) {
+        this.name = name;
+        this.rank = rank;
+        this.player = player;
+    }
+    canCapture(target, targetInMyTrap) {
+        if (this.player === target.player) return false;
+        if (this.rank === 8 && target.rank === 1) return false;
+        if (targetInMyTrap) return true;
+        if (this.rank === 1 && target.rank === 8) return true;
+        return this.rank >= target.rank;
+    }
+}
+
+/* =========================================================
+   遊戲核心
+   ========================================================= */
+class Game {
+    constructor() {
+        this.board = Array.from({ length: 9 }, () => Array(7).fill(null));
+        this.currentPlayer = 'red';
+        this.gameOver = false;
+        this.winner = null;
+        this.setup();
+    }
+
+    setup() {
+        const layout = [
+            ['獅', 7, 'blue', 0, 0], ['虎', 6, 'blue', 0, 6],
+            ['豹', 5, 'blue', 1, 1], ['狼', 4, 'blue', 1, 5],
+            ['狗', 3, 'blue', 2, 0], ['貓', 2, 'blue', 2, 2],
+            ['鼠', 1, 'blue', 2, 4], ['象', 8, 'blue', 2, 6],
+            ['象', 8, 'red', 6, 0],  ['鼠', 1, 'red', 6, 2],
+            ['貓', 2, 'red', 6, 4],  ['狗', 3, 'red', 6, 6],
+            ['狼', 4, 'red', 7, 1],  ['豹', 5, 'red', 7, 5],
+            ['虎', 6, 'red', 8, 0],  ['獅', 7, 'red', 8, 6]
+        ];
+        for (const [n, rk, p, r, c] of layout) {
+            this.board[r][c] = new Piece(n, rk, p);
+        }
+    }
+
+    isValidMove(fr, fc, tr, tc, player) {
+        if (fr < 0 || fr > 8 || fc < 0 || fc > 6) return false;
+        if (tr < 0 || tr > 8 || tc < 0 || tc > 6) return false;
+
+        const piece = this.board[fr][fc];
+        if (!piece || piece.player !== player) return false;
+        if (isDen(tr, tc, player)) return false;
+
+        const target = this.board[tr][tc];
+        if (target && target.player === player) return false;
+
+        const dr = Math.abs(tr - fr);
+        const dc = Math.abs(tc - fc);
+
+        if ((piece.rank === 6 || piece.rank === 7)) {
+            if (dr === 4 && dc === 0) {
+                const step = tr > fr ? 1 : -1;
+                const mids = [];
+                for (let i = 1; i <= 3; i++) mids.push([fr + i * step, fc]);
+                if (mids.every(([r, c]) => isRiver(r, c) && this.board[r][c] === null)) {
+                    if (!target) return true;
+                    const tInMyTrap = isInOpponentTrap(tr, tc, target.player);
+                    if (piece.canCapture(target, tInMyTrap)) return true;
+                }
+            }
+            if (dc === 3 && dr === 0) {
+                const step = tc > fc ? 1 : -1;
+                const mids = [];
+                for (let i = 1; i <= 2; i++) mids.push([fr, fc + i * step]);
+                if (mids.every(([r, c]) => isRiver(r, c) && this.board[r][c] === null)) {
+                    if (!target) return true;
+                    const tInMyTrap = isInOpponentTrap(tr, tc, target.player);
+                    if (piece.canCapture(target, tInMyTrap)) return true;
+                }
+            }
+        }
+
+        if (dr + dc !== 1) return false;
+        if (isRiver(tr, tc) && piece.rank !== 1) return false;
+
+        if (target) {
+            const selfInRiver   = isRiver(fr, fc);
+            const targetInRiver = isRiver(tr, tc);
+
+            if (piece.rank === 1) {
+                if (!selfInRiver && targetInRiver && target.rank === 1) return false;
+                if (selfInRiver && !targetInRiver &&
+                    (target.rank === 1 || target.rank === 8)) return false;
+            }
+
+            const tInMyTrap = isInOpponentTrap(tr, tc, target.player);
+            if (!piece.canCapture(target, tInMyTrap)) return false;
+        }
+        return true;
+    }
+
+    makeMove(fr, fc, tr, tc) {
+        if (this.gameOver) return false;
+        if (!this.isValidMove(fr, fc, tr, tc, this.currentPlayer)) return false;
+
+        const piece = this.board[fr][fc];
+        const isJump = (piece.rank === 6 || piece.rank === 7) &&
+                       (Math.abs(tr - fr) + Math.abs(tc - fc)) > 1;
+        const wasCapture = this.board[tr][tc] !== null;
+
+        this.board[tr][tc] = piece;
+        this.board[fr][fc] = null;
+
+        const opponent = this.currentPlayer === 'red' ? 'blue' : 'red';
+
+        if (isDen(tr, tc, opponent)) {
+            this.gameOver = true;
+            this.winner = this.currentPlayer;
+            return true;
+        }
+
+        let remain = 0;
+        for (let r = 0; r < 9; r++)
+            for (let c = 0; c < 7; c++)
+                if (this.board[r][c] && this.board[r][c].player === opponent) remain++;
+
+        if (remain === 0) {
+            this.gameOver = true;
+            this.winner = this.currentPlayer;
+            return true;
+        }
+
+        this.currentPlayer = opponent;
+        return true;
+    }
+
+    getValidMoves(player) {
+        const moves = [];
+        for (let fr = 0; fr < 9; fr++) {
+            for (let fc = 0; fc < 7; fc++) {
+                const p = this.board[fr][fc];
+                if (!p || p.player !== player) continue;
+                for (let tr = 0; tr < 9; tr++) {
+                    for (let tc = 0; tc < 7; tc++) {
+                        if (this.isValidMove(fr, fc, tr, tc, player)) {
+                            moves.push({ fromR: fr, fromC: fc, toR: tr, toC: tc });
+                        }
+                    }
+                }
+            }
+        }
+        return moves;
+    }
+
+    clone() {
+        const g = new Game();
+        g.board = this.board.map(row =>
+            row.map(p => p ? new Piece(p.name, p.rank, p.player) : null)
+        );
+        g.currentPlayer = this.currentPlayer;
+        g.gameOver = this.gameOver;
+        g.winner = this.winner;
+        return g;
+    }
+}
+
+/* =========================================================
+   AI
+   ========================================================= */
+const AI = {
+    getRiverJumpTargets(game, r, c, piece) {
+        const targets = [];
+        if (piece.rank !== 6 && piece.rank !== 7) return targets;
+        for (const dr of [-4, 4]) {
+            const tr = r + dr;
+            if (tr < 0 || tr > 8) continue;
+            const step = dr > 0 ? 1 : -1;
+            const mids = [];
+            for (let i = 1; i <= 3; i++) mids.push([r + i * step, c]);
+            if (mids.every(([rr, cc]) => isRiver(rr, cc) && game.board[rr][cc] === null)) {
+                const target = game.board[tr][c];
+                if (!target || target.player !== piece.player) targets.push({ r: tr, c });
+            }
+        }
+        for (const dc of [-3, 3]) {
+            const tc = c + dc;
+            if (tc < 0 || tc > 6) continue;
+            const step = dc > 0 ? 1 : -1;
+            const mids = [];
+            for (let i = 1; i <= 2; i++) mids.push([r, c + i * step]);
+            if (mids.every(([rr, cc]) => isRiver(rr, cc) && game.board[rr][cc] === null)) {
+                const target = game.board[r][tc];
+                if (!target || target.player !== piece.player) targets.push({ r, c: tc });
+            }
+        }
+        return targets;
+    },
+
+    evaluate(game, player) {
+        const opp = player === 'red' ? 'blue' : 'red';
+        const myDen  = DENS[player];
+        const oppDen = DENS[opp];
+        let score = 0;
+
+        for (let r = 0; r < 9; r++) {
+            for (let c = 0; c < 7; c++) {
+                const p = game.board[r][c];
+                if (!p) continue;
+
+                let value = p.rank * 15;
+                if (p.rank === 6 || p.rank === 7) value += 12;
+                if (isInOpponentTrap(r, c, p.player)) value -= 260;
+
+                if (p.player === player) {
+                    const dOpp = Math.abs(r - oppDen[0]) + Math.abs(c - oppDen[1]);
+                    if (dOpp === 1) value += 1500;
+                    else if (dOpp === 2) value += 400;
+                    else if (dOpp === 3) value += 120;
+                    else if (dOpp === 4) value += 30;
+
+                    const dMy = Math.abs(r - myDen[0]) + Math.abs(c - myDen[1]);
+                    if (dMy === 1) value += 90;
+                    else if (dMy === 2) value += 50;
+                    else if (dMy === 3) value += 20;
+
+                    if (p.rank === 8) {
+                        if (dMy === 1) value += 260;
+                        else if (dMy === 2) value += 200;
+                        else if (dMy === 3) value += 90;
+                    }
+                    if (p.rank === 1 && isRiver(r, c)) value += 90;
+
+                    score += value;
+                } else {
+                    const dMy = Math.abs(r - myDen[0]) + Math.abs(c - myDen[1]);
+                    if (dMy === 1) value += 4000;
+                    else if (dMy === 2) value += 800;
+                    else if (dMy === 3) value += 200;
+                    else if (dMy === 4) value += 50;
+
+                    const dOpp = Math.abs(r - oppDen[0]) + Math.abs(c - oppDen[1]);
+                    if (dOpp <= 2) value += (3 - dOpp) * 25;
+
+                    score -= value;
+
+                    if (p.rank === 6 || p.rank === 7) {
+                        const inMyHalf = player === 'blue' ? r <= 2 : r >= 6;
+                        if (inMyHalf) {
+                            if (dMy <= 2) score -= 5000;
+                            else if (dMy <= 3) score -= 2200;
+                            else if (dMy <= 5) score -= 900;
+                        } else {
+                            const jumps = this.getRiverJumpTargets(game, r, c, p);
+                            let worst = 0;
+                            for (const t of jumps) {
+                                const inAfter = player === 'blue' ? t.r <= 2 : t.r >= 6;
+                                if (!inAfter) continue;
+                                const dAfter = Math.abs(t.r - myDen[0]) + Math.abs(t.c - myDen[1]);
+                                const threat = Math.max(0, 6 - dAfter) * 320;
+                                if (threat > worst) worst = threat;
+                            }
+                            score -= worst;
+                        }
+                    }
+                }
+            }
+        }
+
+        // 陷阱防守
+        const myTraps = TRAPS[player];
+        const guards  = GUARD_CELLS[player];
+        let oppThreatensTraps = false;
+        for (const [tr, tc] of myTraps) {
+            for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                    const nr = tr + dr, nc = tc + dc;
+                    if (nr < 0 || nr > 8 || nc < 0 || nc > 6) continue;
+                    const p = game.board[nr][nc];
+                    if (p && p.player === opp) { oppThreatensTraps = true; break; }
+                }
+                if (oppThreatensTraps) break;
+            }
+            if (oppThreatensTraps) break;
+        }
+        if (oppThreatensTraps) {
+            let guardsHeld = 0;
+            for (const [gr, gc] of guards) {
+                const p = game.board[gr][gc];
+                if (p && p.player === player) { score += 350; guardsHeld++; }
+            }
+            if (guardsHeld === 0) score -= 200;
+        }
+
+        // 進攻平衡
+        let attackers = 0, totalPieces = 0;
+        for (let r = 0; r < 9; r++) {
+            for (let c = 0; c < 7; c++) {
+                const p = game.board[r][c];
+                if (!p || p.player !== player) continue;
+                totalPieces++;
+                if (player === 'blue' && r >= 4) attackers++;
+                if (player === 'red' && r <= 4) attackers++;
+            }
+        }
+        if (totalPieces > 5 && attackers === 0) score -= 180;
+        else if (totalPieces > 5 && attackers === 1) score -= 50;
+
+        return score;
+    },
+
+    hasImmediateWin(game, player) {
+        const oppDen = DENS[player === 'red' ? 'blue' : 'red'];
+        const moves = game.getValidMoves(player);
+        for (const m of moves) {
+            if (m.toR === oppDen[0] && m.toC === oppDen[1]) return true;
+        }
+        return false;
+    },
+
+    chooseMove(game, player, difficulty) {
+        const moves = game.getValidMoves(player);
+        if (!moves.length) return null;
+
+        const cfg = DIFFICULTY[difficulty] || DIFFICULTY.normal;
+        const opp = player === 'red' ? 'blue' : 'red';
+
+        const oppDen = DENS[opp];
+        for (const m of moves) {
+            if (m.toR === oppDen[0] && m.toC === oppDen[1]) return m;
+        }
+
+        const scored = [];
+        for (const m of moves) {
+            const clone = game.clone();
+            clone.makeMove(m.fromR, m.fromC, m.toR, m.toC);
+
+            let score = this.evaluate(clone, player);
+            if (!clone.gameOver && this.hasImmediateWin(clone, opp)) score -= 1000000;
+            score += (Math.random() - 0.5) * cfg.randomness * 300;
+            scored.push({ move: m, score });
+        }
+
+        scored.sort((a, b) => b.score - a.score);
+
+        if (difficulty === 'easy') {
+            if (Math.random() < 0.55) return moves[Math.floor(Math.random() * moves.length)];
+            return scored[0].move;
+        }
+
+        if (difficulty === 'hard') {
+            const top = scored.slice(0, 10);
+            for (const entry of top) {
+                const c1 = game.clone();
+                c1.makeMove(entry.move.fromR, entry.move.fromC, entry.move.toR, entry.move.toC);
+                if (c1.gameOver) continue;
+
+                const oppMoves = c1.getValidMoves(c1.currentPlayer);
+                let worstForUs = Infinity;
+                for (const om of oppMoves) {
+                    const c2 = c1.clone();
+                    c2.makeMove(om.fromR, om.fromC, om.toR, om.toC);
+                    if (c2.gameOver && c2.winner === c1.currentPlayer) {
+                        worstForUs = -Infinity; break;
+                    }
+                    const s = this.evaluate(c2, player);
+                    if (s < worstForUs) worstForUs = s;
+                }
+                if (worstForUs !== Infinity) entry.score = entry.score * 0.3 + worstForUs * 0.7;
+            }
+            top.sort((a, b) => b.score - a.score);
+            return top[0].move;
+        }
+
+        const top = scored.slice(0, 3);
+        const weights = [0.7, 0.22, 0.08];
+        const r = Math.random();
+        let acc = 0;
+        for (let i = 0; i < top.length; i++) {
+            acc += weights[i];
+            if (r < acc) return top[i].move;
+        }
+        return top[0].move;
+    }
+};
+
+/* =========================================================
+   全域狀態
+   ========================================================= */
+const state = {
+    mode: 'pvp',
+    difficulty: 'normal',
+    game: null,
+    selected: null,
+    validMoves: [],
+    aiThinking: false,
+    animating: false
+};
+
+/* =========================================================
+   DOM
+   ========================================================= */
+const elCover    = document.getElementById('coverScreen');
+const elGame     = document.getElementById('gameScreen');
+const elBoard    = document.getElementById('gameBoard');
+const elStatus   = document.getElementById('gameStatus');
+const elModeTag  = document.getElementById('modeTag');
+const elDiffGroup = document.getElementById('difficultyGroup');
+
+/* =========================================================
+   移動動畫
+   ========================================================= */
+function animateMove(fromR, fromC, toR, toC, soundType, callback) {
+    if (soundType === 'jump') SFX.jump();
+    else if (soundType === 'capture') SFX.capture();
+    else SFX.move();
+    const fromCell = elBoard.querySelector(`.cell[data-r="${fromR}"][data-c="${fromC}"]`);
+    const toCell   = elBoard.querySelector(`.cell[data-r="${toR}"][data-c="${toC}"]`);
+    if (!fromCell || !toCell) { callback(); return; }
+
+    const pieceEl = fromCell.querySelector('.piece');
+    if (!pieceEl) { callback(); return; }
+
+    const fromRect = pieceEl.getBoundingClientRect();
+    const toRect   = toCell.getBoundingClientRect();
+
+    const size = fromRect.width;
+    const targetLeft = toRect.left + (toRect.width - size) / 2;
+    const targetTop  = toRect.top  + (toRect.height - size) / 2;
+
+    pieceEl.style.visibility = 'hidden';
+
+    const floater = document.createElement('div');
+    floater.className = pieceEl.className;
+    floater.textContent = pieceEl.textContent;
+    const cs = getComputedStyle(pieceEl);
+    floater.style.cssText = `
+        position: fixed;
+        left: ${fromRect.left}px;
+        top: ${fromRect.top}px;
+        width: ${size}px;
+        height: ${size}px;
+        font-size: ${cs.fontSize};
+        z-index: 99999;
+        pointer-events: none;
+        margin: 0;
+        transition: left 0.4s cubic-bezier(0.34, 1.2, 0.64, 1),
+                    top 0.4s cubic-bezier(0.34, 1.2, 0.64, 1),
+                    transform 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
+        box-shadow: 0 12px 26px rgba(0,0,0,0.65),
+                    inset 0 -4px 8px rgba(0,0,0,0.3),
+                    inset 0 4px 8px rgba(255,255,255,0.35);
+        transform: scale(1);
+    `;
+    document.body.appendChild(floater);
+
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            floater.style.left = targetLeft + 'px';
+            floater.style.top  = targetTop + 'px';
+            floater.style.transform = 'scale(1.06)';
+        });
+    });
+
+    setTimeout(() => {
+        floater.style.transform = 'scale(1)';
+        setTimeout(() => {
+            floater.remove();
+            callback();
+        }, 80);
+    }, 420);
+}
+
+/* =========================================================
+   封面互動
+   ========================================================= */
+document.querySelectorAll('#modeOptions .opt-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        SFX.click();
+        document.querySelectorAll('#modeOptions .opt-btn')
+            .forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.mode = btn.dataset.mode;
+        elDiffGroup.style.display = state.mode === 'pve' ? 'block' : 'none';
+    });
+});
+
+document.querySelectorAll('#difficultyOptions .opt-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        SFX.click();
+        document.querySelectorAll('#difficultyOptions .opt-btn')
+            .forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.difficulty = btn.dataset.diff;
+    });
+});
+
+document.getElementById('startBtn').addEventListener('click', startGame);
+document.getElementById('backBtn').addEventListener('click', backToCover);
+document.getElementById('restartBtn').addEventListener('click', restartGame);
+document.getElementById('muteBtn').addEventListener('click', toggleMute);
+document.getElementById('fsBtn').addEventListener('click', toggleFullscreen);
+document.getElementById('saveBtn').addEventListener('click', saveProgress);
+document.getElementById('loadBtn').addEventListener('click', loadProgress);
+document.getElementById('resetBtn').addEventListener('click', resetProgress);
+
+document.getElementById('fileInput').addEventListener('change', (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) handleFileLoad(file);
+    e.target.value = '';
+});
+
+/* =========================================================
+   畫面切換
+   ========================================================= */
+function showCover() {
+    elCover.style.display = 'block';
+    elGame.style.display = 'none';
+}
+function showGame() {
+    elCover.style.display = 'none';
+    elGame.style.display = 'block';
+}
+
+function startGame() {
+    SFX.click();
+    state.game = new Game();
+    state.selected = null;
+    state.validMoves = [];
+    state.aiThinking = false;
+    state.animating = false;
+
+    const diffName = DIFFICULTY[state.difficulty].name;
+    elModeTag.textContent = state.mode === 'pvp' ? 'PvP' : `PvAI·${diffName}`;
+
+    showGame();
+    renderBoard();
+    updateStatus();
+}
+
+/* 重新開局：不離開遊戲介面，直接開新一局 */
+function restartGame() {
+    SFX.click();
+    document.getElementById('winnerModal')?.remove();
+
+    state.game = new Game();
+    state.selected = null;
+    state.validMoves = [];
+    state.aiThinking = false;
+    state.animating = false;
+
+    const diffName = DIFFICULTY[state.difficulty].name;
+    elModeTag.textContent = state.mode === 'pvp' ? 'PvP' : `PvAI·${diffName}`;
+
+    renderBoard();
+    updateStatus();
+    showToast('🔄 已重新開局');
+}
+
+function backToCover() {
+    SFX.click();
+    state.game = null;
+    state.selected = null;
+    state.validMoves = [];
+    state.aiThinking = false;
+    state.animating = false;
+    document.getElementById('winnerModal')?.remove();
+    showCover();
+    updateTrophyDisplay(false);
+}
+
+/* =========================================================
+   渲染
+   ========================================================= */
+function renderBoard() {
+    const g = state.game;
+    if (!g) return;
+
+    elBoard.innerHTML = '';
+
+    for (let r = 0; r < 9; r++) {
+        for (let c = 0; c < 7; c++) {
+            const cell = document.createElement('div');
+            cell.className = getCellClasses(r, c);
+            cell.dataset.r = r;
+            cell.dataset.c = c;
+
+            if (isDen(r, c, 'red') || isDen(r, c, 'blue')) {
+                const den = document.createElement('div');
+                den.className = 'den-circle ' + (isDen(r, c, 'red') ? 'den-red' : 'den-blue');
+                den.textContent = '穴';
+                cell.appendChild(den);
+            }
+
+            if (isAnyTrap(r, c) && !isDen(r, c, 'red') && !isDen(r, c, 'blue')) {
+                const trap = document.createElement('div');
+                trap.className = 'trap-mark';
+                trap.textContent = '🪤';
+                cell.appendChild(trap);
+            }
+
+            const piece = g.board[r][c];
+            if (piece) {
+                const p = document.createElement('div');
+                p.className = 'piece ' + piece.player;
+                p.textContent = ICONS[piece.name] || '?';
+                cell.appendChild(p);
+                cell.classList.add('has-piece');
+            }
+
+            if (state.selected && state.selected.r === r && state.selected.c === c) {
+                cell.classList.add('selected');
+            }
+
+            if (state.validMoves.some(m => m.toR === r && m.toC === c)) {
+                cell.classList.add('valid-move');
+            }
+
+            cell.addEventListener('click', () => onCellClick(r, c));
+            elBoard.appendChild(cell);
+        }
+    }
+}
+
+function getCellClasses(r, c) {
+    const cls = ['cell'];
+    const parity = (r + c) % 2;
+    if (isRiver(r, c)) {
+        cls.push(parity === 0 ? 'river-light' : 'river-dark');
+    } else {
+        cls.push(parity === 0 ? 'grass-light' : 'grass-dark');
+    }
+    return cls.join(' ');
+}
+
+function updateStatus() {
+    const g = state.game;
+    if (!g) return;
+
+    if (g.gameOver) {
+        const w = g.winner === 'red' ? '紅方' : '藍方';
+        elStatus.textContent = `🏆 ${w}獲勝`;
+        elStatus.className = 'status win';
+    } else if (state.aiThinking) {
+        elStatus.textContent = '🤖 AI 思考中…';
+        elStatus.className = 'status';
+    } else {
+        const name = g.currentPlayer === 'red' ? '紅方' : '藍方';
+        const dot  = g.currentPlayer === 'red' ? '🔴' : '🔵';
+        elStatus.textContent = `${dot} ${name}回合`;
+        elStatus.className = 'status';
+    }
+}
+
+/* =========================================================
+   點擊邏輯
+   ========================================================= */
+function onCellClick(r, c) {
+    const g = state.game;
+    if (!g || g.gameOver) return;
+    if (state.aiThinking || state.animating) return;
+    if (state.mode === 'pve' && g.currentPlayer === 'blue') return;
+
+    const piece = g.board[r][c];
+
+    if (state.selected &&
+        state.validMoves.some(m => m.toR === r && m.toC === c)) {
+        const from = state.selected;
+        const toR = r, toC = c;
+        state.selected = null;
+        state.validMoves = [];
+        state.animating = true;
+
+        const movingPiece = g.board[from.r][from.c];
+		const targetPiece = g.board[toR][toC];
+		const isJump = (movingPiece.rank === 6 || movingPiece.rank === 7) &&
+					   (Math.abs(toR - from.r) + Math.abs(toC - from.c)) > 1;
+		let sType = 'move';
+		if (isJump) sType = 'jump';
+		else if (targetPiece) sType = 'capture';
+
+		animateMove(from.r, from.c, toR, toC, sType, () => {
+            const ok = g.makeMove(from.r, from.c, toR, toC);
+            state.animating = false;
+
+            if (ok) {
+                renderBoard();
+                updateStatus();
+
+                if (g.gameOver) { handleGameOver(); return; }
+                if (state.mode === 'pve' && g.currentPlayer === 'blue') scheduleAiMove();
+            } else {
+                renderBoard();
+            }
+        });
+        return;
+    }
+
+    if (piece && piece.player === g.currentPlayer) {
+        SFX.select();
+        state.selected = { r, c };
+        state.validMoves = computeMoves(r, c);
+        renderBoard();
+        return;
+    }
+
+    state.selected = null;
+    state.validMoves = [];
+    renderBoard();
+}
+
+function computeMoves(fr, fc) {
+    const g = state.game;
+    const moves = [];
+    for (let tr = 0; tr < 9; tr++) {
+        for (let tc = 0; tc < 7; tc++) {
+            if (g.isValidMove(fr, fc, tr, tc, g.currentPlayer)) {
+                moves.push({ toR: tr, toC: tc });
+            }
+        }
+    }
+    return moves;
+}
+
+/* =========================================================
+   AI 走棋
+   ========================================================= */
+function scheduleAiMove() {
+    state.aiThinking = true;
+    updateStatus();
+
+    setTimeout(() => {
+        if (!state.game || state.game.gameOver) {
+            state.aiThinking = false;
+            return;
+        }
+
+        const move = AI.chooseMove(state.game, 'blue', state.difficulty);
+        if (!move) {
+            state.aiThinking = false;
+            return;
+        }
+
+        state.aiThinking = false;
+        state.animating = true;
+
+        const aiPiece = state.game.board[move.fromR][move.fromC];
+		const aiTarget = state.game.board[move.toR][move.toC];
+		const aiJump = (aiPiece.rank === 6 || aiPiece.rank === 7) &&
+					   (Math.abs(move.toR - move.fromR) + Math.abs(move.toC - move.fromC)) > 1;
+		let aiType = 'move';
+		if (aiJump) aiType = 'jump';
+		else if (aiTarget) aiType = 'capture';
+
+		animateMove(move.fromR, move.fromC, move.toR, move.toC, aiType, () => {
+            state.game.makeMove(move.fromR, move.fromC, move.toR, move.toC);
+            state.animating = false;
+            state.selected = null;
+            state.validMoves = [];
+
+            renderBoard();
+            updateStatus();
+
+            if (state.game.gameOver) handleGameOver();
+        });
+    }, 380);
+}
+
+/* =========================================================
+   遊戲結束
+   ========================================================= */
+function handleGameOver() {
+    const g = state.game;
+    const winner = g.winner;
+    const winnerName = winner === 'red' ? '紅方' : '藍方';
+
+    let reward = 0;
+    if (state.mode === 'pve' && winner === 'red') {
+        reward = DIFFICULTY[state.difficulty].reward;
+        addTrophies(reward);
+    }
+
+    if (state.mode === 'pve') {
+        if (winner === 'red') SFX.win(); else SFX.lose();
+    } else {
+        SFX.win();
+    }
+
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.id = 'winnerModal';
+
+    const rewardHTML = reward > 0
+        ? `<div class="modal-reward">🏆 +${reward} 獎盃</div>`
+        : '';
+
+    overlay.innerHTML = `
+        <div class="modal-box">
+            <div class="modal-emoji">${winner === 'red' ? '🎉' : '🎊'}</div>
+            <h2 class="modal-title ${winner}">${winnerName}獲勝！</h2>
+            <p class="modal-sub">— 森林之王誕生 —</p>
+            ${rewardHTML}
+            <div class="modal-actions">
+                <button class="modal-btn secondary" id="modalBackBtn">返回封面</button>
+                <button class="modal-btn primary" id="modalRestartBtn">再來一局</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
+    if (reward > 0) setTimeout(() => SFX.trophy(), 500);
+
+    document.getElementById('modalBackBtn').addEventListener('click', () => {
+        overlay.remove();
+        backToCover();
+    });
+    document.getElementById('modalRestartBtn').addEventListener('click', () => {
+        overlay.remove();
+        startGame();
+    });
+}
+
+/* =========================================================
+   初始化
+   ========================================================= */
+(function init() {
+    document.getElementById('copyrightText').textContent =
+        `v1.0 © ${new Date().getFullYear()} ☕迪遜咖啡廳，版權所有。`;
+
+    updateMuteBtn();
+    updateTrophyDisplay(false);
+    initBgMusic();
+    showCover();
+})();
+</script>
+</body>
+</html>
