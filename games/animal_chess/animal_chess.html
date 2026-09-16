@@ -77,7 +77,6 @@
         position: relative;
     }
 
-    /* 獎盃顯示 */
     .trophy-bar {
         display: inline-flex;
         align-items: center;
@@ -180,7 +179,6 @@
     }
     .rules strong { color: #d8f3dc; letter-spacing: 2px; }
 
-    /* 存檔按鈕列（3 個並排） */
     .save-bar {
         display: flex;
         gap: 8px;
@@ -299,16 +297,16 @@
 
     .board-wrapper {
         width: min(100%, max(220px, calc((100vh - 180px) * 7 / 9)));
-		width: min(100%, max(220px, calc((100dvh - 180px) * 7 / 9)));
-		aspect-ratio: 7 / 9;
-		margin: 0 auto 30px;
-		background: linear-gradient(160deg, #2d6a4f, #1b4332);
-		border: 4px solid #3a5a40;
-		border-radius: 16px;
-		padding: 6px;
-		box-shadow: 0 22px 55px rgba(0,0,0,0.6),
-					inset 0 3px 14px rgba(0,0,0,0.4),
-					0 0 0 1px rgba(82,183,136,0.3);
+        width: min(100%, max(220px, calc((100dvh - 180px) * 7 / 9)));
+        aspect-ratio: 7 / 9;
+        margin: 0 auto 30px;
+        background: linear-gradient(160deg, #2d6a4f, #1b4332);
+        border: 4px solid #3a5a40;
+        border-radius: 16px;
+        padding: 6px;
+        box-shadow: 0 22px 55px rgba(0,0,0,0.6),
+                    inset 0 3px 14px rgba(0,0,0,0.4),
+                    0 0 0 1px rgba(82,183,136,0.3);
     }
 
     .board-grid {
@@ -440,7 +438,6 @@
         50% { transform: scale(1.06); opacity: 0.65; }
     }
 
-    /* ============ 浮動按鈕 ============ */
     .float-btn {
         position: fixed;
         bottom: 18px;
@@ -466,7 +463,6 @@
     .float-btn.left { left: 18px; }
     .float-btn.right { right: 18px; }
 
-    /* ============ 彈窗 ============ */
     .modal-overlay {
         position: fixed;
         inset: 0;
@@ -710,7 +706,6 @@ const SFX = {
     click: () => playTone(380, 0.05, 'sine', 0.06)
 };
 
-/* ---------- 背景音樂 ---------- */
 let bgMusic = null;
 
 function initBgMusic() {
@@ -831,7 +826,6 @@ function handleFileLoad(file) {
     reader.readAsText(file);
 }
 
-/* ---------- 重設進度 ---------- */
 function resetProgress() {
     SFX.click();
 
@@ -856,12 +850,10 @@ function resetProgress() {
         SFX.click();
     });
     document.getElementById('resetConfirm').addEventListener('click', () => {
-        // 重設獎盃
         trophies = 0;
         localStorage.setItem(LS_TROPHY, '0');
         updateTrophyDisplay(true);
 
-        // 重設音效（預設為開啟）
         muted = false;
         localStorage.setItem(LS_MUTED, 'false');
         updateMuteBtn();
@@ -873,7 +865,6 @@ function resetProgress() {
     });
 }
 
-/* ---------- 輕量提示 ---------- */
 function showToast(msg) {
     const toast = document.createElement('div');
     toast.textContent = msg;
@@ -895,9 +886,6 @@ function showToast(msg) {
     }, 1600);
 }
 
-/* =========================================================
-   全屏
-   ========================================================= */
 function toggleFullscreen() {
     SFX.click();
     const el = document.documentElement;
@@ -935,14 +923,11 @@ const ICONS = {
 };
 
 const DIFFICULTY = {
-    easy:   { randomness: 0.70, name: '簡單', reward: 10 },
-    normal: { randomness: 0.22, name: '普通', reward: 20 },
-    hard:   { randomness: 0.03, name: '困難', reward: 50 }
+    easy:   { name: '簡單', reward: 10, ply: 2 },
+    normal: { name: '普通', reward: 20, ply: 3 },
+    hard:   { name: '困難', reward: 50, ply: 5 }
 };
 
-/* =========================================================
-   地形工具
-   ========================================================= */
 const isRiver = (r, c) => RIVER.has(r + ',' + c);
 const isDen   = (r, c, p) => DENS[p][0] === r && DENS[p][1] === c;
 const isTrapFor = (r, c, p) => TRAPS[p].some(t => t[0] === r && t[1] === c);
@@ -1057,10 +1042,6 @@ class Game {
         if (!this.isValidMove(fr, fc, tr, tc, this.currentPlayer)) return false;
 
         const piece = this.board[fr][fc];
-        const isJump = (piece.rank === 6 || piece.rank === 7) &&
-                       (Math.abs(tr - fr) + Math.abs(tc - fc)) > 1;
-        const wasCapture = this.board[tr][tc] !== null;
-
         this.board[tr][tc] = piece;
         this.board[fr][fc] = null;
 
@@ -1118,221 +1099,214 @@ class Game {
 }
 
 /* =========================================================
-   AI
+   AI — 移植自 davindj/jungle-chess-ai
+   Alpha-Beta 剪枝，帶獸穴/鼠剋象/獅虎機動性啟發
    ========================================================= */
 const AI = {
-    getRiverJumpTargets(game, r, c, piece) {
-        const targets = [];
-        if (piece.rank !== 6 && piece.rank !== 7) return targets;
-        for (const dr of [-4, 4]) {
-            const tr = r + dr;
-            if (tr < 0 || tr > 8) continue;
-            const step = dr > 0 ? 1 : -1;
-            const mids = [];
-            for (let i = 1; i <= 3; i++) mids.push([r + i * step, c]);
-            if (mids.every(([rr, cc]) => isRiver(rr, cc) && game.board[rr][cc] === null)) {
-                const target = game.board[tr][c];
-                if (!target || target.player !== piece.player) targets.push({ r: tr, c });
-            }
-        }
-        for (const dc of [-3, 3]) {
-            const tc = c + dc;
-            if (tc < 0 || tc > 6) continue;
-            const step = dc > 0 ? 1 : -1;
-            const mids = [];
-            for (let i = 1; i <= 2; i++) mids.push([r, c + i * step]);
-            if (mids.every(([rr, cc]) => isRiver(rr, cc) && game.board[rr][cc] === null)) {
-                const target = game.board[r][tc];
-                if (!target || target.player !== piece.player) targets.push({ r, c: tc });
-            }
-        }
-        return targets;
-    },
+    _rootBestMove: null,
+    _rootBestScore: -Infinity,
 
-    evaluate(game, player) {
-        const opp = player === 'red' ? 'blue' : 'red';
-        const myDen  = DENS[player];
-        const oppDen = DENS[opp];
-        let score = 0;
+    /* ---------- 靜態評估 ---------- */
+    _sbe(game, ply, aiturn, aiId) {
+        const neg = aiId === 1 ? 1 : -1;
+        const cost = ply * 0.1 * neg;
+
+        // 紅方獸穴 board[8][3]，藍方獸穴 board[0][3]
+        if (game.board[8][3]) return -2000 * neg + cost;
+        if (game.board[0][3]) return 2000 * neg + cost;
+
+        let a = 0, b = 0;
+        let mouseA = null, mouseB = null;
+        let elephantA = null, elephantB = null;
+        let tigerA = null, tigerB = null;
+        let lionA = null, lionB = null;
 
         for (let r = 0; r < 9; r++) {
             for (let c = 0; c < 7; c++) {
                 const p = game.board[r][c];
                 if (!p) continue;
-
-                let value = p.rank * 15;
-                if (p.rank === 6 || p.rank === 7) value += 12;
-                if (isInOpponentTrap(r, c, p.player)) value -= 260;
-
-                if (p.player === player) {
-                    const dOpp = Math.abs(r - oppDen[0]) + Math.abs(c - oppDen[1]);
-                    if (dOpp === 1) value += 1500;
-                    else if (dOpp === 2) value += 400;
-                    else if (dOpp === 3) value += 120;
-                    else if (dOpp === 4) value += 30;
-
-                    const dMy = Math.abs(r - myDen[0]) + Math.abs(c - myDen[1]);
-                    if (dMy === 1) value += 90;
-                    else if (dMy === 2) value += 50;
-                    else if (dMy === 3) value += 20;
-
-                    if (p.rank === 8) {
-                        if (dMy === 1) value += 260;
-                        else if (dMy === 2) value += 200;
-                        else if (dMy === 3) value += 90;
-                    }
-                    if (p.rank === 1 && isRiver(r, c)) value += 90;
-
-                    score += value;
+                const pId = p.player === 'blue' ? 0 : 1;
+                const val = (p.rank === 1 ? 6 : 0) + p.rank;
+                if (pId === aiId) {
+                    a += val;
+                    if (p.rank === 1) mouseA = { p, r, c };
+                    else if (p.rank === 6) tigerA = { p, r, c };
+                    else if (p.rank === 7) lionA = { p, r, c };
+                    else if (p.rank === 8) elephantA = { p, r, c };
                 } else {
-                    const dMy = Math.abs(r - myDen[0]) + Math.abs(c - myDen[1]);
-                    if (dMy === 1) value += 4000;
-                    else if (dMy === 2) value += 800;
-                    else if (dMy === 3) value += 200;
-                    else if (dMy === 4) value += 50;
-
-                    const dOpp = Math.abs(r - oppDen[0]) + Math.abs(c - oppDen[1]);
-                    if (dOpp <= 2) value += (3 - dOpp) * 25;
-
-                    score -= value;
-
-                    if (p.rank === 6 || p.rank === 7) {
-                        const inMyHalf = player === 'blue' ? r <= 2 : r >= 6;
-                        if (inMyHalf) {
-                            if (dMy <= 2) score -= 5000;
-                            else if (dMy <= 3) score -= 2200;
-                            else if (dMy <= 5) score -= 900;
-                        } else {
-                            const jumps = this.getRiverJumpTargets(game, r, c, p);
-                            let worst = 0;
-                            for (const t of jumps) {
-                                const inAfter = player === 'blue' ? t.r <= 2 : t.r >= 6;
-                                if (!inAfter) continue;
-                                const dAfter = Math.abs(t.r - myDen[0]) + Math.abs(t.c - myDen[1]);
-                                const threat = Math.max(0, 6 - dAfter) * 320;
-                                if (threat > worst) worst = threat;
-                            }
-                            score -= worst;
-                        }
-                    }
+                    b += val;
+                    if (p.rank === 1) mouseB = { p, r, c };
+                    else if (p.rank === 6) tigerB = { p, r, c };
+                    else if (p.rank === 7) lionB = { p, r, c };
+                    else if (p.rank === 8) elephantB = { p, r, c };
                 }
             }
         }
 
-        // 陷阱防守
-        const myTraps = TRAPS[player];
-        const guards  = GUARD_CELLS[player];
-        let oppThreatensTraps = false;
-        for (const [tr, tc] of myTraps) {
-            for (let dr = -1; dr <= 1; dr++) {
-                for (let dc = -1; dc <= 1; dc++) {
-                    const nr = tr + dr, nc = tc + dc;
-                    if (nr < 0 || nr > 8 || nc < 0 || nc > 6) continue;
-                    const p = game.board[nr][nc];
-                    if (p && p.player === opp) { oppThreatensTraps = true; break; }
-                }
-                if (oppThreatensTraps) break;
-            }
-            if (oppThreatensTraps) break;
+        let returnValue = a - b;
+
+        // 鼠剋象（老鼠不在水中才有意義）
+        if (mouseA && elephantB && !isRiver(mouseA.r, mouseA.c)) {
+            const dist = Math.abs(mouseA.r - elephantB.r) + Math.abs(mouseA.c - elephantB.c);
+            if (dist <= 4) {
+				if (dist === 1)      returnValue += 20;
+				else if (dist === 2) returnValue += 12;
+				else if (dist === 3) returnValue += 6;
+				else                 returnValue += 2;
+			}
         }
-        if (oppThreatensTraps) {
-            let guardsHeld = 0;
-            for (const [gr, gc] of guards) {
-                const p = game.board[gr][gc];
-                if (p && p.player === player) { score += 350; guardsHeld++; }
+        if (mouseB && elephantA && !isRiver(mouseB.r, mouseB.c)) {
+            const dist = Math.abs(mouseB.r - elephantA.r) + Math.abs(mouseB.c - elephantA.c);
+            if (dist <= 1 || (dist <= 2 && !aiturn)) {
+                returnValue -= (dist === 1 && !aiturn) ? 7.5 : 3.5;
             }
-            if (guardsHeld === 0) score -= 200;
         }
 
-        // 進攻平衡
-        let attackers = 0, totalPieces = 0;
+        // 大象推進（越靠近敵方獸穴越好）
+        if (elephantA) {
+            const eId = elephantA.p.player === 'blue' ? 0 : 1;
+            returnValue -= eId === 0
+                ? 0.01 * Math.abs(0 - elephantA.r)
+                : 0.01 * Math.abs(8 - elephantA.r);
+        }
+        if (elephantB) {
+            const eId = elephantB.p.player === 'blue' ? 0 : 1;
+            returnValue += eId === 0
+                ? 0.01 * Math.abs(0 - elephantB.r)
+                : 0.01 * Math.abs(8 - elephantB.r);
+        }
+
+        // 獅虎機動性（靠近河中央三格）
+        const lionTigerMobility = (animal) => {
+            let minDist = 1000;
+            for (const [px, py] of [[3,3],[3,4],[3,5]]) {
+                const d = Math.abs(animal.c - px) + Math.abs(animal.r - py);
+                if (d < minDist) minDist = d;
+            }
+            const rand = Math.random() > (animal.p.rank === 7 ? 0.8 : 0.2) ? 0.001 : 0;
+            return 0.05 - 0.01 * minDist + rand;
+        };
+
+        if (lionA)  returnValue += lionTigerMobility(lionA);
+        if (lionB)  returnValue -= lionTigerMobility(lionB);
+        if (tigerA) returnValue += lionTigerMobility(tigerA);
+        if (tigerB) returnValue -= lionTigerMobility(tigerB);
+
+        // 獅虎相鄰的協同
+        if (lionA && tigerA) {
+            const d = Math.abs(lionA.r - tigerA.r) + Math.abs(lionA.c - tigerA.c);
+            if (d === 1) returnValue -= 2;
+        }
+        if (lionB && tigerB) {
+            const d = Math.abs(lionB.r - tigerB.r) + Math.abs(lionB.c - tigerB.c);
+            if (d === 1) returnValue += 2;
+        }
+
+        return returnValue + cost;
+    },
+
+    /* ---------- 終局判斷 ---------- */
+    _exitSbe(game, ply, aiturn, aiId) {
+        const neg = aiId === 1 ? 1 : -1;
+        ply++;
+
+        if (game.board[8][3]) return -2000 * ply * neg;
+        if (game.board[0][3]) return 2000 * ply * neg;
+
+        let arrB = 0, arrR = 0;
         for (let r = 0; r < 9; r++) {
             for (let c = 0; c < 7; c++) {
                 const p = game.board[r][c];
-                if (!p || p.player !== player) continue;
-                totalPieces++;
-                if (player === 'blue' && r >= 4) attackers++;
-                if (player === 'red' && r <= 4) attackers++;
+                if (!p) continue;
+                if (p.player === 'blue') arrB++;
+                else arrR++;
             }
         }
-        if (totalPieces > 5 && attackers === 0) score -= 180;
-        else if (totalPieces > 5 && attackers === 1) score -= 50;
-
-        return score;
+        if (arrB === 0) return 5000 * ply * neg;
+        if (arrR === 0) return -5000 * ply * neg;
+        return null;
     },
 
-    hasImmediateWin(game, player) {
-        const oppDen = DENS[player === 'red' ? 'blue' : 'red'];
-        const moves = game.getValidMoves(player);
-        for (const m of moves) {
-            if (m.toR === oppDen[0] && m.toC === oppDen[1]) return true;
-        }
-        return false;
-    },
+    /* ---------- Alpha-Beta（原地走子 / 撤銷） ---------- */
+    _alphaBeta(game, ply, alpha, beta, aiturn, aiId, rootDepth) {
+        const exitScore = this._exitSbe(game, ply, aiturn, aiId);
+        if (exitScore !== null && ply !== rootDepth) return exitScore;
+        if (ply === 0) return this._sbe(game, ply, aiturn, aiId);
 
-    chooseMove(game, player, difficulty) {
-        const moves = game.getValidMoves(player);
-        if (!moves.length) return null;
+        let ret = aiturn ? -100000 : 100000;
+        let pruning = false;
 
-        const cfg = DIFFICULTY[difficulty] || DIFFICULTY.normal;
-        const opp = player === 'red' ? 'blue' : 'red';
+        const currentPlayer = aiturn
+            ? (aiId === 0 ? 'blue' : 'red')
+            : (aiId === 0 ? 'red' : 'blue');
 
-        const oppDen = DENS[opp];
-        for (const m of moves) {
-            if (m.toR === oppDen[0] && m.toC === oppDen[1]) return m;
-        }
-
-        const scored = [];
-        for (const m of moves) {
-            const clone = game.clone();
-            clone.makeMove(m.fromR, m.fromC, m.toR, m.toC);
-
-            let score = this.evaluate(clone, player);
-            if (!clone.gameOver && this.hasImmediateWin(clone, opp)) score -= 1000000;
-            score += (Math.random() - 0.5) * cfg.randomness * 300;
-            scored.push({ move: m, score });
-        }
-
-        scored.sort((a, b) => b.score - a.score);
-
-        if (difficulty === 'easy') {
-            if (Math.random() < 0.55) return moves[Math.floor(Math.random() * moves.length)];
-            return scored[0].move;
-        }
-
-        if (difficulty === 'hard') {
-            const top = scored.slice(0, 10);
-            for (const entry of top) {
-                const c1 = game.clone();
-                c1.makeMove(entry.move.fromR, entry.move.fromC, entry.move.toR, entry.move.toC);
-                if (c1.gameOver) continue;
-
-                const oppMoves = c1.getValidMoves(c1.currentPlayer);
-                let worstForUs = Infinity;
-                for (const om of oppMoves) {
-                    const c2 = c1.clone();
-                    c2.makeMove(om.fromR, om.fromC, om.toR, om.toC);
-                    if (c2.gameOver && c2.winner === c1.currentPlayer) {
-                        worstForUs = -Infinity; break;
+        // 移動排序：先吃子、再普通
+        const captureMoves = [];
+        const quietMoves = [];
+        for (let fr = 0; fr < 9; fr++) {
+            for (let fc = 0; fc < 7; fc++) {
+                const p = game.board[fr][fc];
+                if (!p || p.player !== currentPlayer) continue;
+                for (let tr = 0; tr < 9; tr++) {
+                    for (let tc = 0; tc < 7; tc++) {
+                        if (!game.isValidMove(fr, fc, tr, tc, currentPlayer)) continue;
+                        const m = { fromR: fr, fromC: fc, toR: tr, toC: tc };
+                        if (game.board[tr][tc]) captureMoves.push(m);
+                        else quietMoves.push(m);
                     }
-                    const s = this.evaluate(c2, player);
-                    if (s < worstForUs) worstForUs = s;
                 }
-                if (worstForUs !== Infinity) entry.score = entry.score * 0.3 + worstForUs * 0.7;
             }
-            top.sort((a, b) => b.score - a.score);
-            return top[0].move;
         }
+        const moves = captureMoves.concat(quietMoves);
 
-        const top = scored.slice(0, 3);
-        const weights = [0.7, 0.22, 0.08];
-        const r = Math.random();
-        let acc = 0;
-        for (let i = 0; i < top.length; i++) {
-            acc += weights[i];
-            if (r < acc) return top[i].move;
+        for (const m of moves) {
+            if (pruning) break;
+
+            const moving   = game.board[m.fromR][m.fromC];
+            const captured = game.board[m.toR][m.toC];
+            game.board[m.toR][m.toC] = moving;
+            game.board[m.fromR][m.fromC] = null;
+
+            const res = this._alphaBeta(game, ply - 1, alpha, beta, !aiturn, aiId, rootDepth);
+
+            game.board[m.fromR][m.fromC] = moving;
+            game.board[m.toR][m.toC] = captured;
+
+            ret = aiturn ? Math.max(res, ret) : Math.min(res, ret);
+
+            if (ply === rootDepth && aiturn && res > this._rootBestScore) {
+                this._rootBestScore = res;
+                this._rootBestMove = m;
+            }
+
+            let cond = 0;
+            if (aiturn) {
+                cond = ret >= beta ? (ret > beta ? 2 : 1) : 0;
+                beta = Math.max(ret, beta);
+            } else {
+                alpha = Math.min(ret, alpha);
+            }
+            if (alpha <= beta) { pruning = true; break; }
         }
-        return top[0].move;
+        return ret;
+    },
+
+    /* ---------- 對外接口 ---------- */
+    chooseMove(game, player, difficulty) {
+        const aiId = player === 'blue' ? 0 : 1;
+        const cfg = DIFFICULTY[difficulty] || DIFFICULTY.normal;
+        const ply = cfg.ply;
+
+        this._rootBestMove = null;
+        this._rootBestScore = -Infinity;
+
+        this._alphaBeta(game, ply, Infinity, -Infinity, true, aiId, ply);
+
+        if (this._rootBestMove) return this._rootBestMove;
+
+        // fallback
+        const moves = game.getValidMoves(player);
+        return moves.length ? moves[Math.floor(Math.random() * moves.length)] : null;
     }
 };
 
@@ -1349,9 +1323,6 @@ const state = {
     animating: false
 };
 
-/* =========================================================
-   DOM
-   ========================================================= */
 const elCover    = document.getElementById('coverScreen');
 const elGame     = document.getElementById('gameScreen');
 const elBoard    = document.getElementById('gameBoard');
@@ -1366,6 +1337,7 @@ function animateMove(fromR, fromC, toR, toC, soundType, callback) {
     if (soundType === 'jump') SFX.jump();
     else if (soundType === 'capture') SFX.capture();
     else SFX.move();
+
     const fromCell = elBoard.querySelector(`.cell[data-r="${fromR}"][data-c="${fromC}"]`);
     const toCell   = elBoard.querySelector(`.cell[data-r="${toR}"][data-c="${toC}"]`);
     if (!fromCell || !toCell) { callback(); return; }
@@ -1490,7 +1462,6 @@ function startGame() {
     updateStatus();
 }
 
-/* 重新開局：不離開遊戲介面，直接開新一局 */
 function restartGame() {
     SFX.click();
     document.getElementById('winnerModal')?.remove();
@@ -1624,14 +1595,14 @@ function onCellClick(r, c) {
         state.animating = true;
 
         const movingPiece = g.board[from.r][from.c];
-		const targetPiece = g.board[toR][toC];
-		const isJump = (movingPiece.rank === 6 || movingPiece.rank === 7) &&
-					   (Math.abs(toR - from.r) + Math.abs(toC - from.c)) > 1;
-		let sType = 'move';
-		if (isJump) sType = 'jump';
-		else if (targetPiece) sType = 'capture';
+        const targetPiece = g.board[toR][toC];
+        const isJump = (movingPiece.rank === 6 || movingPiece.rank === 7) &&
+                       (Math.abs(toR - from.r) + Math.abs(toC - from.c)) > 1;
+        let sType = 'move';
+        if (isJump) sType = 'jump';
+        else if (targetPiece) sType = 'capture';
 
-		animateMove(from.r, from.c, toR, toC, sType, () => {
+        animateMove(from.r, from.c, toR, toC, sType, () => {
             const ok = g.makeMove(from.r, from.c, toR, toC);
             state.animating = false;
 
@@ -1687,7 +1658,18 @@ function scheduleAiMove() {
             return;
         }
 
-        const move = AI.chooseMove(state.game, 'blue', state.difficulty);
+        let move = null;
+        try {
+            move = AI.chooseMove(state.game, 'blue', state.difficulty);
+        } catch (err) {
+            console.error('AI error:', err);
+        }
+
+        if (!move) {
+            const fallback = state.game.getValidMoves('blue');
+            if (fallback.length) move = fallback[Math.floor(Math.random() * fallback.length)];
+        }
+
         if (!move) {
             state.aiThinking = false;
             return;
@@ -1697,14 +1679,14 @@ function scheduleAiMove() {
         state.animating = true;
 
         const aiPiece = state.game.board[move.fromR][move.fromC];
-		const aiTarget = state.game.board[move.toR][move.toC];
-		const aiJump = (aiPiece.rank === 6 || aiPiece.rank === 7) &&
-					   (Math.abs(move.toR - move.fromR) + Math.abs(move.toC - move.fromC)) > 1;
-		let aiType = 'move';
-		if (aiJump) aiType = 'jump';
-		else if (aiTarget) aiType = 'capture';
+        const aiTarget = state.game.board[move.toR][move.toC];
+        const aiJump = (aiPiece.rank === 6 || aiPiece.rank === 7) &&
+                       (Math.abs(move.toR - move.fromR) + Math.abs(move.toC - move.fromC)) > 1;
+        let aiType = 'move';
+        if (aiJump) aiType = 'jump';
+        else if (aiTarget) aiType = 'capture';
 
-		animateMove(move.fromR, move.fromC, move.toR, move.toC, aiType, () => {
+        animateMove(move.fromR, move.fromC, move.toR, move.toC, aiType, () => {
             state.game.makeMove(move.fromR, move.fromC, move.toR, move.toC);
             state.animating = false;
             state.selected = null;
@@ -1777,7 +1759,7 @@ function handleGameOver() {
    ========================================================= */
 (function init() {
     document.getElementById('copyrightText').textContent =
-        `v1.0 © ${new Date().getFullYear()} ☕迪遜咖啡廳，版權所有。`;
+        `v1.1 © ${new Date().getFullYear()} ☕迪遜咖啡廳，版權所有。`;
 
     updateMuteBtn();
     updateTrophyDisplay(false);
