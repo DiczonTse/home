@@ -1,1 +1,1791 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>黑白棋</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
+  html, body {
+    width: 100%;
+    min-height: 100%;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", Roboto, sans-serif;
+    background: #0b0f1a;
+    color: #e0e0e0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 16px;
+    overflow-x: hidden;
+  }
+
+  /* ============ 通用畫面切換 ============ */
+  .screen { display: none; width: 100%; justify-content: center; }
+  .screen.active { display: flex; }
+
+  /* ============ 封面 ============ */
+  .cover-frame {
+    position: relative;
+    width: 100%;
+    max-width: 620px;
+    max-height: 94vh;
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.7);
+    background-image: url('reversi.jpg');
+    background-color: #16213e;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cover-frame::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, rgba(8,12,25,0.55) 0%, rgba(8,12,25,0.82) 45%, rgba(8,12,25,0.95) 100%);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .cover-content {
+    position: relative;
+    z-index: 2;
+    padding: 26px 22px 96px;
+    overflow-y: auto;
+    max-height: 94vh;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.25) transparent;
+  }
+
+  .cover-content::-webkit-scrollbar { width: 8px; }
+  .cover-content::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.22);
+    border-radius: 4px;
+  }
+
+  .cover-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: 8px;
+    text-align: center;
+    color: #fff;
+    text-shadow: 0 4px 24px rgba(120,180,255,0.55),
+                 0 2px 4px rgba(0,0,0,0.8);
+    margin-bottom: 10px;
+  }
+
+  /* ============ 獎盃徽章 ============ */
+  .trophy-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: fit-content;
+    margin: 0 auto 18px;
+    padding: 8px 22px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(255,204,80,0.22), rgba(255,150,40,0.14));
+    border: 1px solid rgba(255,204,80,0.5);
+    box-shadow: 0 0 22px rgba(255,190,60,0.25),
+                inset 0 1px 0 rgba(255,255,255,0.15);
+    color: #ffd766;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-shadow: 0 1px 6px rgba(255,180,40,0.5);
+  }
+
+  .trophy-badge .trophy-icon {
+    font-size: 1.15rem;
+    filter: drop-shadow(0 0 6px rgba(255,190,60,0.7));
+  }
+
+  .trophy-badge.small {
+    padding: 5px 14px;
+    font-size: 0.9rem;
+    margin: 0;
+  }
+
+  /* ============ 設定 / 說明面板 ============ */
+  .panel {
+    background: rgba(20,28,50,0.65);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    box-shadow: 0 6px 22px rgba(0,0,0,0.35);
+  }
+
+  .panel-title {
+    font-size: 0.85rem;
+    letter-spacing: 3px;
+    color: #7aa2ff;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+
+  .settings-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px 14px;
+  }
+
+  .setting-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 0.82rem;
+    color: #b8c0d8;
+  }
+
+  .setting-item.hidden { display: none; }
+
+  .setting-item select {
+    width: 100%;
+    background: #10192e;
+    color: #e5e9f5;
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 7px;
+    padding: 7px 10px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    font-family: inherit;
+  }
+
+  .setting-item select:hover,
+  .setting-item select:focus {
+    border-color: rgba(122,162,255,0.7);
+    box-shadow: 0 0 0 2px rgba(122,162,255,0.15);
+  }
+
+  .help-panel ul {
+    list-style: none;
+    font-size: 0.8rem;
+    line-height: 1.75;
+    color: #b0b8cc;
+  }
+
+  .help-panel li {
+    padding-left: 16px;
+    position: relative;
+  }
+
+  .help-panel li::before {
+    content: '◆';
+    position: absolute;
+    left: 0;
+    color: #4a7bff;
+    font-size: 0.7rem;
+  }
+
+  /* ============ 封面按鈕 ============ */
+  .cover-actions {
+    margin-top: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .btn-start {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 4px;
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    background: linear-gradient(135deg, #2f6bff, #5b3cff);
+    box-shadow: 0 8px 26px rgba(70,110,255,0.45),
+                inset 0 1px 0 rgba(255,255,255,0.25);
+    cursor: pointer;
+    transition: transform 0.12s, box-shadow 0.2s, filter 0.2s;
+    font-family: inherit;
+  }
+
+  .btn-start:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 10px 32px rgba(70,110,255,0.6),
+                inset 0 1px 0 rgba(255,255,255,0.25);
+  }
+
+  .btn-start:active { transform: scale(0.98); }
+
+  .io-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .io-row button {
+    padding: 10px 6px;
+    font-size: 0.82rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.07);
+    color: #dfe4f5;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s, border-color 0.2s;
+    font-family: inherit;
+  }
+
+  .io-row button:hover {
+    background: rgba(122,162,255,0.18);
+    border-color: rgba(122,162,255,0.45);
+  }
+
+  .io-row button:active { transform: scale(0.96); }
+
+  /* ============ 封面頁尾 ============ */
+  .cover-footer {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    z-index: 4;
+    text-align: center;
+    padding: 22px 14px 12px;
+    font-size: 0.76rem;
+    letter-spacing: 0.5px;
+    color: rgba(230,235,250,0.75);
+    background: linear-gradient(transparent, rgba(6,10,20,0.85));
+    pointer-events: none;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+  }
+
+  /* ============ 浮動按鈕 ============ */
+  .float-btn {
+    position: absolute;
+    bottom: 15px;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.22);
+    background: rgba(10,16,32,0.62);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #fff;
+    font-size: 1.15rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 12;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    font-family: inherit;
+    padding: 0;
+  }
+
+  .float-btn:hover {
+    background: rgba(30,45,80,0.85);
+    transform: scale(1.1);
+    box-shadow: 0 6px 22px rgba(0,0,0,0.6);
+  }
+
+  .float-btn:active { transform: scale(0.94); }
+
+  .float-mute { left: 16px; }
+  .float-fullscreen { right: 16px; }
+
+  /* ============ 遊戲畫面 ============ */
+  .game-frame {
+    position: relative;
+    width: 100%;
+    max-width: 540px;
+    background: rgba(14,20,38,0.85);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 18px 16px 0;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  }
+
+  .game-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .game-title {
+    font-size: 1.35rem;
+    letter-spacing: 6px;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 2px 12px rgba(120,180,255,0.5);
+  }
+
+  .scoreboard {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 10px;
+    font-size: 0.92rem;
+  }
+
+  .score-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 16px;
+    border-radius: 9px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid transparent;
+    transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
+  }
+
+  .score-item.active {
+    border-color: rgba(122,162,255,0.7);
+    box-shadow: 0 0 16px rgba(122,162,255,0.25),
+                inset 0 0 12px rgba(122,162,255,0.08);
+    background: rgba(122,162,255,0.09);
+  }
+
+  .score-item .dot { width: 15px; height: 15px; border-radius: 50%; }
+  .score-item .dot.black { background: radial-gradient(circle at 35% 35%, #555, #111); }
+  .score-item .dot.white { background: radial-gradient(circle at 35% 35%, #fff, #ddd); }
+
+  .status {
+    font-size: 0.98rem;
+    min-height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .status .disc-indicator {
+    width: 17px; height: 17px; border-radius: 50%;
+    display: inline-block; transition: background 0.3s;
+  }
+
+  .status .disc-indicator.black {
+    background: radial-gradient(circle at 35% 35%, #555, #111);
+    box-shadow: 0 0 5px rgba(0,0,0,0.6);
+  }
+
+  .status .disc-indicator.white {
+    background: radial-gradient(circle at 35% 35%, #fff, #ccc);
+    box-shadow: 0 0 5px rgba(255,255,255,0.4);
+  }
+
+  .status .thinking {
+    display: inline-block; width: 8px; height: 8px;
+    border-radius: 50%; background: #7aa2ff;
+    animation: pulse 0.9s infinite; margin-left: 3px;
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity: 0.25; transform: scale(0.85); }
+    50%     { opacity: 1;    transform: scale(1.15); }
+  }
+
+  /* ============ 棋盤 ============ */
+  #board {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 2px;
+    background: #234a1e;
+    border: 4px solid #17321a;
+    border-radius: 10px;
+    padding: 3px;
+    aspect-ratio: 1;
+    box-shadow: inset 0 0 30px rgba(0,0,0,0.5),
+                0 10px 30px rgba(0,0,0,0.5);
+  }
+
+  .cell {
+    background: #3f8a37;
+    display: flex; justify-content: center; align-items: center;
+    cursor: pointer; position: relative;
+    transition: background 0.15s;
+    aspect-ratio: 1;
+    border-radius: 2px;
+  }
+
+  .cell.clickable:hover { background: #4fa544; }
+
+  .cell.valid-hint::after {
+    content: '';
+    width: 22%; height: 22%;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    position: absolute;
+    animation: hintPulse 1.4s ease-in-out infinite;
+  }
+
+  @keyframes hintPulse {
+    0%,100% { opacity: 0.5; transform: scale(1); }
+    50%     { opacity: 1;   transform: scale(1.25); }
+  }
+
+  .cell .disc {
+    width: 78%; height: 78%; border-radius: 50%;
+    position: relative;
+    animation: placeDisc 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes placeDisc {
+    0%   { transform: scale(0.2) rotate(-30deg); opacity: 0; }
+    100% { transform: scale(1) rotate(0deg);     opacity: 1; }
+  }
+
+  .disc.black {
+    background: radial-gradient(circle at 35% 32%, #5a5a5a, #0a0a0a 72%);
+    box-shadow: inset -3px -3px 6px rgba(0,0,0,0.7),
+                inset  3px  3px 6px rgba(255,255,255,0.14),
+                0 2px 4px rgba(0,0,0,0.5);
+  }
+
+  .disc.white {
+    background: radial-gradient(circle at 35% 32%, #ffffff, #bdbdbd 75%);
+    box-shadow: inset -3px -3px 6px rgba(0,0,0,0.22),
+                inset  3px  3px 6px rgba(255,255,255,0.85),
+                0 2px 4px rgba(0,0,0,0.35);
+  }
+
+  .disc.flipping { animation: flip 0.34s ease-in-out; }
+
+  @keyframes flip {
+    0%   { transform: scaleX(1)    rotateY(0deg);  }
+    50%  { transform: scaleX(0.05) rotateY(90deg); }
+    100% { transform: scaleX(1)    rotateY(0deg);  }
+  }
+
+  .cell.last-move::before {
+    content: '';
+    position: absolute;
+    inset: 5%;
+    border-radius: 50%;
+    border: 2px solid rgba(255,90,90,0.95);
+    box-shadow: 0 0 10px rgba(255,90,90,0.7),
+                inset 0 0 10px rgba(255,90,90,0.35);
+    pointer-events: none;
+    animation: lastPulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes lastPulse {
+    0%,100% { opacity: 0.6; }
+    50%     { opacity: 1; }
+  }
+
+  /* ============ 棋盤下方預留空間 ============ */
+  .board-footer {
+    position: relative;
+    height: 72px;
+    margin-top: 4px;
+  }
+
+  /* ============ 遊戲控制按鈕 ============ */
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 0 0 16px;
+  }
+
+  .controls button {
+    padding: 10px 22px;
+    font-size: 0.9rem;
+    border-radius: 9px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.07);
+    color: #dfe4f5;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s, border-color 0.2s;
+    font-family: inherit;
+  }
+
+  .controls button:hover {
+    background: rgba(122,162,255,0.18);
+    border-color: rgba(122,162,255,0.4);
+  }
+
+  .controls button:active { transform: scale(0.96); }
+
+  .controls button.primary {
+    background: linear-gradient(135deg, #2f6bff, #5b3cff);
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(70,110,255,0.4);
+  }
+
+  .controls button.primary:hover { filter: brightness(1.1); }
+
+  /* ============ Overlay ============ */
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(4,8,18,0.82);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 200; opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+    padding: 20px;
+  }
+
+  .overlay.show { opacity: 1; pointer-events: auto; }
+
+  .overlay-box {
+    background: linear-gradient(160deg, #1a2542, #101830);
+    padding: 34px 40px;
+    border-radius: 18px;
+    text-align: center;
+    max-width: 360px;
+    width: 100%;
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 24px 70px rgba(0,0,0,0.7);
+    animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes popIn {
+    0%   { transform: scale(0.85); opacity: 0; }
+    100% { transform: scale(1);    opacity: 1; }
+  }
+
+  .overlay-box h2 {
+    font-size: 1.55rem;
+    margin-bottom: 10px;
+    color: #fff;
+    text-shadow: 0 2px 14px rgba(120,180,255,0.5);
+  }
+
+  .overlay-box p {
+    margin-bottom: 8px;
+    font-size: 0.98rem;
+    color: #a8b2cc;
+    line-height: 1.6;
+  }
+
+  .overlay-box .reward {
+    display: inline-block;
+    margin: 12px 0 18px;
+    padding: 7px 20px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(255,204,80,0.2), rgba(255,150,40,0.12));
+    border: 1px solid rgba(255,204,80,0.5);
+    color: #ffd766;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-shadow: 0 1px 6px rgba(255,180,40,0.5);
+  }
+
+  .overlay-box .reward.hidden { display: none; }
+
+  .overlay-box button {
+    padding: 11px 30px;
+    font-size: 0.95rem;
+    border-radius: 10px;
+    border: none;
+    color: #fff;
+    background: linear-gradient(135deg, #2f6bff, #5b3cff);
+    box-shadow: 0 6px 20px rgba(70,110,255,0.45);
+    cursor: pointer;
+    transition: filter 0.2s, transform 0.1s;
+    font-family: inherit;
+  }
+
+  .overlay-box button:hover { filter: brightness(1.1); }
+  .overlay-box button:active { transform: scale(0.97); }
+
+  /* ============ 手機／窄螢幕：封面與電腦版一致雙列，僅縮緊間距 ============ */
+  @media (max-width: 520px) {
+    body { padding: 10px; }
+
+    .cover-frame {
+      max-height: 96vh;
+      border-radius: 16px;
+    }
+
+    .cover-content {
+      padding: 16px 14px 90px;
+      max-height: 96vh;
+    }
+
+    .cover-title {
+      font-size: 1.75rem;
+      letter-spacing: 5px;
+      margin-bottom: 8px;
+    }
+
+    .trophy-badge {
+      padding: 6px 16px;
+      font-size: 0.9rem;
+      margin-bottom: 12px;
+    }
+    .trophy-badge .trophy-icon { font-size: 1rem; }
+
+    .panel {
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      border-radius: 11px;
+    }
+
+    .panel-title {
+      font-size: 0.72rem;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+
+    .settings-grid { gap: 8px 10px; }
+
+    .setting-item { font-size: 0.72rem; gap: 4px; }
+
+    .setting-item select {
+      padding: 5px 7px;
+      font-size: 0.72rem;
+      border-radius: 6px;
+    }
+
+    .help-panel ul { font-size: 0.72rem; line-height: 1.6; }
+    .help-panel li { padding-left: 13px; }
+
+    .btn-start {
+      padding: 12px;
+      font-size: 0.95rem;
+      letter-spacing: 3px;
+      border-radius: 10px;
+    }
+
+    .io-row { gap: 6px; }
+    .io-row button {
+      padding: 8px 4px;
+      font-size: 0.75rem;
+      border-radius: 8px;
+    }
+
+    .cover-footer {
+      font-size: 0.68rem;
+      padding: 18px 10px 8px;
+    }
+
+    .float-btn {
+      width: 40px;
+      height: 40px;
+      font-size: 1rem;
+      bottom: 38px;
+    }
+    .float-mute { left: 12px; }
+    .float-fullscreen { right: 12px; }
+
+    /* 遊戲畫面 */
+    .game-frame { padding: 14px 12px 0; border-radius: 16px; }
+    #board { border-width: 3px; gap: 1px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     封面畫面
+     ============================================================ -->
+<div class="screen active" id="coverScreen">
+  <div class="cover-frame" id="coverFrame">
+
+    <div class="cover-content">
+      <h1 class="cover-title">黑白棋</h1>
+
+      <div class="trophy-badge">
+        <span class="trophy-icon">🏆</span>
+        <span>獎盃：<strong id="coverTrophies">0</strong></span>
+      </div>
+
+      <!-- 遊戲設定 -->
+      <div class="panel">
+        <div class="panel-title">遊戲設定</div>
+        <div class="settings-grid">
+          <label class="setting-item">
+            <span>對戰組合</span>
+            <select id="modeSelect">
+              <option value="pvp">玩家 vs 玩家</option>
+              <option value="pvc" selected>玩家 vs AI</option>
+              <option value="cvc">AI vs AI</option>
+            </select>
+          </label>
+
+          <label class="setting-item" id="humanColorItem">
+            <span>玩家執棋</span>
+            <select id="humanColorSelect">
+              <option value="1" selected>黑棋先手</option>
+              <option value="2">白棋後手</option>
+            </select>
+          </label>
+
+          <label class="setting-item" id="difficultyItem">
+            <span>AI 難度</span>
+            <select id="difficultySelect">
+              <option value="easy">簡單</option>
+              <option value="medium" selected>普通</option>
+              <option value="hard">困難</option>
+            </select>
+          </label>
+
+          <label class="setting-item" id="heuristicItem">
+            <span>AI 風格</span>
+            <select id="heuristicSelect">
+              <option value="coinParity">棋子數</option>
+              <option value="mobility">行動力</option>
+              <option value="combined" selected>綜合</option>
+            </select>
+          </label>
+
+          <!-- AI vs AI：黑方 AI -->
+          <label class="setting-item cvc-opt hidden" id="blackDiffItem">
+            <span>黑 AI 難度</span>
+            <select id="blackDiffSelect">
+              <option value="easy">簡單</option>
+              <option value="medium" selected>普通</option>
+              <option value="hard">困難</option>
+            </select>
+          </label>
+
+          <label class="setting-item cvc-opt hidden" id="blackStyleItem">
+            <span>黑 AI 風格</span>
+            <select id="blackStyleSelect">
+              <option value="coinParity">棋子數</option>
+              <option value="mobility">行動力</option>
+              <option value="combined" selected>綜合</option>
+            </select>
+          </label>
+
+          <!-- AI vs AI：白方 AI -->
+          <label class="setting-item cvc-opt hidden" id="whiteDiffItem">
+            <span>白 AI 難度</span>
+            <select id="whiteDiffSelect">
+              <option value="easy">簡單</option>
+              <option value="medium" selected>普通</option>
+              <option value="hard">困難</option>
+            </select>
+          </label>
+
+          <label class="setting-item cvc-opt hidden" id="whiteStyleItem">
+            <span>白 AI 風格</span>
+            <select id="whiteStyleSelect">
+              <option value="coinParity">棋子數</option>
+              <option value="mobility">行動力</option>
+              <option value="combined" selected>綜合</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <!-- 玩法說明 -->
+      <div class="panel help-panel">
+        <div class="panel-title">玩法說明</div>
+        <ul>
+          <li>在能夾住對手棋子的位置落子，被夾住的棋子會翻成自己的顏色。</li>
+          <li>無法落子時自動跳過回合，雙方皆無法落子時遊戲結束。</li>
+          <li>棋盤填滿或雙方皆無法落子時結算，棋子較多者獲勝。</li>
+          <li>戰勝 AI 可獲得獎盃：簡單 10、普通 50、困難 100。</li>
+        </ul>
+      </div>
+
+      <!-- 操作按鈕 -->
+      <div class="cover-actions">
+        <button class="btn-start" id="startGameBtn">開 始 遊 戲</button>
+        <div class="io-row">
+          <button id="saveBtn">💾 儲存</button>
+          <button id="loadBtn">📂 載入</button>
+          <button id="resetBtn">🔄 重設</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 浮動按鈕 -->
+    <button class="float-btn float-mute" id="coverMuteBtn" title="切換靜音">🔊</button>
+    <button class="float-btn float-fullscreen" id="coverFsBtn" title="全螢幕">⛶</button>
+
+    <!-- 頁尾版權 -->
+    <div class="cover-footer">
+      v1.0 © <span id="coverYear">2026</span> ☕迪遜咖啡廳，版權所有。
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     遊戲畫面
+     ============================================================ -->
+<div class="screen" id="gameScreen">
+  <div class="game-frame">
+    <div class="game-header">
+      <h1 class="game-title">黑白棋</h1>
+      <div class="trophy-badge small">
+        <span class="trophy-icon">🏆</span>
+        <span id="gameTrophies">0</span>
+      </div>
+    </div>
+
+    <div class="scoreboard">
+      <div class="score-item" id="blackScoreItem">
+        <span class="dot black"></span>
+        <span>黑棋：<strong id="blackScore">2</strong></span>
+      </div>
+      <div class="score-item" id="whiteScoreItem">
+        <span class="dot white"></span>
+        <span>白棋：<strong id="whiteScore">2</strong></span>
+      </div>
+    </div>
+
+    <div class="status" id="status">
+      <span class="disc-indicator black"></span>
+      <span id="statusText">黑棋回合</span>
+    </div>
+
+    <div id="board"></div>
+
+    <!-- 棋盤下方預留空間 + 浮動按鈕 -->
+    <div class="board-footer">
+      <button class="float-btn float-mute" id="gameMuteBtn" title="切換靜音">🔊</button>
+      <button class="float-btn float-fullscreen" id="gameFsBtn" title="全螢幕">⛶</button>
+    </div>
+
+    <div class="controls">
+      <button id="backToCoverBtn">← 返回封面</button>
+      <button class="primary" id="newGameBtn">新遊戲</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     遊戲結束 Overlay
+     ============================================================ -->
+<div class="overlay" id="gameOverOverlay">
+  <div class="overlay-box">
+    <h2 id="resultTitle">遊戲結束</h2>
+    <p id="resultDetail"></p>
+    <div class="reward hidden" id="rewardBadge">+0 🏆</div>
+    <button id="playAgainBtn">再玩一局</button>
+  </div>
+</div>
+
+<!-- 隱藏檔案輸入 -->
+<input type="file" id="fileInput" accept=".txt,.json" style="display:none">
+
+<!-- 背景音樂 -->
+<audio id="bgMusic" loop preload="auto">
+  <source src="Reversi - Relax.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+/* ============================================================
+   常數
+   ============================================================ */
+const BOARD_SIZE = 8;
+const EMPTY = 0, BLACK = 1, WHITE = 2;
+const STORAGE_KEY = 'blackwhite_othello_v1';
+const VERSION = '1.0';
+const MUSIC_VOLUME = 1.0;   // 音樂固定 1.0
+const SFX_VOLUME   = 1.0;   // 音效固定 1.0
+
+const DIRECTIONS = [
+  [-1,-1], [-1,0], [-1,1],
+  [ 0,-1],         [ 0,1],
+  [ 1,-1], [ 1,0], [ 1,1]
+];
+
+/* ============================================================
+   應用狀態（獎盃 / 靜音）
+   ============================================================ */
+const defaultState = {
+  version: VERSION,
+  trophies: 0,
+  muted: false
+};
+
+let appState = { ...defaultState };
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch (e) {}
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      appState = {
+        version: VERSION,
+        trophies: Number(parsed.trophies) || 0,
+        muted: !!parsed.muted
+      };
+    }
+  } catch (e) {
+    appState = { ...defaultState };
+  }
+}
+
+/* ============================================================
+   音訊系統
+   ============================================================ */
+let audioCtx = null;
+const bgMusic = document.getElementById('bgMusic');
+
+function getAudioCtx() {
+  if (!audioCtx) {
+    try {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch (e) { audioCtx = null; }
+  }
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume().catch(() => {});
+  }
+  return audioCtx;
+}
+
+/** 播放單一合成音（音效固定 1.0 音量） */
+function playTone(freq, duration, type = 'sine', gain = 0.3, delay = 0) {
+  if (appState.muted) return;
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  try {
+    const t0 = ctx.currentTime + delay;
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t0);
+    const vol = Math.max(0.0001, gain * SFX_VOLUME);
+    g.gain.setValueAtTime(vol, t0);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
+    osc.connect(g);
+    g.connect(ctx.destination);
+    osc.start(t0);
+    osc.stop(t0 + duration + 0.03);
+  } catch (e) {}
+}
+
+const SFX = {
+  click() { playTone(880, 0.045, 'square', 0.1); },
+  place() {
+    playTone(360, 0.11, 'triangle', 0.4);
+    playTone(720, 0.07, 'sine', 0.16, 0.015);
+  },
+  flip() {
+    playTone(620, 0.055, 'sine', 0.18);
+    playTone(840, 0.055, 'sine', 0.14, 0.045);
+    playTone(1050, 0.05, 'sine', 0.1, 0.09);
+  },
+  invalid() {
+    playTone(170, 0.13, 'sawtooth', 0.14);
+    playTone(115, 0.16, 'sawtooth', 0.11, 0.07);
+  },
+  win() {
+    [523, 659, 784, 1047].forEach((f, i) => playTone(f, 0.24, 'sine', 0.28, i * 0.11));
+  },
+  lose() {
+    [440, 392, 330, 262].forEach((f, i) => playTone(f, 0.28, 'sine', 0.22, i * 0.14));
+  },
+  trophy() {
+    [659, 784, 988, 1319, 1568].forEach((f, i) =>
+      playTone(f, 0.16, 'triangle', 0.26, i * 0.075));
+  }
+};
+
+function tryPlayMusic() {
+  if (appState.muted) return;
+  bgMusic.volume = MUSIC_VOLUME;
+  const p = bgMusic.play();
+  if (p && p.catch) p.catch(() => {});
+}
+
+function pauseMusic() { try { bgMusic.pause(); } catch (e) {} }
+
+function setMuted(m) {
+  appState.muted = !!m;
+  if (appState.muted) pauseMusic(); else tryPlayMusic();
+  updateMuteButtons();
+  saveState();
+}
+
+function updateMuteButtons() {
+  const icon = appState.muted ? '🔇' : '🔊';
+  document.querySelectorAll('.float-mute').forEach(btn => {
+    btn.textContent = icon;
+  });
+}
+
+/* ---------- 首次互動備援（解鎖自動播放） ---------- */
+let musicInitialized = false;
+function onFirstInteraction() {
+  if (musicInitialized) return;
+  musicInitialized = true;
+  tryPlayMusic();
+  ['click','touchstart','keydown'].forEach(ev =>
+    document.removeEventListener(ev, onFirstInteraction));
+}
+['click','touchstart','keydown'].forEach(ev =>
+  document.addEventListener(ev, onFirstInteraction));
+
+/* ============================================================
+   Board 類別
+   ============================================================ */
+class Board {
+  constructor() {
+    this.size = BOARD_SIZE;
+    this.grid = Array.from({ length: this.size }, () => Array(this.size).fill(EMPTY));
+  }
+
+  static initial() {
+    const b = new Board();
+    const m = b.size / 2;
+    b.grid[m-1][m-1] = WHITE;
+    b.grid[m-1][m]   = BLACK;
+    b.grid[m][m-1]   = BLACK;
+    b.grid[m][m]     = WHITE;
+    return b;
+  }
+
+  clone() {
+    const b = new Board();
+    b.grid = this.grid.map(row => row.slice());
+    return b;
+  }
+
+  inBounds(r, c) { return r >= 0 && r < this.size && c >= 0 && c < this.size; }
+
+  getFlips(r, c, player) {
+    if (!this.inBounds(r, c) || this.grid[r][c] !== EMPTY) return [];
+    const opp = player === BLACK ? WHITE : BLACK;
+    const flips = [];
+    for (const [dr, dc] of DIRECTIONS) {
+      const line = [];
+      let nr = r + dr, nc = c + dc;
+      while (this.inBounds(nr, nc) && this.grid[nr][nc] === opp) {
+        line.push([nr, nc]);
+        nr += dr; nc += dc;
+      }
+      if (line.length && this.inBounds(nr, nc) && this.grid[nr][nc] === player) {
+        flips.push(...line);
+      }
+    }
+    return flips;
+  }
+
+  isValidMove(r, c, player) {
+    return this.getFlips(r, c, player).length > 0;
+  }
+
+  getAllMoves(player) {
+    const moves = [];
+    for (let r = 0; r < this.size; r++)
+      for (let c = 0; c < this.size; c++)
+        if (this.grid[r][c] === EMPTY && this.isValidMove(r, c, player))
+          moves.push([r, c]);
+    return moves;
+  }
+
+  hasValidMove(player) {
+    for (let r = 0; r < this.size; r++)
+      for (let c = 0; c < this.size; c++)
+        if (this.grid[r][c] === EMPTY && this.isValidMove(r, c, player))
+          return true;
+    return false;
+  }
+
+  placePiece(r, c, player) {
+    const flips = this.getFlips(r, c, player);
+    if (!flips.length) return null;
+    const nb = this.clone();
+    nb.grid[r][c] = player;
+    for (const [fr, fc] of flips) nb.grid[fr][fc] = player;
+    return nb;
+  }
+
+  placeInPlace(r, c, player) {
+    const flips = this.getFlips(r, c, player);
+    if (!flips.length) return false;
+    this.grid[r][c] = player;
+    for (const [fr, fc] of flips) this.grid[fr][fc] = player;
+    return true;
+  }
+
+  count(player) {
+    let n = 0;
+    for (let r = 0; r < this.size; r++)
+      for (let c = 0; c < this.size; c++)
+        if (this.grid[r][c] === player) n++;
+    return n;
+  }
+
+  isFull() {
+    for (let r = 0; r < this.size; r++)
+      for (let c = 0; c < this.size; c++)
+        if (this.grid[r][c] === EMPTY) return false;
+    return true;
+  }
+}
+
+/* ============================================================
+   AI 類別（Minimax + Alpha-Beta）
+   ============================================================ */
+class AI {
+  constructor(player, options = {}) {
+    this.player = player;
+    this.maxDepth = options.maxDepth ?? 4;
+    this.type = options.type ?? 'combined';
+  }
+
+  _opp() { return this.player === BLACK ? WHITE : BLACK; }
+
+  heuristic(board) {
+    if (board.isFull()) {
+      const diff = board.count(this.player) - board.count(this._opp());
+      if (diff > 0) return 1e6 + diff;
+      if (diff < 0) return -1e6 + diff;
+      return 0;
+    }
+    switch (this.type) {
+      case 'coinParity': return this._coinParity(board);
+      case 'mobility':   return this._mobility(board);
+      default:           return this._combined(board);
+    }
+  }
+
+  _coinParity(board) {
+    const mine = board.count(this.player);
+    const theirs = board.count(this._opp());
+    const total = mine + theirs;
+    return total ? 100 * (mine - theirs) / total : 0;
+  }
+
+  _mobility(board) {
+    const my = board.getAllMoves(this.player).length;
+    const th = board.getAllMoves(this._opp()).length;
+    const total = my + th;
+    return total ? 100 * (my - th) / total : 0;
+  }
+
+  _cornerScore(board) {
+    const corners = [[0,0],[0,7],[7,0],[7,7]];
+    let s = 0;
+    for (const [r,c] of corners) {
+      if (board.grid[r][c] === this.player) s++;
+      else if (board.grid[r][c] === this._opp()) s--;
+    }
+    return s * 25;
+  }
+
+  _combined(board) {
+    return this._coinParity(board) * 1 +
+           this._mobility(board) * 3 +
+           this._cornerScore(board) * 5;
+  }
+
+  _moveScore([r, c]) {
+    const corner = (r === 0 || r === 7) && (c === 0 || c === 7);
+    const edge   = (r === 0 || r === 7 || c === 0 || c === 7);
+    const near   = (r <= 1 || r >= 6) && (c <= 1 || c >= 6) && !corner;
+    if (corner) return 1000;
+    if (near)   return -100;
+    if (edge)   return 50;
+    return 0;
+  }
+
+  minimax(board, depth, alpha, beta, maximizing) {
+    const cur = maximizing ? this.player : this._opp();
+    const moves = board.getAllMoves(cur);
+
+    if (!moves.length) {
+      const other = cur === BLACK ? WHITE : BLACK;
+      if (!board.hasValidMove(other)) return { score: this.heuristic(board), move: null };
+      return this.minimax(board, depth, alpha, beta, !maximizing);
+    }
+
+    if (depth === 0) return { score: this.heuristic(board), move: null };
+
+    moves.sort((a, b) => this._moveScore(b) - this._moveScore(a));
+
+    let bestMove = null;
+    if (maximizing) {
+      let best = -Infinity;
+      for (const [r, c] of moves) {
+        const nb = board.placePiece(r, c, cur);
+        if (!nb) continue;
+        const { score } = this.minimax(nb, depth - 1, alpha, beta, false);
+        if (score > best) { best = score; bestMove = [r, c]; }
+        alpha = Math.max(alpha, score);
+        if (beta <= alpha) break;
+      }
+      return { score: best, move: bestMove };
+    } else {
+      let best = Infinity;
+      for (const [r, c] of moves) {
+        const nb = board.placePiece(r, c, cur);
+        if (!nb) continue;
+        const { score } = this.minimax(nb, depth - 1, alpha, beta, true);
+        if (score < best) { best = score; bestMove = [r, c]; }
+        beta = Math.min(beta, score);
+        if (beta <= alpha) break;
+      }
+      return { score: best, move: bestMove };
+    }
+  }
+
+  getMove(board) {
+    const moves = board.getAllMoves(this.player);
+    if (!moves.length) return null;
+    if (moves.length === 1) return moves[0];
+    const { move } = this.minimax(board, this.maxDepth, -Infinity, Infinity, true);
+    return move || moves[0];
+  }
+}
+
+/* ============================================================
+   遊戲狀態
+   ============================================================ */
+let board = Board.initial();
+let currentPlayer = BLACK;
+let gameOver = false;
+let lastMove = null;
+let lastFlips = [];
+let aiThinking = false;
+let aiTimeoutId = null;
+
+let mode = 'pvc';
+let humanColor = BLACK;
+let aiColor = WHITE;
+let difficulty = 'medium';
+let heuristic = 'combined';
+let blackAIDiff = 'medium', blackAIStyle = 'combined';
+let whiteAIDiff = 'medium', whiteAIStyle = 'combined';
+
+/* ---------- DOM 快取 ---------- */
+const $ = id => document.getElementById(id);
+
+const coverScreen = $('coverScreen');
+const gameScreen  = $('gameScreen');
+const boardEl     = $('board');
+const statusEl    = $('status');
+const statusTextEl= $('statusText');
+const blackScoreEl= $('blackScore');
+const whiteScoreEl= $('whiteScore');
+const blackScoreItem = $('blackScoreItem');
+const whiteScoreItem = $('whiteScoreItem');
+const overlay     = $('gameOverOverlay');
+const resultTitle = $('resultTitle');
+const resultDetail= $('resultDetail');
+const rewardBadge = $('rewardBadge');
+const coverTrophiesEl = $('coverTrophies');
+const gameTrophiesEl  = $('gameTrophies');
+
+const modeSelect       = $('modeSelect');
+const humanColorSelect = $('humanColorSelect');
+const difficultySelect = $('difficultySelect');
+const heuristicSelect  = $('heuristicSelect');
+const blackDiffSelect  = $('blackDiffSelect');
+const blackStyleSelect = $('blackStyleSelect');
+const whiteDiffSelect  = $('whiteDiffSelect');
+const whiteStyleSelect = $('whiteStyleSelect');
+
+const humanColorItem = $('humanColorItem');
+const difficultyItem = $('difficultyItem');
+const heuristicItem  = $('heuristicItem');
+
+const fileInput = $('fileInput');
+
+/* ============================================================
+   設定工具
+   ============================================================ */
+function isAIControlled(player) {
+  if (mode === 'pvp') return false;
+  if (mode === 'cvc') return true;
+  return player !== humanColor;
+}
+
+function depthByDiff(d) {
+  return d === 'easy' ? 1 : d === 'medium' ? 3 : 5;
+}
+
+function getAIConfig(player) {
+  if (mode === 'cvc') {
+    return player === BLACK
+      ? { diff: blackAIDiff, style: blackAIStyle }
+      : { diff: whiteAIDiff, style: whiteAIStyle };
+  }
+  return { diff: difficulty, style: heuristic };
+}
+
+function buildAI(player) {
+  const cfg = getAIConfig(player);
+  return new AI(player, { maxDepth: depthByDiff(cfg.diff), type: cfg.style });
+}
+
+/* ============================================================
+   畫面切換
+   ============================================================ */
+function showScreen(name) {
+  if (name === 'cover') {
+    coverScreen.classList.add('active');
+    gameScreen.classList.remove('active');
+  } else {
+    coverScreen.classList.remove('active');
+    gameScreen.classList.add('active');
+  }
+}
+
+/* ============================================================
+   遊戲流程
+   ============================================================ */
+function startGame() {
+  readSettingsFromUI();
+  showScreen('game');
+  SFX.click();
+  newGame();
+}
+
+function newGame() {
+  cancelAITimeout();
+  aiThinking = false;
+  gameOver = false;
+  currentPlayer = BLACK;
+  lastMove = null;
+  lastFlips = [];
+  board = Board.initial();
+
+  overlay.classList.remove('show');
+  rewardBadge.classList.add('hidden');
+
+  render();
+  updateStatus();
+  scheduleAI();
+}
+
+function cancelAITimeout() {
+  if (aiTimeoutId) { clearTimeout(aiTimeoutId); aiTimeoutId = null; }
+}
+
+function scheduleAI() {
+  if (gameOver || aiThinking) return;
+  if (!isAIControlled(currentPlayer)) return;
+
+  aiThinking = true;
+  updateStatus();
+
+  const delay = mode === 'cvc' ? 500 : 280;
+
+  aiTimeoutId = setTimeout(() => {
+    aiTimeoutId = null;
+
+    if (gameOver || !isAIControlled(currentPlayer)) {
+      aiThinking = false;
+      updateStatus();
+      return;
+    }
+
+    const ai = buildAI(currentPlayer);
+    const move = ai.getMove(board);
+    aiThinking = false;
+
+    if (move) {
+      applyMove(move[0], move[1], currentPlayer);
+    } else {
+      advanceTurn(currentPlayer);
+    }
+  }, delay);
+}
+
+function tryPlayerMove(r, c) {
+  if (gameOver || aiThinking) return;
+  if (isAIControlled(currentPlayer)) return;
+  if (!board.isValidMove(r, c, currentPlayer)) {
+    SFX.invalid();
+    return;
+  }
+  applyMove(r, c, currentPlayer);
+}
+
+function applyMove(r, c, player) {
+  const flips = board.getFlips(r, c, player);
+  if (!flips.length) { SFX.invalid(); return; }
+
+  board.placeInPlace(r, c, player);
+  lastMove = [r, c];
+  lastFlips = flips;
+
+  SFX.place();
+  setTimeout(() => SFX.flip(), 90);
+
+  render();
+  updateScore();
+  advanceTurn(player);
+}
+
+function advanceTurn(justPlayed) {
+  if (gameOver) return;
+
+  const opp = justPlayed === BLACK ? WHITE : BLACK;
+
+  if (board.hasValidMove(opp)) {
+    currentPlayer = opp;
+  } else if (board.hasValidMove(justPlayed)) {
+    currentPlayer = justPlayed;
+  } else {
+    endGame();
+    return;
+  }
+
+  render();
+  updateStatus();
+  scheduleAI();
+}
+
+function endGame() {
+  cancelAITimeout();
+  aiThinking = false;
+  gameOver = true;
+
+  const bc = board.count(BLACK);
+  const wc = board.count(WHITE);
+
+  let title, detail, isDraw = (bc === wc);
+
+  if (bc > wc) { title = '黑棋獲勝！'; detail = `黑棋 ${bc} 顆，白棋 ${wc} 顆`; }
+  else if (wc > bc) { title = '白棋獲勝！'; detail = `白棋 ${wc} 顆，黑棋 ${bc} 顆`; }
+  else { title = '平手！'; detail = `雙方各 ${bc} 顆`; }
+
+  let humanWon = false;
+  if (mode === 'pvc') {
+    humanWon = (humanColor === BLACK && bc > wc) ||
+               (humanColor === WHITE && wc > bc);
+    if (isDraw)        title = '平手！';
+    else if (humanWon) title = '你贏了！ ' + title;
+    else               title = 'AI 獲勝！ ' + title;
+  }
+
+  // 獎盃結算
+  let reward = 0;
+  if (mode === 'pvc' && humanWon) {
+    reward = difficulty === 'easy' ? 10 :
+             difficulty === 'medium' ? 50 : 100;
+    appState.trophies += reward;
+    saveState();
+    updateTrophyDisplays();
+
+    rewardBadge.textContent = `+${reward} 🏆`;
+    rewardBadge.classList.remove('hidden');
+    setTimeout(() => SFX.trophy(), 200);
+  } else {
+    rewardBadge.classList.add('hidden');
+  }
+
+  if (mode === 'pvc') {
+    setTimeout(() => humanWon ? SFX.win() : (isDraw ? SFX.click() : SFX.lose()), 120);
+  } else {
+    setTimeout(() => SFX.win(), 120);
+  }
+
+  resultTitle.textContent = title;
+  resultDetail.textContent = detail;
+
+  render();
+  updateStatus();
+  overlay.classList.add('show');
+}
+
+/* ============================================================
+   渲染
+   ============================================================ */
+function render() {
+  boardEl.innerHTML = '';
+
+  const humanTurn = !isAIControlled(currentPlayer);
+  const showHints = !gameOver && !aiThinking && humanTurn;
+  const validMoves = showHints ? board.getAllMoves(currentPlayer) : [];
+  const validSet = new Set(validMoves.map(([r,c]) => `${r},${c}`));
+
+  const lastKey = lastMove ? `${lastMove[0]},${lastMove[1]}` : null;
+  const flipSet = new Set(lastFlips.map(([r,c]) => `${r},${c}`));
+
+  for (let r = 0; r < BOARD_SIZE; r++) {
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+
+      if (showHints) cell.classList.add('clickable');
+      if (showHints && validSet.has(`${r},${c}`)) cell.classList.add('valid-hint');
+
+      if (board.grid[r][c] !== EMPTY) {
+        const disc = document.createElement('div');
+        disc.className = 'disc ' + (board.grid[r][c] === BLACK ? 'black' : 'white');
+        if (flipSet.has(`${r},${c}`)) disc.classList.add('flipping');
+        cell.appendChild(disc);
+      }
+
+      if (lastKey === `${r},${c}`) cell.classList.add('last-move');
+
+      cell.addEventListener('click', () => tryPlayerMove(r, c));
+      boardEl.appendChild(cell);
+    }
+  }
+}
+
+function updateScore() {
+  blackScoreEl.textContent = board.count(BLACK);
+  whiteScoreEl.textContent = board.count(WHITE);
+
+  blackScoreItem.classList.toggle('active', !gameOver && currentPlayer === BLACK);
+  whiteScoreItem.classList.toggle('active', !gameOver && currentPlayer === WHITE);
+}
+
+function updateStatus() {
+  const indicator = statusEl.querySelector('.disc-indicator');
+  statusTextEl.textContent = '';
+  indicator.style.display = '';
+
+  if (gameOver) {
+    indicator.style.display = 'none';
+    statusTextEl.textContent = '遊戲結束';
+    blackScoreItem.classList.remove('active');
+    whiteScoreItem.classList.remove('active');
+    return;
+  }
+
+  indicator.className = 'disc-indicator ' +
+    (currentPlayer === BLACK ? 'black' : 'white');
+
+  const who = currentPlayer === BLACK ? '黑棋' : '白棋';
+  const isAI = isAIControlled(currentPlayer);
+  const suffix = isAI ? '（AI）' : '';
+
+  if (aiThinking) {
+    statusTextEl.textContent = `${who}${suffix} 思考中`;
+    const dot = document.createElement('span');
+    dot.className = 'thinking';
+    statusTextEl.appendChild(dot);
+  } else {
+    statusTextEl.textContent = `${who}${suffix} 回合`;
+  }
+
+  const opp = currentPlayer === BLACK ? WHITE : BLACK;
+  if (!board.hasValidMove(opp)) {
+    statusTextEl.textContent += '（對手無法落子）';
+  }
+
+  updateScore();
+}
+
+/* ============================================================
+   獎盃顯示
+   ============================================================ */
+function updateTrophyDisplays() {
+  coverTrophiesEl.textContent = appState.trophies;
+  gameTrophiesEl.textContent = appState.trophies;
+}
+
+/* ============================================================
+   讀取 / 寫入設定
+   ============================================================ */
+function readSettingsFromUI() {
+  mode = modeSelect.value;
+  humanColor = parseInt(humanColorSelect.value, 10) || BLACK;
+  aiColor = humanColor === BLACK ? WHITE : BLACK;
+
+  difficulty = difficultySelect.value;
+  heuristic = heuristicSelect.value;
+
+  blackAIDiff = blackDiffSelect.value;
+  blackAIStyle = blackStyleSelect.value;
+  whiteAIDiff = whiteDiffSelect.value;
+  whiteAIStyle = whiteStyleSelect.value;
+
+  const isPVC = (mode === 'pvc');
+  const isCVC = (mode === 'cvc');
+
+  humanColorItem.classList.toggle('hidden', !isPVC);
+  difficultyItem.classList.toggle('hidden', !isPVC);
+  heuristicItem.classList.toggle('hidden', !isPVC);
+
+  document.querySelectorAll('.cvc-opt').forEach(el =>
+    el.classList.toggle('hidden', !isCVC));
+}
+
+function applyAppStateToUI() {
+  updateMuteButtons();
+  updateTrophyDisplays();
+}
+
+/* ============================================================
+   匯入 / 匯出 / 重設
+   ============================================================ */
+function exportSettings() {
+  const data = {
+    version: VERSION,
+    trophies: appState.trophies,
+    muted: appState.muted,
+    exportedAt: new Date().toISOString()
+  };
+
+  const content =
+    '=== 黑白棋 設定檔 ===\n' +
+    '版本：' + data.version + '\n' +
+    '獎盃數：' + data.trophies + '\n' +
+    '靜音：' + (data.muted ? '是' : '否') + '\n' +
+    '匯出時間：' + data.exportedAt + '\n' +
+    '\n=== JSON (請勿刪除此段) ===\n' +
+    JSON.stringify(data, null, 2);
+
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '黑白棋設定.txt';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1200);
+  SFX.click();
+}
+
+function importSettingsFromFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const text = String(e.target.result);
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (err) {
+        const idx = text.indexOf('{');
+        if (idx < 0) throw new Error('No JSON');
+        data = JSON.parse(text.slice(idx));
+      }
+
+      appState = {
+        version: VERSION,
+        trophies: Number(data.trophies) || 0,
+        muted: !!data.muted
+      };
+
+      saveState();
+      applyAppStateToUI();
+
+      if (appState.muted) pauseMusic(); else tryPlayMusic();
+      SFX.trophy();
+
+      alert('設定載入成功！目前獎盃：' + appState.trophies + ' 🏆');
+    } catch (err) {
+      SFX.invalid();
+      alert('檔案格式錯誤，無法載入。');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function resetSettings() {
+  if (!confirm('確定要重設音效設定與獎盃數嗎？')) return;
+  appState = { ...defaultState };
+  saveState();
+  applyAppStateToUI();
+  SFX.click();
+}
+
+/* ============================================================
+   全螢幕
+   ============================================================ */
+function toggleFullscreen() {
+  const el = document.documentElement;
+  if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req) req.call(el).catch(() => {});
+  } else {
+    const exit = document.exitFullscreen || document.webkitExitFullscreen;
+    if (exit) exit.call(document);
+  }
+}
+
+/* ============================================================
+   事件綁定
+   ============================================================ */
+$('startGameBtn').addEventListener('click', startGame);
+$('backToCoverBtn').addEventListener('click', () => {
+  cancelAITimeout();
+  aiThinking = false;
+  gameOver = true;
+  overlay.classList.remove('show');
+  showScreen('cover');
+  SFX.click();
+});
+$('newGameBtn').addEventListener('click', () => { SFX.click(); newGame(); });
+$('playAgainBtn').addEventListener('click', () => { SFX.click(); newGame(); });
+
+// 靜音（封面 + 遊戲中同步）
+['coverMuteBtn','gameMuteBtn'].forEach(id => {
+  $(id).addEventListener('click', () => {
+    setMuted(!appState.muted);
+    if (!appState.muted) SFX.click();
+  });
+});
+
+// 全螢幕（封面 + 遊戲中同步）
+['coverFsBtn','gameFsBtn'].forEach(id => {
+  $(id).addEventListener('click', toggleFullscreen);
+});
+
+// 設定變更
+modeSelect.addEventListener('change', () => { readSettingsFromUI(); SFX.click(); });
+difficultySelect.addEventListener('change', () => { readSettingsFromUI(); SFX.click(); });
+heuristicSelect.addEventListener('change',  () => { readSettingsFromUI(); SFX.click(); });
+humanColorSelect.addEventListener('change', () => { readSettingsFromUI(); SFX.click(); });
+blackDiffSelect.addEventListener('change',  () => { readSettingsFromUI(); SFX.click(); });
+blackStyleSelect.addEventListener('change', () => { readSettingsFromUI(); SFX.click(); });
+whiteDiffSelect.addEventListener('change',  () => { readSettingsFromUI(); SFX.click(); });
+whiteStyleSelect.addEventListener('change', () => { readSettingsFromUI(); SFX.click(); });
+
+// 儲存 / 載入 / 重設
+$('saveBtn').addEventListener('click', exportSettings);
+$('loadBtn').addEventListener('click', () => {
+  SFX.click();
+  fileInput.value = '';
+  fileInput.click();
+});
+fileInput.addEventListener('change', e => {
+  const file = e.target.files && e.target.files[0];
+  if (file) importSettingsFromFile(file);
+});
+$('resetBtn').addEventListener('click', resetSettings);
+
+// 鍵盤 Esc 關閉 overlay
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && overlay.classList.contains('show')) {
+    overlay.classList.remove('show');
+  }
+});
+
+/* ============================================================
+   啟動
+   ============================================================ */
+(function init() {
+  $('coverYear').textContent = new Date().getFullYear();
+
+  loadState();
+  applyAppStateToUI();
+
+  bgMusic.volume = MUSIC_VOLUME;
+
+  window.addEventListener('load', () => { tryPlayMusic(); });
+  tryPlayMusic();
+
+  readSettingsFromUI();
+
+  board = Board.initial();
+  render();
+  updateScore();
+  updateStatus();
+})();
+</script>
+
+</body>
+</html>
