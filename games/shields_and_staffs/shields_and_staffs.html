@@ -1,1 +1,1956 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Might &amp; Magic: Armies · 帶兵打仗</title>
+<style>
+    * { box-sizing: border-box; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #0b1a0e; font-family: 'Segoe UI', 'Roboto', sans-serif; touch-action: none; overscroll-behavior: none; }
 
+    .cover-screen {
+        position: fixed; inset: 0; z-index: 1000;
+        display: flex; align-items: center; justify-content: center;
+        background: radial-gradient(circle at 50% 40%, #1a2e14, #050a04 80%);
+        padding: 12px;
+    }
+    .cover-box {
+        position: relative;
+        width: min(92vw, 820px);
+        aspect-ratio: 4 / 3;
+        max-height: 92vh;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 24px 70px rgba(0,0,0,0.85), inset 0 0 0 3px #5e7a4a, inset 0 0 60px rgba(0,0,0,0.6);
+        background: #1a2e14;
+    }
+    .cover-bg {
+        position: absolute; inset: 0;
+        width: 100%; height: 100%;
+        object-fit: cover;
+        pointer-events: none;
+    }
+    .cover-overlay {
+        position: absolute; inset: 0;
+        background: linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0.65) 100%);
+        pointer-events: none;
+    }
+    .cover-content {
+        position: absolute; inset: 0;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        gap: clamp(10px, 2vw, 20px);
+        padding: clamp(20px, 4vw, 50px);
+        text-align: center;
+        z-index: 2;
+    }
+    .cover-title {
+        margin: 0;
+        font-size: clamp(26px, 5vw, 46px);
+        font-weight: 900;
+        color: #ffd966;
+        text-shadow: 0 4px 0 #5a3a1a, 0 8px 20px rgba(0,0,0,0.9);
+        letter-spacing: 2px;
+    }
+    .cover-subtitle {
+        margin: 0;
+        font-size: clamp(14px, 2.4vw, 20px);
+        color: #d4e0b0;
+        text-shadow: 0 2px 6px black;
+        letter-spacing: 4px;
+    }
+    .start-btn {
+        margin-top: clamp(8px, 2vw, 20px);
+        padding: clamp(10px, 1.6vw, 16px) clamp(24px, 4vw, 42px);
+        font-size: clamp(15px, 2.4vw, 20px);
+        font-weight: 900;
+        color: #2a1808;
+        background: linear-gradient(180deg, #ffd966, #d4a017);
+        border: 3px solid #fff3c0;
+        border-radius: 60px;
+        cursor: pointer;
+        box-shadow: 0 6px 0 #8a6b0f, 0 10px 24px rgba(0,0,0,0.7);
+        text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+        transition: transform 0.08s ease, box-shadow 0.08s ease;
+        letter-spacing: 2px;
+        font-family: inherit;
+    }
+    .start-btn:active {
+        transform: translateY(5px);
+        box-shadow: 0 1px 0 #8a6b0f, 0 4px 12px rgba(0,0,0,0.7);
+    }
+    .cover-footer {
+        position: absolute;
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #d4e0b0;
+        font-size: clamp(10px, 1.5vw, 13px);
+        text-shadow: 0 2px 4px black;
+        background: rgba(0,0,0,0.5);
+        padding: 5px 16px;
+        border-radius: 30px;
+        white-space: nowrap;
+        z-index: 3;
+        letter-spacing: 0.5px;
+        border: 1px solid rgba(127,159,92,0.35);
+    }
+    .float-btn {
+        width: clamp(38px, 6vw, 46px);
+        height: clamp(38px, 6vw, 46px);
+        border-radius: 50%;
+        background: rgba(10, 19, 11, 0.72);
+        border: 2px solid rgba(127, 159, 92, 0.65);
+        color: #d4e0b0;
+        font-size: clamp(16px, 2.4vw, 20px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+        transition: transform 0.1s ease, background 0.2s ease;
+        padding: 0;
+        line-height: 1;
+        z-index: 20;
+        backdrop-filter: blur(2px);
+        -webkit-backdrop-filter: blur(2px);
+    }
+    .float-btn:hover { background: rgba(40, 70, 30, 0.85); }
+    .float-btn:active { transform: scale(0.88); }
+
+    .cover-mute { position: absolute; bottom: 12px; left: 12px; z-index: 4; }
+    .cover-fullscreen { position: absolute; bottom: 12px; right: 12px; z-index: 4; }
+
+    .game-wrapper {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 8px;
+    }
+    .top-bar {
+        display: flex; justify-content: space-between; align-items: center; gap: 8px;
+        padding: 6px 14px;
+        background: #0a130b;
+        border-radius: 40px;
+        box-shadow: inset 0 2px 6px black, 0 2px 0 #4d6b3a;
+        color: #d4e0b0; font-weight: bold;
+        font-size: clamp(11px, 2.8vw, 14px);
+        text-shadow: 0 2px 2px black;
+        white-space: nowrap; flex-shrink: 0;
+    }
+    .top-bar .value { color: #ffd966; font-size: clamp(14px, 3.6vw, 18px); }
+    .top-bar .hp { color: #ff8888; }
+    .boost-active { background: #b8860b !important; color: #000 !important; text-shadow: none; padding: 4px 12px; border-radius: 40px; }
+    .restart-btn {
+        background: #3e5d2e; border: none; border-radius: 40px;
+        padding: 6px 16px; color: #e2f0c0; font-weight: bold;
+        font-size: clamp(11px, 2.8vw, 14px);
+        box-shadow: 0 3px 0 #1f2e15, 0 2px 8px black;
+        cursor: pointer; transition: all 0.08s ease;
+        white-space: nowrap; font-family: inherit;
+    }
+    .restart-btn:active { transform: translateY(3px); box-shadow: 0 0 0 #1f2e15, 0 2px 8px black; }
+    .hud-boost { padding: 4px 12px; border-radius: 40px; transition: all 0.2s; }
+    .game-stage {
+        position: relative;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+        border-radius: 16px;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+    canvas { display: block; background: #142410; }
+
+    .game-mute {
+        position: absolute;
+        bottom: calc(200px + env(safe-area-inset-bottom, 0px));
+        left: calc(18px + env(safe-area-inset-left, 0px));
+        z-index: 15;
+    }
+    .game-fullscreen {
+        position: absolute;
+        bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+        right: calc(22px + env(safe-area-inset-right, 0px));
+        z-index: 15;
+    }
+
+    .joystick-base {
+        position: absolute;
+        bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+        left: calc(18px + env(safe-area-inset-left, 0px));
+        width: clamp(110px, 24vw, 160px);
+        height: clamp(110px, 24vw, 160px);
+        border-radius: 50%;
+        background: radial-gradient(circle at 50% 50%, rgba(60, 90, 45, 0.18), rgba(15, 28, 13, 0.32));
+        border: 2px solid rgba(127, 159, 92, 0.35);
+        box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.3), 0 4px 14px rgba(0, 0, 0, 0.35);
+        touch-action: none;
+        z-index: 10;
+    }
+    .joystick-base::after {
+        content: ''; position: absolute; inset: 20%;
+        border-radius: 50%;
+        border: 1px dashed rgba(127, 159, 92, 0.18);
+        pointer-events: none;
+    }
+    .joystick-stick {
+        position: absolute; top: 50%; left: 50%;
+        width: 44%; height: 44%; border-radius: 50%;
+        background: radial-gradient(circle at 35% 32%, rgba(181, 224, 138, 0.55), rgba(63, 138, 42, 0.55) 75%);
+        border: 2px solid rgba(255, 217, 102, 0.55);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 0 12px rgba(255, 255, 255, 0.15);
+        transform: translate(-50%, -50%);
+        transition: transform 0.06s linear;
+        pointer-events: none;
+    }
+    .joystick-base.active .joystick-stick { transition: none; }
+    .boost-btn {
+        position: absolute;
+        bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+        right: calc(22px + env(safe-area-inset-right, 0px));
+        width: clamp(74px, 17vw, 108px);
+        height: clamp(74px, 17vw, 108px);
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 32%, rgba(123, 163, 90, 0.35), rgba(36, 64, 26, 0.42));
+        border: 2px solid rgba(255, 217, 102, 0.5);
+        box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.3), 0 4px 14px rgba(0, 0, 0, 0.35);
+        color: #ffd966; font-weight: bold;
+        font-size: clamp(12px, 3.2vw, 16px);
+        display: flex; flex-direction: column;
+        justify-content: center; align-items: center;
+        line-height: 1.1;
+        z-index: 10; touch-action: none;
+        text-shadow: 0 2px 4px black;
+        transition: opacity 0.2s, transform 0.06s;
+    }
+    .boost-btn.cooldown { opacity: 0.35; border-color: rgba(119, 119, 119, 0.5); color: #aaa; }
+    .boost-btn.pressed { transform: scale(0.93); }
+</style>
+</head>
+<body>
+
+<!-- ================= 封面 ================= -->
+<div class="cover-screen" id="coverScreen">
+    <div class="cover-box" id="coverBox">
+        <img class="cover-bg" src="shields_and_staffs.jpg" alt="封面背景"
+             onerror="this.style.display='none'">
+        <div class="cover-overlay"></div>
+        <div class="cover-content">
+            <h1 class="cover-title">Might &amp; Magic: Armies</h1>
+            <p class="cover-subtitle">帶 兵 打 仗</p>
+            <button class="start-btn" id="startGameBtn">⚔️ 開 始 遊 戲 ⚔️</button>
+        </div>
+        <div class="cover-footer" id="coverFooter">v1.0 © 2026 ☕迪遜咖啡廳，版權所有。</div>
+        <!-- 初始顯示 🔊（音樂正在播放狀態） -->
+        <button class="float-btn cover-mute" id="coverMuteBtn" title="靜音 / 播放">🔊</button>
+        <button class="float-btn cover-fullscreen" id="coverFullscreenBtn" title="全屏">⛶</button>
+    </div>
+</div>
+
+<!-- ================= 遊戲 ================= -->
+<div class="game-wrapper" id="gameWrapper">
+    <div class="top-bar" id="topBar">
+        <span>⚔️ <span class="value" id="soldierCount">0</span></span>
+        <span class="hp" id="hpDisplay">❤️ <span class="value" id="heroHp">100</span></span>
+        <span class="hud-boost" id="boostIndicator">⚡ 加速</span>
+        <button class="restart-btn" id="restartBtn">🔄 重來</button>
+    </div>
+
+    <div class="game-stage" id="gameStage">
+        <canvas id="gameCanvas" width="1000" height="620"></canvas>
+        <div class="joystick-base" id="joystickBase">
+            <div class="joystick-stick" id="joystickStick"></div>
+        </div>
+        <div class="boost-btn" id="boostBtn">⚡<br>加速</div>
+        <!-- 初始顯示 🔊 -->
+        <button class="float-btn game-mute" id="gameMuteBtn" title="靜音 / 播放">🔊</button>
+        <button class="float-btn game-fullscreen" id="gameFullscreenBtn" title="全屏">⛶</button>
+    </div>
+</div>
+
+<audio id="menuMusic" loop preload="auto">
+    <source src="Shields and Staffs - Armies Assault.mp3" type="audio/mpeg">
+</audio>
+<audio id="battleMusic" loop preload="auto">
+    <source src="Shields and Staffs - Warzone Heroes.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+(function() {
+    // ================= 基本元素 =================
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const stage = document.getElementById('gameStage');
+    const topBar = document.getElementById('topBar');
+    const soldierSpan = document.getElementById('soldierCount');
+    const heroHpSpan = document.getElementById('heroHp');
+    const hpDisplay = document.getElementById('hpDisplay');
+    const boostIndicator = document.getElementById('boostIndicator');
+    const boostBtn = document.getElementById('boostBtn');
+
+    const coverScreen = document.getElementById('coverScreen');
+    const gameWrapper = document.getElementById('gameWrapper');
+    const startGameBtn = document.getElementById('startGameBtn');
+    const coverMuteBtn = document.getElementById('coverMuteBtn');
+    const coverFullscreenBtn = document.getElementById('coverFullscreenBtn');
+    const gameMuteBtn = document.getElementById('gameMuteBtn');
+    const gameFullscreenBtn = document.getElementById('gameFullscreenBtn');
+    const coverFooter = document.getElementById('coverFooter');
+
+    const menuMusic = document.getElementById('menuMusic');
+    const battleMusic = document.getElementById('battleMusic');
+
+    // 版權年份
+    coverFooter.textContent = 'v1.0 © ' + new Date().getFullYear() + ' ☕迪遜咖啡廳，版權所有。';
+
+    // ================= 音效系統 =================
+    let audioCtx = null;
+    let isMuted = false;
+
+    function getAudioCtx() {
+        if (!audioCtx) {
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) { return null; }
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume().catch(() => {});
+        }
+        return audioCtx;
+    }
+
+    function playTone(freq, duration, type = 'sine', volume = 0.08) {
+        if (isMuted) return;
+        const ac = getAudioCtx();
+        if (!ac) return;
+        try {
+            const osc = ac.createOscillator();
+            const gain = ac.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, ac.currentTime);
+            gain.gain.setValueAtTime(0, ac.currentTime);
+            gain.gain.linearRampToValueAtTime(volume, ac.currentTime + 0.008);
+            gain.gain.exponentialRampToValueAtTime(0.0008, ac.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(ac.destination);
+            osc.start(ac.currentTime);
+            osc.stop(ac.currentTime + duration + 0.02);
+        } catch (e) {}
+    }
+
+    function playSequence(notes) {
+        if (isMuted) return;
+        const ac = getAudioCtx();
+        if (!ac) return;
+        let t = 0;
+        for (const n of notes) {
+            setTimeout(() => {
+                playTone(n.f, n.d, n.t || 'sine', n.v || 0.09);
+            }, t);
+            t += n.gap || n.d * 1000;
+        }
+    }
+
+    const Sfx = {
+        captureComplete: () => playSequence([
+            { f: 523, d: 0.08, gap: 70 },
+            { f: 659, d: 0.08, gap: 70 },
+            { f: 784, d: 0.14 },
+        ]),
+        villageSpawn: () => playSequence([
+            { f: 440, d: 0.08, gap: 80 },
+            { f: 587, d: 0.12 },
+        ]),
+        combatHit: () => playTone(130 + Math.random() * 180, 0.045, 'square', 0.025),
+        enemyDown: () => playSequence([
+            { f: 440, d: 0.09, t: 'sawtooth', gap: 90 },
+            { f: 330, d: 0.09, t: 'sawtooth', gap: 90 },
+            { f: 220, d: 0.18, t: 'sawtooth' },
+        ]),
+        playerDown: () => playSequence([
+            { f: 300, d: 0.18, t: 'sawtooth', v: 0.11, gap: 180 },
+            { f: 200, d: 0.18, t: 'sawtooth', v: 0.11, gap: 180 },
+            { f: 100, d: 0.5, t: 'sawtooth', v: 0.11 },
+        ]),
+        victory: () => playSequence([
+            { f: 523, d: 0.12, gap: 130 },
+            { f: 659, d: 0.12, gap: 130 },
+            { f: 784, d: 0.12, gap: 130 },
+            { f: 1046, d: 0.4, v: 0.12 },
+        ]),
+        click: () => playTone(820, 0.05, 'sine', 0.055),
+        newEnemy: () => playSequence([
+            { f: 320, d: 0.08, t: 'square', gap: 90 },
+            { f: 400, d: 0.12, t: 'square' },
+        ]),
+        edgeWarn: () => playTone(110, 0.12, 'sawtooth', 0.035),
+    };
+
+    // ================= 音樂控制 =================
+    let currentMusic = null;
+
+    // ★ 統一更新靜音圖示：音樂播放中顯示 🔊，靜音時顯示 🔇
+    function updateMuteIcons() {
+        const icon = isMuted ? '🔇' : '🔊';
+        coverMuteBtn.textContent = icon;
+        gameMuteBtn.textContent = icon;
+    }
+
+    function switchToMenuMusic() {
+        if (currentMusic === menuMusic && !menuMusic.paused) return;
+        try { battleMusic.pause(); battleMusic.currentTime = 0; } catch (e) {}
+        currentMusic = menuMusic;
+        if (!isMuted) {
+            menuMusic.play().then(() => {
+                updateMuteIcons();
+            }).catch(() => {});
+        }
+    }
+
+    function switchToBattleMusic() {
+        try { menuMusic.pause(); menuMusic.currentTime = 0; } catch (e) {}
+        currentMusic = battleMusic;
+        if (!isMuted) {
+            battleMusic.play().then(() => {
+                updateMuteIcons();
+            }).catch(() => {});
+        }
+    }
+
+    function toggleMute() {
+        isMuted = !isMuted;
+        updateMuteIcons();
+
+        if (isMuted) {
+            try { menuMusic.pause(); } catch (e) {}
+            try { battleMusic.pause(); } catch (e) {}
+        } else {
+            if (isPlaying) {
+                battleMusic.play().then(() => updateMuteIcons()).catch(() => {});
+            } else {
+                menuMusic.play().then(() => updateMuteIcons()).catch(() => {});
+            }
+        }
+        Sfx.click();
+    }
+
+    // ================= 全屏 =================
+    function toggleFullscreen() {
+        Sfx.click();
+        if (!document.fullscreenElement) {
+            const el = document.documentElement;
+            if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+            else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        }
+    }
+
+    coverMuteBtn.addEventListener('click', toggleMute);
+    gameMuteBtn.addEventListener('click', toggleMute);
+    coverFullscreenBtn.addEventListener('click', toggleFullscreen);
+    gameFullscreenBtn.addEventListener('click', toggleFullscreen);
+
+    // ================= 自動播放（含 fallback） =================
+    function attemptMenuAutoplay() {
+        currentMusic = menuMusic;
+        menuMusic.play().then(() => {
+            updateMuteIcons();
+        }).catch(() => {
+            // 被瀏覽器阻止，等待第一次用戶互動
+            const resume = () => {
+                if (!isMuted && !isPlaying) {
+                    menuMusic.play().then(() => updateMuteIcons()).catch(() => {});
+                }
+                document.removeEventListener('click', resume);
+                document.removeEventListener('touchstart', resume);
+                document.removeEventListener('keydown', resume);
+            };
+            document.addEventListener('click', resume, { once: true });
+            document.addEventListener('touchstart', resume, { once: true });
+            document.addEventListener('keydown', resume, { once: true });
+        });
+    }
+
+    // 監聽音樂播放/暫停事件，確保圖示同步
+    menuMusic.addEventListener('play', () => { if (!isMuted) updateMuteIcons(); });
+    menuMusic.addEventListener('pause', () => { if (!isMuted) updateMuteIcons(); });
+    battleMusic.addEventListener('play', () => { if (!isMuted) updateMuteIcons(); });
+    battleMusic.addEventListener('pause', () => { if (!isMuted) updateMuteIcons(); });
+
+    // ================= 遊戲參數 =================
+    const WORLD_W = 2200;
+    const WORLD_H = 1500;
+    const VIEW_W = canvas.width;
+    const VIEW_H = canvas.height;
+
+    const TERRAIN_GRID = 60;
+    const HERO_RADIUS = 28;
+    const BASE_SPEED = 2.9;
+    const BOOST_SPEED_MULT = 1.9;
+    const BOOST_POWER_PENALTY = 0.65;
+    const BOOST_DURATION = 180;
+    const BOOST_COOLDOWN = 300;
+
+    const UNIT_BRONZE = 200;
+    const UNIT_SILVER = 1000;
+    const UNIT_GOLD = 5000;
+
+    const CAPTURE_DURATION = 180;
+    const EDGE_MARGIN = 120;
+    const EDGE_SOLDIER_DMG = 1.5;
+    const EDGE_HP_DMG = 0.3;
+    const COMBAT_RATE = 0.004;
+    const COMBAT_MIN = 0.5;
+    const SPAWN_INTERVAL = 300;
+    const SPAWN_COUNT = 3;
+    const MAX_UNITS = 80;
+    const MAX_HERO_HP = 100;
+    const INITIAL_ENEMY_COUNT = 5;
+
+    const TILE_SIZE = TERRAIN_GRID;
+    const GRID_W = Math.ceil(WORLD_W / TILE_SIZE);
+    const GRID_H = Math.ceil(WORLD_H / TILE_SIZE);
+
+    // ================= 遊戲狀態 =================
+    let player = null;
+    let enemies = [];
+    let soldierUnits = [];
+    let forests = [];
+    let riverTiles = new Set();
+    let bridges = new Set();
+    let villages = [];
+    let battleLogs = [];
+    let combatEffects = [];
+    let activeCombats = [];
+    let battleRegistry = new Map();
+    let nextUnitId = 1;
+    let gameOver = false;
+    let winFlag = false;
+    let camera = { x: 0, y: 0 };
+    let frame = 0;
+    let spawnTimer = 0;
+
+    let isPlaying = false;
+    let gameOverTimer = null;
+
+    const keys = { w: false, a: false, s: false, d: false, ArrowUp: false, ArrowLeft: false, ArrowDown: false, ArrowRight: false, ' ': false };
+    const joystickInput = { x: 0, y: 0 };
+
+    let lastCombatSoundFrame = -100;
+    let lastEdgeWarnFrame = -100;
+
+    function resizeGame() {
+        const aspect = VIEW_W / VIEW_H;
+        const topBarH = topBar.offsetHeight || 40;
+        const availW = window.innerWidth - 16;
+        const availH = window.innerHeight - topBarH - 24;
+        let w, h;
+        if (availW / availH > aspect) { h = availH; w = h * aspect; }
+        else { w = availW; h = w / aspect; }
+        stage.style.width = w + 'px';
+        stage.style.height = h + 'px';
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+    }
+
+    function rand(min, max) { return Math.random() * (max - min) + min; }
+    function dist(x1, y1, x2, y2) { return Math.hypot(x2 - x1, y2 - y1); }
+    function seededRand(seed) { let x = Math.sin(seed * 9301 + 49297) * 233280; return x - Math.floor(x); }
+
+    function isInRiver(px, py, radius) {
+        const minGX = Math.floor((px - radius) / TILE_SIZE);
+        const maxGX = Math.floor((px + radius) / TILE_SIZE);
+        const minGY = Math.floor((py - radius) / TILE_SIZE);
+        const maxGY = Math.floor((py + radius) / TILE_SIZE);
+        for (let gx = minGX; gx <= maxGX; gx++) {
+            for (let gy = minGY; gy <= maxGY; gy++) {
+                const key = gx + ',' + gy;
+                if (!riverTiles.has(key)) continue;
+                if (bridges.has(key)) continue;
+                const tileLeft = gx * TILE_SIZE;
+                const tileRight = tileLeft + TILE_SIZE;
+                const tileTop = gy * TILE_SIZE;
+                const tileBottom = tileTop + TILE_SIZE;
+                const closestX = Math.max(tileLeft, Math.min(px, tileRight));
+                const closestY = Math.max(tileTop, Math.min(py, tileBottom));
+                if (Math.hypot(px - closestX, py - closestY) < radius) return true;
+            }
+        }
+        return false;
+    }
+
+    function isBridgeAt(px, py) {
+        const gx = Math.floor(px / TILE_SIZE);
+        const gy = Math.floor(py / TILE_SIZE);
+        return bridges.has(gx + ',' + gy);
+    }
+
+    function tryMoveEntity(entity, dx, dy) {
+        const newX = entity.x + dx;
+        const newY = entity.y + dy;
+        if (!isInRiver(newX, entity.y, entity.radius)) entity.x = newX;
+        if (!isInRiver(entity.x, newY, entity.radius)) entity.y = newY;
+        entity.x = Math.max(HERO_RADIUS, Math.min(WORLD_W - HERO_RADIUS, entity.x));
+        entity.y = Math.max(HERO_RADIUS, Math.min(WORLD_H - HERO_RADIUS, entity.y));
+    }
+
+    function generateRiverTiles() {
+        const tiles = new Set();
+        const numRivers = 2 + Math.floor(Math.random() * 2);
+        for (let r = 0; r < numRivers; r++) {
+            const horizontal = Math.random() > 0.5;
+            if (horizontal) {
+                let gx = 0;
+                let gy = Math.floor(GRID_H * (0.15 + Math.random() * 0.7));
+                const endGx = Math.floor(GRID_W * (0.5 + Math.random() * 0.4));
+                while (gx < endGx && gx < GRID_W) {
+                    tiles.add(gx + ',' + gy);
+                    gx++;
+                    if (Math.random() < 0.45) {
+                        gy += Math.random() < 0.5 ? -1 : 1;
+                        gy = Math.max(2, Math.min(GRID_H - 3, gy));
+                    }
+                    if (Math.random() < 0.12) {
+                        const by = gy + (Math.random() < 0.5 ? -2 : 2);
+                        if (by >= 0 && by < GRID_H) tiles.add(gx + ',' + by);
+                    }
+                }
+            } else {
+                let gy = 0;
+                let gx = Math.floor(GRID_W * (0.15 + Math.random() * 0.7));
+                const endGy = Math.floor(GRID_H * (0.5 + Math.random() * 0.4));
+                while (gy < endGy && gy < GRID_H) {
+                    tiles.add(gx + ',' + gy);
+                    gy++;
+                    if (Math.random() < 0.45) {
+                        gx += Math.random() < 0.5 ? -1 : 1;
+                        gx = Math.max(2, Math.min(GRID_W - 3, gx));
+                    }
+                    if (Math.random() < 0.12) {
+                        const bx = gx + (Math.random() < 0.5 ? -2 : 2);
+                        if (bx >= 0 && bx < GRID_W) tiles.add(bx + ',' + gy);
+                    }
+                }
+            }
+        }
+        const expanded = new Set(tiles);
+        for (const key of tiles) {
+            const [x, y] = key.split(',').map(Number);
+            for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+                if (Math.random() < 0.55) {
+                    const nx = x + dx, ny = y + dy;
+                    if (nx >= 0 && nx < GRID_W && ny >= 0 && ny < GRID_H) expanded.add(nx + ',' + ny);
+                }
+            }
+        }
+        const expanded2 = new Set(expanded);
+        for (const key of expanded) {
+            const [x, y] = key.split(',').map(Number);
+            for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+                if (Math.random() < 0.25) {
+                    const nx = x + dx, ny = y + dy;
+                    if (nx >= 0 && nx < GRID_W && ny >= 0 && ny < GRID_H) expanded2.add(nx + ',' + ny);
+                }
+            }
+        }
+        return expanded2;
+    }
+
+    function generateBridges(riverTiles) {
+        const bridges = new Set();
+        const colCandidates = [];
+        const rowCandidates = [];
+        for (let gx = 2; gx < GRID_W - 2; gx++) {
+            let segments = [];
+            let curStart = -1, curCount = 0;
+            for (let gy = 0; gy < GRID_H; gy++) {
+                if (riverTiles.has(gx + ',' + gy)) {
+                    if (curStart === -1) curStart = gy;
+                    curCount++;
+                } else {
+                    if (curStart !== -1) {
+                        segments.push({ start: curStart, end: gy - 1, count: curCount });
+                        curStart = -1; curCount = 0;
+                    }
+                }
+            }
+            if (curStart !== -1) segments.push({ start: curStart, end: GRID_H - 1, count: curCount });
+            for (const seg of segments) {
+                if (seg.count <= 8 && seg.start > 1 && seg.end < GRID_H - 2) {
+                    const aboveFree = !riverTiles.has(gx + ',' + (seg.start - 1));
+                    const belowFree = !riverTiles.has(gx + ',' + (seg.end + 1));
+                    if (aboveFree && belowFree) {
+                        colCandidates.push({ gx, minY: seg.start, maxY: seg.end, span: seg.count });
+                    }
+                }
+            }
+        }
+        for (let gy = 2; gy < GRID_H - 2; gy++) {
+            let segments = [];
+            let curStart = -1, curCount = 0;
+            for (let gx = 0; gx < GRID_W; gx++) {
+                if (riverTiles.has(gx + ',' + gy)) {
+                    if (curStart === -1) curStart = gx;
+                    curCount++;
+                } else {
+                    if (curStart !== -1) {
+                        segments.push({ start: curStart, end: gx - 1, count: curCount });
+                        curStart = -1; curCount = 0;
+                    }
+                }
+            }
+            if (curStart !== -1) segments.push({ start: curStart, end: GRID_W - 1, count: curCount });
+            for (const seg of segments) {
+                if (seg.count <= 8 && seg.start > 1 && seg.end < GRID_W - 2) {
+                    const leftFree = !riverTiles.has((seg.start - 1) + ',' + gy);
+                    const rightFree = !riverTiles.has((seg.end + 1) + ',' + gy);
+                    if (leftFree && rightFree) {
+                        rowCandidates.push({ gy, minX: seg.start, maxX: seg.end, span: seg.count });
+                    }
+                }
+            }
+        }
+        colCandidates.sort((a, b) => a.span - b.span);
+        rowCandidates.sort((a, b) => a.span - b.span);
+        const usedCols = new Set();
+        const usedRows = new Set();
+        let bridgeCount = 0;
+        const targetBridges = 4;
+        for (const c of colCandidates) {
+            if (bridgeCount >= targetBridges) break;
+            if (usedCols.has(c.gx)) continue;
+            let tooClose = false;
+            for (const ugx of usedCols) {
+                if (Math.abs(ugx - c.gx) < 5) { tooClose = true; break; }
+            }
+            if (tooClose) continue;
+            for (let gy = c.minY; gy <= c.maxY; gy++) bridges.add(c.gx + ',' + gy);
+            usedCols.add(c.gx);
+            bridgeCount++;
+        }
+        for (const r of rowCandidates) {
+            if (bridgeCount >= targetBridges + 2) break;
+            if (usedRows.has(r.gy)) continue;
+            let tooClose = false;
+            for (const ugy of usedRows) {
+                if (Math.abs(ugy - r.gy) < 5) { tooClose = true; break; }
+            }
+            if (tooClose) continue;
+            for (let gx = r.minX; gx <= r.maxX; gx++) bridges.add(gx + ',' + r.gy);
+            usedRows.add(r.gy);
+            bridgeCount++;
+        }
+        return bridges;
+    }
+
+    function generateForests(count) {
+        const arr = [];
+        for (let i = 0; i < count; i++) {
+            const r = rand(90, 170);
+            let fx, fy, safe = false, attempts = 0;
+            while (!safe && attempts < 80) {
+                fx = rand(r, WORLD_W - r);
+                fy = rand(r, WORLD_H - r);
+                if (isInRiver(fx, fy, r * 0.7)) { attempts++; continue; }
+                if (isBridgeAt(fx, fy)) { attempts++; continue; }
+                safe = true;
+            }
+            if (!safe) continue;
+            const trees = [];
+            const treeCount = Math.floor(r / 11);
+            for (let t = 0; t < treeCount; t++) {
+                const a = seededRand(i * 100 + t) * Math.PI * 2;
+                const rr = Math.sqrt(seededRand(i * 200 + t)) * r * 0.85;
+                const tx = fx + Math.cos(a) * rr;
+                const ty = fy + Math.sin(a) * rr;
+                if (isInRiver(tx, ty, 5)) continue;
+                trees.push({
+                    x: tx, y: ty,
+                    type: seededRand(i * 300 + t) > 0.45 ? '🌳' : '🌲',
+                    size: 22 + seededRand(i * 400 + t) * 12,
+                });
+            }
+            arr.push({ x: fx, y: fy, r, trees });
+        }
+        return arr;
+    }
+
+    function generateVillages(count) {
+        const arr = [];
+        for (let i = 0; i < count; i++) {
+            let x, y, safe = false, attempts = 0;
+            while (!safe && attempts < 300) {
+                x = rand(250, WORLD_W - 250);
+                y = rand(250, WORLD_H - 250);
+                if (isInRiver(x, y, 90)) { attempts++; continue; }
+                if (isBridgeAt(x, y)) { attempts++; continue; }
+                let inForest = false;
+                for (const f of forests) {
+                    if (dist(x, y, f.x, f.y) < f.r + 70) { inForest = true; break; }
+                }
+                if (inForest) { attempts++; continue; }
+                let tooClose = false;
+                for (const v of arr) {
+                    if (dist(x, y, v.x, v.y) < 400) { tooClose = true; break; }
+                }
+                if (tooClose) { attempts++; continue; }
+                safe = true;
+            }
+            if (!safe) continue;
+            arr.push({
+                x, y, radius: 42,
+                spawnTimer: Math.floor(rand(180, 480)),
+                pulse: Math.random() * Math.PI * 2,
+            });
+        }
+        return arr;
+    }
+
+    function createSoldierUnit() {
+        const roll = Math.random();
+        let value, color, icon;
+        if (roll < 0.6) { value = UNIT_BRONZE; color = '#cd7f32'; icon = '🤺'; }
+        else if (roll < 0.9) { value = UNIT_SILVER; color = '#c0c0c0'; icon = '🥷'; }
+        else { value = UNIT_GOLD; color = '#ffd700'; icon = '🧙'; }
+        return { x: rand(60, WORLD_W - 60), y: rand(60, WORLD_H - 60), value, color, icon, radius: 20, capturingBy: null, captureProgress: 0 };
+    }
+
+    function findSafeSpot(radius, minDistFromPlayer = 0) {
+        for (let i = 0; i < 300; i++) {
+            const x = rand(60, WORLD_W - 60);
+            const y = rand(60, WORLD_H - 60);
+            if (isInRiver(x, y, radius)) continue;
+            if (minDistFromPlayer > 0 && player && dist(x, y, player.x, player.y) < minDistFromPlayer) continue;
+            return { x, y };
+        }
+        return { x: WORLD_W / 2, y: WORLD_H / 2 };
+    }
+
+    function createVillageUnit(v) {
+        let x = v.x, y = v.y;
+        for (let i = 0; i < 20; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const r = rand(30, 65);
+            x = v.x + Math.cos(angle) * r;
+            y = v.y + Math.sin(angle) * r;
+            if (!isInRiver(x, y, 25)) break;
+        }
+        return { x, y, value: UNIT_GOLD, color: '#ffd700', icon: '🧙', radius: 20, capturingBy: null, captureProgress: 0 };
+    }
+
+    function generateSoldierUnits(count) {
+        const arr = [];
+        for (let i = 0; i < count; i++) {
+            const u = createSoldierUnit();
+            if (isInRiver(u.x, u.y, u.radius + 5)) {
+                const safe = findSafeSpot(u.radius + 5);
+                u.x = safe.x; u.y = safe.y;
+            }
+            arr.push(u);
+        }
+        return arr;
+    }
+
+    function assignId(entity) { if (entity._id === undefined) entity._id = nextUnitId++; }
+
+    function spawnEnemy(soldiers = 0) {
+        const safe = findSafeSpot(HERO_RADIUS + 10, 600);
+        const e = {
+            x: safe.x, y: safe.y,
+            soldiers: soldiers,
+            radius: HERO_RADIUS,
+            speed: BASE_SPEED * 0.85,
+            color: `hsl(${rand(0, 360)}, 70%, 55%)`,
+            vx: 0, vy: 0, wanderTimer: 0,
+            rotOffset: Math.random() * Math.PI * 2,
+        };
+        assignId(e);
+        return e;
+    }
+
+    function generateEnemies(count) {
+        const arr = [];
+        for (let i = 0; i < count; i++) arr.push(spawnEnemy(Math.floor(rand(400, 1800))));
+        return arr;
+    }
+
+    function resetGame() {
+        nextUnitId = 1;
+        battleRegistry = new Map();
+
+        riverTiles = generateRiverTiles();
+        bridges = generateBridges(riverTiles);
+
+        player = {
+            x: WORLD_W / 2, y: WORLD_H / 2,
+            soldiers: 500,
+            heroHp: MAX_HERO_HP, maxHeroHp: MAX_HERO_HP,
+            radius: HERO_RADIUS,
+            boostTimer: 0, boostCooldown: 0,
+            speed: BASE_SPEED, hidden: false,
+            rotOffset: 0, _id: 0,
+        };
+        if (isInRiver(player.x, player.y, HERO_RADIUS + 10)) {
+            const safe = findSafeSpot(HERO_RADIUS + 10);
+            player.x = safe.x; player.y = safe.y;
+        }
+
+        forests = generateForests(15);
+        villages = generateVillages(4);
+        enemies = generateEnemies(INITIAL_ENEMY_COUNT);
+        soldierUnits = generateSoldierUnits(60);
+        battleLogs = [];
+        combatEffects = [];
+        activeCombats = [];
+        gameOver = false;
+        winFlag = false;
+        camera.x = player.x - VIEW_W / 2;
+        camera.y = player.y - VIEW_H / 2;
+        frame = 0;
+        spawnTimer = 0;
+        lastCombatSoundFrame = -100;
+        lastEdgeWarnFrame = -100;
+        updateHUD();
+    }
+
+    function updateHUD() {
+        if (player) {
+            soldierSpan.textContent = Math.floor(player.soldiers).toLocaleString();
+            heroHpSpan.textContent = Math.ceil(Math.max(0, player.heroHp));
+            hpDisplay.style.opacity = player.soldiers <= 0 ? '1' : '0.75';
+        }
+        if (player && player.boostTimer > 0) {
+            boostIndicator.classList.add('boost-active');
+            boostIndicator.textContent = '⚡ 加速中';
+        } else if (player && player.boostCooldown > 0) {
+            boostIndicator.classList.remove('boost-active');
+            boostIndicator.textContent = `⏳ ${Math.ceil(player.boostCooldown / 60)}s`;
+        } else {
+            boostIndicator.classList.remove('boost-active');
+            boostIndicator.textContent = '⚡ 加速';
+        }
+        if (player && player.boostCooldown > 0) boostBtn.classList.add('cooldown');
+        else boostBtn.classList.remove('cooldown');
+    }
+
+    function addBattleLog(x, y, text, color) {
+        battleLogs.push({ x, y, text, color, life: 60, vy: -1.2 });
+    }
+
+    function pairKey(a, b) {
+        const ia = a._id, ib = b._id;
+        return ia < ib ? ia + '_' + ib : ib + '_' + ia;
+    }
+    function registerCombat(a, b) {
+        const key = pairKey(a, b);
+        let entry = battleRegistry.get(key);
+        if (!entry) {
+            entry = { a, b, aStart: a.soldiers, bStart: b.soldiers };
+            battleRegistry.set(key, entry);
+        }
+        return entry;
+    }
+    function endCombat(a, b) { battleRegistry.delete(pairKey(a, b)); }
+    function cleanBattleRegistry() {
+        for (const [key, entry] of battleRegistry.entries()) {
+            const { a, b } = entry;
+            if (a._dead || b._dead) { battleRegistry.delete(key); continue; }
+            if (a.soldiers <= 0 && b.soldiers <= 0) { battleRegistry.delete(key); continue; }
+            if (dist(a.x, a.y, b.x, b.y) > HERO_RADIUS * 2.4) { battleRegistry.delete(key); }
+        }
+    }
+
+    function spawnCombatSparks(x, y, color) {
+        for (let i = 0; i < 2; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 1 + Math.random() * 3.5;
+            const life = 15 + Math.random() * 12;
+            combatEffects.push({
+                x, y,
+                vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+                life: life, maxLife: life,
+                color: color || (Math.random() > 0.5 ? '#ffdd44' : '#ff6633'),
+                size: 2 + Math.random() * 3,
+            });
+        }
+    }
+    function updateCombatEffects() {
+        for (let i = combatEffects.length - 1; i >= 0; i--) {
+            const p = combatEffects[i];
+            p.x += p.vx; p.y += p.vy;
+            p.vx *= 0.94; p.vy *= 0.94;
+            p.life--;
+            if (p.life <= 0) combatEffects.splice(i, 1);
+        }
+    }
+
+    function handleGameOver(win) {
+        if (gameOver) return;
+        gameOver = true;
+        winFlag = win;
+        if (win) Sfx.victory();
+        else Sfx.playerDown();
+        if (gameOverTimer) clearTimeout(gameOverTimer);
+        gameOverTimer = setTimeout(() => {
+            returnToCover();
+        }, 4000);
+    }
+
+    function returnToCover() {
+        isPlaying = false;
+        gameOver = false;
+        winFlag = false;
+        if (gameOverTimer) { clearTimeout(gameOverTimer); gameOverTimer = null; }
+        coverScreen.style.display = 'flex';
+        gameWrapper.style.display = 'none';
+        switchToMenuMusic();
+        updateMuteIcons();
+    }
+
+    function update() {
+        if (!isPlaying) return;
+        if (gameOver) { updateHUD(); return; }
+        frame++;
+        activeCombats = [];
+
+        if (player.boostTimer > 0) {
+            player.boostTimer--;
+            if (player.boostTimer <= 0) player.boostCooldown = BOOST_COOLDOWN;
+        } else if (player.boostCooldown > 0) player.boostCooldown--;
+
+        let dx = 0, dy = 0;
+        if (keys.w || keys.ArrowUp) dy -= 1;
+        if (keys.s || keys.ArrowDown) dy += 1;
+        if (keys.a || keys.ArrowLeft) dx -= 1;
+        if (keys.d || keys.ArrowRight) dx += 1;
+        const jMag = Math.hypot(joystickInput.x, joystickInput.y);
+        if (jMag > 0.15) { dx = joystickInput.x; dy = joystickInput.y; }
+
+        if (dx !== 0 || dy !== 0) {
+            const len = Math.hypot(dx, dy);
+            const mag = Math.min(len, 1);
+            dx /= len; dy /= len;
+            let speed = player.speed;
+            if (player.boostTimer > 0) speed *= BOOST_SPEED_MULT;
+            tryMoveEntity(player, dx * speed * mag, dy * speed * mag);
+        }
+
+        const edgeDx = Math.min(player.x, WORLD_W - player.x);
+        const edgeDy = Math.min(player.y, WORLD_H - player.y);
+        const edgeDist = Math.min(edgeDx, edgeDy);
+        if (edgeDist < EDGE_MARGIN) {
+            const edgeFactor = 1 - edgeDist / EDGE_MARGIN;
+            if (player.soldiers > 0) {
+                player.soldiers = Math.max(0, player.soldiers - edgeFactor * EDGE_SOLDIER_DMG);
+            } else {
+                player.heroHp = Math.max(0, player.heroHp - edgeFactor * EDGE_HP_DMG);
+            }
+            if (frame - lastEdgeWarnFrame > 40) {
+                lastEdgeWarnFrame = frame;
+                Sfx.edgeWarn();
+            }
+        }
+
+        player.hidden = false;
+        for (let f of forests) {
+            if (dist(player.x, player.y, f.x, f.y) < f.r - HERO_RADIUS * 0.5) { player.hidden = true; break; }
+        }
+
+        if (keys[' '] && player.boostCooldown === 0 && player.boostTimer === 0) {
+            player.boostTimer = BOOST_DURATION;
+        }
+
+        spawnTimer++;
+        if (spawnTimer >= SPAWN_INTERVAL) {
+            spawnTimer = 0;
+            if (soldierUnits.length < MAX_UNITS) {
+                for (let i = 0; i < SPAWN_COUNT; i++) {
+                    if (soldierUnits.length >= MAX_UNITS) break;
+                    const u = createSoldierUnit();
+                    if (isInRiver(u.x, u.y, u.radius + 5)) {
+                        const safe = findSafeSpot(u.radius + 5);
+                        u.x = safe.x; u.y = safe.y;
+                    }
+                    soldierUnits.push(u);
+                }
+            }
+        }
+
+        for (const v of villages) {
+            v.spawnTimer--;
+            v.pulse += 0.05;
+            if (v.spawnTimer <= 0) {
+                if (soldierUnits.length < MAX_UNITS) {
+                    soldierUnits.push(createVillageUnit(v));
+                    addBattleLog(v.x, v.y - 40, '🏘️ 村民', '#ffd966');
+                    Sfx.villageSpawn();
+                }
+                v.spawnTimer = Math.floor(rand(420, 720));
+            }
+        }
+
+        for (let i = soldierUnits.length - 1; i >= 0; i--) {
+            const u = soldierUnits[i];
+            const d = dist(player.x, player.y, u.x, u.y);
+            const inRange = d < HERO_RADIUS + u.radius + 6;
+            if (inRange) {
+                if (u.capturingBy && u.capturingBy !== player) continue;
+                if (u.capturingBy !== player) { u.capturingBy = player; u.captureProgress = 0; }
+                u.captureProgress += 1 / CAPTURE_DURATION;
+                if (u.captureProgress >= 1) {
+                    player.soldiers += u.value;
+                    addBattleLog(u.x, u.y, `+${u.value}`, u.color);
+                    soldierUnits.splice(i, 1);
+                    Sfx.captureComplete();
+                }
+            } else {
+                if (u.capturingBy === player) { u.capturingBy = null; u.captureProgress = 0; }
+            }
+        }
+
+        for (let e of enemies) {
+            if (e._dead) continue;
+            let nearestUnit = null, nearestUnitDist = 99999;
+            for (let u of soldierUnits) {
+                if (u.capturingBy && u.capturingBy !== e) continue;
+                let d = dist(e.x, e.y, u.x, u.y);
+                if (d < nearestUnitDist) { nearestUnitDist = d; nearestUnit = u; }
+            }
+            let nearestEnemy = null, nearestEnemyDist = 99999;
+            for (let other of enemies) {
+                if (other === e || other._dead || other.soldiers <= 0) continue;
+                const d = dist(e.x, e.y, other.x, other.y);
+                if (d < nearestEnemyDist) { nearestEnemyDist = d; nearestEnemy = other; }
+            }
+            const distToPlayer = dist(e.x, e.y, player.x, player.y);
+            const playerThreat = player.soldiers < e.soldiers * 1.2 && distToPlayer < 450 && !player.hidden && player.heroHp > 0 && player.soldiers > 0;
+
+            let targetX = null, targetY = null;
+            if (e.soldiers <= 0) {
+                if (nearestUnit) { targetX = nearestUnit.x; targetY = nearestUnit.y; }
+                else { targetX = e.x + rand(-100, 100); targetY = e.y + rand(-100, 100); }
+            } else if (nearestEnemy && nearestEnemyDist < 420 && e.soldiers > nearestEnemy.soldiers * 1.15) {
+                targetX = nearestEnemy.x; targetY = nearestEnemy.y;
+            } else if (playerThreat && distToPlayer < 420) {
+                targetX = player.x; targetY = player.y;
+            } else if (nearestUnit) {
+                targetX = nearestUnit.x; targetY = nearestUnit.y;
+            } else {
+                e.wanderTimer--;
+                if (e.wanderTimer <= 0) {
+                    e.vx = rand(-1, 1); e.vy = rand(-1, 1);
+                    const len = Math.hypot(e.vx, e.vy);
+                    if (len > 0) { e.vx /= len; e.vy /= len; }
+                    e.wanderTimer = Math.floor(rand(60, 180));
+                }
+                targetX = e.x + e.vx * 100;
+                targetY = e.y + e.vy * 100;
+            }
+            if (targetX !== null) {
+                const angle = Math.atan2(targetY - e.y, targetX - e.x);
+                tryMoveEntity(e, Math.cos(angle) * e.speed, Math.sin(angle) * e.speed);
+            }
+        }
+
+        for (let e of enemies) {
+            if (e._dead) continue;
+            for (let i = soldierUnits.length - 1; i >= 0; i--) {
+                const u = soldierUnits[i];
+                const d = dist(e.x, e.y, u.x, u.y);
+                const inRange = d < HERO_RADIUS + u.radius + 6;
+                if (inRange) {
+                    if (u.capturingBy && u.capturingBy !== e) continue;
+                    if (u.capturingBy !== e) { u.capturingBy = e; u.captureProgress = 0; }
+                    u.captureProgress += 1 / CAPTURE_DURATION;
+                    if (u.captureProgress >= 1) {
+                        e.soldiers += u.value;
+                        addBattleLog(u.x, u.y, `+${u.value}`, e.color);
+                        soldierUnits.splice(i, 1);
+                        break;
+                    }
+                } else {
+                    if (u.capturingBy === e) { u.capturingBy = null; u.captureProgress = 0; }
+                }
+            }
+        }
+
+        for (let u of soldierUnits) {
+            if (u.capturingBy && u.capturingBy !== player) {
+                const owner = enemies.find(en => en === u.capturingBy);
+                if (!owner || owner._dead) { u.capturingBy = null; u.captureProgress = 0; }
+            }
+        }
+
+        for (let i = enemies.length - 1; i >= 0; i--) {
+            const e = enemies[i];
+            if (e._dead) continue;
+            if (player.hidden) {
+                let enemyHidden = false;
+                for (let f of forests) {
+                    if (dist(e.x, e.y, f.x, f.y) < f.r - HERO_RADIUS * 0.5) { enemyHidden = true; break; }
+                }
+                if (!enemyHidden) continue;
+            }
+            if (dist(player.x, player.y, e.x, e.y) < HERO_RADIUS * 2.1) {
+                const entry = registerCombat(player, e);
+                activeCombats.push({ x1: player.x, y1: player.y, x2: e.x, y2: e.y, color: '#ffd966' });
+
+                const pLoss = player.soldiers > 0 ? Math.min(player.soldiers, Math.max(COMBAT_MIN, e.soldiers * COMBAT_RATE)) : 0;
+                const eLoss = e.soldiers > 0 ? Math.min(e.soldiers, Math.max(COMBAT_MIN, player.soldiers * COMBAT_RATE)) : 0;
+                player.soldiers = Math.max(0, player.soldiers - pLoss);
+                e.soldiers = Math.max(0, e.soldiers - eLoss);
+
+                if (player.soldiers <= 0 && e.soldiers > 0) player.heroHp = Math.max(0, player.heroHp - 0.3);
+
+                const mx = (player.x + e.x) / 2;
+                const my = (player.y + e.y) / 2;
+                spawnCombatSparks(mx, my);
+                if (frame - lastCombatSoundFrame > 9) {
+                    lastCombatSoundFrame = frame;
+                    Sfx.combatHit();
+                }
+
+                if (e.soldiers <= 0) {
+                    e._dead = true;
+                    player.soldiers += entry.bStart;
+                    addBattleLog(e.x, e.y, `+${Math.floor(entry.bStart)}`, '#7fff00');
+                    addBattleLog(e.x, e.y - 24, '💀 敵將陣亡', '#ff9999');
+                    spawnCombatSparks(e.x, e.y, '#ff8888');
+                    Sfx.enemyDown();
+                    endCombat(player, e);
+                    enemies.splice(i, 1);
+                }
+
+                if (player.heroHp <= 0) {
+                    handleGameOver(false);
+                    return;
+                }
+            }
+        }
+
+        for (let i = 0; i < enemies.length; i++) {
+            for (let j = i + 1; j < enemies.length; j++) {
+                const a = enemies[i], b = enemies[j];
+                if (a._dead || b._dead) continue;
+                if (a.soldiers <= 0 && b.soldiers <= 0) continue;
+                if (dist(a.x, a.y, b.x, b.y) < HERO_RADIUS * 2.1) {
+                    const entry = registerCombat(a, b);
+                    activeCombats.push({ x1: a.x, y1: a.y, x2: b.x, y2: b.y, color: '#ff8866' });
+                    const aLoss = a.soldiers > 0 ? Math.min(a.soldiers, Math.max(COMBAT_MIN, b.soldiers * COMBAT_RATE)) : 0;
+                    const bLoss = b.soldiers > 0 ? Math.min(b.soldiers, Math.max(COMBAT_MIN, a.soldiers * COMBAT_RATE)) : 0;
+                    a.soldiers = Math.max(0, a.soldiers - aLoss);
+                    b.soldiers = Math.max(0, b.soldiers - bLoss);
+                    const mx = (a.x + b.x) / 2;
+                    const my = (a.y + b.y) / 2;
+                    spawnCombatSparks(mx, my, '#ffaa66');
+
+                    if (a.soldiers <= 0) {
+                        a._dead = true;
+                        b.soldiers += entry.aStart;
+                        addBattleLog(a.x, a.y, `+${Math.floor(entry.aStart)}`, '#7fff00');
+                        Sfx.enemyDown();
+                        endCombat(a, b);
+                    } else if (b.soldiers <= 0) {
+                        b._dead = true;
+                        a.soldiers += entry.bStart;
+                        addBattleLog(b.x, b.y, `+${Math.floor(entry.bStart)}`, '#7fff00');
+                        Sfx.enemyDown();
+                        endCombat(a, b);
+                    }
+                }
+            }
+        }
+        enemies = enemies.filter(e => !e._dead);
+
+        while (enemies.length < INITIAL_ENEMY_COUNT) {
+            const newEnemy = spawnEnemy(0);
+            enemies.push(newEnemy);
+            addBattleLog(newEnemy.x, newEnemy.y, '🆕 新對手', '#ffaa88');
+            Sfx.newEnemy();
+        }
+
+        cleanBattleRegistry();
+        updateCombatEffects();
+
+        for (let i = battleLogs.length - 1; i >= 0; i--) {
+            const log = battleLogs[i];
+            log.life--;
+            log.y += log.vy;
+            if (log.life <= 0) battleLogs.splice(i, 1);
+        }
+
+        const tcX = player.x - VIEW_W / 2;
+        const tcY = player.y - VIEW_H / 2;
+        camera.x += (tcX - camera.x) * 0.1;
+        camera.y += (tcY - camera.y) * 0.1;
+        camera.x = Math.max(0, Math.min(WORLD_W - VIEW_W, camera.x));
+        camera.y = Math.max(0, Math.min(WORLD_H - VIEW_H, camera.y));
+
+        updateHUD();
+    }
+
+    function getSoldierIcons(soldiers, maxIcons = 16) {
+        let remaining = Math.floor(soldiers);
+        const goldCount = Math.floor(remaining / UNIT_GOLD);
+        remaining -= goldCount * UNIT_GOLD;
+        const silverCount = Math.floor(remaining / UNIT_SILVER);
+        remaining -= silverCount * UNIT_SILVER;
+        const bronzeCount = Math.floor(remaining / UNIT_BRONZE);
+        const icons = [];
+        const goldShown = Math.min(goldCount, 5);
+        for (let i = 0; i < goldShown; i++) icons.push('🧙');
+        const silverShown = Math.min(silverCount, 8);
+        for (let i = 0; i < silverShown; i++) icons.push('🥷');
+        const remainingSlots = maxIcons - icons.length;
+        const bronzeShown = Math.min(bronzeCount, Math.max(0, remainingSlots));
+        for (let i = 0; i < bronzeShown; i++) icons.push('🤺');
+        return icons;
+    }
+
+    function drawSoldiersCircle(entity, maxIcons = 16) {
+        const icons = getSoldierIcons(entity.soldiers, maxIcons);
+        if (icons.length === 0) return;
+        const rotationSpeed = 0.011;
+        const baseAngle = frame * rotationSpeed + (entity.rotOffset || 0);
+        const baseRadius = entity.radius + 24;
+        const iconsPerRing = 8;
+        const ringGap = 26;
+        ctx.font = '22px serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        for (let i = 0; i < icons.length; i++) {
+            const ring = Math.floor(i / iconsPerRing);
+            const idxInRing = i % iconsPerRing;
+            const remainingInRing = icons.length - ring * iconsPerRing;
+            const ringCount = Math.min(iconsPerRing, remainingInRing);
+            const radius = baseRadius + ring * ringGap;
+            const ringOffset = ring * 0.42;
+            const angle = (idxInRing / ringCount) * Math.PI * 2 + baseAngle + ringOffset;
+            const ix = entity.x + Math.cos(angle) * radius;
+            const iy = entity.y + Math.sin(angle) * radius;
+            const sx = ix - camera.x;
+            const sy = iy - camera.y;
+            if (sx < -30 || sx > VIEW_W + 30 || sy < -30 || sy > VIEW_H + 30) continue;
+            ctx.fillText(icons[i], sx, sy);
+        }
+    }
+
+    function drawTerrainGrid() {
+        const gridSize = TERRAIN_GRID;
+        const startX = Math.floor(camera.x / gridSize) * gridSize;
+        const startY = Math.floor(camera.y / gridSize) * gridSize;
+        for (let x = startX; x < camera.x + VIEW_W + gridSize; x += gridSize) {
+            for (let y = startY; y < camera.y + VIEW_H + gridSize; y += gridSize) {
+                const sx = x - camera.x;
+                const sy = y - camera.y;
+                if (sx > -gridSize && sx < VIEW_W && sy > -gridSize && sy < VIEW_H) {
+                    ctx.fillStyle = (Math.floor(x / gridSize) + Math.floor(y / gridSize)) % 2 === 0 ? '#203a1a' : '#1d3417';
+                    ctx.fillRect(sx, sy, gridSize, gridSize);
+                }
+            }
+        }
+    }
+
+    function drawRiverTiles() {
+        for (const key of riverTiles) {
+            if (bridges.has(key)) continue;
+            const [gx, gy] = key.split(',').map(Number);
+            const x = gx * TILE_SIZE - camera.x;
+            const y = gy * TILE_SIZE - camera.y;
+            if (x + TILE_SIZE < -4 || x > VIEW_W + 4 || y + TILE_SIZE < -4 || y > VIEW_H + 4) continue;
+            ctx.fillStyle = '#2a4a5e';
+            ctx.fillRect(x - 2, y - 2, TILE_SIZE + 4, TILE_SIZE + 4);
+        }
+        for (const key of riverTiles) {
+            if (bridges.has(key)) continue;
+            const [gx, gy] = key.split(',').map(Number);
+            const x = gx * TILE_SIZE - camera.x;
+            const y = gy * TILE_SIZE - camera.y;
+            if (x + TILE_SIZE < -4 || x > VIEW_W + 4 || y + TILE_SIZE < -4 || y > VIEW_H + 4) continue;
+            ctx.fillStyle = '#3a6b8a';
+            ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+        }
+        const t = frame * 0.03;
+        ctx.globalAlpha = 0.35;
+        for (const key of riverTiles) {
+            if (bridges.has(key)) continue;
+            const [gx, gy] = key.split(',').map(Number);
+            const x = gx * TILE_SIZE - camera.x;
+            const y = gy * TILE_SIZE - camera.y;
+            if (x + TILE_SIZE < -4 || x > VIEW_W + 4 || y + TILE_SIZE < -4 || y > VIEW_H + 4) continue;
+            const ripple = Math.sin(t + gx * 0.7 + gy * 0.5);
+            if (ripple > 0.2) {
+                ctx.fillStyle = '#7ab8d9';
+                const inset = 5 + ripple * 4;
+                ctx.fillRect(x + inset, y + inset, TILE_SIZE - inset * 2, TILE_SIZE - inset * 2);
+            }
+        }
+        ctx.globalAlpha = 1;
+    }
+
+    function drawBridges() {
+        for (const key of bridges) {
+            const [gx, gy] = key.split(',').map(Number);
+            const x = gx * TILE_SIZE - camera.x;
+            const y = gy * TILE_SIZE - camera.y;
+            if (x + TILE_SIZE < -4 || x > VIEW_W + 4 || y + TILE_SIZE < -4 || y > VIEW_H + 4) continue;
+            const hasVertNeighbor = bridges.has(gx + ',' + (gy - 1)) || bridges.has(gx + ',' + (gy + 1));
+            const hasHorizNeighbor = bridges.has((gx - 1) + ',' + gy) || bridges.has((gx + 1) + ',' + gy);
+
+            ctx.fillStyle = '#8B5A2B';
+            ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+            ctx.fillStyle = '#A0703C';
+            ctx.fillRect(x + 3, y + 3, TILE_SIZE - 6, TILE_SIZE - 6);
+            ctx.strokeStyle = '#5a3a1a';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(x + 0.5, y + 0.5, TILE_SIZE - 1, TILE_SIZE - 1);
+
+            ctx.strokeStyle = '#6B4226';
+            ctx.lineWidth = 1;
+            if (hasVertNeighbor) {
+                for (let ly = 8; ly < TILE_SIZE; ly += 9) {
+                    ctx.beginPath();
+                    ctx.moveTo(x + 5, y + ly);
+                    ctx.lineTo(x + TILE_SIZE - 5, y + ly);
+                    ctx.stroke();
+                }
+            } else if (hasHorizNeighbor) {
+                for (let lx = 8; lx < TILE_SIZE; lx += 9) {
+                    ctx.beginPath();
+                    ctx.moveTo(x + lx, y + 5);
+                    ctx.lineTo(x + lx, y + TILE_SIZE - 5);
+                    ctx.stroke();
+                }
+            } else {
+                ctx.beginPath();
+                ctx.moveTo(x + 5, y + 5);
+                ctx.lineTo(x + TILE_SIZE - 5, y + TILE_SIZE - 5);
+                ctx.moveTo(x + TILE_SIZE - 5, y + 5);
+                ctx.lineTo(x + 5, y + TILE_SIZE - 5);
+                ctx.stroke();
+            }
+            ctx.strokeStyle = '#4a2a10';
+            ctx.lineWidth = 2;
+            if (hasVertNeighbor) {
+                ctx.beginPath();
+                ctx.moveTo(x + 3, y);
+                ctx.lineTo(x + 3, y + TILE_SIZE);
+                ctx.moveTo(x + TILE_SIZE - 3, y);
+                ctx.lineTo(x + TILE_SIZE - 3, y + TILE_SIZE);
+                ctx.stroke();
+            } else if (hasHorizNeighbor) {
+                ctx.beginPath();
+                ctx.moveTo(x, y + 3);
+                ctx.lineTo(x + TILE_SIZE, y + 3);
+                ctx.moveTo(x, y + TILE_SIZE - 3);
+                ctx.lineTo(x + TILE_SIZE, y + TILE_SIZE - 3);
+                ctx.stroke();
+            }
+        }
+    }
+
+    function draw() {
+        if (!isPlaying) return;
+        ctx.clearRect(0, 0, VIEW_W, VIEW_H);
+        ctx.fillStyle = '#1a2e14';
+        ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+
+        drawTerrainGrid();
+
+        const edgeW = EDGE_MARGIN;
+        if (camera.x < edgeW) {
+            const g = ctx.createLinearGradient(0, 0, edgeW - camera.x, 0);
+            g.addColorStop(0, 'rgba(180, 40, 40, 0.35)');
+            g.addColorStop(1, 'rgba(180, 40, 40, 0)');
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, edgeW - camera.x, VIEW_H);
+        }
+        if (camera.y < edgeW) {
+            const g = ctx.createLinearGradient(0, 0, 0, edgeW - camera.y);
+            g.addColorStop(0, 'rgba(180, 40, 40, 0.35)');
+            g.addColorStop(1, 'rgba(180, 40, 40, 0)');
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, VIEW_W, edgeW - camera.y);
+        }
+        const rightStart = WORLD_W - edgeW - camera.x;
+        if (rightStart < VIEW_W) {
+            const g2 = ctx.createLinearGradient(VIEW_W, 0, rightStart, 0);
+            g2.addColorStop(0, 'rgba(180, 40, 40, 0.35)');
+            g2.addColorStop(1, 'rgba(180, 40, 40, 0)');
+            ctx.fillStyle = g2;
+            ctx.fillRect(rightStart, 0, VIEW_W - rightStart, VIEW_H);
+        }
+        const bottomStart = WORLD_H - edgeW - camera.y;
+        if (bottomStart < VIEW_H) {
+            const g2 = ctx.createLinearGradient(0, VIEW_H, 0, bottomStart);
+            g2.addColorStop(0, 'rgba(180, 40, 40, 0.35)');
+            g2.addColorStop(1, 'rgba(180, 40, 40, 0)');
+            ctx.fillStyle = g2;
+            ctx.fillRect(0, bottomStart, VIEW_W, VIEW_H - bottomStart);
+        }
+
+        drawRiverTiles();
+        drawBridges();
+
+        for (const v of villages) {
+            const sx = v.x - camera.x;
+            const sy = v.y - camera.y;
+            if (sx + 80 < -40 || sx - 80 > VIEW_W + 40 || sy + 80 < -40 || sy - 80 > VIEW_H + 40) continue;
+            const pulse = 0.5 + 0.5 * Math.sin(v.pulse);
+            ctx.beginPath();
+            ctx.arc(sx, sy, v.radius + 10 + pulse * 6, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(255, 217, 102, ${0.35 + 0.25 * pulse})`;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(sx, sy, v.radius, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(120, 90, 50, 0.35)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(180, 140, 80, 0.6)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.font = '34px serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🏘️', sx, sy);
+            const prog = 1 - Math.min(v.spawnTimer / 420, 1);
+            ctx.beginPath();
+            ctx.arc(sx, sy, v.radius + 4, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * prog);
+            ctx.strokeStyle = '#ffd966';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+        }
+
+        for (let f of forests) {
+            const sx = f.x - camera.x;
+            const sy = f.y - camera.y;
+            if (sx + f.r < -40 || sx - f.r > VIEW_W + 40 || sy + f.r < -40 || sy - f.r > VIEW_H + 40) continue;
+            ctx.beginPath();
+            ctx.arc(sx, sy, f.r, 0, Math.PI * 2);
+            const grad = ctx.createRadialGradient(sx, sy, f.r * 0.1, sx, sy, f.r);
+            grad.addColorStop(0, 'rgba(60, 130, 50, 0.30)');
+            grad.addColorStop(1, 'rgba(20, 70, 18, 0.50)');
+            ctx.fillStyle = grad;
+            ctx.fill();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            for (let t of f.trees) {
+                const tx = t.x - camera.x;
+                const ty = t.y - camera.y;
+                if (tx < -30 || tx > VIEW_W + 30 || ty < -30 || ty > VIEW_H + 30) continue;
+                ctx.font = `${t.size}px serif`;
+                ctx.fillText(t.type, tx, ty);
+            }
+        }
+
+        for (let u of soldierUnits) {
+            const sx = u.x - camera.x;
+            const sy = u.y - camera.y;
+            if (sx < -40 || sx > VIEW_W + 40 || sy < -40 || sy > VIEW_H + 40) continue;
+            ctx.beginPath();
+            ctx.arc(sx, sy, u.radius, 0, Math.PI * 2);
+            ctx.fillStyle = u.color + '44';
+            ctx.fill();
+            ctx.strokeStyle = u.color;
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+            ctx.font = '24px serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(u.icon, sx, sy);
+            ctx.font = 'bold 12px "Segoe UI", monospace';
+            ctx.fillStyle = '#fff';
+            ctx.shadowColor = 'black';
+            ctx.shadowBlur = 5;
+            ctx.fillText(u.value, sx, sy + u.radius + 12);
+            ctx.shadowBlur = 0;
+            if (u.capturingBy && u.captureProgress > 0) {
+                const prog = Math.min(u.captureProgress, 1);
+                const ringR = u.radius + 8;
+                const isPlayerCapturing = (u.capturingBy === player);
+                const ringColor = isPlayerCapturing ? '#ffd966' : (u.capturingBy.color || '#ff6b6b');
+                ctx.beginPath();
+                ctx.arc(sx, sy, ringR, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+                ctx.lineWidth = 5;
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(sx, sy, ringR, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * prog);
+                ctx.strokeStyle = ringColor;
+                ctx.lineWidth = 5;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+                ctx.lineCap = 'butt';
+                const remain = Math.ceil((1 - prog) * 3);
+                ctx.font = 'bold 14px "Segoe UI"';
+                ctx.fillStyle = ringColor;
+                ctx.shadowColor = 'black';
+                ctx.shadowBlur = 6;
+                ctx.fillText(remain + 's', sx, sy - ringR - 10);
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        for (let c of activeCombats) {
+            const sx1 = c.x1 - camera.x, sy1 = c.y1 - camera.y;
+            const sx2 = c.x2 - camera.x, sy2 = c.y2 - camera.y;
+            const pulse = 0.35 + 0.35 * Math.sin(frame * 0.6);
+            ctx.beginPath();
+            ctx.moveTo(sx1, sy1);
+            ctx.lineTo(sx2, sy2);
+            ctx.strokeStyle = c.color;
+            ctx.globalAlpha = pulse;
+            ctx.lineWidth = 3;
+            ctx.setLineDash([6, 6]);
+            ctx.lineDashOffset = -frame * 1.2;
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.globalAlpha = 1;
+            for (let [x, y] of [[sx1, sy1], [sx2, sy2]]) {
+                ctx.beginPath();
+                ctx.arc(x, y, 14 + Math.sin(frame * 0.8) * 3, 0, Math.PI * 2);
+                ctx.strokeStyle = c.color;
+                ctx.globalAlpha = 0.5 + 0.3 * Math.sin(frame * 0.8);
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        for (let e of enemies) {
+            const ex = e.x - camera.x;
+            const ey = e.y - camera.y;
+            if (ex < -150 || ex > VIEW_W + 150 || ey < -150 || ey > VIEW_H + 150) continue;
+            if (e.soldiers > 0) drawSoldiersCircle(e, 16);
+            ctx.font = '44px serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            if (e.soldiers <= 0) ctx.globalAlpha = 0.7;
+            ctx.fillText('🏇', ex, ey);
+            ctx.globalAlpha = 1;
+            const num = Math.floor(e.soldiers);
+            ctx.font = 'bold 14px "Segoe UI", monospace';
+            const textW = ctx.measureText(num).width + 16;
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
+            ctx.beginPath();
+            ctx.roundRect(ex - textW / 2, ey - 52, textW, 22, 11);
+            ctx.fill();
+            ctx.fillStyle = e.soldiers > 0 ? '#ff9b9b' : '#888';
+            ctx.shadowColor = 'black';
+            ctx.shadowBlur = 4;
+            ctx.fillText(num, ex, ey - 41);
+            ctx.shadowBlur = 0;
+        }
+
+        if (player) {
+            const px = player.x - camera.x;
+            const py = player.y - camera.y;
+            if (player.heroHp > 0) {
+                if (player.boostTimer > 0) {
+                    ctx.beginPath();
+                    ctx.arc(px, py, HERO_RADIUS + 14, 0, Math.PI * 2);
+                    ctx.strokeStyle = '#ffaa00';
+                    ctx.lineWidth = 3;
+                    ctx.setLineDash([8, 8]);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+                if (player.soldiers > 0) drawSoldiersCircle(player, 16);
+                ctx.font = '48px serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                if (player.hidden) ctx.globalAlpha = 0.55;
+                ctx.fillText('🏇', px, py);
+                ctx.globalAlpha = 1;
+                const num = Math.floor(player.soldiers);
+                ctx.font = 'bold 14px "Segoe UI", monospace';
+                const textW = ctx.measureText(num).width + 16;
+                ctx.fillStyle = 'rgba(0,0,0,0.65)';
+                ctx.beginPath();
+                ctx.roundRect(px - textW / 2, py - 56, textW, 22, 11);
+                ctx.fill();
+                ctx.fillStyle = '#ffd966';
+                ctx.shadowColor = 'black';
+                ctx.shadowBlur = 4;
+                ctx.fillText(num, px, py - 45);
+                ctx.shadowBlur = 0;
+                if (player.soldiers <= 0) {
+                    ctx.font = 'bold 13px "Segoe UI"';
+                    ctx.fillStyle = '#ff8888';
+                    ctx.shadowColor = 'black';
+                    ctx.shadowBlur = 4;
+                    ctx.fillText('❤️ ' + Math.ceil(player.heroHp), px, py + 44);
+                    ctx.shadowBlur = 0;
+                }
+                if (player.boostTimer > 0) {
+                    ctx.font = 'bold 13px "Segoe UI"';
+                    ctx.fillStyle = '#ffaa00';
+                    ctx.shadowColor = 'black';
+                    ctx.shadowBlur = 4;
+                    ctx.fillText('⚡ 力量降低', px, py + (player.soldiers <= 0 ? 62 : 44));
+                    ctx.shadowBlur = 0;
+                }
+            }
+        }
+
+        for (let p of combatEffects) {
+            const sx = p.x - camera.x;
+            const sy = p.y - camera.y;
+            if (sx < -20 || sx > VIEW_W + 20 || sy < -20 || sy > VIEW_H + 20) continue;
+            const alpha = p.life / p.maxLife;
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(sx, sy, p.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+
+        for (let log of battleLogs) {
+            const sx = log.x - camera.x;
+            const sy = log.y - camera.y;
+            ctx.font = 'bold 20px "Segoe UI", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.shadowColor = 'black';
+            ctx.shadowBlur = 6;
+            ctx.fillStyle = log.color;
+            ctx.globalAlpha = Math.min(1, log.life / 40);
+            ctx.fillText(log.text, sx, sy);
+            ctx.globalAlpha = 1;
+            ctx.shadowBlur = 0;
+        }
+
+        if (player && player.hidden && !gameOver) {
+            const grad = ctx.createRadialGradient(VIEW_W / 2, VIEW_H / 2, VIEW_H * 0.3, VIEW_W / 2, VIEW_H / 2, VIEW_H * 0.8);
+            grad.addColorStop(0, 'rgba(0,0,0,0)');
+            grad.addColorStop(1, 'rgba(0,0,0,0.55)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+            ctx.font = 'bold 22px "Segoe UI"';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#8fbc6b';
+            ctx.shadowColor = 'black';
+            ctx.shadowBlur = 10;
+            ctx.fillText('🌲 森林隱藏中', VIEW_W / 2, 56);
+            ctx.shadowBlur = 0;
+        }
+
+        if (gameOver) {
+            ctx.fillStyle = 'rgba(0,0,0,0.72)';
+            ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+            ctx.font = 'bold 48px "Segoe UI", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.shadowColor = 'black';
+            ctx.shadowBlur = 20;
+            if (winFlag) {
+                ctx.fillStyle = '#ffd966';
+                ctx.fillText('🏆 勝利！', VIEW_W / 2, VIEW_H / 2 - 30);
+            } else {
+                ctx.fillStyle = '#d9534f';
+                ctx.fillText('💀 軍隊覆滅...', VIEW_W / 2, VIEW_H / 2 - 30);
+            }
+            ctx.font = '22px "Segoe UI"';
+            ctx.fillStyle = '#e0e0e0';
+            ctx.fillText('即將返回封面…', VIEW_W / 2, VIEW_H / 2 + 50);
+            ctx.shadowBlur = 0;
+        }
+
+        const mapW = 150, mapH = 105;
+        const mapX = VIEW_W - mapW - 15;
+        const mapY = 15;
+        ctx.fillStyle = '#0a130bcc';
+        ctx.fillRect(mapX, mapY, mapW, mapH);
+        ctx.strokeStyle = '#7f9f5c';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(mapX, mapY, mapW, mapH);
+        ctx.strokeStyle = '#ff5555';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(mapX + (EDGE_MARGIN / WORLD_W) * mapW, mapY + (EDGE_MARGIN / WORLD_H) * mapH,
+            mapW - 2 * (EDGE_MARGIN / WORLD_W) * mapW, mapH - 2 * (EDGE_MARGIN / WORLD_H) * mapH);
+
+        const mTileW = (TILE_SIZE / WORLD_W) * mapW;
+        const mTileH = (TILE_SIZE / WORLD_H) * mapH;
+
+        ctx.fillStyle = '#3a6b8a';
+        for (const key of riverTiles) {
+            const [gx, gy] = key.split(',').map(Number);
+            const mx = mapX + (gx * TILE_SIZE / WORLD_W) * mapW;
+            const my = mapY + (gy * TILE_SIZE / WORLD_H) * mapH;
+            if (mx + mTileW < mapX || mx > mapX + mapW || my + mTileH < mapY || my > mapY + mapH) continue;
+            ctx.fillRect(mx, my, mTileW + 0.5, mTileH + 0.5);
+        }
+        ctx.fillStyle = '#A0703C';
+        for (const key of bridges) {
+            const [gx, gy] = key.split(',').map(Number);
+            const mx = mapX + (gx * TILE_SIZE / WORLD_W) * mapW;
+            const my = mapY + (gy * TILE_SIZE / WORLD_H) * mapH;
+            if (mx + mTileW < mapX || mx > mapX + mapW || my + mTileH < mapY || my > mapY + mapH) continue;
+            ctx.fillRect(mx, my, mTileW + 0.5, mTileH + 0.5);
+        }
+        for (const v of villages) {
+            ctx.beginPath();
+            ctx.arc(mapX + (v.x / WORLD_W) * mapW, mapY + (v.y / WORLD_H) * mapH, 3, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffd966';
+            ctx.fill();
+        }
+        for (let u of soldierUnits) {
+            ctx.beginPath();
+            ctx.arc(mapX + (u.x / WORLD_W) * mapW, mapY + (u.y / WORLD_H) * mapH, 1.3, 0, Math.PI * 2);
+            ctx.fillStyle = u.color;
+            ctx.fill();
+        }
+        for (let e of enemies) {
+            ctx.beginPath();
+            ctx.arc(mapX + (e.x / WORLD_W) * mapW, mapY + (e.y / WORLD_H) * mapH, 2.5, 0, Math.PI * 2);
+            ctx.fillStyle = e.soldiers > 0 ? '#ff6b6b' : '#aa6666';
+            ctx.fill();
+        }
+        if (player) {
+            ctx.beginPath();
+            ctx.arc(mapX + (player.x / WORLD_W) * mapW, mapY + (player.y / WORLD_H) * mapH, 3.5, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffd966';
+            ctx.fill();
+        }
+    }
+
+    if (!CanvasRenderingContext2D.prototype.roundRect) {
+        CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+            if (w < 2 * r) r = w / 2;
+            if (h < 2 * r) r = h / 2;
+            this.beginPath();
+            this.moveTo(x + r, y);
+            this.arcTo(x + w, y, x + w, y + h, r);
+            this.arcTo(x + w, y + h, x, y + h, r);
+            this.arcTo(x, y + h, x, y, r);
+            this.arcTo(x, y, x + w, y, r);
+            this.closePath();
+            return this;
+        };
+    }
+
+    function gameLoop() {
+        if (isPlaying) {
+            update();
+            draw();
+        }
+        requestAnimationFrame(gameLoop);
+    }
+
+    (function initJoystick() {
+        const base = document.getElementById('joystickBase');
+        const stick = document.getElementById('joystickStick');
+        let active = false, pointerId = null;
+        let centerX = 0, centerY = 0, maxRadius = 0;
+        function refreshGeometry() {
+            const rect = base.getBoundingClientRect();
+            centerX = rect.left + rect.width / 2;
+            centerY = rect.top + rect.height / 2;
+            maxRadius = rect.width * 0.29;
+        }
+        function setStick(clientX, clientY) {
+            let dx = clientX - centerX, dy = clientY - centerY;
+            const d = Math.hypot(dx, dy);
+            if (d > maxRadius) { dx = dx / d * maxRadius; dy = dy / d * maxRadius; }
+            joystickInput.x = dx / maxRadius;
+            joystickInput.y = dy / maxRadius;
+            stick.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+        }
+        function reset() {
+            joystickInput.x = 0; joystickInput.y = 0;
+            stick.style.transform = 'translate(-50%, -50%)';
+            base.classList.remove('active');
+            active = false; pointerId = null;
+        }
+        base.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            if (active) return;
+            active = true; pointerId = e.pointerId;
+            try { base.setPointerCapture(pointerId); } catch (err) {}
+            base.classList.add('active');
+            refreshGeometry();
+            setStick(e.clientX, e.clientY);
+        });
+        base.addEventListener('pointermove', (e) => {
+            if (!active || e.pointerId !== pointerId) return;
+            e.preventDefault();
+            setStick(e.clientX, e.clientY);
+        });
+        function endHandler(e) { if (e.pointerId !== pointerId) return; reset(); }
+        base.addEventListener('pointerup', endHandler);
+        base.addEventListener('pointercancel', endHandler);
+        base.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+        base.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+    })();
+
+    (function initBoostBtn() {
+        const btn = boostBtn;
+        let pressed = false;
+        function press(e) { e.preventDefault(); if (pressed) return; pressed = true; keys[' '] = true; btn.classList.add('pressed'); }
+        function release(e) { if (!pressed) return; pressed = false; keys[' '] = false; btn.classList.remove('pressed'); }
+        btn.addEventListener('pointerdown', press);
+        btn.addEventListener('pointerup', release);
+        btn.addEventListener('pointercancel', release);
+        btn.addEventListener('pointerleave', release);
+        btn.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+        btn.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+    })();
+
+    window.addEventListener('keydown', (e) => {
+        const key = e.key;
+        if (key === ' ') { e.preventDefault(); keys[' '] = true; }
+        if (key in keys) { keys[key] = true; if (key.startsWith('Arrow')) e.preventDefault(); }
+    });
+    window.addEventListener('keyup', (e) => {
+        const key = e.key;
+        if (key === ' ') keys[' '] = false;
+        if (key in keys) keys[key] = false;
+    });
+
+    document.getElementById('restartBtn').addEventListener('click', () => {
+        Sfx.click();
+        if (gameOverTimer) { clearTimeout(gameOverTimer); gameOverTimer = null; }
+        resetGame();
+        gameOver = false;
+        winFlag = false;
+    });
+
+    function startGame() {
+        Sfx.click();
+        getAudioCtx();
+        resetGame();
+        isPlaying = true;
+        coverScreen.style.display = 'none';
+        gameWrapper.style.display = 'flex';
+        requestAnimationFrame(() => {
+            resizeGame();
+            getAudioCtx();
+        });
+        switchToBattleMusic();
+    }
+
+    startGameBtn.addEventListener('click', startGame);
+
+    document.addEventListener('gesturestart', (e) => e.preventDefault());
+    document.addEventListener('touchmove', (e) => {
+        if (e.target.closest('.joystick-base') || e.target.closest('.boost-btn') || e.target.closest('.float-btn')) return;
+        e.preventDefault();
+    }, { passive: false });
+
+    window.addEventListener('resize', () => { if (isPlaying) resizeGame(); });
+    window.addEventListener('orientationchange', () => setTimeout(() => { if (isPlaying) resizeGame(); }, 120));
+
+    // ================= 啟動 =================
+    // 初始化圖示狀態（依 isMuted 顯示 🔊）
+    updateMuteIcons();
+    attemptMenuAutoplay();
+    gameLoop();
+})();
+</script>
+</body>
+</html>
