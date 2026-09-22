@@ -3,11 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Might &amp; Magic: Armies · 帶兵打仗</title>
+<title>Shields &amp; Staffs</title>
 <style>
     * { box-sizing: border-box; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
     html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #0b1a0e; font-family: 'Segoe UI', 'Roboto', sans-serif; touch-action: none; overscroll-behavior: none; }
 
+    :root {
+        --joystick-size: clamp(90px, 20vw, 128px);
+        --boost-size: clamp(58px, 13vw, 84px);
+        --float-btn-size: clamp(32px, 5.5vw, 40px);
+        --edge-gap: 12px;
+    }
+
+    /* ---------- 封面 ---------- */
     .cover-screen {
         position: fixed; inset: 0; z-index: 1000;
         display: flex; align-items: center; justify-content: center;
@@ -39,45 +47,60 @@
         position: absolute; inset: 0;
         display: flex; flex-direction: column;
         align-items: center; justify-content: center;
-        gap: clamp(10px, 2vw, 20px);
+        gap: clamp(8px, 1.6vw, 16px);
         padding: clamp(20px, 4vw, 50px);
         text-align: center;
         z-index: 2;
     }
     .cover-title {
         margin: 0;
-        font-size: clamp(26px, 5vw, 46px);
+        font-size: clamp(30px, 6vw, 56px);
         font-weight: 900;
         color: #ffd966;
         text-shadow: 0 4px 0 #5a3a1a, 0 8px 20px rgba(0,0,0,0.9);
         letter-spacing: 2px;
+        font-family: 'Georgia', 'Times New Roman', serif;
     }
     .cover-subtitle {
         margin: 0;
-        font-size: clamp(14px, 2.4vw, 20px);
+        font-size: clamp(13px, 2.2vw, 18px);
         color: #d4e0b0;
         text-shadow: 0 2px 6px black;
-        letter-spacing: 4px;
+        letter-spacing: 5px;
     }
-    .start-btn {
-        margin-top: clamp(8px, 2vw, 20px);
-        padding: clamp(10px, 1.6vw, 16px) clamp(24px, 4vw, 42px);
-        font-size: clamp(15px, 2.4vw, 20px);
+    .cover-btn {
+        padding: clamp(9px, 1.4vw, 14px) clamp(22px, 3.6vw, 38px);
+        font-size: clamp(14px, 2.2vw, 18px);
         font-weight: 900;
-        color: #2a1808;
-        background: linear-gradient(180deg, #ffd966, #d4a017);
-        border: 3px solid #fff3c0;
         border-radius: 60px;
         cursor: pointer;
-        box-shadow: 0 6px 0 #8a6b0f, 0 10px 24px rgba(0,0,0,0.7);
-        text-shadow: 0 1px 0 rgba(255,255,255,0.4);
         transition: transform 0.08s ease, box-shadow 0.08s ease;
         letter-spacing: 2px;
         font-family: inherit;
+        text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+    }
+    .start-btn {
+        margin-top: clamp(6px, 1.4vw, 14px);
+        color: #2a1808;
+        background: linear-gradient(180deg, #ffd966, #d4a017);
+        border: 3px solid #fff3c0;
+        box-shadow: 0 6px 0 #8a6b0f, 0 10px 24px rgba(0,0,0,0.7);
     }
     .start-btn:active {
         transform: translateY(5px);
         box-shadow: 0 1px 0 #8a6b0f, 0 4px 12px rgba(0,0,0,0.7);
+    }
+    .help-btn {
+        color: #e0f0c0;
+        background: linear-gradient(180deg, #5e7a4a, #3a5028);
+        border: 3px solid #a0c080;
+        box-shadow: 0 5px 0 #1f2e15, 0 8px 20px rgba(0,0,0,0.6);
+        font-size: clamp(12px, 1.9vw, 16px);
+        padding: clamp(7px, 1.2vw, 11px) clamp(18px, 3vw, 30px);
+    }
+    .help-btn:active {
+        transform: translateY(4px);
+        box-shadow: 0 1px 0 #1f2e15, 0 4px 12px rgba(0,0,0,0.6);
     }
     .cover-footer {
         position: absolute;
@@ -96,13 +119,13 @@
         border: 1px solid rgba(127,159,92,0.35);
     }
     .float-btn {
-        width: clamp(38px, 6vw, 46px);
-        height: clamp(38px, 6vw, 46px);
+        width: var(--float-btn-size);
+        height: var(--float-btn-size);
         border-radius: 50%;
         background: rgba(10, 19, 11, 0.72);
         border: 2px solid rgba(127, 159, 92, 0.65);
         color: #d4e0b0;
-        font-size: clamp(16px, 2.4vw, 20px);
+        font-size: clamp(14px, 2.2vw, 18px);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -121,6 +144,83 @@
     .cover-mute { position: absolute; bottom: 12px; left: 12px; z-index: 4; }
     .cover-fullscreen { position: absolute; bottom: 12px; right: 12px; z-index: 4; }
 
+    /* ---------- 說明彈窗 ---------- */
+    .help-modal {
+        position: fixed; inset: 0; z-index: 1500;
+        display: none;
+        align-items: center; justify-content: center;
+        background: rgba(0,0,0,0.85);
+        padding: 16px;
+    }
+    .help-modal.show { display: flex; }
+    .help-content {
+        background: linear-gradient(180deg, #1e2f1f, #0a130b);
+        border: 3px solid #5e7a4a;
+        border-radius: 24px;
+        padding: clamp(18px, 3vw, 30px) clamp(20px, 4vw, 40px);
+        max-width: min(92vw, 560px);
+        max-height: 88vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+        color: #d4e0b0;
+    }
+    .help-content h2 {
+        margin: 0 0 16px;
+        color: #ffd966;
+        text-align: center;
+        font-size: clamp(20px, 3.4vw, 26px);
+        text-shadow: 0 2px 8px black;
+        letter-spacing: 2px;
+    }
+    .help-content h3 {
+        margin: 18px 0 8px;
+        color: #a8d080;
+        font-size: clamp(14px, 2.2vw, 16px);
+        letter-spacing: 1px;
+    }
+    .help-content p, .help-content li {
+        font-size: clamp(12px, 1.9vw, 14px);
+        line-height: 1.7;
+        margin: 4px 0;
+        color: #d4e0b0;
+    }
+    .help-content ul {
+        margin: 4px 0;
+        padding-left: 20px;
+    }
+    .key-tag {
+        display: inline-block;
+        background: #2e4a22;
+        border: 1px solid #7f9f5c;
+        border-radius: 6px;
+        padding: 1px 8px;
+        font-family: monospace;
+        font-weight: bold;
+        color: #ffd966;
+        font-size: 0.95em;
+        margin: 0 2px;
+    }
+    .close-help-btn {
+        display: block;
+        margin: 20px auto 0;
+        padding: 10px 32px;
+        font-size: clamp(14px, 2.2vw, 16px);
+        font-weight: 900;
+        color: #2a1808;
+        background: linear-gradient(180deg, #ffd966, #d4a017);
+        border: 3px solid #fff3c0;
+        border-radius: 60px;
+        cursor: pointer;
+        box-shadow: 0 5px 0 #8a6b0f, 0 8px 20px rgba(0,0,0,0.6);
+        font-family: inherit;
+        letter-spacing: 1px;
+    }
+    .close-help-btn:active {
+        transform: translateY(4px);
+        box-shadow: 0 1px 0 #8a6b0f, 0 4px 12px rgba(0,0,0,0.6);
+    }
+
+    /* ---------- 遊戲 ---------- */
     .game-wrapper {
         display: none;
         flex-direction: column;
@@ -145,15 +245,15 @@
     .top-bar .value { color: #ffd966; font-size: clamp(14px, 3.6vw, 18px); }
     .top-bar .hp { color: #ff8888; }
     .boost-active { background: #b8860b !important; color: #000 !important; text-shadow: none; padding: 4px 12px; border-radius: 40px; }
-    .restart-btn {
-        background: #3e5d2e; border: none; border-radius: 40px;
-        padding: 6px 16px; color: #e2f0c0; font-weight: bold;
+    .home-btn {
+        background: #5a3a1a; border: none; border-radius: 40px;
+        padding: 6px 14px; color: #ffe0a0; font-weight: bold;
         font-size: clamp(11px, 2.8vw, 14px);
-        box-shadow: 0 3px 0 #1f2e15, 0 2px 8px black;
+        box-shadow: 0 3px 0 #2e1a08, 0 2px 8px black;
         cursor: pointer; transition: all 0.08s ease;
         white-space: nowrap; font-family: inherit;
     }
-    .restart-btn:active { transform: translateY(3px); box-shadow: 0 0 0 #1f2e15, 0 2px 8px black; }
+    .home-btn:active { transform: translateY(3px); box-shadow: 0 0 0 #2e1a08, 0 2px 8px black; }
     .hud-boost { padding: 4px 12px; border-radius: 40px; transition: all 0.2s; }
     .game-stage {
         position: relative;
@@ -166,23 +266,23 @@
 
     .game-mute {
         position: absolute;
-        bottom: calc(200px + env(safe-area-inset-bottom, 0px));
-        left: calc(18px + env(safe-area-inset-left, 0px));
+        bottom: calc(var(--edge-gap) + var(--joystick-size) + 8px);
+        left: var(--edge-gap);
         z-index: 15;
     }
     .game-fullscreen {
         position: absolute;
-        bottom: calc(20px + env(safe-area-inset-bottom, 0px));
-        right: calc(22px + env(safe-area-inset-right, 0px));
+        bottom: calc(var(--edge-gap) + 4px + var(--boost-size) + 8px);
+        right: var(--edge-gap);
         z-index: 15;
     }
 
     .joystick-base {
         position: absolute;
-        bottom: calc(20px + env(safe-area-inset-bottom, 0px));
-        left: calc(18px + env(safe-area-inset-left, 0px));
-        width: clamp(110px, 24vw, 160px);
-        height: clamp(110px, 24vw, 160px);
+        bottom: var(--edge-gap);
+        left: var(--edge-gap);
+        width: var(--joystick-size);
+        height: var(--joystick-size);
         border-radius: 50%;
         background: radial-gradient(circle at 50% 50%, rgba(60, 90, 45, 0.18), rgba(15, 28, 13, 0.32));
         border: 2px solid rgba(127, 159, 92, 0.35);
@@ -207,18 +307,19 @@
         pointer-events: none;
     }
     .joystick-base.active .joystick-stick { transition: none; }
+
     .boost-btn {
         position: absolute;
-        bottom: calc(28px + env(safe-area-inset-bottom, 0px));
-        right: calc(22px + env(safe-area-inset-right, 0px));
-        width: clamp(74px, 17vw, 108px);
-        height: clamp(74px, 17vw, 108px);
+        bottom: calc(var(--edge-gap) + 4px);
+        right: var(--edge-gap);
+        width: var(--boost-size);
+        height: var(--boost-size);
         border-radius: 50%;
         background: radial-gradient(circle at 35% 32%, rgba(123, 163, 90, 0.35), rgba(36, 64, 26, 0.42));
         border: 2px solid rgba(255, 217, 102, 0.5);
         box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.3), 0 4px 14px rgba(0, 0, 0, 0.35);
         color: #ffd966; font-weight: bold;
-        font-size: clamp(12px, 3.2vw, 16px);
+        font-size: clamp(10px, 2.6vw, 14px);
         display: flex; flex-direction: column;
         justify-content: center; align-items: center;
         line-height: 1.1;
@@ -228,6 +329,101 @@
     }
     .boost-btn.cooldown { opacity: 0.35; border-color: rgba(119, 119, 119, 0.5); color: #aaa; }
     .boost-btn.pressed { transform: scale(0.93); }
+
+    /* ★ 電腦版（有精確指標、無觸控）隱藏搖桿與加速鈕 */
+    @media (hover: hover) and (pointer: fine) {
+        .joystick-base,
+        .boost-btn {
+            display: none !important;
+        }
+        /* 靜音與全屏按鈕在電腦版仍顯示，但位置改到左下 / 右下貼邊 */
+        .game-mute {
+            bottom: var(--edge-gap);
+            left: var(--edge-gap);
+        }
+        .game-fullscreen {
+            bottom: var(--edge-gap);
+            right: var(--edge-gap);
+        }
+    }
+
+    .gameover-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.85);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 40;
+        border-radius: 16px;
+    }
+    .gameover-overlay.show { display: flex; }
+    .gameover-box {
+        background: linear-gradient(180deg, #1e2f1f, #0a130b);
+        border: 3px solid #5e7a4a;
+        border-radius: 24px;
+        padding: clamp(18px, 4vw, 36px) clamp(24px, 6vw, 56px);
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.9), inset 0 0 30px rgba(0,0,0,0.5);
+        max-width: 90%;
+    }
+    .gameover-title {
+        font-size: clamp(24px, 5vw, 40px);
+        font-weight: 900;
+        margin: 0 0 clamp(10px, 2vw, 18px);
+        text-shadow: 0 4px 12px black;
+        letter-spacing: 2px;
+    }
+    .gameover-title.win { color: #ffd966; }
+    .gameover-title.lose { color: #d9534f; }
+    .score-line {
+        color: #d4e0b0;
+        font-size: clamp(13px, 2.6vw, 17px);
+        margin: clamp(6px, 1.5vw, 10px) 0;
+        text-shadow: 0 2px 4px black;
+    }
+    .score-line .num {
+        color: #ffd966;
+        font-size: clamp(16px, 3.4vw, 22px);
+        font-weight: 900;
+        margin-left: 6px;
+    }
+    .score-line .best {
+        color: #7fff7f;
+        font-size: clamp(16px, 3.4vw, 22px);
+        font-weight: 900;
+        margin-left: 6px;
+    }
+    .new-record {
+        color: #ffaa00;
+        font-weight: bold;
+        font-size: clamp(12px, 2.4vw, 15px);
+        margin-top: 6px;
+        animation: pulse 1s infinite alternate;
+    }
+    @keyframes pulse {
+        from { opacity: 0.6; transform: scale(0.98); }
+        to { opacity: 1; transform: scale(1.02); }
+    }
+    .return-btn {
+        margin-top: clamp(14px, 3vw, 24px);
+        padding: clamp(10px, 1.8vw, 14px) clamp(28px, 5vw, 48px);
+        font-size: clamp(15px, 2.6vw, 20px);
+        font-weight: 900;
+        color: #2a1808;
+        background: linear-gradient(180deg, #ffd966, #d4a017);
+        border: 3px solid #fff3c0;
+        border-radius: 60px;
+        cursor: pointer;
+        box-shadow: 0 6px 0 #8a6b0f, 0 10px 24px rgba(0,0,0,0.7);
+        transition: transform 0.08s ease, box-shadow 0.08s ease;
+        letter-spacing: 2px;
+        font-family: inherit;
+    }
+    .return-btn:active {
+        transform: translateY(5px);
+        box-shadow: 0 1px 0 #8a6b0f, 0 4px 12px rgba(0,0,0,0.7);
+    }
 </style>
 </head>
 <body>
@@ -239,14 +435,57 @@
              onerror="this.style.display='none'">
         <div class="cover-overlay"></div>
         <div class="cover-content">
-            <h1 class="cover-title">Might &amp; Magic: Armies</h1>
+            <h1 class="cover-title">Shields &amp; Staffs</h1>
             <p class="cover-subtitle">帶 兵 打 仗</p>
-            <button class="start-btn" id="startGameBtn">⚔️ 開 始 遊 戲 ⚔️</button>
+            <button class="cover-btn start-btn" id="startGameBtn">⚔️ 開 始 遊 戲 ⚔️</button>
+            <button class="cover-btn help-btn" id="helpBtn">📖 遊戲說明</button>
         </div>
         <div class="cover-footer" id="coverFooter">v1.0 © 2026 ☕迪遜咖啡廳，版權所有。</div>
-        <!-- 初始顯示 🔊（音樂正在播放狀態） -->
         <button class="float-btn cover-mute" id="coverMuteBtn" title="靜音 / 播放">🔊</button>
         <button class="float-btn cover-fullscreen" id="coverFullscreenBtn" title="全屏">⛶</button>
+    </div>
+</div>
+
+<!-- ================= 說明彈窗 ================= -->
+<div class="help-modal" id="helpModal">
+    <div class="help-content">
+        <h2>📖 遊戲說明</h2>
+
+        <h3>🎯 遊戲目標</h3>
+        <p>率領你的 🏇 英雄在地圖上招募士兵，擊敗所有敵方英雄即可獲勝。士兵歸零後英雄會開始受傷，血量歸零則遊戲結束。</p>
+
+        <h3>🕹️ 操作方式</h3>
+        <ul>
+            <li><strong>電腦版：</strong> <span class="key-tag">W</span><span class="key-tag">A</span><span class="key-tag">S</span><span class="key-tag">D</span> 或 <span class="key-tag">↑</span><span class="key-tag">←</span><span class="key-tag">↓</span><span class="key-tag">→</span> 移動</li>
+            <li><strong>電腦版技能：</strong> 按 <span class="key-tag">J</span> 或 <span class="key-tag">空白鍵</span> 使用加速技能</li>
+            <li><strong>手機版：</strong> 左下虛擬搖桿移動，右下按鈕使用加速技能</li>
+        </ul>
+
+        <h3>⚡ 加速技能</h3>
+        <p>按下技能鍵後移動速度提升 90%，持續約 3 秒。但加速期間士兵力量降至 65%，冷卻 5 秒。</p>
+
+        <h3>🤺 招募士兵</h3>
+        <p>地圖上會出現三種招募單位，站在圓形範圍內 3 秒即可招募：</p>
+        <ul>
+            <li>🤺 青銅士兵：+200 兵</li>
+            <li>🥷 白銀士兵：+1000 兵</li>
+            <li>🧙 黃金士兵：+5000 兵</li>
+        </ul>
+
+        <h3>🏘️ 村莊與森林</h3>
+        <ul>
+            <li>🏘️ 村莊會定期產出高價值的 🧙 士兵，是兵家必爭之地。</li>
+            <li>🌲🌳 森林可讓英雄隱藏，避免被敵人發現。</li>
+            <li>🌊 河流無法穿越，但可透過木橋通行。</li>
+        </ul>
+
+        <h3>⚠️ 邊界警告</h3>
+        <p>地圖四周有紅色警示區。靠近邊界會持續損失士兵，士兵歸零後改扣英雄血量。</p>
+
+        <h3>⚔️ 戰鬥規則</h3>
+        <p>雙方碰撞後會持續互相扣減兵力，兵力差距越大弱勢方損失越快。勝利方會吸收敗方開戰時的士兵總數。敵人之間也會互相攻擊。</p>
+
+        <button class="close-help-btn" id="closeHelpBtn">關閉</button>
     </div>
 </div>
 
@@ -256,7 +495,7 @@
         <span>⚔️ <span class="value" id="soldierCount">0</span></span>
         <span class="hp" id="hpDisplay">❤️ <span class="value" id="heroHp">100</span></span>
         <span class="hud-boost" id="boostIndicator">⚡ 加速</span>
-        <button class="restart-btn" id="restartBtn">🔄 重來</button>
+        <button class="home-btn" id="homeBtn">🏠 封面</button>
     </div>
 
     <div class="game-stage" id="gameStage">
@@ -265,17 +504,26 @@
             <div class="joystick-stick" id="joystickStick"></div>
         </div>
         <div class="boost-btn" id="boostBtn">⚡<br>加速</div>
-        <!-- 初始顯示 🔊 -->
         <button class="float-btn game-mute" id="gameMuteBtn" title="靜音 / 播放">🔊</button>
         <button class="float-btn game-fullscreen" id="gameFullscreenBtn" title="全屏">⛶</button>
+
+        <div class="gameover-overlay" id="gameoverOverlay">
+            <div class="gameover-box">
+                <h2 class="gameover-title" id="gameoverTitle">🏆 勝利！</h2>
+                <div class="score-line">本局最高士兵<span class="num" id="runScore">0</span></div>
+                <div class="score-line">歷史最高分<span class="best" id="bestScore">0</span></div>
+                <div class="new-record" id="newRecord" style="display:none;">🎉 新紀錄！</div>
+                <button class="return-btn" id="returnToCoverBtn">返回封面</button>
+            </div>
+        </div>
     </div>
 </div>
 
 <audio id="menuMusic" loop preload="auto">
-    <source src="Shields and Staffs - Armies Assault.mp3" type="audio/mpeg">
+    <source src="Shields and Staffs - Warzone Heroes.mp3" type="audio/mpeg">
 </audio>
 <audio id="battleMusic" loop preload="auto">
-    <source src="Shields and Staffs - Warzone Heroes.mp3" type="audio/mpeg">
+    <source src="Shields and Staffs - Armies Assault.mp3" type="audio/mpeg">
 </audio>
 
 <script>
@@ -294,17 +542,28 @@
     const coverScreen = document.getElementById('coverScreen');
     const gameWrapper = document.getElementById('gameWrapper');
     const startGameBtn = document.getElementById('startGameBtn');
+    const helpBtn = document.getElementById('helpBtn');
+    const helpModal = document.getElementById('helpModal');
+    const closeHelpBtn = document.getElementById('closeHelpBtn');
     const coverMuteBtn = document.getElementById('coverMuteBtn');
     const coverFullscreenBtn = document.getElementById('coverFullscreenBtn');
     const gameMuteBtn = document.getElementById('gameMuteBtn');
     const gameFullscreenBtn = document.getElementById('gameFullscreenBtn');
     const coverFooter = document.getElementById('coverFooter');
+    const homeBtn = document.getElementById('homeBtn');
+    const gameoverOverlay = document.getElementById('gameoverOverlay');
+    const gameoverTitle = document.getElementById('gameoverTitle');
+    const runScoreEl = document.getElementById('runScore');
+    const bestScoreEl = document.getElementById('bestScore');
+    const newRecordEl = document.getElementById('newRecord');
+    const returnToCoverBtn = document.getElementById('returnToCoverBtn');
 
     const menuMusic = document.getElementById('menuMusic');
     const battleMusic = document.getElementById('battleMusic');
 
-    // 版權年份
     coverFooter.textContent = 'v1.0 © ' + new Date().getFullYear() + ' ☕迪遜咖啡廳，版權所有。';
+
+    const BEST_KEY = 'mma_best_score_v1';
 
     // ================= 音效系統 =================
     let audioCtx = null;
@@ -387,12 +646,17 @@
             { f: 400, d: 0.12, t: 'square' },
         ]),
         edgeWarn: () => playTone(110, 0.12, 'sawtooth', 0.035),
+        newRecord: () => playSequence([
+            { f: 659, d: 0.1, gap: 100 },
+            { f: 784, d: 0.1, gap: 100 },
+            { f: 1046, d: 0.1, gap: 100 },
+            { f: 1318, d: 0.35, v: 0.12 },
+        ]),
     };
 
     // ================= 音樂控制 =================
     let currentMusic = null;
 
-    // ★ 統一更新靜音圖示：音樂播放中顯示 🔊，靜音時顯示 🔇
     function updateMuteIcons() {
         const icon = isMuted ? '🔇' : '🔊';
         coverMuteBtn.textContent = icon;
@@ -400,13 +664,10 @@
     }
 
     function switchToMenuMusic() {
-        if (currentMusic === menuMusic && !menuMusic.paused) return;
         try { battleMusic.pause(); battleMusic.currentTime = 0; } catch (e) {}
         currentMusic = menuMusic;
         if (!isMuted) {
-            menuMusic.play().then(() => {
-                updateMuteIcons();
-            }).catch(() => {});
+            menuMusic.play().then(() => updateMuteIcons()).catch(() => {});
         }
     }
 
@@ -414,16 +675,13 @@
         try { menuMusic.pause(); menuMusic.currentTime = 0; } catch (e) {}
         currentMusic = battleMusic;
         if (!isMuted) {
-            battleMusic.play().then(() => {
-                updateMuteIcons();
-            }).catch(() => {});
+            battleMusic.play().then(() => updateMuteIcons()).catch(() => {});
         }
     }
 
     function toggleMute() {
         isMuted = !isMuted;
         updateMuteIcons();
-
         if (isMuted) {
             try { menuMusic.pause(); } catch (e) {}
             try { battleMusic.pause(); } catch (e) {}
@@ -450,18 +708,15 @@
         }
     }
 
-    coverMuteBtn.addEventListener('click', toggleMute);
+    coverMuteBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleMute(); });
     gameMuteBtn.addEventListener('click', toggleMute);
-    coverFullscreenBtn.addEventListener('click', toggleFullscreen);
+    coverFullscreenBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleFullscreen(); });
     gameFullscreenBtn.addEventListener('click', toggleFullscreen);
 
-    // ================= 自動播放（含 fallback） =================
+    // ================= 自動播放 =================
     function attemptMenuAutoplay() {
         currentMusic = menuMusic;
-        menuMusic.play().then(() => {
-            updateMuteIcons();
-        }).catch(() => {
-            // 被瀏覽器阻止，等待第一次用戶互動
+        menuMusic.play().then(() => updateMuteIcons()).catch(() => {
             const resume = () => {
                 if (!isMuted && !isPlaying) {
                     menuMusic.play().then(() => updateMuteIcons()).catch(() => {});
@@ -476,11 +731,8 @@
         });
     }
 
-    // 監聽音樂播放/暫停事件，確保圖示同步
     menuMusic.addEventListener('play', () => { if (!isMuted) updateMuteIcons(); });
-    menuMusic.addEventListener('pause', () => { if (!isMuted) updateMuteIcons(); });
     battleMusic.addEventListener('play', () => { if (!isMuted) updateMuteIcons(); });
-    battleMusic.addEventListener('pause', () => { if (!isMuted) updateMuteIcons(); });
 
     // ================= 遊戲參數 =================
     const WORLD_W = 2200;
@@ -536,9 +788,9 @@
     let spawnTimer = 0;
 
     let isPlaying = false;
-    let gameOverTimer = null;
+    let maxSoldiersThisRun = 0;
 
-    const keys = { w: false, a: false, s: false, d: false, ArrowUp: false, ArrowLeft: false, ArrowDown: false, ArrowRight: false, ' ': false };
+    const keys = { w: false, a: false, s: false, d: false, ArrowUp: false, ArrowLeft: false, ArrowDown: false, ArrowRight: false, ' ': false, j: false };
     const joystickInput = { x: 0, y: 0 };
 
     let lastCombatSoundFrame = -100;
@@ -909,12 +1161,14 @@
         activeCombats = [];
         gameOver = false;
         winFlag = false;
+        maxSoldiersThisRun = player.soldiers;
         camera.x = player.x - VIEW_W / 2;
         camera.y = player.y - VIEW_H / 2;
         frame = 0;
         spawnTimer = 0;
         lastCombatSoundFrame = -100;
         lastEdgeWarnFrame = -100;
+        gameoverOverlay.classList.remove('show');
         updateHUD();
     }
 
@@ -989,23 +1243,41 @@
         }
     }
 
+    // ================= 遊戲結束（含防死機保護） =================
+    let gameOverHandled = false;
     function handleGameOver(win) {
-        if (gameOver) return;
+        if (gameOverHandled) return;
+        gameOverHandled = true;
         gameOver = true;
         winFlag = win;
         if (win) Sfx.victory();
         else Sfx.playerDown();
-        if (gameOverTimer) clearTimeout(gameOverTimer);
-        gameOverTimer = setTimeout(() => {
-            returnToCover();
-        }, 4000);
+
+        let best = 0;
+        try {
+            best = parseInt(localStorage.getItem(BEST_KEY) || '0', 10) || 0;
+        } catch (e) { best = 0; }
+        const isNewRecord = maxSoldiersThisRun > best;
+        if (isNewRecord) {
+            best = maxSoldiersThisRun;
+            try { localStorage.setItem(BEST_KEY, String(best)); } catch (e) {}
+            setTimeout(() => Sfx.newRecord(), 600);
+        }
+
+        gameoverTitle.textContent = win ? '🏆 勝利！' : '💀 軍隊覆滅...';
+        gameoverTitle.className = 'gameover-title ' + (win ? 'win' : 'lose');
+        runScoreEl.textContent = Math.floor(maxSoldiersThisRun).toLocaleString();
+        bestScoreEl.textContent = Math.floor(best).toLocaleString();
+        newRecordEl.style.display = isNewRecord ? 'block' : 'none';
+        gameoverOverlay.classList.add('show');
     }
 
     function returnToCover() {
         isPlaying = false;
         gameOver = false;
+        gameOverHandled = false;
         winFlag = false;
-        if (gameOverTimer) { clearTimeout(gameOverTimer); gameOverTimer = null; }
+        gameoverOverlay.classList.remove('show');
         coverScreen.style.display = 'flex';
         gameWrapper.style.display = 'none';
         switchToMenuMusic();
@@ -1015,14 +1287,24 @@
     function update() {
         if (!isPlaying) return;
         if (gameOver) { updateHUD(); return; }
+
+        // ★ 安全檢查：任何時候英雄血量歸零就結束遊戲
+        if (player && player.heroHp <= 0) {
+            handleGameOver(false);
+            return;
+        }
+
         frame++;
         activeCombats = [];
+
+        if (player.soldiers > maxSoldiersThisRun) maxSoldiersThisRun = player.soldiers;
 
         if (player.boostTimer > 0) {
             player.boostTimer--;
             if (player.boostTimer <= 0) player.boostCooldown = BOOST_COOLDOWN;
         } else if (player.boostCooldown > 0) player.boostCooldown--;
 
+        // ============ 玩家移動（WASD + 方向鍵 + 搖桿） ============
         let dx = 0, dy = 0;
         if (keys.w || keys.ArrowUp) dy -= 1;
         if (keys.s || keys.ArrowDown) dy += 1;
@@ -1040,6 +1322,7 @@
             tryMoveEntity(player, dx * speed * mag, dy * speed * mag);
         }
 
+        // ============ 邊界傷害（含防死機） ============
         const edgeDx = Math.min(player.x, WORLD_W - player.x);
         const edgeDy = Math.min(player.y, WORLD_H - player.y);
         const edgeDist = Math.min(edgeDx, edgeDy);
@@ -1049,6 +1332,11 @@
                 player.soldiers = Math.max(0, player.soldiers - edgeFactor * EDGE_SOLDIER_DMG);
             } else {
                 player.heroHp = Math.max(0, player.heroHp - edgeFactor * EDGE_HP_DMG);
+                // ★ 立即檢查英雄血量
+                if (player.heroHp <= 0) {
+                    handleGameOver(false);
+                    return;
+                }
             }
             if (frame - lastEdgeWarnFrame > 40) {
                 lastEdgeWarnFrame = frame;
@@ -1061,7 +1349,8 @@
             if (dist(player.x, player.y, f.x, f.y) < f.r - HERO_RADIUS * 0.5) { player.hidden = true; break; }
         }
 
-        if (keys[' '] && player.boostCooldown === 0 && player.boostTimer === 0) {
+        // ★ 加速觸發：空白鍵或 J 鍵
+        if ((keys[' '] || keys.j) && player.boostCooldown === 0 && player.boostTimer === 0) {
             player.boostTimer = BOOST_DURATION;
         }
 
@@ -1205,7 +1494,9 @@
                 player.soldiers = Math.max(0, player.soldiers - pLoss);
                 e.soldiers = Math.max(0, e.soldiers - eLoss);
 
-                if (player.soldiers <= 0 && e.soldiers > 0) player.heroHp = Math.max(0, player.heroHp - 0.3);
+                if (player.soldiers <= 0 && e.soldiers > 0) {
+                    player.heroHp = Math.max(0, player.heroHp - 0.3);
+                }
 
                 const mx = (player.x + e.x) / 2;
                 const my = (player.y + e.y) / 2;
@@ -1226,6 +1517,7 @@
                     enemies.splice(i, 1);
                 }
 
+                // ★ 立即檢查英雄血量
                 if (player.heroHp <= 0) {
                     handleGameOver(false);
                     return;
@@ -1740,27 +2032,6 @@
             ctx.shadowBlur = 0;
         }
 
-        if (gameOver) {
-            ctx.fillStyle = 'rgba(0,0,0,0.72)';
-            ctx.fillRect(0, 0, VIEW_W, VIEW_H);
-            ctx.font = 'bold 48px "Segoe UI", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.shadowColor = 'black';
-            ctx.shadowBlur = 20;
-            if (winFlag) {
-                ctx.fillStyle = '#ffd966';
-                ctx.fillText('🏆 勝利！', VIEW_W / 2, VIEW_H / 2 - 30);
-            } else {
-                ctx.fillStyle = '#d9534f';
-                ctx.fillText('💀 軍隊覆滅...', VIEW_W / 2, VIEW_H / 2 - 30);
-            }
-            ctx.font = '22px "Segoe UI"';
-            ctx.fillStyle = '#e0e0e0';
-            ctx.fillText('即將返回封面…', VIEW_W / 2, VIEW_H / 2 + 50);
-            ctx.shadowBlur = 0;
-        }
-
         const mapW = 150, mapH = 105;
         const mapX = VIEW_W - mapW - 15;
         const mapY = 15;
@@ -1901,28 +2172,63 @@
         btn.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
     })();
 
+    // ============ 鍵盤輸入（WASD + 方向鍵 + J + 空白） ============
     window.addEventListener('keydown', (e) => {
-        const key = e.key;
-        if (key === ' ') { e.preventDefault(); keys[' '] = true; }
-        if (key in keys) { keys[key] = true; if (key.startsWith('Arrow')) e.preventDefault(); }
+        const key = e.key.toLowerCase();
+        if (key === ' ') {
+            e.preventDefault();
+            keys[' '] = true;
+            return;
+        }
+        if (key === 'j') {
+            e.preventDefault();
+            keys.j = true;
+            return;
+        }
+        if (key in keys) {
+            keys[key] = true;
+            if (key.startsWith('arrow')) e.preventDefault();
+        }
     });
     window.addEventListener('keyup', (e) => {
-        const key = e.key;
-        if (key === ' ') keys[' '] = false;
+        const key = e.key.toLowerCase();
+        if (key === ' ') { keys[' '] = false; return; }
+        if (key === 'j') { keys.j = false; return; }
         if (key in keys) keys[key] = false;
     });
 
-    document.getElementById('restartBtn').addEventListener('click', () => {
+    // ============ 說明彈窗 ============
+    helpBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
         Sfx.click();
-        if (gameOverTimer) { clearTimeout(gameOverTimer); gameOverTimer = null; }
-        resetGame();
-        gameOver = false;
-        winFlag = false;
+        helpModal.classList.add('show');
+    });
+    closeHelpBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        Sfx.click();
+        helpModal.classList.remove('show');
+    });
+    helpModal.addEventListener('click', (e) => {
+        if (e.target === helpModal) {
+            helpModal.classList.remove('show');
+        }
+    });
+
+    // ============ 遊戲按鈕 ============
+    homeBtn.addEventListener('click', () => {
+        Sfx.click();
+        returnToCover();
+    });
+
+    returnToCoverBtn.addEventListener('click', () => {
+        Sfx.click();
+        returnToCover();
     });
 
     function startGame() {
         Sfx.click();
         getAudioCtx();
+        gameOverHandled = false;
         resetGame();
         isPlaying = true;
         coverScreen.style.display = 'none';
@@ -1934,7 +2240,10 @@
         switchToBattleMusic();
     }
 
-    startGameBtn.addEventListener('click', startGame);
+    startGameBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        startGame();
+    });
 
     document.addEventListener('gesturestart', (e) => e.preventDefault());
     document.addEventListener('touchmove', (e) => {
@@ -1946,7 +2255,6 @@
     window.addEventListener('orientationchange', () => setTimeout(() => { if (isPlaying) resizeGame(); }, 120));
 
     // ================= 啟動 =================
-    // 初始化圖示狀態（依 isMuted 顯示 🔊）
     updateMuteIcons();
     attemptMenuAutoplay();
     gameLoop();
