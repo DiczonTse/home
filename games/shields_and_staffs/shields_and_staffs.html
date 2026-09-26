@@ -25,67 +25,65 @@ html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
     100% { transform: scale(1.08); }
 }
 .cover-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0.75) 100%); pointer-events: none; }
-.cover-content { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(6px, 1.2vw, 12px); padding: clamp(16px, 3vw, 40px); text-align: center; z-index: 2; }
-.cover-title { margin: 0; font-size: clamp(26px, 5.4vw, 50px); font-weight: 900; color: #ffd966; text-shadow: 0 4px 0 #5a3a1a, 0 8px 20px rgba(0,0,0,0.9); letter-spacing: 2px; font-family: 'Georgia', 'Times New Roman', serif; animation: titlePulse 3s ease-in-out infinite, titleGlow 3s ease-in-out infinite; }
-@keyframes titlePulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.04); }
-}
-@keyframes titleGlow {
-    0%, 100% { filter: drop-shadow(0 0 8px rgba(255,217,102,0.5)); }
-    50% { filter: drop-shadow(0 0 24px rgba(255,217,102,0.95)); }
-}
-.cover-subtitle { margin: 0; font-size: clamp(12px, 2vw, 16px); color: #d4e0b0; text-shadow: 0 2px 6px black; letter-spacing: 5px; animation: subtitleFade 4s ease-in-out infinite; }
-@keyframes subtitleFade {
-    0%, 100% { opacity: 0.75; letter-spacing: 5px; }
-    50% { opacity: 1; letter-spacing: 7px; }
-}
-.cover-gold { margin: 4px 0; font-size: clamp(13px, 2.2vw, 17px); color: #ffd966; text-shadow: 0 2px 6px black; font-weight: bold; letter-spacing: 1px; background: rgba(0,0,0,0.5); padding: 4px 18px; border-radius: 30px; border: 1px solid #8a6b0f; animation: goldShine 2.5s ease-in-out infinite; }
-@keyframes goldShine {
-    0%, 100% { box-shadow: 0 0 8px rgba(255,217,102,0.4); }
-    50% { box-shadow: 0 0 22px rgba(255,217,102,0.9); }
-}
-.cover-hero { margin: 2px 0; font-size: clamp(12px, 2vw, 15px); color: #d4e0b0; text-shadow: 0 2px 4px black; }
-.cover-btn { padding: clamp(8px, 1.2vw, 13px) clamp(18px, 3vw, 32px); font-size: clamp(13px, 2vw, 17px); font-weight: 900; border-radius: 60px; cursor: pointer; transition: transform 0.08s ease, box-shadow 0.08s ease; letter-spacing: 1.5px; font-family: inherit; text-shadow: 0 1px 0 rgba(255,255,255,0.4); }
+.cover-content { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(6px, 1.2vw, 12px); padding: clamp(14px, 3vw, 40px) clamp(14px, 3vw, 40px) clamp(56px, 9vw, 76px); text-align: center; z-index: 2; }
+.cover-title { margin: 0; font-size: clamp(24px, 5vw, 46px); font-weight: 900; color: #ffd966; text-shadow: 0 4px 0 #5a3a1a, 0 8px 20px rgba(0,0,0,0.9); letter-spacing: 2px; font-family: 'Georgia', 'Times New Roman', serif; animation: titlePulse 3s ease-in-out infinite, titleGlow 3s ease-in-out infinite; }
+@keyframes titlePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+@keyframes titleGlow { 0%, 100% { filter: drop-shadow(0 0 8px rgba(255,217,102,0.5)); } 50% { filter: drop-shadow(0 0 24px rgba(255,217,102,0.95)); } }
+.cover-subtitle { margin: 0; font-size: clamp(11px, 1.8vw, 15px); color: #d4e0b0; text-shadow: 0 2px 6px black; letter-spacing: 5px; animation: subtitleFade 4s ease-in-out infinite; }
+@keyframes subtitleFade { 0%, 100% { opacity: 0.75; letter-spacing: 5px; } 50% { opacity: 1; letter-spacing: 7px; } }
+.cover-gold { margin: 4px 0; font-size: clamp(12px, 2vw, 16px); color: #ffd966; text-shadow: 0 2px 6px black; font-weight: bold; letter-spacing: 1px; background: rgba(0,0,0,0.5); padding: 4px 16px; border-radius: 30px; border: 1px solid #8a6b0f; animation: goldShine 2.5s ease-in-out infinite; }
+@keyframes goldShine { 0%, 100% { box-shadow: 0 0 8px rgba(255,217,102,0.4); } 50% { box-shadow: 0 0 22px rgba(255,217,102,0.9); } }
+.cover-hero { margin: 2px 0; font-size: clamp(11px, 1.8vw, 14px); color: #d4e0b0; text-shadow: 0 2px 4px black; }
+.cover-btn { padding: clamp(7px, 1.1vw, 12px) clamp(16px, 2.6vw, 28px); font-size: clamp(12px, 1.8vw, 16px); font-weight: 900; border-radius: 60px; cursor: pointer; transition: transform 0.08s ease, box-shadow 0.08s ease; letter-spacing: 1.5px; font-family: inherit; text-shadow: 0 1px 0 rgba(255,255,255,0.4); }
 .start-btn { margin-top: clamp(4px, 1vw, 10px); color: #2a1808; background: linear-gradient(180deg, #ffd966, #d4a017); border: 3px solid #fff3c0; box-shadow: 0 6px 0 #8a6b0f, 0 10px 24px rgba(0,0,0,0.7); animation: startPulse 2s ease-in-out infinite; }
-@keyframes startPulse {
-    0%, 100% { transform: scale(1); box-shadow: 0 6px 0 #8a6b0f, 0 10px 24px rgba(0,0,0,0.7); }
-    50% { transform: scale(1.05); box-shadow: 0 6px 0 #8a6b0f, 0 10px 36px rgba(255,217,102,0.6); }
-}
+@keyframes startPulse { 0%, 100% { transform: scale(1); box-shadow: 0 6px 0 #8a6b0f, 0 10px 24px rgba(0,0,0,0.7); } 50% { transform: scale(1.05); box-shadow: 0 6px 0 #8a6b0f, 0 10px 36px rgba(255,217,102,0.6); } }
 .start-btn:active { transform: translateY(5px); box-shadow: 0 1px 0 #8a6b0f, 0 4px 12px rgba(0,0,0,0.7); }
-.small-btn { color: #e0f0c0; background: linear-gradient(180deg, #5e7a4a, #3a5028); border: 2px solid #a0c080; box-shadow: 0 4px 0 #1f2e15, 0 6px 16px rgba(0,0,0,0.6); font-size: clamp(11px, 1.7vw, 14px); padding: clamp(6px, 1vw, 10px) clamp(14px, 2.4vw, 24px); }
+.small-btn { color: #e0f0c0; background: linear-gradient(180deg, #5e7a4a, #3a5028); border: 2px solid #a0c080; box-shadow: 0 4px 0 #1f2e15, 0 6px 16px rgba(0,0,0,0.6); font-size: clamp(10px, 1.5vw, 13px); padding: clamp(5px, 0.9vw, 9px) clamp(12px, 2vw, 20px); }
 .small-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #1f2e15, 0 4px 12px rgba(0,0,0,0.6); }
-.shop-btn { color: #2a1808; background: linear-gradient(180deg, #ffb84d, #d48017); border: 2px solid #fff3c0; box-shadow: 0 4px 0 #8a5010, 0 6px 16px rgba(0,0,0,0.6); font-size: clamp(11px, 1.7vw, 14px); padding: clamp(6px, 1vw, 10px) clamp(14px, 2.4vw, 24px); }
+.shop-btn { color: #2a1808; background: linear-gradient(180deg, #ffb84d, #d48017); border: 2px solid #fff3c0; box-shadow: 0 4px 0 #8a5010, 0 6px 16px rgba(0,0,0,0.6); font-size: clamp(10px, 1.5vw, 13px); padding: clamp(5px, 0.9vw, 9px) clamp(12px, 2vw, 20px); }
 .shop-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #8a5010, 0 4px 12px rgba(0,0,0,0.6); }
-.button-row { display: flex; flex-wrap: wrap; gap: clamp(4px, 1vw, 10px); justify-content: center; align-items: center; margin-top: 4px; }
-.cover-footer { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); color: #d4e0b0; font-size: clamp(9px, 1.3vw, 12px); text-shadow: 0 2px 4px black; background: rgba(0,0,0,0.5); padding: 4px 14px; border-radius: 30px; white-space: nowrap; z-index: 3; letter-spacing: 0.5px; border: 1px solid rgba(127,159,92,0.35); }
+.button-row { display: flex; flex-wrap: wrap; gap: clamp(4px, 0.8vw, 8px); justify-content: center; align-items: center; margin-top: 2px; }
+.cover-footer { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); color: #d4e0b0; font-size: clamp(8px, 1.1vw, 11px); text-shadow: 0 2px 4px black; background: rgba(0,0,0,0.55); padding: 3px 12px; border-radius: 30px; white-space: nowrap; z-index: 3; letter-spacing: 0.4px; border: 1px solid rgba(127,159,92,0.3); max-width: calc(100% - 100px); overflow: hidden; text-overflow: ellipsis; }
 .float-btn { width: var(--float-btn-size); height: var(--float-btn-size); border-radius: 50%; background: rgba(10, 19, 11, 0.72); border: 2px solid rgba(127, 159, 92, 0.65); color: #d4e0b0; font-size: clamp(14px, 2.2vw, 18px); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.6); padding: 0; line-height: 1; z-index: 20; backdrop-filter: blur(2px); transition: transform 0.1s ease; }
 .float-btn:active { transform: scale(0.88); }
-.cover-mute { position: absolute; bottom: 12px; left: 12px; z-index: 4; }
-.cover-fullscreen { position: absolute; bottom: 12px; right: 12px; z-index: 4; }
+.cover-mute { position: absolute; bottom: 8px; left: 8px; z-index: 4; }
+.cover-fullscreen { position: absolute; bottom: 8px; right: 8px; z-index: 4; }
 .modal { position: fixed; inset: 0; z-index: 1500; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.85); padding: 16px; }
 .modal.show { display: flex; }
-.modal-content { background: linear-gradient(180deg, #1e2f1f, #0a130b); border: 3px solid #5e7a4a; border-radius: 24px; padding: clamp(16px, 3vw, 28px) clamp(18px, 3.5vw, 36px); max-width: min(94vw, 680px); max-height: 88vh; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; box-shadow: 0 20px 60px rgba(0,0,0,0.9); color: #d4e0b0; }
-.modal-content h2 { margin: 0 0 14px; color: #ffd966; text-align: center; font-size: clamp(18px, 3vw, 24px); text-shadow: 0 2px 8px black; letter-spacing: 2px; }
-.modal-content h3 { margin: 14px 0 6px; color: #a8d080; font-size: clamp(13px, 2vw, 15px); letter-spacing: 1px; }
-.modal-content p, .modal-content li { font-size: clamp(11px, 1.8vw, 13px); line-height: 1.6; margin: 3px 0; color: #d4e0b0; }
+.modal-content { background: linear-gradient(180deg, #1e2f1f, #0a130b); border: 3px solid #5e7a4a; border-radius: 24px; padding: clamp(14px, 2.6vw, 24px) clamp(16px, 3vw, 32px); max-width: min(94vw, 680px); max-height: 88vh; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; box-shadow: 0 20px 60px rgba(0,0,0,0.9); color: #d4e0b0; }
+.modal-content h2 { margin: 0 0 12px; color: #ffd966; text-align: center; font-size: clamp(17px, 2.8vw, 22px); text-shadow: 0 2px 8px black; letter-spacing: 2px; }
+.modal-content h3 { margin: 12px 0 5px; color: #a8d080; font-size: clamp(12px, 1.8vw, 14px); letter-spacing: 1px; }
+.modal-content p, .modal-content li { font-size: clamp(11px, 1.6vw, 13px); line-height: 1.55; margin: 3px 0; color: #d4e0b0; }
 .modal-content ul { margin: 3px 0; padding-left: 18px; }
 .key-tag { display: inline-block; background: #2e4a22; border: 1px solid #7f9f5c; border-radius: 6px; padding: 1px 7px; font-family: monospace; font-weight: bold; color: #ffd966; font-size: 0.95em; margin: 0 2px; }
-.close-modal-btn { display: block; margin: 16px auto 0; padding: 9px 28px; font-size: clamp(13px, 2vw, 15px); font-weight: 900; color: #2a1808; background: linear-gradient(180deg, #ffd966, #d4a017); border: 3px solid #fff3c0; border-radius: 60px; cursor: pointer; box-shadow: 0 5px 0 #8a6b0f; font-family: inherit; letter-spacing: 1px; }
+.soldier-row { display: flex; align-items: center; gap: 8px; padding: 3px 0; border-bottom: 1px dashed rgba(127,159,92,0.2); }
+.soldier-icon { font-size: 20px; min-width: 30px; text-align: center; }
+.soldier-name { flex: 1; color: #d4e0b0; font-size: clamp(11px, 1.6vw, 13px); }
+.soldier-value { color: #ffd966; font-weight: bold; font-size: clamp(11px, 1.6vw, 13px); }
+.soldier-tier { font-size: clamp(9px, 1.3vw, 11px); padding: 1px 6px; border-radius: 10px; }
+.tier-bronze { background: rgba(205,127,50,0.25); color: #e0a060; }
+.tier-silver { background: rgba(192,192,192,0.25); color: #e8e8e8; }
+.tier-gold { background: rgba(255,215,0,0.25); color: #ffd966; }
+.close-modal-btn { display: block; margin: 14px auto 0; padding: 8px 26px; font-size: clamp(12px, 1.8vw, 14px); font-weight: 900; color: #2a1808; background: linear-gradient(180deg, #ffd966, #d4a017); border: 3px solid #fff3c0; border-radius: 60px; cursor: pointer; box-shadow: 0 5px 0 #8a6b0f; font-family: inherit; letter-spacing: 1px; }
 .close-modal-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #8a6b0f; }
-.shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 10px; }
-.shop-item { background: linear-gradient(180deg, #2a3f24, #142410); border: 2px solid #5e7a4a; border-radius: 14px; padding: 10px 8px; text-align: center; position: relative; }
+.shop-grid { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 10px; padding: 12px 4px; margin-top: 8px; -webkit-overflow-scrolling: touch; scrollbar-width: none; cursor: grab; }
+.shop-grid::-webkit-scrollbar { display: none; }
+.shop-grid:active { cursor: grabbing; }
+.shop-item { flex: 0 0 auto; width: 155px; scroll-snap-align: center; background: linear-gradient(180deg, #2a3f24, #142410); border: 2px solid #5e7a4a; border-radius: 14px; padding: 10px 8px; text-align: center; position: relative; transition: transform 0.2s, border-color 0.2s; }
 .shop-item.owned { border-color: #ffd966; }
-.shop-item.selected { border-color: #7fff7f; box-shadow: 0 0 12px #7fff7f66; }
-.shop-icon { font-size: 36px; line-height: 1; }
-.shop-name { font-size: clamp(12px, 1.8vw, 14px); color: #ffd966; font-weight: bold; margin: 4px 0 2px; }
-.shop-skill { font-size: clamp(10px, 1.4vw, 12px); color: #a8d080; margin-bottom: 3px; }
-.shop-desc { font-size: clamp(9px, 1.3vw, 11px); color: #b0c090; min-height: 28px; line-height: 1.3; }
-.shop-price { font-size: clamp(11px, 1.7vw, 13px); color: #ffd966; margin: 4px 0; font-weight: bold; }
-.shop-action-btn { padding: 5px 14px; border-radius: 20px; font-size: clamp(10px, 1.5vw, 12px); font-weight: bold; border: 2px solid #a0c080; background: #3e5d2e; color: #e2f0c0; cursor: pointer; font-family: inherit; }
+.shop-item.selected { border-color: #7fff7f; box-shadow: 0 0 16px #7fff7f66; transform: scale(1.04); }
+.shop-icon { font-size: 34px; line-height: 1; }
+.shop-name { font-size: clamp(12px, 1.7vw, 14px); color: #ffd966; font-weight: bold; margin: 3px 0 2px; }
+.shop-skill { font-size: clamp(10px, 1.4vw, 12px); color: #a8d080; margin-bottom: 2px; }
+.shop-desc { font-size: clamp(9px, 1.2vw, 11px); color: #b0c090; min-height: 26px; line-height: 1.3; }
+.shop-price { font-size: clamp(10px, 1.5vw, 12px); color: #ffd966; margin: 3px 0; font-weight: bold; }
+.shop-action-btn { padding: 4px 12px; border-radius: 20px; font-size: clamp(10px, 1.4vw, 12px); font-weight: bold; border: 2px solid #a0c080; background: #3e5d2e; color: #e2f0c0; cursor: pointer; font-family: inherit; width: 100%; }
 .shop-action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .shop-action-btn.selected-btn { background: #2e6b2e; border-color: #7fff7f; color: #7fff7f; }
 .shop-action-btn.buy-btn { background: #8a5010; border-color: #ffd966; color: #ffe0a0; }
+.shop-info { text-align: center; padding: 4px 0 2px; }
+.shop-info p { margin: 3px 0; }
+.shop-hint { font-size: clamp(10px, 1.4vw, 12px); color: #8fbc6b; text-align: center; margin: 6px 0 0; font-style: italic; }
 .game-wrapper { display: none; flex-direction: column; width: 100%; height: 100%; align-items: center; justify-content: center; gap: 8px; padding: 8px; }
 .top-bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 14px; background: #0a130b; border-radius: 40px; box-shadow: inset 0 2px 6px black, 0 2px 0 #4d6b3a; color: #d4e0b0; font-weight: bold; font-size: clamp(11px, 2.6vw, 14px); text-shadow: 0 2px 2px black; white-space: nowrap; flex-shrink: 0; }
 .top-bar .value { color: #ffd966; font-size: clamp(13px, 3.4vw, 17px); }
@@ -167,9 +165,14 @@ canvas { display: block; background: #142410; }
         </ul>
         <h3>⚡ 技能</h3>
         <p>每位英雄有專屬技能，技能冷卻 30 秒，效果依角色而定。技能不會降低攻擊力。AI 也會使用技能。</p>
-        <h3>💰 士兵與招募</h3>
-        <p>地圖上會出現各種士兵單位，稀有度越高價值越高、越少見。佔領時間依階級：</p>
-        <ul><li>銅：1 秒</li><li>銀：3 秒</li><li>金：5 秒（金士兵出現時地圖上會有標示）</li></ul>
+        <h3>💰 士兵招募與佔領時間</h3>
+        <ul>
+            <li><strong>銅階：</strong>佔領 1 秒</li>
+            <li><strong>銀階：</strong>佔領 3 秒</li>
+            <li><strong>金階：</strong>佔領 5 秒（出現時地圖有金色光環標示）</li>
+        </ul>
+        <h3>⚔️ 士兵種類與價值</h3>
+        <div id="soldierListHelp"></div>
         <h3>🏘️ 村莊與森林</h3>
         <ul>
             <li>村莊會密集產出所有種類士兵（同時最多 5 隻）。</li>
@@ -189,8 +192,12 @@ canvas { display: block; background: #142410; }
 <div class="modal" id="shopModal">
     <div class="modal-content">
         <h2>🏪 英雄商店</h2>
-        <p style="text-align:center;">💰 目前金幣：<span id="shopGold" style="color:#ffd966;font-weight:bold;">$0</span></p>
+        <div class="shop-info">
+            <p>💰 目前金幣：<span id="shopGold" style="color:#ffd966;font-weight:bold;">$0</span></p>
+            <p>🏆 最高紀錄兵力：<span id="shopBest" style="color:#7fff7f;font-weight:bold;">0</span></p>
+        </div>
         <div class="shop-grid" id="shopGrid"></div>
+        <p class="shop-hint">← 橫向滑動或拖曳選擇英雄 →</p>
         <button class="close-modal-btn" id="closeShopBtn">關閉</button>
     </div>
 </div>
@@ -261,6 +268,7 @@ canvas { display: block; background: #142410; }
         { icon: '🐉', name: '巨龍', value: 10000000, tier: 'gold', weight: 0.3, color: '#ffd700' },
     ];
     const TIER_TIME = { bronze: 60, silver: 180, gold: 300 };
+    const TIER_LABEL = { bronze: '銅', silver: '銀', gold: '金' };
     const TOTAL_WEIGHT = SOLDIER_TYPES.reduce((s, t) => s + t.weight, 0);
     function pickSoldierType() {
         let r = Math.random() * TOTAL_WEIGHT;
@@ -268,16 +276,16 @@ canvas { display: block; background: #142410; }
         return SOLDIER_TYPES[0];
     }
 
-    // ================= 英雄（順序：Roland → Adelaide → Sandro → Jenova → Mephala → Zydar → Rashka → Xeron）
+    // ================= 英雄 =================
     const HEROES = [
         { id: 'roland',   icon: '🏇',   name: 'Roland',   skillName: "King's Wind",       desc: '加速移動一段時間',                    price: 0 },
         { id: 'adelaide', icon: '🧙‍♂️', name: 'Adelaide', skillName: 'Blizzard',          desc: '範圍內下暴風雪減速敵人',              price: 100000000 },
-        { id: 'sandro',   icon: '☠️',   name: 'Sandro',   skillName: 'Necromancy',        desc: '召喚💀士兵 +5000',                    price: 500000000 },
-        { id: 'jenova',   icon: '🧝',   name: 'Jenova',   skillName: 'Heart of Purity',   desc: '召喚🦄士兵 +100000',                  price: 1000000000 },
+        { id: 'sandro',   icon: '☠️',   name: 'Sandro',   skillName: 'Necromancy',        desc: '召喚💀士兵 +5K',                      price: 500000000 },
+        { id: 'jenova',   icon: '🧝',   name: 'Jenova',   skillName: 'Heart of Purity',   desc: '召喚🦄士兵 +100K',                    price: 1000000000 },
         { id: 'mephala',  icon: '🕷',   name: 'Mephala',  skillName: 'Holy Shield',       desc: '開盾無敵一段短時間',                  price: 5000000000 },
         { id: 'zydar',    icon: '👹',   name: 'Zydar',    skillName: 'Fireball',          desc: '範圍內敵人兵力-1/3',                  price: 10000000000 },
         { id: 'rashka',   icon: '🧛',   name: 'Rashka',   skillName: 'Inferno Flame',     desc: '10秒熔岩，減速+每秒傷害',             price: 50000000000 },
-        { id: 'xeron',    icon: '👺',   name: 'Xeron',    skillName: 'Echo of the Abyss', desc: '召喚😈士兵 +3000000',                 price: 100000000000 },
+        { id: 'xeron',    icon: '👺',   name: 'Xeron',    skillName: 'Echo of the Abyss', desc: '召喚😈士兵 +3M',                      price: 100000000000 },
     ];
 
     const SAVE_KEY = 'shields_staffs_save_v1';
@@ -323,6 +331,7 @@ canvas { display: block; background: #142410; }
     const closeShopBtn = document.getElementById('closeShopBtn');
     const shopGrid = document.getElementById('shopGrid');
     const shopGold = document.getElementById('shopGold');
+    const shopBest = document.getElementById('shopBest');
     const saveBtn = document.getElementById('saveBtn');
     const loadBtn = document.getElementById('loadBtn');
     const resetBtn = document.getElementById('resetBtn');
@@ -343,11 +352,26 @@ canvas { display: block; background: #142410; }
     const totalGoldEl = document.getElementById('totalGold');
     const newRecordEl = document.getElementById('newRecord');
     const returnToCoverBtn = document.getElementById('returnToCoverBtn');
+    const soldierListHelp = document.getElementById('soldierListHelp');
 
     const menuMusic = document.getElementById('menuMusic');
     const battleMusic = document.getElementById('battleMusic');
 
     coverFooter.textContent = 'v1.0 © ' + new Date().getFullYear() + ' ☕迪遜咖啡廳，版權所有。';
+
+    // 動態生成士兵說明
+    (function buildSoldierHelp() {
+        let html = '';
+        for (const t of SOLDIER_TYPES) {
+            html += `<div class="soldier-row">
+                <span class="soldier-icon">${t.icon}</span>
+                <span class="soldier-name">${t.name}</span>
+                <span class="soldier-value">+${formatNum(t.value)}</span>
+                <span class="soldier-tier tier-${t.tier}">${TIER_LABEL[t.tier]}</span>
+            </div>`;
+        }
+        soldierListHelp.innerHTML = html;
+    })();
 
     // ================= 音效 =================
     let audioCtx = null;
@@ -406,20 +430,28 @@ canvas { display: block; background: #142410; }
     coverFullscreenBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleFullscreen(); });
     gameFullscreenBtn.addEventListener('click', toggleFullscreen);
 
+    // ★ 封面任意點擊嘗試播放音樂（含手機）
+    function tryPlayMenuMusic() {
+        if (isMuted || isPlaying) return;
+        if (menuMusic.paused) {
+            getAudioCtx();
+            menuMusic.play().then(() => updateMuteIcons()).catch(() => {});
+        }
+    }
+    coverScreen.addEventListener('click', tryPlayMenuMusic);
+    coverScreen.addEventListener('touchstart', tryPlayMenuMusic, { passive: true });
+    // 額外掛到 document 作為備援
+    document.addEventListener('touchstart', tryPlayMenuMusic, { passive: true });
+    document.addEventListener('click', tryPlayMenuMusic);
+
     function attemptMenuAutoplay() {
         currentMusic = menuMusic;
-        menuMusic.play().then(() => updateMuteIcons()).catch(() => {
-            const resume = () => { if (!isMuted && !isPlaying) menuMusic.play().then(() => updateMuteIcons()).catch(() => {}); document.removeEventListener('click', resume); document.removeEventListener('touchstart', resume); document.removeEventListener('keydown', resume); };
-            document.addEventListener('click', resume, { once: true });
-            document.addEventListener('touchstart', resume, { once: true });
-            document.addEventListener('keydown', resume, { once: true });
-        });
+        menuMusic.play().then(() => updateMuteIcons()).catch(() => {});
     }
     menuMusic.addEventListener('play', () => { if (!isMuted) updateMuteIcons(); });
     battleMusic.addEventListener('play', () => { if (!isMuted) updateMuteIcons(); });
 
     // ================= 遊戲參數 =================
-    // 地圖擴大 1.6 倍左右
     const WORLD_W = 3600, WORLD_H = 2400;
     const VIEW_W = canvas.width, VIEW_H = canvas.height;
     const TERRAIN_GRID = 60;
@@ -474,7 +506,6 @@ canvas { display: block; background: #142410; }
         return ICON_BASE_RADIUS + (rings - 1) * ICON_RING_GAP + 25;
     }
 
-    // ================= 狀態 =================
     let player = null, enemies = [], soldierUnits = [], forests = [], riverTiles = new Set(), bridges = new Set(), villages = [];
     let battleLogs = [], combatEffects = [], activeCombats = [], battleRegistry = new Map();
     let nextUnitId = 1, gameOver = false, winFlag = false;
@@ -533,7 +564,6 @@ canvas { display: block; background: #142410; }
         return { x: Math.max(margin, Math.min(WORLD_W - margin, tx)), y: Math.max(margin, Math.min(WORLD_H - margin, ty)) };
     }
 
-    // 地形生成
     function generateRiverTiles() {
         const tiles = new Set();
         const numRivers = 2 + Math.floor(Math.random() * 2);
@@ -678,7 +708,6 @@ canvas { display: block; background: #142410; }
     function assignId(e) { if (e._id === undefined) e._id = nextUnitId++; }
     function spawnEnemy(soldiers = 0) {
         const s = findSafeSpot(HERO_RADIUS + 10, 600);
-        // AI 隨機選一隻英雄
         const randomHero = HEROES[Math.floor(Math.random() * HEROES.length)];
         const e = {
             x: s.x, y: s.y, soldiers,
@@ -698,7 +727,6 @@ canvas { display: block; background: #142410; }
     }
     function generateEnemies(count) { const arr = []; for (let i = 0; i < count; i++) arr.push(spawnEnemy(Math.floor(rand(400, 1800)))); return arr; }
 
-    // 動態 AI 兵力（依玩家士兵數回傳）
     function getNewEnemyBaseSoldiers() {
         const s = player ? player.soldiers : 0;
         if (s >= 100000000000) return 100000000000;
@@ -767,7 +795,6 @@ canvas { display: block; background: #142410; }
         for (let i = combatEffects.length - 1; i >= 0; i--) { const p = combatEffects[i]; p.x += p.vx; p.y += p.vy; p.vx *= 0.94; p.vy *= 0.94; p.life--; if (p.life <= 0) combatEffects.splice(i, 1); }
     }
 
-    // 玩家施放技能
     function castSkill() {
         if (skillCooldown > 0 || !isPlaying || gameOver) return;
         const hero = getHero(gameState.selectedHero);
@@ -776,7 +803,7 @@ canvas { display: block; background: #142410; }
         switch (hero.id) {
             case 'roland': skillTimer = SKILL_DURATION; addBattleLog(player.x, player.y - 60, "King's Wind!", '#ffd966'); break;
             case 'adelaide': slowEffects.push({ x: player.x, y: player.y, radius: 260, life: 300, owner: 'player' }); addBattleLog(player.x, player.y - 60, 'Blizzard!', '#a8d8ff'); break;
-            case 'sandro': player.soldiers += 5000; addBattleLog(player.x, player.y - 60, 'Necromancy! +5000', '#a0a0a0'); break;
+            case 'sandro': player.soldiers += 5000; addBattleLog(player.x, player.y - 60, 'Necromancy! +5K', '#a0a0a0'); break;
             case 'jenova': player.soldiers += 100000; addBattleLog(player.x, player.y - 60, 'Heart of Purity! +100K', '#ffd700'); break;
             case 'xeron': player.soldiers += 3000000; addBattleLog(player.x, player.y - 60, 'Echo of the Abyss! +3M', '#ff6060'); break;
             case 'mephala': invincibleTimer = 150; addBattleLog(player.x, player.y - 60, 'Holy Shield!', '#ffffff'); break;
@@ -791,7 +818,6 @@ canvas { display: block; background: #142410; }
         }
     }
 
-    // AI 施放技能
     function aiCastSkill(e) {
         if (e.skillCooldown > 0 || e._dead) return;
         const heroId = e.heroId;
@@ -805,7 +831,6 @@ canvas { display: block; background: #142410; }
             case 'mephala': e.invincibleTimer = 120; break;
             case 'zydar': {
                 const r = 260;
-                // 傷害附近敵人（包含玩家和其他 AI）
                 if (player && player.heroHp > 0 && dist(e.x, e.y, player.x, player.y) < r) {
                     player.soldiers = Math.max(0, player.soldiers - Math.floor(player.soldiers / 3));
                 }
@@ -847,7 +872,6 @@ canvas { display: block; background: #142410; }
         updateCover(); switchToMenuMusic(); updateMuteIcons();
     }
 
-    // ================= 更新 =================
     function update() {
         if (!isPlaying) return;
         if (gameOver) { updateHUD(); return; }
@@ -859,16 +883,10 @@ canvas { display: block; background: #142410; }
         if (skillCooldown > 0) skillCooldown--;
         if (invincibleTimer > 0) invincibleTimer--;
 
-        // 減速效果
         for (let i = slowEffects.length - 1; i >= 0; i--) { slowEffects[i].life--; if (slowEffects[i].life <= 0) slowEffects.splice(i, 1); }
-        // 熔岩成長與傷害
         for (let i = lavaEffects.length - 1; i >= 0; i--) {
-            const lv = lavaEffects[i];
-            lv.life--; lv.tickTimer++;
-            // ★ Growing 特效：半徑逐漸擴大
-            if (lv.radius < lv.targetRadius) {
-                lv.radius = Math.min(lv.targetRadius, lv.radius + 2.5);
-            }
+            const lv = lavaEffects[i]; lv.life--; lv.tickTimer++;
+            if (lv.radius < lv.targetRadius) lv.radius = Math.min(lv.targetRadius, lv.radius + 2.5);
             if (lv.tickTimer >= 60) {
                 lv.tickTimer = 0;
                 for (const e of enemies) {
@@ -878,7 +896,6 @@ canvas { display: block; background: #142410; }
                         if (e.soldiers <= 0 && e.heroHp <= 0) e._dead = true;
                     }
                 }
-                // 對玩家（非本人熔岩）造成傷害
                 if (lv.owner === 'ai' && player && player.heroHp > 0 && dist(lv.x, lv.y, player.x, player.y) < lv.radius) {
                     player.soldiers = Math.max(0, player.soldiers - Math.floor(player.soldiers / 10));
                 }
@@ -889,7 +906,6 @@ canvas { display: block; background: #142410; }
         if (player.soldiers > maxSoldiersThisRun) maxSoldiersThisRun = player.soldiers;
         player.hidden = isInForest(player.x, player.y, HERO_RADIUS);
 
-        // 玩家減速檢查
         for (const s of slowEffects) {
             if (s.owner !== 'player' && dist(player.x, player.y, s.x, s.y) < s.radius) { player.slowTimer = Math.max(player.slowTimer, 5); break; }
         }
@@ -897,7 +913,6 @@ canvas { display: block; background: #142410; }
             if (lv.owner === 'ai' && dist(player.x, player.y, lv.x, lv.y) < lv.radius) { player.slowTimer = Math.max(player.slowTimer, 5); break; }
         }
 
-        // 玩家移動
         let dx = 0, dy = 0;
         if (keys.w || keys.ArrowUp) dy -= 1;
         if (keys.s || keys.ArrowDown) dy += 1;
@@ -915,7 +930,6 @@ canvas { display: block; background: #142410; }
         }
         if (player.slowTimer > 0) player.slowTimer--;
 
-        // 邊界傷害
         const eDx = Math.min(player.x, WORLD_W - player.x);
         const eDy = Math.min(player.y, WORLD_H - player.y);
         const eDist = Math.min(eDx, eDy);
@@ -929,7 +943,6 @@ canvas { display: block; background: #142410; }
         if ((keys[' '] || keys.j) && skillCooldown === 0) castSkill();
         if (keys[' '] || keys.j) { keys[' '] = false; keys.j = false; }
 
-        // 士兵刷新
         spawnTimer++;
         if (spawnTimer >= SPAWN_INTERVAL) {
             spawnTimer = 0;
@@ -943,7 +956,6 @@ canvas { display: block; background: #142410; }
             }
         }
 
-        // 村莊產兵
         for (const v of villages) {
             v.spawnTimer--;
             v.pulse += 0.05;
@@ -958,7 +970,6 @@ canvas { display: block; background: #142410; }
             }
         }
 
-        // 玩家佔領
         for (let i = soldierUnits.length - 1; i >= 0; i--) {
             const u = soldierUnits[i];
             const d = dist(player.x, player.y, u.x, u.y);
@@ -974,19 +985,19 @@ canvas { display: block; background: #142410; }
 
         const playerVisibleForAI = player && !player.hidden && player.heroHp > 0;
 
-        // AI 更新
         for (const e of enemies) {
             if (e._dead) continue;
             if (e.skillCooldown > 0) e.skillCooldown--;
             if (e.skillTimer > 0) e.skillTimer--;
             if (e.invincibleTimer > 0) e.invincibleTimer--;
 
-            // AI 技能施放
             if (e.skillCooldown <= 0) aiCastSkill(e);
 
             let aiSpeed = e.speed * getSpeedMultiplier(e.soldiers);
             if (e.skillTimer > 0 && e.heroId === 'roland') aiSpeed *= SKILL_SPEED_MULT;
             if (e.slowTimer > 0) { aiSpeed *= 0.5; e.slowTimer--; }
+            // ★ AI 進入森林也減速
+            if (isInForest(e.x, e.y, e.radius)) aiSpeed *= FOREST_SPEED_FACTOR;
             for (const s of slowEffects) if (dist(e.x, e.y, s.x, s.y) < s.radius) { e.slowTimer = Math.max(e.slowTimer, 5); break; }
             for (const lv of lavaEffects) if (dist(e.x, e.y, lv.x, lv.y) < lv.radius) { e.slowTimer = Math.max(e.slowTimer, 5); break; }
 
@@ -1049,7 +1060,6 @@ canvas { display: block; background: #142410; }
             }
         }
 
-        // AI 佔領
         for (const e of enemies) {
             if (e._dead) continue;
             for (let i = soldierUnits.length - 1; i >= 0; i--) {
@@ -1070,7 +1080,6 @@ canvas { display: block; background: #142410; }
             }
         }
 
-        // 玩家 vs 敵人
         for (let i = enemies.length - 1; i >= 0; i--) {
             const e = enemies[i];
             if (e._dead) continue;
@@ -1108,7 +1117,6 @@ canvas { display: block; background: #142410; }
             }
         }
 
-        // 敵人 vs 敵人
         for (let i = 0; i < enemies.length; i++) {
             for (let j = i + 1; j < enemies.length; j++) {
                 const a = enemies[i], b = enemies[j];
@@ -1145,7 +1153,6 @@ canvas { display: block; background: #142410; }
         }
         enemies = enemies.filter(e => !e._dead);
 
-        // AI 重生
         while (enemies.length < INITIAL_ENEMY_COUNT) {
             const base = getNewEnemyBaseSoldiers();
             const ne = spawnEnemy(base);
@@ -1168,7 +1175,6 @@ canvas { display: block; background: #142410; }
         updateHUD();
     }
 
-    // ================= 繪製 =================
     function drawSoldiersCircle(entity) {
         let icons = getSoldierIcons(entity.soldiers);
         if (icons.length === 0) return;
@@ -1265,24 +1271,19 @@ canvas { display: block; background: #142410; }
 
         drawRiverTiles(); drawBridges();
 
-        // 減速效果
         for (const s of slowEffects) {
             const sx = s.x - camera.x, sy = s.y - camera.y;
             ctx.beginPath(); ctx.arc(sx, sy, s.radius, 0, Math.PI * 2);
             ctx.fillStyle = 'rgba(150, 200, 255, 0.18)'; ctx.fill();
             ctx.strokeStyle = 'rgba(180, 220, 255, 0.5)'; ctx.lineWidth = 2; ctx.stroke();
         }
-        // 熔岩（Growing 特效）
         for (const lv of lavaEffects) {
             const sx = lv.x - camera.x, sy = lv.y - camera.y;
             const t = frame * 0.08;
-            // 外圍脈動光環
             ctx.beginPath();
             ctx.arc(sx, sy, lv.radius + 6 + Math.sin(t) * 4, 0, Math.PI * 2);
             ctx.strokeStyle = 'rgba(255, 200, 50, ' + (0.35 + 0.25 * Math.sin(t)) + ')';
-            ctx.lineWidth = 3;
-            ctx.stroke();
-            // 主體漸層
+            ctx.lineWidth = 3; ctx.stroke();
             ctx.beginPath(); ctx.arc(sx, sy, lv.radius, 0, Math.PI * 2);
             const g = ctx.createRadialGradient(sx, sy, lv.radius * 0.1, sx, sy, lv.radius);
             g.addColorStop(0, 'rgba(255, 240, 100, 0.7)');
@@ -1292,7 +1293,6 @@ canvas { display: block; background: #142410; }
             ctx.fillStyle = g; ctx.fill();
         }
 
-        // 村莊
         for (const v of villages) {
             const sx = v.x - camera.x, sy = v.y - camera.y;
             if (sx + 80 < -40 || sx - 80 > VIEW_W + 40 || sy + 80 < -40 || sy - 80 > VIEW_H + 40) continue;
@@ -1309,7 +1309,6 @@ canvas { display: block; background: #142410; }
             ctx.strokeStyle = '#ffd966'; ctx.lineWidth = 3; ctx.stroke();
         }
 
-        // 森林
         for (const f of forests) {
             const sx = f.x - camera.x, sy = f.y - camera.y;
             if (sx + f.r < -40 || sx - f.r > VIEW_W + 40 || sy + f.r < -40 || sy - f.r > VIEW_H + 40) continue;
@@ -1325,7 +1324,6 @@ canvas { display: block; background: #142410; }
             }
         }
 
-        // 士兵單位
         for (const u of soldierUnits) {
             const sx = u.x - camera.x, sy = u.y - camera.y;
             if (sx < -40 || sx > VIEW_W + 40 || sy < -40 || sy > VIEW_H + 40) continue;
@@ -1361,7 +1359,6 @@ canvas { display: block; background: #142410; }
             }
         }
 
-        // 戰鬥連線
         for (const c of activeCombats) {
             const sx1 = c.x1 - camera.x, sy1 = c.y1 - camera.y;
             const sx2 = c.x2 - camera.x, sy2 = c.y2 - camera.y;
@@ -1376,13 +1373,11 @@ canvas { display: block; background: #142410; }
             }
         }
 
-        // 敵人
         for (const e of enemies) {
             const ex = e.x - camera.x, ey = e.y - camera.y;
             if (ex < -150 || ex > VIEW_W + 150 || ey < -150 || ey > VIEW_H + 150) continue;
             if (e.soldiers > 0) drawSoldiersCircle(e);
             const eHero = getHero(e.heroId);
-            // 技能光環
             if (e.skillTimer > 0) {
                 ctx.beginPath(); ctx.arc(ex, ey, HERO_RADIUS + 12, 0, Math.PI * 2);
                 ctx.strokeStyle = '#ffaa00'; ctx.lineWidth = 2; ctx.setLineDash([6, 6]); ctx.stroke(); ctx.setLineDash([]);
@@ -1416,7 +1411,6 @@ canvas { display: block; background: #142410; }
             }
         }
 
-        // 玩家
         if (player) {
             const px = player.x - camera.x, py = player.y - camera.y;
             if (player.heroHp > 0) {
@@ -1448,7 +1442,6 @@ canvas { display: block; background: #142410; }
             }
         }
 
-        // 粒子
         for (const p of combatEffects) {
             const sx = p.x - camera.x, sy = p.y - camera.y;
             if (sx < -20 || sx > VIEW_W + 20 || sy < -20 || sy > VIEW_H + 20) continue;
@@ -1483,7 +1476,6 @@ canvas { display: block; background: #142410; }
             ctx.fillText('🌲 森林隱藏中', VIEW_W / 2, 56); ctx.shadowBlur = 0;
         }
 
-        // 小地圖
         const mW = 150, mH = 105;
         const mX = VIEW_W - mW - 15, mY = 15;
         ctx.fillStyle = '#0a130bcc'; ctx.fillRect(mX, mY, mW, mH);
@@ -1563,7 +1555,7 @@ canvas { display: block; background: #142410; }
 
     document.addEventListener('gesturestart', (e) => e.preventDefault());
     document.addEventListener('touchmove', (e) => {
-        if (e.target.closest('.joystick-base') || e.target.closest('.boost-btn') || e.target.closest('.float-btn') || e.target.closest('.modal-content')) return;
+        if (e.target.closest('.joystick-base') || e.target.closest('.boost-btn') || e.target.closest('.float-btn') || e.target.closest('.modal-content') || e.target.closest('.shop-grid')) return;
         e.preventDefault();
     }, { passive: false });
 
@@ -1576,23 +1568,115 @@ canvas { display: block; background: #142410; }
         const hero = getHero(gameState.selectedHero);
         coverHero.textContent = hero.icon + ' ' + hero.name + ' · ' + hero.skillName;
     }
-    function openShop() { Sfx.click(); shopGold.textContent = formatGold(gameState.gold); renderShop(); shopModal.classList.add('show'); }
+    function openShop() {
+        Sfx.click();
+        shopGold.textContent = formatGold(gameState.gold);
+        shopBest.textContent = formatNum(gameState.bestScore);
+        renderShop();
+        shopModal.classList.add('show');
+    }
+
+    let shopScrollTimer = null;
+    let suppressShopScroll = false;
+
     function renderShop() {
         shopGrid.innerHTML = '';
+        let selectedItemEl = null;
         for (const h of HEROES) {
             const owned = gameState.ownedHeroes.includes(h.id);
             const selected = gameState.selectedHero === h.id;
             const canAfford = gameState.gold >= h.price;
             const item = document.createElement('div');
             item.className = 'shop-item' + (owned ? ' owned' : '') + (selected ? ' selected' : '');
+            item.dataset.heroId = h.id;
             item.innerHTML = `<div class="shop-icon">${h.icon}</div><div class="shop-name">${h.name}</div><div class="shop-skill">${h.skillName}</div><div class="shop-desc">${h.desc}</div><div class="shop-price">${h.price === 0 ? '免費' : formatGold(h.price)}</div>`;
             const btn = document.createElement('button');
             if (selected) { btn.className = 'shop-action-btn selected-btn'; btn.textContent = '使用中'; btn.disabled = true; }
-            else if (owned) { btn.className = 'shop-action-btn'; btn.textContent = '選擇'; btn.onclick = () => { gameState.selectedHero = h.id; saveGame(); updateCover(); renderShop(); Sfx.buy(); }; }
-            else { btn.className = 'shop-action-btn buy-btn'; btn.textContent = canAfford ? '購買' : '金幣不足'; btn.disabled = !canAfford; btn.onclick = () => { if (gameState.gold >= h.price) { gameState.gold -= h.price; gameState.ownedHeroes.push(h.id); gameState.selectedHero = h.id; saveGame(); updateCover(); shopGold.textContent = formatGold(gameState.gold); renderShop(); Sfx.buy(); } }; }
-            item.appendChild(btn); shopGrid.appendChild(item);
+            else if (owned) {
+                btn.className = 'shop-action-btn'; btn.textContent = '選擇';
+                btn.onclick = () => { gameState.selectedHero = h.id; saveGame(); updateCover(); renderShop(); Sfx.buy(); };
+            }
+            else {
+                btn.className = 'shop-action-btn buy-btn';
+                btn.textContent = canAfford ? '購買' : '金幣不足';
+                btn.disabled = !canAfford;
+                btn.onclick = () => {
+                    if (gameState.gold >= h.price) {
+                        gameState.gold -= h.price;
+                        gameState.ownedHeroes.push(h.id);
+                        gameState.selectedHero = h.id;
+                        saveGame(); updateCover();
+                        shopGold.textContent = formatGold(gameState.gold);
+                        renderShop(); Sfx.buy();
+                    }
+                };
+            }
+            item.appendChild(btn);
+            shopGrid.appendChild(item);
+            if (selected) selectedItemEl = item;
+        }
+        // 捲動到選中項
+        if (selectedItemEl) {
+            requestAnimationFrame(() => {
+                suppressShopScroll = true;
+                try {
+                    const itemCenter = selectedItemEl.offsetLeft + selectedItemEl.offsetWidth / 2;
+                    shopGrid.scrollLeft = itemCenter - shopGrid.clientWidth / 2;
+                } catch (e) {}
+                setTimeout(() => { suppressShopScroll = false; }, 200);
+            });
         }
     }
+
+    // 商店橫向滑動選擇
+    shopGrid.addEventListener('scroll', () => {
+        if (suppressShopScroll) return;
+        clearTimeout(shopScrollTimer);
+        shopScrollTimer = setTimeout(() => {
+            const gridRect = shopGrid.getBoundingClientRect();
+            const centerX = gridRect.left + gridRect.width / 2;
+            let closestEl = null, closestDist = Infinity;
+            shopGrid.querySelectorAll('.shop-item').forEach(el => {
+                const r = el.getBoundingClientRect();
+                const c = r.left + r.width / 2;
+                const d = Math.abs(c - centerX);
+                if (d < closestDist) { closestDist = d; closestEl = el; }
+            });
+            if (closestEl) {
+                const heroId = closestEl.dataset.heroId;
+                if (heroId && gameState.ownedHeroes.includes(heroId) && gameState.selectedHero !== heroId) {
+                    gameState.selectedHero = heroId;
+                    saveGame();
+                    updateCover();
+                    // 只更新視覺高亮，不重繪整個商店
+                    shopGrid.querySelectorAll('.shop-item').forEach(el => {
+                        el.classList.toggle('selected', el.dataset.heroId === heroId);
+                    });
+                    // 更新使用中按鈕
+                    shopGrid.querySelectorAll('.shop-item').forEach(el => {
+                        const btn = el.querySelector('.shop-action-btn');
+                        if (!btn) return;
+                        const isThis = el.dataset.heroId === heroId;
+                        const isOwned = gameState.ownedHeroes.includes(el.dataset.heroId);
+                        if (isThis) {
+                            btn.className = 'shop-action-btn selected-btn';
+                            btn.textContent = '使用中';
+                            btn.disabled = true;
+                        } else if (isOwned) {
+                            btn.className = 'shop-action-btn';
+                            btn.textContent = '選擇';
+                            btn.disabled = false;
+                            btn.onclick = () => {
+                                gameState.selectedHero = el.dataset.heroId;
+                                saveGame(); updateCover(); renderShop(); Sfx.buy();
+                            };
+                        }
+                    });
+                }
+            }
+        }, 180);
+    }, { passive: true });
+
     shopBtn.addEventListener('click', (e) => { e.stopPropagation(); openShop(); });
     closeShopBtn.addEventListener('click', (e) => { e.stopPropagation(); Sfx.click(); shopModal.classList.remove('show'); });
     shopModal.addEventListener('click', (e) => { if (e.target === shopModal) shopModal.classList.remove('show'); });
