@@ -388,6 +388,15 @@
 
 <script>
 // ============================================================
+//  Service Worker 註冊
+// ============================================================
+window.addEventListener('load', function() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  }
+});
+
+// ============================================================
 //  设置 / 存档 / 奖杯
 // ============================================================
 let soundEnabled = localStorage.getItem('xiangqi_sound_enabled') !== 'false';
