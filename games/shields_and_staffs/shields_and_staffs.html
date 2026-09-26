@@ -1728,6 +1728,11 @@ canvas { display: block; background: #142410; }
     updateCover();
     attemptMenuAutoplay();
     gameLoop();
+	window.addEventListener('load', function() {
+		if ('serviceWorker' in navigator) {
+			navigator.serviceWorker.register('/sw.js').catch(() => {});
+		}
+	});
 })();
 </script>
 </body>
