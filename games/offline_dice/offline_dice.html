@@ -10871,6 +10871,10 @@
 
         if (soundEnabled) playBgMusic('menu');
         updateSoundButtonIcon();
+		
+		if ('serviceWorker' in navigator) {
+			navigator.serviceWorker.register('/sw.js').catch(() => {});
+		}
 
         // ★ 啟動背景滾動動畫
         requestAnimationFrame(bgScrollLoop);
@@ -10901,11 +10905,6 @@
             }
             draw();
             updateUI();
-            window.addEventListener('load', function() {
-                if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.register('/sw.js').catch(() => {});
-                }
-            });
             requestAnimationFrame(gameLoop);
         }
 
