@@ -33,6 +33,7 @@
     position: relative;
     width: 100%;
     max-width: 620px;
+    min-height: min(78vh, 540px);
     max-height: 94vh;
     border-radius: 22px;
     overflow: hidden;
@@ -59,6 +60,10 @@
   .cover-content {
     position: relative;
     z-index: 2;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     padding: 26px 22px 96px;
     overflow-y: auto;
     max-height: 94vh;
@@ -113,6 +118,7 @@
     padding: 5px 14px;
     font-size: 0.9rem;
     margin: 0;
+    flex-shrink: 0;
   }
 
   /* ============ 設定 / 說明面板 ============ */
@@ -191,6 +197,118 @@
     color: #4a7bff;
     font-size: 0.7rem;
   }
+
+  /* ============ 設定頁 ============ */
+  .setup-frame {
+    position: relative;
+    width: 100%;
+    max-width: 620px;
+    min-height: min(78vh, 540px);
+    max-height: 94vh;
+    border-radius: 22px;
+    overflow: hidden;
+    background: linear-gradient(170deg, #16203a, #0d1424);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 24px 70px rgba(0,0,0,0.7);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .setup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 16px 18px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    flex-shrink: 0;
+  }
+
+  .setup-title {
+    flex: 1;
+    text-align: center;
+    font-size: 1.15rem;
+    letter-spacing: 5px;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 2px 12px rgba(120,180,255,0.5);
+  }
+
+  .icon-btn {
+    width: 38px; height: 38px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.06);
+    color: #dfe4f5;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, transform 0.1s, border-color 0.2s;
+    font-family: inherit;
+    padding: 0;
+  }
+
+  .icon-btn:hover {
+    background: rgba(122,162,255,0.18);
+    border-color: rgba(122,162,255,0.45);
+  }
+  .icon-btn:active { transform: scale(0.94); }
+
+  .setup-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 18px 100px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.25) transparent;
+  }
+
+  .setup-body::-webkit-scrollbar { width: 8px; }
+  .setup-body::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.22);
+    border-radius: 4px;
+  }
+
+  .setup-body .panel:last-child { margin-bottom: 0; }
+
+  .setup-footer {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 16px 16px;
+    background: linear-gradient(transparent, rgba(8,12,24,0.96) 48%);
+  }
+
+  .setup-footer .btn-start {
+    flex: 1;
+    padding: 13px;
+    font-size: 0.98rem;
+    letter-spacing: 4px;
+    border-radius: 12px;
+  }
+
+  .mini-btn {
+    width: 44px; height: 44px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.07);
+    color: #fff;
+    font-size: 1.05rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, transform 0.15s;
+    font-family: inherit;
+    padding: 0;
+  }
+
+  .mini-btn:hover { background: rgba(122,162,255,0.2); }
+  .mini-btn:active { transform: scale(0.94); }
 
   /* ============ 封面按鈕 ============ */
   .cover-actions {
@@ -317,6 +435,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 10px;
     margin-bottom: 12px;
   }
 
@@ -602,12 +721,13 @@
   .overlay-box button:hover { filter: brightness(1.1); }
   .overlay-box button:active { transform: scale(0.97); }
 
-  /* ============ 手機／窄螢幕：封面與電腦版一致雙列，僅縮緊間距 ============ */
+  /* ============ 手機／窄螢幕 ============ */
   @media (max-width: 520px) {
     body { padding: 10px; }
 
     .cover-frame {
       max-height: 96vh;
+      min-height: min(72vh, 440px);
       border-radius: 16px;
     }
 
@@ -628,6 +748,21 @@
       margin-bottom: 12px;
     }
     .trophy-badge .trophy-icon { font-size: 1rem; }
+    .trophy-badge.small { padding: 4px 11px; font-size: 0.78rem; }
+
+    /* 設定頁 */
+    .setup-frame {
+      max-height: 96vh;
+      min-height: min(72vh, 440px);
+      border-radius: 16px;
+    }
+    .setup-header { padding: 12px 13px 10px; gap: 8px; }
+    .setup-title { font-size: 1rem; letter-spacing: 3px; }
+    .icon-btn { width: 34px; height: 34px; font-size: 0.9rem; }
+    .setup-body { padding: 13px 13px 96px; }
+    .setup-footer { padding: 13px 13px 14px; gap: 8px; }
+    .setup-footer .btn-start { padding: 12px; font-size: 0.9rem; letter-spacing: 3px; }
+    .mini-btn { width: 40px; height: 40px; font-size: 0.95rem; }
 
     .panel {
       padding: 10px 12px;
@@ -684,6 +819,7 @@
 
     /* 遊戲畫面 */
     .game-frame { padding: 14px 12px 0; border-radius: 16px; }
+    .game-title { font-size: 1.1rem; letter-spacing: 4px; }
     #board { border-width: 3px; gap: 1px; }
   }
 </style>
@@ -691,7 +827,7 @@
 <body>
 
 <!-- ============================================================
-     封面畫面
+     第一頁：封面（只有標題、獎盃、開始遊戲、存讀取）
      ============================================================ -->
 <div class="screen active" id="coverScreen">
   <div class="cover-frame" id="coverFrame">
@@ -704,9 +840,44 @@
         <span>獎盃：<strong id="coverTrophies">0</strong></span>
       </div>
 
-      <!-- 遊戲設定 -->
+      <div class="cover-actions">
+        <button class="btn-start" id="startGameBtn">開 始 遊 戲</button>
+        <div class="io-row">
+          <button id="saveBtn">💾 儲存</button>
+          <button id="loadBtn">📂 載入</button>
+          <button id="resetBtn">🔄 重設</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="float-btn float-mute" data-mute id="coverMuteBtn" title="切換靜音">🔊</button>
+    <button class="float-btn float-fullscreen" data-fs id="coverFsBtn" title="全螢幕">⛶</button>
+
+    <div class="cover-footer">
+      v1.0 © <span id="coverYear">2026</span> ☕迪遜咖啡廳，版權所有。
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     第二頁：遊戲設定（設定好才進入棋盤）
+     ============================================================ -->
+<div class="screen" id="setupScreen">
+  <div class="setup-frame">
+
+    <div class="setup-header">
+      <button class="icon-btn" id="setupBackBtn" title="返回封面">←</button>
+      <h1 class="setup-title">遊戲設定</h1>
+      <div class="trophy-badge small">
+        <span class="trophy-icon">🏆</span>
+        <span id="setupTrophies">0</span>
+      </div>
+    </div>
+
+    <div class="setup-body">
+      <!-- 對戰設定 -->
       <div class="panel">
-        <div class="panel-title">遊戲設定</div>
+        <div class="panel-title">對戰設定</div>
         <div class="settings-grid">
           <label class="setting-item">
             <span>對戰組合</span>
@@ -793,31 +964,18 @@
           <li>戰勝 AI 可獲得獎盃：簡單 10、普通 50、困難 100。</li>
         </ul>
       </div>
-
-      <!-- 操作按鈕 -->
-      <div class="cover-actions">
-        <button class="btn-start" id="startGameBtn">開 始 遊 戲</button>
-        <div class="io-row">
-          <button id="saveBtn">💾 儲存</button>
-          <button id="loadBtn">📂 載入</button>
-          <button id="resetBtn">🔄 重設</button>
-        </div>
-      </div>
     </div>
 
-    <!-- 浮動按鈕 -->
-    <button class="float-btn float-mute" id="coverMuteBtn" title="切換靜音">🔊</button>
-    <button class="float-btn float-fullscreen" id="coverFsBtn" title="全螢幕">⛶</button>
-
-    <!-- 頁尾版權 -->
-    <div class="cover-footer">
-      v1.0 © <span id="coverYear">2026</span> ☕迪遜咖啡廳，版權所有。
+    <div class="setup-footer">
+      <button class="mini-btn" data-mute id="setupMuteBtn" title="切換靜音">🔊</button>
+      <button class="btn-start" id="beginGameBtn">開 始 對 局</button>
+      <button class="mini-btn" data-fs id="setupFsBtn" title="全螢幕">⛶</button>
     </div>
   </div>
 </div>
 
 <!-- ============================================================
-     遊戲畫面
+     第三頁：棋盤
      ============================================================ -->
 <div class="screen" id="gameScreen">
   <div class="game-frame">
@@ -847,14 +1005,13 @@
 
     <div id="board"></div>
 
-    <!-- 棋盤下方預留空間 + 浮動按鈕 -->
     <div class="board-footer">
-      <button class="float-btn float-mute" id="gameMuteBtn" title="切換靜音">🔊</button>
-      <button class="float-btn float-fullscreen" id="gameFsBtn" title="全螢幕">⛶</button>
+      <button class="float-btn float-mute" data-mute id="gameMuteBtn" title="切換靜音">🔊</button>
+      <button class="float-btn float-fullscreen" data-fs id="gameFsBtn" title="全螢幕">⛶</button>
     </div>
 
     <div class="controls">
-      <button id="backToCoverBtn">← 返回封面</button>
+      <button id="backToSetupBtn">← 設定</button>
       <button class="primary" id="newGameBtn">新遊戲</button>
     </div>
   </div>
@@ -888,8 +1045,8 @@ const BOARD_SIZE = 8;
 const EMPTY = 0, BLACK = 1, WHITE = 2;
 const STORAGE_KEY = 'blackwhite_othello_v1';
 const VERSION = '1.0';
-const MUSIC_VOLUME = 1.0;   // 音樂固定 1.0
-const SFX_VOLUME   = 1.0;   // 音效固定 1.0
+const MUSIC_VOLUME = 1.0;
+const SFX_VOLUME   = 1.0;
 
 const DIRECTIONS = [
   [-1,-1], [-1,0], [-1,1],
@@ -898,33 +1055,62 @@ const DIRECTIONS = [
 ];
 
 /* ============================================================
-   應用狀態（獎盃 / 靜音）
+   應用狀態（獎盃 / 靜音 / 遊戲設定）
    ============================================================ */
 const defaultState = {
   version: VERSION,
   trophies: 0,
-  muted: false
+  muted: false,
+  settings: {
+    mode: 'pvc',
+    humanColor: BLACK,
+    difficulty: 'medium',
+    heuristic: 'combined',
+    blackDiff: 'medium',
+    blackStyle: 'combined',
+    whiteDiff: 'medium',
+    whiteStyle: 'combined'
+  }
 };
 
-let appState = { ...defaultState };
+let appState = JSON.parse(JSON.stringify(defaultState));
+
+const MODES  = ['pvp', 'pvc', 'cvc'];
+const LEVELS = ['easy', 'medium', 'hard'];
+const STYLES = ['coinParity', 'mobility', 'combined'];
+
+function sanitizeSettings(raw) {
+  const s = { ...defaultState.settings };
+  if (raw && typeof raw === 'object') {
+    if (MODES.includes(raw.mode)) s.mode = raw.mode;
+    const hc = Number(raw.humanColor);
+    if (hc === BLACK || hc === WHITE) s.humanColor = hc;
+    if (LEVELS.includes(raw.difficulty)) s.difficulty = raw.difficulty;
+    if (STYLES.includes(raw.heuristic))  s.heuristic  = raw.heuristic;
+    if (LEVELS.includes(raw.blackDiff))  s.blackDiff  = raw.blackDiff;
+    if (STYLES.includes(raw.blackStyle)) s.blackStyle = raw.blackStyle;
+    if (LEVELS.includes(raw.whiteDiff))  s.whiteDiff  = raw.whiteDiff;
+    if (STYLES.includes(raw.whiteStyle)) s.whiteStyle = raw.whiteStyle;
+  }
+  return s;
+}
 
 function saveState() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch (e) {}
 }
 
 function loadState() {
+  appState = JSON.parse(JSON.stringify(defaultState));
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      appState = {
-        version: VERSION,
-        trophies: Number(parsed.trophies) || 0,
-        muted: !!parsed.muted
-      };
+      appState.trophies = Number(parsed.trophies) || 0;
+      appState.muted    = !!parsed.muted;
+      appState.settings = sanitizeSettings(parsed.settings);
     }
   } catch (e) {
-    appState = { ...defaultState };
+    appState = JSON.parse(JSON.stringify(defaultState));
   }
 }
 
@@ -946,7 +1132,6 @@ function getAudioCtx() {
   return audioCtx;
 }
 
-/** 播放單一合成音（音效固定 1.0 音量） */
 function playTone(freq, duration, type = 'sine', gain = 0.3, delay = 0) {
   if (appState.muted) return;
   const ctx = getAudioCtx();
@@ -1012,7 +1197,7 @@ function setMuted(m) {
 
 function updateMuteButtons() {
   const icon = appState.muted ? '🔇' : '🔊';
-  document.querySelectorAll('.float-mute').forEach(btn => {
+  document.querySelectorAll('[data-mute]').forEach(btn => {
     btn.textContent = icon;
   });
 }
@@ -1248,7 +1433,7 @@ class AI {
    ============================================================ */
 let board = Board.initial();
 let currentPlayer = BLACK;
-let gameOver = false;
+let gameOver = true;
 let lastMove = null;
 let lastFlips = [];
 let aiThinking = false;
@@ -1266,7 +1451,9 @@ let whiteAIDiff = 'medium', whiteAIStyle = 'combined';
 const $ = id => document.getElementById(id);
 
 const coverScreen = $('coverScreen');
+const setupScreen = $('setupScreen');
 const gameScreen  = $('gameScreen');
+
 const boardEl     = $('board');
 const statusEl    = $('status');
 const statusTextEl= $('statusText');
@@ -1279,6 +1466,7 @@ const resultTitle = $('resultTitle');
 const resultDetail= $('resultDetail');
 const rewardBadge = $('rewardBadge');
 const coverTrophiesEl = $('coverTrophies');
+const setupTrophiesEl = $('setupTrophies');
 const gameTrophiesEl  = $('gameTrophies');
 
 const modeSelect       = $('modeSelect');
@@ -1297,7 +1485,7 @@ const heuristicItem  = $('heuristicItem');
 const fileInput = $('fileInput');
 
 /* ============================================================
-   設定工具
+   設定：UI <-> appState <-> 執行期變數
    ============================================================ */
 function isAIControlled(player) {
   if (mode === 'pvp') return false;
@@ -1323,24 +1511,80 @@ function buildAI(player) {
   return new AI(player, { maxDepth: depthByDiff(cfg.diff), type: cfg.style });
 }
 
+/** 把目前設定頁下拉選單的值寫入 appState 並存檔 */
+function syncSettingsFromUI() {
+  appState.settings = {
+    mode: modeSelect.value,
+    humanColor: (parseInt(humanColorSelect.value, 10) === WHITE) ? WHITE : BLACK,
+    difficulty: difficultySelect.value,
+    heuristic: heuristicSelect.value,
+    blackDiff: blackDiffSelect.value,
+    blackStyle: blackStyleSelect.value,
+    whiteDiff: whiteDiffSelect.value,
+    whiteStyle: whiteStyleSelect.value
+  };
+  saveState();
+}
+
+/** 把 appState.settings 套用到設定頁下拉選單 */
+function applySettingsToUI() {
+  const s = appState.settings;
+  modeSelect.value       = s.mode;
+  humanColorSelect.value = String(s.humanColor);
+  difficultySelect.value = s.difficulty;
+  heuristicSelect.value  = s.heuristic;
+  blackDiffSelect.value  = s.blackDiff;
+  blackStyleSelect.value = s.blackStyle;
+  whiteDiffSelect.value  = s.whiteDiff;
+  whiteStyleSelect.value = s.whiteStyle;
+  applySettingsToRuntime();
+}
+
+/** 把 appState.settings 套用到執行期變數 + 選項顯示/隱藏 */
+function applySettingsToRuntime() {
+  const s = appState.settings;
+
+  mode = s.mode;
+  humanColor = (s.humanColor === WHITE) ? WHITE : BLACK;
+  aiColor = humanColor === BLACK ? WHITE : BLACK;
+  difficulty = s.difficulty;
+  heuristic  = s.heuristic;
+  blackAIDiff  = s.blackDiff;
+  blackAIStyle = s.blackStyle;
+  whiteAIDiff  = s.whiteDiff;
+  whiteAIStyle = s.whiteStyle;
+
+  const isPVC = (mode === 'pvc');
+  const isCVC = (mode === 'cvc');
+
+  humanColorItem.classList.toggle('hidden', !isPVC);
+  difficultyItem.classList.toggle('hidden', !isPVC);
+  heuristicItem.classList.toggle('hidden', !isPVC);
+
+  document.querySelectorAll('.cvc-opt').forEach(el =>
+    el.classList.toggle('hidden', !isCVC));
+}
+
 /* ============================================================
-   畫面切換
+   畫面切換（三頁）
    ============================================================ */
+const SCREENS = { cover: coverScreen, setup: setupScreen, game: gameScreen };
+
 function showScreen(name) {
-  if (name === 'cover') {
-    coverScreen.classList.add('active');
-    gameScreen.classList.remove('active');
-  } else {
-    coverScreen.classList.remove('active');
-    gameScreen.classList.add('active');
-  }
+  Object.keys(SCREENS).forEach(k => {
+    SCREENS[k].classList.toggle('active', k === name);
+  });
 }
 
 /* ============================================================
    遊戲流程
    ============================================================ */
-function startGame() {
-  readSettingsFromUI();
+function beginGame() {
+  // 1. 從設定頁讀取最新選擇，寫入 localStorage
+  syncSettingsFromUI();
+  // 2. 套用到執行期變數
+  applySettingsToRuntime();
+  // 3. 進入棋盤頁並開新局
   showScreen('game');
   SFX.click();
   newGame();
@@ -1361,6 +1605,13 @@ function newGame() {
   render();
   updateStatus();
   scheduleAI();
+}
+
+function stopGame() {
+  cancelAITimeout();
+  aiThinking = false;
+  gameOver = true;
+  overlay.classList.remove('show');
 }
 
 function cancelAITimeout() {
@@ -1582,49 +1833,24 @@ function updateStatus() {
    ============================================================ */
 function updateTrophyDisplays() {
   coverTrophiesEl.textContent = appState.trophies;
-  gameTrophiesEl.textContent = appState.trophies;
+  setupTrophiesEl.textContent = appState.trophies;
+  gameTrophiesEl.textContent  = appState.trophies;
 }
 
 /* ============================================================
-   讀取 / 寫入設定
+   匯出 / 匯入 / 重設（含遊戲設定）
    ============================================================ */
-function readSettingsFromUI() {
-  mode = modeSelect.value;
-  humanColor = parseInt(humanColorSelect.value, 10) || BLACK;
-  aiColor = humanColor === BLACK ? WHITE : BLACK;
+const MODE_LABEL  = { pvp: '玩家 vs 玩家', pvc: '玩家 vs AI', cvc: 'AI vs AI' };
+const LEVEL_LABEL = { easy: '簡單', medium: '普通', hard: '困難' };
+const STYLE_LABEL = { coinParity: '棋子數', mobility: '行動力', combined: '綜合' };
 
-  difficulty = difficultySelect.value;
-  heuristic = heuristicSelect.value;
-
-  blackAIDiff = blackDiffSelect.value;
-  blackAIStyle = blackStyleSelect.value;
-  whiteAIDiff = whiteDiffSelect.value;
-  whiteAIStyle = whiteStyleSelect.value;
-
-  const isPVC = (mode === 'pvc');
-  const isCVC = (mode === 'cvc');
-
-  humanColorItem.classList.toggle('hidden', !isPVC);
-  difficultyItem.classList.toggle('hidden', !isPVC);
-  heuristicItem.classList.toggle('hidden', !isPVC);
-
-  document.querySelectorAll('.cvc-opt').forEach(el =>
-    el.classList.toggle('hidden', !isCVC));
-}
-
-function applyAppStateToUI() {
-  updateMuteButtons();
-  updateTrophyDisplays();
-}
-
-/* ============================================================
-   匯入 / 匯出 / 重設
-   ============================================================ */
 function exportSettings() {
+  const s = appState.settings;
   const data = {
     version: VERSION,
     trophies: appState.trophies,
     muted: appState.muted,
+    settings: { ...s },
     exportedAt: new Date().toISOString()
   };
 
@@ -1633,6 +1859,14 @@ function exportSettings() {
     '版本：' + data.version + '\n' +
     '獎盃數：' + data.trophies + '\n' +
     '靜音：' + (data.muted ? '是' : '否') + '\n' +
+    '對戰組合：' + (MODE_LABEL[s.mode] || s.mode) + '\n' +
+    '玩家執棋：' + (s.humanColor === BLACK ? '黑棋先手' : '白棋後手') + '\n' +
+    'AI 難度：' + (LEVEL_LABEL[s.difficulty] || s.difficulty) + '\n' +
+    'AI 風格：' + (STYLE_LABEL[s.heuristic] || s.heuristic) + '\n' +
+    '黑 AI 難度：' + (LEVEL_LABEL[s.blackDiff] || s.blackDiff) + '\n' +
+    '黑 AI 風格：' + (STYLE_LABEL[s.blackStyle] || s.blackStyle) + '\n' +
+    '白 AI 難度：' + (LEVEL_LABEL[s.whiteDiff] || s.whiteDiff) + '\n' +
+    '白 AI 風格：' + (STYLE_LABEL[s.whiteStyle] || s.whiteStyle) + '\n' +
     '匯出時間：' + data.exportedAt + '\n' +
     '\n=== JSON (請勿刪除此段) ===\n' +
     JSON.stringify(data, null, 2);
@@ -1663,11 +1897,9 @@ function importSettingsFromFile(file) {
         data = JSON.parse(text.slice(idx));
       }
 
-      appState = {
-        version: VERSION,
-        trophies: Number(data.trophies) || 0,
-        muted: !!data.muted
-      };
+      appState.trophies = Number(data.trophies) || 0;
+      appState.muted    = !!data.muted;
+      appState.settings = sanitizeSettings(data.settings);
 
       saveState();
       applyAppStateToUI();
@@ -1675,7 +1907,8 @@ function importSettingsFromFile(file) {
       if (appState.muted) pauseMusic(); else tryPlayMusic();
       SFX.trophy();
 
-      alert('設定載入成功！目前獎盃：' + appState.trophies + ' 🏆');
+      alert('設定載入成功！\n獎盃：' + appState.trophies + ' 🏆\n' +
+            '對戰組合：' + (MODE_LABEL[appState.settings.mode] || appState.settings.mode));
     } catch (err) {
       SFX.invalid();
       alert('檔案格式錯誤，無法載入。');
@@ -1685,8 +1918,8 @@ function importSettingsFromFile(file) {
 }
 
 function resetSettings() {
-  if (!confirm('確定要重設音效設定與獎盃數嗎？')) return;
-  appState = { ...defaultState };
+  if (!confirm('確定要重設音效設定、獎盃數與遊戲設定嗎？')) return;
+  appState = JSON.parse(JSON.stringify(defaultState));
   saveState();
   applyAppStateToUI();
   SFX.click();
@@ -1707,44 +1940,67 @@ function toggleFullscreen() {
 }
 
 /* ============================================================
+   頂層套用
+   ============================================================ */
+function applyAppStateToUI() {
+  updateMuteButtons();
+  updateTrophyDisplays();
+  applySettingsToUI();   // 內部會呼叫 applySettingsToRuntime()
+}
+
+/* ============================================================
    事件綁定
    ============================================================ */
-$('startGameBtn').addEventListener('click', startGame);
-$('backToCoverBtn').addEventListener('click', () => {
-  cancelAITimeout();
-  aiThinking = false;
-  gameOver = true;
-  overlay.classList.remove('show');
-  showScreen('cover');
+
+/* --- 封面 --- */
+$('startGameBtn').addEventListener('click', () => {
   SFX.click();
+  showScreen('setup');   // 進入設定頁，不直接開局
 });
+
+/* --- 設定頁 --- */
+$('setupBackBtn').addEventListener('click', () => {
+  SFX.click();
+  showScreen('cover');
+});
+
+$('beginGameBtn').addEventListener('click', beginGame);
+
+/* --- 棋盤頁 --- */
+$('backToSetupBtn').addEventListener('click', () => {
+  stopGame();
+  SFX.click();
+  showScreen('setup');
+});
+
 $('newGameBtn').addEventListener('click', () => { SFX.click(); newGame(); });
 $('playAgainBtn').addEventListener('click', () => { SFX.click(); newGame(); });
 
-// 靜音（封面 + 遊戲中同步）
-['coverMuteBtn','gameMuteBtn'].forEach(id => {
-  $(id).addEventListener('click', () => {
+/* --- 靜音（全部頁面同步） --- */
+document.querySelectorAll('[data-mute]').forEach(btn => {
+  btn.addEventListener('click', () => {
     setMuted(!appState.muted);
     if (!appState.muted) SFX.click();
   });
 });
 
-// 全螢幕（封面 + 遊戲中同步）
-['coverFsBtn','gameFsBtn'].forEach(id => {
-  $(id).addEventListener('click', toggleFullscreen);
+/* --- 全螢幕（全部頁面同步） --- */
+document.querySelectorAll('[data-fs]').forEach(btn => {
+  btn.addEventListener('click', toggleFullscreen);
 });
 
-// 設定變更
-modeSelect.addEventListener('change', () => { readSettingsFromUI(); SFX.click(); });
-difficultySelect.addEventListener('change', () => { readSettingsFromUI(); SFX.click(); });
-heuristicSelect.addEventListener('change',  () => { readSettingsFromUI(); SFX.click(); });
-humanColorSelect.addEventListener('change', () => { readSettingsFromUI(); SFX.click(); });
-blackDiffSelect.addEventListener('change',  () => { readSettingsFromUI(); SFX.click(); });
-blackStyleSelect.addEventListener('change', () => { readSettingsFromUI(); SFX.click(); });
-whiteDiffSelect.addEventListener('change',  () => { readSettingsFromUI(); SFX.click(); });
-whiteStyleSelect.addEventListener('change', () => { readSettingsFromUI(); SFX.click(); });
+/* --- 設定變更 → 立即寫入 localStorage + 套用 --- */
+[modeSelect, humanColorSelect, difficultySelect, heuristicSelect,
+ blackDiffSelect, blackStyleSelect, whiteDiffSelect, whiteStyleSelect]
+.forEach(sel => {
+  sel.addEventListener('change', () => {
+    syncSettingsFromUI();
+    applySettingsToRuntime();
+    SFX.click();
+  });
+});
 
-// 儲存 / 載入 / 重設
+/* --- 儲存 / 載入 / 重設 --- */
 $('saveBtn').addEventListener('click', exportSettings);
 $('loadBtn').addEventListener('click', () => {
   SFX.click();
@@ -1757,7 +2013,7 @@ fileInput.addEventListener('change', e => {
 });
 $('resetBtn').addEventListener('click', resetSettings);
 
-// 鍵盤 Esc 關閉 overlay
+/* --- Esc 關閉 overlay --- */
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && overlay.classList.contains('show')) {
     overlay.classList.remove('show');
@@ -1770,21 +2026,25 @@ document.addEventListener('keydown', e => {
 (function init() {
   $('coverYear').textContent = new Date().getFullYear();
 
-  loadState();
-  applyAppStateToUI();
+  loadState();          // 讀 localStorage（獎盃 / 靜音 / 遊戲設定）
+  applyAppStateToUI();  // 套用到設定頁 UI 與執行期變數
 
   bgMusic.volume = MUSIC_VOLUME;
 
   window.addEventListener('load', () => { tryPlayMusic(); });
   tryPlayMusic();
 
-  readSettingsFromUI();
-
   board = Board.initial();
   render();
   updateScore();
   updateStatus();
 })();
+
+window.addEventListener('load', function() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  }
+});
 </script>
 
 </body>
