@@ -5,440 +5,148 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Shields &amp; Staffs</title>
 <style>
-    * { box-sizing: border-box; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
-    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #0b1a0e; font-family: 'Segoe UI', 'Roboto', sans-serif; touch-action: none; overscroll-behavior: none; }
-
-    :root {
-        --joystick-size: clamp(90px, 20vw, 128px);
-        --boost-size: clamp(58px, 13vw, 84px);
-        --float-btn-size: clamp(32px, 5.5vw, 40px);
-        --edge-gap: 12px;
-    }
-
-    /* ---------- 封面 ---------- */
-    .cover-screen {
-        position: fixed; inset: 0; z-index: 1000;
-        display: flex; align-items: center; justify-content: center;
-        background: radial-gradient(circle at 50% 40%, #1a2e14, #050a04 80%);
-        padding: 12px;
-    }
-    .cover-box {
-        position: relative;
-        width: min(92vw, 820px);
-        aspect-ratio: 4 / 3;
-        max-height: 92vh;
-        border-radius: 24px;
-        overflow: hidden;
-        box-shadow: 0 24px 70px rgba(0,0,0,0.85), inset 0 0 0 3px #5e7a4a, inset 0 0 60px rgba(0,0,0,0.6);
-        background: #1a2e14;
-    }
-    .cover-bg {
-        position: absolute; inset: 0;
-        width: 100%; height: 100%;
-        object-fit: cover;
-        pointer-events: none;
-    }
-    .cover-overlay {
-        position: absolute; inset: 0;
-        background: linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0.65) 100%);
-        pointer-events: none;
-    }
-    .cover-content {
-        position: absolute; inset: 0;
-        display: flex; flex-direction: column;
-        align-items: center; justify-content: center;
-        gap: clamp(8px, 1.6vw, 16px);
-        padding: clamp(20px, 4vw, 50px);
-        text-align: center;
-        z-index: 2;
-    }
-    .cover-title {
-        margin: 0;
-        font-size: clamp(30px, 6vw, 56px);
-        font-weight: 900;
-        color: #ffd966;
-        text-shadow: 0 4px 0 #5a3a1a, 0 8px 20px rgba(0,0,0,0.9);
-        letter-spacing: 2px;
-        font-family: 'Georgia', 'Times New Roman', serif;
-    }
-    .cover-subtitle {
-        margin: 0;
-        font-size: clamp(13px, 2.2vw, 18px);
-        color: #d4e0b0;
-        text-shadow: 0 2px 6px black;
-        letter-spacing: 5px;
-    }
-    .cover-btn {
-        padding: clamp(9px, 1.4vw, 14px) clamp(22px, 3.6vw, 38px);
-        font-size: clamp(14px, 2.2vw, 18px);
-        font-weight: 900;
-        border-radius: 60px;
-        cursor: pointer;
-        transition: transform 0.08s ease, box-shadow 0.08s ease;
-        letter-spacing: 2px;
-        font-family: inherit;
-        text-shadow: 0 1px 0 rgba(255,255,255,0.4);
-    }
-    .start-btn {
-        margin-top: clamp(6px, 1.4vw, 14px);
-        color: #2a1808;
-        background: linear-gradient(180deg, #ffd966, #d4a017);
-        border: 3px solid #fff3c0;
-        box-shadow: 0 6px 0 #8a6b0f, 0 10px 24px rgba(0,0,0,0.7);
-    }
-    .start-btn:active {
-        transform: translateY(5px);
-        box-shadow: 0 1px 0 #8a6b0f, 0 4px 12px rgba(0,0,0,0.7);
-    }
-    .help-btn {
-        color: #e0f0c0;
-        background: linear-gradient(180deg, #5e7a4a, #3a5028);
-        border: 3px solid #a0c080;
-        box-shadow: 0 5px 0 #1f2e15, 0 8px 20px rgba(0,0,0,0.6);
-        font-size: clamp(12px, 1.9vw, 16px);
-        padding: clamp(7px, 1.2vw, 11px) clamp(18px, 3vw, 30px);
-    }
-    .help-btn:active {
-        transform: translateY(4px);
-        box-shadow: 0 1px 0 #1f2e15, 0 4px 12px rgba(0,0,0,0.6);
-    }
-    .cover-footer {
-        position: absolute;
-        bottom: 12px;
-        left: 50%;
-        transform: translateX(-50%);
-        color: #d4e0b0;
-        font-size: clamp(10px, 1.5vw, 13px);
-        text-shadow: 0 2px 4px black;
-        background: rgba(0,0,0,0.5);
-        padding: 5px 16px;
-        border-radius: 30px;
-        white-space: nowrap;
-        z-index: 3;
-        letter-spacing: 0.5px;
-        border: 1px solid rgba(127,159,92,0.35);
-    }
-    .float-btn {
-        width: var(--float-btn-size);
-        height: var(--float-btn-size);
-        border-radius: 50%;
-        background: rgba(10, 19, 11, 0.72);
-        border: 2px solid rgba(127, 159, 92, 0.65);
-        color: #d4e0b0;
-        font-size: clamp(14px, 2.2vw, 18px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-        transition: transform 0.1s ease, background 0.2s ease;
-        padding: 0;
-        line-height: 1;
-        z-index: 20;
-        backdrop-filter: blur(2px);
-        -webkit-backdrop-filter: blur(2px);
-    }
-    .float-btn:hover { background: rgba(40, 70, 30, 0.85); }
-    .float-btn:active { transform: scale(0.88); }
-
-    .cover-mute { position: absolute; bottom: 12px; left: 12px; z-index: 4; }
-    .cover-fullscreen { position: absolute; bottom: 12px; right: 12px; z-index: 4; }
-
-    /* ---------- 說明彈窗 ---------- */
-    .help-modal {
-        position: fixed; inset: 0; z-index: 1500;
-        display: none;
-        align-items: center; justify-content: center;
-        background: rgba(0,0,0,0.85);
-        padding: 16px;
-    }
-    .help-modal.show { display: flex; }
-    .help-content {
-        background: linear-gradient(180deg, #1e2f1f, #0a130b);
-        border: 3px solid #5e7a4a;
-        border-radius: 24px;
-        padding: clamp(18px, 3vw, 30px) clamp(20px, 4vw, 40px);
-        max-width: min(92vw, 560px);
-        max-height: 88vh;
-        overflow-y: auto;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.9);
-        color: #d4e0b0;
-    }
-    .help-content h2 {
-        margin: 0 0 16px;
-        color: #ffd966;
-        text-align: center;
-        font-size: clamp(20px, 3.4vw, 26px);
-        text-shadow: 0 2px 8px black;
-        letter-spacing: 2px;
-    }
-    .help-content h3 {
-        margin: 18px 0 8px;
-        color: #a8d080;
-        font-size: clamp(14px, 2.2vw, 16px);
-        letter-spacing: 1px;
-    }
-    .help-content p, .help-content li {
-        font-size: clamp(12px, 1.9vw, 14px);
-        line-height: 1.7;
-        margin: 4px 0;
-        color: #d4e0b0;
-    }
-    .help-content ul {
-        margin: 4px 0;
-        padding-left: 20px;
-    }
-    .key-tag {
-        display: inline-block;
-        background: #2e4a22;
-        border: 1px solid #7f9f5c;
-        border-radius: 6px;
-        padding: 1px 8px;
-        font-family: monospace;
-        font-weight: bold;
-        color: #ffd966;
-        font-size: 0.95em;
-        margin: 0 2px;
-    }
-    .close-help-btn {
-        display: block;
-        margin: 20px auto 0;
-        padding: 10px 32px;
-        font-size: clamp(14px, 2.2vw, 16px);
-        font-weight: 900;
-        color: #2a1808;
-        background: linear-gradient(180deg, #ffd966, #d4a017);
-        border: 3px solid #fff3c0;
-        border-radius: 60px;
-        cursor: pointer;
-        box-shadow: 0 5px 0 #8a6b0f, 0 8px 20px rgba(0,0,0,0.6);
-        font-family: inherit;
-        letter-spacing: 1px;
-    }
-    .close-help-btn:active {
-        transform: translateY(4px);
-        box-shadow: 0 1px 0 #8a6b0f, 0 4px 12px rgba(0,0,0,0.6);
-    }
-
-    /* ---------- 遊戲 ---------- */
-    .game-wrapper {
-        display: none;
-        flex-direction: column;
-        width: 100%;
-        height: 100%;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 8px;
-    }
-    .top-bar {
-        display: flex; justify-content: space-between; align-items: center; gap: 8px;
-        padding: 6px 14px;
-        background: #0a130b;
-        border-radius: 40px;
-        box-shadow: inset 0 2px 6px black, 0 2px 0 #4d6b3a;
-        color: #d4e0b0; font-weight: bold;
-        font-size: clamp(11px, 2.8vw, 14px);
-        text-shadow: 0 2px 2px black;
-        white-space: nowrap; flex-shrink: 0;
-    }
-    .top-bar .value { color: #ffd966; font-size: clamp(14px, 3.6vw, 18px); }
-    .top-bar .hp { color: #ff8888; }
-    .boost-active { background: #b8860b !important; color: #000 !important; text-shadow: none; padding: 4px 12px; border-radius: 40px; }
-    .home-btn {
-        background: #5a3a1a; border: none; border-radius: 40px;
-        padding: 6px 14px; color: #ffe0a0; font-weight: bold;
-        font-size: clamp(11px, 2.8vw, 14px);
-        box-shadow: 0 3px 0 #2e1a08, 0 2px 8px black;
-        cursor: pointer; transition: all 0.08s ease;
-        white-space: nowrap; font-family: inherit;
-    }
-    .home-btn:active { transform: translateY(3px); box-shadow: 0 0 0 #2e1a08, 0 2px 8px black; }
-    .hud-boost { padding: 4px 12px; border-radius: 40px; transition: all 0.2s; }
-    .game-stage {
-        position: relative;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
-        border-radius: 16px;
-        overflow: hidden;
-        flex-shrink: 0;
-    }
-    canvas { display: block; background: #142410; }
-
-    .game-mute {
-        position: absolute;
-        bottom: calc(var(--edge-gap) + var(--joystick-size) + 8px);
-        left: var(--edge-gap);
-        z-index: 15;
-    }
-    .game-fullscreen {
-        position: absolute;
-        bottom: calc(var(--edge-gap) + 4px + var(--boost-size) + 8px);
-        right: var(--edge-gap);
-        z-index: 15;
-    }
-
-    .joystick-base {
-        position: absolute;
-        bottom: var(--edge-gap);
-        left: var(--edge-gap);
-        width: var(--joystick-size);
-        height: var(--joystick-size);
-        border-radius: 50%;
-        background: radial-gradient(circle at 50% 50%, rgba(60, 90, 45, 0.18), rgba(15, 28, 13, 0.32));
-        border: 2px solid rgba(127, 159, 92, 0.35);
-        box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.3), 0 4px 14px rgba(0, 0, 0, 0.35);
-        touch-action: none;
-        z-index: 10;
-    }
-    .joystick-base::after {
-        content: ''; position: absolute; inset: 20%;
-        border-radius: 50%;
-        border: 1px dashed rgba(127, 159, 92, 0.18);
-        pointer-events: none;
-    }
-    .joystick-stick {
-        position: absolute; top: 50%; left: 50%;
-        width: 44%; height: 44%; border-radius: 50%;
-        background: radial-gradient(circle at 35% 32%, rgba(181, 224, 138, 0.55), rgba(63, 138, 42, 0.55) 75%);
-        border: 2px solid rgba(255, 217, 102, 0.55);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 0 12px rgba(255, 255, 255, 0.15);
-        transform: translate(-50%, -50%);
-        transition: transform 0.06s linear;
-        pointer-events: none;
-    }
-    .joystick-base.active .joystick-stick { transition: none; }
-
-    .boost-btn {
-        position: absolute;
-        bottom: calc(var(--edge-gap) + 4px);
-        right: var(--edge-gap);
-        width: var(--boost-size);
-        height: var(--boost-size);
-        border-radius: 50%;
-        background: radial-gradient(circle at 35% 32%, rgba(123, 163, 90, 0.35), rgba(36, 64, 26, 0.42));
-        border: 2px solid rgba(255, 217, 102, 0.5);
-        box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.3), 0 4px 14px rgba(0, 0, 0, 0.35);
-        color: #ffd966; font-weight: bold;
-        font-size: clamp(10px, 2.6vw, 14px);
-        display: flex; flex-direction: column;
-        justify-content: center; align-items: center;
-        line-height: 1.1;
-        z-index: 10; touch-action: none;
-        text-shadow: 0 2px 4px black;
-        transition: opacity 0.2s, transform 0.06s;
-    }
-    .boost-btn.cooldown { opacity: 0.35; border-color: rgba(119, 119, 119, 0.5); color: #aaa; }
-    .boost-btn.pressed { transform: scale(0.93); }
-
-    /* ★ 電腦版（有精確指標、無觸控）隱藏搖桿與加速鈕 */
-    @media (hover: hover) and (pointer: fine) {
-        .joystick-base,
-        .boost-btn {
-            display: none !important;
-        }
-        /* 靜音與全屏按鈕在電腦版仍顯示，但位置改到左下 / 右下貼邊 */
-        .game-mute {
-            bottom: var(--edge-gap);
-            left: var(--edge-gap);
-        }
-        .game-fullscreen {
-            bottom: var(--edge-gap);
-            right: var(--edge-gap);
-        }
-    }
-
-    .gameover-overlay {
-        position: absolute;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.85);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 40;
-        border-radius: 16px;
-    }
-    .gameover-overlay.show { display: flex; }
-    .gameover-box {
-        background: linear-gradient(180deg, #1e2f1f, #0a130b);
-        border: 3px solid #5e7a4a;
-        border-radius: 24px;
-        padding: clamp(18px, 4vw, 36px) clamp(24px, 6vw, 56px);
-        text-align: center;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.9), inset 0 0 30px rgba(0,0,0,0.5);
-        max-width: 90%;
-    }
-    .gameover-title {
-        font-size: clamp(24px, 5vw, 40px);
-        font-weight: 900;
-        margin: 0 0 clamp(10px, 2vw, 18px);
-        text-shadow: 0 4px 12px black;
-        letter-spacing: 2px;
-    }
-    .gameover-title.win { color: #ffd966; }
-    .gameover-title.lose { color: #d9534f; }
-    .score-line {
-        color: #d4e0b0;
-        font-size: clamp(13px, 2.6vw, 17px);
-        margin: clamp(6px, 1.5vw, 10px) 0;
-        text-shadow: 0 2px 4px black;
-    }
-    .score-line .num {
-        color: #ffd966;
-        font-size: clamp(16px, 3.4vw, 22px);
-        font-weight: 900;
-        margin-left: 6px;
-    }
-    .score-line .best {
-        color: #7fff7f;
-        font-size: clamp(16px, 3.4vw, 22px);
-        font-weight: 900;
-        margin-left: 6px;
-    }
-    .new-record {
-        color: #ffaa00;
-        font-weight: bold;
-        font-size: clamp(12px, 2.4vw, 15px);
-        margin-top: 6px;
-        animation: pulse 1s infinite alternate;
-    }
-    @keyframes pulse {
-        from { opacity: 0.6; transform: scale(0.98); }
-        to { opacity: 1; transform: scale(1.02); }
-    }
-    .return-btn {
-        margin-top: clamp(14px, 3vw, 24px);
-        padding: clamp(10px, 1.8vw, 14px) clamp(28px, 5vw, 48px);
-        font-size: clamp(15px, 2.6vw, 20px);
-        font-weight: 900;
-        color: #2a1808;
-        background: linear-gradient(180deg, #ffd966, #d4a017);
-        border: 3px solid #fff3c0;
-        border-radius: 60px;
-        cursor: pointer;
-        box-shadow: 0 6px 0 #8a6b0f, 0 10px 24px rgba(0,0,0,0.7);
-        transition: transform 0.08s ease, box-shadow 0.08s ease;
-        letter-spacing: 2px;
-        font-family: inherit;
-    }
-    .return-btn:active {
-        transform: translateY(5px);
-        box-shadow: 0 1px 0 #8a6b0f, 0 4px 12px rgba(0,0,0,0.7);
-    }
+* { box-sizing: border-box; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #0b1a0e; font-family: 'Segoe UI', 'Roboto', sans-serif; touch-action: none; overscroll-behavior: none; }
+:root {
+    --joystick-size: clamp(90px, 20vw, 128px);
+    --boost-size: clamp(58px, 13vw, 84px);
+    --float-btn-size: clamp(32px, 5.5vw, 40px);
+    --edge-gap: 12px;
+}
+.cover-screen { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 40%, #1a2e14, #050a04 80%); padding: 12px; }
+.cover-box { position: relative; width: min(92vw, 820px); aspect-ratio: 4/3; max-height: 92vh; border-radius: 24px; overflow: hidden; box-shadow: 0 24px 70px rgba(0,0,0,0.85), inset 0 0 0 3px #5e7a4a, inset 0 0 60px rgba(0,0,0,0.6); background: #1a2e14; animation: boxBreathe 6s ease-in-out infinite; }
+@keyframes boxBreathe {
+    0%, 100% { box-shadow: 0 24px 70px rgba(0,0,0,0.85), inset 0 0 0 3px #5e7a4a, inset 0 0 60px rgba(0,0,0,0.6); }
+    50% { box-shadow: 0 24px 80px rgba(255,215,100,0.25), inset 0 0 0 3px #8fae6a, inset 0 0 80px rgba(255,215,100,0.15); }
+}
+.cover-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; animation: bgZoom 20s ease-in-out infinite alternate; }
+@keyframes bgZoom {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.08); }
+}
+.cover-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0.75) 100%); pointer-events: none; }
+.cover-content { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(6px, 1.2vw, 12px); padding: clamp(16px, 3vw, 40px); text-align: center; z-index: 2; }
+.cover-title { margin: 0; font-size: clamp(26px, 5.4vw, 50px); font-weight: 900; color: #ffd966; text-shadow: 0 4px 0 #5a3a1a, 0 8px 20px rgba(0,0,0,0.9); letter-spacing: 2px; font-family: 'Georgia', 'Times New Roman', serif; animation: titlePulse 3s ease-in-out infinite, titleGlow 3s ease-in-out infinite; }
+@keyframes titlePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+}
+@keyframes titleGlow {
+    0%, 100% { filter: drop-shadow(0 0 8px rgba(255,217,102,0.5)); }
+    50% { filter: drop-shadow(0 0 24px rgba(255,217,102,0.95)); }
+}
+.cover-subtitle { margin: 0; font-size: clamp(12px, 2vw, 16px); color: #d4e0b0; text-shadow: 0 2px 6px black; letter-spacing: 5px; animation: subtitleFade 4s ease-in-out infinite; }
+@keyframes subtitleFade {
+    0%, 100% { opacity: 0.75; letter-spacing: 5px; }
+    50% { opacity: 1; letter-spacing: 7px; }
+}
+.cover-gold { margin: 4px 0; font-size: clamp(13px, 2.2vw, 17px); color: #ffd966; text-shadow: 0 2px 6px black; font-weight: bold; letter-spacing: 1px; background: rgba(0,0,0,0.5); padding: 4px 18px; border-radius: 30px; border: 1px solid #8a6b0f; animation: goldShine 2.5s ease-in-out infinite; }
+@keyframes goldShine {
+    0%, 100% { box-shadow: 0 0 8px rgba(255,217,102,0.4); }
+    50% { box-shadow: 0 0 22px rgba(255,217,102,0.9); }
+}
+.cover-hero { margin: 2px 0; font-size: clamp(12px, 2vw, 15px); color: #d4e0b0; text-shadow: 0 2px 4px black; }
+.cover-btn { padding: clamp(8px, 1.2vw, 13px) clamp(18px, 3vw, 32px); font-size: clamp(13px, 2vw, 17px); font-weight: 900; border-radius: 60px; cursor: pointer; transition: transform 0.08s ease, box-shadow 0.08s ease; letter-spacing: 1.5px; font-family: inherit; text-shadow: 0 1px 0 rgba(255,255,255,0.4); }
+.start-btn { margin-top: clamp(4px, 1vw, 10px); color: #2a1808; background: linear-gradient(180deg, #ffd966, #d4a017); border: 3px solid #fff3c0; box-shadow: 0 6px 0 #8a6b0f, 0 10px 24px rgba(0,0,0,0.7); animation: startPulse 2s ease-in-out infinite; }
+@keyframes startPulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 6px 0 #8a6b0f, 0 10px 24px rgba(0,0,0,0.7); }
+    50% { transform: scale(1.05); box-shadow: 0 6px 0 #8a6b0f, 0 10px 36px rgba(255,217,102,0.6); }
+}
+.start-btn:active { transform: translateY(5px); box-shadow: 0 1px 0 #8a6b0f, 0 4px 12px rgba(0,0,0,0.7); }
+.small-btn { color: #e0f0c0; background: linear-gradient(180deg, #5e7a4a, #3a5028); border: 2px solid #a0c080; box-shadow: 0 4px 0 #1f2e15, 0 6px 16px rgba(0,0,0,0.6); font-size: clamp(11px, 1.7vw, 14px); padding: clamp(6px, 1vw, 10px) clamp(14px, 2.4vw, 24px); }
+.small-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #1f2e15, 0 4px 12px rgba(0,0,0,0.6); }
+.shop-btn { color: #2a1808; background: linear-gradient(180deg, #ffb84d, #d48017); border: 2px solid #fff3c0; box-shadow: 0 4px 0 #8a5010, 0 6px 16px rgba(0,0,0,0.6); font-size: clamp(11px, 1.7vw, 14px); padding: clamp(6px, 1vw, 10px) clamp(14px, 2.4vw, 24px); }
+.shop-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #8a5010, 0 4px 12px rgba(0,0,0,0.6); }
+.button-row { display: flex; flex-wrap: wrap; gap: clamp(4px, 1vw, 10px); justify-content: center; align-items: center; margin-top: 4px; }
+.cover-footer { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); color: #d4e0b0; font-size: clamp(9px, 1.3vw, 12px); text-shadow: 0 2px 4px black; background: rgba(0,0,0,0.5); padding: 4px 14px; border-radius: 30px; white-space: nowrap; z-index: 3; letter-spacing: 0.5px; border: 1px solid rgba(127,159,92,0.35); }
+.float-btn { width: var(--float-btn-size); height: var(--float-btn-size); border-radius: 50%; background: rgba(10, 19, 11, 0.72); border: 2px solid rgba(127, 159, 92, 0.65); color: #d4e0b0; font-size: clamp(14px, 2.2vw, 18px); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.6); padding: 0; line-height: 1; z-index: 20; backdrop-filter: blur(2px); transition: transform 0.1s ease; }
+.float-btn:active { transform: scale(0.88); }
+.cover-mute { position: absolute; bottom: 12px; left: 12px; z-index: 4; }
+.cover-fullscreen { position: absolute; bottom: 12px; right: 12px; z-index: 4; }
+.modal { position: fixed; inset: 0; z-index: 1500; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.85); padding: 16px; }
+.modal.show { display: flex; }
+.modal-content { background: linear-gradient(180deg, #1e2f1f, #0a130b); border: 3px solid #5e7a4a; border-radius: 24px; padding: clamp(16px, 3vw, 28px) clamp(18px, 3.5vw, 36px); max-width: min(94vw, 680px); max-height: 88vh; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; box-shadow: 0 20px 60px rgba(0,0,0,0.9); color: #d4e0b0; }
+.modal-content h2 { margin: 0 0 14px; color: #ffd966; text-align: center; font-size: clamp(18px, 3vw, 24px); text-shadow: 0 2px 8px black; letter-spacing: 2px; }
+.modal-content h3 { margin: 14px 0 6px; color: #a8d080; font-size: clamp(13px, 2vw, 15px); letter-spacing: 1px; }
+.modal-content p, .modal-content li { font-size: clamp(11px, 1.8vw, 13px); line-height: 1.6; margin: 3px 0; color: #d4e0b0; }
+.modal-content ul { margin: 3px 0; padding-left: 18px; }
+.key-tag { display: inline-block; background: #2e4a22; border: 1px solid #7f9f5c; border-radius: 6px; padding: 1px 7px; font-family: monospace; font-weight: bold; color: #ffd966; font-size: 0.95em; margin: 0 2px; }
+.close-modal-btn { display: block; margin: 16px auto 0; padding: 9px 28px; font-size: clamp(13px, 2vw, 15px); font-weight: 900; color: #2a1808; background: linear-gradient(180deg, #ffd966, #d4a017); border: 3px solid #fff3c0; border-radius: 60px; cursor: pointer; box-shadow: 0 5px 0 #8a6b0f; font-family: inherit; letter-spacing: 1px; }
+.close-modal-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #8a6b0f; }
+.shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 10px; }
+.shop-item { background: linear-gradient(180deg, #2a3f24, #142410); border: 2px solid #5e7a4a; border-radius: 14px; padding: 10px 8px; text-align: center; position: relative; }
+.shop-item.owned { border-color: #ffd966; }
+.shop-item.selected { border-color: #7fff7f; box-shadow: 0 0 12px #7fff7f66; }
+.shop-icon { font-size: 36px; line-height: 1; }
+.shop-name { font-size: clamp(12px, 1.8vw, 14px); color: #ffd966; font-weight: bold; margin: 4px 0 2px; }
+.shop-skill { font-size: clamp(10px, 1.4vw, 12px); color: #a8d080; margin-bottom: 3px; }
+.shop-desc { font-size: clamp(9px, 1.3vw, 11px); color: #b0c090; min-height: 28px; line-height: 1.3; }
+.shop-price { font-size: clamp(11px, 1.7vw, 13px); color: #ffd966; margin: 4px 0; font-weight: bold; }
+.shop-action-btn { padding: 5px 14px; border-radius: 20px; font-size: clamp(10px, 1.5vw, 12px); font-weight: bold; border: 2px solid #a0c080; background: #3e5d2e; color: #e2f0c0; cursor: pointer; font-family: inherit; }
+.shop-action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.shop-action-btn.selected-btn { background: #2e6b2e; border-color: #7fff7f; color: #7fff7f; }
+.shop-action-btn.buy-btn { background: #8a5010; border-color: #ffd966; color: #ffe0a0; }
+.game-wrapper { display: none; flex-direction: column; width: 100%; height: 100%; align-items: center; justify-content: center; gap: 8px; padding: 8px; }
+.top-bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 14px; background: #0a130b; border-radius: 40px; box-shadow: inset 0 2px 6px black, 0 2px 0 #4d6b3a; color: #d4e0b0; font-weight: bold; font-size: clamp(11px, 2.6vw, 14px); text-shadow: 0 2px 2px black; white-space: nowrap; flex-shrink: 0; }
+.top-bar .value { color: #ffd966; font-size: clamp(13px, 3.4vw, 17px); }
+.top-bar .hp { color: #ff8888; }
+.skill-active { background: #b8860b !important; color: #000 !important; text-shadow: none; padding: 4px 12px; border-radius: 40px; }
+.home-btn { background: #5a3a1a; border: none; border-radius: 40px; padding: 6px 14px; color: #ffe0a0; font-weight: bold; font-size: clamp(11px, 2.6vw, 14px); box-shadow: 0 3px 0 #2e1a08, 0 2px 8px black; cursor: pointer; white-space: nowrap; font-family: inherit; }
+.home-btn:active { transform: translateY(3px); box-shadow: 0 0 0 #2e1a08, 0 2px 8px black; }
+.hud-skill { padding: 4px 12px; border-radius: 40px; transition: all 0.2s; }
+.game-stage { position: relative; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8); border-radius: 16px; overflow: hidden; flex-shrink: 0; }
+canvas { display: block; background: #142410; }
+.game-mute { position: absolute; bottom: calc(var(--edge-gap) + var(--joystick-size) + 8px); left: var(--edge-gap); z-index: 15; }
+.game-fullscreen { position: absolute; bottom: calc(var(--edge-gap) + 4px + var(--boost-size) + 8px); right: var(--edge-gap); z-index: 15; }
+.joystick-base { position: absolute; bottom: var(--edge-gap); left: var(--edge-gap); width: var(--joystick-size); height: var(--joystick-size); border-radius: 50%; background: radial-gradient(circle at 50% 50%, rgba(60, 90, 45, 0.18), rgba(15, 28, 13, 0.32)); border: 2px solid rgba(127, 159, 92, 0.35); box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.3), 0 4px 14px rgba(0, 0, 0, 0.35); touch-action: none; z-index: 10; }
+.joystick-base::after { content: ''; position: absolute; inset: 20%; border-radius: 50%; border: 1px dashed rgba(127, 159, 92, 0.18); pointer-events: none; }
+.joystick-stick { position: absolute; top: 50%; left: 50%; width: 44%; height: 44%; border-radius: 50%; background: radial-gradient(circle at 35% 32%, rgba(181, 224, 138, 0.55), rgba(63, 138, 42, 0.55) 75%); border: 2px solid rgba(255, 217, 102, 0.55); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 0 12px rgba(255, 255, 255, 0.15); transform: translate(-50%, -50%); transition: transform 0.06s linear; pointer-events: none; }
+.joystick-base.active .joystick-stick { transition: none; }
+.boost-btn { position: absolute; bottom: calc(var(--edge-gap) + 4px); right: var(--edge-gap); width: var(--boost-size); height: var(--boost-size); border-radius: 50%; background: radial-gradient(circle at 35% 32%, rgba(123, 163, 90, 0.35), rgba(36, 64, 26, 0.42)); border: 2px solid rgba(255, 217, 102, 0.5); box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.3), 0 4px 14px rgba(0, 0, 0, 0.35); color: #ffd966; font-weight: bold; font-size: clamp(10px, 2.6vw, 14px); display: flex; flex-direction: column; justify-content: center; align-items: center; line-height: 1.1; z-index: 10; touch-action: none; text-shadow: 0 2px 4px black; transition: opacity 0.2s, transform 0.06s; }
+.boost-btn.cooldown { opacity: 0.35; border-color: rgba(119, 119, 119, 0.5); color: #aaa; }
+.boost-btn.pressed { transform: scale(0.93); }
+@media (hover: hover) and (pointer: fine) {
+    .joystick-base, .boost-btn { display: none !important; }
+    .game-mute { bottom: var(--edge-gap); left: var(--edge-gap); }
+    .game-fullscreen { bottom: var(--edge-gap); right: var(--edge-gap); }
+}
+.gameover-overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; z-index: 40; border-radius: 16px; }
+.gameover-overlay.show { display: flex; }
+.gameover-box { background: linear-gradient(180deg, #1e2f1f, #0a130b); border: 3px solid #5e7a4a; border-radius: 24px; padding: clamp(16px, 3.5vw, 32px) clamp(22px, 5vw, 50px); text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.9); max-width: 90%; }
+.gameover-title { font-size: clamp(22px, 4.5vw, 36px); font-weight: 900; margin: 0 0 clamp(8px, 1.6vw, 16px); text-shadow: 0 4px 12px black; letter-spacing: 2px; }
+.gameover-title.win { color: #ffd966; }
+.gameover-title.lose { color: #d9534f; }
+.score-line { color: #d4e0b0; font-size: clamp(12px, 2.4vw, 16px); margin: clamp(5px, 1.2vw, 9px) 0; text-shadow: 0 2px 4px black; }
+.score-line .num { color: #ffd966; font-size: clamp(15px, 3vw, 20px); font-weight: 900; margin-left: 6px; }
+.score-line .best { color: #7fff7f; font-size: clamp(15px, 3vw, 20px); font-weight: 900; margin-left: 6px; }
+.new-record { color: #ffaa00; font-weight: bold; font-size: clamp(11px, 2.2vw, 14px); margin-top: 5px; animation: pulse 1s infinite alternate; }
+@keyframes pulse { from { opacity: 0.6; } to { opacity: 1; } }
+.return-btn { margin-top: clamp(12px, 2.5vw, 20px); padding: clamp(9px, 1.6vw, 13px) clamp(24px, 4.5vw, 42px); font-size: clamp(14px, 2.4vw, 18px); font-weight: 900; color: #2a1808; background: linear-gradient(180deg, #ffd966, #d4a017); border: 3px solid #fff3c0; border-radius: 60px; cursor: pointer; box-shadow: 0 6px 0 #8a6b0f; font-family: inherit; letter-spacing: 2px; }
+.return-btn:active { transform: translateY(5px); box-shadow: 0 1px 0 #8a6b0f; }
 </style>
 </head>
 <body>
 
-<!-- ================= 封面 ================= -->
 <div class="cover-screen" id="coverScreen">
     <div class="cover-box" id="coverBox">
-        <img class="cover-bg" src="shields_and_staffs.jpg" alt="封面背景"
-             onerror="this.style.display='none'">
+        <img class="cover-bg" src="shields_and_staffs.jpg" alt="封面背景" onerror="this.style.display='none'">
         <div class="cover-overlay"></div>
         <div class="cover-content">
             <h1 class="cover-title">Shields &amp; Staffs</h1>
             <p class="cover-subtitle">帶 兵 打 仗</p>
+            <div class="cover-gold" id="coverGold">💰 金幣: $0</div>
+            <div class="cover-hero" id="coverHero">🏇 Roland · King's Wind</div>
             <button class="cover-btn start-btn" id="startGameBtn">⚔️ 開 始 遊 戲 ⚔️</button>
-            <button class="cover-btn help-btn" id="helpBtn">📖 遊戲說明</button>
+            <div class="button-row">
+                <button class="cover-btn shop-btn" id="shopBtn">🏪 商店</button>
+                <button class="cover-btn small-btn" id="helpBtn">📖 說明</button>
+            </div>
+            <div class="button-row">
+                <button class="cover-btn small-btn" id="saveBtn">💾 儲存</button>
+                <button class="cover-btn small-btn" id="loadBtn">📂 載入</button>
+                <button class="cover-btn small-btn" id="resetBtn">🗑️ 重設</button>
+            </div>
+            <input type="file" id="loadFileInput" accept=".txt" style="display:none;">
         </div>
         <div class="cover-footer" id="coverFooter">v1.0 © 2026 ☕迪遜咖啡廳，版權所有。</div>
         <button class="float-btn cover-mute" id="coverMuteBtn" title="靜音 / 播放">🔊</button>
@@ -446,72 +154,67 @@
     </div>
 </div>
 
-<!-- ================= 說明彈窗 ================= -->
-<div class="help-modal" id="helpModal">
-    <div class="help-content">
+<div class="modal" id="helpModal">
+    <div class="modal-content">
         <h2>📖 遊戲說明</h2>
-
         <h3>🎯 遊戲目標</h3>
-        <p>率領你的 🏇 英雄在地圖上招募士兵，擊敗所有敵方英雄即可獲勝。士兵歸零後英雄會開始受傷，血量歸零則遊戲結束。</p>
-
+        <p>率領英雄在地圖上招募士兵，擊敗所有敵方英雄。士兵歸零後英雄會開始受傷，血量歸零遊戲結束。遊戲結束時獲得的金幣等於本局最高兵力。</p>
         <h3>🕹️ 操作方式</h3>
         <ul>
-            <li><strong>電腦版：</strong> <span class="key-tag">W</span><span class="key-tag">A</span><span class="key-tag">S</span><span class="key-tag">D</span> 或 <span class="key-tag">↑</span><span class="key-tag">←</span><span class="key-tag">↓</span><span class="key-tag">→</span> 移動</li>
-            <li><strong>電腦版技能：</strong> 按 <span class="key-tag">J</span> 或 <span class="key-tag">空白鍵</span> 使用加速技能</li>
-            <li><strong>手機版：</strong> 左下虛擬搖桿移動，右下按鈕使用加速技能</li>
+            <li><strong>電腦版：</strong> <span class="key-tag">W</span><span class="key-tag">A</span><span class="key-tag">S</span><span class="key-tag">D</span> 或方向鍵移動</li>
+            <li><strong>電腦版技能：</strong> <span class="key-tag">J</span> 或 <span class="key-tag">空白鍵</span></li>
+            <li><strong>手機版：</strong> 左下搖桿移動，右下按鈕施放技能</li>
         </ul>
-
-        <h3>⚡ 加速技能</h3>
-        <p>按下技能鍵後移動速度提升 90%，持續約 3 秒。但加速期間士兵力量降至 65%，冷卻 5 秒。</p>
-
-        <h3>🤺 招募士兵</h3>
-        <p>地圖上會出現三種招募單位，站在圓形範圍內 3 秒即可招募：</p>
-        <ul>
-            <li>🤺 青銅士兵：+200 兵</li>
-            <li>🥷 白銀士兵：+1000 兵</li>
-            <li>🧙 黃金士兵：+5000 兵</li>
-        </ul>
-
+        <h3>⚡ 技能</h3>
+        <p>每位英雄有專屬技能，技能冷卻 30 秒，效果依角色而定。技能不會降低攻擊力。AI 也會使用技能。</p>
+        <h3>💰 士兵與招募</h3>
+        <p>地圖上會出現各種士兵單位，稀有度越高價值越高、越少見。佔領時間依階級：</p>
+        <ul><li>銅：1 秒</li><li>銀：3 秒</li><li>金：5 秒（金士兵出現時地圖上會有標示）</li></ul>
         <h3>🏘️ 村莊與森林</h3>
         <ul>
-            <li>🏘️ 村莊會定期產出高價值的 🧙 士兵，是兵家必爭之地。</li>
-            <li>🌲🌳 森林可讓英雄隱藏，避免被敵人發現。</li>
-            <li>🌊 河流無法穿越，但可透過木橋通行。</li>
+            <li>村莊會密集產出所有種類士兵（同時最多 5 隻）。</li>
+            <li>森林可隱藏英雄，AI 不會直接看到你，但會朝最後看到你的位置前進最多約 2 秒。</li>
+            <li>河流無法穿越，木橋可通行。</li>
         </ul>
-
         <h3>⚠️ 邊界警告</h3>
-        <p>地圖四周有紅色警示區。靠近邊界會持續損失士兵，士兵歸零後改扣英雄血量。</p>
-
-        <h3>⚔️ 戰鬥規則</h3>
-        <p>雙方碰撞後會持續互相扣減兵力，兵力差距越大弱勢方損失越快。勝利方會吸收敗方開戰時的士兵總數。敵人之間也會互相攻擊。</p>
-
-        <button class="close-help-btn" id="closeHelpBtn">關閉</button>
+        <p>地圖四周紅色警示區會持續損失士兵，士兵歸零後扣英雄血量。AI 會避開紅邊。</p>
+        <h3>⚔️ 戰鬥與血量</h3>
+        <p>士兵歸零後雙方會繼續互扣英雄血量。AI 也有血量，擊敗 AI 後可吸收其開戰時兵力。</p>
+        <h3>📈 動態 AI 兵力</h3>
+        <p>玩家士兵達 5000 / 50000 / 100000 / 500000 / 1000000 / 10000000 / 100000000 / 1000000000 / 10000000000 / 100000000000 時，新 AI 會以對應兵力起始。</p>
+        <button class="close-modal-btn" id="closeHelpBtn">關閉</button>
     </div>
 </div>
 
-<!-- ================= 遊戲 ================= -->
+<div class="modal" id="shopModal">
+    <div class="modal-content">
+        <h2>🏪 英雄商店</h2>
+        <p style="text-align:center;">💰 目前金幣：<span id="shopGold" style="color:#ffd966;font-weight:bold;">$0</span></p>
+        <div class="shop-grid" id="shopGrid"></div>
+        <button class="close-modal-btn" id="closeShopBtn">關閉</button>
+    </div>
+</div>
+
 <div class="game-wrapper" id="gameWrapper">
     <div class="top-bar" id="topBar">
         <span>⚔️ <span class="value" id="soldierCount">0</span></span>
         <span class="hp" id="hpDisplay">❤️ <span class="value" id="heroHp">100</span></span>
-        <span class="hud-boost" id="boostIndicator">⚡ 加速</span>
-        <button class="home-btn" id="homeBtn">🏠 封面</button>
+        <span class="hud-skill" id="skillIndicator">⚡ 技能</span>
+        <button class="home-btn" id="homeBtn">🏠 結算</button>
     </div>
-
     <div class="game-stage" id="gameStage">
         <canvas id="gameCanvas" width="1000" height="620"></canvas>
-        <div class="joystick-base" id="joystickBase">
-            <div class="joystick-stick" id="joystickStick"></div>
-        </div>
-        <div class="boost-btn" id="boostBtn">⚡<br>加速</div>
+        <div class="joystick-base" id="joystickBase"><div class="joystick-stick" id="joystickStick"></div></div>
+        <div class="boost-btn" id="boostBtn">⚡<br>技能</div>
         <button class="float-btn game-mute" id="gameMuteBtn" title="靜音 / 播放">🔊</button>
         <button class="float-btn game-fullscreen" id="gameFullscreenBtn" title="全屏">⛶</button>
-
         <div class="gameover-overlay" id="gameoverOverlay">
             <div class="gameover-box">
                 <h2 class="gameover-title" id="gameoverTitle">🏆 勝利！</h2>
                 <div class="score-line">本局最高士兵<span class="num" id="runScore">0</span></div>
                 <div class="score-line">歷史最高分<span class="best" id="bestScore">0</span></div>
+                <div class="score-line">獲得金幣<span class="num" id="earnedGold">$0</span></div>
+                <div class="score-line">總金幣<span class="best" id="totalGold">$0</span></div>
                 <div class="new-record" id="newRecord" style="display:none;">🎉 新紀錄！</div>
                 <button class="return-btn" id="returnToCoverBtn">返回封面</button>
             </div>
@@ -519,16 +222,86 @@
     </div>
 </div>
 
-<audio id="menuMusic" loop preload="auto">
-    <source src="Shields and Staffs - Warzone Heroes.mp3" type="audio/mpeg">
-</audio>
-<audio id="battleMusic" loop preload="auto">
-    <source src="Shields and Staffs - Armies Assault.mp3" type="audio/mpeg">
-</audio>
+<audio id="menuMusic" loop preload="auto"><source src="Shields and Staffs - Warzone Heroes.mp3" type="audio/mpeg"></audio>
+<audio id="battleMusic" loop preload="auto"><source src="Shields and Staffs - Armies Assault.mp3" type="audio/mpeg"></audio>
 
 <script>
 (function() {
-    // ================= 基本元素 =================
+    // ================= 數字格式化 =================
+    function formatNum(n) {
+        n = Math.floor(n);
+        if (n < 1000) return n.toString();
+        if (n < 1000000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+        if (n < 1000000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+        if (n < 1000000000000) return (n / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
+        return (n / 1000000000000).toFixed(1).replace(/\.0$/, '') + 'T';
+    }
+    function formatGold(n) { return '$' + formatNum(n); }
+
+    // ================= 士兵定義 =================
+    const SOLDIER_TYPES = [
+        { icon: '🤺', name: '劍士', value: 200, tier: 'bronze', weight: 110, color: '#cd7f32' },
+        { icon: '👨‍🌾', name: '農民', value: 500, tier: 'bronze', weight: 90, color: '#b87333' },
+        { icon: '🥷', name: '忍者', value: 1000, tier: 'bronze', weight: 75, color: '#8a7050' },
+        { icon: '🧟', name: '殭屍', value: 3000, tier: 'bronze', weight: 55, color: '#7a9a5a' },
+        { icon: '💀', name: '骷髏', value: 5000, tier: 'bronze', weight: 42, color: '#e0e0d0' },
+        { icon: '👻', name: '幽靈', value: 7000, tier: 'bronze', weight: 35, color: '#a8d8ff' },
+        { icon: '🦂', name: '蠍子', value: 10000, tier: 'silver', weight: 26, color: '#c0c0c0' },
+        { icon: '🧚‍♀️', name: '精靈', value: 30000, tier: 'silver', weight: 18, color: '#ffb8d0' },
+        { icon: '🐯', name: '猛虎', value: 50000, tier: 'silver', weight: 13, color: '#d0a060' },
+        { icon: '🦁', name: '獅子', value: 70000, tier: 'silver', weight: 10, color: '#e0b040' },
+        { icon: '🦄', name: '獨角獸', value: 100000, tier: 'gold', weight: 6.5, color: '#ffd700' },
+        { icon: '🐊', name: '鱷魚', value: 300000, tier: 'gold', weight: 4, color: '#a0d060' },
+        { icon: '🦣', name: '長毛象', value: 500000, tier: 'gold', weight: 3, color: '#c09070' },
+        { icon: '🧜‍♂️', name: '人魚', value: 700000, tier: 'gold', weight: 2.2, color: '#80c0e0' },
+        { icon: '🧌', name: '巨魔', value: 1000000, tier: 'gold', weight: 1.6, color: '#80a060' },
+        { icon: '😈', name: '惡魔', value: 3000000, tier: 'gold', weight: 1.1, color: '#ff6060' },
+        { icon: '🦖', name: '暴龍', value: 5000000, tier: 'gold', weight: 0.75, color: '#90d040' },
+        { icon: '🐦‍🔥', name: '鳳凰', value: 7000000, tier: 'gold', weight: 0.5, color: '#ff8000' },
+        { icon: '🐉', name: '巨龍', value: 10000000, tier: 'gold', weight: 0.3, color: '#ffd700' },
+    ];
+    const TIER_TIME = { bronze: 60, silver: 180, gold: 300 };
+    const TOTAL_WEIGHT = SOLDIER_TYPES.reduce((s, t) => s + t.weight, 0);
+    function pickSoldierType() {
+        let r = Math.random() * TOTAL_WEIGHT;
+        for (const t of SOLDIER_TYPES) { r -= t.weight; if (r <= 0) return t; }
+        return SOLDIER_TYPES[0];
+    }
+
+    // ================= 英雄（順序：Roland → Adelaide → Sandro → Jenova → Mephala → Zydar → Rashka → Xeron）
+    const HEROES = [
+        { id: 'roland',   icon: '🏇',   name: 'Roland',   skillName: "King's Wind",       desc: '加速移動一段時間',                    price: 0 },
+        { id: 'adelaide', icon: '🧙‍♂️', name: 'Adelaide', skillName: 'Blizzard',          desc: '範圍內下暴風雪減速敵人',              price: 100000000 },
+        { id: 'sandro',   icon: '☠️',   name: 'Sandro',   skillName: 'Necromancy',        desc: '召喚💀士兵 +5000',                    price: 500000000 },
+        { id: 'jenova',   icon: '🧝',   name: 'Jenova',   skillName: 'Heart of Purity',   desc: '召喚🦄士兵 +100000',                  price: 1000000000 },
+        { id: 'mephala',  icon: '🕷',   name: 'Mephala',  skillName: 'Holy Shield',       desc: '開盾無敵一段短時間',                  price: 5000000000 },
+        { id: 'zydar',    icon: '👹',   name: 'Zydar',    skillName: 'Fireball',          desc: '範圍內敵人兵力-1/3',                  price: 10000000000 },
+        { id: 'rashka',   icon: '🧛',   name: 'Rashka',   skillName: 'Inferno Flame',     desc: '10秒熔岩，減速+每秒傷害',             price: 50000000000 },
+        { id: 'xeron',    icon: '👺',   name: 'Xeron',    skillName: 'Echo of the Abyss', desc: '召喚😈士兵 +3000000',                 price: 100000000000 },
+    ];
+
+    const SAVE_KEY = 'shields_staffs_save_v1';
+    let gameState = { gold: 0, ownedHeroes: ['roland'], selectedHero: 'roland', muted: false, bestScore: 0 };
+
+    function loadSave() {
+        try {
+            const raw = localStorage.getItem(SAVE_KEY);
+            if (raw) {
+                const data = JSON.parse(raw);
+                gameState.gold = Number(data.gold) || 0;
+                gameState.ownedHeroes = Array.isArray(data.ownedHeroes) && data.ownedHeroes.length ? data.ownedHeroes : ['roland'];
+                if (!gameState.ownedHeroes.includes('roland')) gameState.ownedHeroes.unshift('roland');
+                gameState.selectedHero = data.selectedHero && gameState.ownedHeroes.includes(data.selectedHero) ? data.selectedHero : 'roland';
+                gameState.muted = !!data.muted;
+                gameState.bestScore = Number(data.bestScore) || 0;
+            }
+        } catch (e) {}
+        isMuted = gameState.muted;
+    }
+    function saveGame() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(gameState)); } catch (e) {} }
+    function getHero(id) { return HEROES.find(h => h.id === id) || HEROES[0]; }
+
+    // ================= 元素 =================
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const stage = document.getElementById('gameStage');
@@ -536,15 +309,26 @@
     const soldierSpan = document.getElementById('soldierCount');
     const heroHpSpan = document.getElementById('heroHp');
     const hpDisplay = document.getElementById('hpDisplay');
-    const boostIndicator = document.getElementById('boostIndicator');
+    const skillIndicator = document.getElementById('skillIndicator');
     const boostBtn = document.getElementById('boostBtn');
 
     const coverScreen = document.getElementById('coverScreen');
     const gameWrapper = document.getElementById('gameWrapper');
     const startGameBtn = document.getElementById('startGameBtn');
     const helpBtn = document.getElementById('helpBtn');
+    const shopBtn = document.getElementById('shopBtn');
     const helpModal = document.getElementById('helpModal');
+    const shopModal = document.getElementById('shopModal');
     const closeHelpBtn = document.getElementById('closeHelpBtn');
+    const closeShopBtn = document.getElementById('closeShopBtn');
+    const shopGrid = document.getElementById('shopGrid');
+    const shopGold = document.getElementById('shopGold');
+    const saveBtn = document.getElementById('saveBtn');
+    const loadBtn = document.getElementById('loadBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const loadFileInput = document.getElementById('loadFileInput');
+    const coverGold = document.getElementById('coverGold');
+    const coverHero = document.getElementById('coverHero');
     const coverMuteBtn = document.getElementById('coverMuteBtn');
     const coverFullscreenBtn = document.getElementById('coverFullscreenBtn');
     const gameMuteBtn = document.getElementById('gameMuteBtn');
@@ -555,6 +339,8 @@
     const gameoverTitle = document.getElementById('gameoverTitle');
     const runScoreEl = document.getElementById('runScore');
     const bestScoreEl = document.getElementById('bestScore');
+    const earnedGoldEl = document.getElementById('earnedGold');
+    const totalGoldEl = document.getElementById('totalGold');
     const newRecordEl = document.getElementById('newRecord');
     const returnToCoverBtn = document.getElementById('returnToCoverBtn');
 
@@ -563,238 +349,142 @@
 
     coverFooter.textContent = 'v1.0 © ' + new Date().getFullYear() + ' ☕迪遜咖啡廳，版權所有。';
 
-    const BEST_KEY = 'mma_best_score_v1';
-
-    // ================= 音效系統 =================
+    // ================= 音效 =================
     let audioCtx = null;
     let isMuted = false;
-
     function getAudioCtx() {
-        if (!audioCtx) {
-            try {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            } catch (e) { return null; }
-        }
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume().catch(() => {});
-        }
+        if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
+        if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
         return audioCtx;
     }
-
     function playTone(freq, duration, type = 'sine', volume = 0.08) {
         if (isMuted) return;
-        const ac = getAudioCtx();
-        if (!ac) return;
+        const ac = getAudioCtx(); if (!ac) return;
         try {
-            const osc = ac.createOscillator();
-            const gain = ac.createGain();
-            osc.type = type;
-            osc.frequency.setValueAtTime(freq, ac.currentTime);
+            const osc = ac.createOscillator(); const gain = ac.createGain();
+            osc.type = type; osc.frequency.setValueAtTime(freq, ac.currentTime);
             gain.gain.setValueAtTime(0, ac.currentTime);
             gain.gain.linearRampToValueAtTime(volume, ac.currentTime + 0.008);
             gain.gain.exponentialRampToValueAtTime(0.0008, ac.currentTime + duration);
-            osc.connect(gain);
-            gain.connect(ac.destination);
-            osc.start(ac.currentTime);
-            osc.stop(ac.currentTime + duration + 0.02);
+            osc.connect(gain); gain.connect(ac.destination);
+            osc.start(ac.currentTime); osc.stop(ac.currentTime + duration + 0.02);
         } catch (e) {}
     }
-
-    function playSequence(notes) {
-        if (isMuted) return;
-        const ac = getAudioCtx();
-        if (!ac) return;
-        let t = 0;
-        for (const n of notes) {
-            setTimeout(() => {
-                playTone(n.f, n.d, n.t || 'sine', n.v || 0.09);
-            }, t);
-            t += n.gap || n.d * 1000;
-        }
-    }
-
+    function playSequence(notes) { if (isMuted) return; let t = 0; for (const n of notes) { setTimeout(() => playTone(n.f, n.d, n.t || 'sine', n.v || 0.09), t); t += n.gap || n.d * 1000; } }
     const Sfx = {
-        captureComplete: () => playSequence([
-            { f: 523, d: 0.08, gap: 70 },
-            { f: 659, d: 0.08, gap: 70 },
-            { f: 784, d: 0.14 },
-        ]),
-        villageSpawn: () => playSequence([
-            { f: 440, d: 0.08, gap: 80 },
-            { f: 587, d: 0.12 },
-        ]),
-        combatHit: () => playTone(130 + Math.random() * 180, 0.045, 'square', 0.025),
-        enemyDown: () => playSequence([
-            { f: 440, d: 0.09, t: 'sawtooth', gap: 90 },
-            { f: 330, d: 0.09, t: 'sawtooth', gap: 90 },
-            { f: 220, d: 0.18, t: 'sawtooth' },
-        ]),
-        playerDown: () => playSequence([
-            { f: 300, d: 0.18, t: 'sawtooth', v: 0.11, gap: 180 },
-            { f: 200, d: 0.18, t: 'sawtooth', v: 0.11, gap: 180 },
-            { f: 100, d: 0.5, t: 'sawtooth', v: 0.11 },
-        ]),
-        victory: () => playSequence([
-            { f: 523, d: 0.12, gap: 130 },
-            { f: 659, d: 0.12, gap: 130 },
-            { f: 784, d: 0.12, gap: 130 },
-            { f: 1046, d: 0.4, v: 0.12 },
-        ]),
+        captureComplete: () => playSequence([{f:523,d:.08,gap:70},{f:659,d:.08,gap:70},{f:784,d:.14}]),
+        villageSpawn: () => playSequence([{f:440,d:.08,gap:80},{f:587,d:.12}]),
+        combatHit: () => playTone(130 + Math.random() * 180, 0.045, 'square', 0.02),
+        enemyDown: () => playSequence([{f:440,d:.09,t:'sawtooth',gap:90},{f:330,d:.09,t:'sawtooth',gap:90},{f:220,d:.18,t:'sawtooth'}]),
+        playerDown: () => playSequence([{f:300,d:.18,t:'sawtooth',gap:180},{f:200,d:.18,t:'sawtooth',gap:180},{f:100,d:.5,t:'sawtooth'}]),
+        victory: () => playSequence([{f:523,d:.12,gap:130},{f:659,d:.12,gap:130},{f:784,d:.12,gap:130},{f:1046,d:.4,v:.12}]),
         click: () => playTone(820, 0.05, 'sine', 0.055),
-        newEnemy: () => playSequence([
-            { f: 320, d: 0.08, t: 'square', gap: 90 },
-            { f: 400, d: 0.12, t: 'square' },
-        ]),
-        edgeWarn: () => playTone(110, 0.12, 'sawtooth', 0.035),
-        newRecord: () => playSequence([
-            { f: 659, d: 0.1, gap: 100 },
-            { f: 784, d: 0.1, gap: 100 },
-            { f: 1046, d: 0.1, gap: 100 },
-            { f: 1318, d: 0.35, v: 0.12 },
-        ]),
+        newEnemy: () => playSequence([{f:320,d:.08,t:'square',gap:90},{f:400,d:.12,t:'square'}]),
+        edgeWarn: () => playTone(110, 0.12, 'sawtooth', 0.03),
+        newRecord: () => playSequence([{f:659,d:.1,gap:100},{f:784,d:.1,gap:100},{f:1046,d:.1,gap:100},{f:1318,d:.35,v:.12}]),
+        skillCast: () => playSequence([{f:660,d:.07,gap:60},{f:880,d:.1,gap:60},{f:1100,d:.12}]),
+        buy: () => playSequence([{f:784,d:.08,gap:80},{f:1046,d:.16}]),
     };
 
-    // ================= 音樂控制 =================
     let currentMusic = null;
-
-    function updateMuteIcons() {
-        const icon = isMuted ? '🔇' : '🔊';
-        coverMuteBtn.textContent = icon;
-        gameMuteBtn.textContent = icon;
-    }
-
-    function switchToMenuMusic() {
-        try { battleMusic.pause(); battleMusic.currentTime = 0; } catch (e) {}
-        currentMusic = menuMusic;
-        if (!isMuted) {
-            menuMusic.play().then(() => updateMuteIcons()).catch(() => {});
-        }
-    }
-
-    function switchToBattleMusic() {
-        try { menuMusic.pause(); menuMusic.currentTime = 0; } catch (e) {}
-        currentMusic = battleMusic;
-        if (!isMuted) {
-            battleMusic.play().then(() => updateMuteIcons()).catch(() => {});
-        }
-    }
-
+    function updateMuteIcons() { const icon = isMuted ? '🔇' : '🔊'; coverMuteBtn.textContent = icon; gameMuteBtn.textContent = icon; }
+    function switchToMenuMusic() { try { battleMusic.pause(); battleMusic.currentTime = 0; } catch (e) {} currentMusic = menuMusic; if (!isMuted) menuMusic.play().then(() => updateMuteIcons()).catch(() => {}); }
+    function switchToBattleMusic() { try { menuMusic.pause(); menuMusic.currentTime = 0; } catch (e) {} currentMusic = battleMusic; if (!isMuted) battleMusic.play().then(() => updateMuteIcons()).catch(() => {}); }
     function toggleMute() {
-        isMuted = !isMuted;
-        updateMuteIcons();
-        if (isMuted) {
-            try { menuMusic.pause(); } catch (e) {}
-            try { battleMusic.pause(); } catch (e) {}
-        } else {
-            if (isPlaying) {
-                battleMusic.play().then(() => updateMuteIcons()).catch(() => {});
-            } else {
-                menuMusic.play().then(() => updateMuteIcons()).catch(() => {});
-            }
-        }
+        isMuted = !isMuted; gameState.muted = isMuted; saveGame(); updateMuteIcons();
+        if (isMuted) { try { menuMusic.pause(); } catch (e) {} try { battleMusic.pause(); } catch (e) {} }
+        else { if (isPlaying) battleMusic.play().then(() => updateMuteIcons()).catch(() => {}); else menuMusic.play().then(() => updateMuteIcons()).catch(() => {}); }
         Sfx.click();
     }
-
-    // ================= 全屏 =================
     function toggleFullscreen() {
         Sfx.click();
-        if (!document.fullscreenElement) {
-            const el = document.documentElement;
-            if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
-            else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-        } else {
-            if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
-            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-        }
+        if (!document.fullscreenElement) { const el = document.documentElement; if (el.requestFullscreen) el.requestFullscreen().catch(() => {}); else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen(); }
+        else { if (document.exitFullscreen) document.exitFullscreen().catch(() => {}); else if (document.webkitExitFullscreen) document.webkitExitFullscreen(); }
     }
-
     coverMuteBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleMute(); });
     gameMuteBtn.addEventListener('click', toggleMute);
     coverFullscreenBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleFullscreen(); });
     gameFullscreenBtn.addEventListener('click', toggleFullscreen);
 
-    // ================= 自動播放 =================
     function attemptMenuAutoplay() {
         currentMusic = menuMusic;
         menuMusic.play().then(() => updateMuteIcons()).catch(() => {
-            const resume = () => {
-                if (!isMuted && !isPlaying) {
-                    menuMusic.play().then(() => updateMuteIcons()).catch(() => {});
-                }
-                document.removeEventListener('click', resume);
-                document.removeEventListener('touchstart', resume);
-                document.removeEventListener('keydown', resume);
-            };
+            const resume = () => { if (!isMuted && !isPlaying) menuMusic.play().then(() => updateMuteIcons()).catch(() => {}); document.removeEventListener('click', resume); document.removeEventListener('touchstart', resume); document.removeEventListener('keydown', resume); };
             document.addEventListener('click', resume, { once: true });
             document.addEventListener('touchstart', resume, { once: true });
             document.addEventListener('keydown', resume, { once: true });
         });
     }
-
     menuMusic.addEventListener('play', () => { if (!isMuted) updateMuteIcons(); });
     battleMusic.addEventListener('play', () => { if (!isMuted) updateMuteIcons(); });
 
     // ================= 遊戲參數 =================
-    const WORLD_W = 2200;
-    const WORLD_H = 1500;
-    const VIEW_W = canvas.width;
-    const VIEW_H = canvas.height;
-
+    // 地圖擴大 1.6 倍左右
+    const WORLD_W = 3600, WORLD_H = 2400;
+    const VIEW_W = canvas.width, VIEW_H = canvas.height;
     const TERRAIN_GRID = 60;
     const HERO_RADIUS = 28;
     const BASE_SPEED = 2.9;
-    const BOOST_SPEED_MULT = 1.9;
-    const BOOST_POWER_PENALTY = 0.65;
-    const BOOST_DURATION = 180;
-    const BOOST_COOLDOWN = 300;
-
-    const UNIT_BRONZE = 200;
-    const UNIT_SILVER = 1000;
-    const UNIT_GOLD = 5000;
-
-    const CAPTURE_DURATION = 180;
+    const SKILL_SPEED_MULT = 2.0;
+    const SKILL_DURATION = 180;
+    const SKILL_COOLDOWN = 1800;
     const EDGE_MARGIN = 120;
     const EDGE_SOLDIER_DMG = 1.5;
     const EDGE_HP_DMG = 0.3;
     const COMBAT_RATE = 0.004;
     const COMBAT_MIN = 0.5;
-    const SPAWN_INTERVAL = 300;
+    const SPAWN_INTERVAL = 180;
     const SPAWN_COUNT = 3;
-    const MAX_UNITS = 80;
+    const MAX_UNITS = 90;
     const MAX_HERO_HP = 100;
+    const AI_MAX_HP = 100;
     const INITIAL_ENEMY_COUNT = 5;
-
     const TILE_SIZE = TERRAIN_GRID;
     const GRID_W = Math.ceil(WORLD_W / TILE_SIZE);
     const GRID_H = Math.ceil(WORLD_H / TILE_SIZE);
+    const MAX_ICONS_DISPLAY = 60;
+    const ICONS_PER_RING = 8;
+    const ICON_BASE_RADIUS = HERO_RADIUS + 20;
+    const ICON_RING_GAP = 22;
+    const FOREST_SPEED_FACTOR = 0.55;
+    const LAST_SEEN_DURATION = 120;
+    const VILLAGE_UNIT_LIMIT = 5;
 
-    // ================= 遊戲狀態 =================
-    let player = null;
-    let enemies = [];
-    let soldierUnits = [];
-    let forests = [];
-    let riverTiles = new Set();
-    let bridges = new Set();
-    let villages = [];
-    let battleLogs = [];
-    let combatEffects = [];
-    let activeCombats = [];
-    let battleRegistry = new Map();
-    let nextUnitId = 1;
-    let gameOver = false;
-    let winFlag = false;
-    let camera = { x: 0, y: 0 };
-    let frame = 0;
-    let spawnTimer = 0;
+    function getSoldierIcons(soldiers) {
+        let remaining = Math.floor(soldiers);
+        if (remaining <= 0) return [];
+        const icons = [];
+        for (let i = SOLDIER_TYPES.length - 1; i >= 0; i--) {
+            const t = SOLDIER_TYPES[i];
+            const c = Math.floor(remaining / t.value);
+            if (c > 0) { for (let j = 0; j < c; j++) icons.push(t.icon); remaining -= c * t.value; }
+        }
+        if (icons.length === 0 && soldiers > 0) icons.push('🤺');
+        return icons;
+    }
+    function getSpeedMultiplier(soldiers) {
+        const reduction = Math.min(0.55, Math.log10(Math.max(1, soldiers)) * 0.11);
+        return 1 - reduction;
+    }
+    function getAttackRange(soldiers) {
+        if (soldiers <= 0) return HERO_RADIUS * 2;
+        let iconCount = getSoldierIcons(soldiers).length;
+        if (iconCount > MAX_ICONS_DISPLAY) iconCount = MAX_ICONS_DISPLAY;
+        const rings = Math.max(1, Math.ceil(iconCount / ICONS_PER_RING));
+        return ICON_BASE_RADIUS + (rings - 1) * ICON_RING_GAP + 25;
+    }
 
-    let isPlaying = false;
-    let maxSoldiersThisRun = 0;
-
+    // ================= 狀態 =================
+    let player = null, enemies = [], soldierUnits = [], forests = [], riverTiles = new Set(), bridges = new Set(), villages = [];
+    let battleLogs = [], combatEffects = [], activeCombats = [], battleRegistry = new Map();
+    let nextUnitId = 1, gameOver = false, winFlag = false;
+    let camera = { x: 0, y: 0 }, frame = 0, spawnTimer = 0;
+    let isPlaying = false, maxSoldiersThisRun = 0;
+    let skillTimer = 0, skillCooldown = 0, invincibleTimer = 0;
+    let slowEffects = [], lavaEffects = [];
     const keys = { w: false, a: false, s: false, d: false, ArrowUp: false, ArrowLeft: false, ArrowDown: false, ArrowRight: false, ' ': false, j: false };
     const joystickInput = { x: 0, y: 0 };
-
-    let lastCombatSoundFrame = -100;
-    let lastEdgeWarnFrame = -100;
+    let lastCombatSoundFrame = -100, lastEdgeWarnFrame = -100;
 
     function resizeGame() {
         const aspect = VIEW_W / VIEW_H;
@@ -802,12 +492,9 @@
         const availW = window.innerWidth - 16;
         const availH = window.innerHeight - topBarH - 24;
         let w, h;
-        if (availW / availH > aspect) { h = availH; w = h * aspect; }
-        else { w = availW; h = w / aspect; }
-        stage.style.width = w + 'px';
-        stage.style.height = h + 'px';
-        canvas.style.width = w + 'px';
-        canvas.style.height = h + 'px';
+        if (availW / availH > aspect) { h = availH; w = h * aspect; } else { w = availW; h = w / aspect; }
+        stage.style.width = w + 'px'; stage.style.height = h + 'px';
+        canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
     }
 
     function rand(min, max) { return Math.random() * (max - min) + min; }
@@ -824,487 +511,393 @@
                 const key = gx + ',' + gy;
                 if (!riverTiles.has(key)) continue;
                 if (bridges.has(key)) continue;
-                const tileLeft = gx * TILE_SIZE;
-                const tileRight = tileLeft + TILE_SIZE;
-                const tileTop = gy * TILE_SIZE;
-                const tileBottom = tileTop + TILE_SIZE;
-                const closestX = Math.max(tileLeft, Math.min(px, tileRight));
-                const closestY = Math.max(tileTop, Math.min(py, tileBottom));
-                if (Math.hypot(px - closestX, py - closestY) < radius) return true;
+                const tl = gx * TILE_SIZE, tr = tl + TILE_SIZE, tt = gy * TILE_SIZE, tb = tt + TILE_SIZE;
+                const cx = Math.max(tl, Math.min(px, tr));
+                const cy = Math.max(tt, Math.min(py, tb));
+                if (Math.hypot(px - cx, py - cy) < radius) return true;
             }
         }
         return false;
     }
-
-    function isBridgeAt(px, py) {
-        const gx = Math.floor(px / TILE_SIZE);
-        const gy = Math.floor(py / TILE_SIZE);
-        return bridges.has(gx + ',' + gy);
-    }
-
+    function isBridgeAt(px, py) { const gx = Math.floor(px / TILE_SIZE), gy = Math.floor(py / TILE_SIZE); return bridges.has(gx + ',' + gy); }
     function tryMoveEntity(entity, dx, dy) {
-        const newX = entity.x + dx;
-        const newY = entity.y + dy;
-        if (!isInRiver(newX, entity.y, entity.radius)) entity.x = newX;
-        if (!isInRiver(entity.x, newY, entity.radius)) entity.y = newY;
+        const nx = entity.x + dx, ny = entity.y + dy;
+        if (!isInRiver(nx, entity.y, entity.radius)) entity.x = nx;
+        if (!isInRiver(entity.x, ny, entity.radius)) entity.y = ny;
         entity.x = Math.max(HERO_RADIUS, Math.min(WORLD_W - HERO_RADIUS, entity.x));
         entity.y = Math.max(HERO_RADIUS, Math.min(WORLD_H - HERO_RADIUS, entity.y));
     }
+    function isInForest(px, py, radius) { for (let f of forests) if (dist(px, py, f.x, f.y) < f.r - radius * 0.5) return true; return false; }
+    function clampFromEdge(tx, ty) {
+        const margin = EDGE_MARGIN + 40;
+        return { x: Math.max(margin, Math.min(WORLD_W - margin, tx)), y: Math.max(margin, Math.min(WORLD_H - margin, ty)) };
+    }
 
+    // 地形生成
     function generateRiverTiles() {
         const tiles = new Set();
         const numRivers = 2 + Math.floor(Math.random() * 2);
         for (let r = 0; r < numRivers; r++) {
             const horizontal = Math.random() > 0.5;
             if (horizontal) {
-                let gx = 0;
-                let gy = Math.floor(GRID_H * (0.15 + Math.random() * 0.7));
+                let gx = 0, gy = Math.floor(GRID_H * (0.15 + Math.random() * 0.7));
                 const endGx = Math.floor(GRID_W * (0.5 + Math.random() * 0.4));
                 while (gx < endGx && gx < GRID_W) {
-                    tiles.add(gx + ',' + gy);
-                    gx++;
-                    if (Math.random() < 0.45) {
-                        gy += Math.random() < 0.5 ? -1 : 1;
-                        gy = Math.max(2, Math.min(GRID_H - 3, gy));
-                    }
-                    if (Math.random() < 0.12) {
-                        const by = gy + (Math.random() < 0.5 ? -2 : 2);
-                        if (by >= 0 && by < GRID_H) tiles.add(gx + ',' + by);
-                    }
+                    tiles.add(gx + ',' + gy); gx++;
+                    if (Math.random() < 0.45) { gy += Math.random() < 0.5 ? -1 : 1; gy = Math.max(2, Math.min(GRID_H - 3, gy)); }
+                    if (Math.random() < 0.12) { const by = gy + (Math.random() < 0.5 ? -2 : 2); if (by >= 0 && by < GRID_H) tiles.add(gx + ',' + by); }
                 }
             } else {
-                let gy = 0;
-                let gx = Math.floor(GRID_W * (0.15 + Math.random() * 0.7));
+                let gy = 0, gx = Math.floor(GRID_W * (0.15 + Math.random() * 0.7));
                 const endGy = Math.floor(GRID_H * (0.5 + Math.random() * 0.4));
                 while (gy < endGy && gy < GRID_H) {
-                    tiles.add(gx + ',' + gy);
-                    gy++;
-                    if (Math.random() < 0.45) {
-                        gx += Math.random() < 0.5 ? -1 : 1;
-                        gx = Math.max(2, Math.min(GRID_W - 3, gx));
-                    }
-                    if (Math.random() < 0.12) {
-                        const bx = gx + (Math.random() < 0.5 ? -2 : 2);
-                        if (bx >= 0 && bx < GRID_W) tiles.add(bx + ',' + gy);
-                    }
+                    tiles.add(gx + ',' + gy); gy++;
+                    if (Math.random() < 0.45) { gx += Math.random() < 0.5 ? -1 : 1; gx = Math.max(2, Math.min(GRID_W - 3, gx)); }
+                    if (Math.random() < 0.12) { const bx = gx + (Math.random() < 0.5 ? -2 : 2); if (bx >= 0 && bx < GRID_W) tiles.add(bx + ',' + gy); }
                 }
             }
         }
-        const expanded = new Set(tiles);
-        for (const key of tiles) {
-            const [x, y] = key.split(',').map(Number);
-            for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
-                if (Math.random() < 0.55) {
-                    const nx = x + dx, ny = y + dy;
-                    if (nx >= 0 && nx < GRID_W && ny >= 0 && ny < GRID_H) expanded.add(nx + ',' + ny);
-                }
-            }
-        }
-        const expanded2 = new Set(expanded);
-        for (const key of expanded) {
-            const [x, y] = key.split(',').map(Number);
-            for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
-                if (Math.random() < 0.25) {
-                    const nx = x + dx, ny = y + dy;
-                    if (nx >= 0 && nx < GRID_W && ny >= 0 && ny < GRID_H) expanded2.add(nx + ',' + ny);
-                }
-            }
-        }
-        return expanded2;
+        const e1 = new Set(tiles);
+        for (const key of tiles) { const [x, y] = key.split(',').map(Number); for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) if (Math.random() < 0.55) { const nx = x + dx, ny = y + dy; if (nx >= 0 && nx < GRID_W && ny >= 0 && ny < GRID_H) e1.add(nx + ',' + ny); } }
+        const e2 = new Set(e1);
+        for (const key of e1) { const [x, y] = key.split(',').map(Number); for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) if (Math.random() < 0.25) { const nx = x + dx, ny = y + dy; if (nx >= 0 && nx < GRID_W && ny >= 0 && ny < GRID_H) e2.add(nx + ',' + ny); } }
+        return e2;
     }
-
     function generateBridges(riverTiles) {
-        const bridges = new Set();
-        const colCandidates = [];
-        const rowCandidates = [];
+        const bridges = new Set(); const usedCols = new Set(); const usedRows = new Set();
+        let count = 0; const target = 5; const MAX_SPAN = 12;
+        const colC = [];
         for (let gx = 2; gx < GRID_W - 2; gx++) {
-            let segments = [];
-            let curStart = -1, curCount = 0;
-            for (let gy = 0; gy < GRID_H; gy++) {
-                if (riverTiles.has(gx + ',' + gy)) {
-                    if (curStart === -1) curStart = gy;
-                    curCount++;
-                } else {
-                    if (curStart !== -1) {
-                        segments.push({ start: curStart, end: gy - 1, count: curCount });
-                        curStart = -1; curCount = 0;
-                    }
-                }
-            }
-            if (curStart !== -1) segments.push({ start: curStart, end: GRID_H - 1, count: curCount });
-            for (const seg of segments) {
-                if (seg.count <= 8 && seg.start > 1 && seg.end < GRID_H - 2) {
-                    const aboveFree = !riverTiles.has(gx + ',' + (seg.start - 1));
-                    const belowFree = !riverTiles.has(gx + ',' + (seg.end + 1));
-                    if (aboveFree && belowFree) {
-                        colCandidates.push({ gx, minY: seg.start, maxY: seg.end, span: seg.count });
-                    }
-                }
-            }
+            const rows = []; for (let gy = 0; gy < GRID_H; gy++) if (riverTiles.has(gx + ',' + gy)) rows.push(gy);
+            if (rows.length === 0 || rows.length > MAX_SPAN) continue;
+            const minY = rows[0], maxY = rows[rows.length - 1];
+            if (maxY - minY + 1 > MAX_SPAN || minY <= 1 || maxY >= GRID_H - 2) continue;
+            if (riverTiles.has(gx + ',' + (minY - 1)) || riverTiles.has(gx + ',' + (maxY + 1))) continue;
+            colC.push({ gx, minY, maxY, span: maxY - minY + 1 });
         }
+        colC.sort((a,b) => a.span - b.span);
+        for (const c of colC) {
+            if (count >= target) break;
+            let tooClose = false; for (const ugx of usedCols) if (Math.abs(ugx - c.gx) < 6) { tooClose = true; break; }
+            if (tooClose) continue;
+            for (let gy = c.minY; gy <= c.maxY; gy++) if (riverTiles.has(c.gx + ',' + gy)) bridges.add(c.gx + ',' + gy);
+            usedCols.add(c.gx); count++;
+        }
+        const rowC = [];
         for (let gy = 2; gy < GRID_H - 2; gy++) {
-            let segments = [];
-            let curStart = -1, curCount = 0;
-            for (let gx = 0; gx < GRID_W; gx++) {
-                if (riverTiles.has(gx + ',' + gy)) {
-                    if (curStart === -1) curStart = gx;
-                    curCount++;
-                } else {
-                    if (curStart !== -1) {
-                        segments.push({ start: curStart, end: gx - 1, count: curCount });
-                        curStart = -1; curCount = 0;
-                    }
-                }
-            }
-            if (curStart !== -1) segments.push({ start: curStart, end: GRID_W - 1, count: curCount });
-            for (const seg of segments) {
-                if (seg.count <= 8 && seg.start > 1 && seg.end < GRID_W - 2) {
-                    const leftFree = !riverTiles.has((seg.start - 1) + ',' + gy);
-                    const rightFree = !riverTiles.has((seg.end + 1) + ',' + gy);
-                    if (leftFree && rightFree) {
-                        rowCandidates.push({ gy, minX: seg.start, maxX: seg.end, span: seg.count });
-                    }
-                }
-            }
+            const cols = []; for (let gx = 0; gx < GRID_W; gx++) if (riverTiles.has(gx + ',' + gy)) cols.push(gx);
+            if (cols.length === 0 || cols.length > MAX_SPAN) continue;
+            const minX = cols[0], maxX = cols[cols.length - 1];
+            if (maxX - minX + 1 > MAX_SPAN || minX <= 1 || maxX >= GRID_W - 2) continue;
+            if (riverTiles.has((minX - 1) + ',' + gy) || riverTiles.has((maxX + 1) + ',' + gy)) continue;
+            rowC.push({ gy, minX, maxX, span: maxX - minX + 1 });
         }
-        colCandidates.sort((a, b) => a.span - b.span);
-        rowCandidates.sort((a, b) => a.span - b.span);
-        const usedCols = new Set();
-        const usedRows = new Set();
-        let bridgeCount = 0;
-        const targetBridges = 4;
-        for (const c of colCandidates) {
-            if (bridgeCount >= targetBridges) break;
-            if (usedCols.has(c.gx)) continue;
-            let tooClose = false;
-            for (const ugx of usedCols) {
-                if (Math.abs(ugx - c.gx) < 5) { tooClose = true; break; }
-            }
+        rowC.sort((a,b) => a.span - b.span);
+        for (const r of rowC) {
+            if (count >= target + 3) break;
+            let tooClose = false; for (const ugy of usedRows) if (Math.abs(ugy - r.gy) < 6) { tooClose = true; break; }
             if (tooClose) continue;
-            for (let gy = c.minY; gy <= c.maxY; gy++) bridges.add(c.gx + ',' + gy);
-            usedCols.add(c.gx);
-            bridgeCount++;
+            for (let gx = r.minX; gx <= r.maxX; gx++) if (riverTiles.has(gx + ',' + r.gy)) bridges.add(gx + ',' + r.gy);
+            usedRows.add(r.gy); count++;
         }
-        for (const r of rowCandidates) {
-            if (bridgeCount >= targetBridges + 2) break;
-            if (usedRows.has(r.gy)) continue;
-            let tooClose = false;
-            for (const ugy of usedRows) {
-                if (Math.abs(ugy - r.gy) < 5) { tooClose = true; break; }
+        if (count < 2) {
+            let best = null, bs = 999;
+            for (let gx = 2; gx < GRID_W - 2; gx++) {
+                const rows = []; for (let gy = 0; gy < GRID_H; gy++) if (riverTiles.has(gx + ',' + gy)) rows.push(gy);
+                if (rows.length === 0 || rows.length > MAX_SPAN + 5) continue;
+                const mn = rows[0], mx = rows[rows.length-1];
+                if (mx - mn + 1 < bs) { bs = mx - mn + 1; best = { gx, mn, mx }; }
             }
-            if (tooClose) continue;
-            for (let gx = r.minX; gx <= r.maxX; gx++) bridges.add(gx + ',' + r.gy);
-            usedRows.add(r.gy);
-            bridgeCount++;
+            if (best) for (let gy = best.mn; gy <= best.mx; gy++) if (riverTiles.has(best.gx + ',' + gy)) bridges.add(best.gx + ',' + gy);
         }
         return bridges;
     }
-
     function generateForests(count) {
         const arr = [];
         for (let i = 0; i < count; i++) {
             const r = rand(90, 170);
-            let fx, fy, safe = false, attempts = 0;
-            while (!safe && attempts < 80) {
-                fx = rand(r, WORLD_W - r);
-                fy = rand(r, WORLD_H - r);
-                if (isInRiver(fx, fy, r * 0.7)) { attempts++; continue; }
-                if (isBridgeAt(fx, fy)) { attempts++; continue; }
-                safe = true;
-            }
+            let fx, fy, safe = false, att = 0;
+            while (!safe && att < 80) { fx = rand(r, WORLD_W - r); fy = rand(r, WORLD_H - r); if (isInRiver(fx, fy, r * 0.7)) { att++; continue; } if (isBridgeAt(fx, fy)) { att++; continue; } safe = true; }
             if (!safe) continue;
-            const trees = [];
-            const treeCount = Math.floor(r / 11);
-            for (let t = 0; t < treeCount; t++) {
+            const trees = []; const tc = Math.floor(r / 11);
+            for (let t = 0; t < tc; t++) {
                 const a = seededRand(i * 100 + t) * Math.PI * 2;
                 const rr = Math.sqrt(seededRand(i * 200 + t)) * r * 0.85;
-                const tx = fx + Math.cos(a) * rr;
-                const ty = fy + Math.sin(a) * rr;
+                const tx = fx + Math.cos(a) * rr, ty = fy + Math.sin(a) * rr;
                 if (isInRiver(tx, ty, 5)) continue;
-                trees.push({
-                    x: tx, y: ty,
-                    type: seededRand(i * 300 + t) > 0.45 ? '🌳' : '🌲',
-                    size: 22 + seededRand(i * 400 + t) * 12,
-                });
+                trees.push({ x: tx, y: ty, type: seededRand(i * 300 + t) > 0.45 ? '🌳' : '🌲', size: 22 + seededRand(i * 400 + t) * 12 });
             }
             arr.push({ x: fx, y: fy, r, trees });
         }
         return arr;
     }
-
     function generateVillages(count) {
         const arr = [];
         for (let i = 0; i < count; i++) {
-            let x, y, safe = false, attempts = 0;
-            while (!safe && attempts < 300) {
-                x = rand(250, WORLD_W - 250);
-                y = rand(250, WORLD_H - 250);
-                if (isInRiver(x, y, 90)) { attempts++; continue; }
-                if (isBridgeAt(x, y)) { attempts++; continue; }
-                let inForest = false;
-                for (const f of forests) {
-                    if (dist(x, y, f.x, f.y) < f.r + 70) { inForest = true; break; }
-                }
-                if (inForest) { attempts++; continue; }
-                let tooClose = false;
-                for (const v of arr) {
-                    if (dist(x, y, v.x, v.y) < 400) { tooClose = true; break; }
-                }
-                if (tooClose) { attempts++; continue; }
+            let x, y, safe = false, att = 0;
+            while (!safe && att < 300) {
+                x = rand(250, WORLD_W - 250); y = rand(250, WORLD_H - 250);
+                if (isInRiver(x, y, 90)) { att++; continue; }
+                if (isBridgeAt(x, y)) { att++; continue; }
+                let inF = false; for (const f of forests) if (dist(x, y, f.x, f.y) < f.r + 70) { inF = true; break; }
+                if (inF) { att++; continue; }
+                let tc = false; for (const v of arr) if (dist(x, y, v.x, v.y) < 500) { tc = true; break; }
+                if (tc) { att++; continue; }
                 safe = true;
             }
             if (!safe) continue;
-            arr.push({
-                x, y, radius: 42,
-                spawnTimer: Math.floor(rand(180, 480)),
-                pulse: Math.random() * Math.PI * 2,
-            });
+            arr.push({ x, y, radius: 42, spawnTimer: Math.floor(rand(120, 300)), pulse: Math.random() * Math.PI * 2 });
         }
         return arr;
     }
 
     function createSoldierUnit() {
-        const roll = Math.random();
-        let value, color, icon;
-        if (roll < 0.6) { value = UNIT_BRONZE; color = '#cd7f32'; icon = '🤺'; }
-        else if (roll < 0.9) { value = UNIT_SILVER; color = '#c0c0c0'; icon = '🥷'; }
-        else { value = UNIT_GOLD; color = '#ffd700'; icon = '🧙'; }
-        return { x: rand(60, WORLD_W - 60), y: rand(60, WORLD_H - 60), value, color, icon, radius: 20, capturingBy: null, captureProgress: 0 };
+        const t = pickSoldierType();
+        return { x: rand(60, WORLD_W - 60), y: rand(60, WORLD_H - 60), type: t, value: t.value, color: t.color, icon: t.icon, tier: t.tier, radius: 20, capturingBy: null, captureProgress: 0 };
     }
-
     function findSafeSpot(radius, minDistFromPlayer = 0) {
         for (let i = 0; i < 300; i++) {
-            const x = rand(60, WORLD_W - 60);
-            const y = rand(60, WORLD_H - 60);
+            const x = rand(60, WORLD_W - 60), y = rand(60, WORLD_H - 60);
             if (isInRiver(x, y, radius)) continue;
             if (minDistFromPlayer > 0 && player && dist(x, y, player.x, player.y) < minDistFromPlayer) continue;
             return { x, y };
         }
         return { x: WORLD_W / 2, y: WORLD_H / 2 };
     }
-
     function createVillageUnit(v) {
+        const t = pickSoldierType();
         let x = v.x, y = v.y;
-        for (let i = 0; i < 20; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const r = rand(30, 65);
-            x = v.x + Math.cos(angle) * r;
-            y = v.y + Math.sin(angle) * r;
-            if (!isInRiver(x, y, 25)) break;
-        }
-        return { x, y, value: UNIT_GOLD, color: '#ffd700', icon: '🧙', radius: 20, capturingBy: null, captureProgress: 0 };
+        for (let i = 0; i < 20; i++) { const a = Math.random() * Math.PI * 2, r = rand(25, 55); x = v.x + Math.cos(a) * r; y = v.y + Math.sin(a) * r; if (!isInRiver(x, y, 20)) break; }
+        return { x, y, type: t, value: t.value, color: t.color, icon: t.icon, tier: t.tier, radius: 18, capturingBy: null, captureProgress: 0, _village: v };
     }
-
     function generateSoldierUnits(count) {
         const arr = [];
-        for (let i = 0; i < count; i++) {
-            const u = createSoldierUnit();
-            if (isInRiver(u.x, u.y, u.radius + 5)) {
-                const safe = findSafeSpot(u.radius + 5);
-                u.x = safe.x; u.y = safe.y;
-            }
-            arr.push(u);
-        }
+        for (let i = 0; i < count; i++) { const u = createSoldierUnit(); if (isInRiver(u.x, u.y, u.radius + 5)) { const s = findSafeSpot(u.radius + 5); u.x = s.x; u.y = s.y; } arr.push(u); }
         return arr;
     }
-
-    function assignId(entity) { if (entity._id === undefined) entity._id = nextUnitId++; }
-
+    function assignId(e) { if (e._id === undefined) e._id = nextUnitId++; }
     function spawnEnemy(soldiers = 0) {
-        const safe = findSafeSpot(HERO_RADIUS + 10, 600);
+        const s = findSafeSpot(HERO_RADIUS + 10, 600);
+        // AI 隨機選一隻英雄
+        const randomHero = HEROES[Math.floor(Math.random() * HEROES.length)];
         const e = {
-            x: safe.x, y: safe.y,
-            soldiers: soldiers,
-            radius: HERO_RADIUS,
-            speed: BASE_SPEED * 0.85,
+            x: s.x, y: s.y, soldiers,
+            heroId: randomHero.id,
+            heroHp: AI_MAX_HP, maxHeroHp: AI_MAX_HP,
+            radius: HERO_RADIUS, speed: BASE_SPEED * 0.85,
             color: `hsl(${rand(0, 360)}, 70%, 55%)`,
             vx: 0, vy: 0, wanderTimer: 0,
             rotOffset: Math.random() * Math.PI * 2,
+            stuckCheckX: s.x, stuckCheckY: s.y,
+            stuckTimer: 0, unstickDir: null, unstickTimer: 0,
+            lastSeenPlayer: null, slowTimer: 0,
+            skillCooldown: Math.floor(rand(0, SKILL_COOLDOWN)),
+            skillTimer: 0, invincibleTimer: 0,
         };
-        assignId(e);
-        return e;
+        assignId(e); return e;
     }
+    function generateEnemies(count) { const arr = []; for (let i = 0; i < count; i++) arr.push(spawnEnemy(Math.floor(rand(400, 1800)))); return arr; }
 
-    function generateEnemies(count) {
-        const arr = [];
-        for (let i = 0; i < count; i++) arr.push(spawnEnemy(Math.floor(rand(400, 1800))));
-        return arr;
+    // 動態 AI 兵力（依玩家士兵數回傳）
+    function getNewEnemyBaseSoldiers() {
+        const s = player ? player.soldiers : 0;
+        if (s >= 100000000000) return 100000000000;
+        if (s >= 10000000000) return 10000000000;
+        if (s >= 1000000000) return 1000000000;
+        if (s >= 100000000) return 100000000;
+        if (s >= 10000000) return 10000000;
+        if (s >= 1000000) return 1000000;
+        if (s >= 500000) return 500000;
+        if (s >= 100000) return 100000;
+        if (s >= 50000) return 50000;
+        if (s >= 5000) return 5000;
+        return 0;
     }
 
     function resetGame() {
-        nextUnitId = 1;
-        battleRegistry = new Map();
-
+        nextUnitId = 1; battleRegistry = new Map();
         riverTiles = generateRiverTiles();
         bridges = generateBridges(riverTiles);
-
-        player = {
-            x: WORLD_W / 2, y: WORLD_H / 2,
-            soldiers: 500,
-            heroHp: MAX_HERO_HP, maxHeroHp: MAX_HERO_HP,
-            radius: HERO_RADIUS,
-            boostTimer: 0, boostCooldown: 0,
-            speed: BASE_SPEED, hidden: false,
-            rotOffset: 0, _id: 0,
-        };
-        if (isInRiver(player.x, player.y, HERO_RADIUS + 10)) {
-            const safe = findSafeSpot(HERO_RADIUS + 10);
-            player.x = safe.x; player.y = safe.y;
-        }
-
-        forests = generateForests(15);
-        villages = generateVillages(4);
+        const hero = getHero(gameState.selectedHero);
+        player = { x: WORLD_W / 2, y: WORLD_H / 2, soldiers: 0, heroHp: MAX_HERO_HP, maxHeroHp: MAX_HERO_HP, radius: HERO_RADIUS, boostTimer: 0, boostCooldown: 0, speed: BASE_SPEED, hidden: false, rotOffset: 0, _id: 0, hero, slowTimer: 0 };
+        if (isInRiver(player.x, player.y, HERO_RADIUS + 10)) { const s = findSafeSpot(HERO_RADIUS + 10); player.x = s.x; player.y = s.y; }
+        forests = generateForests(22);
+        villages = generateVillages(6);
         enemies = generateEnemies(INITIAL_ENEMY_COUNT);
-        soldierUnits = generateSoldierUnits(60);
-        battleLogs = [];
-        combatEffects = [];
-        activeCombats = [];
-        gameOver = false;
-        winFlag = false;
-        maxSoldiersThisRun = player.soldiers;
-        camera.x = player.x - VIEW_W / 2;
-        camera.y = player.y - VIEW_H / 2;
-        frame = 0;
-        spawnTimer = 0;
-        lastCombatSoundFrame = -100;
-        lastEdgeWarnFrame = -100;
+        soldierUnits = generateSoldierUnits(90);
+        battleLogs = []; combatEffects = []; activeCombats = [];
+        skillTimer = 0; skillCooldown = 0; invincibleTimer = 0;
+        slowEffects = []; lavaEffects = [];
+        gameOver = false; winFlag = false; gameOverHandled = false;
+        maxSoldiersThisRun = 0;
+        camera.x = player.x - VIEW_W / 2; camera.y = player.y - VIEW_H / 2;
+        frame = 0; spawnTimer = 0;
+        lastCombatSoundFrame = -100; lastEdgeWarnFrame = -100;
         gameoverOverlay.classList.remove('show');
         updateHUD();
     }
 
     function updateHUD() {
         if (player) {
-            soldierSpan.textContent = Math.floor(player.soldiers).toLocaleString();
+            soldierSpan.textContent = formatNum(player.soldiers);
             heroHpSpan.textContent = Math.ceil(Math.max(0, player.heroHp));
             hpDisplay.style.opacity = player.soldiers <= 0 ? '1' : '0.75';
         }
-        if (player && player.boostTimer > 0) {
-            boostIndicator.classList.add('boost-active');
-            boostIndicator.textContent = '⚡ 加速中';
-        } else if (player && player.boostCooldown > 0) {
-            boostIndicator.classList.remove('boost-active');
-            boostIndicator.textContent = `⏳ ${Math.ceil(player.boostCooldown / 60)}s`;
-        } else {
-            boostIndicator.classList.remove('boost-active');
-            boostIndicator.textContent = '⚡ 加速';
-        }
-        if (player && player.boostCooldown > 0) boostBtn.classList.add('cooldown');
-        else boostBtn.classList.remove('cooldown');
+        const hero = getHero(gameState.selectedHero);
+        if (skillCooldown > 0) { skillIndicator.classList.remove('skill-active'); skillIndicator.textContent = `⏳ ${Math.ceil(skillCooldown / 60)}s`; }
+        else if (skillTimer > 0 || invincibleTimer > 0) { skillIndicator.classList.add('skill-active'); skillIndicator.textContent = `✨ ${hero.skillName}`; }
+        else { skillIndicator.classList.remove('skill-active'); skillIndicator.textContent = `⚡ ${hero.skillName}`; }
+        if (skillCooldown > 0) boostBtn.classList.add('cooldown'); else boostBtn.classList.remove('cooldown');
     }
-
-    function addBattleLog(x, y, text, color) {
-        battleLogs.push({ x, y, text, color, life: 60, vy: -1.2 });
-    }
-
-    function pairKey(a, b) {
-        const ia = a._id, ib = b._id;
-        return ia < ib ? ia + '_' + ib : ib + '_' + ia;
-    }
-    function registerCombat(a, b) {
-        const key = pairKey(a, b);
-        let entry = battleRegistry.get(key);
-        if (!entry) {
-            entry = { a, b, aStart: a.soldiers, bStart: b.soldiers };
-            battleRegistry.set(key, entry);
-        }
-        return entry;
-    }
+    function addBattleLog(x, y, text, color) { battleLogs.push({ x, y, text, color, life: 60, vy: -1.2 }); }
+    function pairKey(a, b) { const ia = a._id, ib = b._id; return ia < ib ? ia + '_' + ib : ib + '_' + ia; }
+    function registerCombat(a, b) { const k = pairKey(a, b); let e = battleRegistry.get(k); if (!e) { e = { a, b, aStart: a.soldiers, bStart: b.soldiers }; battleRegistry.set(k, e); } return e; }
     function endCombat(a, b) { battleRegistry.delete(pairKey(a, b)); }
     function cleanBattleRegistry() {
-        for (const [key, entry] of battleRegistry.entries()) {
-            const { a, b } = entry;
-            if (a._dead || b._dead) { battleRegistry.delete(key); continue; }
-            if (a.soldiers <= 0 && b.soldiers <= 0) { battleRegistry.delete(key); continue; }
-            if (dist(a.x, a.y, b.x, b.y) > HERO_RADIUS * 2.4) { battleRegistry.delete(key); }
+        for (const [k, e] of battleRegistry.entries()) {
+            const { a, b } = e;
+            if (a._dead || b._dead || (a.soldiers <= 0 && b.soldiers <= 0 && a.heroHp <= 0 && b.heroHp <= 0)) { battleRegistry.delete(k); continue; }
+            if (dist(a.x, a.y, b.x, b.y) > getAttackRange(a.soldiers) + getAttackRange(b.soldiers) + 100) battleRegistry.delete(k);
         }
     }
-
     function spawnCombatSparks(x, y, color) {
-        for (let i = 0; i < 2; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const speed = 1 + Math.random() * 3.5;
-            const life = 15 + Math.random() * 12;
-            combatEffects.push({
-                x, y,
-                vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
-                life: life, maxLife: life,
-                color: color || (Math.random() > 0.5 ? '#ffdd44' : '#ff6633'),
-                size: 2 + Math.random() * 3,
-            });
-        }
+        for (let i = 0; i < 2; i++) { const a = Math.random() * Math.PI * 2, s = 1 + Math.random() * 3.5, l = 15 + Math.random() * 12; combatEffects.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: l, maxLife: l, color: color || (Math.random() > 0.5 ? '#ffdd44' : '#ff6633'), size: 2 + Math.random() * 3 }); }
     }
     function updateCombatEffects() {
-        for (let i = combatEffects.length - 1; i >= 0; i--) {
-            const p = combatEffects[i];
-            p.x += p.vx; p.y += p.vy;
-            p.vx *= 0.94; p.vy *= 0.94;
-            p.life--;
-            if (p.life <= 0) combatEffects.splice(i, 1);
+        for (let i = combatEffects.length - 1; i >= 0; i--) { const p = combatEffects[i]; p.x += p.vx; p.y += p.vy; p.vx *= 0.94; p.vy *= 0.94; p.life--; if (p.life <= 0) combatEffects.splice(i, 1); }
+    }
+
+    // 玩家施放技能
+    function castSkill() {
+        if (skillCooldown > 0 || !isPlaying || gameOver) return;
+        const hero = getHero(gameState.selectedHero);
+        skillCooldown = SKILL_COOLDOWN;
+        Sfx.skillCast();
+        switch (hero.id) {
+            case 'roland': skillTimer = SKILL_DURATION; addBattleLog(player.x, player.y - 60, "King's Wind!", '#ffd966'); break;
+            case 'adelaide': slowEffects.push({ x: player.x, y: player.y, radius: 260, life: 300, owner: 'player' }); addBattleLog(player.x, player.y - 60, 'Blizzard!', '#a8d8ff'); break;
+            case 'sandro': player.soldiers += 5000; addBattleLog(player.x, player.y - 60, 'Necromancy! +5000', '#a0a0a0'); break;
+            case 'jenova': player.soldiers += 100000; addBattleLog(player.x, player.y - 60, 'Heart of Purity! +100K', '#ffd700'); break;
+            case 'xeron': player.soldiers += 3000000; addBattleLog(player.x, player.y - 60, 'Echo of the Abyss! +3M', '#ff6060'); break;
+            case 'mephala': invincibleTimer = 150; addBattleLog(player.x, player.y - 60, 'Holy Shield!', '#ffffff'); break;
+            case 'zydar': {
+                const r = 300;
+                for (const e of enemies) { if (e._dead) continue; if (dist(player.x, player.y, e.x, e.y) < r) { e.soldiers = Math.max(0, e.soldiers - Math.floor(e.soldiers / 3)); spawnCombatSparks(e.x, e.y, '#ff4400'); if (e.soldiers <= 0 && e.heroHp <= 0) e._dead = true; } }
+                combatEffects.push({ x: player.x, y: player.y, vx: 0, vy: 0, life: 30, maxLife: 30, color: '#ff4400', size: r, isFireball: true });
+                addBattleLog(player.x, player.y - 60, 'Fireball!', '#ff4400');
+                break;
+            }
+            case 'rashka': lavaEffects.push({ x: player.x, y: player.y, radius: 30, targetRadius: 300, life: 600, tickTimer: 0, owner: 'player' }); addBattleLog(player.x, player.y - 60, 'Inferno Flame!', '#ff6600'); break;
         }
     }
 
-    // ================= 遊戲結束（含防死機保護） =================
+    // AI 施放技能
+    function aiCastSkill(e) {
+        if (e.skillCooldown > 0 || e._dead) return;
+        const heroId = e.heroId;
+        e.skillCooldown = SKILL_COOLDOWN;
+        switch (heroId) {
+            case 'roland': e.skillTimer = SKILL_DURATION; break;
+            case 'adelaide': slowEffects.push({ x: e.x, y: e.y, radius: 220, life: 240, owner: 'ai' }); break;
+            case 'sandro': e.soldiers += 5000; break;
+            case 'jenova': e.soldiers += 100000; break;
+            case 'xeron': e.soldiers += 3000000; break;
+            case 'mephala': e.invincibleTimer = 120; break;
+            case 'zydar': {
+                const r = 260;
+                // 傷害附近敵人（包含玩家和其他 AI）
+                if (player && player.heroHp > 0 && dist(e.x, e.y, player.x, player.y) < r) {
+                    player.soldiers = Math.max(0, player.soldiers - Math.floor(player.soldiers / 3));
+                }
+                for (const other of enemies) {
+                    if (other === e || other._dead) continue;
+                    if (dist(e.x, e.y, other.x, other.y) < r) {
+                        other.soldiers = Math.max(0, other.soldiers - Math.floor(other.soldiers / 3));
+                    }
+                }
+                combatEffects.push({ x: e.x, y: e.y, vx: 0, vy: 0, life: 30, maxLife: 30, color: '#ff4400', size: r, isFireball: true });
+                break;
+            }
+            case 'rashka': lavaEffects.push({ x: e.x, y: e.y, radius: 20, targetRadius: 200, life: 600, tickTimer: 0, owner: 'ai' }); break;
+        }
+    }
+
     let gameOverHandled = false;
     function handleGameOver(win) {
         if (gameOverHandled) return;
-        gameOverHandled = true;
-        gameOver = true;
-        winFlag = win;
-        if (win) Sfx.victory();
-        else Sfx.playerDown();
-
-        let best = 0;
-        try {
-            best = parseInt(localStorage.getItem(BEST_KEY) || '0', 10) || 0;
-        } catch (e) { best = 0; }
-        const isNewRecord = maxSoldiersThisRun > best;
-        if (isNewRecord) {
-            best = maxSoldiersThisRun;
-            try { localStorage.setItem(BEST_KEY, String(best)); } catch (e) {}
-            setTimeout(() => Sfx.newRecord(), 600);
-        }
-
+        gameOverHandled = true; gameOver = true; winFlag = win;
+        if (win) Sfx.victory(); else Sfx.playerDown();
+        const earned = Math.floor(maxSoldiersThisRun);
+        gameState.gold += earned;
+        if (maxSoldiersThisRun > gameState.bestScore) { gameState.bestScore = maxSoldiersThisRun; newRecordEl.style.display = 'block'; setTimeout(() => Sfx.newRecord(), 600); }
+        else { newRecordEl.style.display = 'none'; }
+        saveGame();
         gameoverTitle.textContent = win ? '🏆 勝利！' : '💀 軍隊覆滅...';
         gameoverTitle.className = 'gameover-title ' + (win ? 'win' : 'lose');
-        runScoreEl.textContent = Math.floor(maxSoldiersThisRun).toLocaleString();
-        bestScoreEl.textContent = Math.floor(best).toLocaleString();
-        newRecordEl.style.display = isNewRecord ? 'block' : 'none';
+        runScoreEl.textContent = formatNum(earned);
+        bestScoreEl.textContent = formatNum(gameState.bestScore);
+        earnedGoldEl.textContent = '$' + formatNum(earned);
+        totalGoldEl.textContent = '$' + formatNum(gameState.gold);
         gameoverOverlay.classList.add('show');
     }
-
     function returnToCover() {
-        isPlaying = false;
-        gameOver = false;
-        gameOverHandled = false;
-        winFlag = false;
+        isPlaying = false; gameOver = false; gameOverHandled = false; winFlag = false;
         gameoverOverlay.classList.remove('show');
-        coverScreen.style.display = 'flex';
-        gameWrapper.style.display = 'none';
-        switchToMenuMusic();
-        updateMuteIcons();
+        coverScreen.style.display = 'flex'; gameWrapper.style.display = 'none';
+        updateCover(); switchToMenuMusic(); updateMuteIcons();
     }
 
+    // ================= 更新 =================
     function update() {
         if (!isPlaying) return;
         if (gameOver) { updateHUD(); return; }
-
-        // ★ 安全檢查：任何時候英雄血量歸零就結束遊戲
-        if (player && player.heroHp <= 0) {
-            handleGameOver(false);
-            return;
-        }
+        if (player && player.heroHp <= 0) { handleGameOver(false); return; }
 
         frame++;
         activeCombats = [];
+        if (skillTimer > 0) skillTimer--;
+        if (skillCooldown > 0) skillCooldown--;
+        if (invincibleTimer > 0) invincibleTimer--;
+
+        // 減速效果
+        for (let i = slowEffects.length - 1; i >= 0; i--) { slowEffects[i].life--; if (slowEffects[i].life <= 0) slowEffects.splice(i, 1); }
+        // 熔岩成長與傷害
+        for (let i = lavaEffects.length - 1; i >= 0; i--) {
+            const lv = lavaEffects[i];
+            lv.life--; lv.tickTimer++;
+            // ★ Growing 特效：半徑逐漸擴大
+            if (lv.radius < lv.targetRadius) {
+                lv.radius = Math.min(lv.targetRadius, lv.radius + 2.5);
+            }
+            if (lv.tickTimer >= 60) {
+                lv.tickTimer = 0;
+                for (const e of enemies) {
+                    if (e._dead) continue;
+                    if (dist(lv.x, lv.y, e.x, e.y) < lv.radius) {
+                        e.soldiers = Math.max(0, e.soldiers - Math.floor(e.soldiers / 10));
+                        if (e.soldiers <= 0 && e.heroHp <= 0) e._dead = true;
+                    }
+                }
+                // 對玩家（非本人熔岩）造成傷害
+                if (lv.owner === 'ai' && player && player.heroHp > 0 && dist(lv.x, lv.y, player.x, player.y) < lv.radius) {
+                    player.soldiers = Math.max(0, player.soldiers - Math.floor(player.soldiers / 10));
+                }
+            }
+            if (lv.life <= 0) lavaEffects.splice(i, 1);
+        }
 
         if (player.soldiers > maxSoldiersThisRun) maxSoldiersThisRun = player.soldiers;
+        player.hidden = isInForest(player.x, player.y, HERO_RADIUS);
 
-        if (player.boostTimer > 0) {
-            player.boostTimer--;
-            if (player.boostTimer <= 0) player.boostCooldown = BOOST_COOLDOWN;
-        } else if (player.boostCooldown > 0) player.boostCooldown--;
+        // 玩家減速檢查
+        for (const s of slowEffects) {
+            if (s.owner !== 'player' && dist(player.x, player.y, s.x, s.y) < s.radius) { player.slowTimer = Math.max(player.slowTimer, 5); break; }
+        }
+        for (const lv of lavaEffects) {
+            if (lv.owner === 'ai' && dist(player.x, player.y, lv.x, lv.y) < lv.radius) { player.slowTimer = Math.max(player.slowTimer, 5); break; }
+        }
 
-        // ============ 玩家移動（WASD + 方向鍵 + 搖桿） ============
+        // 玩家移動
         let dx = 0, dy = 0;
         if (keys.w || keys.ArrowUp) dy -= 1;
         if (keys.s || keys.ArrowDown) dy += 1;
@@ -1312,48 +905,31 @@
         if (keys.d || keys.ArrowRight) dx += 1;
         const jMag = Math.hypot(joystickInput.x, joystickInput.y);
         if (jMag > 0.15) { dx = joystickInput.x; dy = joystickInput.y; }
-
         if (dx !== 0 || dy !== 0) {
-            const len = Math.hypot(dx, dy);
-            const mag = Math.min(len, 1);
-            dx /= len; dy /= len;
-            let speed = player.speed;
-            if (player.boostTimer > 0) speed *= BOOST_SPEED_MULT;
+            const len = Math.hypot(dx, dy); const mag = Math.min(len, 1); dx /= len; dy /= len;
+            let speed = player.speed * getSpeedMultiplier(player.soldiers);
+            if (skillTimer > 0 && getHero(gameState.selectedHero).id === 'roland') speed *= SKILL_SPEED_MULT;
+            if (player.slowTimer > 0) speed *= 0.5;
+            if (player.hidden) speed *= FOREST_SPEED_FACTOR;
             tryMoveEntity(player, dx * speed * mag, dy * speed * mag);
         }
+        if (player.slowTimer > 0) player.slowTimer--;
 
-        // ============ 邊界傷害（含防死機） ============
-        const edgeDx = Math.min(player.x, WORLD_W - player.x);
-        const edgeDy = Math.min(player.y, WORLD_H - player.y);
-        const edgeDist = Math.min(edgeDx, edgeDy);
-        if (edgeDist < EDGE_MARGIN) {
-            const edgeFactor = 1 - edgeDist / EDGE_MARGIN;
-            if (player.soldiers > 0) {
-                player.soldiers = Math.max(0, player.soldiers - edgeFactor * EDGE_SOLDIER_DMG);
-            } else {
-                player.heroHp = Math.max(0, player.heroHp - edgeFactor * EDGE_HP_DMG);
-                // ★ 立即檢查英雄血量
-                if (player.heroHp <= 0) {
-                    handleGameOver(false);
-                    return;
-                }
-            }
-            if (frame - lastEdgeWarnFrame > 40) {
-                lastEdgeWarnFrame = frame;
-                Sfx.edgeWarn();
-            }
+        // 邊界傷害
+        const eDx = Math.min(player.x, WORLD_W - player.x);
+        const eDy = Math.min(player.y, WORLD_H - player.y);
+        const eDist = Math.min(eDx, eDy);
+        if (eDist < EDGE_MARGIN) {
+            const f = 1 - eDist / EDGE_MARGIN;
+            if (player.soldiers > 0) player.soldiers = Math.max(0, player.soldiers - f * EDGE_SOLDIER_DMG);
+            else { player.heroHp = Math.max(0, player.heroHp - f * EDGE_HP_DMG); if (player.heroHp <= 0) { handleGameOver(false); return; } }
+            if (frame - lastEdgeWarnFrame > 40) { lastEdgeWarnFrame = frame; Sfx.edgeWarn(); }
         }
 
-        player.hidden = false;
-        for (let f of forests) {
-            if (dist(player.x, player.y, f.x, f.y) < f.r - HERO_RADIUS * 0.5) { player.hidden = true; break; }
-        }
+        if ((keys[' '] || keys.j) && skillCooldown === 0) castSkill();
+        if (keys[' '] || keys.j) { keys[' '] = false; keys.j = false; }
 
-        // ★ 加速觸發：空白鍵或 J 鍵
-        if ((keys[' '] || keys.j) && player.boostCooldown === 0 && player.boostTimer === 0) {
-            player.boostTimer = BOOST_DURATION;
-        }
-
+        // 士兵刷新
         spawnTimer++;
         if (spawnTimer >= SPAWN_INTERVAL) {
             spawnTimer = 0;
@@ -1361,223 +937,229 @@
                 for (let i = 0; i < SPAWN_COUNT; i++) {
                     if (soldierUnits.length >= MAX_UNITS) break;
                     const u = createSoldierUnit();
-                    if (isInRiver(u.x, u.y, u.radius + 5)) {
-                        const safe = findSafeSpot(u.radius + 5);
-                        u.x = safe.x; u.y = safe.y;
-                    }
+                    if (isInRiver(u.x, u.y, u.radius + 5)) { const s = findSafeSpot(u.radius + 5); u.x = s.x; u.y = s.y; }
                     soldierUnits.push(u);
                 }
             }
         }
 
+        // 村莊產兵
         for (const v of villages) {
             v.spawnTimer--;
             v.pulse += 0.05;
             if (v.spawnTimer <= 0) {
-                if (soldierUnits.length < MAX_UNITS) {
+                let alive = 0;
+                for (const u of soldierUnits) if (u._village === v) alive++;
+                if (alive < VILLAGE_UNIT_LIMIT && soldierUnits.length < MAX_UNITS) {
                     soldierUnits.push(createVillageUnit(v));
-                    addBattleLog(v.x, v.y - 40, '🏘️ 村民', '#ffd966');
                     Sfx.villageSpawn();
                 }
-                v.spawnTimer = Math.floor(rand(420, 720));
+                v.spawnTimer = Math.floor(rand(120, 300));
             }
         }
 
+        // 玩家佔領
         for (let i = soldierUnits.length - 1; i >= 0; i--) {
             const u = soldierUnits[i];
             const d = dist(player.x, player.y, u.x, u.y);
-            const inRange = d < HERO_RADIUS + u.radius + 6;
-            if (inRange) {
+            if (d < HERO_RADIUS + u.radius + 6) {
                 if (u.capturingBy && u.capturingBy !== player) continue;
                 if (u.capturingBy !== player) { u.capturingBy = player; u.captureProgress = 0; }
-                u.captureProgress += 1 / CAPTURE_DURATION;
-                if (u.captureProgress >= 1) {
-                    player.soldiers += u.value;
-                    addBattleLog(u.x, u.y, `+${u.value}`, u.color);
-                    soldierUnits.splice(i, 1);
-                    Sfx.captureComplete();
-                }
+                u.captureProgress += 1 / TIER_TIME[u.tier];
+                if (u.captureProgress >= 1) { player.soldiers += u.value; addBattleLog(u.x, u.y, `+${formatNum(u.value)}`, u.color); soldierUnits.splice(i, 1); Sfx.captureComplete(); }
             } else {
                 if (u.capturingBy === player) { u.capturingBy = null; u.captureProgress = 0; }
             }
         }
 
-        for (let e of enemies) {
+        const playerVisibleForAI = player && !player.hidden && player.heroHp > 0;
+
+        // AI 更新
+        for (const e of enemies) {
             if (e._dead) continue;
-            let nearestUnit = null, nearestUnitDist = 99999;
-            for (let u of soldierUnits) {
-                if (u.capturingBy && u.capturingBy !== e) continue;
-                let d = dist(e.x, e.y, u.x, u.y);
-                if (d < nearestUnitDist) { nearestUnitDist = d; nearestUnit = u; }
+            if (e.skillCooldown > 0) e.skillCooldown--;
+            if (e.skillTimer > 0) e.skillTimer--;
+            if (e.invincibleTimer > 0) e.invincibleTimer--;
+
+            // AI 技能施放
+            if (e.skillCooldown <= 0) aiCastSkill(e);
+
+            let aiSpeed = e.speed * getSpeedMultiplier(e.soldiers);
+            if (e.skillTimer > 0 && e.heroId === 'roland') aiSpeed *= SKILL_SPEED_MULT;
+            if (e.slowTimer > 0) { aiSpeed *= 0.5; e.slowTimer--; }
+            for (const s of slowEffects) if (dist(e.x, e.y, s.x, s.y) < s.radius) { e.slowTimer = Math.max(e.slowTimer, 5); break; }
+            for (const lv of lavaEffects) if (dist(e.x, e.y, lv.x, lv.y) < lv.radius) { e.slowTimer = Math.max(e.slowTimer, 5); break; }
+
+            if (e.unstickTimer > 0) {
+                e.unstickTimer--;
+                tryMoveEntity(e, e.unstickDir.x * aiSpeed * 1.3, e.unstickDir.y * aiSpeed * 1.3);
+                if (playerVisibleForAI) e.lastSeenPlayer = { x: player.x, y: player.y, timer: LAST_SEEN_DURATION };
+                else if (e.lastSeenPlayer) { e.lastSeenPlayer.timer--; if (e.lastSeenPlayer.timer <= 0) e.lastSeenPlayer = null; }
+                continue;
             }
+
+            if (playerVisibleForAI) e.lastSeenPlayer = { x: player.x, y: player.y, timer: LAST_SEEN_DURATION };
+            else if (e.lastSeenPlayer) { e.lastSeenPlayer.timer--; if (e.lastSeenPlayer.timer <= 0) e.lastSeenPlayer = null; }
+
             let nearestEnemy = null, nearestEnemyDist = 99999;
-            for (let other of enemies) {
-                if (other === e || other._dead || other.soldiers <= 0) continue;
+            if (playerVisibleForAI) { const d = dist(e.x, e.y, player.x, player.y); if (d < nearestEnemyDist) { nearestEnemyDist = d; nearestEnemy = player; } }
+            for (const other of enemies) {
+                if (other === e || other._dead || other.heroHp <= 0) continue;
                 const d = dist(e.x, e.y, other.x, other.y);
                 if (d < nearestEnemyDist) { nearestEnemyDist = d; nearestEnemy = other; }
             }
-            const distToPlayer = dist(e.x, e.y, player.x, player.y);
-            const playerThreat = player.soldiers < e.soldiers * 1.2 && distToPlayer < 450 && !player.hidden && player.heroHp > 0 && player.soldiers > 0;
+
+            let nearestUnit = null, nearestUnitDist = 99999;
+            for (const u of soldierUnits) {
+                if (u.capturingBy && u.capturingBy !== e) continue;
+                const d = dist(e.x, e.y, u.x, u.y);
+                if (d < nearestUnitDist) { nearestUnitDist = d; nearestUnit = u; }
+            }
 
             let targetX = null, targetY = null;
-            if (e.soldiers <= 0) {
-                if (nearestUnit) { targetX = nearestUnit.x; targetY = nearestUnit.y; }
-                else { targetX = e.x + rand(-100, 100); targetY = e.y + rand(-100, 100); }
-            } else if (nearestEnemy && nearestEnemyDist < 420 && e.soldiers > nearestEnemy.soldiers * 1.15) {
+            const strongEnemyNearby = nearestEnemy && nearestEnemy.soldiers > e.soldiers * 1.15 && nearestEnemyDist < 200;
+
+            if (strongEnemyNearby) {
+                const a = Math.atan2(e.y - nearestEnemy.y, e.x - nearestEnemy.x);
+                targetX = e.x + Math.cos(a) * 250; targetY = e.y + Math.sin(a) * 250;
+            } else if (nearestEnemy && nearestEnemy.soldiers <= e.soldiers * 1.15) {
                 targetX = nearestEnemy.x; targetY = nearestEnemy.y;
-            } else if (playerThreat && distToPlayer < 420) {
-                targetX = player.x; targetY = player.y;
             } else if (nearestUnit) {
                 targetX = nearestUnit.x; targetY = nearestUnit.y;
+            } else if (e.lastSeenPlayer) {
+                targetX = e.lastSeenPlayer.x; targetY = e.lastSeenPlayer.y;
             } else {
                 e.wanderTimer--;
-                if (e.wanderTimer <= 0) {
-                    e.vx = rand(-1, 1); e.vy = rand(-1, 1);
-                    const len = Math.hypot(e.vx, e.vy);
-                    if (len > 0) { e.vx /= len; e.vy /= len; }
-                    e.wanderTimer = Math.floor(rand(60, 180));
-                }
-                targetX = e.x + e.vx * 100;
-                targetY = e.y + e.vy * 100;
+                if (e.wanderTimer <= 0) { e.vx = rand(-1, 1); e.vy = rand(-1, 1); const len = Math.hypot(e.vx, e.vy); if (len > 0) { e.vx /= len; e.vy /= len; } e.wanderTimer = Math.floor(rand(60, 180)); }
+                targetX = e.x + e.vx * 100; targetY = e.y + e.vy * 100;
             }
+
             if (targetX !== null) {
-                const angle = Math.atan2(targetY - e.y, targetX - e.x);
-                tryMoveEntity(e, Math.cos(angle) * e.speed, Math.sin(angle) * e.speed);
+                const clamped = clampFromEdge(targetX, targetY);
+                targetX = clamped.x; targetY = clamped.y;
+                const a = Math.atan2(targetY - e.y, targetX - e.x);
+                tryMoveEntity(e, Math.cos(a) * aiSpeed, Math.sin(a) * aiSpeed);
+            }
+
+            e.stuckTimer++;
+            if (e.stuckTimer >= 180) {
+                const moved = Math.hypot(e.x - e.stuckCheckX, e.y - e.stuckCheckY);
+                if (moved < 40) { const a = Math.random() * Math.PI * 2; e.unstickDir = { x: Math.cos(a), y: Math.sin(a) }; e.unstickTimer = 60; }
+                e.stuckCheckX = e.x; e.stuckCheckY = e.y; e.stuckTimer = 0;
             }
         }
 
-        for (let e of enemies) {
+        // AI 佔領
+        for (const e of enemies) {
             if (e._dead) continue;
             for (let i = soldierUnits.length - 1; i >= 0; i--) {
                 const u = soldierUnits[i];
                 const d = dist(e.x, e.y, u.x, u.y);
-                const inRange = d < HERO_RADIUS + u.radius + 6;
-                if (inRange) {
+                if (d < HERO_RADIUS + u.radius + 6) {
                     if (u.capturingBy && u.capturingBy !== e) continue;
                     if (u.capturingBy !== e) { u.capturingBy = e; u.captureProgress = 0; }
-                    u.captureProgress += 1 / CAPTURE_DURATION;
-                    if (u.captureProgress >= 1) {
-                        e.soldiers += u.value;
-                        addBattleLog(u.x, u.y, `+${u.value}`, e.color);
-                        soldierUnits.splice(i, 1);
-                        break;
-                    }
-                } else {
-                    if (u.capturingBy === e) { u.capturingBy = null; u.captureProgress = 0; }
-                }
+                    u.captureProgress += 1 / TIER_TIME[u.tier];
+                    if (u.captureProgress >= 1) { e.soldiers += u.value; addBattleLog(u.x, u.y, `+${formatNum(u.value)}`, e.color); soldierUnits.splice(i, 1); break; }
+                } else { if (u.capturingBy === e) { u.capturingBy = null; u.captureProgress = 0; } }
             }
         }
-
-        for (let u of soldierUnits) {
+        for (const u of soldierUnits) {
             if (u.capturingBy && u.capturingBy !== player) {
                 const owner = enemies.find(en => en === u.capturingBy);
                 if (!owner || owner._dead) { u.capturingBy = null; u.captureProgress = 0; }
             }
         }
 
+        // 玩家 vs 敵人
         for (let i = enemies.length - 1; i >= 0; i--) {
             const e = enemies[i];
             if (e._dead) continue;
             if (player.hidden) {
-                let enemyHidden = false;
-                for (let f of forests) {
-                    if (dist(e.x, e.y, f.x, f.y) < f.r - HERO_RADIUS * 0.5) { enemyHidden = true; break; }
-                }
-                if (!enemyHidden) continue;
+                let eh = false;
+                for (const f of forests) if (dist(e.x, e.y, f.x, f.y) < f.r - HERO_RADIUS * 0.5) { eh = true; break; }
+                if (!eh) continue;
             }
-            if (dist(player.x, player.y, e.x, e.y) < HERO_RADIUS * 2.1) {
+            const cRange = (getAttackRange(player.soldiers) + getAttackRange(e.soldiers)) * 0.5;
+            if (dist(player.x, player.y, e.x, e.y) < cRange) {
                 const entry = registerCombat(player, e);
                 activeCombats.push({ x1: player.x, y1: player.y, x2: e.x, y2: e.y, color: '#ffd966' });
 
                 const pLoss = player.soldiers > 0 ? Math.min(player.soldiers, Math.max(COMBAT_MIN, e.soldiers * COMBAT_RATE)) : 0;
                 const eLoss = e.soldiers > 0 ? Math.min(e.soldiers, Math.max(COMBAT_MIN, player.soldiers * COMBAT_RATE)) : 0;
-                player.soldiers = Math.max(0, player.soldiers - pLoss);
+                if (invincibleTimer <= 0) player.soldiers = Math.max(0, player.soldiers - pLoss);
                 e.soldiers = Math.max(0, e.soldiers - eLoss);
 
-                if (player.soldiers <= 0 && e.soldiers > 0) {
-                    player.heroHp = Math.max(0, player.heroHp - 0.3);
-                }
+                if (e.soldiers <= 0 && e.heroHp > 0) e.heroHp = Math.max(0, e.heroHp - 0.3);
+                if (player.soldiers <= 0 && invincibleTimer <= 0 && player.heroHp > 0) player.heroHp = Math.max(0, player.heroHp - 0.3);
 
-                const mx = (player.x + e.x) / 2;
-                const my = (player.y + e.y) / 2;
+                const mx = (player.x + e.x) / 2, my = (player.y + e.y) / 2;
                 spawnCombatSparks(mx, my);
-                if (frame - lastCombatSoundFrame > 9) {
-                    lastCombatSoundFrame = frame;
-                    Sfx.combatHit();
-                }
+                if (frame - lastCombatSoundFrame > 9) { lastCombatSoundFrame = frame; Sfx.combatHit(); }
 
-                if (e.soldiers <= 0) {
+                if (e.heroHp <= 0) {
                     e._dead = true;
                     player.soldiers += entry.bStart;
-                    addBattleLog(e.x, e.y, `+${Math.floor(entry.bStart)}`, '#7fff00');
+                    addBattleLog(e.x, e.y, `+${formatNum(entry.bStart)}`, '#7fff00');
                     addBattleLog(e.x, e.y - 24, '💀 敵將陣亡', '#ff9999');
                     spawnCombatSparks(e.x, e.y, '#ff8888');
-                    Sfx.enemyDown();
-                    endCombat(player, e);
-                    enemies.splice(i, 1);
+                    Sfx.enemyDown(); endCombat(player, e); enemies.splice(i, 1);
                 }
-
-                // ★ 立即檢查英雄血量
-                if (player.heroHp <= 0) {
-                    handleGameOver(false);
-                    return;
-                }
+                if (player.heroHp <= 0) { handleGameOver(false); return; }
             }
         }
 
+        // 敵人 vs 敵人
         for (let i = 0; i < enemies.length; i++) {
             for (let j = i + 1; j < enemies.length; j++) {
                 const a = enemies[i], b = enemies[j];
                 if (a._dead || b._dead) continue;
-                if (a.soldiers <= 0 && b.soldiers <= 0) continue;
-                if (dist(a.x, a.y, b.x, b.y) < HERO_RADIUS * 2.1) {
+                if (a.soldiers <= 0 && b.soldiers <= 0 && a.heroHp <= 0 && b.heroHp <= 0) continue;
+                const cR = (getAttackRange(a.soldiers) + getAttackRange(b.soldiers)) * 0.5;
+                if (dist(a.x, a.y, b.x, b.y) < cR) {
                     const entry = registerCombat(a, b);
                     activeCombats.push({ x1: a.x, y1: a.y, x2: b.x, y2: b.y, color: '#ff8866' });
+
                     const aLoss = a.soldiers > 0 ? Math.min(a.soldiers, Math.max(COMBAT_MIN, b.soldiers * COMBAT_RATE)) : 0;
                     const bLoss = b.soldiers > 0 ? Math.min(b.soldiers, Math.max(COMBAT_MIN, a.soldiers * COMBAT_RATE)) : 0;
-                    a.soldiers = Math.max(0, a.soldiers - aLoss);
-                    b.soldiers = Math.max(0, b.soldiers - bLoss);
-                    const mx = (a.x + b.x) / 2;
-                    const my = (a.y + b.y) / 2;
+                    if (a.invincibleTimer <= 0) a.soldiers = Math.max(0, a.soldiers - aLoss);
+                    if (b.invincibleTimer <= 0) b.soldiers = Math.max(0, b.soldiers - bLoss);
+
+                    if (a.soldiers <= 0 && a.heroHp > 0) a.heroHp = Math.max(0, a.heroHp - 0.3);
+                    if (b.soldiers <= 0 && b.heroHp > 0) b.heroHp = Math.max(0, b.heroHp - 0.3);
+
+                    const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
                     spawnCombatSparks(mx, my, '#ffaa66');
 
-                    if (a.soldiers <= 0) {
-                        a._dead = true;
-                        b.soldiers += entry.aStart;
-                        addBattleLog(a.x, a.y, `+${Math.floor(entry.aStart)}`, '#7fff00');
-                        Sfx.enemyDown();
-                        endCombat(a, b);
-                    } else if (b.soldiers <= 0) {
-                        b._dead = true;
-                        a.soldiers += entry.bStart;
-                        addBattleLog(b.x, b.y, `+${Math.floor(entry.bStart)}`, '#7fff00');
-                        Sfx.enemyDown();
-                        endCombat(a, b);
+                    if (a.heroHp <= 0 && !a._dead) {
+                        a._dead = true; b.soldiers += entry.aStart;
+                        addBattleLog(a.x, a.y, `+${formatNum(entry.aStart)}`, '#7fff00');
+                        Sfx.enemyDown(); endCombat(a, b);
+                    }
+                    if (b.heroHp <= 0 && !b._dead) {
+                        b._dead = true; a.soldiers += entry.bStart;
+                        addBattleLog(b.x, b.y, `+${formatNum(entry.bStart)}`, '#7fff00');
+                        Sfx.enemyDown(); endCombat(a, b);
                     }
                 }
             }
         }
         enemies = enemies.filter(e => !e._dead);
 
+        // AI 重生
         while (enemies.length < INITIAL_ENEMY_COUNT) {
-            const newEnemy = spawnEnemy(0);
-            enemies.push(newEnemy);
-            addBattleLog(newEnemy.x, newEnemy.y, '🆕 新對手', '#ffaa88');
+            const base = getNewEnemyBaseSoldiers();
+            const ne = spawnEnemy(base);
+            enemies.push(ne);
+            const label = base > 0 ? `🆕 新對手 +${formatNum(base)}` : '🆕 新對手';
+            addBattleLog(ne.x, ne.y, label, '#ffaa88');
             Sfx.newEnemy();
         }
 
         cleanBattleRegistry();
         updateCombatEffects();
+        for (let i = battleLogs.length - 1; i >= 0; i--) { const log = battleLogs[i]; log.life--; log.y += log.vy; if (log.life <= 0) battleLogs.splice(i, 1); }
 
-        for (let i = battleLogs.length - 1; i >= 0; i--) {
-            const log = battleLogs[i];
-            log.life--;
-            log.y += log.vy;
-            if (log.life <= 0) battleLogs.splice(i, 1);
-        }
-
-        const tcX = player.x - VIEW_W / 2;
-        const tcY = player.y - VIEW_H / 2;
+        const tcX = player.x - VIEW_W / 2, tcY = player.y - VIEW_H / 2;
         camera.x += (tcX - camera.x) * 0.1;
         camera.y += (tcY - camera.y) * 0.1;
         camera.x = Math.max(0, Math.min(WORLD_W - VIEW_W, camera.x));
@@ -1586,609 +1168,379 @@
         updateHUD();
     }
 
-    function getSoldierIcons(soldiers, maxIcons = 16) {
-        let remaining = Math.floor(soldiers);
-        const goldCount = Math.floor(remaining / UNIT_GOLD);
-        remaining -= goldCount * UNIT_GOLD;
-        const silverCount = Math.floor(remaining / UNIT_SILVER);
-        remaining -= silverCount * UNIT_SILVER;
-        const bronzeCount = Math.floor(remaining / UNIT_BRONZE);
-        const icons = [];
-        const goldShown = Math.min(goldCount, 5);
-        for (let i = 0; i < goldShown; i++) icons.push('🧙');
-        const silverShown = Math.min(silverCount, 8);
-        for (let i = 0; i < silverShown; i++) icons.push('🥷');
-        const remainingSlots = maxIcons - icons.length;
-        const bronzeShown = Math.min(bronzeCount, Math.max(0, remainingSlots));
-        for (let i = 0; i < bronzeShown; i++) icons.push('🤺');
-        return icons;
-    }
-
-    function drawSoldiersCircle(entity, maxIcons = 16) {
-        const icons = getSoldierIcons(entity.soldiers, maxIcons);
+    // ================= 繪製 =================
+    function drawSoldiersCircle(entity) {
+        let icons = getSoldierIcons(entity.soldiers);
         if (icons.length === 0) return;
-        const rotationSpeed = 0.011;
-        const baseAngle = frame * rotationSpeed + (entity.rotOffset || 0);
-        const baseRadius = entity.radius + 24;
-        const iconsPerRing = 8;
-        const ringGap = 26;
-        ctx.font = '22px serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
+        if (icons.length > MAX_ICONS_DISPLAY) { const step = icons.length / MAX_ICONS_DISPLAY; const sc = []; for (let i = 0; i < MAX_ICONS_DISPLAY; i++) sc.push(icons[Math.floor(i * step)]); icons = sc; }
+        const rotSpeed = 0.011;
+        const baseAngle = frame * rotSpeed + (entity.rotOffset || 0);
+        ctx.font = '22px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         for (let i = 0; i < icons.length; i++) {
-            const ring = Math.floor(i / iconsPerRing);
-            const idxInRing = i % iconsPerRing;
-            const remainingInRing = icons.length - ring * iconsPerRing;
-            const ringCount = Math.min(iconsPerRing, remainingInRing);
-            const radius = baseRadius + ring * ringGap;
-            const ringOffset = ring * 0.42;
-            const angle = (idxInRing / ringCount) * Math.PI * 2 + baseAngle + ringOffset;
+            const ring = Math.floor(i / ICONS_PER_RING);
+            const idx = i % ICONS_PER_RING;
+            const rem = icons.length - ring * ICONS_PER_RING;
+            const rCount = Math.min(ICONS_PER_RING, rem);
+            const radius = ICON_BASE_RADIUS + ring * ICON_RING_GAP;
+            const rOff = ring * 0.42;
+            const angle = (idx / rCount) * Math.PI * 2 + baseAngle + rOff;
             const ix = entity.x + Math.cos(angle) * radius;
             const iy = entity.y + Math.sin(angle) * radius;
-            const sx = ix - camera.x;
-            const sy = iy - camera.y;
+            const sx = ix - camera.x, sy = iy - camera.y;
             if (sx < -30 || sx > VIEW_W + 30 || sy < -30 || sy > VIEW_H + 30) continue;
             ctx.fillText(icons[i], sx, sy);
         }
     }
-
     function drawTerrainGrid() {
-        const gridSize = TERRAIN_GRID;
-        const startX = Math.floor(camera.x / gridSize) * gridSize;
-        const startY = Math.floor(camera.y / gridSize) * gridSize;
-        for (let x = startX; x < camera.x + VIEW_W + gridSize; x += gridSize) {
-            for (let y = startY; y < camera.y + VIEW_H + gridSize; y += gridSize) {
-                const sx = x - camera.x;
-                const sy = y - camera.y;
-                if (sx > -gridSize && sx < VIEW_W && sy > -gridSize && sy < VIEW_H) {
-                    ctx.fillStyle = (Math.floor(x / gridSize) + Math.floor(y / gridSize)) % 2 === 0 ? '#203a1a' : '#1d3417';
-                    ctx.fillRect(sx, sy, gridSize, gridSize);
-                }
+        const gs = TERRAIN_GRID;
+        const sx = Math.floor(camera.x / gs) * gs;
+        const sy = Math.floor(camera.y / gs) * gs;
+        for (let x = sx; x < camera.x + VIEW_W + gs; x += gs) for (let y = sy; y < camera.y + VIEW_H + gs; y += gs) {
+            const px = x - camera.x, py = y - camera.y;
+            if (px > -gs && px < VIEW_W && py > -gs && py < VIEW_H) {
+                ctx.fillStyle = (Math.floor(x / gs) + Math.floor(y / gs)) % 2 === 0 ? '#203a1a' : '#1d3417';
+                ctx.fillRect(px, py, gs, gs);
             }
         }
     }
-
     function drawRiverTiles() {
         for (const key of riverTiles) {
             if (bridges.has(key)) continue;
             const [gx, gy] = key.split(',').map(Number);
-            const x = gx * TILE_SIZE - camera.x;
-            const y = gy * TILE_SIZE - camera.y;
+            const x = gx * TILE_SIZE - camera.x, y = gy * TILE_SIZE - camera.y;
             if (x + TILE_SIZE < -4 || x > VIEW_W + 4 || y + TILE_SIZE < -4 || y > VIEW_H + 4) continue;
-            ctx.fillStyle = '#2a4a5e';
-            ctx.fillRect(x - 2, y - 2, TILE_SIZE + 4, TILE_SIZE + 4);
+            ctx.fillStyle = '#2a4a5e'; ctx.fillRect(x - 2, y - 2, TILE_SIZE + 4, TILE_SIZE + 4);
         }
         for (const key of riverTiles) {
             if (bridges.has(key)) continue;
             const [gx, gy] = key.split(',').map(Number);
-            const x = gx * TILE_SIZE - camera.x;
-            const y = gy * TILE_SIZE - camera.y;
+            const x = gx * TILE_SIZE - camera.x, y = gy * TILE_SIZE - camera.y;
             if (x + TILE_SIZE < -4 || x > VIEW_W + 4 || y + TILE_SIZE < -4 || y > VIEW_H + 4) continue;
-            ctx.fillStyle = '#3a6b8a';
-            ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+            ctx.fillStyle = '#3a6b8a'; ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
         }
         const t = frame * 0.03;
         ctx.globalAlpha = 0.35;
         for (const key of riverTiles) {
             if (bridges.has(key)) continue;
             const [gx, gy] = key.split(',').map(Number);
-            const x = gx * TILE_SIZE - camera.x;
-            const y = gy * TILE_SIZE - camera.y;
+            const x = gx * TILE_SIZE - camera.x, y = gy * TILE_SIZE - camera.y;
             if (x + TILE_SIZE < -4 || x > VIEW_W + 4 || y + TILE_SIZE < -4 || y > VIEW_H + 4) continue;
-            const ripple = Math.sin(t + gx * 0.7 + gy * 0.5);
-            if (ripple > 0.2) {
-                ctx.fillStyle = '#7ab8d9';
-                const inset = 5 + ripple * 4;
-                ctx.fillRect(x + inset, y + inset, TILE_SIZE - inset * 2, TILE_SIZE - inset * 2);
-            }
+            const r = Math.sin(t + gx * 0.7 + gy * 0.5);
+            if (r > 0.2) { ctx.fillStyle = '#7ab8d9'; const inset = 5 + r * 4; ctx.fillRect(x + inset, y + inset, TILE_SIZE - inset * 2, TILE_SIZE - inset * 2); }
         }
         ctx.globalAlpha = 1;
     }
-
     function drawBridges() {
         for (const key of bridges) {
             const [gx, gy] = key.split(',').map(Number);
-            const x = gx * TILE_SIZE - camera.x;
-            const y = gy * TILE_SIZE - camera.y;
+            const x = gx * TILE_SIZE - camera.x, y = gy * TILE_SIZE - camera.y;
             if (x + TILE_SIZE < -4 || x > VIEW_W + 4 || y + TILE_SIZE < -4 || y > VIEW_H + 4) continue;
-            const hasVertNeighbor = bridges.has(gx + ',' + (gy - 1)) || bridges.has(gx + ',' + (gy + 1));
-            const hasHorizNeighbor = bridges.has((gx - 1) + ',' + gy) || bridges.has((gx + 1) + ',' + gy);
-
-            ctx.fillStyle = '#8B5A2B';
-            ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-            ctx.fillStyle = '#A0703C';
-            ctx.fillRect(x + 3, y + 3, TILE_SIZE - 6, TILE_SIZE - 6);
-            ctx.strokeStyle = '#5a3a1a';
-            ctx.lineWidth = 1.5;
-            ctx.strokeRect(x + 0.5, y + 0.5, TILE_SIZE - 1, TILE_SIZE - 1);
-
-            ctx.strokeStyle = '#6B4226';
-            ctx.lineWidth = 1;
-            if (hasVertNeighbor) {
-                for (let ly = 8; ly < TILE_SIZE; ly += 9) {
-                    ctx.beginPath();
-                    ctx.moveTo(x + 5, y + ly);
-                    ctx.lineTo(x + TILE_SIZE - 5, y + ly);
-                    ctx.stroke();
-                }
-            } else if (hasHorizNeighbor) {
-                for (let lx = 8; lx < TILE_SIZE; lx += 9) {
-                    ctx.beginPath();
-                    ctx.moveTo(x + lx, y + 5);
-                    ctx.lineTo(x + lx, y + TILE_SIZE - 5);
-                    ctx.stroke();
-                }
-            } else {
-                ctx.beginPath();
-                ctx.moveTo(x + 5, y + 5);
-                ctx.lineTo(x + TILE_SIZE - 5, y + TILE_SIZE - 5);
-                ctx.moveTo(x + TILE_SIZE - 5, y + 5);
-                ctx.lineTo(x + 5, y + TILE_SIZE - 5);
-                ctx.stroke();
-            }
-            ctx.strokeStyle = '#4a2a10';
-            ctx.lineWidth = 2;
-            if (hasVertNeighbor) {
-                ctx.beginPath();
-                ctx.moveTo(x + 3, y);
-                ctx.lineTo(x + 3, y + TILE_SIZE);
-                ctx.moveTo(x + TILE_SIZE - 3, y);
-                ctx.lineTo(x + TILE_SIZE - 3, y + TILE_SIZE);
-                ctx.stroke();
-            } else if (hasHorizNeighbor) {
-                ctx.beginPath();
-                ctx.moveTo(x, y + 3);
-                ctx.lineTo(x + TILE_SIZE, y + 3);
-                ctx.moveTo(x, y + TILE_SIZE - 3);
-                ctx.lineTo(x + TILE_SIZE, y + TILE_SIZE - 3);
-                ctx.stroke();
-            }
+            const hV = bridges.has(gx + ',' + (gy - 1)) || bridges.has(gx + ',' + (gy + 1));
+            const hH = bridges.has((gx - 1) + ',' + gy) || bridges.has((gx + 1) + ',' + gy);
+            ctx.fillStyle = '#8B5A2B'; ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+            ctx.fillStyle = '#A0703C'; ctx.fillRect(x + 3, y + 3, TILE_SIZE - 6, TILE_SIZE - 6);
+            ctx.strokeStyle = '#5a3a1a'; ctx.lineWidth = 1.5; ctx.strokeRect(x + 0.5, y + 0.5, TILE_SIZE - 1, TILE_SIZE - 1);
+            ctx.strokeStyle = '#6B4226'; ctx.lineWidth = 1;
+            if (hV) { for (let ly = 8; ly < TILE_SIZE; ly += 9) { ctx.beginPath(); ctx.moveTo(x + 5, y + ly); ctx.lineTo(x + TILE_SIZE - 5, y + ly); ctx.stroke(); } }
+            else if (hH) { for (let lx = 8; lx < TILE_SIZE; lx += 9) { ctx.beginPath(); ctx.moveTo(x + lx, y + 5); ctx.lineTo(x + lx, y + TILE_SIZE - 5); ctx.stroke(); } }
+            ctx.strokeStyle = '#4a2a10'; ctx.lineWidth = 2;
+            if (hV) { ctx.beginPath(); ctx.moveTo(x + 3, y); ctx.lineTo(x + 3, y + TILE_SIZE); ctx.moveTo(x + TILE_SIZE - 3, y); ctx.lineTo(x + TILE_SIZE - 3, y + TILE_SIZE); ctx.stroke(); }
+            else if (hH) { ctx.beginPath(); ctx.moveTo(x, y + 3); ctx.lineTo(x + TILE_SIZE, y + 3); ctx.moveTo(x, y + TILE_SIZE - 3); ctx.lineTo(x + TILE_SIZE, y + TILE_SIZE - 3); ctx.stroke(); }
         }
     }
 
     function draw() {
         if (!isPlaying) return;
         ctx.clearRect(0, 0, VIEW_W, VIEW_H);
-        ctx.fillStyle = '#1a2e14';
-        ctx.fillRect(0, 0, VIEW_W, VIEW_H);
-
+        ctx.fillStyle = '#1a2e14'; ctx.fillRect(0, 0, VIEW_W, VIEW_H);
         drawTerrainGrid();
 
-        const edgeW = EDGE_MARGIN;
-        if (camera.x < edgeW) {
-            const g = ctx.createLinearGradient(0, 0, edgeW - camera.x, 0);
-            g.addColorStop(0, 'rgba(180, 40, 40, 0.35)');
-            g.addColorStop(1, 'rgba(180, 40, 40, 0)');
-            ctx.fillStyle = g;
-            ctx.fillRect(0, 0, edgeW - camera.x, VIEW_H);
-        }
-        if (camera.y < edgeW) {
-            const g = ctx.createLinearGradient(0, 0, 0, edgeW - camera.y);
-            g.addColorStop(0, 'rgba(180, 40, 40, 0.35)');
-            g.addColorStop(1, 'rgba(180, 40, 40, 0)');
-            ctx.fillStyle = g;
-            ctx.fillRect(0, 0, VIEW_W, edgeW - camera.y);
-        }
-        const rightStart = WORLD_W - edgeW - camera.x;
-        if (rightStart < VIEW_W) {
-            const g2 = ctx.createLinearGradient(VIEW_W, 0, rightStart, 0);
-            g2.addColorStop(0, 'rgba(180, 40, 40, 0.35)');
-            g2.addColorStop(1, 'rgba(180, 40, 40, 0)');
-            ctx.fillStyle = g2;
-            ctx.fillRect(rightStart, 0, VIEW_W - rightStart, VIEW_H);
-        }
-        const bottomStart = WORLD_H - edgeW - camera.y;
-        if (bottomStart < VIEW_H) {
-            const g2 = ctx.createLinearGradient(0, VIEW_H, 0, bottomStart);
-            g2.addColorStop(0, 'rgba(180, 40, 40, 0.35)');
-            g2.addColorStop(1, 'rgba(180, 40, 40, 0)');
-            ctx.fillStyle = g2;
-            ctx.fillRect(0, bottomStart, VIEW_W, VIEW_H - bottomStart);
-        }
+        const eW = EDGE_MARGIN;
+        if (camera.x < eW) { const g = ctx.createLinearGradient(0, 0, eW - camera.x, 0); g.addColorStop(0, 'rgba(180, 40, 40, 0.35)'); g.addColorStop(1, 'rgba(180, 40, 40, 0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, eW - camera.x, VIEW_H); }
+        if (camera.y < eW) { const g = ctx.createLinearGradient(0, 0, 0, eW - camera.y); g.addColorStop(0, 'rgba(180, 40, 40, 0.35)'); g.addColorStop(1, 'rgba(180, 40, 40, 0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, VIEW_W, eW - camera.y); }
+        const rS = WORLD_W - eW - camera.x;
+        if (rS < VIEW_W) { const g = ctx.createLinearGradient(VIEW_W, 0, rS, 0); g.addColorStop(0, 'rgba(180, 40, 40, 0.35)'); g.addColorStop(1, 'rgba(180, 40, 40, 0)'); ctx.fillStyle = g; ctx.fillRect(rS, 0, VIEW_W - rS, VIEW_H); }
+        const bS = WORLD_H - eW - camera.y;
+        if (bS < VIEW_H) { const g = ctx.createLinearGradient(0, VIEW_H, 0, bS); g.addColorStop(0, 'rgba(180, 40, 40, 0.35)'); g.addColorStop(1, 'rgba(180, 40, 40, 0)'); ctx.fillStyle = g; ctx.fillRect(0, bS, VIEW_W, VIEW_H - bS); }
 
-        drawRiverTiles();
-        drawBridges();
+        drawRiverTiles(); drawBridges();
 
-        for (const v of villages) {
-            const sx = v.x - camera.x;
-            const sy = v.y - camera.y;
-            if (sx + 80 < -40 || sx - 80 > VIEW_W + 40 || sy + 80 < -40 || sy - 80 > VIEW_H + 40) continue;
-            const pulse = 0.5 + 0.5 * Math.sin(v.pulse);
+        // 減速效果
+        for (const s of slowEffects) {
+            const sx = s.x - camera.x, sy = s.y - camera.y;
+            ctx.beginPath(); ctx.arc(sx, sy, s.radius, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(150, 200, 255, 0.18)'; ctx.fill();
+            ctx.strokeStyle = 'rgba(180, 220, 255, 0.5)'; ctx.lineWidth = 2; ctx.stroke();
+        }
+        // 熔岩（Growing 特效）
+        for (const lv of lavaEffects) {
+            const sx = lv.x - camera.x, sy = lv.y - camera.y;
+            const t = frame * 0.08;
+            // 外圍脈動光環
             ctx.beginPath();
-            ctx.arc(sx, sy, v.radius + 10 + pulse * 6, 0, Math.PI * 2);
-            ctx.strokeStyle = `rgba(255, 217, 102, ${0.35 + 0.25 * pulse})`;
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.arc(sx, sy, v.radius, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(120, 90, 50, 0.35)';
-            ctx.fill();
-            ctx.strokeStyle = 'rgba(180, 140, 80, 0.6)';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            ctx.font = '34px serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('🏘️', sx, sy);
-            const prog = 1 - Math.min(v.spawnTimer / 420, 1);
-            ctx.beginPath();
-            ctx.arc(sx, sy, v.radius + 4, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * prog);
-            ctx.strokeStyle = '#ffd966';
+            ctx.arc(sx, sy, lv.radius + 6 + Math.sin(t) * 4, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(255, 200, 50, ' + (0.35 + 0.25 * Math.sin(t)) + ')';
             ctx.lineWidth = 3;
             ctx.stroke();
+            // 主體漸層
+            ctx.beginPath(); ctx.arc(sx, sy, lv.radius, 0, Math.PI * 2);
+            const g = ctx.createRadialGradient(sx, sy, lv.radius * 0.1, sx, sy, lv.radius);
+            g.addColorStop(0, 'rgba(255, 240, 100, 0.7)');
+            g.addColorStop(0.4, 'rgba(255, 140, 0, 0.6)');
+            g.addColorStop(0.75, 'rgba(220, 60, 0, 0.5)');
+            g.addColorStop(1, 'rgba(80, 10, 0, 0.35)');
+            ctx.fillStyle = g; ctx.fill();
         }
 
-        for (let f of forests) {
-            const sx = f.x - camera.x;
-            const sy = f.y - camera.y;
+        // 村莊
+        for (const v of villages) {
+            const sx = v.x - camera.x, sy = v.y - camera.y;
+            if (sx + 80 < -40 || sx - 80 > VIEW_W + 40 || sy + 80 < -40 || sy - 80 > VIEW_H + 40) continue;
+            const pulse = 0.5 + 0.5 * Math.sin(v.pulse);
+            ctx.beginPath(); ctx.arc(sx, sy, v.radius + 10 + pulse * 6, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(255, 217, 102, ${0.35 + 0.25 * pulse})`; ctx.lineWidth = 2; ctx.stroke();
+            ctx.beginPath(); ctx.arc(sx, sy, v.radius, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(120, 90, 50, 0.35)'; ctx.fill();
+            ctx.strokeStyle = 'rgba(180, 140, 80, 0.6)'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.font = '34px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText('🏘️', sx, sy);
+            const prog = 1 - Math.min(v.spawnTimer / 300, 1);
+            ctx.beginPath(); ctx.arc(sx, sy, v.radius + 4, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * prog);
+            ctx.strokeStyle = '#ffd966'; ctx.lineWidth = 3; ctx.stroke();
+        }
+
+        // 森林
+        for (const f of forests) {
+            const sx = f.x - camera.x, sy = f.y - camera.y;
             if (sx + f.r < -40 || sx - f.r > VIEW_W + 40 || sy + f.r < -40 || sy - f.r > VIEW_H + 40) continue;
-            ctx.beginPath();
-            ctx.arc(sx, sy, f.r, 0, Math.PI * 2);
-            const grad = ctx.createRadialGradient(sx, sy, f.r * 0.1, sx, sy, f.r);
-            grad.addColorStop(0, 'rgba(60, 130, 50, 0.30)');
-            grad.addColorStop(1, 'rgba(20, 70, 18, 0.50)');
-            ctx.fillStyle = grad;
-            ctx.fill();
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            for (let t of f.trees) {
-                const tx = t.x - camera.x;
-                const ty = t.y - camera.y;
+            ctx.beginPath(); ctx.arc(sx, sy, f.r, 0, Math.PI * 2);
+            const g = ctx.createRadialGradient(sx, sy, f.r * 0.1, sx, sy, f.r);
+            g.addColorStop(0, 'rgba(60, 130, 50, 0.30)'); g.addColorStop(1, 'rgba(20, 70, 18, 0.50)');
+            ctx.fillStyle = g; ctx.fill();
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            for (const t of f.trees) {
+                const tx = t.x - camera.x, ty = t.y - camera.y;
                 if (tx < -30 || tx > VIEW_W + 30 || ty < -30 || ty > VIEW_H + 30) continue;
-                ctx.font = `${t.size}px serif`;
-                ctx.fillText(t.type, tx, ty);
+                ctx.font = `${t.size}px serif`; ctx.fillText(t.type, tx, ty);
             }
         }
 
-        for (let u of soldierUnits) {
-            const sx = u.x - camera.x;
-            const sy = u.y - camera.y;
+        // 士兵單位
+        for (const u of soldierUnits) {
+            const sx = u.x - camera.x, sy = u.y - camera.y;
             if (sx < -40 || sx > VIEW_W + 40 || sy < -40 || sy > VIEW_H + 40) continue;
-            ctx.beginPath();
-            ctx.arc(sx, sy, u.radius, 0, Math.PI * 2);
-            ctx.fillStyle = u.color + '44';
-            ctx.fill();
-            ctx.strokeStyle = u.color;
-            ctx.lineWidth = 2.5;
-            ctx.stroke();
-            ctx.font = '24px serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
+            if (u.tier === 'gold') {
+                const pulse = 0.5 + 0.5 * Math.sin(frame * 0.08);
+                ctx.beginPath(); ctx.arc(sx, sy, u.radius + 8 + pulse * 6, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(255, 215, 0, ${0.5 + 0.4 * pulse})`; ctx.lineWidth = 3; ctx.stroke();
+            }
+            ctx.beginPath(); ctx.arc(sx, sy, u.radius, 0, Math.PI * 2);
+            ctx.fillStyle = u.color + '44'; ctx.fill();
+            ctx.strokeStyle = u.tier === 'gold' ? '#ffd700' : (u.tier === 'silver' ? '#e0e0e0' : u.color);
+            ctx.lineWidth = 2.5; ctx.stroke();
+            ctx.font = '24px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             ctx.fillText(u.icon, sx, sy);
-            ctx.font = 'bold 12px "Segoe UI", monospace';
-            ctx.fillStyle = '#fff';
-            ctx.shadowColor = 'black';
-            ctx.shadowBlur = 5;
-            ctx.fillText(u.value, sx, sy + u.radius + 12);
+            ctx.font = 'bold 11px "Segoe UI", monospace';
+            ctx.fillStyle = '#fff'; ctx.shadowColor = 'black'; ctx.shadowBlur = 5;
+            ctx.fillText(formatNum(u.value), sx, sy + u.radius + 12);
             ctx.shadowBlur = 0;
             if (u.capturingBy && u.captureProgress > 0) {
                 const prog = Math.min(u.captureProgress, 1);
                 const ringR = u.radius + 8;
-                const isPlayerCapturing = (u.capturingBy === player);
-                const ringColor = isPlayerCapturing ? '#ffd966' : (u.capturingBy.color || '#ff6b6b');
-                ctx.beginPath();
-                ctx.arc(sx, sy, ringR, 0, Math.PI * 2);
-                ctx.strokeStyle = 'rgba(0,0,0,0.6)';
-                ctx.lineWidth = 5;
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.arc(sx, sy, ringR, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * prog);
-                ctx.strokeStyle = ringColor;
-                ctx.lineWidth = 5;
-                ctx.lineCap = 'round';
-                ctx.stroke();
-                ctx.lineCap = 'butt';
-                const remain = Math.ceil((1 - prog) * 3);
-                ctx.font = 'bold 14px "Segoe UI"';
-                ctx.fillStyle = ringColor;
-                ctx.shadowColor = 'black';
-                ctx.shadowBlur = 6;
-                ctx.fillText(remain + 's', sx, sy - ringR - 10);
-                ctx.shadowBlur = 0;
+                const isP = (u.capturingBy === player);
+                const ringColor = isP ? '#ffd966' : (u.capturingBy.color || '#ff6b6b');
+                ctx.beginPath(); ctx.arc(sx, sy, ringR, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.lineWidth = 5; ctx.stroke();
+                ctx.beginPath(); ctx.arc(sx, sy, ringR, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * prog);
+                ctx.strokeStyle = ringColor; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.stroke(); ctx.lineCap = 'butt';
+                const totalSec = u.tier === 'gold' ? 5 : (u.tier === 'silver' ? 3 : 1);
+                const remain = Math.ceil((1 - prog) * totalSec);
+                ctx.font = 'bold 13px "Segoe UI"'; ctx.fillStyle = ringColor;
+                ctx.shadowColor = 'black'; ctx.shadowBlur = 6;
+                ctx.fillText(remain + 's', sx, sy - ringR - 10); ctx.shadowBlur = 0;
             }
         }
 
-        for (let c of activeCombats) {
+        // 戰鬥連線
+        for (const c of activeCombats) {
             const sx1 = c.x1 - camera.x, sy1 = c.y1 - camera.y;
             const sx2 = c.x2 - camera.x, sy2 = c.y2 - camera.y;
             const pulse = 0.35 + 0.35 * Math.sin(frame * 0.6);
-            ctx.beginPath();
-            ctx.moveTo(sx1, sy1);
-            ctx.lineTo(sx2, sy2);
-            ctx.strokeStyle = c.color;
-            ctx.globalAlpha = pulse;
-            ctx.lineWidth = 3;
-            ctx.setLineDash([6, 6]);
-            ctx.lineDashOffset = -frame * 1.2;
-            ctx.stroke();
-            ctx.setLineDash([]);
-            ctx.globalAlpha = 1;
-            for (let [x, y] of [[sx1, sy1], [sx2, sy2]]) {
-                ctx.beginPath();
-                ctx.arc(x, y, 14 + Math.sin(frame * 0.8) * 3, 0, Math.PI * 2);
-                ctx.strokeStyle = c.color;
-                ctx.globalAlpha = 0.5 + 0.3 * Math.sin(frame * 0.8);
-                ctx.lineWidth = 2;
-                ctx.stroke();
-                ctx.globalAlpha = 1;
+            ctx.beginPath(); ctx.moveTo(sx1, sy1); ctx.lineTo(sx2, sy2);
+            ctx.strokeStyle = c.color; ctx.globalAlpha = pulse; ctx.lineWidth = 3;
+            ctx.setLineDash([6, 6]); ctx.lineDashOffset = -frame * 1.2; ctx.stroke();
+            ctx.setLineDash([]); ctx.globalAlpha = 1;
+            for (const [x, y] of [[sx1, sy1], [sx2, sy2]]) {
+                ctx.beginPath(); ctx.arc(x, y, 14 + Math.sin(frame * 0.8) * 3, 0, Math.PI * 2);
+                ctx.strokeStyle = c.color; ctx.globalAlpha = 0.5 + 0.3 * Math.sin(frame * 0.8); ctx.lineWidth = 2; ctx.stroke(); ctx.globalAlpha = 1;
             }
         }
 
-        for (let e of enemies) {
-            const ex = e.x - camera.x;
-            const ey = e.y - camera.y;
+        // 敵人
+        for (const e of enemies) {
+            const ex = e.x - camera.x, ey = e.y - camera.y;
             if (ex < -150 || ex > VIEW_W + 150 || ey < -150 || ey > VIEW_H + 150) continue;
-            if (e.soldiers > 0) drawSoldiersCircle(e, 16);
-            ctx.font = '44px serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            if (e.soldiers <= 0) ctx.globalAlpha = 0.7;
-            ctx.fillText('🏇', ex, ey);
-            ctx.globalAlpha = 1;
+            if (e.soldiers > 0) drawSoldiersCircle(e);
+            const eHero = getHero(e.heroId);
+            // 技能光環
+            if (e.skillTimer > 0) {
+                ctx.beginPath(); ctx.arc(ex, ey, HERO_RADIUS + 12, 0, Math.PI * 2);
+                ctx.strokeStyle = '#ffaa00'; ctx.lineWidth = 2; ctx.setLineDash([6, 6]); ctx.stroke(); ctx.setLineDash([]);
+            }
+            if (e.invincibleTimer > 0) {
+                ctx.beginPath(); ctx.arc(ex, ey, HERO_RADIUS + 16, 0, Math.PI * 2);
+                ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.setLineDash([4, 4]); ctx.lineDashOffset = -frame; ctx.stroke(); ctx.setLineDash([]);
+            }
+            ctx.font = '44px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            if (e.soldiers <= 0 && e.heroHp <= 30) ctx.globalAlpha = 0.6;
+            ctx.fillText(eHero.icon, ex, ey); ctx.globalAlpha = 1;
             const num = Math.floor(e.soldiers);
-            ctx.font = 'bold 14px "Segoe UI", monospace';
-            const textW = ctx.measureText(num).width + 16;
+            ctx.font = 'bold 13px "Segoe UI", monospace';
+            const tw = ctx.measureText(formatNum(num)).width + 14;
             ctx.fillStyle = 'rgba(0,0,0,0.6)';
-            ctx.beginPath();
-            ctx.roundRect(ex - textW / 2, ey - 52, textW, 22, 11);
-            ctx.fill();
+            ctx.beginPath(); ctx.roundRect(ex - tw / 2, ey - 52, tw, 20, 10); ctx.fill();
             ctx.fillStyle = e.soldiers > 0 ? '#ff9b9b' : '#888';
-            ctx.shadowColor = 'black';
-            ctx.shadowBlur = 4;
-            ctx.fillText(num, ex, ey - 41);
-            ctx.shadowBlur = 0;
+            ctx.shadowColor = 'black'; ctx.shadowBlur = 4;
+            ctx.fillText(formatNum(num), ex, ey - 42); ctx.shadowBlur = 0;
+            if (e.heroHp < e.maxHeroHp) {
+                const bw = 44, bh = 5;
+                const bx = ex - bw / 2, by = ey - 36;
+                ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(bx, by, bw, bh);
+                ctx.fillStyle = e.heroHp > 50 ? '#7fff7f' : (e.heroHp > 25 ? '#ffd966' : '#ff5555');
+                ctx.fillRect(bx, by, bw * (e.heroHp / e.maxHeroHp), bh);
+            }
+            if (e.unstickTimer > 0) {
+                ctx.font = 'bold 16px "Segoe UI"'; ctx.fillStyle = '#ffaa00';
+                ctx.shadowColor = 'black'; ctx.shadowBlur = 4;
+                ctx.fillText('💫', ex, ey - 70); ctx.shadowBlur = 0;
+            }
         }
 
+        // 玩家
         if (player) {
-            const px = player.x - camera.x;
-            const py = player.y - camera.y;
+            const px = player.x - camera.x, py = player.y - camera.y;
             if (player.heroHp > 0) {
-                if (player.boostTimer > 0) {
-                    ctx.beginPath();
-                    ctx.arc(px, py, HERO_RADIUS + 14, 0, Math.PI * 2);
-                    ctx.strokeStyle = '#ffaa00';
-                    ctx.lineWidth = 3;
-                    ctx.setLineDash([8, 8]);
-                    ctx.stroke();
-                    ctx.setLineDash([]);
+                if (skillTimer > 0 && getHero(gameState.selectedHero).id === 'roland') {
+                    ctx.beginPath(); ctx.arc(px, py, HERO_RADIUS + 14, 0, Math.PI * 2);
+                    ctx.strokeStyle = '#ffaa00'; ctx.lineWidth = 3; ctx.setLineDash([8, 8]); ctx.stroke(); ctx.setLineDash([]);
                 }
-                if (player.soldiers > 0) drawSoldiersCircle(player, 16);
-                ctx.font = '48px serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
+                if (invincibleTimer > 0) {
+                    ctx.beginPath(); ctx.arc(px, py, HERO_RADIUS + 18, 0, Math.PI * 2);
+                    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 4; ctx.setLineDash([4, 4]); ctx.lineDashOffset = -frame; ctx.stroke(); ctx.setLineDash([]);
+                }
+                if (player.soldiers > 0) drawSoldiersCircle(player);
+                const hero = getHero(gameState.selectedHero);
+                ctx.font = '48px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                 if (player.hidden) ctx.globalAlpha = 0.55;
-                ctx.fillText('🏇', px, py);
-                ctx.globalAlpha = 1;
+                ctx.fillText(hero.icon, px, py); ctx.globalAlpha = 1;
                 const num = Math.floor(player.soldiers);
                 ctx.font = 'bold 14px "Segoe UI", monospace';
-                const textW = ctx.measureText(num).width + 16;
+                const tw = ctx.measureText(formatNum(num)).width + 16;
                 ctx.fillStyle = 'rgba(0,0,0,0.65)';
-                ctx.beginPath();
-                ctx.roundRect(px - textW / 2, py - 56, textW, 22, 11);
-                ctx.fill();
-                ctx.fillStyle = '#ffd966';
-                ctx.shadowColor = 'black';
-                ctx.shadowBlur = 4;
-                ctx.fillText(num, px, py - 45);
-                ctx.shadowBlur = 0;
+                ctx.beginPath(); ctx.roundRect(px - tw / 2, py - 56, tw, 22, 11); ctx.fill();
+                ctx.fillStyle = '#ffd966'; ctx.shadowColor = 'black'; ctx.shadowBlur = 4;
+                ctx.fillText(formatNum(num), px, py - 45); ctx.shadowBlur = 0;
                 if (player.soldiers <= 0) {
-                    ctx.font = 'bold 13px "Segoe UI"';
-                    ctx.fillStyle = '#ff8888';
-                    ctx.shadowColor = 'black';
-                    ctx.shadowBlur = 4;
-                    ctx.fillText('❤️ ' + Math.ceil(player.heroHp), px, py + 44);
-                    ctx.shadowBlur = 0;
-                }
-                if (player.boostTimer > 0) {
-                    ctx.font = 'bold 13px "Segoe UI"';
-                    ctx.fillStyle = '#ffaa00';
-                    ctx.shadowColor = 'black';
-                    ctx.shadowBlur = 4;
-                    ctx.fillText('⚡ 力量降低', px, py + (player.soldiers <= 0 ? 62 : 44));
-                    ctx.shadowBlur = 0;
+                    ctx.font = 'bold 13px "Segoe UI"'; ctx.fillStyle = '#ff8888';
+                    ctx.shadowColor = 'black'; ctx.shadowBlur = 4;
+                    ctx.fillText('❤️ ' + Math.ceil(player.heroHp), px, py + 44); ctx.shadowBlur = 0;
                 }
             }
         }
 
-        for (let p of combatEffects) {
-            const sx = p.x - camera.x;
-            const sy = p.y - camera.y;
+        // 粒子
+        for (const p of combatEffects) {
+            const sx = p.x - camera.x, sy = p.y - camera.y;
             if (sx < -20 || sx > VIEW_W + 20 || sy < -20 || sy > VIEW_H + 20) continue;
-            const alpha = p.life / p.maxLife;
-            ctx.globalAlpha = alpha;
-            ctx.fillStyle = p.color;
-            ctx.beginPath();
-            ctx.arc(sx, sy, p.size, 0, Math.PI * 2);
-            ctx.fill();
+            if (p.isFireball) {
+                ctx.globalAlpha = Math.min(1, p.life / 30);
+                ctx.beginPath(); ctx.arc(sx, sy, p.size * (1 - p.life / 30 * 0.5), 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 100, 0, 0.5)'; ctx.fill(); ctx.globalAlpha = 1;
+            } else {
+                ctx.globalAlpha = p.life / p.maxLife;
+                ctx.fillStyle = p.color;
+                ctx.beginPath(); ctx.arc(sx, sy, p.size, 0, Math.PI * 2); ctx.fill();
+            }
         }
         ctx.globalAlpha = 1;
 
-        for (let log of battleLogs) {
-            const sx = log.x - camera.x;
-            const sy = log.y - camera.y;
-            ctx.font = 'bold 20px "Segoe UI", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.shadowColor = 'black';
-            ctx.shadowBlur = 6;
+        for (const log of battleLogs) {
+            const sx = log.x - camera.x, sy = log.y - camera.y;
+            ctx.font = 'bold 20px "Segoe UI", sans-serif'; ctx.textAlign = 'center';
+            ctx.shadowColor = 'black'; ctx.shadowBlur = 6;
             ctx.fillStyle = log.color;
             ctx.globalAlpha = Math.min(1, log.life / 40);
             ctx.fillText(log.text, sx, sy);
-            ctx.globalAlpha = 1;
-            ctx.shadowBlur = 0;
+            ctx.globalAlpha = 1; ctx.shadowBlur = 0;
         }
 
         if (player && player.hidden && !gameOver) {
-            const grad = ctx.createRadialGradient(VIEW_W / 2, VIEW_H / 2, VIEW_H * 0.3, VIEW_W / 2, VIEW_H / 2, VIEW_H * 0.8);
-            grad.addColorStop(0, 'rgba(0,0,0,0)');
-            grad.addColorStop(1, 'rgba(0,0,0,0.55)');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, VIEW_W, VIEW_H);
-            ctx.font = 'bold 22px "Segoe UI"';
-            ctx.textAlign = 'center';
-            ctx.fillStyle = '#8fbc6b';
-            ctx.shadowColor = 'black';
-            ctx.shadowBlur = 10;
-            ctx.fillText('🌲 森林隱藏中', VIEW_W / 2, 56);
-            ctx.shadowBlur = 0;
+            const g = ctx.createRadialGradient(VIEW_W/2, VIEW_H/2, VIEW_H*0.3, VIEW_W/2, VIEW_H/2, VIEW_H*0.8);
+            g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,0.55)');
+            ctx.fillStyle = g; ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+            ctx.font = 'bold 22px "Segoe UI"'; ctx.textAlign = 'center';
+            ctx.fillStyle = '#8fbc6b'; ctx.shadowColor = 'black'; ctx.shadowBlur = 10;
+            ctx.fillText('🌲 森林隱藏中', VIEW_W / 2, 56); ctx.shadowBlur = 0;
         }
 
-        const mapW = 150, mapH = 105;
-        const mapX = VIEW_W - mapW - 15;
-        const mapY = 15;
-        ctx.fillStyle = '#0a130bcc';
-        ctx.fillRect(mapX, mapY, mapW, mapH);
-        ctx.strokeStyle = '#7f9f5c';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(mapX, mapY, mapW, mapH);
-        ctx.strokeStyle = '#ff5555';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(mapX + (EDGE_MARGIN / WORLD_W) * mapW, mapY + (EDGE_MARGIN / WORLD_H) * mapH,
-            mapW - 2 * (EDGE_MARGIN / WORLD_W) * mapW, mapH - 2 * (EDGE_MARGIN / WORLD_H) * mapH);
-
-        const mTileW = (TILE_SIZE / WORLD_W) * mapW;
-        const mTileH = (TILE_SIZE / WORLD_H) * mapH;
-
+        // 小地圖
+        const mW = 150, mH = 105;
+        const mX = VIEW_W - mW - 15, mY = 15;
+        ctx.fillStyle = '#0a130bcc'; ctx.fillRect(mX, mY, mW, mH);
+        ctx.strokeStyle = '#7f9f5c'; ctx.lineWidth = 2; ctx.strokeRect(mX, mY, mW, mH);
+        ctx.strokeStyle = '#ff5555'; ctx.lineWidth = 1;
+        ctx.strokeRect(mX + (EDGE_MARGIN / WORLD_W) * mW, mY + (EDGE_MARGIN / WORLD_H) * mH, mW - 2 * (EDGE_MARGIN / WORLD_W) * mW, mH - 2 * (EDGE_MARGIN / WORLD_H) * mH);
+        const mTW = (TILE_SIZE / WORLD_W) * mW, mTH = (TILE_SIZE / WORLD_H) * mH;
         ctx.fillStyle = '#3a6b8a';
-        for (const key of riverTiles) {
-            const [gx, gy] = key.split(',').map(Number);
-            const mx = mapX + (gx * TILE_SIZE / WORLD_W) * mapW;
-            const my = mapY + (gy * TILE_SIZE / WORLD_H) * mapH;
-            if (mx + mTileW < mapX || mx > mapX + mapW || my + mTileH < mapY || my > mapY + mapH) continue;
-            ctx.fillRect(mx, my, mTileW + 0.5, mTileH + 0.5);
-        }
+        for (const key of riverTiles) { const [gx, gy] = key.split(',').map(Number); const mx = mX + (gx * TILE_SIZE / WORLD_W) * mW; const my = mY + (gy * TILE_SIZE / WORLD_H) * mH; if (mx + mTW < mX || mx > mX + mW || my + mTH < mY || my > mY + mH) continue; ctx.fillRect(mx, my, mTW + 0.5, mTH + 0.5); }
         ctx.fillStyle = '#A0703C';
-        for (const key of bridges) {
-            const [gx, gy] = key.split(',').map(Number);
-            const mx = mapX + (gx * TILE_SIZE / WORLD_W) * mapW;
-            const my = mapY + (gy * TILE_SIZE / WORLD_H) * mapH;
-            if (mx + mTileW < mapX || mx > mapX + mapW || my + mTileH < mapY || my > mapY + mapH) continue;
-            ctx.fillRect(mx, my, mTileW + 0.5, mTileH + 0.5);
-        }
-        for (const v of villages) {
-            ctx.beginPath();
-            ctx.arc(mapX + (v.x / WORLD_W) * mapW, mapY + (v.y / WORLD_H) * mapH, 3, 0, Math.PI * 2);
-            ctx.fillStyle = '#ffd966';
-            ctx.fill();
-        }
-        for (let u of soldierUnits) {
-            ctx.beginPath();
-            ctx.arc(mapX + (u.x / WORLD_W) * mapW, mapY + (u.y / WORLD_H) * mapH, 1.3, 0, Math.PI * 2);
-            ctx.fillStyle = u.color;
-            ctx.fill();
-        }
-        for (let e of enemies) {
-            ctx.beginPath();
-            ctx.arc(mapX + (e.x / WORLD_W) * mapW, mapY + (e.y / WORLD_H) * mapH, 2.5, 0, Math.PI * 2);
-            ctx.fillStyle = e.soldiers > 0 ? '#ff6b6b' : '#aa6666';
-            ctx.fill();
-        }
-        if (player) {
-            ctx.beginPath();
-            ctx.arc(mapX + (player.x / WORLD_W) * mapW, mapY + (player.y / WORLD_H) * mapH, 3.5, 0, Math.PI * 2);
-            ctx.fillStyle = '#ffd966';
-            ctx.fill();
-        }
+        for (const key of bridges) { const [gx, gy] = key.split(',').map(Number); const mx = mX + (gx * TILE_SIZE / WORLD_W) * mW; const my = mY + (gy * TILE_SIZE / WORLD_H) * mH; if (mx + mTW < mX || mx > mX + mW || my + mTH < mY || my > mY + mH) continue; ctx.fillRect(mx, my, mTW + 0.5, mTH + 0.5); }
+        for (const v of villages) { ctx.beginPath(); ctx.arc(mX + (v.x / WORLD_W) * mW, mY + (v.y / WORLD_H) * mH, 3, 0, Math.PI * 2); ctx.fillStyle = '#ffd966'; ctx.fill(); }
+        for (const u of soldierUnits) { ctx.beginPath(); ctx.arc(mX + (u.x / WORLD_W) * mW, mY + (u.y / WORLD_H) * mH, u.tier === 'gold' ? 2.5 : 1.3, 0, Math.PI * 2); ctx.fillStyle = u.tier === 'gold' ? '#ffd700' : (u.tier === 'silver' ? '#e0e0e0' : u.color); ctx.fill(); }
+        for (const e of enemies) { ctx.beginPath(); ctx.arc(mX + (e.x / WORLD_W) * mW, mY + (e.y / WORLD_H) * mH, 2.5, 0, Math.PI * 2); ctx.fillStyle = e.soldiers > 0 ? '#ff6b6b' : '#aa6666'; ctx.fill(); }
+        if (player) { ctx.beginPath(); ctx.arc(mX + (player.x / WORLD_W) * mW, mY + (player.y / WORLD_H) * mH, 3.5, 0, Math.PI * 2); ctx.fillStyle = '#ffd966'; ctx.fill(); }
     }
 
     if (!CanvasRenderingContext2D.prototype.roundRect) {
         CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
-            if (w < 2 * r) r = w / 2;
-            if (h < 2 * r) r = h / 2;
-            this.beginPath();
-            this.moveTo(x + r, y);
-            this.arcTo(x + w, y, x + w, y + h, r);
-            this.arcTo(x + w, y + h, x, y + h, r);
-            this.arcTo(x, y + h, x, y, r);
-            this.arcTo(x, y, x + w, y, r);
-            this.closePath();
-            return this;
+            if (w < 2 * r) r = w / 2; if (h < 2 * r) r = h / 2;
+            this.beginPath(); this.moveTo(x + r, y);
+            this.arcTo(x + w, y, x + w, y + h, r); this.arcTo(x + w, y + h, x, y + h, r);
+            this.arcTo(x, y + h, x, y, r); this.arcTo(x, y, x + w, y, r); this.closePath(); return this;
         };
     }
 
-    function gameLoop() {
-        if (isPlaying) {
-            update();
-            draw();
-        }
-        requestAnimationFrame(gameLoop);
-    }
+    function gameLoop() { if (isPlaying) { update(); draw(); } requestAnimationFrame(gameLoop); }
 
     (function initJoystick() {
-        const base = document.getElementById('joystickBase');
-        const stick = document.getElementById('joystickStick');
-        let active = false, pointerId = null;
-        let centerX = 0, centerY = 0, maxRadius = 0;
-        function refreshGeometry() {
-            const rect = base.getBoundingClientRect();
-            centerX = rect.left + rect.width / 2;
-            centerY = rect.top + rect.height / 2;
-            maxRadius = rect.width * 0.29;
-        }
-        function setStick(clientX, clientY) {
-            let dx = clientX - centerX, dy = clientY - centerY;
-            const d = Math.hypot(dx, dy);
-            if (d > maxRadius) { dx = dx / d * maxRadius; dy = dy / d * maxRadius; }
-            joystickInput.x = dx / maxRadius;
-            joystickInput.y = dy / maxRadius;
-            stick.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-        }
-        function reset() {
-            joystickInput.x = 0; joystickInput.y = 0;
-            stick.style.transform = 'translate(-50%, -50%)';
-            base.classList.remove('active');
-            active = false; pointerId = null;
-        }
-        base.addEventListener('pointerdown', (e) => {
-            e.preventDefault();
-            if (active) return;
-            active = true; pointerId = e.pointerId;
-            try { base.setPointerCapture(pointerId); } catch (err) {}
-            base.classList.add('active');
-            refreshGeometry();
-            setStick(e.clientX, e.clientY);
-        });
-        base.addEventListener('pointermove', (e) => {
-            if (!active || e.pointerId !== pointerId) return;
-            e.preventDefault();
-            setStick(e.clientX, e.clientY);
-        });
-        function endHandler(e) { if (e.pointerId !== pointerId) return; reset(); }
-        base.addEventListener('pointerup', endHandler);
-        base.addEventListener('pointercancel', endHandler);
+        const base = document.getElementById('joystickBase'); const stick = document.getElementById('joystickStick');
+        let active = false, pid = null, cx = 0, cy = 0, mr = 0;
+        function refresh() { const r = base.getBoundingClientRect(); cx = r.left + r.width / 2; cy = r.top + r.height / 2; mr = r.width * 0.29; }
+        function set(clientX, clientY) { let dx = clientX - cx, dy = clientY - cy; const d = Math.hypot(dx, dy); if (d > mr) { dx = dx / d * mr; dy = dy / d * mr; } joystickInput.x = dx / mr; joystickInput.y = dy / mr; stick.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`; }
+        function reset() { joystickInput.x = 0; joystickInput.y = 0; stick.style.transform = 'translate(-50%, -50%)'; base.classList.remove('active'); active = false; pid = null; }
+        base.addEventListener('pointerdown', (e) => { e.preventDefault(); if (active) return; active = true; pid = e.pointerId; try { base.setPointerCapture(pid); } catch (err) {} base.classList.add('active'); refresh(); set(e.clientX, e.clientY); });
+        base.addEventListener('pointermove', (e) => { if (!active || e.pointerId !== pid) return; e.preventDefault(); set(e.clientX, e.clientY); });
+        function end(e) { if (e.pointerId !== pid) return; reset(); }
+        base.addEventListener('pointerup', end); base.addEventListener('pointercancel', end);
         base.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
         base.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
     })();
 
-    (function initBoostBtn() {
-        const btn = boostBtn;
-        let pressed = false;
-        function press(e) { e.preventDefault(); if (pressed) return; pressed = true; keys[' '] = true; btn.classList.add('pressed'); }
-        function release(e) { if (!pressed) return; pressed = false; keys[' '] = false; btn.classList.remove('pressed'); }
-        btn.addEventListener('pointerdown', press);
-        btn.addEventListener('pointerup', release);
-        btn.addEventListener('pointercancel', release);
-        btn.addEventListener('pointerleave', release);
+    (function initSkillBtn() {
+        const btn = boostBtn; let pressed = false;
+        function press(e) { e.preventDefault(); if (pressed) return; pressed = true; castSkill(); btn.classList.add('pressed'); }
+        function release(e) { if (!pressed) return; pressed = false; btn.classList.remove('pressed'); }
+        btn.addEventListener('pointerdown', press); btn.addEventListener('pointerup', release);
+        btn.addEventListener('pointercancel', release); btn.addEventListener('pointerleave', release);
         btn.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
         btn.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
     })();
 
-    // ============ 鍵盤輸入（WASD + 方向鍵 + J + 空白） ============
     window.addEventListener('keydown', (e) => {
         const key = e.key.toLowerCase();
-        if (key === ' ') {
-            e.preventDefault();
-            keys[' '] = true;
-            return;
-        }
-        if (key === 'j') {
-            e.preventDefault();
-            keys.j = true;
-            return;
-        }
-        if (key in keys) {
-            keys[key] = true;
-            if (key.startsWith('arrow')) e.preventDefault();
-        }
+        if (key === ' ') { e.preventDefault(); keys[' '] = true; return; }
+        if (key === 'j') { e.preventDefault(); keys.j = true; return; }
+        if (key in keys) { keys[key] = true; if (key.startsWith('arrow')) e.preventDefault(); }
     });
     window.addEventListener('keyup', (e) => {
         const key = e.key.toLowerCase();
@@ -2197,65 +1549,99 @@
         if (key in keys) keys[key] = false;
     });
 
-    // ============ 說明彈窗 ============
-    helpBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        Sfx.click();
-        helpModal.classList.add('show');
-    });
-    closeHelpBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        Sfx.click();
-        helpModal.classList.remove('show');
-    });
-    helpModal.addEventListener('click', (e) => {
-        if (e.target === helpModal) {
-            helpModal.classList.remove('show');
-        }
-    });
-
-    // ============ 遊戲按鈕 ============
-    homeBtn.addEventListener('click', () => {
-        Sfx.click();
-        returnToCover();
-    });
-
-    returnToCoverBtn.addEventListener('click', () => {
-        Sfx.click();
-        returnToCover();
-    });
+    homeBtn.addEventListener('click', () => { Sfx.click(); if (isPlaying && !gameOver) handleGameOver(false); });
+    returnToCoverBtn.addEventListener('click', () => { Sfx.click(); returnToCover(); });
 
     function startGame() {
-        Sfx.click();
-        getAudioCtx();
-        gameOverHandled = false;
-        resetGame();
-        isPlaying = true;
-        coverScreen.style.display = 'none';
-        gameWrapper.style.display = 'flex';
-        requestAnimationFrame(() => {
-            resizeGame();
-            getAudioCtx();
-        });
+        Sfx.click(); getAudioCtx(); gameOverHandled = false;
+        resetGame(); isPlaying = true;
+        coverScreen.style.display = 'none'; gameWrapper.style.display = 'flex';
+        requestAnimationFrame(() => { resizeGame(); getAudioCtx(); });
         switchToBattleMusic();
     }
-
-    startGameBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        startGame();
-    });
+    startGameBtn.addEventListener('click', (e) => { e.stopPropagation(); startGame(); });
 
     document.addEventListener('gesturestart', (e) => e.preventDefault());
     document.addEventListener('touchmove', (e) => {
-        if (e.target.closest('.joystick-base') || e.target.closest('.boost-btn') || e.target.closest('.float-btn')) return;
+        if (e.target.closest('.joystick-base') || e.target.closest('.boost-btn') || e.target.closest('.float-btn') || e.target.closest('.modal-content')) return;
         e.preventDefault();
     }, { passive: false });
 
     window.addEventListener('resize', () => { if (isPlaying) resizeGame(); });
     window.addEventListener('orientationchange', () => setTimeout(() => { if (isPlaying) resizeGame(); }, 120));
 
+    // ================= 封面 UI =================
+    function updateCover() {
+        coverGold.textContent = '💰 金幣: ' + formatGold(gameState.gold);
+        const hero = getHero(gameState.selectedHero);
+        coverHero.textContent = hero.icon + ' ' + hero.name + ' · ' + hero.skillName;
+    }
+    function openShop() { Sfx.click(); shopGold.textContent = formatGold(gameState.gold); renderShop(); shopModal.classList.add('show'); }
+    function renderShop() {
+        shopGrid.innerHTML = '';
+        for (const h of HEROES) {
+            const owned = gameState.ownedHeroes.includes(h.id);
+            const selected = gameState.selectedHero === h.id;
+            const canAfford = gameState.gold >= h.price;
+            const item = document.createElement('div');
+            item.className = 'shop-item' + (owned ? ' owned' : '') + (selected ? ' selected' : '');
+            item.innerHTML = `<div class="shop-icon">${h.icon}</div><div class="shop-name">${h.name}</div><div class="shop-skill">${h.skillName}</div><div class="shop-desc">${h.desc}</div><div class="shop-price">${h.price === 0 ? '免費' : formatGold(h.price)}</div>`;
+            const btn = document.createElement('button');
+            if (selected) { btn.className = 'shop-action-btn selected-btn'; btn.textContent = '使用中'; btn.disabled = true; }
+            else if (owned) { btn.className = 'shop-action-btn'; btn.textContent = '選擇'; btn.onclick = () => { gameState.selectedHero = h.id; saveGame(); updateCover(); renderShop(); Sfx.buy(); }; }
+            else { btn.className = 'shop-action-btn buy-btn'; btn.textContent = canAfford ? '購買' : '金幣不足'; btn.disabled = !canAfford; btn.onclick = () => { if (gameState.gold >= h.price) { gameState.gold -= h.price; gameState.ownedHeroes.push(h.id); gameState.selectedHero = h.id; saveGame(); updateCover(); shopGold.textContent = formatGold(gameState.gold); renderShop(); Sfx.buy(); } }; }
+            item.appendChild(btn); shopGrid.appendChild(item);
+        }
+    }
+    shopBtn.addEventListener('click', (e) => { e.stopPropagation(); openShop(); });
+    closeShopBtn.addEventListener('click', (e) => { e.stopPropagation(); Sfx.click(); shopModal.classList.remove('show'); });
+    shopModal.addEventListener('click', (e) => { if (e.target === shopModal) shopModal.classList.remove('show'); });
+
+    helpBtn.addEventListener('click', (e) => { e.stopPropagation(); Sfx.click(); helpModal.classList.add('show'); });
+    closeHelpBtn.addEventListener('click', (e) => { e.stopPropagation(); Sfx.click(); helpModal.classList.remove('show'); });
+    helpModal.addEventListener('click', (e) => { if (e.target === helpModal) helpModal.classList.remove('show'); });
+
+    saveBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); Sfx.click();
+        const data = JSON.stringify(gameState, null, 2);
+        const blob = new Blob([data], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'shields_staffs_save.txt'; a.click();
+        URL.revokeObjectURL(url);
+    });
+    loadBtn.addEventListener('click', (e) => { e.stopPropagation(); Sfx.click(); loadFileInput.value = ''; loadFileInput.click(); });
+    loadFileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            try {
+                const data = JSON.parse(ev.target.result);
+                gameState.gold = Number(data.gold) || 0;
+                gameState.ownedHeroes = Array.isArray(data.ownedHeroes) && data.ownedHeroes.length ? data.ownedHeroes : ['roland'];
+                if (!gameState.ownedHeroes.includes('roland')) gameState.ownedHeroes.unshift('roland');
+                gameState.selectedHero = data.selectedHero && gameState.ownedHeroes.includes(data.selectedHero) ? data.selectedHero : 'roland';
+                gameState.muted = !!data.muted;
+                gameState.bestScore = Number(data.bestScore) || 0;
+                isMuted = gameState.muted;
+                saveGame(); updateCover(); updateMuteIcons();
+                if (!isMuted && !isPlaying) menuMusic.play().catch(() => {});
+                Sfx.buy();
+            } catch (err) { alert('存檔格式錯誤'); }
+        };
+        reader.readAsText(file);
+    });
+    resetBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!confirm('確定要重設所有遊戲進度嗎？')) return;
+        Sfx.click();
+        gameState = { gold: 0, ownedHeroes: ['roland'], selectedHero: 'roland', muted: false, bestScore: 0 };
+        isMuted = false; saveGame(); updateCover(); updateMuteIcons();
+    });
+
     // ================= 啟動 =================
+    loadSave();
     updateMuteIcons();
+    updateCover();
     attemptMenuAutoplay();
     gameLoop();
 })();
