@@ -13,27 +13,73 @@ html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
     --float-btn-size: clamp(32px, 5.5vw, 40px);
     --edge-gap: 12px;
 }
+
+/* ===== 封面：改為 flex 容器，內容參與佈局，不再絕對定位撐爆 ===== */
 .cover-screen { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 40%, #1a2e14, #050a04 80%); padding: 12px; }
-.cover-box { position: relative; width: min(92vw, 820px); aspect-ratio: 4/3; max-height: 92vh; border-radius: 24px; overflow: hidden; box-shadow: 0 24px 70px rgba(0,0,0,0.85), inset 0 0 0 3px #5e7a4a, inset 0 0 60px rgba(0,0,0,0.6); background: #1a2e14; animation: boxBreathe 6s ease-in-out infinite; }
+.cover-box {
+    position: relative;
+    width: min(92vw, 820px, 122.6vh);
+    aspect-ratio: 4 / 3;
+    max-height: 92vh;
+    border-radius: 24px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.85), inset 0 0 0 3px #5e7a4a, inset 0 0 60px rgba(0,0,0,0.6);
+    background: #1a2e14;
+    animation: boxBreathe 6s ease-in-out infinite;
+}
 @keyframes boxBreathe {
     0%, 100% { box-shadow: 0 24px 70px rgba(0,0,0,0.85), inset 0 0 0 3px #5e7a4a, inset 0 0 60px rgba(0,0,0,0.6); }
     50% { box-shadow: 0 24px 80px rgba(255,215,100,0.25), inset 0 0 0 3px #8fae6a, inset 0 0 80px rgba(255,215,100,0.15); }
 }
-.cover-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; animation: bgZoom 20s ease-in-out infinite alternate; }
-@keyframes bgZoom {
-    0% { transform: scale(1); }
-    100% { transform: scale(1.08); }
+
+.cover-box::before {
+    content: '';
+    position: absolute;
+    inset: -40px;
+    background: url('shields_and_staffs.jpg') center/cover no-repeat;
+    filter: blur(22px) brightness(0.42) saturate(0.9);
+    z-index: 0;
+    pointer-events: none;
 }
-.cover-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0.75) 100%); pointer-events: none; }
-.cover-content { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(6px, 1.2vw, 12px); padding: clamp(14px, 3vw, 40px) clamp(14px, 3vw, 40px) clamp(56px, 9vw, 76px); text-align: center; z-index: 2; }
-.cover-title { margin: 0; font-size: clamp(24px, 5vw, 46px); font-weight: 900; color: #ffd966; text-shadow: 0 4px 0 #5a3a1a, 0 8px 20px rgba(0,0,0,0.9); letter-spacing: 2px; font-family: 'Georgia', 'Times New Roman', serif; animation: titlePulse 3s ease-in-out infinite, titleGlow 3s ease-in-out infinite; }
+
+.cover-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    pointer-events: none;
+    z-index: 1;
+}
+.cover-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0.75) 100%); pointer-events: none; z-index: 2; }
+
+.cover-content {
+    position: relative;
+    z-index: 3;
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(4px, 1.2vw, 12px);
+    padding: clamp(14px, 3vw, 40px) clamp(14px, 3vw, 40px) clamp(50px, 9vw, 76px);
+    text-align: center;
+}
+
+.cover-title { margin: 0; font-size: clamp(22px, 5vw, 46px); font-weight: 900; color: #ffd966; text-shadow: 0 4px 0 #5a3a1a, 0 8px 20px rgba(0,0,0,0.9); letter-spacing: 2px; font-family: 'Georgia', 'Times New Roman', serif; animation: titlePulse 3s ease-in-out infinite, titleGlow 3s ease-in-out infinite; }
 @keyframes titlePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
 @keyframes titleGlow { 0%, 100% { filter: drop-shadow(0 0 8px rgba(255,217,102,0.5)); } 50% { filter: drop-shadow(0 0 24px rgba(255,217,102,0.95)); } }
 .cover-subtitle { margin: 0; font-size: clamp(11px, 1.8vw, 15px); color: #d4e0b0; text-shadow: 0 2px 6px black; letter-spacing: 5px; animation: subtitleFade 4s ease-in-out infinite; }
 @keyframes subtitleFade { 0%, 100% { opacity: 0.75; letter-spacing: 5px; } 50% { opacity: 1; letter-spacing: 7px; } }
-.cover-gold { margin: 4px 0; font-size: clamp(12px, 2vw, 16px); color: #ffd966; text-shadow: 0 2px 6px black; font-weight: bold; letter-spacing: 1px; background: rgba(0,0,0,0.5); padding: 4px 16px; border-radius: 30px; border: 1px solid #8a6b0f; animation: goldShine 2.5s ease-in-out infinite; }
+.cover-gold { margin: 0; font-size: clamp(12px, 2vw, 16px); color: #ffd966; text-shadow: 0 2px 6px black; font-weight: bold; letter-spacing: 1px; background: rgba(0,0,0,0.5); padding: 4px 16px; border-radius: 30px; border: 1px solid #8a6b0f; animation: goldShine 2.5s ease-in-out infinite; }
 @keyframes goldShine { 0%, 100% { box-shadow: 0 0 8px rgba(255,217,102,0.4); } 50% { box-shadow: 0 0 22px rgba(255,217,102,0.9); } }
-.cover-hero { margin: 2px 0; font-size: clamp(11px, 1.8vw, 14px); color: #d4e0b0; text-shadow: 0 2px 4px black; }
+.cover-hero { margin: 0; font-size: clamp(11px, 1.8vw, 14px); color: #d4e0b0; text-shadow: 0 2px 4px black; }
 .cover-btn { padding: clamp(7px, 1.1vw, 12px) clamp(16px, 2.6vw, 28px); font-size: clamp(12px, 1.8vw, 16px); font-weight: 900; border-radius: 60px; cursor: pointer; transition: transform 0.08s ease, box-shadow 0.08s ease; letter-spacing: 1.5px; font-family: inherit; text-shadow: 0 1px 0 rgba(255,255,255,0.4); }
 .start-btn { margin-top: clamp(4px, 1vw, 10px); color: #2a1808; background: linear-gradient(180deg, #ffd966, #d4a017); border: 3px solid #fff3c0; box-shadow: 0 6px 0 #8a6b0f, 0 10px 24px rgba(0,0,0,0.7); animation: startPulse 2s ease-in-out infinite; }
 @keyframes startPulse { 0%, 100% { transform: scale(1); box-shadow: 0 6px 0 #8a6b0f, 0 10px 24px rgba(0,0,0,0.7); } 50% { transform: scale(1.05); box-shadow: 0 6px 0 #8a6b0f, 0 10px 36px rgba(255,217,102,0.6); } }
@@ -43,11 +89,65 @@ html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 .shop-btn { color: #2a1808; background: linear-gradient(180deg, #ffb84d, #d48017); border: 2px solid #fff3c0; box-shadow: 0 4px 0 #8a5010, 0 6px 16px rgba(0,0,0,0.6); font-size: clamp(10px, 1.5vw, 13px); padding: clamp(5px, 0.9vw, 9px) clamp(12px, 2vw, 20px); }
 .shop-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #8a5010, 0 4px 12px rgba(0,0,0,0.6); }
 .button-row { display: flex; flex-wrap: wrap; gap: clamp(4px, 0.8vw, 8px); justify-content: center; align-items: center; margin-top: 2px; }
-.cover-footer { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); color: #d4e0b0; font-size: clamp(8px, 1.1vw, 11px); text-shadow: 0 2px 4px black; background: rgba(0,0,0,0.55); padding: 3px 12px; border-radius: 30px; white-space: nowrap; z-index: 3; letter-spacing: 0.4px; border: 1px solid rgba(127,159,92,0.3); max-width: calc(100% - 100px); overflow: hidden; text-overflow: ellipsis; }
+.cover-footer { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); color: #d4e0b0; font-size: clamp(8px, 1.1vw, 11px); text-shadow: 0 2px 4px black; background: rgba(0,0,0,0.55); padding: 3px 12px; border-radius: 30px; white-space: nowrap; z-index: 4; letter-spacing: 0.4px; border: 1px solid rgba(127,159,92,0.3); max-width: calc(100% - 100px); overflow: hidden; text-overflow: ellipsis; }
 .float-btn { width: var(--float-btn-size); height: var(--float-btn-size); border-radius: 50%; background: rgba(10, 19, 11, 0.72); border: 2px solid rgba(127, 159, 92, 0.65); color: #d4e0b0; font-size: clamp(14px, 2.2vw, 18px); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.6); padding: 0; line-height: 1; z-index: 20; backdrop-filter: blur(2px); transition: transform 0.1s ease; }
 .float-btn:active { transform: scale(0.88); }
 .cover-mute { position: absolute; bottom: 8px; left: 8px; z-index: 4; }
 .cover-fullscreen { position: absolute; bottom: 8px; right: 8px; z-index: 4; }
+
+/* ===== 手機版：高度改由內容決定，允許垂直滾動，四邊完整顯示 ===== */
+@media (max-width: 700px), (max-height: 560px) {
+    .cover-screen { padding: 8px; }
+    .cover-box {
+        width: 94vw;
+        max-width: 94vw;
+        aspect-ratio: auto;
+        min-height: 74vw;
+        max-height: 92vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+    }
+    .cover-content {
+        flex: 0 0 auto;
+        justify-content: center;
+        padding: 16px 12px 52px;
+        gap: 7px;   /* 稍微拉開間距 */
+    }
+    .cover-title { font-size: clamp(19px, 5.6vw, 30px); letter-spacing: 1px; }
+    .cover-subtitle { font-size: 11px; letter-spacing: 4px; }
+    .cover-gold { font-size: 11px; padding: 3px 12px; }
+    .cover-hero { font-size: 11px; }
+    .cover-btn { font-size: 12px; padding: 7px 15px; letter-spacing: 1px; }
+
+    /* ★ 關鍵修正：關閉 startPulse 動畫，縮小立體陰影與外發光，避免遮住下方按鈕 */
+    .start-btn {
+        font-size: 14px;
+        padding: 9px 20px;
+        border-width: 2px;
+        margin-top: 2px;
+        margin-bottom: 8px;       /* 與下方按鈕拉開距離 */
+        box-shadow: 0 3px 0 #8a6b0f, 0 4px 10px rgba(0,0,0,0.5);
+        animation: none;          /* 關閉脈動，避免動畫中的大陰影閃爍覆蓋 */
+    }
+    .start-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #8a6b0f, 0 2px 6px rgba(0,0,0,0.5); }
+
+    .small-btn, .shop-btn { font-size: 11px; padding: 6px 13px; }
+    .button-row { gap: 8px; margin-top: 4px; position: relative; z-index: 1; }
+    .cover-footer { font-size: 9px; padding: 2px 10px; bottom: 6px; max-width: calc(100% - 92px); }
+    .cover-mute, .cover-fullscreen { bottom: 6px; }
+}
+
+/* ===== 極窄/極矮裝置再縮一檔 ===== */
+@media (max-width: 360px) {
+    .cover-title { font-size: 18px; }
+    .cover-subtitle { font-size: 10px; letter-spacing: 3px; }
+    .cover-btn { font-size: 11px; padding: 6px 12px; }
+    .start-btn { font-size: 13px; padding: 8px 16px; box-shadow: 0 2px 0 #8a6b0f, 0 3px 8px rgba(0,0,0,0.45); }
+    .small-btn, .shop-btn { font-size: 10px; padding: 5px 10px; }
+}
+
 .modal { position: fixed; inset: 0; z-index: 1500; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.85); padding: 16px; }
 .modal.show { display: flex; }
 .modal-content { background: linear-gradient(180deg, #1e2f1f, #0a130b); border: 3px solid #5e7a4a; border-radius: 24px; padding: clamp(14px, 2.6vw, 24px) clamp(16px, 3vw, 32px); max-width: min(94vw, 680px); max-height: 88vh; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; box-shadow: 0 20px 60px rgba(0,0,0,0.9); color: #d4e0b0; }
@@ -996,7 +1096,6 @@ canvas { display: block; background: #142410; }
             let aiSpeed = e.speed * getSpeedMultiplier(e.soldiers);
             if (e.skillTimer > 0 && e.heroId === 'roland') aiSpeed *= SKILL_SPEED_MULT;
             if (e.slowTimer > 0) { aiSpeed *= 0.5; e.slowTimer--; }
-            // ★ AI 進入森林也減速
             if (isInForest(e.x, e.y, e.radius)) aiSpeed *= FOREST_SPEED_FACTOR;
             for (const s of slowEffects) if (dist(e.x, e.y, s.x, s.y) < s.radius) { e.slowTimer = Math.max(e.slowTimer, 5); break; }
             for (const lv of lavaEffects) if (dist(e.x, e.y, lv.x, lv.y) < lv.radius) { e.slowTimer = Math.max(e.slowTimer, 5); break; }
