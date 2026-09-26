@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>🐾 鬥獸棋 · 森林之戰</title>
+<title>🐾鬥獸棋 · 森林之戰</title>
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
@@ -922,10 +922,12 @@ const ICONS = {
     '狼':'🐺', '狗':'🐕', '貓':'🐈', '鼠':'🐭'
 };
 
+/* 難度設定：maxDepth 為迭代加深上限，timeLimit 為思考時間上限（毫秒），
+   noise 為評估擾動（簡單模式用於降低棋力） */
 const DIFFICULTY = {
-    easy:   { name: '簡單', reward: 10, ply: 2 },
-    normal: { name: '普通', reward: 20, ply: 3 },
-    hard:   { name: '困難', reward: 50, ply: 5 }
+    easy:   { name: '簡單', reward: 10, maxDepth: 2, timeLimit: 250,  noise: 22 },
+    normal: { name: '普通', reward: 20, maxDepth: 4, timeLimit: 800,  noise: 4  },
+    hard:   { name: '困難', reward: 50, maxDepth: 7, timeLimit: 1400, noise: 0  }
 };
 
 const isRiver = (r, c) => RIVER.has(r + ',' + c);
@@ -1099,216 +1101,315 @@ class Game {
 }
 
 /* =========================================================
-   AI — 移植自 davindj/jungle-chess-ai
-   Alpha-Beta 剪枝，帶獸穴/鼠剋象/獅虎機動性啟發
+   AI — 強化版 Alpha-Beta 搜尋引擎
+   ---------------------------------------------------------
+   • 正確的 Alpha-Beta 剪枝（原版等於無剪枝的全展開）
+   • 迭代加深 + 時間預算控制
+   • MVV-LVA 吃子排序
+   • 靜態搜尋（Quiescence）消除地平線效應
+   • 進穴必殺 / 被進穴威脅偵測
+   • 更貼近實戰的子力價值與位置評估
    ========================================================= */
-const AI = {
-    _rootBestMove: null,
-    _rootBestScore: -Infinity,
+const AI = (() => {
+    const MATE = 1000000;
 
-    /* ---------- 靜態評估 ---------- */
-    _sbe(game, ply, aiturn, aiId) {
-        const neg = aiId === 1 ? 1 : -1;
-        const cost = ply * 0.1 * neg;
+    /* 子力價值（比單純 rank 更貼近實戰強度） */
+    const PIECE_VALUE = {
+        '鼠': 20, '貓': 26, '狗': 36, '狼': 48,
+        '豹': 66, '虎': 92, '獅': 104, '象': 120
+    };
 
-        // 紅方獸穴 board[8][3]，藍方獸穴 board[0][3]
-        if (game.board[8][3]) return -2000 * neg + cost;
-        if (game.board[0][3]) return 2000 * neg + cost;
+    /* 搜尋狀態 */
+    let nodes = 0;
+    let deadline = 0;
+    let timeUp = false;
 
-        let a = 0, b = 0;
-        let mouseA = null, mouseB = null;
-        let elephantA = null, elephantB = null;
-        let tigerA = null, tigerB = null;
-        let lionA = null, lionB = null;
+    /* ---------------- 局面評估（從 side 視角） ---------------- */
+    function evaluate(game, side) {
+        const opp      = side === 'red' ? 'blue' : 'red';
+        const myDen    = DENS[side];
+        const enemyDen = DENS[opp];
+
+        let score = 0;
+        const myList = [], oppList = [];
+        let myMouse = null, oppMouse = null;
+        let myElephant = null, oppElephant = null;
 
         for (let r = 0; r < 9; r++) {
             for (let c = 0; c < 7; c++) {
                 const p = game.board[r][c];
                 if (!p) continue;
-                const pId = p.player === 'blue' ? 0 : 1;
-                const val = (p.rank === 1 ? 6 : 0) + p.rank;
-                if (pId === aiId) {
-                    a += val;
-                    if (p.rank === 1) mouseA = { p, r, c };
-                    else if (p.rank === 6) tigerA = { p, r, c };
-                    else if (p.rank === 7) lionA = { p, r, c };
-                    else if (p.rank === 8) elephantA = { p, r, c };
+                if (p.player === side) {
+                    myList.push({ p, r, c });
+                    if (p.rank === 1)      myMouse    = { r, c };
+                    else if (p.rank === 8) myElephant = { r, c };
                 } else {
-                    b += val;
-                    if (p.rank === 1) mouseB = { p, r, c };
-                    else if (p.rank === 6) tigerB = { p, r, c };
-                    else if (p.rank === 7) lionB = { p, r, c };
-                    else if (p.rank === 8) elephantB = { p, r, c };
+                    oppList.push({ p, r, c });
+                    if (p.rank === 1)      oppMouse    = { r, c };
+                    else if (p.rank === 8) oppElephant = { r, c };
                 }
             }
         }
 
-        let returnValue = a - b;
+        /* 1) 子力 */
+        for (const x of myList)  score += PIECE_VALUE[x.p.name];
+        for (const x of oppList) score -= PIECE_VALUE[x.p.name];
 
-        // 鼠剋象（老鼠不在水中才有意義）
-        if (mouseA && elephantB && !isRiver(mouseA.r, mouseA.c)) {
-            const dist = Math.abs(mouseA.r - elephantB.r) + Math.abs(mouseA.c - elephantB.c);
-            if (dist <= 4) {
-				if (dist === 1)      returnValue += 20;
-				else if (dist === 2) returnValue += 12;
-				else if (dist === 3) returnValue += 6;
-				else                 returnValue += 2;
-			}
+        /* 2) 推進 / 逼近對方獸穴 */
+        for (const x of myList) {
+            const d = Math.abs(x.r - enemyDen[0]) + Math.abs(x.c - enemyDen[1]);
+            if (d <= 6) score += (7 - d) * 2;
         }
-        if (mouseB && elephantA && !isRiver(mouseB.r, mouseB.c)) {
-            const dist = Math.abs(mouseB.r - elephantA.r) + Math.abs(mouseB.c - elephantA.c);
-            if (dist <= 1 || (dist <= 2 && !aiturn)) {
-                returnValue -= (dist === 1 && !aiturn) ? 7.5 : 3.5;
-            }
+        for (const x of oppList) {
+            const d = Math.abs(x.r - myDen[0]) + Math.abs(x.c - myDen[1]);
+            if (d <= 6) score -= (7 - d) * 3;
         }
 
-        // 大象推進（越靠近敵方獸穴越好）
-        if (elephantA) {
-            const eId = elephantA.p.player === 'blue' ? 0 : 1;
-            returnValue -= eId === 0
-                ? 0.01 * Math.abs(0 - elephantA.r)
-                : 0.01 * Math.abs(8 - elephantA.r);
+        /* 3) 一步進穴的直接威脅（殺著偵測） */
+        for (const x of myList) {
+            const d = Math.abs(x.r - enemyDen[0]) + Math.abs(x.c - enemyDen[1]);
+            if (d <= 4 && game.isValidMove(x.r, x.c, enemyDen[0], enemyDen[1], side))
+                score += 900;
         }
-        if (elephantB) {
-            const eId = elephantB.p.player === 'blue' ? 0 : 1;
-            returnValue += eId === 0
-                ? 0.01 * Math.abs(0 - elephantB.r)
-                : 0.01 * Math.abs(8 - elephantB.r);
+        for (const x of oppList) {
+            const d = Math.abs(x.r - myDen[0]) + Math.abs(x.c - myDen[1]);
+            if (d <= 4 && game.isValidMove(x.r, x.c, myDen[0], myDen[1], opp))
+                score -= 1000;
         }
 
-        // 獅虎機動性（靠近河中央三格）
-        const lionTigerMobility = (animal) => {
-            let minDist = 1000;
-            for (const [px, py] of [[3,3],[3,4],[3,5]]) {
-                const d = Math.abs(animal.c - px) + Math.abs(animal.r - py);
-                if (d < minDist) minDist = d;
-            }
-            const rand = Math.random() > (animal.p.rank === 7 ? 0.8 : 0.2) ? 0.001 : 0;
-            return 0.05 - 0.01 * minDist + rand;
-        };
-
-        if (lionA)  returnValue += lionTigerMobility(lionA);
-        if (lionB)  returnValue -= lionTigerMobility(lionB);
-        if (tigerA) returnValue += lionTigerMobility(tigerA);
-        if (tigerB) returnValue -= lionTigerMobility(tigerB);
-
-        // 獅虎相鄰的協同
-        if (lionA && tigerA) {
-            const d = Math.abs(lionA.r - tigerA.r) + Math.abs(lionA.c - tigerA.c);
-            if (d === 1) returnValue -= 2;
-        }
-        if (lionB && tigerB) {
-            const d = Math.abs(lionB.r - tigerB.r) + Math.abs(lionB.c - tigerB.c);
-            if (d === 1) returnValue += 2;
+        /* 4) 護穴（棋子守在自家獸穴附近） */
+        for (const x of myList) {
+            const d = Math.abs(x.r - myDen[0]) + Math.abs(x.c - myDen[1]);
+            if (d === 1) score += 10;
+            else if (d === 2) score += 3;
         }
 
-        return returnValue + cost;
-    },
-
-    /* ---------- 終局判斷 ---------- */
-    _exitSbe(game, ply, aiturn, aiId) {
-        const neg = aiId === 1 ? 1 : -1;
-        ply++;
-
-        if (game.board[8][3]) return -2000 * ply * neg;
-        if (game.board[0][3]) return 2000 * ply * neg;
-
-        let arrB = 0, arrR = 0;
-        for (let r = 0; r < 9; r++) {
-            for (let c = 0; c < 7; c++) {
-                const p = game.board[r][c];
-                if (!p) continue;
-                if (p.player === 'blue') arrB++;
-                else arrR++;
-            }
+        /* 5) 鼠剋象（老鼠離大象越近價值越高） */
+        if (myMouse && oppElephant && !isRiver(myMouse.r, myMouse.c)) {
+            const d = Math.abs(myMouse.r - oppElephant.r) + Math.abs(myMouse.c - oppElephant.c);
+            if (d <= 6) score += (7 - d) * 5;
         }
-        if (arrB === 0) return 5000 * ply * neg;
-        if (arrR === 0) return -5000 * ply * neg;
-        return null;
-    },
+        if (oppMouse && myElephant && !isRiver(oppMouse.r, oppMouse.c)) {
+            const d = Math.abs(oppMouse.r - myElephant.r) + Math.abs(oppMouse.c - myElephant.c);
+            if (d <= 6) score -= (7 - d) * 6;
+        }
 
-    /* ---------- Alpha-Beta（原地走子 / 撤銷） ---------- */
-    _alphaBeta(game, ply, alpha, beta, aiturn, aiId, rootDepth) {
-        const exitScore = this._exitSbe(game, ply, aiturn, aiId);
-        if (exitScore !== null && ply !== rootDepth) return exitScore;
-        if (ply === 0) return this._sbe(game, ply, aiturn, aiId);
+        /* 6) 踩在對方陷阱上的風險（會被任意吃） */
+        for (const x of myList) {
+            if (isTrapFor(x.r, x.c, opp)) score -= PIECE_VALUE[x.p.name] * 0.45;
+        }
+        for (const x of oppList) {
+            if (isTrapFor(x.r, x.c, side)) score += PIECE_VALUE[x.p.name] * 0.45;
+        }
 
-        let ret = aiturn ? -100000 : 100000;
-        let pruning = false;
+        return score;
+    }
 
-        const currentPlayer = aiturn
-            ? (aiId === 0 ? 'blue' : 'red')
-            : (aiId === 0 ? 'red' : 'blue');
+    /* ---------------- 走法生成（只嘗試合法目標，比全盤掃描快得多） ---------------- */
+    function genMoves(game, player) {
+        const moves = [];
+        const dirs  = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+        const jumps = [[-4, 0], [4, 0], [0, -3], [0, 3]];
 
-        // 移動排序：先吃子、再普通
-        const captureMoves = [];
-        const quietMoves = [];
         for (let fr = 0; fr < 9; fr++) {
             for (let fc = 0; fc < 7; fc++) {
                 const p = game.board[fr][fc];
-                if (!p || p.player !== currentPlayer) continue;
-                for (let tr = 0; tr < 9; tr++) {
-                    for (let tc = 0; tc < 7; tc++) {
-                        if (!game.isValidMove(fr, fc, tr, tc, currentPlayer)) continue;
-                        const m = { fromR: fr, fromC: fc, toR: tr, toC: tc };
-                        if (game.board[tr][tc]) captureMoves.push(m);
-                        else quietMoves.push(m);
+                if (!p || p.player !== player) continue;
+
+                for (let i = 0; i < 4; i++) {
+                    const tr = fr + dirs[i][0], tc = fc + dirs[i][1];
+                    if (tr < 0 || tr > 8 || tc < 0 || tc > 6) continue;
+                    if (game.isValidMove(fr, fc, tr, tc, player)) {
+                        moves.push({
+                            fromR: fr, fromC: fc, toR: tr, toC: tc,
+                            cap: game.board[tr][tc]
+                        });
+                    }
+                }
+
+                if (p.rank === 6 || p.rank === 7) {
+                    for (let i = 0; i < 4; i++) {
+                        const tr = fr + jumps[i][0], tc = fc + jumps[i][1];
+                        if (tr < 0 || tr > 8 || tc < 0 || tc > 6) continue;
+                        if (game.isValidMove(fr, fc, tr, tc, player)) {
+                            moves.push({
+                                fromR: fr, fromC: fc, toR: tr, toC: tc,
+                                cap: game.board[tr][tc]
+                            });
+                        }
                     }
                 }
             }
         }
-        const moves = captureMoves.concat(quietMoves);
+        return moves;
+    }
 
-        for (const m of moves) {
-            if (pruning) break;
+    /* ---------------- 走法排序（MVV-LVA） ---------------- */
+    function orderScore(m) {
+        if (m.cap) return 10000 + PIECE_VALUE[m.cap.name] * 8;
+        return 0;
+    }
+    function sortMoves(moves) {
+        moves.sort((a, b) => orderScore(b) - orderScore(a));
+        return moves;
+    }
 
+    /* ---------------- 靜態搜尋：只展開吃子，處理地平線效應 ---------------- */
+    function quiesce(game, alpha, beta, toMove, ply) {
+        if ((++nodes & 1023) === 0 && performance.now() > deadline) timeUp = true;
+        if (timeUp) return 0;
+
+        /* 終局：獸穴被佔 */
+        if (game.board[8][3]) return toMove === 'red' ? -(MATE - ply) : (MATE - ply);
+        if (game.board[0][3]) return toMove === 'blue' ? -(MATE - ply) : (MATE - ply);
+
+        const standPat = evaluate(game, toMove);
+        if (standPat >= beta) return beta;
+        if (standPat > alpha) alpha = standPat;
+
+        const next = toMove === 'red' ? 'blue' : 'red';
+        const targetDen = toMove === 'red' ? DENS.blue : DENS.red;
+
+        const moves = genMoves(game, toMove);
+
+        /* 一步進穴直接取勝 */
+        for (let i = 0; i < moves.length; i++) {
+            const m = moves[i];
+            if (m.toR === targetDen[0] && m.toC === targetDen[1]) return MATE - ply - 1;
+        }
+
+        const caps = [];
+        for (let i = 0; i < moves.length; i++) {
+            if (moves[i].cap) caps.push(moves[i]);
+        }
+        if (caps.length === 0) return alpha;
+
+        sortMoves(caps);
+
+        for (let i = 0; i < caps.length; i++) {
+            const m = caps[i];
             const moving   = game.board[m.fromR][m.fromC];
             const captured = game.board[m.toR][m.toC];
+
             game.board[m.toR][m.toC] = moving;
             game.board[m.fromR][m.fromC] = null;
 
-            const res = this._alphaBeta(game, ply - 1, alpha, beta, !aiturn, aiId, rootDepth);
+            const score = -quiesce(game, -beta, -alpha, next, ply + 1);
 
             game.board[m.fromR][m.fromC] = moving;
             game.board[m.toR][m.toC] = captured;
 
-            ret = aiturn ? Math.max(res, ret) : Math.min(res, ret);
-
-            if (ply === rootDepth && aiturn && res > this._rootBestScore) {
-                this._rootBestScore = res;
-                this._rootBestMove = m;
-            }
-
-            let cond = 0;
-            if (aiturn) {
-                cond = ret >= beta ? (ret > beta ? 2 : 1) : 0;
-                beta = Math.max(ret, beta);
-            } else {
-                alpha = Math.min(ret, alpha);
-            }
-            if (alpha <= beta) { pruning = true; break; }
+            if (timeUp) return alpha;
+            if (score > alpha) alpha = score;
+            if (alpha >= beta) return beta;
         }
-        return ret;
-    },
-
-    /* ---------- 對外接口 ---------- */
-    chooseMove(game, player, difficulty) {
-        const aiId = player === 'blue' ? 0 : 1;
-        const cfg = DIFFICULTY[difficulty] || DIFFICULTY.normal;
-        const ply = cfg.ply;
-
-        this._rootBestMove = null;
-        this._rootBestScore = -Infinity;
-
-        this._alphaBeta(game, ply, Infinity, -Infinity, true, aiId, ply);
-
-        if (this._rootBestMove) return this._rootBestMove;
-
-        // fallback
-        const moves = game.getValidMoves(player);
-        return moves.length ? moves[Math.floor(Math.random() * moves.length)] : null;
+        return alpha;
     }
-};
+
+    /* ---------------- 主搜尋：Negamax + Alpha-Beta ---------------- */
+    function search(game, depth, alpha, beta, toMove, ply) {
+        if ((++nodes & 1023) === 0 && performance.now() > deadline) timeUp = true;
+        if (timeUp) return 0;
+
+        /* 終局判定 */
+        if (game.board[8][3]) return toMove === 'red' ? -(MATE - ply) : (MATE - ply);
+        if (game.board[0][3]) return toMove === 'blue' ? -(MATE - ply) : (MATE - ply);
+
+        if (depth <= 0) return quiesce(game, alpha, beta, toMove, ply);
+
+        const moves = genMoves(game, toMove);
+        if (moves.length === 0) return -(MATE - ply);   // 無子可動 = 敗
+
+        sortMoves(moves);
+
+        const next = toMove === 'red' ? 'blue' : 'red';
+        let best = -Infinity;
+
+        for (let i = 0; i < moves.length; i++) {
+            const m = moves[i];
+            const moving   = game.board[m.fromR][m.fromC];
+            const captured = game.board[m.toR][m.toC];
+
+            game.board[m.toR][m.toC] = moving;
+            game.board[m.fromR][m.fromC] = null;
+
+            const score = -search(game, depth - 1, -beta, -alpha, next, ply + 1);
+
+            game.board[m.fromR][m.fromC] = moving;
+            game.board[m.toR][m.toC] = captured;
+
+            if (timeUp) return best === -Infinity ? 0 : best;
+
+            if (score > best) best = score;
+            if (best > alpha) alpha = best;
+            if (alpha >= beta) break;            // Alpha-Beta 剪枝
+        }
+        return best;
+    }
+
+    /* ---------------- 對外接口：迭代加深根搜尋 ---------------- */
+    function chooseMove(game, player, difficulty) {
+        const cfg = DIFFICULTY[difficulty] || DIFFICULTY.normal;
+        const maxDepth  = cfg.maxDepth  || 4;
+        const timeLimit = cfg.timeLimit || 800;
+        const noise     = cfg.noise     || 0;
+
+        nodes    = 0;
+        timeUp   = false;
+        deadline = performance.now() + timeLimit;
+
+        const rootMoves = genMoves(game, player);
+        if (rootMoves.length === 0) return null;
+        sortMoves(rootMoves);
+
+        const next = player === 'red' ? 'blue' : 'red';
+        let bestMove  = rootMoves[0];
+        let bestScore = -Infinity;
+
+        for (let depth = 1; depth <= maxDepth; depth++) {
+            let alpha = -Infinity;
+            let iterBest = null;
+            let iterBestScore = -Infinity;
+            let aborted = false;
+
+            for (let i = 0; i < rootMoves.length; i++) {
+                const m = rootMoves[i];
+                const moving   = game.board[m.fromR][m.fromC];
+                const captured = game.board[m.toR][m.toC];
+
+                game.board[m.toR][m.toC] = moving;
+                game.board[m.fromR][m.fromC] = null;
+
+                let score = -search(game, depth - 1, -Infinity, -alpha, next, 1);
+
+                game.board[m.fromR][m.fromC] = moving;
+                game.board[m.toR][m.toC] = captured;
+
+                if (timeUp) { aborted = true; break; }
+
+                if (noise > 0) score += (Math.random() * 2 - 1) * noise;
+
+                if (score > iterBestScore) {
+                    iterBestScore = score;
+                    iterBest = m;
+                }
+                if (score > alpha) alpha = score;
+            }
+
+            if (aborted) break;
+            if (iterBest) {
+                bestMove  = iterBest;
+                bestScore = iterBestScore;
+            }
+            /* 已找到必勝，不用再深 */
+            if (bestScore >= MATE - 1000) break;
+        }
+
+        return bestMove;
+    }
+
+    return { chooseMove };
+})();
 
 /* =========================================================
    全域狀態
@@ -1759,12 +1860,17 @@ function handleGameOver() {
    ========================================================= */
 (function init() {
     document.getElementById('copyrightText').textContent =
-        `v1.1 © ${new Date().getFullYear()} ☕迪遜咖啡廳，版權所有。`;
+        `v1.2 © ${new Date().getFullYear()} ☕迪遜咖啡廳，版權所有。`;
 
     updateMuteBtn();
     updateTrophyDisplay(false);
     initBgMusic();
     showCover();
+    window.addEventListener('load', function() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+        }
+    });
 })();
 </script>
 </body>
