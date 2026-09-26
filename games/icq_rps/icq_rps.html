@@ -3133,10 +3133,13 @@
             };
         })();
         window.addEventListener('load', function() {
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/sw.js').catch(() => {});
-            }
-        });
+			if (!('serviceWorker' in navigator)) return;
+			if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
+
+			navigator.serviceWorker.register('./sw.js', { scope: './' })
+				.then(reg => console.log('[SW] registered:', reg.scope))
+				.catch(err => console.warn('[SW] register failed:', err));
+		});
     </script>
 </body>
 </html>
