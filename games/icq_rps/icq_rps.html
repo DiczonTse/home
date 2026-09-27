@@ -3132,14 +3132,13 @@
                 getState: function() { return { phase: gamePhase, color: playerColor, musicPhase: currentMusicPhase }; }
             };
         })();
-        window.addEventListener('load', function() {
-			if (!('serviceWorker' in navigator)) return;
-			if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-
-			navigator.serviceWorker.register('./sw.js', { scope: './' })
-				.then(reg => console.log('[SW] registered:', reg.scope))
-				.catch(err => console.warn('[SW] register failed:', err));
-		});
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/home/sw.js', { scope: '/home/' })
+                    .then((reg) => console.log('SW 已註冊，作用域：', reg.scope))
+                    .catch((err) => console.warn('SW 註冊失敗：', err));
+            });
+        }
     </script>
 </body>
 </html>
