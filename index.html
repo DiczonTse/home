@@ -34936,8 +34936,12 @@
         });
 
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').catch(() => {});
-        }
+			window.addEventListener('load', () => {
+			  navigator.serviceWorker.register('sw.js')
+				.then((reg) => console.log('SW 已註冊，作用域：', reg.scope))
+				.catch((err) => console.warn('SW 註冊失敗：', err));
+			});
+		}
 
         initMegaNav();
 
