@@ -1867,11 +1867,13 @@ function handleGameOver() {
     initBgMusic();
     showCover();
 })();
-window.addEventListener('load', function() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
-  }
-});
+if ('serviceWorker' in navigator) {
+	window.addEventListener('load', () => {
+	  navigator.serviceWorker.register('/home/sw.js', { scope: '/home/' })
+		.then((reg) => console.log('SW 已註冊，作用域：', reg.scope))
+		.catch((err) => console.warn('SW 註冊失敗：', err));
+	});
+}
 </script>
 </body>
 </html>
