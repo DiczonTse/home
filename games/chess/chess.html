@@ -1466,11 +1466,11 @@ updateHistory();
 // 頁面載入即嘗試播放音樂（若被擋，會在第一次互動時自動嘗試）
 setTimeout(tryPlayMusic, 300);
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-	navigator.serviceWorker.register('/sw.js')
-	  .then((reg) => console.log('SW 註冊成功：', reg.scope))
-	  .catch((err) => console.warn('SW 註冊失敗：', err));
-  });
+	window.addEventListener('load', () => {
+	  navigator.serviceWorker.register('/home/sw.js', { scope: '/home/' })
+		.then((reg) => console.log('SW 已註冊，作用域：', reg.scope))
+		.catch((err) => console.warn('SW 註冊失敗：', err));
+	});
 }
 </script>
 
