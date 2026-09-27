@@ -696,7 +696,7 @@
             padding: 6px 16px;
             border-radius: 10px;
             font-size: 13px;
-            z-index: 999;
+            z-index: 10001;
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.4s;
@@ -1314,6 +1314,53 @@
             if (!p) return false;
             return countItem(id) > 0 || Object.values(p.equipment).includes(id);
         }
+		
+		function isSnowMap() {
+			const mapId = G.player ? G.player.mapId : G.currentMapId;
+			return mapId === 'ice' || mapId === 'snowy_plains';
+		}
+		
+		function findPath(sx, sy, tx, ty, map, isAquatic) {
+			const W = map.width, H = map.height;
+			const visited = Array.from({ length: H }, () => new Array(W).fill(false));
+			const queue = [];
+			queue.push({ x: sx, y: sy, steps: 0, dir: null });
+			visited[sy][sx] = true;
+
+			const maxSteps = 20;
+			const dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+
+			while (queue.length > 0) {
+				const cur = queue.shift();
+				if (cur.x === tx && cur.y === ty) {
+					return cur.dir;
+				}
+				if (cur.steps >= maxSteps) continue;
+
+				for (const [dx, dy] of dirs) {
+					const nx = cur.x + dx, ny = cur.y + dy;
+					if (nx < 0 || nx >= W || ny < 0 || ny >= H) continue;
+					if (visited[ny][nx]) continue;
+					if (nx === tx && ny === ty) {
+						const newDir = cur.dir || [dx, dy];
+						visited[ny][nx] = true;
+						queue.push({ x: nx, y: ny, steps: cur.steps + 1, dir: newDir });
+						continue;
+					}
+					const obj = map.objects[ny]?.[nx];
+					if (obj) continue;
+					if (isAquatic) {
+						const terrain = map.terrain[ny]?.[nx];
+						if (terrain !== 'ocean' && terrain !== 'river') continue;
+					}
+
+					visited[ny][nx] = true;
+					const newDir = cur.dir || [dx, dy];
+					queue.push({ x: nx, y: ny, steps: cur.steps + 1, dir: newDir });
+				}
+			}
+			return null;
+		}
 
         function canAfford(cost) {
             const p = G.player;
@@ -1501,7 +1548,13 @@
             if (G.inCave) { playMusic('cave'); return; }
             if (G.weather === 'rain' || G.weather === 'thunder') {
                 playMusic('night');
-                startRainSound();
+                if (isSnowMap()) {
+					stopRainSound();
+					toast('❄️ 下雪了', 'info', 1500);
+				} else {
+					startRainSound();
+					toast('🌧️ 下雨了', 'info', 1500);
+				}
                 return;
             }
             if (G.isNight) {
@@ -1874,7 +1927,7 @@
                 drops: [{ id: 'bear_meat', chance: 1, count: 1 }, { id: 'raw_fish', chance: 0.5, count: 1 }] },
         };
 
-        const NO_RAIN_MAPS = ['cave', 'ocean', 'river', 'desert', 'nether', 'heaven'];
+        const NO_RAIN_MAPS = ['cave', 'ocean', 'desert', 'nether', 'heaven'];
         const AQUATIC_MOBS = new Set([
             'salmon', 'tropical_fish', 'pufferfish',
             'octopus', 'squid', 'shark', 'dolphin'
@@ -2320,7 +2373,7 @@
                         y = rand(riverYStart + 1, riverYEnd - 1);
                     const t = terrain[y]?.[x];
                     if (!objects[y][x] && (t === 'river' || t === 'ocean')) {
-                        const pool = ['salmon', 'pufferfish', 'tropical_fish'];
+                        const pool = ['salmon', 'tropical_fish', 'squid', 'pufferfish'];
                         objects[y][x] = { type: 'mob', mobId: pool[rand(0, pool.length - 1)] };
                     }
                 }
@@ -3571,8 +3624,12 @@
             }
 
             if (isOcean) {
-                const fishPool = ['salmon', 'pufferfish', 'tropical_fish', 'octopus', 'squid', 'dolphin'];
-                if (map.id === 'ocean') fishPool.push('shark');
+				let fishPool;
+				if (map.id === 'ocean') {
+					fishPool = ['salmon', 'pufferfish', 'tropical_fish', 'octopus', 'squid', 'dolphin', 'shark'];
+				} else {
+					fishPool = ['salmon', 'pufferfish', 'tropical_fish'];
+				}
                 const count = (isRain || isNight) ? 12 : 8;
                 for (let i = 0; i < count; i++) {
                     const x = rand(1, map.width - 2),
@@ -3609,7 +3666,7 @@
             }
 
             if (map.id === 'plain') {
-                const fishPool = ['salmon', 'tropical_fish', 'pufferfish'];
+                const fishPool = ['salmon', 'tropical_fish'];
                 for (let y = 0; y < map.height; y++) {
                     for (let x = 0; x < map.width; x++) {
                         const t = map.terrain[y]?.[x];
@@ -3953,48 +4010,30 @@
                 return;
             }
             if (obj.type === 'mob') {
-                if (x === p.x && y === p.y) {
-                    const mobData = MOBS[obj.mobId];
-                    if (mobData && mobData.passive) {
-                        killMobDirect(obj.mobId, x, y);
-                    } else {
-                        startBattle(obj.mobId, x, y);
-                    }
-                    return;
-                }
-                const weaponId = p.equipment.weapon;
-                const weapon = weaponId ? ITEMS[weaponId] : null;
-                if (weapon && weapon.range) {
-                    const dx = Math.abs(p.x - x);
-                    const dy = Math.abs(p.y - y);
-                    const dist = Math.max(dx, dy);
-                    if (dist <= weapon.range) {
-                        performRangeAttack();
-                        return;
-                    }
-                }
-                if (weaponId && weaponId.endsWith('_dagger')) {
-                    const mobData = MOBS[obj.mobId];
-                    if (mobData) {
-                        if (!mobData.passive) {
-                            const atk = getPlayerAtk(p);
-                            const def = mobData.def || 0;
-                            let damage = Math.max(1, atk - Math.floor(def / 2) + rand(-2, 4));
-                            const remainingHp = mobData.hp - damage;
-                            if (remainingHp <= 0) {
-                                killMobDirect(obj.mobId, x, y);
-                            } else {
-                                startBattle(obj.mobId, x, y, remainingHp);
-                            }
-                        } else {
-                            killMobDirect(obj.mobId, x, y);
-                        }
-                        return;
-                    }
-                }
-                startBattle(obj.mobId, x, y);
-                return;
-            }
+				const mobData = MOBS[obj.mobId];
+				if (!mobData) return;
+				if (x === p.x && y === p.y) {
+					const weaponId = p.equipment.weapon;
+					if (weaponId && weaponId.endsWith('_dagger')) {
+						const atk = getPlayerAtk(p);
+						const def = mobData.def || 0;
+						let damage = Math.max(1, atk - Math.floor(def / 2) + rand(-2, 4));
+						const remainingHp = mobData.hp - damage;
+						if (remainingHp <= 0) {
+							killMobDirect(obj.mobId, x, y);
+						} else {
+							startBattle(obj.mobId, x, y, remainingHp);
+						}
+					} else {
+						if (mobData.passive) {
+							killMobDirect(obj.mobId, x, y);
+						} else {
+							startBattle(obj.mobId, x, y);
+						}
+					}
+					return;
+				}
+			}
             if (obj.type === 'arrow') { handleArrow(obj.dir, x, y); return; }
             if (obj.type === 'village') { openVillageShop(obj.profession); return; }
             if (obj.type === 'camp') { openTraderCamp(); return; }
@@ -4337,6 +4376,8 @@
         function battleAttack() {
             const b = G.battle;
             if (!b || b.ended || b.state !== 'player_turn') return;
+			b.state = 'processing';
+			renderBattle();
             const p = G.player;
             const e = b.enemy;
             animateBattle('player', 'enemy', () => {
@@ -4488,6 +4529,8 @@
         function battleFlee() {
             const b = G.battle;
             if (!b || b.ended || b.state !== 'player_turn') return;
+			b.state = 'processing';
+			renderBattle();
             const p = G.player;
             const chance = Math.min(90, 50 + p.level * 2);
             const success = Math.random() * 100 < chance;
@@ -6933,83 +6976,66 @@
 
         // ===== 移動怪物 =====
         function moveMobs() {
-            if (G.battle) return;
-            const map = G.map;
-            if (!map) return;
-            const p = G.player;
-            const dirs = [
-                [0, 1],
-                [0, -1],
-                [1, 0],
-                [-1, 0]
-            ];
-            const mobs = [];
-            for (let y = 0; y < map.height; y++) {
-                for (let x = 0; x < map.width; x++) {
-                    const obj = map.objects[y]?.[x];
-                    if (obj && obj.type === 'mob') mobs.push({ x, y, obj });
-                }
-            }
-            for (const mob of mobs) {
-                const mobData = MOBS[mob.obj.mobId];
-                if (!mobData) continue;
-                if (!mobData.passive) {
-                    const dx = p.x - mob.x;
-                    const dy = p.y - mob.y;
-                    const dist = Math.max(Math.abs(dx), Math.abs(dy));
-                    if (dist <= 8 && dist > 0) {
-                        let moveX = 0,
-                            moveY = 0;
-                        if (Math.abs(dx) >= Math.abs(dy)) {
-                            moveX = dx > 0 ? 1 : -1;
-                        } else {
-                            moveY = dy > 0 ? 1 : -1;
-                        }
-                        const nx = mob.x + moveX,
-                            ny = mob.y + moveY;
-                        if (nx >= 0 && nx < map.width && ny >= 0 && ny < map.height) {
-                            const target = map.objects[ny]?.[nx];
-                            if (isAquatic(mob.obj.mobId)) {
-                                const targetTerrain = map.terrain[ny]?.[nx];
-                                if (targetTerrain !== 'ocean' && targetTerrain !== 'river') {
-                                    continue;
-                                }
-                            }
-                            if (nx === p.x && ny === p.y) {
-                                startBattle(mob.obj.mobId, mob.x, mob.y, undefined, true);
-                                continue;
-                            }
-                            if (!target && !(nx === p.x && ny === p.y)) {
-                                map.objects[ny][nx] = mob.obj;
-                                map.objects[mob.y][mob.x] = null;
-                            }
-                        }
-                        continue;
-                    }
-                }
-                if (Math.random() < 0.3) {
-                    const dir = dirs[rand(0, 3)];
-                    const nx = mob.x + dir[0],
-                        ny = mob.y + dir[1];
-                    if (nx >= 0 && nx < map.width && ny >= 0 && ny < map.height) {
-                        const target = map.objects[ny]?.[nx];
-                        const isWaterMap = (map.id === 'ocean' || map.id === 'river');
-                        const targetTerrain = map.terrain[ny]?.[nx];
-                        if (isAquatic(mob.obj.mobId)) {
-                            const targetTerrain = map.terrain[ny]?.[nx];
-                            if (targetTerrain !== 'ocean' && targetTerrain !== 'river') {
-                                continue;
-                            }
-                        }
-                        if (!target && !(nx === p.x && ny === p.y)) {
-                            map.objects[ny][nx] = mob.obj;
-                            map.objects[mob.y][mob.x] = null;
-                        }
-                    }
-                }
-            }
-            render();
-        }
+			if (G.battle) return;
+			const map = G.map;
+			if (!map) return;
+			const p = G.player;
+			const dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+			const mobs = [];
+			for (let y = 0; y < map.height; y++) {
+				for (let x = 0; x < map.width; x++) {
+					const obj = map.objects[y]?.[x];
+					if (obj && obj.type === 'mob') mobs.push({ x, y, obj });
+				}
+			}
+
+			for (const mob of mobs) {
+				const mobData = MOBS[mob.obj.mobId];
+				if (!mobData) continue;
+				if (!mobData.passive) {
+					const dx = p.x - mob.x;
+					const dy = p.y - mob.y;
+					const dist = Math.max(Math.abs(dx), Math.abs(dy));
+
+					if (dist <= 8 && dist > 0) {
+						const isAquaticMob = isAquatic(mob.obj.mobId);
+						const dir = findPath(mob.x, mob.y, p.x, p.y, map, isAquaticMob);
+
+						if (dir) {
+							const [moveX, moveY] = dir;
+							const nx = mob.x + moveX, ny = mob.y + moveY;
+							if (nx === p.x && ny === p.y) {
+								startBattle(mob.obj.mobId, mob.x, mob.y, undefined, true);
+								continue;
+							}
+							const targetObj = map.objects[ny]?.[nx];
+							if (!targetObj) {
+								map.objects[ny][nx] = mob.obj;
+								map.objects[mob.y][mob.x] = null;
+							}
+							continue;
+						}
+					}
+				}
+				if (Math.random() < 0.3) {
+					const dir = dirs[rand(0, 3)];
+					const nx = mob.x + dir[0], ny = mob.y + dir[1];
+					if (nx >= 0 && nx < map.width && ny >= 0 && ny < map.height) {
+						const targetObj = map.objects[ny]?.[nx];
+						const targetTerrain = map.terrain[ny]?.[nx];
+						if (nx === p.x && ny === p.y) continue;
+						if (isAquatic(mob.obj.mobId)) {
+							if (targetTerrain !== 'ocean' && targetTerrain !== 'river') continue;
+						}
+						if (!targetObj) {
+							map.objects[ny][nx] = mob.obj;
+							map.objects[mob.y][mob.x] = null;
+						}
+					}
+				}
+			}
+			render();
+		}
 
         // ===== 鍵盤 =====
         document.addEventListener('keydown', (e) => {
@@ -7432,7 +7458,7 @@
         function isAnyModalOpen() { return document.querySelector('.modal-overlay.active') !== null; }
 
         canvas.addEventListener('click', (e) => {
-            if (G.gameOver || G.battle) return;
+			if (G.gameOver || G.battle) return;
             if (isAnyModalOpen()) return;
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
@@ -7441,7 +7467,14 @@
             const my = (e.clientY - rect.top) * scaleY;
             const gx = Math.floor(mx / 32);
             const gy = Math.floor(my / 32);
-            if (window._bedPlacement) {
+            const p = G.player;
+			const map = G.map;
+			if (gx < 0 || gx >= map.width || gy < 0 || gy >= map.height) return;
+			const obj = map.objects[gy]?.[gx];
+			const dx = gx - p.x;
+			const dy = gy - p.y;
+			const dist = Math.abs(dx) + Math.abs(dy);
+			if (window._bedPlacement) {
                 const p = G.player;
                 const map = G.map;
                 if (gx >= 0 && gx < map.width && gy >= 0 && gy < map.height) {
@@ -7467,38 +7500,33 @@
                 }
                 return;
             }
-            const p = G.player;
-            const obj = G.map.objects[gy]?.[gx];
-            if (obj && obj.type === 'mob') {
-                const weaponId = p.equipment.weapon;
-                const weapon = weaponId ? ITEMS[weaponId] : null;
-                const dx = Math.abs(gx - p.x);
-                const dy = Math.abs(gy - p.y);
-                const dist = dx + dy;
-                if (weapon && weapon.range && dist <= weapon.range) {
-                    rangedAttackTarget(obj.mobId, gx, gy);
-                    return;
-                }
-                if (dist === 1 && (dx + dy) === 1) {
-                    movePlayer(gx - p.x, gy - p.y);
-                    return;
-                }
-                toast('距離太遠，無法攻擊！', 'warning');
-                return;
-            }
-            if (gx === p.x && gy === p.y) {
-                if (obj) {
-                    handleObjectInteraction(obj, p.x, p.y);
-                } else {
-                    toast('此處沒有可互動的物件', 'info');
-                }
-                return;
-            }
-            const dx = gx - p.x,
-                dy = gy - p.y;
-            if (Math.abs(dx) + Math.abs(dy) === 1) {
-                movePlayer(dx, dy);
-            }
+             if (obj && obj.type === 'mob') {
+				const weaponId = p.equipment.weapon;
+				const weapon = weaponId ? ITEMS[weaponId] : null;
+				if (weapon && weapon.range && dist <= weapon.range) {
+					rangedAttackTarget(obj.mobId, gx, gy);
+					return;
+				}
+				if (dist === 1) {
+					startBattle(obj.mobId, gx, gy);
+					return;
+				}
+				toast('距離太遠，無法攻擊！', 'warning');
+				return;
+			}
+			if (gx === p.x && gy === p.y) {
+				if (obj) {
+					handleObjectInteraction(obj, p.x, p.y);
+				} else {
+					toast('此處沒有可互動的物件', 'info');
+				}
+				return;
+			}
+			if (dist === 1 && !obj) {
+				movePlayer(dx, dy);
+			} else {
+				toast('無法移動至此處', 'warning');
+			}
         });
 
         let touchStartX = 0,
@@ -7577,8 +7605,14 @@
             if (copyright) {
                 copyright.textContent = `v3.2 © ${new Date().getFullYear()} ☕迪遜咖啡廳，版權所有。`;
             }
+			if ('serviceWorker' in navigator) {
+				window.addEventListener('load', () => {
+					navigator.serviceWorker.register('/home/sw.js', { scope: '/home/' })
+						.then((reg) => console.log('SW 已註冊，作用域：', reg.scope))
+						.catch((err) => console.warn('SW 註冊失敗：', err));
+				});
+			}
         });
-
         console.log('⛏️ 方塊傳說 v3.2 已載入！');
         console.log('🔧 修復：遠程武器踩怪、水域判定、洞穴蜘蛛綠框、河豚毒、剪刀製作、山地結構、平原魚類、天堂島嶼');
         console.log('🌊 新增：平原/海洋/河流的村莊、傳送門、花、草只生成在陸地上（非 river/ocean）');
