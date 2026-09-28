@@ -12,7 +12,6 @@
     --panel2:#1d222d;
     --line:#2a3040;
     --accent:#f0b429;
-    --bg:#080a0e;
   }
   html{overscroll-behavior:none;-webkit-text-size-adjust:100%}
   body{
@@ -27,7 +26,6 @@
   .screen.active{display:block}
   @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
-  /* ============ 浮動按鈕 ============ */
   .float-btn{
     position:fixed;bottom:14px;width:46px;height:46px;border-radius:50%;
     background:rgba(22,26,35,.92);border:1px solid rgba(255,255,255,.16);
@@ -64,33 +62,43 @@
     background-size:cover;background-position:center;
   }
   .cover-bg img{width:100%;height:100%;object-fit:cover;display:block}
+  /* 遮罩更透明 */
   .cover-veil{
     position:absolute;inset:0;
     background:
-      radial-gradient(ellipse at 50% 60%, rgba(10,14,22,.2) 0%, rgba(5,7,11,.7) 80%),
-      linear-gradient(180deg, rgba(5,7,11,.72) 0%, rgba(5,7,11,.28) 30%, rgba(5,7,11,.9) 100%);
+      radial-gradient(ellipse at 50% 60%, rgba(10,14,22,.02) 0%, rgba(5,7,11,.32) 85%),
+      linear-gradient(180deg, rgba(5,7,11,.28) 0%, rgba(5,7,11,.05) 35%, rgba(5,7,11,.5) 100%);
   }
-  /* 標題與按鈕置頂 */
   .cover-inner{
     position:absolute;inset:0;
     display:flex;flex-direction:column;align-items:center;
     justify-content:flex-start;
-    padding:clamp(22px,5vh,60px) 6% 0;
-    gap:clamp(14px,2.6vh,30px);
+    padding:clamp(16px,4vh,50px) 6% 0;
+    gap:clamp(10px,2vh,24px);
   }
   .cover-title{
-    font-size:clamp(28px,7.2vw,84px);
-    font-weight:900;letter-spacing:clamp(1px,.9vw,6px);
+    font-size:clamp(26px,5vw,64px);
+    font-weight:900;letter-spacing:clamp(1px,.7vw,5px);
     color:#fff;text-shadow:0 0 30px rgba(240,180,41,.55),0 4px 0 rgba(0,0,0,.4),0 10px 40px rgba(0,0,0,.85);
     background:linear-gradient(180deg,#fff7e0 0%,#f0b429 55%,#b87f0d 100%);
     -webkit-background-clip:text;background-clip:text;
     -webkit-text-fill-color:transparent;
     text-align:center;line-height:1.1;
   }
-  .cover-actions{display:flex;flex-direction:column;align-items:center;gap:12px}
+  .cover-actions{display:flex;flex-direction:column;align-items:center;gap:10px}
   .cover-save-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+  .cover-trophy-badge{
+    font-size:13px;font-weight:800;color:#fff;
+    background:rgba(22,26,35,.85);
+    border:1px solid rgba(240,180,41,.4);
+    padding:6px 16px;border-radius:20px;
+    backdrop-filter:blur(8px);
+    box-shadow:0 4px 14px rgba(0,0,0,.5);
+    letter-spacing:.5px;
+  }
+  .cover-trophy-badge .val{color:#f0b429;font-size:15px}
   .cbtn{
-    background:rgba(29,34,45,.9);color:#dfe3ec;
+    background:rgba(29,34,45,.85);color:#dfe3ec;
     border:1px solid rgba(255,255,255,.16);border-radius:12px;
     padding:10px 20px;font-size:13.5px;font-weight:800;
     cursor:pointer;transition:.16s;font-family:inherit;
@@ -101,19 +109,28 @@
   .cbtn:disabled{opacity:.35;cursor:not-allowed}
   .cbtn-primary{
     background:linear-gradient(180deg,#f7c243,#d4910a);color:#2a1c00;
-    border:none;font-size:clamp(15px,2.4vw,20px);
-    padding:clamp(12px,2vh,18px) clamp(38px,7vw,64px);
-    border-radius:16px;letter-spacing:2px;
+    border:none;font-size:16px;
+    padding:12px 44px;
+    border-radius:14px;letter-spacing:1.5px;
     box-shadow:0 8px 30px rgba(240,180,41,.42),inset 0 1px 0 rgba(255,255,255,.5);
   }
   .cbtn-primary:hover:not(:disabled){filter:brightness(1.09);transform:translateY(-2px);box-shadow:0 12px 38px rgba(240,180,41,.55)}
   .cbtn-primary:active{transform:translateY(0)}
   .cbtn-primary:disabled{filter:grayscale(1);box-shadow:none}
   .cover-copyright{
-    position:absolute;left:0;right:0;bottom:clamp(10px,2.2vh,22px);
-    text-align:center;font-size:clamp(9.5px,1.15vw,13px);
-    color:rgba(220,226,240,.72);letter-spacing:.6px;font-weight:600;
-    text-shadow:0 2px 8px rgba(0,0,0,.9);pointer-events:none;padding:0 70px;
+    position:absolute;left:0;right:0;bottom:clamp(8px,1.8vh,18px);
+    text-align:center;font-size:clamp(9.5px,1.05vw,12px);
+    color:rgba(220,226,240,.75);letter-spacing:.6px;font-weight:600;
+    text-shadow:0 2px 8px rgba(0,0,0,.95);pointer-events:none;padding:0 70px;
+  }
+  @media(max-width:520px){
+    .cover-title{font-size:clamp(22px,6vw,38px);letter-spacing:1px}
+    .cbtn-primary{font-size:14px;padding:10px 34px;border-radius:12px}
+    .cbtn{padding:8px 15px;font-size:12px;border-radius:10px}
+    .cover-inner{gap:12px}
+    .cover-save-actions{gap:7px}
+    .cover-trophy-badge{font-size:11px;padding:5px 12px}
+    .cover-trophy-badge .val{font-size:13px}
   }
 
   /* ============ 選角 ============ */
@@ -138,29 +155,23 @@
   }
   .select-sub b{color:#f0b429}
 
-  /* 循環橫向滾動器 */
-  .char-scroller-wrap{
-    position:relative;
-    padding:14px 0 24px;
-  }
+  .char-scroller-wrap{position:relative;padding:14px 0 24px}
   .char-scroller-wrap::before,
   .char-scroller-wrap::after{
-    content:'';position:absolute;top:0;bottom:0;width:60px;
+    content:'';position:absolute;top:0;bottom:0;width:50px;
     pointer-events:none;z-index:3;
   }
-  .char-scroller-wrap::before{
-    left:0;background:linear-gradient(90deg,#080a0e 5%,transparent);
-  }
-  .char-scroller-wrap::after{
-    right:0;background:linear-gradient(-90deg,#080a0e 5%,transparent);
-  }
+  .char-scroller-wrap::before{left:0;background:linear-gradient(90deg,#080a0e 5%,transparent)}
+  .char-scroller-wrap::after{right:0;background:linear-gradient(-90deg,#080a0e 5%,transparent)}
   .char-scroller{
     display:flex;gap:14px;overflow-x:auto;
     padding:8px 0 14px;
     -webkit-overflow-scrolling:touch;
     scrollbar-width:none;
-    scroll-behavior:auto;
+    cursor:grab;
+    touch-action:pan-x;
   }
+  .char-scroller.dragging{cursor:grabbing}
   .char-scroller::-webkit-scrollbar{display:none}
 
   .char-card{
@@ -174,7 +185,7 @@
                border-color .25s, box-shadow .25s, filter .25s;
     touch-action:pan-x;
     transform:scale(.86);
-    opacity:.55;
+    opacity:.6;
   }
   .char-card.centered{
     transform:scale(1);
@@ -187,10 +198,10 @@
     transform:scale(1.02);
     opacity:1;
   }
+  /* 遮罩更透明 */
   .char-card.locked{cursor:pointer}
-  .char-card.locked.centered{filter:brightness(.55) grayscale(.65)}
-  .char-card.locked:not(.centered){filter:brightness(.3) grayscale(.85)}
-  .char-card:not(.locked).centered{filter:none}
+  .char-card.locked.centered{filter:brightness(.8) grayscale(.45)}
+  .char-card.locked:not(.centered){filter:brightness(.55) grayscale(.72)}
 
   .char-card img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
   .char-fallback{
@@ -204,22 +215,23 @@
     font-size:14px;font-weight:900;letter-spacing:1.5px;
     text-align:center;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.9);
   }
-  .char-card.locked .char-name{color:#a8afc0}
+  .char-card.locked .char-name{color:#c5ccdb}
   .char-lock-badge{
     position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-    display:flex;flex-direction:column;align-items:center;gap:6px;
-    font-size:11px;font-weight:800;color:#f0b429;
-    background:rgba(8,10,15,.92);border:1px solid rgba(240,180,41,.45);
-    padding:10px 14px;border-radius:12px;letter-spacing:.5px;
-    text-align:center;line-height:1.4;pointer-events:none;
+    display:flex;flex-direction:column;align-items:center;gap:5px;
+    font-size:10.5px;font-weight:800;color:#f0b429;
+    background:rgba(8,10,15,.9);border:1px solid rgba(240,180,41,.45);
+    padding:8px 12px;border-radius:11px;letter-spacing:.4px;
+    text-align:center;line-height:1.3;pointer-events:none;
     opacity:0;transition:opacity .25s;
+    max-width:88%;
   }
   .char-card.locked.centered .char-lock-badge{opacity:1}
-  .char-lock-badge .lock-ico{font-size:22px}
+  .char-lock-badge .lock-ico{font-size:18px}
   .char-lock-badge .try-hint{
-    color:#8b95ab;font-size:9.5px;font-weight:700;
+    color:#8b95ab;font-size:9px;font-weight:700;
     border-top:1px solid rgba(255,255,255,.08);
-    margin-top:2px;padding-top:5px;
+    margin-top:1px;padding-top:4px;
   }
   .char-check{
     position:absolute;top:10px;right:10px;
@@ -253,7 +265,6 @@
   .select-foot .cbtn{min-width:120px;text-align:center}
   .select-foot .cbtn-primary{min-width:180px}
 
-  /* Toast */
   .toast{
     position:fixed;left:50%;top:50%;
     transform:translate(-50%,-50%) scale(.9);
@@ -287,6 +298,7 @@
     width:26px;height:26px;border-radius:50%;object-fit:cover;
     border:1.5px solid var(--accent);
   }
+  .game-main{display:block}
   .panel{
     background:var(--panel);border:1px solid var(--line);border-radius:16px;
     padding:11px;margin-bottom:10px;
@@ -308,7 +320,8 @@
   }
   .dps.hot{color:#ffb84d;border-color:#5a4413}
 
-  #shopView{position:relative;padding:4px;border-radius:14px;overflow:hidden}
+  #shopView{position:relative;padding:4px;border-radius:14px;overflow:hidden;transition:.2s}
+  #shopView.sell-hover{box-shadow:0 0 0 3px rgba(80,225,140,.5)}
   .shop-bg{
     position:absolute;inset:0;
     background-color:#0c1017;
@@ -340,12 +353,17 @@
     position:absolute;border-right:1px solid #13171f;border-bottom:1px solid #13171f;
     pointer-events:none;
   }
-  .bagblock{
-    position:absolute;background:rgba(180,140,80,.13);
-    border:2px solid rgba(200,165,105,.42);border-radius:9px;
-    box-shadow:inset 0 0 18px rgba(200,165,105,.08);
+  /* 背包格：無邊框無接縫 */
+  .bagblock-cell{
+    position:absolute;
+    background:rgba(180,140,80,.18);
+    box-shadow:
+      inset 0 0 0 1.5px rgba(210,175,110,.35);
     cursor:grab;touch-action:none;
+    box-sizing:border-box;
   }
+  .bagblock-cell:active{cursor:grabbing}
+
   .item{
     position:absolute;border-radius:8px;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -475,7 +493,7 @@
   .overlay.show{opacity:1;pointer-events:auto}
   .modal{
     background:var(--panel);border:1px solid var(--line);border-radius:20px;
-    padding:30px 28px;text-align:center;max-width:330px;width:100%;
+    padding:30px 28px;text-align:center;max-width:340px;width:100%;
     box-shadow:0 24px 70px rgba(0,0,0,.8);
     transform:scale(.92);transition:transform .28s cubic-bezier(.2,1.4,.5,1);
   }
@@ -486,6 +504,11 @@
   .modal h3.lose{color:#e5484d}
   .modal p{font-size:12.5px;color:#9aa3b8;line-height:1.8;margin-bottom:22px}
   .modal .gold-gain{color:var(--accent);font-weight:900}
+  .modal .trophy-line{
+    display:block;margin-top:10px;padding-top:10px;
+    border-top:1px solid rgba(255,255,255,.08);
+    color:#f0b429;font-weight:800;font-size:13px;
+  }
 
   @media(max-width:400px){
     .shop-card{width:62px}
@@ -493,6 +516,65 @@
     .hud-item .val{font-size:13px}
     .stash-card{width:52px;height:52px}
     .char-card{height:min(46vh,340px)}
+  }
+
+  /* ============ 手機橫向 —— 遊戲對戰並排 ============ */
+  @media (orientation: landscape) and (max-height: 620px) {
+    body { padding: 4px; }
+    #screenGame {
+      max-width: 100vw; padding-bottom: 4px;
+      display: flex; flex-direction: column;
+      height: 100vh; gap: 4px; overflow: hidden;
+    }
+    .hud { padding: 5px 10px; margin-bottom: 0; border-radius: 9px; gap: 6px; }
+    .hud-item { font-size: 10.5px; gap: 3px; }
+    .hud-item .val { font-size: 12px; }
+    .hud-char { width: 20px; height: 20px; }
+    .life { font-size: 11px; }
+
+    .game-main { display: flex; flex-direction: row; gap: 6px; flex: 1; min-height: 0; }
+    #shopPanel, #playerPanel {
+      flex: 1 1 50%; padding: 6px 8px; margin-bottom: 0;
+      min-width: 0; display: flex; flex-direction: column; overflow: hidden;
+    }
+    .panel-head { margin-bottom: 4px; min-height: 22px; }
+    .panel-head h2 { font-size: 10.5px; }
+    .dps { font-size: 9.5px; padding: 2px 7px; }
+    .btn { padding: 4px 9px; font-size: 10px; border-radius: 7px; }
+    .bars { margin-top: 4px; gap: 3px; }
+    .bar { height: 8px; }
+    .bar-txt { font-size: 8px; }
+    .grid { max-width: 100%; max-height: 100%; }
+
+    .stash-panel { padding: 4px 8px; margin-bottom: 0; border-radius: 10px; }
+    .stash-head { font-size: 9px; margin-bottom: 3px; }
+    .stash-list { min-height: 34px; gap: 4px; }
+    .stash-card { width: 34px; height: 34px; border-radius: 7px; }
+    .stash-card .s-ico { font-size: 14px; }
+    .stash-card .s-name { font-size: 6.5px; }
+    .stash-empty { font-size: 9px; padding: 6px 6px; line-height: 1.3; }
+    .stash-empty br { display: none; }
+    .btn.primary { padding: 9px 0; font-size: 13px; border-radius: 10px; }
+    .hint { display: none; }
+
+    .char-lock-badge { font-size: 8.5px; padding: 5px 8px; gap: 2px; border-radius: 7px; letter-spacing: 0; }
+    .char-lock-badge .lock-ico { font-size: 13px; }
+    .char-lock-badge .try-hint { font-size: 7px; padding-top: 3px; margin-top: 1px; }
+    .char-name { font-size: 11px; padding: 18px 8px 8px; letter-spacing: 1px; }
+    .char-card { height: min(58vh,320px); }
+    .char-preview-tag { font-size: 8px; padding: 2px 6px; }
+    .select-head h2 { font-size: 15px; letter-spacing: 1.5px; }
+    .select-trophy { font-size: 12px; padding: 5px 12px; }
+    .select-trophy span { font-size: 14px; }
+    .select-sub { font-size: 10px; margin-bottom: 6px; }
+    .scroll-hint { font-size: 10px; margin-top: 0; }
+    .select-foot { margin-top: 6px; gap: 8px; }
+    .select-foot .cbtn { min-width: 100px; padding: 7px 14px; font-size: 11.5px; }
+    .select-foot .cbtn-primary { min-width: 140px; }
+
+    .float-btn { width: 38px; height: 38px; font-size: 15px; bottom: 8px; }
+    .float-btn.mute { left: 8px; }
+    .float-btn.fs { right: 8px; }
   }
 </style>
 </head>
@@ -513,6 +595,7 @@
         <button class="cbtn" id="btnLoad">📂 載入</button>
         <button class="cbtn" id="btnResetData">🗑 重設</button>
       </div>
+      <div class="cover-trophy-badge">🏆 總獎盃 <span class="val" id="coverTrophyCount">0</span></div>
     </div>
     <div class="cover-copyright">
       v1.0 © <span id="copyrightYear"></span> ☕迪遜咖啡廳，版權所有。
@@ -527,12 +610,12 @@
     <div class="select-trophy">🏆 <span id="selectTrophyCount">0</span></div>
   </div>
   <div class="select-sub">
-    左右<b>橫滑</b>切換角色 · 置中自動選擇或<b>試聽主題曲</b>
+    左右<b>滑動</b>切換角色 · 置中自動選擇或<b>試聽主題曲</b>
   </div>
   <div class="char-scroller-wrap">
     <div class="char-scroller" id="charScroller"></div>
   </div>
-  <div class="scroll-hint" id="scrollHint">← 滑動選擇 →</div>
+  <div class="scroll-hint" id="scrollHint">← 拖曳滑動選擇 →</div>
   <div class="select-foot">
     <button class="cbtn" id="btnBackCover">← 返回封面</button>
     <button class="cbtn cbtn-primary" id="btnConfirmChar" disabled>開始遊戲 →</button>
@@ -543,60 +626,62 @@
 <section class="screen" id="screenGame">
   <div class="hud">
     <div class="hud-item">💰 <span class="val" id="hudGold">20</span></div>
-    <div class="hud-item">🏆 <span class="val" id="hudRound">1</span>/10</div>
+    <div class="hud-item">🏆 <span class="val" id="hudTrophies">0</span>/10</div>
     <div class="hud-item">🔥 <span class="val" id="hudStreak">0</span></div>
     <div class="hud-item">❤️ <span class="lives" id="hudLives"></span></div>
     <div class="hud-item"><img class="hud-char" id="hudCharImg" alt=""></div>
   </div>
 
-  <div class="panel">
-    <div id="shopView">
-      <div class="shop-bg"></div>
-      <div class="shop-content">
-        <div id="shopInner">
-          <div class="panel-head">
-            <h2>🛒 商店</h2>
-            <div class="head-btns">
-              <button class="btn" id="refreshBtn">🔄 刷新 1💰</button>
-              <button class="btn" id="btnSettle">🏁 結算</button>
+  <div class="game-main">
+    <div class="panel" id="shopPanel">
+      <div id="shopView">
+        <div class="shop-bg"></div>
+        <div class="shop-content">
+          <div id="shopInner">
+            <div class="panel-head">
+              <h2>🛒 商店</h2>
+              <div class="head-btns">
+                <button class="btn" id="refreshBtn">🔄 刷新 1💰</button>
+                <button class="btn" id="btnSettle">🏁 結算</button>
+              </div>
             </div>
+            <div class="shop-list" id="shopList"></div>
           </div>
-          <div class="shop-list" id="shopList"></div>
+        </div>
+      </div>
+
+      <div id="enemyView" style="display:none">
+        <div class="panel-head">
+          <h2>👹 對手 #<span id="eRound">1</span></h2>
+          <span class="dps" id="eDps">—</span>
+        </div>
+        <div class="grid" id="enemyGrid"></div>
+        <div class="bars">
+          <div class="bar">
+            <div class="bar-fill hp" id="eHpBar" style="width:100%"></div>
+            <div class="bar-txt" id="eHpTxt">100 / 100</div>
+          </div>
+          <div class="bar thin">
+            <div class="bar-fill ar" id="eArBar" style="width:0%"></div>
+          </div>
         </div>
       </div>
     </div>
 
-    <div id="enemyView" style="display:none">
+    <div class="panel" id="playerPanel">
       <div class="panel-head">
-        <h2>👹 對手 #<span id="eRound">1</span></h2>
-        <span class="dps" id="eDps">—</span>
+        <h2>🎒 你的背包</h2>
+        <span class="dps" id="pDps">—</span>
       </div>
-      <div class="grid" id="enemyGrid"></div>
+      <div class="grid" id="playerGrid"></div>
       <div class="bars">
         <div class="bar">
-          <div class="bar-fill hp" id="eHpBar" style="width:100%"></div>
-          <div class="bar-txt" id="eHpTxt">100 / 100</div>
+          <div class="bar-fill hp" id="pHpBar" style="width:100%"></div>
+          <div class="bar-txt" id="pHpTxt">100 / 100</div>
         </div>
         <div class="bar thin">
-          <div class="bar-fill ar" id="eArBar" style="width:0%"></div>
+          <div class="bar-fill ar" id="pArBar" style="width:0%"></div>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="panel">
-    <div class="panel-head">
-      <h2>🎒 你的背包</h2>
-      <span class="dps" id="pDps">—</span>
-    </div>
-    <div class="grid" id="playerGrid"></div>
-    <div class="bars">
-      <div class="bar">
-        <div class="bar-fill hp" id="pHpBar" style="width:100%"></div>
-        <div class="bar-txt" id="pHpTxt">100 / 100</div>
-      </div>
-      <div class="bar thin">
-        <div class="bar-fill ar" id="pArBar" style="width:0%"></div>
       </div>
     </div>
   </div>
@@ -612,8 +697,8 @@
   <button class="btn primary" id="battleBtn">⚔️ 開始戰鬥</button>
 
   <div class="hint">
-    <b>拖動背包</b>到新位置可整體移動（含上方物品）<br>
-    <b>拖到網格外</b>會放入暫存區，再拖回來重新排位
+    <b>拖動背包</b>到新位置（上面物品自動移到暫存區）<br>
+    <b>拖到商店</b>可販賣物品（半價）· <b>雙擊/空格</b> 旋轉物品
   </div>
 </section>
 
@@ -642,24 +727,23 @@
 
 <script>
 /* =========================================================
-   音樂資源（音量固定 1.0）
+   音樂資源
    ========================================================= */
 const BGM_VOL = 1.0;
-
 const SONGS = {
-  openBag:  'Backpack Scramble - Open Bag.mp3',
-  you:      'Backpack Scramble - You.mp3',
-  victor:   'Backpack Scramble - Victor.mp3',
-  diczon:   'Backpack Scramble - Diczon.mp3',
-  cherier:  'Backpack Scramble - Cherier.mp3',
-  ringo:    'Backpack Scramble - Ringo.mp3',
-  leo:      'Backpack Scramble - Leo.mp3',
-  zoe:      'Backpack Scramble - Zoe.mp3',
-  terry:    'Backpack Scramble - Terry.mp3',
-  rodge:    'Backpack Scramble - Rodge.mp3',
-  lok:      'Backpack Scramble - Lok.mp3',
-  rico:     'Backpack Scramble - Rico.mp3',
-  shopping: 'Backpack Scramble - Shopping Goods.mp3',
+  openBag:'Backpack Scramble - Open Bag.mp3',
+  you:'Backpack Scramble - You.mp3',
+  victor:'Backpack Scramble - Victor.mp3',
+  diczon:'Backpack Scramble - Diczon.mp3',
+  cherier:'Backpack Scramble - Cherier.mp3',
+  ringo:'Backpack Scramble - Ringo.mp3',
+  leo:'Backpack Scramble - Leo.mp3',
+  zoe:'Backpack Scramble - Zoe.mp3',
+  terry:'Backpack Scramble - Terry.mp3',
+  rodge:'Backpack Scramble - Rodge.mp3',
+  lok:'Backpack Scramble - Lok.mp3',
+  rico:'Backpack Scramble - Rico.mp3',
+  shopping:'Backpack Scramble - Shopping Goods.mp3',
 };
 
 const CHARACTERS = [
@@ -678,10 +762,8 @@ const CHARACTERS = [
 ];
 
 const STORAGE = {
-  muted:    'bs_muted',
-  trophies: 'bs_trophies',
-  char:     'bs_character',
-  progress: 'bs_progress',
+  muted:'bs_muted', trophies:'bs_trophies',
+  char:'bs_character', progress:'bs_progress',
 };
 
 /* =========================================================
@@ -692,8 +774,23 @@ let   CELL   = 44;
 const BASE_HP    = 100;
 const MAX_ROUND  = 10;
 const MAX_LIVES  = 3;
-const BAG_COST   = 7;
 const START_GOLD = 20;
+
+/* ---- 背包類型（支援形狀） ---- */
+const BAG_TYPES = {
+  small: {
+    id:'small', name:'迷你背包', icon:'👝',
+    w:1, h:1, shape:[[1]], cost:1, color:'#4a3a28',
+  },
+  L: {
+    id:'L', name:'L型背包', icon:'👜',
+    w:2, h:2, shape:[[1,1],[1,0]], cost:3, color:'#5a4a32',
+  },
+  square: {
+    id:'square', name:'背包', icon:'🎒',
+    w:2, h:2, shape:[[1,1],[1,1]], cost:4, color:'#5c4a32',
+  },
+};
 
 const ITEMS = {
   dagger: { name:'匕首',     w:1,h:1, cd:1.6, dmg:3,   cost:3,  icon:'🗡️', color:'#4b5563' },
@@ -708,52 +805,69 @@ const ITEMS = {
   heart:  { name:'生命護符', w:1,h:1, passive:'hp',  value:15, cost:6, icon:'❤️', color:'#9f1239' },
 };
 const ITEM_KEYS = Object.keys(ITEMS);
-const BAG_COLOR = '#5c4a32';
+
+/* =========================================================
+   工具 —— 形狀 / 尺寸
+   ========================================================= */
+function rotateShape(shape){
+  const h = shape.length, w = shape[0].length;
+  const ns = Array.from({length:w}, () => Array(h).fill(0));
+  for (let y=0; y<h; y++)
+    for (let x=0; x<w; x++)
+      ns[x][h-1-y] = shape[y][x];
+  return ns;
+}
+
+function getBagDims(bag){
+  const t = BAG_TYPES[bag.bagType];
+  if (bag.rotated) {
+    return { w:t.h, h:t.w, shape: rotateShape(t.shape) };
+  }
+  return { w:t.w, h:t.h, shape: t.shape };
+}
+
+function itemSize(it){
+  const def = ITEMS[it.defKey];
+  if (it.rotated) return { w:def.h, h:def.w };
+  return { w:def.w, h:def.h };
+}
 
 /* =========================================================
    音訊管理器
    ========================================================= */
 const AudioMgr = {
-  ctx: null, bgm: null, currentSrc: null, lastHit: 0,
-
-  ensureCtx() {
+  ctx:null, bgm:null, currentSrc:null, lastHit:0,
+  ensureCtx(){
     if (!this.ctx) {
-      try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); }
+      try { this.ctx = new (window.AudioContext||window.webkitAudioContext)(); }
       catch(e){ this.ctx = null; }
     }
-    if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume().catch(()=>{});
+    if (this.ctx && this.ctx.state==='suspended') this.ctx.resume().catch(()=>{});
     return this.ctx;
   },
-
-  playBGM(src, volume=BGM_VOL) {
-    if (this.currentSrc === src && this.bgm) {
+  playBGM(src, volume=BGM_VOL){
+    if (this.currentSrc===src && this.bgm){
       this.bgm.volume = volume;
       if (this.bgm.paused) this.bgm.play().catch(()=>{});
       return;
     }
     this.stopBGM();
     const a = new Audio(src);
-    a.loop = true;
-    a.volume = volume;
-    a.muted = appState.muted;
+    a.loop = true; a.volume = volume; a.muted = appState.muted;
     a.addEventListener('error', () => console.warn('[BGM 缺失]', src));
     const p = a.play();
     if (p && p.catch) p.catch(()=>{});
-    this.bgm = a;
-    this.currentSrc = src;
+    this.bgm = a; this.currentSrc = src;
   },
-
-  stopBGM() {
-    if (this.bgm) {
+  stopBGM(){
+    if (this.bgm){
       try { this.bgm.pause(); this.bgm.currentTime = 0; } catch(e){}
       this.bgm = null;
     }
     this.currentSrc = null;
   },
-
-  setMuted(m) { if (this.bgm) this.bgm.muted = m; },
-
-  tone(freq, dur, type='sine', vol=0.08, delay=0) {
+  setMuted(m){ if (this.bgm) this.bgm.muted = m; },
+  tone(freq, dur, type='sine', vol=0.08, delay=0){
     if (appState.muted) return;
     const ctx = this.ensureCtx(); if (!ctx) return;
     const now = ctx.currentTime + delay;
@@ -761,61 +875,51 @@ const AudioMgr = {
     o.type = type;
     o.frequency.setValueAtTime(freq, now);
     g.gain.setValueAtTime(0.0001, now);
-    g.gain.exponentialRampToValueAtTime(vol, now + 0.012);
-    g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+    g.gain.exponentialRampToValueAtTime(vol, now+0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, now+dur);
     o.connect(g); g.connect(ctx.destination);
-    o.start(now); o.stop(now + dur + 0.03);
+    o.start(now); o.stop(now+dur+0.03);
   },
-
-  noise(dur, vol=0.14, delay=0) {
+  noise(dur, vol=0.14, delay=0){
     if (appState.muted) return;
     const ctx = this.ensureCtx(); if (!ctx) return;
     const now = ctx.currentTime + delay;
-    const len = Math.floor(ctx.sampleRate * dur);
+    const len = Math.floor(ctx.sampleRate*dur);
     const buf = ctx.createBuffer(1, len, ctx.sampleRate);
     const d = buf.getChannelData(0);
-    for (let i = 0; i < len; i++)
-      d[i] = (Math.random()*2-1) * Math.pow(1 - i/len, 2.2);
+    for (let i=0; i<len; i++)
+      d[i] = (Math.random()*2-1)*Math.pow(1-i/len, 2.2);
     const src = ctx.createBufferSource(); src.buffer = buf;
     const g = ctx.createGain(); g.gain.value = vol;
     const f = ctx.createBiquadFilter();
-    f.type = 'bandpass'; f.frequency.value = 1400; f.Q.value = 0.8;
+    f.type='bandpass'; f.frequency.value=1400; f.Q.value=0.8;
     src.connect(f); f.connect(g); g.connect(ctx.destination);
     src.start(now);
   },
-
-  sfx(type) {
-    switch (type) {
-      case 'click':  this.tone(720, 0.055, 'triangle', 0.055); break;
-      case 'pickup': this.tone(560, 0.06, 'sine', 0.065);
-                     this.tone(840, 0.08, 'sine', 0.05, 0.045); break;
-      case 'place':  this.tone(420, 0.09, 'sine', 0.065);
-                     this.tone(630, 0.07, 'sine', 0.04, 0.04); break;
-      case 'buy':    this.tone(880, 0.08, 'triangle', 0.075);
-                     this.tone(1175, 0.13, 'triangle', 0.065, 0.07); break;
-      case 'error':  this.tone(180, 0.14, 'sawtooth', 0.045); break;
+  sfx(type){
+    switch(type){
+      case 'click':  this.tone(720,0.055,'triangle',0.055); break;
+      case 'pickup': this.tone(560,0.06,'sine',0.065); this.tone(840,0.08,'sine',0.05,0.045); break;
+      case 'place':  this.tone(420,0.09,'sine',0.065); this.tone(630,0.07,'sine',0.04,0.04); break;
+      case 'buy':    this.tone(880,0.08,'triangle',0.075); this.tone(1175,0.13,'triangle',0.065,0.07); break;
+      case 'sell':   this.tone(620,0.07,'triangle',0.07); this.tone(980,0.1,'triangle',0.06,0.05); break;
+      case 'rotate': this.tone(700,0.05,'square',0.045); this.tone(1050,0.06,'square',0.035,0.05); break;
+      case 'error':  this.tone(180,0.14,'sawtooth',0.045); break;
       case 'hit': {
         const now = performance.now();
-        if (now - this.lastHit < 55) return;
+        if (now-this.lastHit < 55) return;
         this.lastHit = now;
-        this.noise(0.09, 0.11);
-        this.tone(160, 0.06, 'square', 0.035);
+        this.noise(0.09,0.11); this.tone(160,0.06,'square',0.035);
         break;
       }
-      case 'heal':   this.tone(660, 0.1, 'sine', 0.06);
-                     this.tone(880, 0.12, 'sine', 0.05, 0.07);
-                     this.tone(1100, 0.16, 'sine', 0.04, 0.14); break;
-      case 'armor':  this.tone(300, 0.1, 'square', 0.05); break;
-      case 'gold':   this.tone(1046, 0.06, 'triangle', 0.06);
-                     this.tone(1568, 0.12, 'triangle', 0.05, 0.05); break;
-      case 'win':    [523, 659, 784, 1046].forEach((f,i)=>this.tone(f,0.22,'triangle',0.075,i*0.1)); break;
-      case 'lose':   [523, 440, 349, 262].forEach((f,i)=>this.tone(f,0.26,'sine',0.07,i*0.13)); break;
-      case 'select': this.tone(880, 0.07, 'sine', 0.07);
-                     this.tone(1320, 0.1, 'sine', 0.05, 0.06); break;
-      case 'unlock': [659, 784, 988, 1319].forEach((f,i)=>this.tone(f,0.18,'triangle',0.07,i*0.08)); break;
-      case 'preview': this.tone(660, 0.06, 'sine', 0.05);
-                      this.tone(990, 0.08, 'sine', 0.04, 0.05); break;
-      case 'snap':   this.tone(1040, 0.04, 'sine', 0.04); break;
+      case 'heal':   this.tone(660,0.1,'sine',0.06); this.tone(880,0.12,'sine',0.05,0.07); this.tone(1100,0.16,'sine',0.04,0.14); break;
+      case 'armor':  this.tone(300,0.1,'square',0.05); break;
+      case 'gold':   this.tone(1046,0.06,'triangle',0.06); this.tone(1568,0.12,'triangle',0.05,0.05); break;
+      case 'win':    [523,659,784,1046].forEach((f,i)=>this.tone(f,0.22,'triangle',0.075,i*0.1)); break;
+      case 'lose':   [523,440,349,262].forEach((f,i)=>this.tone(f,0.26,'sine',0.07,i*0.13)); break;
+      case 'select': this.tone(880,0.07,'sine',0.07); this.tone(1320,0.1,'sine',0.05,0.06); break;
+      case 'unlock': [659,784,988,1319].forEach((f,i)=>this.tone(f,0.18,'triangle',0.07,i*0.08)); break;
+      case 'preview':this.tone(660,0.06,'sine',0.05); this.tone(990,0.08,'sine',0.04,0.05); break;
     }
   }
 };
@@ -825,19 +929,19 @@ const AudioMgr = {
    ========================================================= */
 const appState = { screen:'cover', muted:false, trophies:0, character:null };
 
-function persistState() {
+function persistState(){
   try {
-    localStorage.setItem(STORAGE.muted,    appState.muted ? '1' : '0');
+    localStorage.setItem(STORAGE.muted, appState.muted?'1':'0');
     localStorage.setItem(STORAGE.trophies, String(appState.trophies));
-    localStorage.setItem(STORAGE.char,     appState.character || '');
+    localStorage.setItem(STORAGE.char, appState.character||'');
   } catch(e){}
 }
-function restoreState() {
+function restoreState(){
   try {
     const m = localStorage.getItem(STORAGE.muted);
-    if (m !== null) appState.muted = (m === '1');
+    if (m!==null) appState.muted = (m==='1');
     const t = localStorage.getItem(STORAGE.trophies);
-    if (t !== null) appState.trophies = parseInt(t) || 0;
+    if (t!==null) appState.trophies = parseInt(t)||0;
     const c = localStorage.getItem(STORAGE.char);
     if (c) appState.character = c;
   } catch(e){}
@@ -849,6 +953,7 @@ function restoreState() {
 let uidCounter = 0;
 const state = {
   phase:'prepare', round:1, gold:START_GOLD, lives:MAX_LIVES, streak:0,
+  sessionTrophies:0,           // ★ 本局獲得獎盃
   bags:[], items:[], stash:[],
   enemyBags:[], enemyItems:[],
   shop:[],
@@ -866,8 +971,8 @@ const playerGridEl = $('playerGrid');
 const enemyGridEl  = $('enemyGrid');
 const shopListEl   = $('shopList');
 const shopView     = $('shopView');
-const shopInner    = $('shopInner');
 const enemyView    = $('enemyView');
+const shopPanel    = $('shopPanel');
 const stashPanel   = $('stashPanel');
 const stashListEl  = $('stashList');
 const stashCount   = $('stashCount');
@@ -880,12 +985,13 @@ const modalDesc    = $('modalDesc');
 const modalBtn     = $('modalBtn');
 
 let previewEl = null;
+let lastMouseX = 0, lastMouseY = 0;
 
 /* =========================================================
    Toast
    ========================================================= */
 let toastTimer = null;
-function showToast(text, icon='🔒', duration=1600) {
+function showToast(text, icon='🔒', duration=1600){
   const t = $('toast');
   $('toastIcon').textContent = icon;
   $('toastText').textContent = text;
@@ -897,87 +1003,135 @@ function showToast(text, icon='🔒', duration=1600) {
 /* =========================================================
    尺寸
    ========================================================= */
-function computeCell() {
-  const avail = Math.min(window.innerWidth - 54, 520);
-  CELL = Math.max(26, Math.min(46, Math.floor(avail / GRID_W)));
-  document.documentElement.style.setProperty('--cell', CELL + 'px');
+function computeCell(){
+  const isLandscape = window.innerWidth > window.innerHeight*1.3 && window.innerHeight < 620;
+  if (isLandscape && appState.screen === 'game'){
+    const availW = (window.innerWidth/2) - 36;
+    const availH = window.innerHeight - 190;
+    CELL = Math.max(16, Math.min(
+      Math.floor(availW/GRID_W),
+      Math.floor(availH/GRID_H),
+      36
+    ));
+  } else {
+    const avail = Math.min(window.innerWidth-54, 520);
+    CELL = Math.max(26, Math.min(46, Math.floor(avail/GRID_W)));
+  }
+  document.documentElement.style.setProperty('--cell', CELL+'px');
 }
 
 /* =========================================================
    工具函式
    ========================================================= */
-function shade(hex, amt) {
-  const n = parseInt(hex.slice(1), 16);
-  let r = (n>>16)+amt, g = ((n>>8)&0xff)+amt, b = (n&0xff)+amt;
-  r = Math.max(0,Math.min(255,r));
-  g = Math.max(0,Math.min(255,g));
-  b = Math.max(0,Math.min(255,b));
-  return '#' + ((r<<16)|(g<<8)|b).toString(16).padStart(6,'0');
+function shade(hex, amt){
+  const n = parseInt(hex.slice(1),16);
+  let r=(n>>16)+amt, g=((n>>8)&0xff)+amt, b=(n&0xff)+amt;
+  r=Math.max(0,Math.min(255,r));
+  g=Math.max(0,Math.min(255,g));
+  b=Math.max(0,Math.min(255,b));
+  return '#'+((r<<16)|(g<<8)|b).toString(16).padStart(6,'0');
 }
-function buildOcc(items, excludeUid) {
+
+/* 檢查格子是否被任何背包覆蓋 */
+function cellInBags(bags, x, y){
+  for (const b of bags){
+    const d = getBagDims(b);
+    const rx = x - b.x, ry = y - b.y;
+    if (rx>=0 && rx<d.w && ry>=0 && ry<d.h && d.shape[ry][rx]) return true;
+  }
+  return false;
+}
+
+/* 建立物品佔用表 */
+function buildOcc(items, excludeUid){
   const occ = Array.from({length:GRID_H}, () => Array(GRID_W).fill(null));
-  for (const it of items) {
+  for (const it of items){
     if (excludeUid !== undefined && it.uid === excludeUid) continue;
-    const def = ITEMS[it.defKey]; if (!def) continue;
-    for (let dy=0; dy<def.h; dy++)
-      for (let dx=0; dx<def.w; dx++) {
+    const s = itemSize(it);
+    for (let dy=0; dy<s.h; dy++)
+      for (let dx=0; dx<s.w; dx++){
         const y = it.y+dy, x = it.x+dx;
         if (y>=0 && y<GRID_H && x>=0 && x<GRID_W) occ[y][x] = it.uid;
       }
   }
   return occ;
 }
-function cellInBags(bags, x, y) {
-  for (const b of bags)
-    if (x>=b.x && x<b.x+b.w && y>=b.y && y<b.y+b.h) return true;
-  return false;
-}
-function canPlaceItem(bags, items, def, x, y, excludeUid) {
-  if (x<0||y<0||x+def.w>GRID_W||y+def.h>GRID_H) return false;
-  for (let dy=0; dy<def.h; dy++)
-    for (let dx=0; dx<def.w; dx++)
+
+/* 物品能否放置 */
+function canPlaceItem(bags, items, w, h, x, y, excludeUid){
+  if (x<0||y<0||x+w>GRID_W||y+h>GRID_H) return false;
+  for (let dy=0; dy<h; dy++)
+    for (let dx=0; dx<w; dx++)
       if (!cellInBags(bags, x+dx, y+dy)) return false;
   const occ = buildOcc(items, excludeUid);
-  for (let dy=0; dy<def.h; dy++)
-    for (let dx=0; dx<def.w; dx++)
+  for (let dy=0; dy<h; dy++)
+    for (let dx=0; dx<w; dx++)
       if (occ[y+dy][x+dx] !== null) return false;
   return true;
 }
-function canPlaceBag(bags, x, y, w, h) {
+
+/* 背包能否放置 */
+function canPlaceBag(bags, x, y, w, h, shape, excludeUid){
   if (x<0||y<0||x+w>GRID_W||y+h>GRID_H) return false;
-  for (const b of bags)
-    if (x < b.x+b.w && x+w > b.x && y < b.y+b.h && y+h > b.y) return false;
+  for (let dy=0; dy<h; dy++){
+    for (let dx=0; dx<w; dx++){
+      if (!shape[dy][dx]) continue;
+      const gx = x+dx, gy = y+dy;
+      for (const b of bags){
+        if (excludeUid !== undefined && b.uid === excludeUid) continue;
+        const bd = getBagDims(b);
+        const rx = gx - b.x, ry = gy - b.y;
+        if (rx>=0 && rx<bd.w && ry>=0 && ry<bd.h && bd.shape[ry][rx]) return false;
+      }
+    }
+  }
   return true;
 }
-function isItemInBag(item, bag) {
+
+/* 物品是否完全在背包內 */
+function isItemInBag(item, bag){
   const def = ITEMS[item.defKey]; if (!def) return false;
-  return item.x>=bag.x && item.y>=bag.y &&
-         item.x+def.w<=bag.x+bag.w && item.y+def.h<=bag.y+bag.h;
+  const s = itemSize(item);
+  const bd = getBagDims(bag);
+  for (let dy=0; dy<s.h; dy++){
+    for (let dx=0; dx<s.w; dx++){
+      const bx = item.x + dx - bag.x;
+      const by = item.y + dy - bag.y;
+      if (bx<0 || bx>=bd.w || by<0 || by>=bd.h) return false;
+      if (!bd.shape[by][bx]) return false;
+    }
+  }
+  return true;
 }
-function rectsAdjacent(a, b) {
+
+function rectsAdjacent(a, b){
   const set = new Set();
   for (let dy=0; dy<a.h; dy++)
     for (let dx=0; dx<a.w; dx++) set.add((a.x+dx)+','+(a.y+dy));
   for (let dy=0; dy<b.h; dy++)
-    for (let dx=0; dx<b.w; dx++) {
-      const x = b.x+dx, y = b.y+dy;
+    for (let dx=0; dx<b.w; dx++){
+      const x=b.x+dx, y=b.y+dy;
       if (set.has((x+1)+','+y)||set.has((x-1)+','+y)||
           set.has(x+','+(y+1))||set.has(x+','+(y-1))) return true;
     }
   return false;
 }
-function findBagSpot(bags) {
-  const adj=[], any=[];
-  for (let y=0; y<=GRID_H-2; y++) {
-    for (let x=0; x<=GRID_W-2; x++) {
-      if (!canPlaceBag(bags, x, y, 2, 2)) continue;
+
+/* 找背包放置位置（優先與其他背包相鄰） */
+function findBagSpot(bags, type){
+  const t = BAG_TYPES[type];
+  const adj = [], any = [];
+  for (let y=0; y<=GRID_H-t.h; y++){
+    for (let x=0; x<=GRID_W-t.w; x++){
+      if (!canPlaceBag(bags, x, y, t.w, t.h, t.shape)) continue;
       any.push({x,y});
-      let near=false;
-      for (const b of bags) {
-        if (x===b.x+b.w && y<b.y+b.h && y+2>b.y) near=true;
-        if (x+2===b.x && y<b.y+b.h && y+2>b.y) near=true;
-        if (y===b.y+b.h && x<b.x+b.w && x+2>b.x) near=true;
-        if (y+2===b.y && x<b.x+b.w && x+2>b.x) near=true;
+      let near = false;
+      for (const b of bags){
+        const bd = getBagDims(b);
+        if (x === b.x+bd.w && y < b.y+bd.h && y+t.h > b.y) near = true;
+        if (x+t.w === b.x && y < b.y+bd.h && y+t.h > b.y) near = true;
+        if (y === b.y+bd.h && x < b.x+bd.w && x+t.w > b.x) near = true;
+        if (y+t.h === b.y && x < b.x+bd.w && x+t.w > b.x) near = true;
       }
       if (near) adj.push({x,y});
     }
@@ -986,11 +1140,13 @@ function findBagSpot(bags) {
   if (!pool.length) return null;
   return pool[Math.floor(Math.random()*pool.length)];
 }
-function findItemSpot(bags, items, def) {
+
+/* 找物品放置位置 */
+function findItemSpot(bags, items, def){
   const spots = [];
   for (let y=0; y<=GRID_H-def.h; y++)
     for (let x=0; x<=GRID_W-def.w; x++)
-      if (canPlaceItem(bags, items, def, x, y)) spots.push({x,y});
+      if (canPlaceItem(bags, items, def.w, def.h, x, y)) spots.push({x,y});
   if (!spots.length) return null;
   return spots[Math.floor(Math.random()*spots.length)];
 }
@@ -998,22 +1154,23 @@ function findItemSpot(bags, items, def) {
 /* =========================================================
    畫面切換
    ========================================================= */
-function showScreen(name) {
+function showScreen(name){
   appState.screen = name;
   document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-  if (name === 'cover') {
+  if (name === 'cover'){
     screenCover.classList.add('active');
     screenCover.style.display = 'flex';
+    $('coverTrophyCount').textContent = appState.trophies;
     AudioMgr.playBGM(SONGS.openBag, BGM_VOL);
   } else {
     screenCover.style.display = 'none';
   }
-  if (name === 'select') {
+  if (name === 'select'){
     screenSelect.classList.add('active');
-    // 進選角時建構循環滾動器
+    $('selectTrophyCount').textContent = appState.trophies;
     initCharScroller();
   }
-  if (name === 'game') {
+  if (name === 'game'){
     screenGame.classList.add('active');
     computeCell();
     renderAll();
@@ -1023,7 +1180,7 @@ function showScreen(name) {
 /* =========================================================
    封面
    ========================================================= */
-function initCover() {
+function initCover(){
   $('copyrightYear').textContent = new Date().getFullYear();
   const bg = $('coverBg');
   const img = new Image();
@@ -1037,22 +1194,16 @@ function initCover() {
    選角 —— 循環橫向滾動器
    ========================================================= */
 const CS = {
-  copies: 3,          // 複製 3 份達成循環
-  cards: [],          // 所有卡片 DOM
-  setWidth: 0,        // 一份完整角色列表的寬度（含間距）
-  centeredId: null,   // 目前置中的角色 id
-  initDone: false,
-  scrollTimer: null,
-  lastUserInput: 0,
-  rafPending: false,
+  copies:3, cards:[], setWidth:0, centeredId:null,
+  initDone:false, scrollTimer:null,
+  isMouseDown:false, mouseStartX:0, mouseStartScroll:0, mouseHasDragged:false,
 };
 
-function createCharCard(ch, copyIdx) {
+function createCharCard(ch){
   const locked = appState.trophies < ch.need;
   const card = document.createElement('div');
   card.className = 'char-card' + (locked ? ' locked' : '');
   card.dataset.id = ch.id;
-  card.dataset.copy = copyIdx;
 
   const fallback = document.createElement('div');
   fallback.className = 'char-fallback';
@@ -1060,8 +1211,7 @@ function createCharCard(ch, copyIdx) {
   card.appendChild(fallback);
 
   const im = document.createElement('img');
-  im.alt = ch.name;
-  im.draggable = false;
+  im.alt = ch.name; im.draggable = false;
   im.onload = () => { fallback.style.display = 'none'; };
   im.onerror = () => im.remove();
   im.src = ch.img;
@@ -1082,164 +1232,168 @@ function createCharCard(ch, copyIdx) {
   ck.textContent = '✓';
   card.appendChild(ck);
 
-  if (locked) {
+  if (locked){
     const lock = document.createElement('div');
     lock.className = 'char-lock-badge';
     lock.innerHTML =
       `<div class="lock-ico">🔒</div>` +
-      `需要 ${ch.need} 🏆 解鎖` +
-      `<div class="try-hint">已自動試聽主題曲</div>`;
+      `需要 ${ch.need} 🏆` +
+      `<div class="try-hint">試聽主題曲</div>`;
     card.appendChild(lock);
   }
 
-  // 點擊卡片 → 置中
   card.addEventListener('click', () => {
+    if (CS.mouseHasDragged) { CS.mouseHasDragged = false; return; }
     const scroller = $('charScroller');
     const target = card.offsetLeft + card.offsetWidth/2 - scroller.clientWidth/2;
-    CS.lastUserInput = performance.now();
-    scroller.scrollTo({ left: target, behavior: 'smooth' });
-    // scroll 事件會自動觸發後續處理
+    scroller.scrollTo({ left: target, behavior:'smooth' });
   });
 
   return card;
 }
 
-function initCharScroller() {
+function initCharScroller(){
   const scroller = $('charScroller');
   scroller.innerHTML = '';
   CS.cards = [];
   CS.initDone = false;
 
   const n = CHARACTERS.length;
-  for (let c = 0; c < CS.copies; c++) {
-    for (let i = 0; i < n; i++) {
-      const ch = CHARACTERS[i];
-      const card = createCharCard(ch, c);
+  for (let c=0; c<CS.copies; c++){
+    for (let i=0; i<n; i++){
+      const card = createCharCard(CHARACTERS[i]);
       scroller.appendChild(card);
       CS.cards.push(card);
     }
   }
 
-  // 等 layout 完成後才量寬度並定位
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       measureSetWidth();
-      // 定位到中間副本的「已選角色」或第一個角色
       let startIdx = 0;
-      if (appState.character) {
+      if (appState.character){
         const i = CHARACTERS.findIndex(c => c.id === appState.character);
         if (i >= 0) startIdx = i;
       }
-      const midCard = scroller.children[n * 1 + startIdx];
-      if (midCard) {
+      const midCard = scroller.children[n + startIdx];
+      if (midCard){
         scroller.scrollLeft = midCard.offsetLeft + midCard.offsetWidth/2 - scroller.clientWidth/2;
       } else {
         scroller.scrollLeft = scroller.scrollWidth / 3;
       }
       CS.initDone = true;
-      // 立刻同步一次置中
       syncCenterFromScroll(true);
     });
   });
 
-  // 綁定事件（避免重複綁定，先移除再綁）
   scroller.removeEventListener('scroll', onScrollerScroll);
   scroller.addEventListener('scroll', onScrollerScroll, { passive:true });
+  scroller.removeEventListener('mousedown', onScrollerMouseDown);
+  scroller.addEventListener('mousedown', onScrollerMouseDown);
+  scroller.removeEventListener('wheel', onScrollerWheel);
+  scroller.addEventListener('wheel', onScrollerWheel, { passive:false });
 }
 
-function measureSetWidth() {
+function measureSetWidth(){
   const scroller = $('charScroller');
   const n = CHARACTERS.length;
-  if (scroller.children.length < n * 2) return;
-  const a = scroller.children[0];
-  const b = scroller.children[n];
-  CS.setWidth = b.offsetLeft - a.offsetLeft;
+  if (scroller.children.length < n*2) return;
+  CS.setWidth = scroller.children[n].offsetLeft - scroller.children[0].offsetLeft;
 }
 
-function onScrollerScroll() {
+function onScrollerScroll(){
   if (!CS.initDone) return;
   const scroller = $('charScroller');
-
-  // 循環包裹（即時，保持 scrollLeft 永遠在中間副本範圍附近）
-  if (CS.setWidth > 0) {
-    // 避免用 while 造成無限迴圈
-    if (scroller.scrollLeft < CS.setWidth * 0.5) {
+  if (CS.setWidth > 0){
+    if (scroller.scrollLeft < CS.setWidth*0.5){
       scroller.scrollLeft += CS.setWidth;
-    } else if (scroller.scrollLeft > CS.setWidth * 1.5) {
+    } else if (scroller.scrollLeft > CS.setWidth*1.5){
       scroller.scrollLeft -= CS.setWidth;
     }
   }
-
-  // 記錄使用者操作時間
-  CS.lastUserInput = performance.now();
-
-  // 防抖：滑動停下來後才吸附 + 播放音樂
   clearTimeout(CS.scrollTimer);
-  CS.scrollTimer = setTimeout(() => {
-    syncCenterFromScroll(false);
-  }, 130);
+  CS.scrollTimer = setTimeout(() => syncCenterFromScroll(false), 130);
 }
 
-/**
- * 找到最接近視窗中心的卡片
- * @param {boolean} silent - true 表示不播放音效（初始化用）
- */
-function syncCenterFromScroll(silent) {
+function onScrollerMouseDown(ev){
+  if (ev.button !== 0) return;
+  const scroller = $('charScroller');
+  CS.isMouseDown = true;
+  CS.mouseHasDragged = false;
+  CS.mouseStartX = ev.clientX;
+  CS.mouseStartScroll = scroller.scrollLeft;
+  scroller.classList.add('dragging');
+  ev.preventDefault();
+}
+function onScrollerMouseMove(ev){
+  if (!CS.isMouseDown) return;
+  const scroller = $('charScroller');
+  const dx = ev.clientX - CS.mouseStartX;
+  if (Math.abs(dx) > 4) CS.mouseHasDragged = true;
+  scroller.scrollLeft = CS.mouseStartScroll - dx;
+}
+function onScrollerMouseUp(){
+  if (!CS.isMouseDown) return;
+  CS.isMouseDown = false;
+  $('charScroller').classList.remove('dragging');
+  if (CS.mouseHasDragged) syncCenterFromScroll(false);
+}
+function onScrollerWheel(ev){
+  const scroller = $('charScroller');
+  if (Math.abs(ev.deltaY) > Math.abs(ev.deltaX)){
+    scroller.scrollLeft += ev.deltaY;
+    ev.preventDefault();
+  }
+}
+
+function syncCenterFromScroll(silent){
   const scroller = $('charScroller');
   const cRect = scroller.getBoundingClientRect();
-  const centerX = cRect.left + cRect.width / 2;
+  const centerX = cRect.left + cRect.width/2;
 
   let best = null, bestDist = Infinity;
-  for (const card of CS.cards) {
+  for (const card of CS.cards){
     const r = card.getBoundingClientRect();
-    const cx = r.left + r.width / 2;
+    const cx = r.left + r.width/2;
     const d = Math.abs(cx - centerX);
-    if (d < bestDist) { bestDist = d; best = card; }
+    if (d < bestDist){ bestDist = d; best = card; }
   }
   if (!best) return;
 
-  // 平滑吸附到中心
   const r = best.getBoundingClientRect();
   const targetScrollLeft = scroller.scrollLeft + (r.left + r.width/2) - centerX;
-  const diff = Math.abs(targetScrollLeft - scroller.scrollLeft);
-  if (diff > 2) {
-    scroller.scrollTo({ left: targetScrollLeft, behavior: 'smooth' });
+  if (Math.abs(targetScrollLeft - scroller.scrollLeft) > 2){
+    scroller.scrollTo({ left: targetScrollLeft, behavior:'smooth' });
   }
 
   const chId = best.dataset.id;
   const ch = CHARACTERS.find(c => c.id === chId);
   if (!ch) return;
 
-  // 若置中角色沒變，只更新視覺（例如 trophy 變化時）
   const locked = appState.trophies < ch.need;
 
-  // 更新置中/試聽樣式
   CS.cards.forEach(c => {
     c.classList.toggle('centered', c === best);
     c.classList.toggle('previewing', c === best);
   });
 
-  if (CS.centeredId === chId && silent !== true) {
-    // 同樣角色，但鎖定狀態可能變了，仍要更新選擇狀態
+  if (CS.centeredId === chId && silent !== true){
     updateSelectedVisual();
     return;
   }
   CS.centeredId = chId;
 
-  // 播放音樂（音量 1.0）
   AudioMgr.ensureCtx();
   AudioMgr.playBGM(ch.music, BGM_VOL);
 
-  if (locked) {
-    // 鎖定：只試聽，不選擇
-    if (!silent) {
+  if (locked){
+    if (!silent){
       AudioMgr.sfx('preview');
       showToast(`已試聽 ${ch.name} 的主題曲\n🔒 需要 ${ch.need} 🏆 才能使用`, '🎵');
     }
     updateSelectedVisual();
   } else {
-    // 解鎖：正式選擇
-    if (appState.character !== ch.id) {
+    if (appState.character !== ch.id){
       appState.character = ch.id;
       persistState();
       if (!silent) AudioMgr.sfx('select');
@@ -1248,7 +1402,7 @@ function syncCenterFromScroll(silent) {
   }
 }
 
-function updateSelectedVisual() {
+function updateSelectedVisual(){
   CS.cards.forEach(c => {
     c.classList.toggle('selected',
       !c.classList.contains('locked') && c.dataset.id === appState.character);
@@ -1257,16 +1411,16 @@ function updateSelectedVisual() {
 }
 
 /* =========================================================
-   遊戲渲染 —— 網格
+   渲染 —— 網格
    ========================================================= */
-function renderGrid(el, bags, items, prefix, interactive) {
+function renderGrid(el, bags, items, prefix, interactive){
   if (!el) return;
   el.innerHTML = '';
   el.style.width  = GRID_W * CELL + 'px';
   el.style.height = GRID_H * CELL + 'px';
 
-  for (let y=0; y<GRID_H; y++) {
-    for (let x=0; x<GRID_W; x++) {
+  for (let y=0; y<GRID_H; y++){
+    for (let x=0; x<GRID_W; x++){
       const c = document.createElement('div');
       c.className = 'cell';
       c.style.cssText = `left:${x*CELL}px;top:${y*CELL}px;width:${CELL}px;height:${CELL}px`;
@@ -1274,31 +1428,39 @@ function renderGrid(el, bags, items, prefix, interactive) {
     }
   }
 
-  for (const b of bags) {
-    const d = document.createElement('div');
-    d.className = 'bagblock';
-    d.id = prefix + 'bag-' + b.uid;
-    d.style.cssText =
-      `left:${b.x*CELL}px;top:${b.y*CELL}px;width:${b.w*CELL}px;height:${b.h*CELL}px`;
-    el.appendChild(d);
+  // 背包（多格描繪）
+  for (const b of bags){
+    const dims = getBagDims(b);
+    for (let dy=0; dy<dims.h; dy++){
+      for (let dx=0; dx<dims.w; dx++){
+        if (!dims.shape[dy][dx]) continue;
+        const cell = document.createElement('div');
+        cell.className = 'bagblock-cell';
+        cell.style.cssText =
+          `left:${(b.x+dx)*CELL}px;top:${(b.y+dy)*CELL}px;` +
+          `width:${CELL}px;height:${CELL}px;`;
+        el.appendChild(cell);
 
-    if (interactive && state.phase === 'prepare') {
-      d.addEventListener('pointerdown', (ev) => {
-        if (ev.target !== d) return;
-        ev.preventDefault(); ev.stopPropagation();
-        startDrag(ev, { kind:'bag', uid:b.uid, source:'grid', origBag:{...b} });
-      });
+        if (interactive && state.phase === 'prepare'){
+          cell.addEventListener('pointerdown', (ev) => {
+            ev.preventDefault(); ev.stopPropagation();
+            startDrag(ev, { kind:'bag', uid:b.uid, source:'grid', origBag:{...b} });
+          });
+        }
+      }
     }
   }
 
-  for (const it of items) {
+  // 物品
+  for (const it of items){
     const def = ITEMS[it.defKey]; if (!def) continue;
+    const s = itemSize(it);
     const d = document.createElement('div');
     d.className = 'item';
     d.id = prefix + it.uid;
     d.style.cssText =
       `left:${it.x*CELL+2}px;top:${it.y*CELL+2}px;` +
-      `width:${def.w*CELL-4}px;height:${def.h*CELL-4}px;` +
+      `width:${s.w*CELL-4}px;height:${s.h*CELL-4}px;` +
       `background:linear-gradient(150deg,${def.color},${shade(def.color,-30)})`;
     d.innerHTML =
       `<span class="ico">${def.icon}</span>` +
@@ -1307,7 +1469,7 @@ function renderGrid(el, bags, items, prefix, interactive) {
     d.title = itemTooltip(def);
     el.appendChild(d);
 
-    if (interactive && state.phase === 'prepare') {
+    if (interactive && state.phase === 'prepare'){
       d.addEventListener('pointerdown', (ev) => {
         ev.preventDefault(); ev.stopPropagation();
         startDrag(ev, {
@@ -1315,17 +1477,22 @@ function renderGrid(el, bags, items, prefix, interactive) {
           source:'grid', origX:it.x, origY:it.y
         });
       });
+      // ★ 雙擊旋轉
+      d.addEventListener('dblclick', (ev) => {
+        ev.preventDefault(); ev.stopPropagation();
+        rotateItemByUid(it.uid);
+      });
     }
   }
 
-  if (prefix === 'pi-') {
+  if (prefix === 'pi-'){
     previewEl = document.createElement('div');
     previewEl.className = 'preview';
     el.appendChild(previewEl);
   }
 }
 
-function itemTooltip(def) {
+function itemTooltip(def){
   const p = [def.name];
   if (def.dmg)   p.push(`傷害 ${def.dmg} / 冷卻 ${def.cd}s`);
   if (def.armor) p.push(`護甲 +${def.armor} / 冷卻 ${def.cd}s`);
@@ -1333,40 +1500,38 @@ function itemTooltip(def) {
   if (def.passive === 'dmg') p.push(`相鄰武器傷害 +${def.value}`);
   if (def.passive === 'hp')  p.push(`最大生命 +${def.value}`);
   p.push(`價格 ${def.cost}💰`);
+  if (def.w !== def.h) p.push(`雙擊或空白鍵旋轉`);
   return p.join('\n');
 }
 
 /* =========================================================
    暫存區
    ========================================================= */
-function renderStash() {
+function renderStash(){
   stashListEl.innerHTML = '';
   stashCount.textContent = state.stash.length ? state.stash.length + ' 件' : '';
-
-  if (!state.stash.length) {
+  if (!state.stash.length){
     stashListEl.innerHTML =
       '<div class="stash-empty">拖動<b>背包</b>或<b>物品</b>到網格外<br>可暫時放到這裡重新排位</div>';
     return;
   }
-
-  for (const s of state.stash) {
+  for (const s of state.stash){
     const el = document.createElement('div');
     el.className = 'stash-card';
     el.id = 'st-' + s.uid;
-
-    if (s.kind === 'bag') {
-      el.innerHTML = `<div class="s-ico">🎒</div><div class="s-name">${s.w}×${s.h}</div>`;
+    if (s.kind === 'bag'){
+      const t = BAG_TYPES[s.bagType];
+      el.innerHTML = `<div class="s-ico">${t.icon}</div><div class="s-name">${t.name}</div>`;
     } else {
       const d = ITEMS[s.defKey]; if (!d) continue;
       el.innerHTML = `<div class="s-ico">${d.icon}</div><div class="s-name">${d.name}</div>`;
     }
-
-    if (state.phase === 'prepare') {
+    if (state.phase === 'prepare'){
       el.addEventListener('pointerdown', (ev) => {
         ev.preventDefault(); ev.stopPropagation();
         startDrag(ev, {
-          kind:s.kind, defKey:s.defKey, uid:s.uid,
-          w:s.w, h:s.h, source:'stash'
+          kind:s.kind, defKey:s.defKey, bagType:s.bagType, uid:s.uid,
+          source:'stash'
         });
       });
     }
@@ -1377,42 +1542,50 @@ function renderStash() {
 /* =========================================================
    商店
    ========================================================= */
-function rollShop() {
+function rollShop(){
   const shop = [];
-  const maxCost = 4 + state.round * 1.7;
+  const maxCost = 4 + state.round*1.7;
   const pool = ITEM_KEYS.filter(k => ITEMS[k].cost <= maxCost);
-  const bagChance = state.bags.length < 3 ? 0.42 : 0.24;
+  const bagChance = state.bags.length < 3 ? 0.4 : 0.22;
 
-  for (let i=0; i<5; i++) {
-    if (Math.random() < bagChance) {
-      shop.push({ id: ++uidCounter, kind:'bag', cost:BAG_COST });
+  for (let i=0; i<5; i++){
+    if (Math.random() < bagChance){
+      // 加權：迷你背包最常見，L型次之，方形最少
+      const r = Math.random();
+      const bagType = r < 0.4 ? 'small' : r < 0.75 ? 'L' : 'square';
+      shop.push({
+        id:++uidCounter, kind:'bag', bagType,
+        cost: BAG_TYPES[bagType].cost,
+      });
     } else {
       const k = pool[Math.floor(Math.random()*pool.length)];
-      shop.push({ id: ++uidCounter, kind:'item', key:k, cost:ITEMS[k].cost });
+      shop.push({ id:++uidCounter, kind:'item', key:k, cost:ITEMS[k].cost });
     }
   }
   return shop;
 }
 
-function renderShop() {
+function renderShop(){
   shopListEl.innerHTML = '';
-  if (!state.shop.length) {
+  if (!state.shop.length){
     shopListEl.innerHTML = '<div class="shop-empty">已售罄 — 點擊刷新</div>';
     return;
   }
-
-  for (const slot of state.shop) {
+  for (const slot of state.shop){
     let icon, name, stat, cost;
-    if (slot.kind === 'bag') {
-      icon='🎒'; name='背包'; stat='2×2 空間'; cost=slot.cost;
+    if (slot.kind === 'bag'){
+      const t = BAG_TYPES[slot.bagType];
+      icon = t.icon; name = t.name;
+      stat = `${t.w}×${t.h} 空間`;
+      cost = slot.cost;
     } else {
       const d = ITEMS[slot.key];
-      icon=d.icon; name=d.name; cost=slot.cost;
-      stat = d.dmg   ? d.dmg + ' 傷害'
-           : d.armor ? d.armor + ' 護甲'
-           : d.heal  ? d.heal + ' 治療'
-           : d.passive === 'hp' ? '+' + d.value + ' 生命'
-           : '+' + d.value + ' 傷害';
+      icon = d.icon; name = d.name; cost = slot.cost;
+      stat = d.dmg ? d.dmg+' 傷害'
+           : d.armor ? d.armor+' 護甲'
+           : d.heal ? d.heal+' 治療'
+           : d.passive === 'hp' ? '+'+d.value+' 生命'
+           : '+'+d.value+' 傷害';
     }
 
     const card = document.createElement('div');
@@ -1425,10 +1598,10 @@ function renderShop() {
 
     card.addEventListener('pointerdown', (ev) => {
       if (state.phase !== 'prepare') return;
-      if (state.gold < cost) { AudioMgr.sfx('error'); return; }
+      if (state.gold < cost){ AudioMgr.sfx('error'); return; }
       ev.preventDefault(); ev.stopPropagation();
-      if (slot.kind === 'bag') {
-        startDrag(ev, { kind:'bag', cost, shopId:slot.id, source:'shop' });
+      if (slot.kind === 'bag'){
+        startDrag(ev, { kind:'bag', bagType:slot.bagType, cost, shopId:slot.id, source:'shop' });
       } else {
         startDrag(ev, { kind:'item', defKey:slot.key, cost, shopId:slot.id, source:'shop' });
       }
@@ -1438,48 +1611,74 @@ function renderShop() {
 }
 
 /* =========================================================
+   旋轉
+   ========================================================= */
+function rotateItemByUid(uid){
+  const it = state.items.find(x => x.uid === uid);
+  if (!it) return;
+  const def = ITEMS[it.defKey];
+  if (def.w === def.h){ AudioMgr.sfx('error'); return; }
+  const old = it.rotated || false;
+  it.rotated = !old;
+  const s = itemSize(it);
+  const others = state.items.filter(x => x.uid !== uid);
+  if (!canPlaceItem(state.bags, others, s.w, s.h, it.x, it.y)){
+    it.rotated = old;
+    AudioMgr.sfx('error');
+    showToast('空間不足，無法旋轉', '🚫', 900);
+    return;
+  }
+  AudioMgr.sfx('rotate');
+  renderAll();
+}
+
+/* =========================================================
    拖拽系統
    ========================================================= */
 let drag = null;
 
-function startDrag(ev, payload) {
+function startDrag(ev, payload){
   if (drag) return;
   if (state.phase !== 'prepare') return;
 
-  let def, innerItems = [];
-  if (payload.kind === 'bag') {
-    let bw=2, bh=2;
-    if (payload.source === 'grid' && payload.origBag) { bw=payload.origBag.w; bh=payload.origBag.h; }
-    else if (payload.source === 'stash') { bw=payload.w||2; bh=payload.h||2; }
-    def = { w:bw, h:bh, icon:'🎒', color:BAG_COLOR, name:'背包' };
+  let def, innerItems = [], bagType = null;
 
-    if (payload.source === 'grid' && payload.origBag) {
+  if (payload.kind === 'bag'){
+    if (payload.source === 'shop') bagType = payload.bagType;
+    else if (payload.source === 'grid') bagType = payload.origBag.bagType;
+    else if (payload.source === 'stash') bagType = payload.bagType;
+
+    const t = BAG_TYPES[bagType];
+    def = { w:t.w, h:t.h, icon:t.icon, color:t.color, name:t.name };
+
+    // ★ 從網格拖出背包 → 上面物品移到暫存區
+    if (payload.source === 'grid' && payload.origBag){
       const bag = payload.origBag;
-      innerItems = state.items
-        .filter(it => isItemInBag(it, bag))
-        .map(it => ({ uid:it.uid, defKey:it.defKey, dx:it.x-bag.x, dy:it.y-bag.y }));
+      const bagItems = state.items.filter(it => isItemInBag(it, bag));
+      for (const it of bagItems){
+        state.stash.push({ uid:it.uid, kind:'item', defKey:it.defKey });
+      }
+      state.items = state.items.filter(it => !bagItems.includes(it));
+      state.bags  = state.bags.filter(b => b.uid !== bag.uid);
+      renderPlayerGrid();
+      renderStash();
     }
   } else {
     def = ITEMS[payload.defKey]; if (!def) return;
   }
 
-  if (payload.source === 'grid') {
-    if (payload.kind === 'item') {
+  // 視覺隱藏
+  if (payload.source === 'grid'){
+    if (payload.kind === 'item'){
       const el = document.getElementById('pi-' + payload.uid);
       if (el) el.style.visibility = 'hidden';
-    } else {
-      const bagEl = document.getElementById('pi-bag-' + payload.uid);
-      if (bagEl) bagEl.style.visibility = 'hidden';
-      for (const bi of innerItems) {
-        const el = document.getElementById('pi-' + bi.uid);
-        if (el) el.style.visibility = 'hidden';
-      }
     }
-  } else if (payload.source === 'stash') {
+  } else if (payload.source === 'stash'){
     const el = document.getElementById('st-' + payload.uid);
     if (el) el.style.visibility = 'hidden';
   }
 
+  // Ghost
   const ghost = document.createElement('div');
   ghost.className = 'ghost';
   ghost.style.width  = def.w * CELL - 4 + 'px';
@@ -1487,14 +1686,21 @@ function startDrag(ev, payload) {
   ghost.style.background = `linear-gradient(150deg,${def.color},${shade(def.color,-30)})`;
   ghost.innerHTML =
     `<span style="font-size:${Math.round(Math.min(def.w,def.h)*CELL*0.46)}px;` +
-    `filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))">${def.icon}</span>` +
-    (innerItems.length
-      ? `<span style="position:absolute;bottom:2px;right:4px;font-size:9px;` +
-        `font-weight:900;color:#ffd76a;text-shadow:0 1px 3px #000">+${innerItems.length}</span>`
-      : '');
+    `filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))">${def.icon}</span>`;
   document.body.appendChild(ghost);
 
-  drag = { ...payload, def, ghost, innerItems, gx:-99, gy:-99, valid:false, pid:ev.pointerId };
+  // 販賣價
+  let sellPrice = 0;
+  if (payload.kind === 'bag'){
+    sellPrice = Math.max(1, Math.floor(BAG_TYPES[bagType].cost/2));
+  } else {
+    sellPrice = Math.max(1, Math.floor(ITEMS[payload.defKey].cost/2));
+  }
+
+  drag = {
+    ...payload, def, ghost, innerItems, bagType, sellPrice,
+    gx:-99, gy:-99, valid:false, pid:ev.pointerId,
+  };
   AudioMgr.sfx('pickup');
 
   try { if (document.body.setPointerCapture) document.body.setPointerCapture(ev.pointerId); } catch(e){}
@@ -1507,20 +1713,20 @@ function startDrag(ev, payload) {
   document.addEventListener('pointercancel', onPointerCancel);
 }
 
-function moveGhost(cx, cy) {
+function moveGhost(cx, cy){
   if (!drag) return;
   drag.ghost.style.left = cx + 'px';
   drag.ghost.style.top  = cy + 'px';
 }
 
-function onPointerMove(ev) {
+function onPointerMove(ev){
   if (!drag) return;
   if (ev.cancelable) ev.preventDefault();
   moveGhost(ev.clientX, ev.clientY);
   updatePreview(ev.clientX, ev.clientY);
 }
 
-function updatePreview(cx, cy) {
+function updatePreview(cx, cy){
   if (!drag || !previewEl) return;
   const def = drag.def;
   const rect = playerGridEl.getBoundingClientRect();
@@ -1530,17 +1736,20 @@ function updatePreview(cx, cy) {
   drag.gx = gx; drag.gy = gy;
 
   let ok;
-  if (drag.kind === 'bag') {
+  if (drag.kind === 'bag'){
+    const t = BAG_TYPES[drag.bagType];
     const others = drag.source === 'grid'
       ? state.bags.filter(b => b.uid !== drag.uid) : state.bags;
-    ok = canPlaceBag(others, gx, gy, def.w, def.h);
+    ok = canPlaceBag(others, gx, gy, t.w, t.h, t.shape);
   } else {
+    const s = ITEMS[drag.defKey];
     const ex = drag.source === 'grid' ? drag.uid : undefined;
-    ok = canPlaceItem(state.bags, state.items, def, gx, gy, ex);
+    // 注意：預覽使用原始方向（不旋轉）
+    ok = canPlaceItem(state.bags, state.items, s.w, s.h, gx, gy, ex);
   }
   drag.valid = ok;
 
-  if (gx < -3 || gy < -3 || gx > GRID_W+2 || gy > GRID_H+2) {
+  if (gx < -3 || gy < -3 || gx > GRID_W+2 || gy > GRID_H+2){
     previewEl.style.display = 'none';
   } else {
     previewEl.style.display = 'block';
@@ -1551,13 +1760,21 @@ function updatePreview(cx, cy) {
     previewEl.className = 'preview ' + (ok ? 'ok' : 'bad');
   }
 
+  // 暫存區高亮
   const sr = stashListEl.getBoundingClientRect();
   const overStash = cx >= sr.left-40 && cx <= sr.right+40 &&
                     cy >= sr.top-40  && cy <= sr.bottom+40;
   stashPanel.classList.toggle('drop-hover', overStash && drag.source !== 'shop');
+
+  // ★ 商店販賣高亮
+  const spr = shopPanel.getBoundingClientRect();
+  const overShop = cx >= spr.left && cx <= spr.right &&
+                   cy >= spr.top  && cy <= spr.bottom;
+  shopView.classList.toggle('sell-hover',
+    overShop && (drag.source === 'grid' || drag.source === 'stash'));
 }
 
-function onPointerUp(ev) {
+function onPointerUp(ev){
   cleanupDragListeners();
   if (!drag) return;
 
@@ -1566,56 +1783,91 @@ function onPointerUp(ev) {
     ev.clientX >= rect.left && ev.clientX <= rect.right &&
     ev.clientY >= rect.top  && ev.clientY <= rect.bottom;
 
+  const spr = shopPanel.getBoundingClientRect();
+  const overShop =
+    ev.clientX >= spr.left && ev.clientX <= spr.right &&
+    ev.clientY >= spr.top  && ev.clientY <= spr.bottom;
+
   const d = drag;
 
-  if (d.valid && overGrid) {
-    if (d.kind === 'bag') {
-      if (d.source === 'grid') {
-        const old = d.origBag;
-        state.bags  = state.bags.filter(b => b.uid !== old.uid);
-        state.items = state.items.filter(it => !isItemInBag(it, old));
-      } else if (d.source === 'stash') {
+  // ★ 販賣：拖到商店
+  if (overShop && d.source !== 'shop'){
+    state.gold += d.sellPrice;
+    AudioMgr.sfx('sell');
+    showToast(`販賣獲得 +${d.sellPrice}💰`, '💰', 900);
+    try { document.body.releasePointerCapture(d.pid); } catch(e){}
+    d.ghost.remove();
+    drag = null;
+    renderAll();
+    return;
+  }
+
+  if (d.valid && overGrid){
+    // 放到網格
+    if (d.kind === 'bag'){
+      if (d.source === 'grid'){
+        // 已於 startDrag 中移除，不用再處理
+      } else if (d.source === 'stash'){
         state.stash = state.stash.filter(s => s.uid !== d.uid);
       }
-      const nb = { uid:d.uid||(++uidCounter), x:d.gx, y:d.gy, w:d.def.w, h:d.def.h };
-      state.bags.push(nb);
-      for (const bi of d.innerItems)
-        state.items.push({ uid:bi.uid, defKey:bi.defKey, x:nb.x+bi.dx, y:nb.y+bi.dy });
+      state.bags.push({
+        uid: d.uid || (++uidCounter),
+        bagType: d.bagType,
+        x: d.gx, y: d.gy,
+        rotated: false,
+      });
     } else {
       if (d.source === 'grid') state.items = state.items.filter(it => it.uid !== d.uid);
       else if (d.source === 'stash') state.stash = state.stash.filter(s => s.uid !== d.uid);
-      state.items.push({ uid:d.uid||(++uidCounter), defKey:d.defKey, x:d.gx, y:d.gy });
+      state.items.push({
+        uid: d.uid || (++uidCounter),
+        defKey: d.defKey,
+        x: d.gx, y: d.gy,
+        rotated: false,
+      });
     }
-    if (d.source === 'shop') {
+    if (d.source === 'shop'){
       state.gold -= d.cost;
       state.shop = state.shop.filter(s => s.id !== d.shopId);
       AudioMgr.sfx('buy');
     } else {
       AudioMgr.sfx('place');
     }
-  } else if (!overGrid && d.source !== 'shop') {
-    if (d.source === 'grid') {
-      if (d.kind === 'bag') {
-        const old = d.origBag;
-        state.bags  = state.bags.filter(b => b.uid !== old.uid);
-        state.items = state.items.filter(it => !isItemInBag(it, old));
-        state.stash.push({ uid:d.uid, kind:'bag', w:d.def.w, h:d.def.h });
-        for (const bi of d.innerItems)
-          state.stash.push({ uid:bi.uid, kind:'item', defKey:bi.defKey });
+  } else if (!overGrid && d.source !== 'shop'){
+    // 放到暫存區
+    if (d.source === 'grid'){
+      if (d.kind === 'bag'){
+        // 已於 startDrag 移除，物品也已進暫存區
+        state.stash.push({ uid:d.uid, kind:'bag', bagType:d.bagType });
       } else {
         state.items = state.items.filter(it => it.uid !== d.uid);
         state.stash.push({ uid:d.uid, kind:'item', defKey:d.defKey });
       }
-    } else if (d.source === 'stash') {
-      if (d.kind === 'bag') {
-        state.stash.push({ uid:d.uid, kind:'bag', w:d.def.w, h:d.def.h });
-        for (const bi of d.innerItems)
-          state.stash.push({ uid:bi.uid, kind:'item', defKey:bi.defKey });
+    } else if (d.source === 'stash'){
+      if (d.kind === 'bag'){
+        state.stash.push({ uid:d.uid, kind:'bag', bagType:d.bagType });
       } else {
         state.stash.push({ uid:d.uid, kind:'item', defKey:d.defKey });
       }
     }
     AudioMgr.sfx('place');
+  } else if (d.source === 'grid'){
+    // 拖回原位（無效放置）
+    if (d.kind === 'bag'){
+      state.bags.push({
+        uid: d.uid, bagType: d.bagType,
+        x: d.origBag.x, y: d.origBag.y, rotated: false,
+      });
+    } else {
+      state.items.push({
+        uid: d.uid, defKey: d.defKey,
+        x: d.origX, y: d.origY, rotated: false,
+      });
+    }
+  } else if (d.source === 'stash'){
+    state.stash.push({
+      uid: d.uid, kind: d.kind, defKey: d.defKey, bagType: d.bagType,
+    });
   }
 
   try { document.body.releasePointerCapture(d.pid); } catch(e){}
@@ -1624,7 +1876,7 @@ function onPointerUp(ev) {
   renderAll();
 }
 
-function onPointerCancel(ev) {
+function onPointerCancel(ev){
   cleanupDragListeners();
   if (!drag) return;
   try { document.body.releasePointerCapture(drag.pid); } catch(e){}
@@ -1633,26 +1885,27 @@ function onPointerCancel(ev) {
   renderAll();
 }
 
-function cleanupDragListeners() {
+function cleanupDragListeners(){
   document.removeEventListener('pointermove', onPointerMove);
   document.removeEventListener('pointerup', onPointerUp);
   document.removeEventListener('pointercancel', onPointerCancel);
   stashPanel.classList.remove('drop-hover');
+  shopView.classList.remove('sell-hover');
 }
 
 /* =========================================================
    渲染主控
    ========================================================= */
-function renderPlayerGrid() {
+function renderPlayerGrid(){
   const inBattle = (state.phase === 'battle' || state.phase === 'result') && state.fP;
   const items = inBattle ? state.fP.items : state.items;
   renderGrid(playerGridEl, state.bags, items, 'pi-', state.phase === 'prepare');
 }
-function renderEnemyGrid() {
+function renderEnemyGrid(){
   const items = state.fE ? state.fE.items : [];
   renderGrid(enemyGridEl, state.enemyBags, items, 'ei-', false);
 }
-function renderAll() {
+function renderAll(){
   if (appState.screen !== 'game') return;
   renderPlayerGrid();
   if (state.phase === 'battle' || state.phase === 'result') renderEnemyGrid();
@@ -1665,14 +1918,15 @@ function renderAll() {
 /* =========================================================
    HUD
    ========================================================= */
-function updateHud() {
-  $('hudGold').textContent   = state.gold;
-  $('hudRound').textContent  = Math.min(state.round, MAX_ROUND);
+function updateHud(){
+  $('hudGold').textContent = state.gold;
+  // ★ 本局獎盃
+  $('hudTrophies').textContent = state.sessionTrophies;
   $('hudStreak').textContent = state.streak;
 
   const livesEl = $('hudLives');
   livesEl.innerHTML = '';
-  for (let i=0; i<MAX_LIVES; i++) {
+  for (let i=0; i<MAX_LIVES; i++){
     const s = document.createElement('span');
     s.className = 'life' + (i < state.lives ? ' on' : '');
     s.textContent = '❤️';
@@ -1681,31 +1935,35 @@ function updateHud() {
 
   const chImg = $('hudCharImg');
   const ch = CHARACTERS.find(c => c.id === appState.character);
-  if (ch) {
+  if (ch){
     chImg.src = ch.img;
     chImg.onerror = () => { chImg.style.display = 'none'; };
     chImg.style.display = '';
   }
 
+  // DPS 估算（只計算非旋轉以簡化，實際上旋轉不影響 DPS）
   let dps = 0;
   const src = state.items;
-  for (const it of src) {
+  for (const it of src){
     const d = ITEMS[it.defKey];
     if (d && d.dmg) dps += d.dmg/d.cd;
   }
-  for (const it of src) {
+  for (const it of src){
     const d = ITEMS[it.defKey];
     if (!d || d.passive !== 'dmg') continue;
-    for (const o of src) {
+    for (const o of src){
       const od = ITEMS[o.defKey];
       if (!od || !od.dmg) continue;
-      if (rectsAdjacent({x:it.x,y:it.y,w:d.w,h:d.h},{x:o.x,y:o.y,w:od.w,h:od.h}))
-        dps += d.value/od.cd;
+      const s1 = itemSize(it), s2 = itemSize(o);
+      if (rectsAdjacent(
+        {x:it.x,y:it.y,w:s1.w,h:s1.h},
+        {x:o.x,y:o.y,w:s2.w,h:s2.h}
+      )) dps += d.value/od.cd;
     }
   }
 
   const dpsEl = $('pDps');
-  if (!state.items.length && !state.stash.filter(s => s.kind === 'item').length) {
+  if (!state.items.length && !state.stash.filter(s => s.kind === 'item').length){
     dpsEl.textContent = '空背包'; dpsEl.classList.remove('hot');
   } else {
     dpsEl.textContent = 'DPS ≈ ' + dps.toFixed(1);
@@ -1713,9 +1971,9 @@ function updateHud() {
   }
 
   const eDpsEl = $('eDps');
-  if (state.fE) {
+  if (state.fE){
     let ed = 0;
-    for (const it of state.fE.items) {
+    for (const it of state.fE.items){
       const d = it.def;
       if (d.dmg) ed += (d.dmg + it.bonusDmg)/d.cd;
     }
@@ -1729,13 +1987,13 @@ function updateHud() {
   refreshBtn.disabled = state.phase !== 'prepare' || state.gold < 1;
 }
 
-function updateIdleBars() {
-  if (state.phase === 'prepare' || state.phase === 'gameover') {
+function updateIdleBars(){
+  if (state.phase === 'prepare' || state.phase === 'gameover'){
     setBarWidth('pHpBar','pHpTxt', BASE_HP, BASE_HP, 0);
     setBarWidth('eHpBar','eHpTxt', BASE_HP, BASE_HP, 0);
   }
 }
-function setBarWidth(barId, txtId, hp, maxHp, armor) {
+function setBarWidth(barId, txtId, hp, maxHp, armor){
   const el = $(barId), tx = $(txtId);
   if (!el || !tx) return;
   el.style.width = (maxHp ? Math.max(0,hp/maxHp)*100 : 0) + '%';
@@ -1746,23 +2004,24 @@ function setBarWidth(barId, txtId, hp, maxHp, armor) {
 /* =========================================================
    戰鬥
    ========================================================= */
-function buildFighter(bags, items, baseHp) {
+function buildFighter(bags, items, baseHp){
   const f = { hp:baseHp, maxHp:baseHp, armor:0, alive:true, items:[] };
-  for (const b of items) {
+  for (const b of items){
     const def = ITEMS[b.defKey]; if (!def) continue;
+    const s = itemSize(b);
     f.items.push({
       uid:b.uid, defKey:b.defKey, def,
-      x:b.x, y:b.y, w:def.w, h:def.h,
+      x:b.x, y:b.y, w:s.w, h:s.h,
       timer: def.cd ? def.cd*(0.25+Math.random()*0.75) : 0,
       bonusDmg:0, flash:0
     });
   }
-  for (const it of f.items) {
-    if (it.def.passive === 'hp') { f.maxHp += it.def.value; f.hp += it.def.value; }
+  for (const it of f.items){
+    if (it.def.passive === 'hp'){ f.maxHp += it.def.value; f.hp += it.def.value; }
   }
-  for (const it of f.items) {
+  for (const it of f.items){
     if (it.def.passive !== 'dmg') continue;
-    for (const o of f.items) {
+    for (const o of f.items){
       if (o === it || !o.def.dmg) continue;
       if (rectsAdjacent(it, o)) o.bonusDmg += it.def.value;
     }
@@ -1770,34 +2029,34 @@ function buildFighter(bags, items, baseHp) {
   return f;
 }
 
-function triggerItem(it, owner, foe) {
+function triggerItem(it, owner, foe){
   it.flash = 1;
   const def = it.def;
-  if (def.dmg) {
+  if (def.dmg){
     let dmg = def.dmg + it.bonusDmg;
-    if (foe.armor > 0) {
+    if (foe.armor > 0){
       const abs = Math.min(foe.armor, dmg);
       foe.armor -= abs; dmg -= abs;
     }
-    if (dmg > 0) {
+    if (dmg > 0){
       foe.hp = Math.max(0, foe.hp - dmg);
       AudioMgr.sfx('hit');
       if (foe.hp <= 0) foe.alive = false;
     }
-  } else if (def.armor) {
+  } else if (def.armor){
     owner.armor += def.armor; AudioMgr.sfx('armor');
-  } else if (def.heal) {
+  } else if (def.heal){
     owner.hp = Math.min(owner.maxHp, owner.hp + def.heal); AudioMgr.sfx('heal');
   }
 }
 
-function stepBattle(p, e, dt) {
-  for (const [side, foe] of [[p,e],[e,p]]) {
+function stepBattle(p, e, dt){
+  for (const [side, foe] of [[p,e],[e,p]]){
     if (!side.alive) continue;
-    for (const it of side.items) {
+    for (const it of side.items){
       if (!it.def.cd) continue;
       it.timer -= dt;
-      if (it.timer <= 0) {
+      if (it.timer <= 0){
         it.timer = it.def.cd;
         triggerItem(it, side, foe);
         if (!foe.alive) break;
@@ -1808,7 +2067,7 @@ function stepBattle(p, e, dt) {
 
 let battleRAF = null, lastT = 0;
 
-function startBattle() {
+function startBattle(){
   if (state.phase !== 'prepare') return;
   if (state.items.length === 0) return;
   state.phase = 'battle';
@@ -1820,6 +2079,7 @@ function startBattle() {
   state.fP = buildFighter(state.bags, state.items, BASE_HP);
   state.fE = buildFighter(state.enemyBags, state.enemyItems, BASE_HP);
 
+  computeCell();
   renderPlayerGrid();
   renderEnemyGrid();
   updateHud();
@@ -1834,16 +2094,16 @@ function startBattle() {
   battleRAF = requestAnimationFrame(battleLoop);
 }
 
-function battleLoop(t) {
+function battleLoop(t){
   if (state.phase !== 'battle') return;
   if (!lastT) lastT = t;
-  let dt = Math.min((t - lastT)/1000, 0.06);
+  let dt = Math.min((t-lastT)/1000, 0.06);
   lastT = t;
   state.battleTime += dt;
 
   stepBattle(state.fP, state.fE, dt);
 
-  if (state.battleTime > 20) {
+  if (state.battleTime > 20){
     const fat = (state.battleTime - 20)*3.2*dt;
     state.fP.hp = Math.max(0, state.fP.hp - fat);
     state.fE.hp = Math.max(0, state.fE.hp - fat);
@@ -1855,11 +2115,11 @@ function battleLoop(t) {
   updateCooldowns(state.fP, 'pi-');
   updateCooldowns(state.fE, 'ei-');
 
-  if (!state.fP.alive || !state.fE.alive) { endBattle(); return; }
+  if (!state.fP.alive || !state.fE.alive){ endBattle(); return; }
   battleRAF = requestAnimationFrame(battleLoop);
 }
 
-function updateBars() {
+function updateBars(){
   const p = state.fP, e = state.fE;
   if (!p || !e) return;
   setBarWidth('pHpBar','pHpTxt', p.hp, p.maxHp, p.armor);
@@ -1868,15 +2128,15 @@ function updateBars() {
   $('eArBar').style.width = Math.min(100, e.armor/30*100) + '%';
 }
 
-function updateCooldowns(f, prefix) {
+function updateCooldowns(f, prefix){
   if (!f) return;
-  for (const it of f.items) {
+  for (const it of f.items){
     const el = document.getElementById(prefix + it.uid);
     if (!el) continue;
     const mask = el.querySelector('.cdmask');
     if (mask && it.def.cd)
       mask.style.height = Math.max(0, Math.min(100, it.timer/it.def.cd*100)) + '%';
-    if (it.flash > 0) { el.classList.add('flash'); it.flash -= 0.09; }
+    if (it.flash > 0){ el.classList.add('flash'); it.flash -= 0.09; }
     else el.classList.remove('flash');
   }
 }
@@ -1884,7 +2144,7 @@ function updateCooldowns(f, prefix) {
 /* =========================================================
    戰鬥結算
    ========================================================= */
-function endBattle() {
+function endBattle(){
   cancelAnimationFrame(battleRAF);
   state.phase = 'result';
 
@@ -1894,17 +2154,18 @@ function endBattle() {
 
   let goldGain, title, icon, desc, cls;
 
-  if (playerWon) {
+  if (playerWon){
     state.streak++;
+    state.sessionTrophies++;       // ★ 本局獎盃 +1
+    appState.trophies++;           // ★ 總獎盃 +1
+    persistState();
     goldGain = 8 + Math.min(state.streak, 5)*2;
     title = '勝利！'; icon = '🏆'; cls = 'win';
     desc = `擊敗對手 #${Math.min(state.round, MAX_ROUND)}<br>` +
            `獎勵 <span class="gold-gain">+${goldGain}💰</span>` +
            (state.streak > 1 ? `<br>🔥 ${state.streak} 連勝` : '');
     AudioMgr.sfx('win');
-    appState.trophies++;
-    persistState();
-  } else if (draw) {
+  } else if (draw){
     state.streak = 0; state.lives--; goldGain = 5;
     title = '同歸於盡'; icon = '💀'; cls = 'lose';
     desc = `雙方同時倒下……<br>獲得 <span class="gold-gain">+${goldGain}💰</span>`;
@@ -1926,44 +2187,45 @@ function endBattle() {
 
   const gameOver = state.lives <= 0 || state.round > MAX_ROUND;
 
-  if (gameOver) {
+  if (gameOver){
     const win = state.lives > 0;
     state.phase = 'gameover';
     modalIcon.textContent  = win ? '👑' : '💔';
     modalTitle.textContent = win ? '挑戰完成！' : '挑戰失敗';
     modalTitle.className   = win ? 'win' : 'lose';
-    modalDesc.innerHTML = win
-      ? `你撐過了全部 ${MAX_ROUND} 回合<br>剩餘生命 ${state.lives} ❤️<br>` +
-        `最終金幣 <span class="gold-gain">${state.gold}💰</span>`
-      : `你輸掉了所有生命。<br>止步於第 ${state.round - 1} 回合。`;
+    modalDesc.innerHTML =
+      (win
+        ? `你撐過了全部 ${MAX_ROUND} 回合<br>剩餘生命 ${state.lives} ❤️<br>` +
+          `最終金幣 <span class="gold-gain">${state.gold}💰</span>`
+        : `你輸掉了所有生命。<br>止步於第 ${state.round - 1} 回合。`) +
+      `<span class="trophy-line">🏆 本局獲得獎盃：${state.sessionTrophies}</span>`;
     modalBtn.textContent = '回到封面';
     modalBtn.onclick = () => {
       overlay.classList.remove('show');
-      saveProgressToStorage();
+      resetGameState();
       showScreen('cover');
     };
   } else {
     modalIcon.textContent  = icon;
     modalTitle.textContent = title;
     modalTitle.className   = cls;
-    modalDesc.innerHTML    = desc;
-    modalBtn.textContent   = '繼續';
+    modalDesc.innerHTML = desc +
+      `<span class="trophy-line">🏆 本局獲得獎盃：${state.sessionTrophies}</span>`;
+    modalBtn.textContent = '繼續';
     modalBtn.onclick = () => {
       overlay.classList.remove('show');
       nextRound();
     };
   }
-
   overlay.classList.add('show');
 }
 
 /* =========================================================
    回合流程
    ========================================================= */
-function nextRound() {
+function nextRound(){
   state.phase = 'prepare';
-  state.fP = null;
-  state.fE = null;
+  state.fP = null; state.fE = null;
   state.gold += 6 + Math.floor(state.round/2);
 
   state.enemyBags  = generateEnemyBags(state.round);
@@ -1975,41 +2237,45 @@ function nextRound() {
 
   AudioMgr.playBGM(SONGS.shopping, BGM_VOL);
   saveProgressToStorage();
+  computeCell();
   renderAll();
 }
 
 /* =========================================================
    對手生成
    ========================================================= */
-function generateEnemyBags(round) {
+function generateEnemyBags(round){
   const bags = [];
-  const cx = Math.floor((GRID_W-3)/2);
+  const cx = Math.floor((GRID_W-2)/2);
   const cy = Math.floor((GRID_H-2)/2);
-  bags.push({ uid:++uidCounter, x:cx, y:cy, w:3, h:2 });
+  bags.push({ uid:++uidCounter, bagType:'square', x:cx, y:cy, rotated:false });
 
   const extra = Math.min(round-1, 9);
-  for (let i=0; i<extra; i++) {
-    const spot = findBagSpot(bags);
-    if (!spot) break;
-    bags.push({ uid:++uidCounter, x:spot.x, y:spot.y, w:2, h:2 });
+  for (let i=0; i<extra; i++){
+    const types = ['small','small','L','L','square'];
+    const type = types[Math.floor(Math.random()*types.length)];
+    const spot = findBagSpot(bags, type);
+    if (!spot) continue;
+    bags.push({ uid:++uidCounter, bagType:type, x:spot.x, y:spot.y, rotated:false });
   }
   return bags;
 }
-function generateEnemyItems(bags, round) {
+
+function generateEnemyItems(bags, round){
   const items = [];
   const budget = 9 + round*8;
   let spent = 0, tries = 0;
   const maxCost = 3 + round*1.8;
   const pool = ITEM_KEYS.filter(k => ITEMS[k].cost <= maxCost);
 
-  while (spent < budget && tries < 400) {
+  while (spent < budget && tries < 400){
     tries++;
     const key = pool[Math.floor(Math.random()*pool.length)];
     const def = ITEMS[key];
     if (spent + def.cost > budget+2) continue;
     const spot = findItemSpot(bags, items, def);
     if (!spot) continue;
-    items.push({ uid:++uidCounter, defKey:key, x:spot.x, y:spot.y });
+    items.push({ uid:++uidCounter, defKey:key, x:spot.x, y:spot.y, rotated:false });
     spent += def.cost;
   }
   return items;
@@ -2018,17 +2284,18 @@ function generateEnemyItems(bags, round) {
 /* =========================================================
    進度儲存 / 讀取
    ========================================================= */
-function saveProgressToStorage() {
+function saveProgressToStorage(){
   try {
     const data = {
       round:state.round, gold:state.gold, lives:state.lives, streak:state.streak,
+      sessionTrophies: state.sessionTrophies,
       bags:state.bags, items:state.items, stash:state.stash,
       savedAt: Date.now()
     };
     localStorage.setItem(STORAGE.progress, JSON.stringify(data));
   } catch(e){}
 }
-function loadProgressFromStorage() {
+function loadProgressFromStorage(){
   try {
     const raw = localStorage.getItem(STORAGE.progress);
     if (!raw) return false;
@@ -2038,6 +2305,7 @@ function loadProgressFromStorage() {
     state.gold   = d.gold   ?? START_GOLD;
     state.lives  = d.lives  ?? MAX_LIVES;
     state.streak = d.streak ?? 0;
+    state.sessionTrophies = d.sessionTrophies ?? 0;
     state.bags   = d.bags   || [];
     state.items  = d.items  || [];
     state.stash  = d.stash  || [];
@@ -2052,25 +2320,44 @@ function loadProgressFromStorage() {
     return true;
   } catch(e){ return false; }
 }
-function clearProgress() {
+function clearProgress(){
   try { localStorage.removeItem(STORAGE.progress); } catch(e){}
+}
+
+/* =========================================================
+   重設遊戲狀態
+   ========================================================= */
+function resetGameState(){
+  state.phase = 'prepare';
+  state.round = 1;
+  state.gold = START_GOLD;
+  state.lives = MAX_LIVES;
+  state.streak = 0;
+  state.sessionTrophies = 0;
+  state.fP = null; state.fE = null;
+  state.bags = []; state.items = []; state.stash = [];
+  state.shop = []; state.enemyBags = []; state.enemyItems = [];
+  clearProgress();
+  shopView.style.display = '';
+  enemyView.style.display = 'none';
 }
 
 /* =========================================================
    全新遊戲
    ========================================================= */
-function newGame() {
-  state.phase  = 'prepare';
-  state.round  = 1;
-  state.gold   = START_GOLD;
-  state.lives  = MAX_LIVES;
+function newGame(){
+  state.phase = 'prepare';
+  state.round = 1;
+  state.gold = START_GOLD;
+  state.lives = MAX_LIVES;
   state.streak = 0;
+  state.sessionTrophies = 0;
   state.fP = null; state.fE = null;
 
-  const bx = Math.floor((GRID_W-3)/2);
+  const bx = Math.floor((GRID_W-2)/2);
   const by = Math.floor((GRID_H-2)/2);
-  state.bags  = [{ uid:++uidCounter, x:bx, y:by, w:3, h:2 }];
-  state.items = [{ uid:++uidCounter, defKey:'dagger', x:bx, y:by }];
+  state.bags  = [{ uid:++uidCounter, bagType:'square', x:bx, y:by, rotated:false }];
+  state.items = [{ uid:++uidCounter, defKey:'dagger', x:bx, y:by, rotated:false }];
   state.stash = [];
 
   state.enemyBags  = generateEnemyBags(1);
@@ -2082,38 +2369,52 @@ function newGame() {
 }
 
 /* =========================================================
-   結算 → 回封面
+   結算 → 顯示本局獎盃 → 重設 → 回封面
    ========================================================= */
-function settleAndReturn() {
+function settleAndReturn(){
   if (state.phase === 'battle') return;
-  saveProgressToStorage();
   AudioMgr.sfx('click');
-  overlay.classList.remove('show');
-  showScreen('cover');
+  const earned = state.sessionTrophies;
+
+  modalIcon.textContent = earned > 0 ? '🏆' : '📊';
+  modalTitle.textContent = '結算';
+  modalTitle.className = '';
+  modalDesc.innerHTML =
+    `本局遊戲結束<br>` +
+    `獲得金幣 <span class="gold-gain">${state.gold}💰</span><br>` +
+    `生存回合：${state.round - 1} / ${MAX_ROUND}` +
+    `<span class="trophy-line">🏆 本局獲得獎盃：${earned}</span>`;
+  modalBtn.textContent = '回到封面';
+  modalBtn.onclick = () => {
+    overlay.classList.remove('show');
+    resetGameState();
+    showScreen('cover');
+  };
+  overlay.classList.add('show');
 }
 
 /* =========================================================
    音效 / 全螢幕
    ========================================================= */
-function syncMuteButtons() {
+function syncMuteButtons(){
   const btn = $('btnMute');
   btn.textContent = appState.muted ? '🔇' : '🔊';
   btn.classList.toggle('muted', appState.muted);
   AudioMgr.setMuted(appState.muted);
 }
-function toggleMute() {
+function toggleMute(){
   appState.muted = !appState.muted;
   syncMuteButtons();
   persistState();
-  if (!appState.muted) {
+  if (!appState.muted){
     AudioMgr.sfx('click');
     if (AudioMgr.bgm && AudioMgr.bgm.paused) AudioMgr.bgm.play().catch(()=>{});
   }
 }
-function toggleFullscreen() {
+function toggleFullscreen(){
   AudioMgr.sfx('click');
   const el = document.documentElement;
-  if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+  if (!document.fullscreenElement && !document.webkitFullscreenElement){
     const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
     if (req) req.call(el).catch(()=>{});
   } else {
@@ -2125,7 +2426,7 @@ function toggleFullscreen() {
 /* =========================================================
    存檔 .txt
    ========================================================= */
-function saveSettingsFile() {
+function saveSettingsFile(){
   AudioMgr.sfx('click');
   const now = new Date();
   const char = CHARACTERS.find(c => c.id === appState.character);
@@ -2133,7 +2434,7 @@ function saveSettingsFile() {
 `Backpack Scramble v1.0 存檔
 ========================================
 音效設定: ${appState.muted ? '關閉' : '開啟'}
-獎杯數: ${appState.trophies}
+總獎盃數: ${appState.trophies}
 選擇角色: ${char ? char.name : '未選擇'}
 儲存時間: ${now.toLocaleString('zh-Hant')}
 ========================================
@@ -2149,7 +2450,7 @@ function saveSettingsFile() {
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
-function loadSettingsFile() {
+function loadSettingsFile(){
   AudioMgr.sfx('click');
   const input = document.createElement('input');
   input.type = 'file';
@@ -2161,19 +2462,23 @@ function loadSettingsFile() {
     reader.onload = (ev) => {
       const text = String(ev.target.result || '');
       const mMatch = text.match(/音效設定[:：]\s*(開啟|關閉)/);
-      const tMatch = text.match(/獎杯數[:：]\s*(\d+)/);
+      const tMatch = text.match(/總獎盃數[:：]\s*(\d+)/);
       const cMatch = text.match(/選擇角色[:：]\s*(.+)/);
 
       if (mMatch) appState.muted = (mMatch[1] === '關閉');
       if (tMatch) appState.trophies = parseInt(tMatch[1], 10) || 0;
-      if (cMatch && cMatch[1].trim() !== '未選擇') {
+      if (cMatch && cMatch[1].trim() !== '未選擇'){
         const name = cMatch[1].trim();
         const found = CHARACTERS.find(c => c.name === name);
         if (found) appState.character = found.id;
       }
       persistState();
       syncMuteButtons();
-      initCharScroller();
+      $('coverTrophyCount').textContent = appState.trophies;
+      if (appState.screen === 'select'){
+        $('selectTrophyCount').textContent = appState.trophies;
+        initCharScroller();
+      }
       AudioMgr.sfx('unlock');
       alert('載入成功！');
     };
@@ -2181,26 +2486,29 @@ function loadSettingsFile() {
   };
   input.click();
 }
-function resetAllData() {
+function resetAllData(){
   AudioMgr.sfx('click');
   if (!confirm('確定要重設所有資料嗎？\n這會清除音效設定、獎盃數與遊戲進度。')) return;
   try { Object.values(STORAGE).forEach(k => localStorage.removeItem(k)); } catch(e){}
   appState.muted = false;
   appState.trophies = 0;
   appState.character = null;
-  state.phase = 'prepare';
+  resetGameState();
   syncMuteButtons();
-  initCharScroller();
+  $('coverTrophyCount').textContent = 0;
+  if (appState.screen === 'select'){
+    $('selectTrophyCount').textContent = 0;
+    initCharScroller();
+  }
   alert('已重設完成。');
 }
 
 /* =========================================================
    事件綁定
    ========================================================= */
-function bindEvents() {
+function bindEvents(){
   $('btnStartGame').addEventListener('click', () => {
-    AudioMgr.sfx('click');
-    AudioMgr.ensureCtx();
+    AudioMgr.sfx('click'); AudioMgr.ensureCtx();
     showScreen('select');
   });
   $('btnSave').addEventListener('click', saveSettingsFile);
@@ -2208,17 +2516,15 @@ function bindEvents() {
   $('btnResetData').addEventListener('click', resetAllData);
 
   $('btnBackCover').addEventListener('click', () => {
-    AudioMgr.sfx('click');
-    showScreen('cover');
+    AudioMgr.sfx('click'); showScreen('cover');
   });
   $('btnConfirmChar').addEventListener('click', () => {
     if (!appState.character) return;
-    AudioMgr.sfx('click');
-    AudioMgr.ensureCtx();
+    AudioMgr.sfx('click'); AudioMgr.ensureCtx();
     if (!loadProgressFromStorage()) newGame();
     showScreen('game');
     AudioMgr.playBGM(SONGS.shopping, BGM_VOL);
-    renderAll();
+    computeCell(); renderAll();
   });
 
   refreshBtn.addEventListener('click', () => {
@@ -2226,8 +2532,7 @@ function bindEvents() {
     state.gold -= 1;
     state.shop = rollShop();
     AudioMgr.sfx('click');
-    renderShop();
-    updateHud();
+    renderShop(); updateHud();
   });
   battleBtn.addEventListener('click', () => { AudioMgr.sfx('click'); startBattle(); });
   $('btnSettle').addEventListener('click', settleAndReturn);
@@ -2236,40 +2541,69 @@ function bindEvents() {
   $('btnFs').addEventListener('click', toggleFullscreen);
 
   document.addEventListener('contextmenu', e => e.preventDefault());
-  document.addEventListener('dragstart',   e => e.preventDefault());
+  document.addEventListener('dragstart', e => e.preventDefault());
+
+  // 滑鼠位置追蹤（供空格鍵旋轉）
+  document.addEventListener('pointermove', (e) => {
+    lastMouseX = e.clientX; lastMouseY = e.clientY;
+  });
+
+  // ★ 空白鍵旋轉
+  document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' || e.key === ' '){
+      if (appState.screen !== 'game' || state.phase !== 'prepare') return;
+      e.preventDefault();
+      const el = document.elementFromPoint(lastMouseX, lastMouseY);
+      if (el && el.classList.contains('item') && el.id.startsWith('pi-')){
+        const uid = parseInt(el.id.slice(3));
+        if (!isNaN(uid)) rotateItemByUid(uid);
+      }
+    }
+  });
+
+  // 滑鼠拖曳（選角）
+  document.addEventListener('mousemove', onScrollerMouseMove);
+  document.addEventListener('mouseup', onScrollerMouseUp);
 
   let lastTouch = 0;
   document.addEventListener('touchend', (e) => {
     const now = Date.now();
     if (now - lastTouch < 300) e.preventDefault();
     lastTouch = now;
-  }, { passive: false });
+  }, { passive:false });
 
   window.addEventListener('resize', () => {
     computeCell();
     if (appState.screen === 'game') renderAll();
-    if (appState.screen === 'select') {
-      // 重新量測並保持置中
+    if (appState.screen === 'select'){
       measureSetWidth();
       requestAnimationFrame(() => syncCenterFromScroll(true));
     }
+  });
+  window.addEventListener('orientationchange', () => {
+    setTimeout(() => {
+      computeCell();
+      if (appState.screen === 'game') renderAll();
+      if (appState.screen === 'select'){
+        measureSetWidth();
+        syncCenterFromScroll(true);
+      }
+    }, 220);
   });
 }
 
 /* =========================================================
    自動播放啟動器
    ========================================================= */
-function bootAudio() {
+function bootAudio(){
   const src = SONGS.openBag;
   const a = new Audio(src);
-  a.loop = true;
-  a.volume = BGM_VOL;
-  a.muted = appState.muted;
+  a.loop = true; a.volume = BGM_VOL; a.muted = appState.muted;
   a.addEventListener('error', () => console.warn('[BGM 缺失]', src));
 
   const tryPlay = () => {
     const p = a.play();
-    if (!p || !p.then) {
+    if (!p || !p.then){
       AudioMgr.bgm = a; AudioMgr.currentSrc = src;
       return Promise.resolve();
     }
@@ -2294,7 +2628,7 @@ function bootAudio() {
 /* =========================================================
    啟動
    ========================================================= */
-function boot() {
+function boot(){
   restoreState();
   computeCell();
   initCover();
