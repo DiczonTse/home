@@ -931,7 +931,6 @@
         ? 'radial-gradient(circle,#ff4d4d,transparent 70%)'
         : 'radial-gradient(circle,#5fa8ff,transparent 70%)';
 
-      // 獎盃
       if (isHumanWin) {
         const t = DIFF[state.difficulty].trophy;
         resultTrophy.style.display = '';
@@ -1903,5 +1902,19 @@
 
 })();
 </script>
+
+<!-- =========================================================
+     Service Worker 註冊
+========================================================= -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/home/sw.js', { scope: '/home/' })
+      .then((reg) => console.log('SW 已註冊，作用域：', reg.scope))
+      .catch((err) => console.warn('SW 註冊失敗：', err));
+  });
+}
+</script>
+
 </body>
 </html>
