@@ -1,1 +1,1907 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0b0d12">
+<title>🔴🔵 Connect Four</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{
+    margin:0;padding:0;width:100%;height:100%;
+    overflow:hidden;position:fixed;inset:0;
+    background:#06070b;
+    font-family:system-ui,-apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;
+    user-select:none;-webkit-user-select:none;
+    display:flex;align-items:center;justify-content:center;
+  }
 
+  #app{
+    position:relative;
+    width:min(100vw,calc(100vh * 16 / 9));
+    height:min(calc(100vw * 9 / 16),100vh);
+    overflow:hidden;
+    background:#0b0d12;
+    font-size:16px;
+  }
+  @supports (height:100dvh){
+    #app{
+      width:min(100vw,calc(100dvh * 16 / 9));
+      height:min(calc(100vw * 9 / 16),100dvh);
+    }
+  }
+
+  .page{position:absolute;inset:0;display:none;flex-direction:column;}
+  .page.active{display:flex;}
+
+  /* ---------- 浮動按鈕 ---------- */
+  .float-btn{
+    position:absolute;bottom:.75em;
+    width:2.7em;height:2.7em;
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,.16);
+    background:rgba(18,22,32,.82);
+    color:#cfe0ff;
+    font-size:1em;line-height:1;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;z-index:40;
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    box-shadow:0 .25em .9em rgba(0,0,0,.55);
+    transition:transform .15s,background .18s,color .18s,opacity .18s;
+  }
+  .float-btn:hover{background:rgba(40,52,78,.92);color:#fff;}
+  .float-btn:active{transform:scale(.92);}
+  .float-btn.left{left:.95em;}
+  .float-btn.right{right:.95em;}
+  .float-btn.muted{opacity:.55;}
+
+  /* ---------- 封面 ---------- */
+  #pageCover{padding:1.1em;}
+  .cover-frame{
+    position:relative;flex:1;
+    border-radius:1.1em;
+    overflow:hidden;
+    border:2px solid #2b303b;
+    background:linear-gradient(140deg,#181c26,#0a0c12 55%,#12161f);
+    box-shadow:0 0 3.5em rgba(0,0,0,.85) inset,0 0 2.5em rgba(60,120,255,.12),0 .5em 2em rgba(0,0,0,.7);
+    display:flex;flex-direction:column;
+  }
+  .cover-img{
+    position:absolute;inset:0;width:100%;height:100%;
+    object-fit:cover;z-index:0;
+    opacity:.62;
+    transform:scale(1.02);
+  }
+  .cover-veil{
+    position:absolute;inset:0;z-index:1;
+    background:
+      radial-gradient(120% 90% at 50% 0%,rgba(80,140,255,.18),transparent 60%),
+      linear-gradient(180deg,rgba(6,8,14,.72),rgba(6,8,14,.42) 38%,rgba(6,8,14,.86));
+  }
+  .cover-content{
+    position:relative;z-index:2;flex:1;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    gap:.75em;
+    padding:1em 1em 4.6em;
+    text-align:center;
+  }
+  .cover-title{
+    margin:0;
+    font-size:2.5em;
+    font-weight:900;
+    letter-spacing:.06em;
+    line-height:1.1;
+    background:linear-gradient(100deg,#ff6b6b 0%,#ff9a5c 40%,#5fa8ff 75%,#7b7bff 100%);
+    -webkit-background-clip:text;background-clip:text;
+    color:transparent;
+    filter:drop-shadow(0 .08em .4em rgba(0,0,0,.7));
+  }
+  .cover-sub{
+    font-size:.85em;letter-spacing:.42em;color:#8ea3c8;
+    font-weight:800;text-transform:uppercase;margin-top:-.2em;
+  }
+  .trophy-badge{
+    display:inline-flex;align-items:center;gap:.45em;
+    font-size:1.12em;font-weight:900;
+    padding:.42em 1.1em;
+    border-radius:2em;
+    color:#ffe28a;
+    background:linear-gradient(180deg,rgba(255,200,60,.16),rgba(255,150,20,.07));
+    border:1px solid rgba(255,205,90,.38);
+    box-shadow:0 0 1.4em rgba(255,190,60,.22) inset,0 .2em .8em rgba(0,0,0,.5);
+  }
+  .cover-tools{display:flex;gap:.5em;flex-wrap:wrap;justify-content:center;margin-top:.15em;}
+  .tool-btn{
+    border:1px solid rgba(255,255,255,.14);
+    background:rgba(255,255,255,.055);
+    color:#a9bbdd;
+    font-family:inherit;font-size:.82em;font-weight:800;letter-spacing:.1em;
+    padding:.55em 1.15em;border-radius:2em;cursor:pointer;
+    transition:.18s;
+  }
+  .tool-btn:hover{background:rgba(120,160,255,.18);color:#e2ecff;border-color:rgba(120,160,255,.4);}
+  .tool-btn:active{transform:translateY(.08em);}
+  .cover-bottom{
+    position:absolute;left:0;right:0;bottom:.95em;
+    text-align:center;z-index:5;
+    font-size:.78em;font-weight:700;letter-spacing:.06em;
+    color:#8095b8;
+    text-shadow:0 1px 3px rgba(0,0,0,.85);
+    pointer-events:none;
+    padding:0 6em;
+  }
+
+  /* ---------- 大按鈕 ---------- */
+  .big-btn{
+    border:0;font-family:inherit;
+    font-size:1.05em;font-weight:900;letter-spacing:.14em;
+    padding:.85em 2.6em;
+    border-radius:2.4em;
+    color:#04121e;
+    background:linear-gradient(180deg,#9bf0ff,#2fb9f5 60%,#128fd6);
+    box-shadow:0 .35em 1.1em rgba(47,185,245,.42),0 0 0 1px rgba(255,255,255,.18) inset;
+    cursor:pointer;
+    transition:transform .12s,filter .18s,box-shadow .18s;
+  }
+  .big-btn:hover{filter:brightness(1.09);box-shadow:0 .45em 1.4em rgba(47,185,245,.6);}
+  .big-btn:active{transform:translateY(.12em) scale(.985);}
+
+  .ghost-btn{
+    border:1px solid rgba(255,255,255,.16);
+    background:rgba(255,255,255,.05);
+    color:#9fb3d8;
+    font-family:inherit;font-size:.92em;font-weight:800;letter-spacing:.12em;
+    padding:.72em 1.4em;border-radius:2em;cursor:pointer;
+    transition:.18s;
+  }
+  .ghost-btn:hover{background:rgba(255,255,255,.11);color:#e0eaff;}
+  .ghost-btn:active{transform:translateY(.08em);}
+
+  /* ---------- 設定頁 ---------- */
+  #pageSetup{
+    align-items:center;justify-content:center;
+    padding:1.4em 1.4em 4.2em;
+    background:
+      radial-gradient(120% 120% at 50% -10%,#182444 0%,#0a0e18 55%,#06080e 100%);
+  }
+  .setup-card{
+    width:min(100%,34em);
+    max-height:100%;
+    overflow:auto;
+    border-radius:1.2em;
+    padding:1.5em 1.6em 1.6em;
+    background:linear-gradient(160deg,rgba(30,38,58,.92),rgba(12,16,26,.94));
+    border:1px solid rgba(120,160,255,.18);
+    box-shadow:0 1.2em 3em rgba(0,0,0,.7),0 0 2em rgba(70,120,255,.09) inset;
+    display:flex;flex-direction:column;gap:1.05em;
+  }
+  .setup-title{
+    margin:0;text-align:center;
+    font-size:1.35em;font-weight:900;letter-spacing:.22em;
+    color:#dce8ff;
+  }
+  .opt-block{display:flex;flex-direction:column;gap:.5em;}
+  .opt-label{
+    font-size:.74em;font-weight:800;letter-spacing:.24em;
+    color:#7d90b4;padding-left:.2em;
+  }
+  .seg{
+    display:flex;gap:.32em;padding:.28em;
+    background:rgba(255,255,255,.045);
+    border:1px solid rgba(255,255,255,.075);
+    border-radius:.8em;
+  }
+  .seg button{
+    flex:1;min-width:0;border:0;background:transparent;
+    color:#8fa1c2;font-family:inherit;font-size:.9em;font-weight:800;
+    padding:.62em .2em;border-radius:.6em;cursor:pointer;
+    transition:background .18s,color .18s,box-shadow .18s;
+    white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:.15em;
+  }
+  .seg button small{font-size:.7em;opacity:.72;font-weight:700;letter-spacing:.02em;}
+  .seg button:hover{color:#cfe0ff;}
+  .seg button.on{
+    background:linear-gradient(180deg,#5a8cff,#2f56c8);
+    color:#fff;
+    box-shadow:0 .25em .8em rgba(64,116,255,.5);
+  }
+  .seg button.on small{opacity:.9;}
+  .setup-trophy{
+    text-align:center;font-size:1.05em;font-weight:900;
+    color:#ffe28a;letter-spacing:.06em;
+    padding:.5em;border-radius:.7em;
+    background:rgba(255,200,60,.07);
+    border:1px solid rgba(255,205,90,.22);
+  }
+  .setup-trophy b{font-size:1.25em;}
+  .setup-actions{display:flex;flex-direction:column;gap:.6em;margin-top:.15em;}
+
+  /* ---------- 遊戲頁 ---------- */
+  #pageGame{padding:.9em .9em 0;}
+  .game-layout{
+    flex:1;display:flex;gap:.9em;min-height:0;
+    padding-bottom:3.4em;
+  }
+  .board-area{flex:1 1 auto;position:relative;min-width:0;}
+  .board-wrap{position:absolute;inset:0;}
+  #game{
+    position:absolute;left:50%;top:50%;
+    transform:translate(-50%,-50%);
+    display:block;touch-action:none;
+  }
+
+  .panel{
+    flex:0 0 auto;width:23%;max-width:330px;min-width:7.2em;
+    height:100%;
+    display:flex;flex-direction:column;gap:.55em;
+    justify-content:center;
+    padding-left:.2em;
+    color:#dbe6ff;
+  }
+  .panel-title{
+    font-size:1.3em;font-weight:900;letter-spacing:.16em;
+    background:linear-gradient(100deg,#ff6b6b,#5fa8ff 80%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .status{
+    font-size:.92em;font-weight:800;
+    padding:.6em .55em;border-radius:.6em;text-align:center;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    background:rgba(255,255,255,.055);
+    border:1px solid rgba(255,255,255,.09);
+    color:#c3d2f0;transition:.2s;
+  }
+  .status.p1{color:#ff9b9b;border-color:rgba(255,80,80,.42);background:rgba(255,80,80,.11);box-shadow:0 0 .9em rgba(255,80,80,.16) inset;}
+  .status.p2{color:#9dc4ff;border-color:rgba(90,150,255,.42);background:rgba(90,150,255,.11);box-shadow:0 0 .9em rgba(90,150,255,.16) inset;}
+
+  .scores{display:flex;gap:.45em;}
+  .score{
+    flex:1;display:flex;align-items:center;gap:.35em;
+    padding:.42em .5em;border-radius:.6em;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.07);
+    font-size:.86em;font-weight:800;
+    min-width:0;
+  }
+  .score span:first-of-type{color:#8fa1c2;font-size:.85em;}
+  .score b{margin-left:auto;font-size:1.1em;}
+  .score .dot{width:.72em;height:.72em;border-radius:50%;flex:0 0 auto;}
+  .score.p1 .dot{background:#ef4444;box-shadow:0 0 .55em #ef4444;}
+  .score.p2 .dot{background:#3b82f6;box-shadow:0 0 .55em #3b82f6;}
+  .score.p1 b{color:#ff9b9b;}
+  .score.p2 b{color:#9dc4ff;}
+
+  .trophy-line{
+    text-align:center;font-size:.92em;font-weight:900;color:#ffe28a;
+    padding:.42em;border-radius:.6em;
+    background:rgba(255,200,60,.07);
+    border:1px solid rgba(255,205,90,.2);
+    letter-spacing:.05em;
+  }
+  .mode-info{
+    text-align:center;font-size:.76em;font-weight:800;letter-spacing:.1em;
+    color:#7d90b4;padding:.15em;
+  }
+  .restart{
+    border:0;font-family:inherit;
+    font-size:.92em;font-weight:900;letter-spacing:.1em;
+    padding:.72em .5em;border-radius:.7em;
+    color:#031420;
+    background:linear-gradient(180deg,#9bf0ff,#34bdf8);
+    box-shadow:0 .3em .9em rgba(52,189,248,.35);
+    cursor:pointer;transition:transform .12s,filter .18s;
+  }
+  .restart:hover{filter:brightness(1.08);}
+  .restart:active{transform:translateY(.1em) scale(.985);}
+
+  /* ---------- 獎盃彈出 ---------- */
+  .trophy-pop{
+    position:absolute;left:50%;top:20%;
+    transform:translate(-50%,-50%) scale(.6);
+    font-size:2.2em;font-weight:900;color:#ffe28a;
+    text-shadow:0 0 .6em rgba(255,200,60,.9),0 .1em .3em rgba(0,0,0,.8);
+    pointer-events:none;opacity:0;z-index:60;
+    transition:opacity .3s,transform .5s cubic-bezier(.2,1.6,.4,1);
+    white-space:nowrap;
+  }
+  .trophy-pop.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+
+  /* ---------- 結果彈窗 ---------- */
+  .result-mask{
+    position:absolute;inset:0;z-index:80;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(4,6,12,.68);
+    backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+    opacity:0;pointer-events:none;
+    transition:opacity .35s;
+    padding:1.2em;
+  }
+  .result-mask.show{opacity:1;pointer-events:auto;}
+
+  .result-card{
+    position:relative;
+    width:min(100%,26em);
+    border-radius:1.3em;
+    padding:1.6em 1.5em 1.4em;
+    text-align:center;
+    background:linear-gradient(165deg,rgba(38,46,68,.97),rgba(13,17,28,.98));
+    border:1px solid rgba(130,170,255,.24);
+    box-shadow:0 1.4em 3.4em rgba(0,0,0,.75),0 0 3em rgba(80,140,255,.13) inset;
+    transform:translateY(1.6em) scale(.9);
+    transition:transform .5s cubic-bezier(.2,1.5,.4,1);
+  }
+  .result-mask.show .result-card{transform:translateY(0) scale(1);}
+
+  .result-glow{
+    position:absolute;left:50%;top:0;
+    width:12em;height:12em;
+    transform:translate(-50%,-58%);
+    border-radius:50%;
+    pointer-events:none;
+    filter:blur(2.2em);
+    opacity:.55;
+    transition:background .4s;
+  }
+  .result-icon{
+    position:relative;
+    font-size:2.6em;line-height:1;
+    margin-bottom:.1em;
+    filter:drop-shadow(0 .1em .4em rgba(0,0,0,.6));
+  }
+  .result-title{
+    position:relative;
+    font-size:1.7em;font-weight:900;letter-spacing:.12em;
+    margin:.1em 0 .35em;
+    color:#e8f0ff;
+  }
+  .result-sub{
+    position:relative;
+    font-size:.86em;font-weight:800;letter-spacing:.14em;
+    color:#8ea3c8;margin-bottom:.2em;
+  }
+  .result-trophy{
+    position:relative;
+    display:inline-block;
+    margin:.75em 0 .2em;
+    font-size:1.05em;font-weight:900;
+    padding:.45em 1.2em;border-radius:2em;
+    color:#ffe28a;
+    background:linear-gradient(180deg,rgba(255,200,60,.18),rgba(255,150,20,.08));
+    border:1px solid rgba(255,205,90,.42);
+    box-shadow:0 0 1.4em rgba(255,190,60,.25) inset;
+  }
+  .result-actions{
+    position:relative;
+    display:flex;gap:.6em;justify-content:center;
+    margin-top:1.2em;flex-wrap:wrap;
+  }
+  .result-actions .big-btn{font-size:.92em;padding:.75em 1.7em;letter-spacing:.1em;}
+  .result-actions .ghost-btn{font-size:.86em;padding:.72em 1.3em;}
+
+  /* ---------- 響應式 ---------- */
+  @media (max-width:760px){
+    .panel{width:27%;gap:.42em;padding-left:.35em;}
+    .panel-title{font-size:1.05em;}
+    .status{font-size:.78em;padding:.45em .3em;}
+    .score{font-size:.72em;padding:.32em .35em;}
+    .trophy-line{font-size:.76em;padding:.32em;}
+    .mode-info{font-size:.66em;}
+    .restart{font-size:.78em;padding:.6em .3em;}
+    .ghost-btn{font-size:.76em;padding:.6em .8em;}
+    .setup-card{padding:1.1em 1.1em 1.2em;gap:.8em;}
+    .setup-title{font-size:1.1em;}
+    .seg button{font-size:.78em;padding:.5em .1em;}
+    .big-btn{font-size:.92em;padding:.75em 1.9em;}
+    .cover-title{font-size:1.75em;}
+    .cover-sub{font-size:.7em;letter-spacing:.28em;}
+    .trophy-badge{font-size:.92em;padding:.36em .85em;}
+    .tool-btn{font-size:.72em;padding:.48em .85em;}
+    .cover-bottom{font-size:.65em;padding:0 4.5em;bottom:.8em;}
+    .float-btn{width:2.3em;height:2.3em;font-size:.85em;}
+    .result-icon{font-size:2em;}
+    .result-title{font-size:1.3em;}
+    .result-sub{font-size:.72em;}
+    .result-trophy{font-size:.86em;padding:.4em .95em;}
+    .result-card{padding:1.3em 1.1em 1.2em;}
+    .result-actions .big-btn{font-size:.8em;padding:.68em 1.3em;}
+    .result-actions .ghost-btn{font-size:.76em;padding:.66em 1em;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ================= 封面 ================= -->
+  <section id="pageCover" class="page active">
+    <div class="cover-frame">
+      <img class="cover-img" id="coverImg" src="connect_4.jpg" alt="">
+      <div class="cover-veil"></div>
+
+      <div class="cover-content">
+        <h1 class="cover-title">🔴🔵 Connect Four</h1>
+        <div class="cover-sub">四子棋 · 四連一線</div>
+
+        <div class="trophy-badge">🏆 <span id="coverTrophies">0</span></div>
+
+        <button class="big-btn" id="btnStartCover">開始遊戲</button>
+
+        <div class="cover-tools">
+          <button class="tool-btn" id="btnSave">💾 儲存</button>
+          <button class="tool-btn" id="btnLoad">📂 載入</button>
+          <button class="tool-btn" id="btnReset">↺ 重設</button>
+        </div>
+      </div>
+
+      <div class="cover-bottom" id="coverBottom">v1.0 © 2026 ☕迪遜咖啡廳，版權所有。</div>
+
+      <button class="float-btn left" id="coverMute" title="音效開關">🔊</button>
+      <button class="float-btn right" id="coverFs" title="全屏">⛶</button>
+    </div>
+    <input type="file" id="loadFile" accept=".txt,text/plain" hidden>
+  </section>
+
+  <!-- ================= 設定 ================= -->
+  <section id="pageSetup" class="page">
+    <div class="setup-card">
+      <h2 class="setup-title">遊戲設定</h2>
+
+      <div class="opt-block">
+        <div class="opt-label">對戰模式</div>
+        <div class="seg" id="setupMode">
+          <button data-mode="pvp">雙人對戰</button>
+          <button data-mode="pve">人機對戰</button>
+        </div>
+      </div>
+
+      <div class="opt-block" id="setupDiffBlock">
+        <div class="opt-label">AI 難度</div>
+        <div class="seg" id="setupDiff">
+          <button data-diff="easy">簡單<small>+10🏆</small></button>
+          <button data-diff="medium">普通<small>+50🏆</small></button>
+          <button data-diff="hard">困難<small>+100🏆</small></button>
+        </div>
+      </div>
+
+      <div class="setup-trophy">🏆 目前獎盃：<b id="setupTrophies">0</b></div>
+
+      <div class="setup-actions">
+        <button class="big-btn" id="btnStartGame">開始遊戲</button>
+        <button class="ghost-btn" id="btnBackCover">返回封面</button>
+      </div>
+    </div>
+
+    <button class="float-btn left" id="setupMute" title="音效開關">🔊</button>
+    <button class="float-btn right" id="setupFs" title="全屏">⛶</button>
+  </section>
+
+  <!-- ================= 遊戲 ================= -->
+  <section id="pageGame" class="page">
+    <div class="game-layout">
+      <div class="board-area">
+        <div class="board-wrap" id="boardWrap">
+          <canvas id="game"></canvas>
+        </div>
+      </div>
+
+      <aside class="panel">
+        <div class="panel-title">四子棋</div>
+        <div class="status" id="status">紅方回合</div>
+
+        <div class="scores">
+          <div class="score p1"><span class="dot"></span><span>紅</span><b id="score1">0</b></div>
+          <div class="score p2"><span class="dot"></span><span>藍</span><b id="score2">0</b></div>
+        </div>
+
+        <div class="trophy-line">🏆 <b id="gameTrophies">0</b></div>
+        <div class="mode-info" id="modeInfo">雙人對戰</div>
+
+        <button class="restart" id="btnAgain">再來一局</button>
+        <button class="ghost-btn" id="btnBackCover2">返回封面</button>
+      </aside>
+    </div>
+
+    <div class="trophy-pop" id="trophyPop"></div>
+
+    <!-- 結果彈窗 -->
+    <div class="result-mask" id="resultMask">
+      <div class="result-card" id="resultCard">
+        <div class="result-glow" id="resultGlow"></div>
+        <div class="result-icon" id="resultIcon">🏆</div>
+        <div class="result-title" id="resultTitle">紅方獲勝</div>
+        <div class="result-sub" id="resultSub">四子連線！</div>
+        <div class="result-trophy" id="resultTrophy" style="display:none">+10 🏆</div>
+        <div class="result-actions">
+          <button class="big-btn" id="btnResultAgain">再來一局</button>
+          <button class="ghost-btn" id="btnResultCover">返回封面</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="float-btn left" id="gameMute" title="音效開關">🔊</button>
+    <button class="float-btn right" id="gameFs" title="全屏">⛶</button>
+  </section>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* =========================================================
+     常數
+  ========================================================= */
+  const ROWS = 6, COLS = 7;
+  const EMPTY = 0, P1 = 1, P2 = 2;      // P1 紅, P2 藍
+  const N = ROWS * COLS;
+  const AI_PLAYER = P2;
+
+  const COL_ORDER = [3, 2, 4, 1, 5, 0, 6];
+  const DIRS = [[0, 1], [1, 0], [1, 1], [1, -1]];
+
+  const DIFF = {
+    easy:   { depth: 1, rand: 0.45, trophy: 10,  label: '簡單' },
+    medium: { depth: 4, rand: 0.08, trophy: 50,  label: '普通' },
+    hard:   { depth: 6, rand: 0.00, trophy: 100, label: '困難' }
+  };
+
+  const WINDOWS = (function () {
+    const out = [];
+    const id = (r, c) => r * COLS + c;
+    for (let r = 0; r < ROWS; r++)
+      for (let c = 0; c <= COLS - 4; c++)
+        out.push([id(r, c), id(r, c + 1), id(r, c + 2), id(r, c + 3)]);
+    for (let r = 0; r <= ROWS - 4; r++)
+      for (let c = 0; c < COLS; c++)
+        out.push([id(r, c), id(r + 1, c), id(r + 2, c), id(r + 3, c)]);
+    for (let r = 0; r <= ROWS - 4; r++)
+      for (let c = 0; c <= COLS - 4; c++)
+        out.push([id(r, c), id(r + 1, c + 1), id(r + 2, c + 2), id(r + 3, c + 3)]);
+    for (let r = 0; r <= ROWS - 4; r++)
+      for (let c = 3; c < COLS; c++)
+        out.push([id(r, c), id(r + 1, c - 1), id(r + 2, c - 2), id(r + 3, c - 3)]);
+    return out;
+  })();
+
+  const PIECE_COLORS = {
+    1: { hi:'#ffc9c9', mid:'#ef4444', lo:'#b91c1c', edge:'#7f1d1d', glow:'#ff4d4d' },
+    2: { hi:'#cfe2ff', mid:'#3b82f6', lo:'#1d4ed8', edge:'#1e3a8a', glow:'#5fa8ff' }
+  };
+
+  /* =========================================================
+     DOM
+  ========================================================= */
+  const app        = document.getElementById('app');
+  const wrap       = document.getElementById('boardWrap');
+  const canvas     = document.getElementById('game');
+  const ctx        = canvas.getContext('2d');
+  const statusEl   = document.getElementById('status');
+  const score1El   = document.getElementById('score1');
+  const score2El   = document.getElementById('score2');
+  const modeInfoEl = document.getElementById('modeInfo');
+  const gameTrophyEl = document.getElementById('gameTrophies');
+  const setupTrophyEl= document.getElementById('setupTrophies');
+  const coverTrophyEl= document.getElementById('coverTrophies');
+  const setupMode  = document.getElementById('setupMode');
+  const setupDiff  = document.getElementById('setupDiff');
+  const setupDiffBlock = document.getElementById('setupDiffBlock');
+  const coverImg   = document.getElementById('coverImg');
+  const coverBottom= document.getElementById('coverBottom');
+  const loadFileEl = document.getElementById('loadFile');
+  const trophyPop  = document.getElementById('trophyPop');
+
+  /* 結果彈窗 */
+  const resultMask  = document.getElementById('resultMask');
+  const resultCard  = document.getElementById('resultCard');
+  const resultGlow  = document.getElementById('resultGlow');
+  const resultIcon  = document.getElementById('resultIcon');
+  const resultTitle = document.getElementById('resultTitle');
+  const resultSub   = document.getElementById('resultSub');
+  const resultTrophy= document.getElementById('resultTrophy');
+
+  /* =========================================================
+     狀態
+  ========================================================= */
+  const state = {
+    soundOn: true,
+    mode: 'pvp',
+    difficulty: 'medium',
+    trophies: 0
+  };
+
+  let board      = new Uint8Array(N);
+  let current    = P1;
+  let gameOver   = false;
+  let winCells   = null;
+  let lastWinner = 0;
+  let locked     = false;
+  let thinking   = false;
+  let hoverCol   = -1;
+  let anims      = [];
+  let scores     = { 1: 0, 2: 0 };
+  let aiToken    = 0;
+  let currentPage = 'pageCover';
+  let modalTimer  = null;
+
+  /* 渲染尺寸 */
+  let CW = 0, CH = 0, cellSize = 0, offX = 0, offY = 0;
+  const bgCanvas    = document.createElement('canvas');
+  const frameCanvas = document.createElement('canvas');
+
+  /* =========================================================
+     音效引擎
+  ========================================================= */
+  let audioCtx = null;
+  let masterGain = null;
+  let bgm = null;
+
+  function initAudio() {
+    if (audioCtx) return;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    try {
+      audioCtx = new AC();
+      masterGain = audioCtx.createGain();
+      masterGain.gain.value = state.soundOn ? 0.5 : 0;
+      masterGain.connect(audioCtx.destination);
+    } catch (e) { audioCtx = null; }
+  }
+
+  function ensureAudio() {
+    initAudio();
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(function () {});
+    }
+  }
+
+  function initBgm() {
+    if (bgm) return;
+    try {
+      bgm = new Audio('Connect Four - 4 in a Row.mp3');
+      bgm.loop = true;
+      bgm.volume = 0.42;
+      bgm.preload = 'auto';
+    } catch (e) { bgm = null; }
+  }
+
+  function playBgm() {
+    if (!bgm || !state.soundOn) return;
+    const p = bgm.play();
+    if (p && p.catch) p.catch(function () {});
+  }
+
+  function stopBgm() {
+    if (bgm) { try { bgm.pause(); } catch (e) {} }
+  }
+
+  function tone(o) {
+    if (!audioCtx || !state.soundOn) return;
+    const t0   = audioCtx.currentTime + (o.delay || 0);
+    const dur  = o.dur || 0.2;
+    const vol  = (o.vol == null) ? 0.15 : o.vol;
+    if (vol <= 0) return;
+    const osc  = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = o.type || 'sine';
+    osc.frequency.setValueAtTime(Math.max(20, o.f0), t0);
+    if (o.f1 && o.f1 > 0) {
+      osc.frequency.exponentialRampToValueAtTime(Math.max(20, o.f1), t0 + dur);
+    }
+
+    const atk = o.attack || 0.008;
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(vol, t0 + atk);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+
+    osc.connect(gain);
+    gain.connect(masterGain);
+    osc.start(t0);
+    osc.stop(t0 + dur + 0.05);
+  }
+
+  function sfxClick() {
+    ensureAudio();
+    tone({ f0: 900, f1: 640, dur: 0.05, type: 'sine', vol: 0.045 });
+  }
+  function sfxNav() {
+    ensureAudio();
+    tone({ f0: 480, f1: 900, dur: 0.13, type: 'triangle', vol: 0.06 });
+    tone({ f0: 960, f1: 1500, dur: 0.1, type: 'sine', vol: 0.03, delay: 0.04 });
+  }
+  function sfxHover() {
+    tone({ f0: 1300, dur: 0.028, type: 'sine', vol: 0.012 });
+  }
+  function sfxDrop() {
+    ensureAudio();
+    tone({ f0: 560, f1: 170, dur: 0.20, type: 'sine',     vol: 0.055 });
+    tone({ f0: 900, f1: 300, dur: 0.14, type: 'triangle', vol: 0.028 });
+  }
+  function sfxLand() {
+    ensureAudio();
+    tone({ f0: 190, f1: 62,  dur: 0.13,  type: 'sine',     vol: 0.24 });
+    tone({ f0: 430, f1: 170, dur: 0.055, type: 'triangle', vol: 0.085 });
+    tone({ f0: 128, f1: 72,  dur: 0.17,  type: 'sine',     vol: 0.075, delay: 0.085 });
+    tone({ f0: 330, f1: 260, dur: 0.09,  type: 'sine',     vol: 0.04,  delay: 0.17 });
+  }
+  function sfxWin() {
+    ensureAudio();
+    const notes = [523.25, 659.25, 783.99, 1046.5];
+    notes.forEach(function (f, i) {
+      tone({ f0: f,     dur: 0.32, type: 'triangle', vol: 0.15, delay: i * 0.105 });
+      tone({ f0: f * 2, dur: 0.20, type: 'sine',     vol: 0.045, delay: i * 0.105 });
+    });
+    tone({ f0: 1046.5, dur: 0.8, type: 'sine', vol: 0.09, delay: 0.44 });
+    tone({ f0: 1318.5, dur: 0.8, type: 'sine', vol: 0.06, delay: 0.44 });
+  }
+  function sfxLose() {
+    ensureAudio();
+    tone({ f0: 420, f1: 220, dur: 0.35, type: 'triangle', vol: 0.12 });
+    tone({ f0: 300, f1: 140, dur: 0.55, type: 'sine',     vol: 0.11, delay: 0.16 });
+    tone({ f0: 200, f1: 96,  dur: 0.7,  type: 'sine',     vol: 0.08, delay: 0.36 });
+  }
+  function sfxDraw() {
+    ensureAudio();
+    tone({ f0: 340, f1: 210, dur: 0.45, type: 'sine', vol: 0.13 });
+    tone({ f0: 220, f1: 155, dur: 0.60, type: 'sine', vol: 0.10, delay: 0.15 });
+  }
+  function sfxTrophy() {
+    ensureAudio();
+    [880, 1174.66, 1567.98, 2093].forEach(function (f, i) {
+      tone({ f0: f, dur: 0.36, type: 'triangle', vol: 0.115, delay: i * 0.075 });
+      tone({ f0: f * 1.5, dur: 0.22, type: 'sine', vol: 0.035, delay: i * 0.075 });
+    });
+  }
+  function sfxError() {
+    ensureAudio();
+    tone({ f0: 200, f1: 140, dur: 0.16, type: 'square', vol: 0.05 });
+  }
+  /* 彈窗出現音 */
+  function sfxModal() {
+    ensureAudio();
+    tone({ f0: 660, f1: 990, dur: 0.20, type: 'sine', vol: 0.075 });
+    tone({ f0: 990, f1: 1320, dur: 0.24, type: 'triangle', vol: 0.05, delay: 0.10 });
+  }
+
+  /* =========================================================
+     音效開關
+  ========================================================= */
+  function setSound(on, silent) {
+    state.soundOn = on;
+
+    if (masterGain) masterGain.gain.value = on ? 0.5 : 0;
+
+    if (on) {
+      ensureAudio();
+      initBgm();
+      playBgm();
+    } else {
+      stopBgm();
+    }
+
+    document.querySelectorAll('.float-btn.left').forEach(function (b) {
+      b.textContent = on ? '🔊' : '🔇';
+      b.classList.toggle('muted', !on);
+    });
+
+    saveState();
+
+    if (!silent && on) sfxClick();
+  }
+
+  function toggleSound() {
+    ensureAudio();
+    setSound(!state.soundOn, true);
+    if (state.soundOn) sfxClick(); else sfxError();
+  }
+
+  function unlockAudio() {
+    ensureAudio();
+    initBgm();
+    if (state.soundOn) playBgm();
+    ['pointerdown', 'touchstart', 'keydown'].forEach(function (ev) {
+      document.removeEventListener(ev, unlockAudio);
+    });
+  }
+  ['pointerdown', 'touchstart', 'keydown'].forEach(function (ev) {
+    document.addEventListener(ev, unlockAudio, { passive: true });
+  });
+
+  /* =========================================================
+     存檔 / localStorage
+  ========================================================= */
+  const LS_KEY = 'connect4_state_v1';
+
+  function saveState() {
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify({
+        sound: state.soundOn,
+        mode: state.mode,
+        difficulty: state.difficulty,
+        trophies: state.trophies
+      }));
+    } catch (e) {}
+  }
+
+  function loadState() {
+    try {
+      const s = localStorage.getItem(LS_KEY);
+      if (!s) return;
+      const d = JSON.parse(s);
+      applySettings(d, true);
+    } catch (e) {}
+  }
+
+  function applySettings(d, silent) {
+    if (!d || typeof d !== 'object') return;
+    if (typeof d.sound === 'boolean') {
+      state.soundOn = d.sound;
+      if (masterGain) masterGain.gain.value = d.sound ? 0.5 : 0;
+      if (d.sound) { initBgm(); playBgm(); } else { stopBgm(); }
+      document.querySelectorAll('.float-btn.left').forEach(function (b) {
+        b.textContent = d.sound ? '🔊' : '🔇';
+        b.classList.toggle('muted', !d.sound);
+      });
+    }
+    if (d.mode === 'pvp' || d.mode === 'pve') state.mode = d.mode;
+    if (d.difficulty === 'easy' || d.difficulty === 'medium' || d.difficulty === 'hard') {
+      state.difficulty = d.difficulty;
+    }
+    if (typeof d.trophies === 'number' && isFinite(d.trophies)) {
+      state.trophies = Math.max(0, Math.floor(d.trophies));
+    }
+    saveState();
+    syncSettingsUI();
+  }
+
+  /* =========================================================
+     設定 UI 同步
+  ========================================================= */
+  function syncSettingsUI() {
+    Array.prototype.forEach.call(setupMode.children, function (b) {
+      b.classList.toggle('on', b.dataset.mode === state.mode);
+    });
+    Array.prototype.forEach.call(setupDiff.children, function (b) {
+      b.classList.toggle('on', b.dataset.diff === state.difficulty);
+    });
+    setupDiffBlock.style.display = (state.mode === 'pve') ? '' : 'none';
+
+    coverTrophyEl.textContent = state.trophies;
+    setupTrophyEl.textContent = state.trophies;
+    gameTrophyEl.textContent  = state.trophies;
+
+    if (state.mode === 'pve') {
+      modeInfoEl.textContent = '人機 · ' + DIFF[state.difficulty].label;
+    } else {
+      modeInfoEl.textContent = '雙人對戰';
+    }
+  }
+
+  function addTrophies(n) {
+    if (n <= 0) return;
+    state.trophies += n;
+    saveState();
+    syncSettingsUI();
+    showTrophyPop('+' + n + ' 🏆');
+    setTimeout(sfxTrophy, 180);
+  }
+
+  function showTrophyPop(text) {
+    trophyPop.textContent = text;
+    trophyPop.classList.add('show');
+    setTimeout(function () { trophyPop.classList.remove('show'); }, 1500);
+  }
+
+  /* =========================================================
+     結果彈窗
+  ========================================================= */
+  function hideResultModal() {
+    clearTimeout(modalTimer);
+    resultMask.classList.remove('show');
+  }
+
+  function showResultModal() {
+    const isDraw = (lastWinner === 0);
+
+    if (isDraw) {
+      resultIcon.textContent = '🤝';
+      resultTitle.textContent = '平手！';
+      resultTitle.style.color = '#cfe0ff';
+      resultSub.textContent = '棋盤已滿，勢均力敵';
+      resultGlow.style.background = 'radial-gradient(circle,#7f8ea8,transparent 70%)';
+      resultTrophy.style.display = 'none';
+    } else {
+      const isRed = (lastWinner === P1);
+      const isHumanWin = (state.mode === 'pve' && lastWinner === P1);
+
+      resultIcon.textContent = '🏆';
+      resultTitle.style.color = isRed ? '#ff9b9b' : '#9dc4ff';
+
+      if (state.mode === 'pve') {
+        resultTitle.textContent = isHumanWin ? '你贏了！' : '電腦獲勝';
+        resultSub.textContent = isHumanWin
+          ? ('擊敗「' + DIFF[state.difficulty].label + '」電腦')
+          : '再接再厲，試多一次！';
+      } else {
+        resultTitle.textContent = (isRed ? '紅方' : '藍方') + '獲勝！';
+        resultSub.textContent = '四子連線成功！';
+      }
+
+      resultGlow.style.background = isRed
+        ? 'radial-gradient(circle,#ff4d4d,transparent 70%)'
+        : 'radial-gradient(circle,#5fa8ff,transparent 70%)';
+
+      // 獎盃
+      if (isHumanWin) {
+        const t = DIFF[state.difficulty].trophy;
+        resultTrophy.style.display = '';
+        resultTrophy.textContent = '+' + t + ' 🏆';
+      } else {
+        resultTrophy.style.display = 'none';
+      }
+    }
+
+    resultMask.classList.add('show');
+    setTimeout(sfxModal, 120);
+  }
+
+  function scheduleResultModal() {
+    clearTimeout(modalTimer);
+    modalTimer = setTimeout(showResultModal, 900);
+  }
+
+  /* =========================================================
+     頁面切換
+  ========================================================= */
+  function showPage(id) {
+    currentPage = id;
+    document.querySelectorAll('.page').forEach(function (p) {
+      p.classList.toggle('active', p.id === id);
+    });
+    if (id === 'pageGame') {
+      requestAnimationFrame(function () {
+        resize();
+        requestAnimationFrame(resize);
+      });
+    }
+  }
+
+  /* =========================================================
+     遊戲核心
+  ========================================================= */
+  function newGame() {
+    hideResultModal();
+    board = new Uint8Array(N);
+    current = P1;
+    gameOver = false;
+    winCells = null;
+    lastWinner = 0;
+    locked = false;
+    thinking = false;
+    anims = [];
+    hoverCol = -1;
+    aiToken++;
+    updateUI();
+  }
+
+  function dropRow(b, c) {
+    for (let r = ROWS - 1; r >= 0; r--) {
+      if (b[r * COLS + c] === EMPTY) return r;
+    }
+    return -1;
+  }
+
+  function isFull(b) {
+    for (let c = 0; c < COLS; c++) if (b[c] === EMPTY) return false;
+    return true;
+  }
+
+  function isWinAt(b, r, c) {
+    const p = b[r * COLS + c];
+    if (!p) return null;
+    for (let d = 0; d < 4; d++) {
+      const dr = DIRS[d][0], dc = DIRS[d][1];
+      const cells = [[r, c]];
+      for (let s = -1; s <= 1; s += 2) {
+        let rr = r + dr * s, cc = c + dc * s;
+        while (rr >= 0 && rr < ROWS && cc >= 0 && cc < COLS && b[rr * COLS + cc] === p) {
+          cells.push([rr, cc]);
+          rr += dr * s; cc += dc * s;
+        }
+      }
+      if (cells.length >= 4) return cells;
+    }
+    return null;
+  }
+
+  function orderedValidMoves(b) {
+    const out = [];
+    for (let i = 0; i < 7; i++) {
+      const c = COL_ORDER[i];
+      if (b[c] === EMPTY) out.push(c);
+    }
+    return out;
+  }
+
+  /* =========================================================
+     落子緩動（含回彈）
+  ========================================================= */
+  const FALL_FRACTION = 0.58;
+
+  function fallEase(t) {
+    if (t >= 1) return 1;
+    if (t <= FALL_FRACTION) {
+      const p = t / FALL_FRACTION;
+      return Math.pow(p, 2.5);
+    }
+    const b = (t - FALL_FRACTION) / (1 - FALL_FRACTION);
+    return 1 + Math.sin(b * Math.PI * 2) * (1 - b) * 0.135;
+  }
+
+  function dropPiece(col) {
+    if (col < 0 || col >= COLS) return false;
+    const r = dropRow(board, col);
+    if (r < 0) return false;
+
+    board[r * COLS + col] = current;
+    locked = true;
+    hoverCol = -1;
+
+    anims.push({
+      r: r,
+      c: col,
+      p: current,
+      start: performance.now(),
+      dur: 450
+    });
+
+    sfxDrop();
+    updateUI();
+    return true;
+  }
+
+  function onLanded(a) {
+    locked = false;
+    sfxLand();
+
+    const win = isWinAt(board, a.r, a.c);
+    if (win) {
+      winCells = win;
+      gameOver = true;
+      lastWinner = a.p;
+      scores[a.p]++;
+      updateUI();
+      setTimeout(function () {
+        if (a.p === P1) sfxWin(); else sfxLose();
+      }, 200);
+
+      if (state.mode === 'pve' && a.p === 1) {
+        const t = DIFF[state.difficulty].trophy;
+        setTimeout(function () { addTrophies(t); }, 700);
+      }
+      scheduleResultModal();
+      return;
+    }
+
+    if (isFull(board)) {
+      gameOver = true;
+      lastWinner = 0;
+      updateUI();
+      setTimeout(sfxDraw, 180);
+      scheduleResultModal();
+      return;
+    }
+
+    current = 3 - current;
+    updateUI();
+    maybeAI();
+  }
+
+  /* =========================================================
+     AI
+  ========================================================= */
+  function evaluateFor(b, player) {
+    const opp = 3 - player;
+    let score = 0;
+
+    for (let i = 0; i < WINDOWS.length; i++) {
+      const w = WINDOWS[i];
+      let p = 0, o = 0;
+      const v0 = b[w[0]], v1 = b[w[1]], v2 = b[w[2]], v3 = b[w[3]];
+
+      if (v0 === player) p++; else if (v0 === opp) o++;
+      if (v1 === player) p++; else if (v1 === opp) o++;
+      if (v2 === player) p++; else if (v2 === opp) o++;
+      if (v3 === player) p++; else if (v3 === opp) o++;
+
+      if (p && o) continue;
+
+      if (p === 4) score += 100000;
+      else if (p === 3) score += 92;
+      else if (p === 2) score += 9;
+      else if (p === 1) score += 1;
+      else if (o === 4) score -= 100000;
+      else if (o === 3) score -= 98;
+      else if (o === 2) score -= 10;
+      else if (o === 1) score -= 1;
+    }
+
+    for (let r = 0; r < ROWS; r++) {
+      const v = b[r * COLS + 3];
+      if (v === player) score += 5;
+      else if (v === opp) score -= 5;
+    }
+    return score;
+  }
+
+  function negamax(b, depth, alpha, beta, player) {
+    if (depth === 0) return evaluateFor(b, player);
+
+    const moves = orderedValidMoves(b);
+    if (moves.length === 0) return 0;
+
+    const opp = 3 - player;
+    let best = -Infinity;
+
+    for (let i = 0; i < moves.length; i++) {
+      const c = moves[i];
+      const r = dropRow(b, c);
+      const k = r * COLS + c;
+      b[k] = player;
+
+      let val;
+      if (isWinAt(b, r, c)) {
+        val = 1000000 + depth * 1000;
+      } else {
+        val = -negamax(b, depth - 1, -beta, -alpha, opp);
+      }
+
+      b[k] = EMPTY;
+
+      if (val > best) best = val;
+      if (best > alpha) alpha = best;
+      if (alpha >= beta) break;
+    }
+    return best;
+  }
+
+  function chooseAIMove() {
+    const b = board.slice();
+    const moves = orderedValidMoves(b);
+    if (moves.length === 0) return -1;
+
+    const me = AI_PLAYER;
+    const opp = 3 - me;
+
+    for (let i = 0; i < moves.length; i++) {
+      const c = moves[i];
+      const r = dropRow(b, c);
+      const k = r * COLS + c;
+      b[k] = me;
+      const w = isWinAt(b, r, c);
+      b[k] = EMPTY;
+      if (w) return c;
+    }
+
+    for (let i = 0; i < moves.length; i++) {
+      const c = moves[i];
+      const r = dropRow(b, c);
+      const k = r * COLS + c;
+      b[k] = opp;
+      const w = isWinAt(b, r, c);
+      b[k] = EMPTY;
+      if (w) {
+        if (state.difficulty !== 'easy' || Math.random() < 0.55) return c;
+      }
+    }
+
+    const cfg = DIFF[state.difficulty];
+
+    if (Math.random() < cfg.rand) {
+      return moves[(Math.random() * moves.length) | 0];
+    }
+
+    let best = -Infinity;
+    let bestCols = [];
+    let alpha = -Infinity;
+    const beta = Infinity;
+    const depth = cfg.depth;
+
+    for (let i = 0; i < moves.length; i++) {
+      const c = moves[i];
+      const r = dropRow(b, c);
+      const k = r * COLS + c;
+      b[k] = me;
+
+      let val;
+      if (isWinAt(b, r, c)) {
+        val = 1e9;
+      } else {
+        val = -negamax(b, depth - 1, -beta, -alpha, opp);
+      }
+      b[k] = EMPTY;
+
+      if (val > best + 1e-6) {
+        best = val;
+        bestCols = [c];
+      } else if (Math.abs(val - best) <= 1e-6) {
+        bestCols.push(c);
+      }
+      if (val > alpha) alpha = val;
+    }
+
+    if (bestCols.length === 0) return moves[0];
+    return bestCols[(Math.random() * bestCols.length) | 0];
+  }
+
+  function maybeAI() {
+    if (state.mode !== 'pve' || gameOver) return;
+    if (current !== AI_PLAYER) return;
+
+    thinking = true;
+    updateUI();
+
+    const token = ++aiToken;
+    setTimeout(function () {
+      if (token !== aiToken) return;
+      if (state.mode !== 'pve' || gameOver || current !== AI_PLAYER) {
+        thinking = false;
+        updateUI();
+        return;
+      }
+      let col = -1;
+      try { col = chooseAIMove(); } catch (e) { col = -1; }
+      thinking = false;
+      if (col >= 0) {
+        dropPiece(col);
+      } else {
+        updateUI();
+      }
+    }, 230);
+  }
+
+  /* =========================================================
+     UI 更新
+  ========================================================= */
+  function updateUI() {
+    if (gameOver) {
+      if (lastWinner === 0) {
+        statusEl.textContent = '平手！';
+        statusEl.className = 'status';
+      } else if (state.mode === 'pve') {
+        statusEl.textContent = (lastWinner === AI_PLAYER) ? '電腦獲勝' : '你贏了！';
+        statusEl.className = 'status ' + (lastWinner === 1 ? 'p1' : 'p2');
+      } else {
+        statusEl.textContent = (lastWinner === 1 ? '紅方' : '藍方') + '獲勝！';
+        statusEl.className = 'status ' + (lastWinner === 1 ? 'p1' : 'p2');
+      }
+    } else if (thinking) {
+      statusEl.textContent = '電腦思考中…';
+      statusEl.className = 'status p2';
+    } else if (state.mode === 'pve') {
+      statusEl.textContent = (current === AI_PLAYER) ? '電腦回合' : '你的回合';
+      statusEl.className = 'status ' + (current === 1 ? 'p1' : 'p2');
+    } else {
+      statusEl.textContent = (current === 1 ? '紅方' : '藍方') + '回合';
+      statusEl.className = 'status ' + (current === 1 ? 'p1' : 'p2');
+    }
+
+    score1El.textContent = scores[1];
+    score2El.textContent = scores[2];
+
+    if (state.mode === 'pve') {
+      modeInfoEl.textContent = '人機 · ' + DIFF[state.difficulty].label;
+    } else {
+      modeInfoEl.textContent = '雙人對戰';
+    }
+  }
+
+  /* =========================================================
+     尺寸與畫布建構
+  ========================================================= */
+  const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+
+  function roundRectPath(c, x, y, w, h, r) {
+    r = Math.min(r, w / 2, h / 2);
+    c.moveTo(x + r, y);
+    c.arcTo(x + w, y, x + w, y + h, r);
+    c.arcTo(x + w, y + h, x, y + h, r);
+    c.arcTo(x, y + h, x, y, r);
+    c.arcTo(x, y, x + w, y, r);
+    c.closePath();
+  }
+
+  function resize() {
+    const base = clamp(app.clientWidth * 0.0138, 11, 20.5);
+    app.style.fontSize = base + 'px';
+
+    const rect = wrap.getBoundingClientRect();
+    const availW = Math.max(40, rect.width);
+    const availH = Math.max(40, rect.height);
+
+    const ratio = COLS / ROWS;
+    let w = availW;
+    let h = w / ratio;
+    if (h > availH) { h = availH; w = h * ratio; }
+
+    CW = Math.max(40, Math.floor(w));
+    CH = Math.max(40, Math.floor(h));
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.style.width = CW + 'px';
+    canvas.style.height = CH + 'px';
+    canvas.width  = Math.round(CW * dpr);
+    canvas.height = Math.round(CH * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    cellSize = Math.min(CW / COLS, CH / ROWS);
+    offX = (CW - cellSize * COLS) / 2;
+    offY = (CH - cellSize * ROWS) / 2;
+
+    buildCanvases(dpr);
+  }
+
+  /* =========================================================
+     畫布建構：背景層 + 屏風層（孔洞用 destination-out 挖空）
+  ========================================================= */
+  function buildCanvases(dpr) {
+    const x0 = offX, y0 = offY;
+    const bw = cellSize * COLS;
+    const bh = cellSize * ROWS;
+    const rad = cellSize * 0.28;
+    const holeR = cellSize * 0.395;
+
+    /* ---------- 背景層 ---------- */
+    bgCanvas.width  = Math.round(CW * dpr);
+    bgCanvas.height = Math.round(CH * dpr);
+    const bc = bgCanvas.getContext('2d');
+    bc.setTransform(dpr, 0, 0, dpr, 0, 0);
+    bc.clearRect(0, 0, CW, CH);
+
+    bc.beginPath();
+    roundRectPath(bc, x0, y0, bw, bh, rad);
+    const bg = bc.createLinearGradient(x0, y0, x0, y0 + bh);
+    bg.addColorStop(0, '#0a0d14');
+    bg.addColorStop(1, '#03050a');
+    bc.fillStyle = bg;
+    bc.fill();
+
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const cx = x0 + c * cellSize + cellSize / 2;
+        const cy = y0 + r * cellSize + cellSize / 2;
+        const hg = bc.createRadialGradient(cx, cy - holeR * 0.42, holeR * 0.08, cx, cy, holeR * 1.05);
+        hg.addColorStop(0, '#0d1424');
+        hg.addColorStop(0.55, '#060a12');
+        hg.addColorStop(1, '#02040a');
+        bc.beginPath();
+        bc.arc(cx, cy, holeR, 0, Math.PI * 2);
+        bc.fillStyle = hg;
+        bc.fill();
+      }
+    }
+
+    /* ---------- 屏風層 ---------- */
+    frameCanvas.width  = Math.round(CW * dpr);
+    frameCanvas.height = Math.round(CH * dpr);
+    const fc = frameCanvas.getContext('2d');
+    fc.setTransform(dpr, 0, 0, dpr, 0, 0);
+    fc.clearRect(0, 0, CW, CH);
+
+    fc.save();
+    fc.shadowColor = 'rgba(0,0,0,0.78)';
+    fc.shadowBlur = cellSize * 0.5;
+    fc.shadowOffsetY = cellSize * 0.08;
+    fc.beginPath();
+    roundRectPath(fc, x0, y0, bw, bh, rad);
+    fc.fillStyle = '#2b2e35';
+    fc.fill();
+    fc.restore();
+
+    fc.beginPath();
+    roundRectPath(fc, x0, y0, bw, bh, rad);
+    const fg = fc.createLinearGradient(x0, y0, x0, y0 + bh);
+    fg.addColorStop(0.00, '#474b55');
+    fg.addColorStop(0.18, '#3d414b');
+    fg.addColorStop(0.55, '#2f333b');
+    fg.addColorStop(1.00, '#1e2126');
+    fc.fillStyle = fg;
+    fc.fill();
+
+    fc.save();
+    fc.globalCompositeOperation = 'destination-out';
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const cx = x0 + c * cellSize + cellSize / 2;
+        const cy = y0 + r * cellSize + cellSize / 2;
+        fc.beginPath();
+        fc.arc(cx, cy, holeR, 0, Math.PI * 2);
+        fc.fill();
+      }
+    }
+    fc.restore();
+
+    fc.save();
+    fc.globalCompositeOperation = 'source-atop';
+
+    const hl = fc.createLinearGradient(0, y0, 0, y0 + cellSize * 1.2);
+    hl.addColorStop(0, 'rgba(255,255,255,0.14)');
+    hl.addColorStop(1, 'rgba(255,255,255,0)');
+    fc.fillStyle = hl;
+    fc.fillRect(x0, y0, bw, cellSize * 1.2);
+
+    const dl = fc.createLinearGradient(0, y0 + bh - cellSize * 1.2, 0, y0 + bh);
+    dl.addColorStop(0, 'rgba(0,0,0,0)');
+    dl.addColorStop(1, 'rgba(0,0,0,0.40)');
+    fc.fillStyle = dl;
+    fc.fillRect(x0, y0 + bh - cellSize * 1.2, bw, cellSize * 1.2);
+
+    fc.restore();
+
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const cx = x0 + c * cellSize + cellSize / 2;
+        const cy = y0 + r * cellSize + cellSize / 2;
+
+        fc.beginPath();
+        fc.arc(cx, cy, holeR, 0, Math.PI * 2);
+        fc.strokeStyle = 'rgba(0,0,0,0.55)';
+        fc.lineWidth = Math.max(1, cellSize * 0.024);
+        fc.stroke();
+
+        fc.beginPath();
+        fc.arc(cx, cy, holeR * 0.96, Math.PI * 0.15, Math.PI * 0.85);
+        fc.strokeStyle = 'rgba(255,255,255,0.09)';
+        fc.lineWidth = Math.max(1, cellSize * 0.012);
+        fc.stroke();
+      }
+    }
+  }
+
+  /* =========================================================
+     繪製棋子（含連線發光）
+  ========================================================= */
+  function drawPiece(cx, cy, radius, player, glow, now) {
+    const col = PIECE_COLORS[player] || PIECE_COLORS[1];
+
+    /* ---- 連線時的外層光暈（脈衝） ---- */
+    if (glow) {
+      const pulse = 0.55 + 0.45 * Math.sin(now / 170);
+
+      ctx.save();
+      ctx.globalAlpha = 0.75 * pulse;
+      const halo = ctx.createRadialGradient(
+        cx, cy, radius * 0.55,
+        cx, cy, radius * 2.15
+      );
+      halo.addColorStop(0, col.glow);
+      halo.addColorStop(0.45, col.glow);
+      halo.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = halo;
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius * 2.15, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // 光環圈
+      ctx.save();
+      ctx.globalAlpha = 0.65 * pulse;
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius * 1.32 + radius * 0.10 * pulse, 0, Math.PI * 2);
+      ctx.strokeStyle = col.hi;
+      ctx.lineWidth = radius * 0.10;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    /* ---- 棋子本體 ---- */
+    const g = ctx.createRadialGradient(
+      cx - radius * 0.36, cy - radius * 0.42, radius * 0.05,
+      cx, cy, radius * 1.10
+    );
+    g.addColorStop(0.00, col.hi);
+    g.addColorStop(0.30, col.mid);
+    g.addColorStop(0.72, col.lo);
+    g.addColorStop(1.00, col.edge);
+
+    if (glow) {
+      ctx.shadowColor = col.glow;
+      ctx.shadowBlur = radius * (0.9 + 0.9 * Math.abs(Math.sin(now / 170)));
+    }
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.fillStyle = g;
+    ctx.fill();
+
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = 'transparent';
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius * 0.70, Math.PI * 1.10, Math.PI * 1.68);
+    ctx.strokeStyle = 'rgba(255,255,255,0.26)';
+    ctx.lineWidth = radius * 0.20;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius * 0.40, Math.PI * 0.18, Math.PI * 0.62);
+    ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+    ctx.lineWidth = radius * 0.10;
+    ctx.stroke();
+  }
+
+  /* =========================================================
+     渲染
+  ========================================================= */
+  function render(now) {
+    if (CW < 10) return;
+    ctx.clearRect(0, 0, CW, CH);
+
+    const x0 = offX, y0 = offY;
+    const bw = cellSize * COLS, bh = cellSize * ROWS;
+
+    // 1. 背景層
+    ctx.drawImage(bgCanvas, 0, 0, CW, CH);
+
+    // 2. 棋子層（裁剪至棋盤）
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x0, y0, bw, bh);
+    ctx.clip();
+
+    const canHover = !gameOver && !locked && !thinking &&
+                     !(state.mode === 'pve' && current === AI_PLAYER);
+
+    if (hoverCol >= 0 && canHover) {
+      const hx = x0 + hoverCol * cellSize;
+      ctx.save();
+      ctx.globalAlpha = 0.10;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      roundRectPath(ctx,
+        hx + cellSize * 0.05, y0 + cellSize * 0.05,
+        cellSize - cellSize * 0.10, bh - cellSize * 0.10,
+        cellSize * 0.3);
+      ctx.fill();
+      ctx.restore();
+
+      const hr = dropRow(board, hoverCol);
+      if (hr >= 0) {
+        ctx.save();
+        ctx.globalAlpha = 0.30;
+        drawPiece(
+          x0 + hoverCol * cellSize + cellSize / 2,
+          y0 + hr * cellSize + cellSize / 2,
+          cellSize * 0.372, current, false, now
+        );
+        ctx.restore();
+      }
+    }
+
+    const animSet = new Set();
+    for (let i = 0; i < anims.length; i++) animSet.add(anims[i].r * COLS + anims[i].c);
+
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const v = board[r * COLS + c];
+        if (!v) continue;
+        if (animSet.has(r * COLS + c)) continue;
+
+        let isWinPiece = false;
+        if (winCells) {
+          for (let i = 0; i < winCells.length; i++) {
+            if (winCells[i][0] === r && winCells[i][1] === c) { isWinPiece = true; break; }
+          }
+        }
+
+        drawPiece(
+          x0 + c * cellSize + cellSize / 2,
+          y0 + r * cellSize + cellSize / 2,
+          cellSize * 0.372, v, isWinPiece, now
+        );
+      }
+    }
+
+    for (let i = 0; i < anims.length; i++) {
+      const a = anims[i];
+      const t = clamp((now - a.start) / a.dur, 0, 1);
+      const e = fallEase(t);
+      const targetCY = y0 + a.r * cellSize + cellSize / 2;
+      const startCY  = y0 - cellSize * 1.1;
+      const cy = startCY + (targetCY - startCY) * e;
+      const cx = x0 + a.c * cellSize + cellSize / 2;
+      drawPiece(cx, cy, cellSize * 0.372, a.p, false, now);
+    }
+
+    ctx.restore();
+
+    // 3. 屏風層
+    ctx.drawImage(frameCanvas, 0, 0, CW, CH);
+  }
+
+  /* =========================================================
+     主迴圈
+  ========================================================= */
+  function loop(now) {
+    for (let i = anims.length - 1; i >= 0; i--) {
+      if (now - anims[i].start >= anims[i].dur) {
+        const a = anims[i];
+        anims.splice(i, 1);
+        onLanded(a);
+      }
+    }
+    if (currentPage === 'pageGame') render(now);
+    requestAnimationFrame(loop);
+  }
+
+  /* =========================================================
+     輸入
+  ========================================================= */
+  function pointerToCol(clientX) {
+    const rect = canvas.getBoundingClientRect();
+    if (!rect.width) return -1;
+    const scale = CW / rect.width;
+    const x = (clientX - rect.left) * scale;
+    const c = Math.floor((x - offX) / cellSize);
+    return (c >= 0 && c < COLS) ? c : -1;
+  }
+
+  canvas.addEventListener('pointermove', function (e) {
+    if (e.pointerType === 'touch') return;
+    if (gameOver || locked || thinking) { hoverCol = -1; return; }
+    if (state.mode === 'pve' && current === AI_PLAYER) { hoverCol = -1; return; }
+    const c = pointerToCol(e.clientX);
+    if (c !== hoverCol && c >= 0) sfxHover();
+    hoverCol = c;
+  });
+
+  canvas.addEventListener('pointerleave', function () {
+    hoverCol = -1;
+  });
+
+  canvas.addEventListener('pointerdown', function (e) {
+    e.preventDefault();
+    ensureAudio();
+    if (gameOver || locked || thinking) return;
+    if (state.mode === 'pve' && current === AI_PLAYER) return;
+
+    const col = pointerToCol(e.clientX);
+    if (col < 0) return;
+    if (dropRow(board, col) < 0) { sfxError(); return; }
+    dropPiece(col);
+  }, { passive: false });
+
+  canvas.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+
+  /* =========================================================
+     按鈕綁定
+  ========================================================= */
+  function bind(id, fn) {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('click', fn);
+  }
+
+  function toggleFullscreen() {
+    const el = document.documentElement;
+    const isFs = document.fullscreenElement || document.webkitFullscreenElement ||
+                 document.mozFullScreenElement || document.msFullscreenElement;
+    if (!isFs) {
+      const fn = el.requestFullscreen || el.webkitRequestFullscreen ||
+                 el.mozRequestFullScreen || el.msRequestFullscreen;
+      if (fn) { try { fn.call(el); } catch (e) {} }
+    } else {
+      const fn = document.exitFullscreen || document.webkitExitFullscreen ||
+                 document.mozCancelFullScreen || document.msExitFullscreen;
+      if (fn) { try { fn.call(document); } catch (e) {} }
+    }
+    sfxClick();
+  }
+
+  bind('btnStartCover', function () {
+    ensureAudio();
+    sfxNav();
+    showPage('pageSetup');
+  });
+
+  bind('coverMute', toggleSound);
+  bind('coverFs', toggleFullscreen);
+  bind('setupMute', toggleSound);
+  bind('setupFs', toggleFullscreen);
+  bind('gameMute', toggleSound);
+  bind('gameFs', toggleFullscreen);
+
+  setupMode.addEventListener('click', function (e) {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const m = btn.dataset.mode;
+    if (!m || m === state.mode) return;
+    ensureAudio(); sfxClick();
+    state.mode = m;
+    saveState();
+    syncSettingsUI();
+  });
+
+  setupDiff.addEventListener('click', function (e) {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const d = btn.dataset.diff;
+    if (!d || d === state.difficulty) return;
+    ensureAudio(); sfxClick();
+    state.difficulty = d;
+    saveState();
+    syncSettingsUI();
+  });
+
+  bind('btnStartGame', function () {
+    ensureAudio();
+    sfxNav();
+    scores = { 1: 0, 2: 0 };
+    newGame();
+    syncSettingsUI();
+    showPage('pageGame');
+  });
+
+  bind('btnBackCover', function () {
+    sfxClick();
+    showPage('pageCover');
+  });
+
+  bind('btnAgain', function () {
+    ensureAudio(); sfxNav();
+    scores = { 1: 0, 2: 0 };
+    newGame();
+  });
+
+  bind('btnBackCover2', function () {
+    sfxClick();
+    hideResultModal();
+    aiToken++;
+    thinking = false;
+    showPage('pageCover');
+  });
+
+  /* 結果彈窗按鈕 */
+  bind('btnResultAgain', function () {
+    ensureAudio(); sfxNav();
+    scores = { 1: 0, 2: 0 };
+    newGame();
+  });
+
+  bind('btnResultCover', function () {
+    sfxClick();
+    hideResultModal();
+    aiToken++;
+    thinking = false;
+    showPage('pageCover');
+  });
+
+  /* =========================================================
+     儲存 / 載入 / 重設
+  ========================================================= */
+  bind('btnSave', function () {
+    ensureAudio(); sfxClick();
+    const data = {
+      app: 'Connect Four',
+      version: '1.0',
+      sound: state.soundOn,
+      mode: state.mode,
+      difficulty: state.difficulty,
+      trophies: state.trophies,
+      savedAt: new Date().toISOString()
+    };
+    const text = JSON.stringify(data, null, 2);
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'connect-four-settings.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1200);
+  });
+
+  bind('btnLoad', function () {
+    ensureAudio(); sfxClick();
+    loadFileEl.value = '';
+    loadFileEl.click();
+  });
+
+  loadFileEl.addEventListener('change', function (e) {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = function () {
+      try {
+        const d = JSON.parse(String(reader.result));
+        applySettings(d, false);
+        sfxTrophy();
+      } catch (err) {
+        sfxError();
+      }
+    };
+    reader.onerror = function () { sfxError(); };
+    reader.readAsText(f, 'utf-8');
+    e.target.value = '';
+  });
+
+  bind('btnReset', function () {
+    ensureAudio(); sfxClick();
+    state.mode = 'pvp';
+    state.difficulty = 'medium';
+    state.trophies = 0;
+    state.soundOn = true;
+    if (masterGain) masterGain.gain.value = 0.5;
+    initBgm();
+    playBgm();
+    document.querySelectorAll('.float-btn.left').forEach(function (b) {
+      b.textContent = '🔊';
+      b.classList.remove('muted');
+    });
+    saveState();
+    syncSettingsUI();
+    sfxTrophy();
+  });
+
+  /* =========================================================
+     封面圖片 fallback
+  ========================================================= */
+  coverImg.addEventListener('error', function () {
+    coverImg.style.display = 'none';
+  });
+
+  (function () {
+    const y = new Date().getFullYear();
+    coverBottom.textContent = 'v1.0 © ' + y + ' ☕迪遜咖啡廳，版權所有。';
+  })();
+
+  /* =========================================================
+     尺寸監聽
+  ========================================================= */
+  let resizeTimer = null;
+  function scheduleResize() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(resize, 70);
+  }
+  window.addEventListener('resize', scheduleResize);
+  window.addEventListener('orientationchange', function () {
+    setTimeout(resize, 90);
+    setTimeout(resize, 320);
+  });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', scheduleResize);
+  }
+
+  /* =========================================================
+     啟動
+  ========================================================= */
+  function boot() {
+    loadState();
+    syncSettingsUI();
+    resize();
+    newGame();
+
+    initBgm();
+    if (state.soundOn) {
+      playBgm();
+      setTimeout(function () { if (state.soundOn) playBgm(); }, 350);
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(boot, 0);
+  } else {
+    window.addEventListener('DOMContentLoaded', boot);
+  }
+
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () { setTimeout(resize, 40); });
+  }
+
+})();
+</script>
+</body>
+</html>
