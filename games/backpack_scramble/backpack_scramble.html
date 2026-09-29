@@ -401,10 +401,13 @@ const ITEMS = {
   shield: { name:'盾牌', w:2,h:2, cd:3.2, armor:7, cost:7, icon:'🛡️', color:'#1e3a8a' },
   helmet: { name:'頭盔', w:2,h:2, cd:3.5, armor:6, cost:6, icon:'⛑️', color:'#1e40af' },
   chest:  { name:'護甲', w:2,h:3, cd:4.5, armor:12, cost:10, icon:'🥋', color:'#1e3a8a' },
-  boots:  { name:'護靴', icon:'🥾', color:'#3f2d1a', cost:5, cd:3.0, armor:4, shape:[[1,1],[1,0]] },
+  // ★ 護靴：左上、左下、右下
+  boots:  { name:'護靴', icon:'🥾', color:'#3f2d1a', cost:5, cd:3.0, armor:4, shape:[[1,0],[1,1]] },
   potion: { name:'治療藥水', w:1,h:1, cd:5.0, heal:10, cost:4, icon:'🧪', color:'#065f46', once:true, hpThreshold:0.33 },
   stone:  { name:'石頭', w:1,h:1, cd:3.0, dmg:3, stamina:1, cost:3, icon:'🪨', color:'#44403c', once:true, battleStart:true },
   fish:   { name:'魚', w:1,h:1, cd:7.0, heal:5, stamina:0, cost:4, icon:'🐟', color:'#0e7490' },
+  // ★ 香蕉：左上、左下、右下
+  banana: { name:'香蕉', icon:'🍌', color:'#ca8a04', cost:5, cd:4.5, staminaRestore:3, shape:[[1,0],[1,1]] },
   gem:    { name:'力量寶石', w:1,h:1, passive:'dmg', value:2, cost:6, icon:'💎', color:'#5b21b6' },
   heart:  { name:'生命護符', w:1,h:1, passive:'hp',  value:15, cost:6, icon:'❤️', color:'#9f1239' },
   arthur:    { name:'亞瑟劍', icon:'✝️', color:'#1e3a8a', cost:14, cd:2.8, dmg:13, stamina:3, shape:[[0,1,0],[1,1,1],[0,1,0],[0,1,0]], exclusive:'victor' },
@@ -420,9 +423,6 @@ const ITEMS = {
 };
 const ITEM_KEYS = Object.keys(ITEMS);
 
-/* =========================================================
-   形狀旋轉
-   ========================================================= */
 function rotateShape90(shape){
   const h = shape.length, w = shape[0].length;
   const ns = Array.from({length:w}, () => Array(h).fill(0));
@@ -465,7 +465,21 @@ function getItemDims(def, rot){
 const AudioMgr = {
   ctx:null, bgm:null, currentSrc:null, lastHit:0,
   ensureCtx(){ if (!this.ctx){ try { this.ctx = new (window.AudioContext||window.webkitAudioContext)(); } catch(e){ this.ctx=null; } } if (this.ctx && this.ctx.state==='suspended') this.ctx.resume().catch(()=>{}); return this.ctx; },
-  playBGM(src, volume=BGM_VOL){ if (this.currentSrc===src && this.bgm){ this.bgm.volume=volume; if (this.bgm.paused) this.bgm.play().catch(()=>{}); return; } this.stopBGM(); const a=new Audio(src); a.loop=true; a.volume=volume; a.muted=appState.muted; a.addEventListener('error',()=>console.warn('[BGM 缺失]',src)); const p=a.play(); if (p&&p.catch) p.catch(()=>{}); this.bgm=a; this.currentSrc=src; },
+  playBGM(src, volume=BGM_VOL){
+    if (this.currentSrc===src && this.bgm){
+      this.bgm.volume = volume;
+      this.bgm.muted = appState.muted;
+      if (this.bgm.paused) this.bgm.play().catch(()=>{});
+      return;
+    }
+    this.stopBGM();
+    const a = new Audio(src);
+    a.loop = true; a.volume = volume; a.muted = appState.muted;
+    a.addEventListener('error',()=>console.warn('[BGM 缺失]',src));
+    const p = a.play();
+    if (p && p.catch) p.catch(()=>{});
+    this.bgm = a; this.currentSrc = src;
+  },
   stopBGM(){ if (this.bgm){ try{ this.bgm.pause(); this.bgm.currentTime=0; }catch(e){} this.bgm=null; } this.currentSrc=null; },
   setMuted(m){ if (this.bgm) this.bgm.muted=m; },
   tone(freq,dur,type='sine',vol=0.08,delay=0){ if (appState.muted) return; const ctx=this.ensureCtx(); if (!ctx) return; const now=ctx.currentTime+delay; const o=ctx.createOscillator(),g=ctx.createGain(); o.type=type; o.frequency.setValueAtTime(freq,now); g.gain.setValueAtTime(0.0001,now); g.gain.exponentialRampToValueAtTime(vol,now+0.012); g.gain.exponentialRampToValueAtTime(0.0001,now+dur); o.connect(g); g.connect(ctx.destination); o.start(now); o.stop(now+dur+0.03); },
@@ -486,6 +500,7 @@ const AudioMgr = {
       case 'burn': this.noise(0.15,0.06); this.tone(220,0.1,'sawtooth',0.03); break;
       case 'riposte': this.tone(520,0.05,'square',0.05); break;
       case 'fish': this.tone(440,0.08,'sine',0.06); this.tone(660,0.12,'sine',0.05,0.06); break;
+      case 'banana': this.tone(520,0.08,'sine',0.06); this.tone(780,0.12,'sine',0.05,0.06); break;
       case 'win': [523,659,784,1046].forEach((f,i)=>this.tone(f,0.22,'triangle',0.075,i*0.1)); break;
       case 'lose': [523,440,349,262].forEach((f,i)=>this.tone(f,0.26,'sine',0.07,i*0.13)); break;
       case 'select': this.tone(880,0.07,'sine',0.07); this.tone(1320,0.1,'sine',0.05,0.06); break;
@@ -498,6 +513,16 @@ const AudioMgr = {
 const appState = { screen:'cover', muted:false, trophies:0, character:null };
 function persistState(){ try { localStorage.setItem(STORAGE.muted, appState.muted?'1':'0'); localStorage.setItem(STORAGE.trophies, String(appState.trophies)); localStorage.setItem(STORAGE.char, appState.character||''); } catch(e){} }
 function restoreState(){ try { const m=localStorage.getItem(STORAGE.muted); if (m!==null) appState.muted=(m==='1'); const t=localStorage.getItem(STORAGE.trophies); if (t!==null) appState.trophies=parseInt(t)||0; const c=localStorage.getItem(STORAGE.char); if (c) appState.character=c; } catch(e){} }
+
+/* ★ 檢查是否有進行中的進度 */
+function hasActiveProgress(){
+  try {
+    const raw = localStorage.getItem(STORAGE.progress);
+    if (!raw) return false;
+    const d = JSON.parse(raw);
+    return !!(d && Array.isArray(d.bags) && d.bags.length > 0);
+  } catch(e){ return false; }
+}
 
 let uidCounter = 0;
 const state = {
@@ -663,11 +688,27 @@ function findItemSpot(bags, items, def){
 function showScreen(name){
   appState.screen = name;
   document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-  if (name === 'cover'){ $('screenCover').classList.add('active'); $('screenCover').style.display = 'flex'; $('coverTrophyCount').textContent = appState.trophies; AudioMgr.playBGM(SONGS.openBag, BGM_VOL); }
-  else $('screenCover').style.display = 'none';
+  if (name === 'cover'){
+    $('screenCover').classList.add('active');
+    $('screenCover').style.display = 'flex';
+    $('coverTrophyCount').textContent = appState.trophies;
+    AudioMgr.playBGM(SONGS.openBag, BGM_VOL);
+    updateStartBtn();
+  } else $('screenCover').style.display = 'none';
   if (name === 'select'){ $('screenSelect').classList.add('active'); $('selectTrophyCount').textContent = appState.trophies; initCharScroller(); }
   if (name === 'game'){ $('screenGame').classList.add('active'); computeCell(); renderAll(); }
 }
+
+/* ★ 更新封面按鈕文字 */
+function updateStartBtn(){
+  const btn = $('btnStartGame');
+  if (hasActiveProgress() && appState.character){
+    btn.textContent = '繼續遊戲';
+  } else {
+    btn.textContent = '開始遊戲';
+  }
+}
+
 function initCover(){
   $('copyrightYear').textContent = new Date().getFullYear();
   const bg = $('coverBg'); const img = new Image();
@@ -740,9 +781,6 @@ function syncCenterFromScroll(silent){
 }
 function updateSelectedVisual(){ CS.cards.forEach(c => { c.classList.toggle('selected', !c.classList.contains('locked') && c.dataset.id === appState.character); }); $('btnConfirmChar').disabled = !appState.character; }
 
-/* =========================================================
-   渲染網格
-   ========================================================= */
 function renderGrid(el, bags, items, prefix, interactive){
   if (!el) return;
   el.innerHTML = '';
@@ -763,7 +801,6 @@ function renderGrid(el, bags, items, prefix, interactive){
       cell.style.cssText = `left:${(b.x+dx)*CELL}px;top:${(b.y+dy)*CELL}px;width:${CELL}px;height:${CELL}px;`;
       el.appendChild(cell);
       if (interactive && state.phase === 'prepare'){
-        // ★ 傳入 b.rot，保留旋轉方向
         cell.addEventListener('pointerdown', (ev) => { ev.preventDefault(); ev.stopPropagation(); startDrag(ev, { kind:'bag', uid:b.uid, source:'grid', origBag:{...b}, rot: b.rot || 0 }); });
       }
     }
@@ -805,6 +842,7 @@ function itemTooltip(def){
   if (def.armor) p.push(`護甲 +${def.armor} / 冷卻 ${def.cd}s`);
   if (def.heal) p.push(`治療 ${def.heal} / 冷卻 ${def.cd}s`);
   if (def.stamina) p.push(`體力消耗 ${def.stamina}⚡`);
+  if (def.staminaRestore) p.push(`回復體力 +${def.staminaRestore}⚡ / 冷卻 ${def.cd}s`);
   if (def.pierce) p.push(`無視防禦`);
   if (def.burn) p.push(`使對手燃燒（每層每2秒1HP）`);
   if (def.riposte) p.push(`被攻擊時反擊 ${def.riposte} HP`);
@@ -826,6 +864,7 @@ function getItemStatText(def){
   if (def.dmg) return '⚔ ' + def.dmg;
   if (def.armor) return '🛡 ' + def.armor;
   if (def.heal) return '❤ +' + def.heal;
+  if (def.staminaRestore) return '⚡ +' + def.staminaRestore;
   if (def.passive === 'hp') return '❤ +' + def.value;
   if (def.passive === 'dmg') return '⚔ +' + def.value;
   if (def.isAmmo) return def.ammoCount + ' 發';
@@ -865,14 +904,11 @@ function isItemAvailable(key, charId){
   }
   return true;
 }
-/* ★ 商店：專屬武器不受 maxCost 限制，且出現率提高 */
 function rollShop(){
   const shop = [];
   const charId = appState.character;
   const maxCost = 4 + state.round * 1.7;
-  // 普通物品受 maxCost 限制
   const normalPool = ITEM_KEYS.filter(k => ITEMS[k].cost <= maxCost && isItemAvailable(k, charId) && !ITEMS[k].exclusive);
-  // 專屬武器不受 maxCost 限制（但需符合角色）
   const exclusivePool = ITEM_KEYS.filter(k => isItemAvailable(k, charId) && ITEMS[k].exclusive);
   if (!normalPool.length && !exclusivePool.length) return shop;
 
@@ -885,8 +921,7 @@ function rollShop(){
       shop.push({ id:++uidCounter, kind:'bag', bagType, cost: BAG_TYPES[bagType].cost });
     } else {
       let key;
-      // 35% 機率抽專屬武器（若存在）
-      if (exclusivePool.length && Math.random() < 0.35){
+      if (exclusivePool.length && Math.random() < 0.22){
         key = exclusivePool[Math.floor(Math.random() * exclusivePool.length)];
       } else if (normalPool.length){
         key = normalPool[Math.floor(Math.random() * normalPool.length)];
@@ -907,7 +942,7 @@ function renderShop(){
     else {
       const d = ITEMS[slot.key];
       icon = d.icon; name = d.name; cost = d.cost;
-      stat = d.dmg ? d.dmg+' 傷害' : d.armor ? d.armor+' 護甲' : d.heal ? d.heal+' 治療' : d.passive === 'hp' ? '+'+d.value+' 生命' : d.isAmmo ? `${d.ammoCount} 發` : '+'+d.value+' 傷害';
+      stat = d.dmg ? d.dmg+' 傷害' : d.armor ? d.armor+' 護甲' : d.heal ? d.heal+' 治療' : d.staminaRestore ? '⚡+'+d.staminaRestore : d.passive === 'hp' ? '+'+d.value+' 生命' : d.isAmmo ? `${d.ammoCount} 發` : '+'+d.value+' 傷害';
     }
     const card = document.createElement('div');
     card.className = 'shop-card' + (state.gold < cost ? ' poor' : '');
@@ -923,9 +958,6 @@ function renderShop(){
   }
 }
 
-/* =========================================================
-   拖拽系統
-   ========================================================= */
 let drag = null;
 
 function startDrag(ev, payload){
@@ -968,14 +1000,12 @@ function startDrag(ev, payload){
     }
   }
 
-  // ★ 修正：從 grid 拾取背包時，使用 origBag.rot 作為初始旋轉
   let initRot = payload.rot;
   if (initRot === undefined){
     if (payload.source === 'grid' && payload.origBag) initRot = payload.origBag.rot || 0;
     else initRot = 0;
   }
 
-  // Ghost
   const ghost = document.createElement('div');
   ghost.className = 'ghost';
   const initDims = payload.kind === 'bag'
@@ -1200,12 +1230,10 @@ function updateHud(){
   const ch = CHARACTERS.find(c => c.id === appState.character);
   if (ch){ chImg.src = ch.img; chImg.onerror = () => { chImg.style.display = 'none'; }; chImg.style.display = ''; }
 
-  // ★ 玩家頭像（面板）
   const pAvatar = $('playerAvatar');
   if (ch){ pAvatar.src = ch.img; pAvatar.onerror = () => { pAvatar.style.display = 'none'; }; pAvatar.style.display = ''; }
   else pAvatar.style.display = 'none';
 
-  // ★ 對手頭像（面板）
   const eAvatar = $('enemyAvatar');
   if (state.enemyChar){
     const ech = CHARACTERS.find(c => c.id === state.enemyChar);
@@ -1263,9 +1291,6 @@ function setBarWidth(barId, txtId, hp, maxHp, armor){
   tx.textContent = Math.ceil(Math.max(0,hp)) + ' / ' + Math.ceil(maxHp) + (armor > 0 ? '  🛡' + Math.round(armor) : '');
 }
 
-/* =========================================================
-   戰鬥
-   ========================================================= */
 function buildFighter(bags, items, baseHp){
   const f = {
     hp:baseHp, maxHp:baseHp, armor:0, alive:true, items:[],
@@ -1326,6 +1351,10 @@ function triggerItem(it, owner, foe){
     }
   } else if (def.armor){ owner.armor += def.armor; AudioMgr.sfx('armor'); }
   else if (def.heal){ owner.hp = Math.min(owner.maxHp, owner.hp + def.heal); AudioMgr.sfx('heal'); }
+  else if (def.staminaRestore){
+    owner.stamina = Math.min(owner.maxStamina, owner.stamina + def.staminaRestore);
+    AudioMgr.sfx('banana');
+  }
 }
 function stepBattle(p, e, dt){
   for (const [side, foe] of [[p,e],[e,p]]){
@@ -1523,7 +1552,7 @@ function generateEnemyItems(bags, round, charId){
   while (spent < budget && tries < 400){
     tries++;
     let key;
-    if (exclusive.length && Math.random() < 0.25) key = exclusive[Math.floor(Math.random()*exclusive.length)];
+    if (exclusive.length && Math.random() < 0.22) key = exclusive[Math.floor(Math.random()*exclusive.length)];
     else key = pool[Math.floor(Math.random()*pool.length)];
     const def = ITEMS[key];
     if (spent + def.cost > budget+2) continue;
@@ -1636,6 +1665,7 @@ function loadSettingsFile(){
       persistState(); syncMuteButtons();
       $('coverTrophyCount').textContent = appState.trophies;
       if (appState.screen === 'select'){ $('selectTrophyCount').textContent = appState.trophies; initCharScroller(); }
+      updateStartBtn();
       AudioMgr.sfx('unlock'); alert('載入成功！');
     };
     reader.readAsText(file, 'utf-8');
@@ -1650,11 +1680,25 @@ function resetAllData(){
   resetGameState(); syncMuteButtons();
   $('coverTrophyCount').textContent = 0;
   if (appState.screen === 'select'){ $('selectTrophyCount').textContent = 0; initCharScroller(); }
+  updateStartBtn();
   alert('已重設完成。');
 }
 
 function bindEvents(){
-  $('btnStartGame').addEventListener('click', () => { AudioMgr.sfx('click'); AudioMgr.ensureCtx(); showScreen('select'); });
+  // ★ 開始按鈕：有進行中的進度 → 直接繼續遊戲（跳過選角）
+  $('btnStartGame').addEventListener('click', () => {
+    AudioMgr.sfx('click'); AudioMgr.ensureCtx();
+    if (hasActiveProgress() && appState.character){
+      if (loadProgressFromStorage()){
+        showScreen('game');
+        AudioMgr.playBGM(SONGS.shopping, BGM_VOL);
+        computeCell(); renderAll();
+        return;
+      }
+    }
+    // 全新開始 → 進入選角
+    showScreen('select');
+  });
   $('btnSave').addEventListener('click', saveSettingsFile);
   $('btnLoad').addEventListener('click', loadSettingsFile);
   $('btnResetData').addEventListener('click', resetAllData);
@@ -1707,22 +1751,21 @@ function bindEvents(){
 }
 
 function bootAudio(){
-  const src = SONGS.openBag;
-  const a = new Audio(src);
-  a.loop = true; a.volume = BGM_VOL; a.muted = appState.muted;
-  a.addEventListener('error', () => console.warn('[BGM 缺失]', src));
-  const tryPlay = () => {
-    const p = a.play();
-    if (!p || !p.then){ AudioMgr.bgm = a; AudioMgr.currentSrc = src; return Promise.resolve(); }
-    return p.then(() => { AudioMgr.bgm = a; AudioMgr.currentSrc = src; });
+  AudioMgr.playBGM(SONGS.openBag, BGM_VOL);
+  const resume = () => {
+    AudioMgr.ensureCtx();
+    if (!AudioMgr.bgm || AudioMgr.bgm.paused){
+      AudioMgr.playBGM(SONGS.openBag, BGM_VOL);
+    }
+    document.removeEventListener('pointerdown', resume);
+    document.removeEventListener('click', resume);
+    document.removeEventListener('keydown', resume);
+    document.removeEventListener('touchstart', resume);
   };
-  tryPlay().catch(() => {
-    const resume = () => { tryPlay().catch(()=>{}); document.removeEventListener('pointerdown', resume); document.removeEventListener('click', resume); document.removeEventListener('keydown', resume); document.removeEventListener('touchstart', resume); };
-    document.addEventListener('pointerdown', resume, { once:false });
-    document.addEventListener('click', resume, { once:false });
-    document.addEventListener('keydown', resume, { once:false });
-    document.addEventListener('touchstart', resume, { once:false });
-  });
+  document.addEventListener('pointerdown', resume);
+  document.addEventListener('click', resume);
+  document.addEventListener('keydown', resume);
+  document.addEventListener('touchstart', resume);
 }
 
 function boot(){
