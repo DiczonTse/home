@@ -388,37 +388,40 @@ const STAMINA_REGEN = 1.6;
 const BAG_TYPES = {
   small: { id:'small', name:'迷你背包', icon:'👝', shape:[[1]], cost:1, color:'#4a3a28' },
   long:  { id:'long',  name:'長背包',   icon:'👜', shape:[[1],[1]], cost:2, color:'#55432c' },
-  L:     { id:'L',     name:'L型背包',  icon:'🧳', shape:[[1,1],[1,0]], cost:3, color:'#5a4a32' },
+  // ★ L型背包預設為：左上、左下、右下
+  L:     { id:'L',     name:'L型背包',  icon:'🧳', shape:[[1,0],[1,1]], cost:3, color:'#5a4a32' },
   square:{ id:'square',name:'方形背包', icon:'🎒', shape:[[1,1],[1,1]], cost:4, color:'#5c4a32' },
 };
 
 const ITEMS = {
   dagger: { name:'匕首', w:1,h:1, cd:1.6, dmg:3, stamina:1, cost:3, icon:'🗡️', color:'#4b5563' },
   sword:  { name:'長劍', w:1,h:2, cd:2.2, dmg:6, stamina:2, cost:5, icon:'⚔️', color:'#374151' },
-  bow:    { name:'短弓', w:2,h:1, cd:2.6, dmg:7, stamina:2, cost:6, icon:'🏹', color:'#78350f' },
+  // ★ 短弓改為 1x2
+  bow:    { name:'短弓', w:1,h:2, cd:2.6, dmg:7, stamina:2, cost:6, icon:'🏹', color:'#78350f' },
   spear:  { name:'長矛', w:1,h:3, cd:3.0, dmg:10, stamina:3, cost:8, icon:'🔱', color:'#1f2937' },
   axe:    { name:'戰斧', w:2,h:2, cd:3.6, dmg:14, stamina:4, cost:11, icon:'🪓', color:'#7f1d1d' },
   shield: { name:'盾牌', w:2,h:2, cd:3.2, armor:7, cost:7, icon:'🛡️', color:'#1e3a8a' },
   helmet: { name:'頭盔', w:2,h:2, cd:3.5, armor:6, cost:6, icon:'⛑️', color:'#1e40af' },
   chest:  { name:'護甲', w:2,h:3, cd:4.5, armor:12, cost:10, icon:'🥋', color:'#1e3a8a' },
-  // ★ 護靴：左上、左下、右下
   boots:  { name:'護靴', icon:'🥾', color:'#3f2d1a', cost:5, cd:3.0, armor:4, shape:[[1,0],[1,1]] },
   potion: { name:'治療藥水', w:1,h:1, cd:5.0, heal:10, cost:4, icon:'🧪', color:'#065f46', once:true, hpThreshold:0.33 },
   stone:  { name:'石頭', w:1,h:1, cd:3.0, dmg:3, stamina:1, cost:3, icon:'🪨', color:'#44403c', once:true, battleStart:true },
   fish:   { name:'魚', w:1,h:1, cd:7.0, heal:5, stamina:0, cost:4, icon:'🐟', color:'#0e7490' },
-  // ★ 香蕉：左上、左下、右下
   banana: { name:'香蕉', icon:'🍌', color:'#ca8a04', cost:5, cd:4.5, staminaRestore:3, shape:[[1,0],[1,1]] },
   gem:    { name:'力量寶石', w:1,h:1, passive:'dmg', value:2, cost:6, icon:'💎', color:'#5b21b6' },
   heart:  { name:'生命護符', w:1,h:1, passive:'hp',  value:15, cost:6, icon:'❤️', color:'#9f1239' },
-  arthur:    { name:'亞瑟劍', icon:'✝️', color:'#1e3a8a', cost:14, cd:2.8, dmg:13, stamina:3, shape:[[0,1,0],[1,1,1],[0,1,0],[0,1,0]], exclusive:'victor' },
-  overlord:  { name:'霸刀',   icon:'🗡️', color:'#4c1d95', cost:14, cd:3.0, dmg:15, stamina:4, shape:[[0,1,0],[0,1,0],[1,1,1],[0,1,0]], exclusive:'diczon' },
+  // ★ 域坨專武：每次攻擊 +1 防禦
+  arthur:    { name:'亞瑟劍', icon:'✝️', color:'#1e3a8a', cost:14, cd:2.8, dmg:13, stamina:3, armorOnAttack:1, shape:[[0,1,0],[1,1,1],[0,1,0],[0,1,0]], exclusive:'victor' },
+  // ★ 迪遜專武：每次攻擊使對手流血 -1HP（1回合，疊加）
+  overlord:  { name:'霸刀',   icon:'🗡️', color:'#4c1d95', cost:14, cd:3.0, dmg:15, stamina:4, bleed:1, shape:[[0,1,0],[0,1,0],[1,1,1],[0,1,0]], exclusive:'diczon' },
   firestaff: { name:'火杖',   icon:'🔥', color:'#b91c1c', cost:10, w:1, h:4, cd:2.4, dmg:5, stamina:2, burn:1, exclusive:'cherier' },
   twinaxe:   { name:'雙刃斧', icon:'🪓', color:'#7f1d1d', cost:12, w:2, h:3, cd:3.4, dmg:12, stamina:3, pierce:true, exclusive:'ringo' },
   longspear: { name:'長槍',   icon:'🔱', color:'#0f766e', cost:11, w:1, h:5, cd:2.8, dmg:8, stamina:3, riposte:1, exclusive:'leo' },
   longbow:   { name:'長弓',   icon:'🏹', color:'#78350f', cost:11, w:1, h:4, cd:2.6, dmg:10, stamina:2, exclusive:'zoe' },
   gauntlet:  { name:'機械拳套', icon:'🥊', color:'#374151', cost:9, w:2, h:2, cd:2.0, dmg:5, stamina:2, pairArmor:2, exclusive:'terry' },
   fishingrod:{ name:'釣杆',   icon:'🎣', color:'#365314', cost:8, w:1, h:4, cd:3.0, dmg:4, stamina:0, fishChance:0.4, exclusive:'rodge' },
-  crossbow:  { name:'弩',     icon:'🏹', color:'#44403c', cost:7, w:2, h:1, cd:2.8, dmg:3, stamina:1, needsBolt:true, exclusive:'lok' },
+  // ★ 洛的弩改為 🔫
+  crossbow:  { name:'弩',     icon:'🔫', color:'#44403c', cost:7, w:2, h:1, cd:2.8, dmg:3, stamina:1, needsBolt:true, exclusive:'lok' },
   bolt:      { name:'弩箭',   icon:'➤', color:'#78716c', cost:3, w:1, h:1, isAmmo:true, ammoCount:3, dmg:8, exclusive:'lok' },
 };
 const ITEM_KEYS = Object.keys(ITEMS);
@@ -498,6 +501,7 @@ const AudioMgr = {
       case 'armor': this.tone(300,0.1,'square',0.05); break;
       case 'stone': this.tone(90,0.18,'square',0.08); this.noise(0.12,0.13); break;
       case 'burn': this.noise(0.15,0.06); this.tone(220,0.1,'sawtooth',0.03); break;
+      case 'bleed': this.tone(140,0.15,'sawtooth',0.04); this.noise(0.1,0.08); break;
       case 'riposte': this.tone(520,0.05,'square',0.05); break;
       case 'fish': this.tone(440,0.08,'sine',0.06); this.tone(660,0.12,'sine',0.05,0.06); break;
       case 'banana': this.tone(520,0.08,'sine',0.06); this.tone(780,0.12,'sine',0.05,0.06); break;
@@ -514,7 +518,6 @@ const appState = { screen:'cover', muted:false, trophies:0, character:null };
 function persistState(){ try { localStorage.setItem(STORAGE.muted, appState.muted?'1':'0'); localStorage.setItem(STORAGE.trophies, String(appState.trophies)); localStorage.setItem(STORAGE.char, appState.character||''); } catch(e){} }
 function restoreState(){ try { const m=localStorage.getItem(STORAGE.muted); if (m!==null) appState.muted=(m==='1'); const t=localStorage.getItem(STORAGE.trophies); if (t!==null) appState.trophies=parseInt(t)||0; const c=localStorage.getItem(STORAGE.char); if (c) appState.character=c; } catch(e){} }
 
-/* ★ 檢查是否有進行中的進度 */
 function hasActiveProgress(){
   try {
     const raw = localStorage.getItem(STORAGE.progress);
@@ -529,6 +532,7 @@ const state = {
   phase:'prepare', round:1, gold:START_GOLD, lives:MAX_LIVES, streak:0,
   sessionTrophies:0, bags:[], items:[], stash:[],
   enemyBags:[], enemyItems:[], enemyChar:null, shop:[], fP:null, fE:null, battleTime:0,
+  refreshCost:1,
 };
 
 const $ = id => document.getElementById(id);
@@ -699,7 +703,6 @@ function showScreen(name){
   if (name === 'game'){ $('screenGame').classList.add('active'); computeCell(); renderAll(); }
 }
 
-/* ★ 更新封面按鈕文字 */
 function updateStartBtn(){
   const btn = $('btnStartGame');
   if (hasActiveProgress() && appState.character){
@@ -845,9 +848,11 @@ function itemTooltip(def){
   if (def.staminaRestore) p.push(`回復體力 +${def.staminaRestore}⚡ / 冷卻 ${def.cd}s`);
   if (def.pierce) p.push(`無視防禦`);
   if (def.burn) p.push(`使對手燃燒（每層每2秒1HP）`);
+  if (def.bleed) p.push(`使對手流血（每層1HP，1回合後觸發）`);
+  if (def.armorOnAttack) p.push(`每次攻擊 +${def.armorOnAttack} 護甲`);
   if (def.riposte) p.push(`被攻擊時反擊 ${def.riposte} HP`);
   if (def.pairArmor) p.push(`與另一個拳套相鄰：攻擊時 +${def.pairArmor} 護甲`);
-  if (def.fishChance) p.push(`戰後 ${Math.round(def.fishChance*100)}% 釣到魚`);
+  if (def.fishChance) p.push(`戰後 ${Math.round(def.fishChance*100)}% 釣到魚（存入暫存區）`);
   if (def.needsBolt) p.push(`需相鄰弩箭才能高傷`);
   if (def.isAmmo) p.push(`弩彈藥：${def.ammoCount} 次`);
   if (def.passive === 'dmg') p.push(`相鄰武器傷害 +${def.value}`);
@@ -1123,14 +1128,26 @@ function onPointerUp(ev){
   const overGrid = ev.clientX >= rect.left && ev.clientX <= rect.right && ev.clientY >= rect.top && ev.clientY <= rect.bottom;
   const spr = shopPanel.getBoundingClientRect();
   const overShop = ev.clientX >= spr.left && ev.clientX <= spr.right && ev.clientY >= spr.top && ev.clientY <= spr.bottom;
+  const sr = stashListEl.getBoundingClientRect();
+  const overStash = ev.clientX >= sr.left && ev.clientX <= sr.right && ev.clientY >= sr.top && ev.clientY <= sr.bottom;
 
   const d = drag;
   let handled = false;
 
   if (overShop && d.source !== 'shop'){
+    // 販賣
     state.gold += d.sellPrice;
     AudioMgr.sfx('sell');
     showToast(`販賣獲得 +${d.sellPrice}💰`, '💰', 900);
+    handled = true;
+  } else if (d.source === 'shop' && overStash){
+    // ★ 商店物品拖到暫存區 → 購買並放入暫存區
+    state.gold -= d.cost;
+    state.shop = state.shop.filter(s => s.id !== d.shopId);
+    if (d.kind === 'bag') state.stash.push({ uid: d.uid || (++uidCounter), kind:'bag', bagType:d.bagType, rot: d.rot });
+    else state.stash.push({ uid: d.uid || (++uidCounter), kind:'item', defKey:d.defKey, rot:d.rot });
+    AudioMgr.sfx('buy');
+    showToast(`已購買並放入暫存區 -${d.cost}💰`, '🛒', 900);
     handled = true;
   } else if (d.valid && overGrid){
     if (d.kind === 'bag'){
@@ -1275,7 +1292,9 @@ function updateHud(){
   } else eDpsEl.textContent = '—';
 
   battleBtn.disabled = state.phase !== 'prepare' || state.items.length === 0;
-  refreshBtn.disabled = state.phase !== 'prepare' || state.gold < 1;
+  // ★ 刷新按鈕顯示動態價格
+  refreshBtn.textContent = `🔄 刷新 ${state.refreshCost}💰`;
+  refreshBtn.disabled = state.phase !== 'prepare' || state.gold < state.refreshCost;
 }
 function updateIdleBars(){
   if (state.phase === 'prepare' || state.phase === 'gameover'){
@@ -1295,7 +1314,9 @@ function buildFighter(bags, items, baseHp){
   const f = {
     hp:baseHp, maxHp:baseHp, armor:0, alive:true, items:[],
     stamina: BASE_STAMINA, maxStamina: BASE_STAMINA, staminaRegen: STAMINA_REGEN,
-    burnStacks: 0, burnTimer: 0, riposteDamage: 0,
+    burnStacks: 0, burnTimer: 0,
+    bleedStacks: 0, bleedTimer: 0,
+    riposteDamage: 0,
   };
   for (const b of items){
     const def = ITEMS[b.defKey]; if (!def) continue;
@@ -1342,8 +1363,15 @@ function triggerItem(it, owner, foe){
       if (def.battleStart) AudioMgr.sfx('stone'); else AudioMgr.sfx('hit');
       if (foe.hp <= 0) foe.alive = false;
     }
+    // 火杖燃燒
     if (def.burn){ foe.burnStacks += def.burn; AudioMgr.sfx('burn'); }
+    // ★ 迪遜專武：流血
+    if (def.bleed){ foe.bleedStacks += def.bleed; AudioMgr.sfx('bleed'); }
+    // ★ 域坨專武：每次攻擊 +1 護甲
+    if (def.armorOnAttack){ owner.armor += def.armorOnAttack; AudioMgr.sfx('armor'); }
+    // 泰里機械拳套
     if (def.pairArmor && it.paired){ owner.armor += def.pairArmor; AudioMgr.sfx('armor'); }
+    // 反擊
     if (foe.riposteDamage > 0 && owner.alive){
       owner.hp = Math.max(0, owner.hp - foe.riposteDamage);
       AudioMgr.sfx('riposte');
@@ -1360,12 +1388,23 @@ function stepBattle(p, e, dt){
   for (const [side, foe] of [[p,e],[e,p]]){
     if (!side.alive) continue;
     side.stamina = Math.min(side.maxStamina, side.stamina + side.staminaRegen * dt);
+    // 燃燒（每2秒1HP）
     if (side.burnStacks > 0){
       side.burnTimer += dt;
       if (side.burnTimer >= 2.0){
         side.burnTimer -= 2.0;
         side.hp = Math.max(0, side.hp - 1);
         side.burnStacks--;
+        if (side.hp <= 0) side.alive = false;
+      }
+    }
+    // ★ 流血（1回合=1秒後觸發，每層1HP）
+    if (side.bleedStacks > 0){
+      side.bleedTimer += dt;
+      if (side.bleedTimer >= 1.0){
+        side.bleedTimer -= 1.0;
+        side.hp = Math.max(0, side.hp - side.bleedStacks);
+        side.bleedStacks = 0;
         if (side.hp <= 0) side.alive = false;
       }
     }
@@ -1449,12 +1488,10 @@ function updateCooldowns(f, prefix){
     else el.classList.remove('flash');
   }
 }
+// ★ 釣到的魚直接放暫存位置
 function tryAddFish(){
-  const fishDef = ITEMS.fish;
-  const spot = findItemSpot(state.bags, state.items, fishDef);
-  if (spot){ state.items.push({ uid: ++uidCounter, defKey:'fish', x:spot.x, y:spot.y, rot:0 }); return true; }
   state.stash.push({ uid: ++uidCounter, kind:'item', defKey:'fish', rot:0 });
-  return false;
+  return true;
 }
 function endBattle(){
   cancelAnimationFrame(battleRAF);
@@ -1472,7 +1509,7 @@ function endBattle(){
     AudioMgr.sfx('win');
     for (const it of state.fP.items){
       if (it.def.fishChance && Math.random() < it.def.fishChance){
-        if (tryAddFish()) showToast('🎣 釣到了魚！', '🐟', 1500);
+        if (tryAddFish()) showToast('🎣 釣到了魚！已放入暫存區', '🐟', 1800);
       }
     }
   } else if (draw){
@@ -1515,6 +1552,8 @@ function endBattle(){
 function nextRound(){
   state.phase = 'prepare'; state.fP = null; state.fE = null;
   state.gold += 6 + Math.floor(state.round/2);
+  // ★ 每局重置刷新價格
+  state.refreshCost = 1;
   state.enemyChar = pickRandomEnemyChar();
   state.enemyBags = generateEnemyBags(state.round);
   state.enemyItems = generateEnemyItems(state.enemyBags, state.round, state.enemyChar);
@@ -1566,7 +1605,7 @@ function generateEnemyItems(bags, round, charId){
 
 function saveProgressToStorage(){
   try {
-    const data = { round:state.round, gold:state.gold, lives:state.lives, streak:state.streak, sessionTrophies: state.sessionTrophies, bags:state.bags, items:state.items, stash:state.stash, savedAt: Date.now() };
+    const data = { round:state.round, gold:state.gold, lives:state.lives, streak:state.streak, sessionTrophies: state.sessionTrophies, refreshCost: state.refreshCost, bags:state.bags, items:state.items, stash:state.stash, savedAt: Date.now() };
     localStorage.setItem(STORAGE.progress, JSON.stringify(data));
   } catch(e){}
 }
@@ -1583,6 +1622,7 @@ function loadProgressFromStorage(){
     state.round = d.round ?? 1; state.gold = d.gold ?? START_GOLD;
     state.lives = d.lives ?? MAX_LIVES; state.streak = d.streak ?? 0;
     state.sessionTrophies = d.sessionTrophies ?? 0;
+    state.refreshCost = d.refreshCost ?? 1;
     state.bags = (d.bags || []).map(migrateRot);
     state.items = (d.items || []).map(migrateRot);
     state.stash = (d.stash || []).map(migrateRot);
@@ -1595,12 +1635,14 @@ function loadProgressFromStorage(){
 function clearProgress(){ try { localStorage.removeItem(STORAGE.progress); } catch(e){} }
 function resetGameState(){
   state.phase='prepare'; state.round=1; state.gold=START_GOLD; state.lives=MAX_LIVES; state.streak=0; state.sessionTrophies=0;
+  state.refreshCost=1;
   state.fP=null; state.fE=null; state.bags=[]; state.items=[]; state.stash=[]; state.shop=[]; state.enemyBags=[]; state.enemyItems=[]; state.enemyChar=null;
   clearProgress();
   shopView.style.display = ''; enemyView.style.display = 'none';
 }
 function newGame(){
   state.phase='prepare'; state.round=1; state.gold=START_GOLD; state.lives=MAX_LIVES; state.streak=0; state.sessionTrophies=0;
+  state.refreshCost=1;
   state.fP=null; state.fE=null;
   const bx = Math.floor((GRID_W-2)/2), by = Math.floor((GRID_H-2)/2);
   state.bags = [{ uid:++uidCounter, bagType:'square', x:bx, y:by, rot:0 }];
@@ -1685,7 +1727,6 @@ function resetAllData(){
 }
 
 function bindEvents(){
-  // ★ 開始按鈕：有進行中的進度 → 直接繼續遊戲（跳過選角）
   $('btnStartGame').addEventListener('click', () => {
     AudioMgr.sfx('click'); AudioMgr.ensureCtx();
     if (hasActiveProgress() && appState.character){
@@ -1696,7 +1737,6 @@ function bindEvents(){
         return;
       }
     }
-    // 全新開始 → 進入選角
     showScreen('select');
   });
   $('btnSave').addEventListener('click', saveSettingsFile);
@@ -1711,10 +1751,14 @@ function bindEvents(){
     AudioMgr.playBGM(SONGS.shopping, BGM_VOL);
     computeCell(); renderAll();
   });
+  // ★ 刷新按鈕：每次刷新費用遞增
   refreshBtn.addEventListener('click', () => {
-    if (state.phase !== 'prepare' || state.gold < 1) return;
-    state.gold -= 1; state.shop = rollShop();
-    AudioMgr.sfx('click'); renderShop(); updateHud();
+    if (state.phase !== 'prepare' || state.gold < state.refreshCost) return;
+    state.gold -= state.refreshCost;
+    state.refreshCost += 1;
+    state.shop = rollShop();
+    AudioMgr.sfx('click');
+    renderShop(); updateHud();
   });
   battleBtn.addEventListener('click', () => { AudioMgr.sfx('click'); startBattle(); });
   $('btnSettle').addEventListener('click', settleAndReturn);
@@ -1724,8 +1768,13 @@ function bindEvents(){
   document.addEventListener('contextmenu', e => e.preventDefault());
   document.addEventListener('dragstart', e => e.preventDefault());
   document.addEventListener('pointermove', (e) => { lastPointerX = e.clientX; lastPointerY = e.clientY; }, { passive: true });
+  // ★ 拖動中另一指點擊（包含玩家背包/物品區域）→ 旋轉
   document.addEventListener('pointerdown', (ev) => {
-    if (drag && drag.pid !== ev.pointerId){ ev.preventDefault(); ev.stopPropagation(); rotateDuringDrag(); }
+    if (drag && drag.pid !== ev.pointerId){
+      ev.preventDefault();
+      ev.stopPropagation();
+      rotateDuringDrag();
+    }
   }, true);
   document.addEventListener('keydown', (e) => {
     if (e.code === 'Space' || e.key === ' '){ if (drag){ e.preventDefault(); rotateDuringDrag(); } }
