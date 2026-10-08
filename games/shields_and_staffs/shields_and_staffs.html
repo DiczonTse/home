@@ -388,6 +388,27 @@ canvas { display: block; background: #142410; }
         { id: 'xeron',    icon: '👺',   name: 'Xeron',    skillName: 'Echo of the Abyss', desc: '召喚😈士兵 +3M',                      price: 100000000000 },
     ];
 
+    // ★★★ 兵力進化：達標時英雄外觀改變（由高到低比對） ★★★
+    const HERO_EVOLUTION = [
+        { soldiers: 100000000000, icon: '👺' },   // Xeron
+        { soldiers: 50000000000,  icon: '🧛' },   // Rashka
+        { soldiers: 10000000000,  icon: '👹' },   // Zydar
+        { soldiers: 5000000000,   icon: '🕷'  },   // Mephala
+        { soldiers: 1000000000,   icon: '🧝'  },   // Jenova
+        { soldiers: 500000000,    icon: '☠️' },   // Sandro
+        { soldiers: 100000000,    icon: '🧙‍♂️' },  // Adelaide
+        { soldiers: 50000000,     icon: '🏇'  },   // Roland
+    ];
+
+    function getDisplayHeroIcon(entity) {
+        const s = entity.soldiers || 0;
+        for (const e of HERO_EVOLUTION) {
+            if (s >= e.soldiers) return e.icon;
+        }
+        const id = entity.heroId || gameState.selectedHero;
+        return getHero(id).icon;
+    }
+
     const SAVE_KEY = 'shields_staffs_save_v1';
     let gameState = { gold: 0, ownedHeroes: ['roland'], selectedHero: 'roland', muted: false, bestScore: 0 };
 
@@ -595,7 +616,7 @@ canvas { display: block; background: #142410; }
         return icons;
     }
     function getSpeedMultiplier(soldiers) {
-        const reduction = Math.min(0.55, Math.log10(Math.max(1, soldiers)) * 0.11);
+        const reduction = Math.min(0.55, Math.log10(Math.max(1, soldiers)) * 0.05);
         return 1 - reduction;
     }
     function getAttackRange(soldiers) {
@@ -847,7 +868,7 @@ canvas { display: block; background: #142410; }
         riverTiles = generateRiverTiles();
         bridges = generateBridges(riverTiles);
         const hero = getHero(gameState.selectedHero);
-        player = { x: WORLD_W / 2, y: WORLD_H / 2, soldiers: 0, heroHp: MAX_HERO_HP, maxHeroHp: MAX_HERO_HP, radius: HERO_RADIUS, boostTimer: 0, boostCooldown: 0, speed: BASE_SPEED, hidden: false, rotOffset: 0, _id: 0, hero, slowTimer: 0 };
+        player = { x: WORLD_W / 2, y: WORLD_H / 2, soldiers: 0, heroHp: MAX_HERO_HP, maxHeroHp: MAX_HERO_HP, radius: HERO_RADIUS, boostTimer: 0, boostCooldown: 0, speed: BASE_SPEED, hidden: false, rotOffset: 0, _id: 0, hero, heroId: gameState.selectedHero, slowTimer: 0 };
         if (isInRiver(player.x, player.y, HERO_RADIUS + 10)) { const s = findSafeSpot(HERO_RADIUS + 10); player.x = s.x; player.y = s.y; }
         forests = generateForests(22);
         villages = generateVillages(6);
@@ -1476,7 +1497,6 @@ canvas { display: block; background: #142410; }
             const ex = e.x - camera.x, ey = e.y - camera.y;
             if (ex < -150 || ex > VIEW_W + 150 || ey < -150 || ey > VIEW_H + 150) continue;
             if (e.soldiers > 0) drawSoldiersCircle(e);
-            const eHero = getHero(e.heroId);
             if (e.skillTimer > 0) {
                 ctx.beginPath(); ctx.arc(ex, ey, HERO_RADIUS + 12, 0, Math.PI * 2);
                 ctx.strokeStyle = '#ffaa00'; ctx.lineWidth = 2; ctx.setLineDash([6, 6]); ctx.stroke(); ctx.setLineDash([]);
@@ -1487,7 +1507,8 @@ canvas { display: block; background: #142410; }
             }
             ctx.font = '44px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             if (e.soldiers <= 0 && e.heroHp <= 30) ctx.globalAlpha = 0.6;
-            ctx.fillText(eHero.icon, ex, ey); ctx.globalAlpha = 1;
+            ctx.fillText(getDisplayHeroIcon(e), ex, ey);   // ★ 敵人外觀也會依兵力進化
+            ctx.globalAlpha = 1;
             const num = Math.floor(e.soldiers);
             ctx.font = 'bold 13px "Segoe UI", monospace';
             const tw = ctx.measureText(formatNum(num)).width + 14;
@@ -1522,10 +1543,11 @@ canvas { display: block; background: #142410; }
                     ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 4; ctx.setLineDash([4, 4]); ctx.lineDashOffset = -frame; ctx.stroke(); ctx.setLineDash([]);
                 }
                 if (player.soldiers > 0) drawSoldiersCircle(player);
-                const hero = getHero(gameState.selectedHero);
+                // ★★★ 玩家外觀：依兵力自動進化 ★★★
                 ctx.font = '48px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                 if (player.hidden) ctx.globalAlpha = 0.55;
-                ctx.fillText(hero.icon, px, py); ctx.globalAlpha = 1;
+                ctx.fillText(getDisplayHeroIcon(player), px, py);
+                ctx.globalAlpha = 1;
                 const num = Math.floor(player.soldiers);
                 ctx.font = 'bold 14px "Segoe UI", monospace';
                 const tw = ctx.measureText(formatNum(num)).width + 16;
