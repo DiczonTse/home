@@ -14,7 +14,7 @@ html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
     --edge-gap: 12px;
 }
 
-/* ===== 封面：改為 flex 容器，內容參與佈局，不再絕對定位撐爆 ===== */
+/* ===== 封面 ===== */
 .cover-screen { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 40%, #1a2e14, #050a04 80%); padding: 12px; }
 .cover-box {
     position: relative;
@@ -95,25 +95,33 @@ html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 .cover-mute { position: absolute; bottom: 8px; left: 8px; z-index: 4; }
 .cover-fullscreen { position: absolute; bottom: 8px; right: 8px; z-index: 4; }
 
-/* ===== 手機版：高度改由內容決定，允許垂直滾動，四邊完整顯示 ===== */
+/* ===== 手機版封面：外層可捲動，內容不再被裁切 ===== */
 @media (max-width: 700px), (max-height: 560px) {
-    .cover-screen { padding: 8px; }
-    .cover-box {
-        width: 94vw;
-        max-width: 94vw;
-        aspect-ratio: auto;
-        min-height: 74vw;
-        max-height: 92vh;
+    .cover-screen {
+        padding: 8px;
+        align-items: center;
+        align-items: safe center;
+        justify-content: center;
         overflow-y: auto;
         overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
         overscroll-behavior: contain;
     }
+    .cover-box {
+        width: 94vw;
+        max-width: 94vw;
+        aspect-ratio: auto;
+        min-height: 74vw;
+        max-height: none;
+        height: auto;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
     .cover-content {
         flex: 0 0 auto;
         justify-content: center;
-        padding: 16px 12px 52px;
-        gap: 7px;   /* 稍微拉開間距 */
+        padding: 16px 12px calc(52px + env(safe-area-inset-bottom, 0px));
+        gap: 7px;
     }
     .cover-title { font-size: clamp(19px, 5.6vw, 30px); letter-spacing: 1px; }
     .cover-subtitle { font-size: 11px; letter-spacing: 4px; }
@@ -121,15 +129,14 @@ html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
     .cover-hero { font-size: 11px; }
     .cover-btn { font-size: 12px; padding: 7px 15px; letter-spacing: 1px; }
 
-    /* ★ 關鍵修正：關閉 startPulse 動畫，縮小立體陰影與外發光，避免遮住下方按鈕 */
     .start-btn {
         font-size: 14px;
         padding: 9px 20px;
         border-width: 2px;
         margin-top: 2px;
-        margin-bottom: 8px;       /* 與下方按鈕拉開距離 */
+        margin-bottom: 8px;
         box-shadow: 0 3px 0 #8a6b0f, 0 4px 10px rgba(0,0,0,0.5);
-        animation: none;          /* 關閉脈動，避免動畫中的大陰影閃爍覆蓋 */
+        animation: none;
     }
     .start-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #8a6b0f, 0 2px 6px rgba(0,0,0,0.5); }
 
@@ -139,7 +146,6 @@ html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
     .cover-mute, .cover-fullscreen { bottom: 6px; }
 }
 
-/* ===== 極窄/極矮裝置再縮一檔 ===== */
 @media (max-width: 360px) {
     .cover-title { font-size: 18px; }
     .cover-subtitle { font-size: 10px; letter-spacing: 3px; }
@@ -166,10 +172,24 @@ html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 .tier-gold { background: rgba(255,215,0,0.25); color: #ffd966; }
 .close-modal-btn { display: block; margin: 14px auto 0; padding: 8px 26px; font-size: clamp(12px, 1.8vw, 14px); font-weight: 900; color: #2a1808; background: linear-gradient(180deg, #ffd966, #d4a017); border: 3px solid #fff3c0; border-radius: 60px; cursor: pointer; box-shadow: 0 5px 0 #8a6b0f; font-family: inherit; letter-spacing: 1px; }
 .close-modal-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #8a6b0f; }
-.shop-grid { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 10px; padding: 12px 4px; margin-top: 8px; -webkit-overflow-scrolling: touch; scrollbar-width: none; cursor: grab; }
+
+/* ===== 商店：橫向循環滾動 ===== */
+.shop-grid {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 10px;
+    padding: 12px 4px;
+    margin-top: 8px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    cursor: grab;
+    scroll-behavior: auto;
+    touch-action: pan-x;
+}
 .shop-grid::-webkit-scrollbar { display: none; }
 .shop-grid:active { cursor: grabbing; }
-.shop-item { flex: 0 0 auto; width: 155px; scroll-snap-align: center; background: linear-gradient(180deg, #2a3f24, #142410); border: 2px solid #5e7a4a; border-radius: 14px; padding: 10px 8px; text-align: center; position: relative; transition: transform 0.2s, border-color 0.2s; }
+.shop-item { flex: 0 0 auto; width: 155px; background: linear-gradient(180deg, #2a3f24, #142410); border: 2px solid #5e7a4a; border-radius: 14px; padding: 10px 8px; text-align: center; position: relative; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; }
 .shop-item.owned { border-color: #ffd966; }
 .shop-item.selected { border-color: #7fff7f; box-shadow: 0 0 16px #7fff7f66; transform: scale(1.04); }
 .shop-icon { font-size: 34px; line-height: 1; }
@@ -184,6 +204,7 @@ html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 .shop-info { text-align: center; padding: 4px 0 2px; }
 .shop-info p { margin: 3px 0; }
 .shop-hint { font-size: clamp(10px, 1.4vw, 12px); color: #8fbc6b; text-align: center; margin: 6px 0 0; font-style: italic; }
+
 .game-wrapper { display: none; flex-direction: column; width: 100%; height: 100%; align-items: center; justify-content: center; gap: 8px; padding: 8px; }
 .top-bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 14px; background: #0a130b; border-radius: 40px; box-shadow: inset 0 2px 6px black, 0 2px 0 #4d6b3a; color: #d4e0b0; font-weight: bold; font-size: clamp(11px, 2.6vw, 14px); text-shadow: 0 2px 2px black; white-space: nowrap; flex-shrink: 0; }
 .top-bar .value { color: #ffd966; font-size: clamp(13px, 3.4vw, 17px); }
@@ -285,6 +306,17 @@ canvas { display: block; background: #142410; }
         <p>士兵歸零後雙方會繼續互扣英雄血量。AI 也有血量，擊敗 AI 後可吸收其開戰時兵力。</p>
         <h3>📈 動態 AI 兵力</h3>
         <p>玩家士兵達 5000 / 50000 / 100000 / 500000 / 1000000 / 10000000 / 100000000 / 1000000000 / 10000000000 / 100000000000 時，新 AI 會以對應兵力起始。</p>
+        <h3>🐎 兵力進化（士兵圖示）</h3>
+        <ul>
+            <li>+50M：🏇</li>
+            <li>+100M：🧙‍♂️</li>
+            <li>+500M：☠️</li>
+            <li>+1B：🧝</li>
+            <li>+5B：🕷</li>
+            <li>+10B：👹</li>
+            <li>+50B：🧛</li>
+            <li>+100B：👺</li>
+        </ul>
         <button class="close-modal-btn" id="closeHelpBtn">關閉</button>
     </div>
 </div>
@@ -297,7 +329,7 @@ canvas { display: block; background: #142410; }
             <p>🏆 最高紀錄兵力：<span id="shopBest" style="color:#7fff7f;font-weight:bold;">0</span></p>
         </div>
         <div class="shop-grid" id="shopGrid"></div>
-        <p class="shop-hint">← 橫向滑動或拖曳選擇英雄 →</p>
+        <p class="shop-hint">← 左右拖曳或滑動循環選擇英雄 →</p>
         <button class="close-modal-btn" id="closeShopBtn">關閉</button>
     </div>
 </div>
@@ -388,23 +420,20 @@ canvas { display: block; background: #142410; }
         { id: 'xeron',    icon: '👺',   name: 'Xeron',    skillName: 'Echo of the Abyss', desc: '召喚😈士兵 +3M',                      price: 100000000000 },
     ];
 
-    // ★★★ 兵力進化：達標時英雄外觀改變（由高到低比對） ★★★
-    const HERO_EVOLUTION = [
-        { soldiers: 100000000000, icon: '👺' },   // Xeron
-        { soldiers: 50000000000,  icon: '🧛' },   // Rashka
-        { soldiers: 10000000000,  icon: '👹' },   // Zydar
-        { soldiers: 5000000000,   icon: '🕷'  },   // Mephala
-        { soldiers: 1000000000,   icon: '🧝'  },   // Jenova
-        { soldiers: 500000000,    icon: '☠️' },   // Sandro
-        { soldiers: 100000000,    icon: '🧙‍♂️' },  // Adelaide
-        { soldiers: 50000000,     icon: '🏇'  },   // Roland
+    // ★ 士兵圖示進化門檻（由高到低比對，達到即顯示單一英雄圖示）
+    const SOLDIER_ICON_EVOLUTION = [
+        { soldiers: 100000000000, icon: '👺' },
+        { soldiers: 50000000000,  icon: '🧛' },
+        { soldiers: 10000000000,  icon: '👹' },
+        { soldiers: 5000000000,   icon: '🕷'  },
+        { soldiers: 1000000000,   icon: '🧝'  },
+        { soldiers: 500000000,    icon: '☠️' },
+        { soldiers: 100000000,    icon: '🧙‍♂️' },
+        { soldiers: 50000000,     icon: '🏇'  },
     ];
 
+    // 英雄外觀：固定為所選英雄，不再隨兵力進化
     function getDisplayHeroIcon(entity) {
-        const s = entity.soldiers || 0;
-        for (const e of HERO_EVOLUTION) {
-            if (s >= e.soldiers) return e.icon;
-        }
         const id = entity.heroId || gameState.selectedHero;
         return getHero(id).icon;
     }
@@ -561,7 +590,6 @@ canvas { display: block; background: #142410; }
     }
     coverScreen.addEventListener('click', tryPlayMenuMusic);
     coverScreen.addEventListener('touchstart', tryPlayMenuMusic, { passive: true });
-    // 額外掛到 document 作為備援
     document.addEventListener('touchstart', tryPlayMenuMusic, { passive: true });
     document.addEventListener('click', tryPlayMenuMusic);
 
@@ -603,7 +631,19 @@ canvas { display: block; background: #142410; }
     const LAST_SEEN_DURATION = 120;
     const VILLAGE_UNIT_LIMIT = 5;
 
+    // ★ 取得兵力對應的單一英雄圖示（未達門檻回傳 null）
+    function getEvolutionIcon(soldiers) {
+        for (const e of SOLDIER_ICON_EVOLUTION) {
+            if (soldiers >= e.soldiers) return e.icon;
+        }
+        return null;
+    }
+
     function getSoldierIcons(soldiers) {
+        // ★ 兵力達門檻：只顯示單一英雄圖示（攻擊範圍會縮小，屬預期行為）
+        const evo = getEvolutionIcon(soldiers);
+        if (evo) return [evo];
+
         let remaining = Math.floor(soldiers);
         if (remaining <= 0) return [];
         const icons = [];
@@ -1507,7 +1547,7 @@ canvas { display: block; background: #142410; }
             }
             ctx.font = '44px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             if (e.soldiers <= 0 && e.heroHp <= 30) ctx.globalAlpha = 0.6;
-            ctx.fillText(getDisplayHeroIcon(e), ex, ey);   // ★ 敵人外觀也會依兵力進化
+            ctx.fillText(getDisplayHeroIcon(e), ex, ey);
             ctx.globalAlpha = 1;
             const num = Math.floor(e.soldiers);
             ctx.font = 'bold 13px "Segoe UI", monospace';
@@ -1543,7 +1583,6 @@ canvas { display: block; background: #142410; }
                     ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 4; ctx.setLineDash([4, 4]); ctx.lineDashOffset = -frame; ctx.stroke(); ctx.setLineDash([]);
                 }
                 if (player.soldiers > 0) drawSoldiersCircle(player);
-                // ★★★ 玩家外觀：依兵力自動進化 ★★★
                 ctx.font = '48px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                 if (player.hidden) ctx.globalAlpha = 0.55;
                 ctx.fillText(getDisplayHeroIcon(player), px, py);
@@ -1676,7 +1715,7 @@ canvas { display: block; background: #142410; }
 
     document.addEventListener('gesturestart', (e) => e.preventDefault());
     document.addEventListener('touchmove', (e) => {
-        if (e.target.closest('.joystick-base') || e.target.closest('.boost-btn') || e.target.closest('.float-btn') || e.target.closest('.modal-content') || e.target.closest('.shop-grid')) return;
+        if (e.target.closest('.joystick-base') || e.target.closest('.boost-btn') || e.target.closest('.float-btn') || e.target.closest('.modal-content') || e.target.closest('.shop-grid') || e.target.closest('.cover-screen')) return;
         e.preventDefault();
     }, { passive: false });
 
@@ -1689,114 +1728,203 @@ canvas { display: block; background: #142410; }
         const hero = getHero(gameState.selectedHero);
         coverHero.textContent = hero.icon + ' ' + hero.name + ' · ' + hero.skillName;
     }
+
+    // ================= 商店：橫向循環滾動 =================
+    const SHOP_COPIES = 5;
+    const MIDDLE_COPY = 2;
+    let shopScrollTimer = null;
+    let suppressShopScroll = false;
+    let isAdjustingShopScroll = false;
+
+    function createShopItemEl(h) {
+        const item = document.createElement('div');
+        item.className = 'shop-item';
+        item.dataset.heroId = h.id;
+        item.innerHTML = `<div class="shop-icon">${h.icon}</div><div class="shop-name">${h.name}</div><div class="shop-skill">${h.skillName}</div><div class="shop-desc">${h.desc}</div><div class="shop-price">${h.price === 0 ? '免費' : formatGold(h.price)}</div>`;
+        const btn = document.createElement('button');
+        btn.className = 'shop-action-btn';
+        item.appendChild(btn);
+        return item;
+    }
+
+    function buildShopItems() {
+        shopGrid.innerHTML = '';
+        for (let copy = 0; copy < SHOP_COPIES; copy++) {
+            for (const h of HEROES) {
+                shopGrid.appendChild(createShopItemEl(h));
+            }
+        }
+        refreshShopUI();
+    }
+
+    function refreshShopUI() {
+        shopGrid.querySelectorAll('.shop-item').forEach(item => {
+            const h = getHero(item.dataset.heroId);
+            const owned = gameState.ownedHeroes.includes(h.id);
+            const selected = gameState.selectedHero === h.id;
+            const canAfford = gameState.gold >= h.price;
+            item.classList.toggle('owned', owned);
+            item.classList.toggle('selected', selected);
+            const btn = item.querySelector('.shop-action-btn');
+            if (selected) {
+                btn.className = 'shop-action-btn selected-btn';
+                btn.textContent = '使用中';
+                btn.disabled = true;
+            } else if (owned) {
+                btn.className = 'shop-action-btn';
+                btn.textContent = '選擇';
+                btn.disabled = false;
+            } else {
+                btn.className = 'shop-action-btn buy-btn';
+                btn.textContent = canAfford ? '購買' : '金幣不足';
+                btn.disabled = !canAfford;
+            }
+        });
+    }
+
+    function getSingleShopWidth() {
+        return shopGrid.scrollWidth / SHOP_COPIES;
+    }
+
+    function centerShopOnSelected(behavior) {
+        const items = shopGrid.querySelectorAll(`.shop-item[data-hero-id="${gameState.selectedHero}"]`);
+        const target = items[MIDDLE_COPY];
+        if (!target) return;
+        const itemCenter = target.offsetLeft + target.offsetWidth / 2;
+        let s = itemCenter - shopGrid.clientWidth / 2;
+        const sw = getSingleShopWidth();
+        if (sw > 0) {
+            const minS = sw * (MIDDLE_COPY - 0.9);
+            const maxS = sw * (MIDDLE_COPY + 0.9);
+            while (s < minS) s += sw;
+            while (s > maxS) s -= sw;
+        }
+        suppressShopScroll = true;
+        shopGrid.scrollTo({ left: s, behavior: behavior || 'auto' });
+        setTimeout(() => { suppressShopScroll = false; }, 350);
+    }
+
+    function updateCenterSelection() {
+        if (suppressShopScroll) return;
+        const gridRect = shopGrid.getBoundingClientRect();
+        const centerX = gridRect.left + gridRect.width / 2;
+        let closestEl = null, closestDist = Infinity;
+        shopGrid.querySelectorAll('.shop-item').forEach(el => {
+            const r = el.getBoundingClientRect();
+            const c = r.left + r.width / 2;
+            const d = Math.abs(c - centerX);
+            if (d < closestDist) { closestDist = d; closestEl = el; }
+        });
+        if (!closestEl) return;
+        const heroId = closestEl.dataset.heroId;
+        if (gameState.ownedHeroes.includes(heroId) && gameState.selectedHero !== heroId) {
+            gameState.selectedHero = heroId;
+            saveGame();
+            updateCover();
+            refreshShopUI();
+        }
+        centerShopOnSelected('smooth');
+    }
+
     function openShop() {
         Sfx.click();
         shopGold.textContent = formatGold(gameState.gold);
         shopBest.textContent = formatNum(gameState.bestScore);
-        renderShop();
+        buildShopItems();
         shopModal.classList.add('show');
-    }
-
-    let shopScrollTimer = null;
-    let suppressShopScroll = false;
-
-    function renderShop() {
-        shopGrid.innerHTML = '';
-        let selectedItemEl = null;
-        for (const h of HEROES) {
-            const owned = gameState.ownedHeroes.includes(h.id);
-            const selected = gameState.selectedHero === h.id;
-            const canAfford = gameState.gold >= h.price;
-            const item = document.createElement('div');
-            item.className = 'shop-item' + (owned ? ' owned' : '') + (selected ? ' selected' : '');
-            item.dataset.heroId = h.id;
-            item.innerHTML = `<div class="shop-icon">${h.icon}</div><div class="shop-name">${h.name}</div><div class="shop-skill">${h.skillName}</div><div class="shop-desc">${h.desc}</div><div class="shop-price">${h.price === 0 ? '免費' : formatGold(h.price)}</div>`;
-            const btn = document.createElement('button');
-            if (selected) { btn.className = 'shop-action-btn selected-btn'; btn.textContent = '使用中'; btn.disabled = true; }
-            else if (owned) {
-                btn.className = 'shop-action-btn'; btn.textContent = '選擇';
-                btn.onclick = () => { gameState.selectedHero = h.id; saveGame(); updateCover(); renderShop(); Sfx.buy(); };
-            }
-            else {
-                btn.className = 'shop-action-btn buy-btn';
-                btn.textContent = canAfford ? '購買' : '金幣不足';
-                btn.disabled = !canAfford;
-                btn.onclick = () => {
-                    if (gameState.gold >= h.price) {
-                        gameState.gold -= h.price;
-                        gameState.ownedHeroes.push(h.id);
-                        gameState.selectedHero = h.id;
-                        saveGame(); updateCover();
-                        shopGold.textContent = formatGold(gameState.gold);
-                        renderShop(); Sfx.buy();
-                    }
-                };
-            }
-            item.appendChild(btn);
-            shopGrid.appendChild(item);
-            if (selected) selectedItemEl = item;
-        }
-        // 捲動到選中項
-        if (selectedItemEl) {
+        requestAnimationFrame(() => {
             requestAnimationFrame(() => {
-                suppressShopScroll = true;
-                try {
-                    const itemCenter = selectedItemEl.offsetLeft + selectedItemEl.offsetWidth / 2;
-                    shopGrid.scrollLeft = itemCenter - shopGrid.clientWidth / 2;
-                } catch (e) {}
-                setTimeout(() => { suppressShopScroll = false; }, 200);
+                const sw = getSingleShopWidth();
+                if (sw > 0) shopGrid.scrollLeft = sw * MIDDLE_COPY;
+                centerShopOnSelected('auto');
             });
-        }
+        });
     }
 
-    // 商店橫向滑動選擇
+    // 循環滾動：離開中間份時跳回，達到無縫循環
     shopGrid.addEventListener('scroll', () => {
+        if (isAdjustingShopScroll) return;
+        const sw = getSingleShopWidth();
+        if (sw <= 0) return;
+        const sl = shopGrid.scrollLeft;
+        const minS = sw * (MIDDLE_COPY - 0.9);
+        const maxS = sw * (MIDDLE_COPY + 0.9);
+        if (sl < minS) {
+            isAdjustingShopScroll = true;
+            shopGrid.scrollLeft = sl + sw;
+            requestAnimationFrame(() => { isAdjustingShopScroll = false; });
+            return;
+        }
+        if (sl > maxS) {
+            isAdjustingShopScroll = true;
+            shopGrid.scrollLeft = sl - sw;
+            requestAnimationFrame(() => { isAdjustingShopScroll = false; });
+            return;
+        }
         if (suppressShopScroll) return;
         clearTimeout(shopScrollTimer);
-        shopScrollTimer = setTimeout(() => {
-            const gridRect = shopGrid.getBoundingClientRect();
-            const centerX = gridRect.left + gridRect.width / 2;
-            let closestEl = null, closestDist = Infinity;
-            shopGrid.querySelectorAll('.shop-item').forEach(el => {
-                const r = el.getBoundingClientRect();
-                const c = r.left + r.width / 2;
-                const d = Math.abs(c - centerX);
-                if (d < closestDist) { closestDist = d; closestEl = el; }
-            });
-            if (closestEl) {
-                const heroId = closestEl.dataset.heroId;
-                if (heroId && gameState.ownedHeroes.includes(heroId) && gameState.selectedHero !== heroId) {
-                    gameState.selectedHero = heroId;
-                    saveGame();
-                    updateCover();
-                    // 只更新視覺高亮，不重繪整個商店
-                    shopGrid.querySelectorAll('.shop-item').forEach(el => {
-                        el.classList.toggle('selected', el.dataset.heroId === heroId);
-                    });
-                    // 更新使用中按鈕
-                    shopGrid.querySelectorAll('.shop-item').forEach(el => {
-                        const btn = el.querySelector('.shop-action-btn');
-                        if (!btn) return;
-                        const isThis = el.dataset.heroId === heroId;
-                        const isOwned = gameState.ownedHeroes.includes(el.dataset.heroId);
-                        if (isThis) {
-                            btn.className = 'shop-action-btn selected-btn';
-                            btn.textContent = '使用中';
-                            btn.disabled = true;
-                        } else if (isOwned) {
-                            btn.className = 'shop-action-btn';
-                            btn.textContent = '選擇';
-                            btn.disabled = false;
-                            btn.onclick = () => {
-                                gameState.selectedHero = el.dataset.heroId;
-                                saveGame(); updateCover(); renderShop(); Sfx.buy();
-                            };
-                        }
-                    });
-                }
-            }
-        }, 180);
+        shopScrollTimer = setTimeout(updateCenterSelection, 180);
     }, { passive: true });
+
+    // 電腦版滑鼠拖曳
+    let shopDragging = false, shopDragStartX = 0, shopDragStartScroll = 0, shopDragMoved = false;
+    shopGrid.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'touch') return;
+        shopDragging = true;
+        shopDragMoved = false;
+        shopDragStartX = e.clientX;
+        shopDragStartScroll = shopGrid.scrollLeft;
+        shopGrid.style.cursor = 'grabbing';
+    });
+    window.addEventListener('pointermove', (e) => {
+        if (!shopDragging) return;
+        const dx = e.clientX - shopDragStartX;
+        if (Math.abs(dx) > 4) shopDragMoved = true;
+        shopGrid.scrollLeft = shopDragStartScroll - dx;
+    });
+    function endShopDrag() {
+        if (!shopDragging) return;
+        shopDragging = false;
+        shopGrid.style.cursor = '';
+        if (shopDragMoved) {
+            updateCenterSelection();
+        }
+    }
+    window.addEventListener('pointerup', endShopDrag);
+    window.addEventListener('pointercancel', endShopDrag);
+
+    // 電腦版滾輪橫向滾動
+    shopGrid.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        shopGrid.scrollLeft += (e.deltaY + e.deltaX);
+    }, { passive: false });
+
+    // 商店按鈕點擊（事件委派）
+    shopGrid.addEventListener('click', (e) => {
+        if (shopDragMoved) { shopDragMoved = false; return; }
+        const btn = e.target.closest('.shop-action-btn');
+        if (!btn || btn.disabled) return;
+        const item = btn.closest('.shop-item');
+        const heroId = item.dataset.heroId;
+        const h = getHero(heroId);
+        if (gameState.ownedHeroes.includes(heroId)) {
+            if (gameState.selectedHero === heroId) return;
+            gameState.selectedHero = heroId;
+            saveGame(); updateCover();
+            refreshShopUI();
+            centerShopOnSelected('smooth');
+            Sfx.buy();
+        } else if (gameState.gold >= h.price) {
+            gameState.gold -= h.price;
+            gameState.ownedHeroes.push(heroId);
+            gameState.selectedHero = heroId;
+            saveGame(); updateCover();
+            shopGold.textContent = formatGold(gameState.gold);
+            refreshShopUI();
+            centerShopOnSelected('smooth');
+            Sfx.buy();
+        }
+    });
 
     shopBtn.addEventListener('click', (e) => { e.stopPropagation(); openShop(); });
     closeShopBtn.addEventListener('click', (e) => { e.stopPropagation(); Sfx.click(); shopModal.classList.remove('show'); });
