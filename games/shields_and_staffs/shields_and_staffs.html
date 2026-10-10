@@ -286,6 +286,7 @@ canvas { display: block; background: #142410; }
         </ul>
         <h3>⚡ 技能</h3>
         <p>每位英雄有專屬技能，技能冷卻 30 秒，效果依角色而定。技能不會降低攻擊力。AI 也會使用技能。</p>
+        <p><strong>Adelaide</strong> 不受暴風雪（冰凍）減速影響；<strong>Rashka</strong> 不受熔岩減速影響。</p>
         <h3>💰 士兵招募與佔領時間</h3>
         <ul>
             <li><strong>銅階：</strong>佔領 1 秒</li>
@@ -545,6 +546,104 @@ canvas { display: block; background: #142410; }
         } catch (e) {}
     }
     function playSequence(notes) { if (isMuted) return; let t = 0; for (const n of notes) { setTimeout(() => playTone(n.f, n.d, n.t || 'sine', n.v || 0.09), t); t += n.gap || n.d * 1000; } }
+
+    // ★ 金屬敲擊（擊劍）音效：多個不諧和高頻泛音 + 快速衰減 + 隨機微失諧
+    function playClash(density = 12) { // density: 碰撞密集度，數字越大越激烈
+	  if (isMuted) return;
+	  const ac = getAudioCtx();
+	  if (!ac) return;
+
+	  try {
+		const t0 = ac.currentTime;
+
+		// 定義基礎的擊劍金屬主頻率
+		const partials = [
+		  { f: 2850, t: 'sine', v: 0.12 },
+		  { f: 3920, t: 'sine', v: 0.08 },
+		  { f: 5210, t: 'sine', v: 0.06 },
+		  { f: 6850, t: 'sine', v: 0.04 }
+		];
+
+		// 依據密集度，隨機在不同時間點與空間位置產生交鋒聲
+		for (let i = 0; i < density; i++) {
+		  // 1. 隨機化時間延遲：讓聲音錯落有致，模擬多人交戰 (0 ~ 0.8秒內亂序發生)
+		  const delay = Math.random() * 0.8; 
+		  const t = t0 + delay;
+
+		  // 2. 隨機化遠近與位置：模擬前後左右不同敵我的位置
+		  const panValue = (Math.random() - 0.5) * 2; // -1 (左) 到 1 (右)
+		  const distanceVolume = Math.random() * 0.7 + 0.3; // 隨機音量衰減，模擬遠近
+
+		  // 建立立體聲節點 (若瀏覽器不支援則安全跳過)
+		  let panner = null;
+		  if (ac.createStereoPanner) {
+			panner = ac.createStereoPanner();
+			panner.pan.setValueAtTime(panValue, t);
+		  }
+
+		  // --- A. 生成金屬碰撞聲 (Oscillators) ---
+		  for (const p of partials) {
+			const osc = ac.createOscillator();
+			const gain = ac.createGain();
+			const detune = (1 + (Math.random() - 0.5) * 0.04) * (Math.random() > 0.5 ? 1 : 0.9); // 隨機改變劍的尺寸/音高
+
+			osc.type = p.t;
+			osc.frequency.setValueAtTime(p.f * detune, t);
+			osc.frequency.setValueAtTime(p.f * detune, t + 0.1);
+
+			gain.gain.setValueAtTime(0, t);
+			gain.gain.linearRampToValueAtTime(p.v * distanceVolume, t + 0.001);
+			gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.1 + Math.random() * 0.04);
+
+			// 連接節點
+			if (panner) {
+			  osc.connect(gain);
+			  gain.connect(panner);
+			  panner.connect(ac.destination);
+			} else {
+			  osc.connect(gain);
+			  gain.connect(ac.destination);
+			}
+
+			osc.start(t);
+			osc.stop(t + 0.2);
+		  }
+
+		  // --- B. 生成金屬摩擦與撞擊雜音 (White Noise) ---
+		  const bufferSize = ac.sampleRate * 0.04;
+		  const buffer = ac.createBuffer(1, bufferSize, ac.sampleRate);
+		  const data = buffer.getChannelData(0);
+		  for (let j = 0; j < bufferSize; j++) {
+			data[j] = Math.random() * 2 - 1;
+		  }
+
+		  const noise = ac.createBufferSource();
+		  noise.buffer = buffer;
+
+		  const noiseFilter = ac.createBiquadFilter();
+		  noiseFilter.type = 'highpass';
+		  noiseFilter.frequency.setValueAtTime(3500 + Math.random() * 1000, t);
+
+		  const noiseGain = ac.createGain();
+		  noiseGain.gain.setValueAtTime(0.05 * distanceVolume, t);
+		  noiseGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.03);
+
+		  if (panner) {
+			noise.connect(noiseFilter);
+			noiseFilter.connect(noiseGain);
+			noiseGain.connect(panner);
+		  } else {
+			noise.connect(noiseFilter);
+			noiseFilter.connect(noiseGain);
+			noiseGain.connect(ac.destination);
+		  }
+
+		  noise.start(t);
+		  noise.stop(t + 0.04);
+		}
+	  } catch (e) {}
+	}
+
     const Sfx = {
         captureComplete: () => playSequence([{f:523,d:.08,gap:70},{f:659,d:.08,gap:70},{f:784,d:.14}]),
         villageSpawn: () => playSequence([{f:440,d:.08,gap:80},{f:587,d:.12}]),
@@ -558,6 +657,7 @@ canvas { display: block; background: #142410; }
         newRecord: () => playSequence([{f:659,d:.1,gap:100},{f:784,d:.1,gap:100},{f:1046,d:.1,gap:100},{f:1318,d:.35,v:.12}]),
         skillCast: () => playSequence([{f:660,d:.07,gap:60},{f:880,d:.1,gap:60},{f:1100,d:.12}]),
         buy: () => playSequence([{f:784,d:.08,gap:80},{f:1046,d:.16}]),
+        swordClash: playClash,   // ★ 擊劍金屬聲
     };
 
     let currentMusic = null;
@@ -643,6 +743,8 @@ canvas { display: block; background: #142410; }
 		let remaining = Math.floor(soldiers);
 		if (remaining <= 0) return [];
 		const icons = [];
+
+		// 1. 先按普通士兵類型拆分（使用全部兵力）
 		for (let i = SOLDIER_TYPES.length - 1; i >= 0; i--) {
 			const t = SOLDIER_TYPES[i];
 			const c = Math.floor(remaining / t.value);
@@ -650,9 +752,19 @@ canvas { display: block; background: #142410; }
 		}
 		if (icons.length === 0 && soldiers > 0) icons.push('🤺');
 
-		// ★ 達到進化門檻時，把進化圖示插到最前面，普通士兵圖示全部保留
-		const evo = getEvolutionIcon(soldiers);
-		if (evo) icons.unshift(evo);
+		// 2. 找出當前兵力對應的最高進化等級
+		let evoEntry = null;
+		for (const e of SOLDIER_ICON_EVOLUTION) {
+			if (soldiers >= e.soldiers) { evoEntry = e; break; }
+		}
+
+		// 3. 計算進化圖示數量（以該等級閾值為單位），並插到最前面
+		if (evoEntry) {
+			const evoCount = Math.floor(soldiers / evoEntry.soldiers);
+			for (let i = 0; i < evoCount; i++) {
+				icons.unshift(evoEntry.icon);
+			}
+		}
 
 		return icons;
 	}
@@ -677,7 +789,8 @@ canvas { display: block; background: #142410; }
     let slowEffects = [], lavaEffects = [];
     const keys = { w: false, a: false, s: false, d: false, ArrowUp: false, ArrowLeft: false, ArrowDown: false, ArrowRight: false, ' ': false, j: false };
     const joystickInput = { x: 0, y: 0 };
-    let lastCombatSoundFrame = -100, lastEdgeWarnFrame = -100;
+    let lastCombatSoundFrame = -100, lastEdgeWarnFrame = -100, lastClashSoundFrame = -100;
+    let edgeFlashIntensity = 0;   // ★ 邊界紅光閃爍強度 0~1
 
     function resizeGame() {
         const aspect = VIEW_W / VIEW_H;
@@ -922,7 +1035,8 @@ canvas { display: block; background: #142410; }
         maxSoldiersThisRun = 0;
         camera.x = player.x - VIEW_W / 2; camera.y = player.y - VIEW_H / 2;
         frame = 0; spawnTimer = 0;
-        lastCombatSoundFrame = -100; lastEdgeWarnFrame = -100;
+        lastCombatSoundFrame = -100; lastEdgeWarnFrame = -100; lastClashSoundFrame = -100;
+        edgeFlashIntensity = 0;
         gameoverOverlay.classList.remove('show');
         updateHUD();
     }
@@ -1068,11 +1182,17 @@ canvas { display: block; background: #142410; }
         if (player.soldiers > maxSoldiersThisRun) maxSoldiersThisRun = player.soldiers;
         player.hidden = isInForest(player.x, player.y, HERO_RADIUS);
 
-        for (const s of slowEffects) {
-            if (s.owner !== 'player' && dist(player.x, player.y, s.x, s.y) < s.radius) { player.slowTimer = Math.max(player.slowTimer, 5); break; }
+        // ★ Adelaide 不受暴風雪(冰凍)減速；Rashka 不受熔岩減速
+        const playerHeroId = player.heroId || gameState.selectedHero;
+        if (playerHeroId !== 'adelaide') {
+            for (const s of slowEffects) {
+                if (s.owner !== 'player' && dist(player.x, player.y, s.x, s.y) < s.radius) { player.slowTimer = Math.max(player.slowTimer, 5); break; }
+            }
         }
-        for (const lv of lavaEffects) {
-            if (lv.owner === 'ai' && dist(player.x, player.y, lv.x, lv.y) < lv.radius) { player.slowTimer = Math.max(player.slowTimer, 5); break; }
+        if (playerHeroId !== 'rashka') {
+            for (const lv of lavaEffects) {
+                if (lv.owner === 'ai' && dist(player.x, player.y, lv.x, lv.y) < lv.radius) { player.slowTimer = Math.max(player.slowTimer, 5); break; }
+            }
         }
 
         let dx = 0, dy = 0;
@@ -1097,9 +1217,14 @@ canvas { display: block; background: #142410; }
         const eDist = Math.min(eDx, eDy);
         if (eDist < EDGE_MARGIN) {
             const f = 1 - eDist / EDGE_MARGIN;
+            // ★ 邊界紅光：進入時快速拉高
+            edgeFlashIntensity = Math.min(1, edgeFlashIntensity + 0.12);
             if (player.soldiers > 0) player.soldiers = Math.max(0, player.soldiers - f * EDGE_SOLDIER_DMG);
             else { player.heroHp = Math.max(0, player.heroHp - f * EDGE_HP_DMG); if (player.heroHp <= 0) { handleGameOver(false); return; } }
             if (frame - lastEdgeWarnFrame > 40) { lastEdgeWarnFrame = frame; Sfx.edgeWarn(); }
+        } else if (edgeFlashIntensity > 0) {
+            // ★ 離開邊界後淡出
+            edgeFlashIntensity = Math.max(0, edgeFlashIntensity - 0.08);
         }
 
         if ((keys[' '] || keys.j) && skillCooldown === 0) castSkill();
@@ -1159,8 +1284,14 @@ canvas { display: block; background: #142410; }
             if (e.skillTimer > 0 && e.heroId === 'roland') aiSpeed *= SKILL_SPEED_MULT;
             if (e.slowTimer > 0) { aiSpeed *= 0.5; e.slowTimer--; }
             if (isInForest(e.x, e.y, e.radius)) aiSpeed *= FOREST_SPEED_FACTOR;
-            for (const s of slowEffects) if (dist(e.x, e.y, s.x, s.y) < s.radius) { e.slowTimer = Math.max(e.slowTimer, 5); break; }
-            for (const lv of lavaEffects) if (dist(e.x, e.y, lv.x, lv.y) < lv.radius) { e.slowTimer = Math.max(e.slowTimer, 5); break; }
+
+            // ★ Adelaide 免疫冰凍、Rashka 免疫熔岩
+            if (e.heroId !== 'adelaide') {
+                for (const s of slowEffects) if (dist(e.x, e.y, s.x, s.y) < s.radius) { e.slowTimer = Math.max(e.slowTimer, 5); break; }
+            }
+            if (e.heroId !== 'rashka') {
+                for (const lv of lavaEffects) if (dist(e.x, e.y, lv.x, lv.y) < lv.radius) { e.slowTimer = Math.max(e.slowTimer, 5); break; }
+            }
 
             if (e.unstickTimer > 0) {
                 e.unstickTimer--;
@@ -1265,6 +1396,8 @@ canvas { display: block; background: #142410; }
                 const mx = (player.x + e.x) / 2, my = (player.y + e.y) / 2;
                 spawnCombatSparks(mx, my);
                 if (frame - lastCombatSoundFrame > 9) { lastCombatSoundFrame = frame; Sfx.combatHit(); }
+                // ★ 擊劍金屬聲
+                if (frame - lastClashSoundFrame > 24) { lastClashSoundFrame = frame; Sfx.swordClash(); }
 
                 if (e.heroHp <= 0) {
                     e._dead = true;
@@ -1298,6 +1431,8 @@ canvas { display: block; background: #142410; }
 
                     const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
                     spawnCombatSparks(mx, my, '#ffaa66');
+                    // ★ 擊劍金屬聲
+                    if (frame - lastClashSoundFrame > 24) { lastClashSoundFrame = frame; Sfx.swordClash(); }
 
                     if (a.heroHp <= 0 && !a._dead) {
                         a._dead = true; b.soldiers += entry.aStart;
@@ -1637,6 +1772,20 @@ canvas { display: block; background: #142410; }
             ctx.fillText('🌲 森林隱藏中', VIEW_W / 2, 56); ctx.shadowBlur = 0;
         }
 
+        // ★ 邊界受傷紅光閃爍
+        if (edgeFlashIntensity > 0.01) {
+            const pulse = 0.55 + 0.45 * Math.sin(frame * 0.4);
+            const a = (0.5 * edgeFlashIntensity * pulse).toFixed(3);
+            const g = ctx.createRadialGradient(
+                VIEW_W / 2, VIEW_H / 2, Math.min(VIEW_W, VIEW_H) * 0.18,
+                VIEW_W / 2, VIEW_H / 2, Math.max(VIEW_W, VIEW_H) * 0.78
+            );
+            g.addColorStop(0, 'rgba(255,0,0,0)');
+            g.addColorStop(1, 'rgba(255,0,0,' + a + ')');
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+        }
+
         const mW = 150, mH = 105;
         const mX = VIEW_W - mW - 15, mY = 15;
         ctx.fillStyle = '#0a130bcc'; ctx.fillRect(mX, mY, mW, mH);
@@ -1787,11 +1936,14 @@ canvas { display: block; background: #142410; }
         return shopGrid.scrollWidth / SHOP_COPIES;
     }
 
+    // ★ 修正：改用 getBoundingClientRect 換算內容座標，避免 offsetParent 造成偏移
     function centerShopOnSelected(behavior) {
         const items = shopGrid.querySelectorAll(`.shop-item[data-hero-id="${gameState.selectedHero}"]`);
         const target = items[MIDDLE_COPY];
         if (!target) return;
-        const itemCenter = target.offsetLeft + target.offsetWidth / 2;
+        const gridRect = shopGrid.getBoundingClientRect();
+        const itemRect = target.getBoundingClientRect();
+        const itemCenter = shopGrid.scrollLeft + (itemRect.left - gridRect.left) + itemRect.width / 2;
         let s = itemCenter - shopGrid.clientWidth / 2;
         const sw = getSingleShopWidth();
         if (sw > 0) {
