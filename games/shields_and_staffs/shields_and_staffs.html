@@ -640,21 +640,22 @@ canvas { display: block; background: #142410; }
     }
 
     function getSoldierIcons(soldiers) {
-        // ★ 兵力達門檻：只顯示單一英雄圖示（攻擊範圍會縮小，屬預期行為）
-        const evo = getEvolutionIcon(soldiers);
-        if (evo) return [evo];
+		let remaining = Math.floor(soldiers);
+		if (remaining <= 0) return [];
+		const icons = [];
+		for (let i = SOLDIER_TYPES.length - 1; i >= 0; i--) {
+			const t = SOLDIER_TYPES[i];
+			const c = Math.floor(remaining / t.value);
+			if (c > 0) { for (let j = 0; j < c; j++) icons.push(t.icon); remaining -= c * t.value; }
+		}
+		if (icons.length === 0 && soldiers > 0) icons.push('🤺');
 
-        let remaining = Math.floor(soldiers);
-        if (remaining <= 0) return [];
-        const icons = [];
-        for (let i = SOLDIER_TYPES.length - 1; i >= 0; i--) {
-            const t = SOLDIER_TYPES[i];
-            const c = Math.floor(remaining / t.value);
-            if (c > 0) { for (let j = 0; j < c; j++) icons.push(t.icon); remaining -= c * t.value; }
-        }
-        if (icons.length === 0 && soldiers > 0) icons.push('🤺');
-        return icons;
-    }
+		// ★ 達到進化門檻時，把進化圖示插到最前面，普通士兵圖示全部保留
+		const evo = getEvolutionIcon(soldiers);
+		if (evo) icons.unshift(evo);
+
+		return icons;
+	}
     function getSpeedMultiplier(soldiers) {
         const reduction = Math.min(0.55, Math.log10(Math.max(1, soldiers)) * 0.05);
         return 1 - reduction;
