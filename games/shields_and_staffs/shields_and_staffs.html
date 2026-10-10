@@ -744,28 +744,26 @@ canvas { display: block; background: #142410; }
 		if (remaining <= 0) return [];
 		const icons = [];
 
-		// 1. 先按普通士兵類型拆分（使用全部兵力）
-		for (let i = SOLDIER_TYPES.length - 1; i >= 0; i--) {
-			const t = SOLDIER_TYPES[i];
-			const c = Math.floor(remaining / t.value);
-			if (c > 0) { for (let j = 0; j < c; j++) icons.push(t.icon); remaining -= c * t.value; }
-		}
-		if (icons.length === 0 && soldiers > 0) icons.push('🤺');
-
-		// 2. 找出當前兵力對應的最高進化等級
-		let evoEntry = null;
-		for (const e of SOLDIER_ICON_EVOLUTION) {
-			if (soldiers >= e.soldiers) { evoEntry = e; break; }
-		}
-
-		// 3. 計算進化圖示數量（以該等級閾值為單位），並插到最前面
-		if (evoEntry) {
-			const evoCount = Math.floor(soldiers / evoEntry.soldiers);
-			for (let i = 0; i < evoCount; i++) {
-				icons.unshift(evoEntry.icon);
+		// 1. 先處理進化圖示（由高到低）
+		for (const e of SOLDIER_ICON_EVOLUTION) {   // 已是由高到低排序
+			if (remaining >= e.soldiers) {
+				const count = Math.floor(remaining / e.soldiers);
+				for (let i = 0; i < count; i++) icons.push(e.icon);
+				remaining -= count * e.soldiers;
 			}
 		}
 
+		// 2. 剩下的兵力再拆普通士兵
+		for (let i = SOLDIER_TYPES.length - 1; i >= 0; i--) {
+			const t = SOLDIER_TYPES[i];
+			const c = Math.floor(remaining / t.value);
+			if (c > 0) {
+				for (let j = 0; j < c; j++) icons.push(t.icon);
+				remaining -= c * t.value;
+			}
+		}
+
+		if (icons.length === 0 && soldiers > 0) icons.push('🤺');
 		return icons;
 	}
     function getSpeedMultiplier(soldiers) {
