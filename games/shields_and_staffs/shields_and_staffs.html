@@ -286,7 +286,12 @@ canvas { display: block; background: #142410; }
         </ul>
         <h3>⚡ 技能</h3>
         <p>每位英雄有專屬技能，技能冷卻 30 秒，效果依角色而定。技能不會降低攻擊力。AI 也會使用技能。</p>
-        <p><strong>Adelaide</strong> 不受暴風雪（冰凍）減速影響；<strong>Rashka</strong> 不受熔岩減速影響。</p>
+        <ul>
+            <li><strong>Mephala</strong> 的 <em>Holy Shield</em>：無敵 3 秒（180 幀），期間不會損失士兵與血量。AI 的 Mephala 開盾時同樣免疫你的攻擊。</li>
+            <li><strong>Murazel</strong> 的 <em>Fly</em>：可穿越河流，持續 3 秒（180 幀）。若效果結束時仍停留在河面上，會繼續保持飛行，直到回到陸地才結束，並從那一刻起才開始計算技能冷卻。</li>
+            <li><strong>Adelaide</strong> 不受暴風雪（冰凍）減速影響。</li>
+            <li><strong>Rashka</strong> 不受熔岩減速影響，也不會被自己施放的熔岩傷害（自身兵力／血量免疫）。</li>
+        </ul>
         <h3>💰 士兵招募與佔領時間</h3>
         <ul>
             <li><strong>銅階：</strong>佔領 1 秒</li>
@@ -299,24 +304,25 @@ canvas { display: block; background: #142410; }
         <ul>
             <li>村莊會密集產出所有種類士兵（同時最多 5 隻）。</li>
             <li>森林可隱藏英雄，AI 不會直接看到你，但會朝最後看到你的位置前進最多約 2 秒。</li>
-            <li>河流無法穿越，木橋可通行。</li>
+            <li>河流無法穿越，木橋可通行（Murazel 的 Fly 可直接飛越）。</li>
         </ul>
         <h3>⚠️ 邊界警告</h3>
         <p>地圖四周紅色警示區會持續損失士兵，士兵歸零後扣英雄血量。AI 會避開紅邊。</p>
         <h3>⚔️ 戰鬥與血量</h3>
         <p>士兵歸零後雙方會繼續互扣英雄血量。AI 也有血量，擊敗 AI 後可吸收其開戰時兵力。</p>
         <h3>📈 動態 AI 兵力</h3>
-        <p>玩家士兵達 5000 / 50000 / 100000 / 500000 / 1000000 / 10000000 / 100000000 / 1000000000 / 10000000000 / 100000000000 時，新 AI 會以對應兵力起始。</p>
+        <p>新生成的 AI 英雄，起始兵力<strong>直接等於玩家當時的兵力</strong>，你的軍隊越強，新對手就越強。</p>
         <h3>🐎 兵力進化（士兵圖示）</h3>
         <ul>
-            <li>+50M：🏇</li>
-            <li>+100M：🧙‍♂️</li>
-            <li>+500M：☠️</li>
-            <li>+1B：🧝</li>
-            <li>+5B：🕷</li>
-            <li>+10B：👹</li>
-            <li>+50B：🧛</li>
-            <li>+100B：👺</li>
+            <li>1.91 × 10¹³：🏇</li>
+			<li>9.54 × 10¹³：🧙‍♂️</li>
+			<li>4.77 × 10¹⁴：☠️</li>
+			<li>2.38 × 10¹⁵：🧝</li>
+			<li>1.19 × 10¹⁶：🕷</li>
+			<li>5.96 × 10¹⁶：👹</li>
+			<li>2.98 × 10¹⁷：🧛</li>
+			<li>1.49 × 10¹⁸：👺</li>
+			<li>7.45 × 10¹⁸：👼</li>
         </ul>
         <button class="close-modal-btn" id="closeHelpBtn">關閉</button>
     </div>
@@ -368,37 +374,59 @@ canvas { display: block; background: #142410; }
 <script>
 (function() {
     // ================= 數字格式化 =================
+    const NUM_UNITS = [
+        { v: 1e3,  s: 'K'  },
+        { v: 1e6,  s: 'M'  },
+        { v: 1e9,  s: 'B'  },
+        { v: 1e12, s: 'T'  },
+        { v: 1e15, s: 'Qa' },
+        { v: 1e18, s: 'Qi' },
+        { v: 1e21, s: 'Sx' },
+        { v: 1e24, s: 'Sp' },
+        { v: 1e27, s: 'Oc' },
+        { v: 1e30, s: 'No' },
+        { v: 1e33, s: 'Dc' },
+        { v: 1e36, s: 'Ud' },
+    ];
     function formatNum(n) {
         n = Math.floor(n);
+        if (!isFinite(n)) return '∞';
         if (n < 1000) return n.toString();
-        if (n < 1000000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
-        if (n < 1000000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
-        if (n < 1000000000000) return (n / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
-        return (n / 1000000000000).toFixed(1).replace(/\.0$/, '') + 'T';
+        for (let i = NUM_UNITS.length - 1; i >= 0; i--) {
+            const u = NUM_UNITS[i];
+            if (n >= u.v) {
+                const val = n / u.v;
+                let str;
+                if (val >= 100) str = val.toFixed(0);
+                else str = val.toFixed(1).replace(/\.0$/, '');
+                return str + u.s;
+            }
+        }
+        return n.toString();
     }
     function formatGold(n) { return '$' + formatNum(n); }
 
-    // ================= 士兵定義 =================
+    // ================= 士兵定義（更新後兵力） =================
     const SOLDIER_TYPES = [
-        { icon: '🤺', name: '劍士', value: 200, tier: 'bronze', weight: 110, color: '#cd7f32' },
-        { icon: '👨‍🌾', name: '農民', value: 500, tier: 'bronze', weight: 90, color: '#b87333' },
-        { icon: '🥷', name: '忍者', value: 1000, tier: 'bronze', weight: 75, color: '#8a7050' },
-        { icon: '🧟', name: '殭屍', value: 3000, tier: 'bronze', weight: 55, color: '#7a9a5a' },
-        { icon: '💀', name: '骷髏', value: 5000, tier: 'bronze', weight: 42, color: '#e0e0d0' },
-        { icon: '👻', name: '幽靈', value: 7000, tier: 'bronze', weight: 35, color: '#a8d8ff' },
-        { icon: '🦂', name: '蠍子', value: 10000, tier: 'silver', weight: 26, color: '#c0c0c0' },
-        { icon: '🧚‍♀️', name: '精靈', value: 30000, tier: 'silver', weight: 18, color: '#ffb8d0' },
-        { icon: '🐯', name: '猛虎', value: 50000, tier: 'silver', weight: 13, color: '#d0a060' },
-        { icon: '🦁', name: '獅子', value: 70000, tier: 'silver', weight: 10, color: '#e0b040' },
-        { icon: '🦄', name: '獨角獸', value: 100000, tier: 'gold', weight: 6.5, color: '#ffd700' },
-        { icon: '🐊', name: '鱷魚', value: 300000, tier: 'gold', weight: 4, color: '#a0d060' },
-        { icon: '🦣', name: '長毛象', value: 500000, tier: 'gold', weight: 3, color: '#c09070' },
-        { icon: '🧜‍♂️', name: '人魚', value: 700000, tier: 'gold', weight: 2.2, color: '#80c0e0' },
-        { icon: '🧌', name: '巨魔', value: 1000000, tier: 'gold', weight: 1.6, color: '#80a060' },
-        { icon: '😈', name: '惡魔', value: 3000000, tier: 'gold', weight: 1.1, color: '#ff6060' },
-        { icon: '🦖', name: '暴龍', value: 5000000, tier: 'gold', weight: 0.75, color: '#90d040' },
-        { icon: '🐦‍🔥', name: '鳳凰', value: 7000000, tier: 'gold', weight: 0.5, color: '#ff8000' },
-        { icon: '🐉', name: '巨龍', value: 10000000, tier: 'gold', weight: 0.3, color: '#ffd700' },
+        { icon: '🤺', name: '劍士',       value: 1,        tier: 'bronze', weight: 110,  color: '#cd7f32' },
+        { icon: '👨‍🌾', name: '農民',       value: 5,       tier: 'bronze', weight: 90,   color: '#b87333' },
+        { icon: '🥷', name: '忍者',       value: 25,       tier: 'bronze', weight: 75,   color: '#8a7050' },
+        { icon: '🧟', name: '殭屍',       value: 125,       tier: 'bronze', weight: 55,   color: '#7a9a5a' },
+        { icon: '💀', name: '骷髏',       value: 625,       tier: 'bronze', weight: 42,   color: '#e0e0d0' },
+        { icon: '👻', name: '幽靈',       value: 3125,       tier: 'bronze', weight: 35,   color: '#a8d8ff' },
+        { icon: '🦂', name: '蠍子',       value: 15625,       tier: 'silver', weight: 26,   color: '#c0c0c0' },
+        { icon: '🧚‍♀️', name: '精靈',      value: 78125,       tier: 'silver', weight: 18,   color: '#ffb8d0' },
+        { icon: '🐯', name: '猛虎',       value: 390625,       tier: 'silver', weight: 13,   color: '#d0a060' },
+        { icon: '🦁', name: '獅子',       value: 1953125,       tier: 'silver', weight: 10,   color: '#e0b040' },
+        { icon: '🦄', name: '獨角獸',     value: 9765625,      tier: 'gold',   weight: 6.5,  color: '#ffd700' },
+        { icon: '🐊', name: '鱷魚',       value: 48828125,      tier: 'gold',   weight: 4,    color: '#a0d060' },
+        { icon: '🦣', name: '長毛象',     value: 244140625,      tier: 'gold',   weight: 3,    color: '#c09070' },
+        { icon: '🧜‍♂️', name: '人魚',      value: 1220703125,      tier: 'gold',   weight: 2.2,  color: '#80c0e0' },
+        { icon: '🧌', name: '巨魔',       value: 6103515625,      tier: 'gold',   weight: 1.6,  color: '#80a060' },
+        { icon: '😈', name: '惡魔',       value: 30517578125,      tier: 'gold',   weight: 1.1,  color: '#ff6060' },
+        { icon: '🦖', name: '暴龍',       value: 152587890625,      tier: 'gold',   weight: 0.75, color: '#90d040' },
+        { icon: '🐦‍🔥', name: '鳳凰',      value: 762939453125,      tier: 'gold',   weight: 0.5,  color: '#ff8000' },
+        { icon: '🐉', name: '巨龍',       value: 3814697265625,      tier: 'gold',   weight: 0.35, color: '#ffd700' },
     ];
     const TIER_TIME = { bronze: 60, silver: 180, gold: 300 };
     const TIER_LABEL = { bronze: '銅', silver: '銀', gold: '金' };
@@ -409,28 +437,30 @@ canvas { display: block; background: #142410; }
         return SOLDIER_TYPES[0];
     }
 
-    // ================= 英雄 =================
+    // ================= 英雄（價格對應更新後兵力） =================
     const HEROES = [
-        { id: 'roland',   icon: '🏇',   name: 'Roland',   skillName: "King's Wind",       desc: '加速移動一段時間',                    price: 0 },
-        { id: 'adelaide', icon: '🧙‍♂️', name: 'Adelaide', skillName: 'Blizzard',          desc: '範圍內下暴風雪減速敵人',              price: 100000000 },
-        { id: 'sandro',   icon: '☠️',   name: 'Sandro',   skillName: 'Necromancy',        desc: '召喚💀士兵 +5K',                      price: 500000000 },
-        { id: 'jenova',   icon: '🧝',   name: 'Jenova',   skillName: 'Heart of Purity',   desc: '召喚🦄士兵 +100K',                    price: 1000000000 },
-        { id: 'mephala',  icon: '🕷',   name: 'Mephala',  skillName: 'Holy Shield',       desc: '開盾無敵一段短時間',                  price: 5000000000 },
-        { id: 'zydar',    icon: '👹',   name: 'Zydar',    skillName: 'Fireball',          desc: '範圍內敵人兵力-1/3',                  price: 10000000000 },
-        { id: 'rashka',   icon: '🧛',   name: 'Rashka',   skillName: 'Inferno Flame',     desc: '10秒熔岩，減速+每秒傷害',             price: 50000000000 },
-        { id: 'xeron',    icon: '👺',   name: 'Xeron',    skillName: 'Echo of the Abyss', desc: '召喚😈士兵 +3M',                      price: 100000000000 },
+        { id: 'roland',   icon: '🏇',   name: 'Roland',   skillName: "King's Wind",       desc: '加速移動一段時間',                 price: 0 },
+        { id: 'adelaide', icon: '🧙‍♂️', name: 'Adelaide', skillName: 'Blizzard',          desc: '範圍內下暴風雪減速敵人',           price: 95367431640625 },
+        { id: 'sandro',   icon: '☠️',   name: 'Sandro',   skillName: 'Necromancy',        desc: '召喚💀士兵',                  price: 476837158203125 },
+        { id: 'jenova',   icon: '🧝',   name: 'Jenova',   skillName: 'Heart of Purity',   desc: '召喚🦄士兵',                  price: 2384185791015625 },
+        { id: 'mephala',  icon: '🕷',   name: 'Mephala',  skillName: 'Holy Shield',       desc: '開盾無敵 3 秒',                     price: 1.192092895507813e16 },
+        { id: 'zydar',    icon: '👹',   name: 'Zydar',    skillName: 'Fireball',          desc: '範圍內敵人兵力-1/3',               price: 5.960464477539063e16 },
+        { id: 'rashka',   icon: '🧛',   name: 'Rashka',   skillName: 'Inferno Flame',     desc: '10秒熔岩，減速+每秒傷害（自身免疫）', price: 2.980232238769531e17 },
+        { id: 'xeron',    icon: '👺',   name: 'Xeron',    skillName: 'Echo of the Abyss', desc: '召喚😈士兵',                  price: 1.490116119384766e18 },
+        { id: 'murazel',  icon: '👼',   name: 'Murazel',  skillName: 'Fly',               desc: '可穿越河流 3 秒',                   price: 7.450580596923828e18 },
     ];
 
-    // ★ 士兵圖示進化門檻（由高到低比對，達到即顯示單一英雄圖示）
+    // ★ 士兵圖示進化門檻（由高到低比對，達到即顯示對應圖示）
     const SOLDIER_ICON_EVOLUTION = [
-        { soldiers: 100000000000, icon: '👺' },
-        { soldiers: 50000000000,  icon: '🧛' },
-        { soldiers: 10000000000,  icon: '👹' },
-        { soldiers: 5000000000,   icon: '🕷'  },
-        { soldiers: 1000000000,   icon: '🧝'  },
-        { soldiers: 500000000,    icon: '☠️' },
-        { soldiers: 100000000,    icon: '🧙‍♂️' },
-        { soldiers: 50000000,     icon: '🏇'  },
+        { soldiers: 7.450580596923828e18, icon: '👼' },
+        { soldiers: 1.490116119384766e18, icon: '👺' },
+        { soldiers: 2.980232238769531e17, icon: '🧛' },
+        { soldiers: 5.960464477539063e16, icon: '👹' },
+        { soldiers: 1.192092895507813e16, icon: '🕷' },
+        { soldiers: 2384185791015625, icon: '🧝' },
+        { soldiers: 476837158203125, icon: '☠️' },
+        { soldiers: 95367431640625, icon: '🧙‍♂️' },
+		{ soldiers: 19073486328125, icon: '🏇' },
     ];
 
     // 英雄外觀：固定為所選英雄，不再隨兵力進化
@@ -547,8 +577,8 @@ canvas { display: block; background: #142410; }
     }
     function playSequence(notes) { if (isMuted) return; let t = 0; for (const n of notes) { setTimeout(() => playTone(n.f, n.d, n.t || 'sine', n.v || 0.09), t); t += n.gap || n.d * 1000; } }
 
-    // ★ 金屬敲擊（擊劍）音效：多個不諧和高頻泛音 + 快速衰減 + 隨機微失諧
-    function playClash(density = 12) { // density: 碰撞密集度，數字越大越激烈
+    // ★ 金屬敲擊（擊劍）音效
+    function playClash(density = 12) {
 	  if (isMuted) return;
 	  const ac = getAudioCtx();
 	  if (!ac) return;
@@ -556,7 +586,6 @@ canvas { display: block; background: #142410; }
 	  try {
 		const t0 = ac.currentTime;
 
-		// 定義基礎的擊劍金屬主頻率
 		const partials = [
 		  { f: 2850, t: 'sine', v: 0.12 },
 		  { f: 3920, t: 'sine', v: 0.08 },
@@ -564,28 +593,23 @@ canvas { display: block; background: #142410; }
 		  { f: 6850, t: 'sine', v: 0.04 }
 		];
 
-		// 依據密集度，隨機在不同時間點與空間位置產生交鋒聲
 		for (let i = 0; i < density; i++) {
-		  // 1. 隨機化時間延遲：讓聲音錯落有致，模擬多人交戰 (0 ~ 0.8秒內亂序發生)
-		  const delay = Math.random() * 0.8; 
+		  const delay = Math.random() * 0.8;
 		  const t = t0 + delay;
 
-		  // 2. 隨機化遠近與位置：模擬前後左右不同敵我的位置
-		  const panValue = (Math.random() - 0.5) * 2; // -1 (左) 到 1 (右)
-		  const distanceVolume = Math.random() * 0.7 + 0.3; // 隨機音量衰減，模擬遠近
+		  const panValue = (Math.random() - 0.5) * 2;
+		  const distanceVolume = Math.random() * 0.7 + 0.3;
 
-		  // 建立立體聲節點 (若瀏覽器不支援則安全跳過)
 		  let panner = null;
 		  if (ac.createStereoPanner) {
 			panner = ac.createStereoPanner();
 			panner.pan.setValueAtTime(panValue, t);
 		  }
 
-		  // --- A. 生成金屬碰撞聲 (Oscillators) ---
 		  for (const p of partials) {
 			const osc = ac.createOscillator();
 			const gain = ac.createGain();
-			const detune = (1 + (Math.random() - 0.5) * 0.04) * (Math.random() > 0.5 ? 1 : 0.9); // 隨機改變劍的尺寸/音高
+			const detune = (1 + (Math.random() - 0.5) * 0.04) * (Math.random() > 0.5 ? 1 : 0.9);
 
 			osc.type = p.t;
 			osc.frequency.setValueAtTime(p.f * detune, t);
@@ -595,27 +619,20 @@ canvas { display: block; background: #142410; }
 			gain.gain.linearRampToValueAtTime(p.v * distanceVolume, t + 0.001);
 			gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.1 + Math.random() * 0.04);
 
-			// 連接節點
 			if (panner) {
-			  osc.connect(gain);
-			  gain.connect(panner);
-			  panner.connect(ac.destination);
+			  osc.connect(gain); gain.connect(panner); panner.connect(ac.destination);
 			} else {
-			  osc.connect(gain);
-			  gain.connect(ac.destination);
+			  osc.connect(gain); gain.connect(ac.destination);
 			}
 
 			osc.start(t);
 			osc.stop(t + 0.2);
 		  }
 
-		  // --- B. 生成金屬摩擦與撞擊雜音 (White Noise) ---
 		  const bufferSize = ac.sampleRate * 0.04;
 		  const buffer = ac.createBuffer(1, bufferSize, ac.sampleRate);
 		  const data = buffer.getChannelData(0);
-		  for (let j = 0; j < bufferSize; j++) {
-			data[j] = Math.random() * 2 - 1;
-		  }
+		  for (let j = 0; j < bufferSize; j++) data[j] = Math.random() * 2 - 1;
 
 		  const noise = ac.createBufferSource();
 		  noise.buffer = buffer;
@@ -629,13 +646,9 @@ canvas { display: block; background: #142410; }
 		  noiseGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.03);
 
 		  if (panner) {
-			noise.connect(noiseFilter);
-			noiseFilter.connect(noiseGain);
-			noiseGain.connect(panner);
+			noise.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(panner);
 		  } else {
-			noise.connect(noiseFilter);
-			noiseFilter.connect(noiseGain);
-			noiseGain.connect(ac.destination);
+			noise.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(ac.destination);
 		  }
 
 		  noise.start(t);
@@ -657,7 +670,7 @@ canvas { display: block; background: #142410; }
         newRecord: () => playSequence([{f:659,d:.1,gap:100},{f:784,d:.1,gap:100},{f:1046,d:.1,gap:100},{f:1318,d:.35,v:.12}]),
         skillCast: () => playSequence([{f:660,d:.07,gap:60},{f:880,d:.1,gap:60},{f:1100,d:.12}]),
         buy: () => playSequence([{f:784,d:.08,gap:80},{f:1046,d:.16}]),
-        swordClash: playClash,   // ★ 擊劍金屬聲
+        swordClash: playClash,
     };
 
     let currentMusic = null;
@@ -680,7 +693,6 @@ canvas { display: block; background: #142410; }
     coverFullscreenBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleFullscreen(); });
     gameFullscreenBtn.addEventListener('click', toggleFullscreen);
 
-    // ★ 封面任意點擊嘗試播放音樂（含手機）
     function tryPlayMenuMusic() {
         if (isMuted || isPlaying) return;
         if (menuMusic.paused) {
@@ -707,7 +719,7 @@ canvas { display: block; background: #142410; }
     const HERO_RADIUS = 28;
     const BASE_SPEED = 2.9;
     const SKILL_SPEED_MULT = 2.0;
-    const SKILL_DURATION = 180;
+    const SKILL_DURATION = 180;      // ★ 180 幀（3 秒），Mephala 無敵與 Murazel 飛行共用
     const SKILL_COOLDOWN = 1800;
     const EDGE_MARGIN = 120;
     const EDGE_SOLDIER_DMG = 1.5;
@@ -731,21 +743,13 @@ canvas { display: block; background: #142410; }
     const LAST_SEEN_DURATION = 120;
     const VILLAGE_UNIT_LIMIT = 5;
 
-    // ★ 取得兵力對應的單一英雄圖示（未達門檻回傳 null）
-    function getEvolutionIcon(soldiers) {
-        for (const e of SOLDIER_ICON_EVOLUTION) {
-            if (soldiers >= e.soldiers) return e.icon;
-        }
-        return null;
-    }
-
     function getSoldierIcons(soldiers) {
 		let remaining = Math.floor(soldiers);
 		if (remaining <= 0) return [];
 		const icons = [];
 
 		// 1. 先處理進化圖示（由高到低）
-		for (const e of SOLDIER_ICON_EVOLUTION) {   // 已是由高到低排序
+		for (const e of SOLDIER_ICON_EVOLUTION) {
 			if (remaining >= e.soldiers) {
 				const count = Math.floor(remaining / e.soldiers);
 				for (let i = 0; i < count; i++) icons.push(e.icon);
@@ -788,7 +792,7 @@ canvas { display: block; background: #142410; }
     const keys = { w: false, a: false, s: false, d: false, ArrowUp: false, ArrowLeft: false, ArrowDown: false, ArrowRight: false, ' ': false, j: false };
     const joystickInput = { x: 0, y: 0 };
     let lastCombatSoundFrame = -100, lastEdgeWarnFrame = -100, lastClashSoundFrame = -100;
-    let edgeFlashIntensity = 0;   // ★ 邊界紅光閃爍強度 0~1
+    let edgeFlashIntensity = 0;
 
     function resizeGame() {
         const aspect = VIEW_W / VIEW_H;
@@ -824,10 +828,17 @@ canvas { display: block; background: #142410; }
         return false;
     }
     function isBridgeAt(px, py) { const gx = Math.floor(px / TILE_SIZE), gy = Math.floor(py / TILE_SIZE); return bridges.has(gx + ',' + gy); }
-    function tryMoveEntity(entity, dx, dy) {
+
+    // ★ 新增 ignoreRiver 參數：Murazel 飛行時可穿越河流
+    function tryMoveEntity(entity, dx, dy, ignoreRiver) {
         const nx = entity.x + dx, ny = entity.y + dy;
-        if (!isInRiver(nx, entity.y, entity.radius)) entity.x = nx;
-        if (!isInRiver(entity.x, ny, entity.radius)) entity.y = ny;
+        if (ignoreRiver) {
+            entity.x = nx;
+            entity.y = ny;
+        } else {
+            if (!isInRiver(nx, entity.y, entity.radius)) entity.x = nx;
+            if (!isInRiver(entity.x, ny, entity.radius)) entity.y = ny;
+        }
         entity.x = Math.max(HERO_RADIUS, Math.min(WORLD_W - HERO_RADIUS, entity.x));
         entity.y = Math.max(HERO_RADIUS, Math.min(WORLD_H - HERO_RADIUS, entity.y));
     }
@@ -995,24 +1006,19 @@ canvas { display: block; background: #142410; }
             lastSeenPlayer: null, slowTimer: 0,
             skillCooldown: Math.floor(rand(0, SKILL_COOLDOWN)),
             skillTimer: 0, invincibleTimer: 0,
+            flyTimer: 0, flyHold: false,
         };
         assignId(e); return e;
     }
-    function generateEnemies(count) { const arr = []; for (let i = 0; i < count; i++) arr.push(spawnEnemy(Math.floor(rand(400, 1800)))); return arr; }
+    function generateEnemies(count) {
+        const arr = [];
+        for (let i = 0; i < count; i++) arr.push(spawnEnemy(Math.floor(rand(20, 90))));
+        return arr;
+    }
 
+    // ★ 新生成 AI 兵力 = 玩家當時兵力
     function getNewEnemyBaseSoldiers() {
-        const s = player ? player.soldiers : 0;
-        if (s >= 100000000000) return 100000000000;
-        if (s >= 10000000000) return 10000000000;
-        if (s >= 1000000000) return 1000000000;
-        if (s >= 100000000) return 100000000;
-        if (s >= 10000000) return 10000000;
-        if (s >= 1000000) return 1000000;
-        if (s >= 500000) return 500000;
-        if (s >= 100000) return 100000;
-        if (s >= 50000) return 50000;
-        if (s >= 5000) return 5000;
-        return 0;
+        return player ? Math.floor(player.soldiers) : 0;
     }
 
     function resetGame() {
@@ -1020,7 +1026,14 @@ canvas { display: block; background: #142410; }
         riverTiles = generateRiverTiles();
         bridges = generateBridges(riverTiles);
         const hero = getHero(gameState.selectedHero);
-        player = { x: WORLD_W / 2, y: WORLD_H / 2, soldiers: 0, heroHp: MAX_HERO_HP, maxHeroHp: MAX_HERO_HP, radius: HERO_RADIUS, boostTimer: 0, boostCooldown: 0, speed: BASE_SPEED, hidden: false, rotOffset: 0, _id: 0, hero, heroId: gameState.selectedHero, slowTimer: 0 };
+        player = {
+            x: WORLD_W / 2, y: WORLD_H / 2, soldiers: 0,
+            heroHp: MAX_HERO_HP, maxHeroHp: MAX_HERO_HP,
+            radius: HERO_RADIUS, boostTimer: 0, boostCooldown: 0,
+            speed: BASE_SPEED, hidden: false, rotOffset: 0, _id: 0,
+            hero, heroId: gameState.selectedHero, slowTimer: 0,
+            flyTimer: 0, flyHold: false
+        };
         if (isInRiver(player.x, player.y, HERO_RADIUS + 10)) { const s = findSafeSpot(HERO_RADIUS + 10); player.x = s.x; player.y = s.y; }
         forests = generateForests(22);
         villages = generateVillages(6);
@@ -1046,10 +1059,22 @@ canvas { display: block; background: #142410; }
             hpDisplay.style.opacity = player.soldiers <= 0 ? '1' : '0.75';
         }
         const hero = getHero(gameState.selectedHero);
-        if (skillCooldown > 0) { skillIndicator.classList.remove('skill-active'); skillIndicator.textContent = `⏳ ${Math.ceil(skillCooldown / 60)}s`; }
-        else if (skillTimer > 0 || invincibleTimer > 0) { skillIndicator.classList.add('skill-active'); skillIndicator.textContent = `✨ ${hero.skillName}`; }
-        else { skillIndicator.classList.remove('skill-active'); skillIndicator.textContent = `⚡ ${hero.skillName}`; }
-        if (skillCooldown > 0) boostBtn.classList.add('cooldown'); else boostBtn.classList.remove('cooldown');
+        const flying = player && (player.flyTimer > 0 || player.flyHold);
+        if (flying) {
+            skillIndicator.classList.add('skill-active');
+            skillIndicator.textContent = '✨ Fly';
+        } else if (skillCooldown > 0) {
+            skillIndicator.classList.remove('skill-active');
+            skillIndicator.textContent = `⏳ ${Math.ceil(skillCooldown / 60)}s`;
+        } else if (skillTimer > 0 || invincibleTimer > 0) {
+            skillIndicator.classList.add('skill-active');
+            skillIndicator.textContent = `✨ ${hero.skillName}`;
+        } else {
+            skillIndicator.classList.remove('skill-active');
+            skillIndicator.textContent = `⚡ ${hero.skillName}`;
+        }
+        if (skillCooldown > 0 || flying) boostBtn.classList.add('cooldown');
+        else boostBtn.classList.remove('cooldown');
     }
     function addBattleLog(x, y, text, color) { battleLogs.push({ x, y, text, color, life: 60, vy: -1.2 }); }
     function pairKey(a, b) { const ia = a._id, ib = b._id; return ia < ib ? ia + '_' + ib : ib + '_' + ia; }
@@ -1071,16 +1096,24 @@ canvas { display: block; background: #142410; }
 
     function castSkill() {
         if (skillCooldown > 0 || !isPlaying || gameOver) return;
+        if (player.flyTimer > 0 || player.flyHold) return;
         const hero = getHero(gameState.selectedHero);
-        skillCooldown = SKILL_COOLDOWN;
         Sfx.skillCast();
+
+        // ★ Murazel：Fly（不立即進入冷卻，落地後才開始冷卻）
+        if (hero.id === 'murazel') {
+            player.flyTimer = SKILL_DURATION;
+            addBattleLog(player.x, player.y - 60, 'Fly!', '#aaddff');
+            return;
+        }
+
+        skillCooldown = SKILL_COOLDOWN;
         switch (hero.id) {
             case 'roland': skillTimer = SKILL_DURATION; addBattleLog(player.x, player.y - 60, "King's Wind!", '#ffd966'); break;
             case 'adelaide': slowEffects.push({ x: player.x, y: player.y, radius: 260, life: 300, owner: 'player' }); addBattleLog(player.x, player.y - 60, 'Blizzard!', '#a8d8ff'); break;
-            case 'sandro': player.soldiers += 5000; addBattleLog(player.x, player.y - 60, 'Necromancy! +5K', '#a0a0a0'); break;
-            case 'jenova': player.soldiers += 100000; addBattleLog(player.x, player.y - 60, 'Heart of Purity! +100K', '#ffd700'); break;
-            case 'xeron': player.soldiers += 3000000; addBattleLog(player.x, player.y - 60, 'Echo of the Abyss! +3M', '#ff6060'); break;
-            case 'mephala': invincibleTimer = 150; addBattleLog(player.x, player.y - 60, 'Holy Shield!', '#ffffff'); break;
+            case 'sandro': player.soldiers += 625; addBattleLog(player.x, player.y - 60, 'Necromancy! +625', '#a0a0a0'); break;
+            case 'jenova': player.soldiers += 9765625; addBattleLog(player.x, player.y - 60, 'Heart of Purity! +9.8M', '#ffd700'); break;
+            case 'mephala': invincibleTimer = SKILL_DURATION; addBattleLog(player.x, player.y - 60, 'Holy Shield!', '#ffffff'); break;
             case 'zydar': {
                 const r = 300;
                 for (const e of enemies) { if (e._dead) continue; if (dist(player.x, player.y, e.x, e.y) < r) { e.soldiers = Math.max(0, e.soldiers - Math.floor(e.soldiers / 3)); spawnCombatSparks(e.x, e.y, '#ff4400'); if (e.soldiers <= 0 && e.heroHp <= 0) e._dead = true; } }
@@ -1088,21 +1121,33 @@ canvas { display: block; background: #142410; }
                 addBattleLog(player.x, player.y - 60, 'Fireball!', '#ff4400');
                 break;
             }
-            case 'rashka': lavaEffects.push({ x: player.x, y: player.y, radius: 30, targetRadius: 300, life: 600, tickTimer: 0, owner: 'player' }); addBattleLog(player.x, player.y - 60, 'Inferno Flame!', '#ff6600'); break;
+            case 'rashka':
+                // ★ 記錄施放者，自身免疫
+                lavaEffects.push({ x: player.x, y: player.y, radius: 30, targetRadius: 300, life: 600, tickTimer: 0, owner: 'player', caster: player });
+                addBattleLog(player.x, player.y - 60, 'Inferno Flame!', '#ff6600');
+                break;
+			case 'xeron': player.soldiers += 30517578125; addBattleLog(player.x, player.y - 60, 'Echo of the Abyss! +30.5B', '#ff6060'); break;
         }
     }
 
     function aiCastSkill(e) {
         if (e.skillCooldown > 0 || e._dead) return;
+        if (e.flyTimer > 0 || e.flyHold) return;
         const heroId = e.heroId;
+
+        // ★ Murazel AI：Fly
+        if (heroId === 'murazel') {
+            e.flyTimer = SKILL_DURATION;
+            return;
+        }
+
         e.skillCooldown = SKILL_COOLDOWN;
         switch (heroId) {
             case 'roland': e.skillTimer = SKILL_DURATION; break;
             case 'adelaide': slowEffects.push({ x: e.x, y: e.y, radius: 220, life: 240, owner: 'ai' }); break;
-            case 'sandro': e.soldiers += 5000; break;
-            case 'jenova': e.soldiers += 100000; break;
-            case 'xeron': e.soldiers += 3000000; break;
-            case 'mephala': e.invincibleTimer = 120; break;
+            case 'sandro': e.soldiers += 625; break;
+            case 'jenova': e.soldiers += 9,765,625; break;
+            case 'mephala': e.invincibleTimer = SKILL_DURATION; break;
             case 'zydar': {
                 const r = 260;
                 if (player && player.heroHp > 0 && dist(e.x, e.y, player.x, player.y) < r) {
@@ -1117,7 +1162,10 @@ canvas { display: block; background: #142410; }
                 combatEffects.push({ x: e.x, y: e.y, vx: 0, vy: 0, life: 30, maxLife: 30, color: '#ff4400', size: r, isFireball: true });
                 break;
             }
-            case 'rashka': lavaEffects.push({ x: e.x, y: e.y, radius: 20, targetRadius: 200, life: 600, tickTimer: 0, owner: 'ai' }); break;
+            case 'rashka':
+                lavaEffects.push({ x: e.x, y: e.y, radius: 20, targetRadius: 200, life: 600, tickTimer: 0, owner: 'ai', caster: e });
+                break;
+			case 'xeron': e.soldiers += 30,517,578,125; break;
         }
     }
 
@@ -1157,6 +1205,23 @@ canvas { display: block; background: #142410; }
         if (skillCooldown > 0) skillCooldown--;
         if (invincibleTimer > 0) invincibleTimer--;
 
+        // ★ 玩家 Murazel Fly 狀態處理（移動前）
+        if (player.flyTimer > 0) {
+            player.flyTimer--;
+            if (player.flyTimer === 0) {
+                if (isInRiver(player.x, player.y, player.radius)) {
+                    player.flyHold = true;   // 仍在河上 → 繼續飛行，冷卻暫停
+                } else {
+                    skillCooldown = SKILL_COOLDOWN; // 回到陸地 → 開始冷卻
+                }
+            }
+        } else if (player.flyHold) {
+            if (!isInRiver(player.x, player.y, player.radius)) {
+                player.flyHold = false;
+                skillCooldown = SKILL_COOLDOWN;
+            }
+        }
+
         for (let i = slowEffects.length - 1; i >= 0; i--) { slowEffects[i].life--; if (slowEffects[i].life <= 0) slowEffects.splice(i, 1); }
         for (let i = lavaEffects.length - 1; i >= 0; i--) {
             const lv = lavaEffects[i]; lv.life--; lv.tickTimer++;
@@ -1165,12 +1230,14 @@ canvas { display: block; background: #142410; }
                 lv.tickTimer = 0;
                 for (const e of enemies) {
                     if (e._dead) continue;
+                    if (e === lv.caster) continue;              // ★ 施放者免疫
                     if (dist(lv.x, lv.y, e.x, e.y) < lv.radius) {
                         e.soldiers = Math.max(0, e.soldiers - Math.floor(e.soldiers / 10));
                         if (e.soldiers <= 0 && e.heroHp <= 0) e._dead = true;
                     }
                 }
-                if (lv.owner === 'ai' && player && player.heroHp > 0 && dist(lv.x, lv.y, player.x, player.y) < lv.radius) {
+                if (lv.owner === 'ai' && player && player.heroHp > 0 && player !== lv.caster
+                    && dist(lv.x, lv.y, player.x, player.y) < lv.radius) {
                     player.soldiers = Math.max(0, player.soldiers - Math.floor(player.soldiers / 10));
                 }
             }
@@ -1200,13 +1267,16 @@ canvas { display: block; background: #142410; }
         if (keys.d || keys.ArrowRight) dx += 1;
         const jMag = Math.hypot(joystickInput.x, joystickInput.y);
         if (jMag > 0.15) { dx = joystickInput.x; dy = joystickInput.y; }
+
+        const playerFlying = (player.flyTimer > 0 || player.flyHold);
+
         if (dx !== 0 || dy !== 0) {
             const len = Math.hypot(dx, dy); const mag = Math.min(len, 1); dx /= len; dy /= len;
             let speed = player.speed * getSpeedMultiplier(player.soldiers);
             if (skillTimer > 0 && getHero(gameState.selectedHero).id === 'roland') speed *= SKILL_SPEED_MULT;
             if (player.slowTimer > 0) speed *= 0.5;
             if (player.hidden) speed *= FOREST_SPEED_FACTOR;
-            tryMoveEntity(player, dx * speed * mag, dy * speed * mag);
+            tryMoveEntity(player, dx * speed * mag, dy * speed * mag, playerFlying);
         }
         if (player.slowTimer > 0) player.slowTimer--;
 
@@ -1215,13 +1285,11 @@ canvas { display: block; background: #142410; }
         const eDist = Math.min(eDx, eDy);
         if (eDist < EDGE_MARGIN) {
             const f = 1 - eDist / EDGE_MARGIN;
-            // ★ 邊界紅光：進入時快速拉高
             edgeFlashIntensity = Math.min(1, edgeFlashIntensity + 0.12);
             if (player.soldiers > 0) player.soldiers = Math.max(0, player.soldiers - f * EDGE_SOLDIER_DMG);
             else { player.heroHp = Math.max(0, player.heroHp - f * EDGE_HP_DMG); if (player.heroHp <= 0) { handleGameOver(false); return; } }
             if (frame - lastEdgeWarnFrame > 40) { lastEdgeWarnFrame = frame; Sfx.edgeWarn(); }
         } else if (edgeFlashIntensity > 0) {
-            // ★ 離開邊界後淡出
             edgeFlashIntensity = Math.max(0, edgeFlashIntensity - 0.08);
         }
 
@@ -1276,6 +1344,20 @@ canvas { display: block; background: #142410; }
             if (e.skillTimer > 0) e.skillTimer--;
             if (e.invincibleTimer > 0) e.invincibleTimer--;
 
+            // ★ AI Murazel Fly 狀態處理
+            if (e.flyTimer > 0) {
+                e.flyTimer--;
+                if (e.flyTimer === 0) {
+                    if (isInRiver(e.x, e.y, e.radius)) e.flyHold = true;
+                    else e.skillCooldown = SKILL_COOLDOWN;
+                }
+            } else if (e.flyHold) {
+                if (!isInRiver(e.x, e.y, e.radius)) {
+                    e.flyHold = false;
+                    e.skillCooldown = SKILL_COOLDOWN;
+                }
+            }
+
             if (e.skillCooldown <= 0) aiCastSkill(e);
 
             let aiSpeed = e.speed * getSpeedMultiplier(e.soldiers);
@@ -1291,9 +1373,11 @@ canvas { display: block; background: #142410; }
                 for (const lv of lavaEffects) if (dist(e.x, e.y, lv.x, lv.y) < lv.radius) { e.slowTimer = Math.max(e.slowTimer, 5); break; }
             }
 
+            const aiFlying = (e.flyTimer > 0 || e.flyHold);
+
             if (e.unstickTimer > 0) {
                 e.unstickTimer--;
-                tryMoveEntity(e, e.unstickDir.x * aiSpeed * 1.3, e.unstickDir.y * aiSpeed * 1.3);
+                tryMoveEntity(e, e.unstickDir.x * aiSpeed * 1.3, e.unstickDir.y * aiSpeed * 1.3, aiFlying);
                 if (playerVisibleForAI) e.lastSeenPlayer = { x: player.x, y: player.y, timer: LAST_SEEN_DURATION };
                 else if (e.lastSeenPlayer) { e.lastSeenPlayer.timer--; if (e.lastSeenPlayer.timer <= 0) e.lastSeenPlayer = null; }
                 continue;
@@ -1339,7 +1423,7 @@ canvas { display: block; background: #142410; }
                 const clamped = clampFromEdge(targetX, targetY);
                 targetX = clamped.x; targetY = clamped.y;
                 const a = Math.atan2(targetY - e.y, targetX - e.x);
-                tryMoveEntity(e, Math.cos(a) * aiSpeed, Math.sin(a) * aiSpeed);
+                tryMoveEntity(e, Math.cos(a) * aiSpeed, Math.sin(a) * aiSpeed, aiFlying);
             }
 
             e.stuckTimer++;
@@ -1386,15 +1470,15 @@ canvas { display: block; background: #142410; }
                 const pLoss = player.soldiers > 0 ? Math.min(player.soldiers, Math.max(COMBAT_MIN, e.soldiers * COMBAT_RATE)) : 0;
                 const eLoss = e.soldiers > 0 ? Math.min(e.soldiers, Math.max(COMBAT_MIN, player.soldiers * COMBAT_RATE)) : 0;
                 if (invincibleTimer <= 0) player.soldiers = Math.max(0, player.soldiers - pLoss);
-                e.soldiers = Math.max(0, e.soldiers - eLoss);
+                // ★ 玩家 vs AI：檢查 AI 的 invincibleTimer（Mephala 開盾免疫）
+                if (e.invincibleTimer <= 0) e.soldiers = Math.max(0, e.soldiers - eLoss);
 
-                if (e.soldiers <= 0 && e.heroHp > 0) e.heroHp = Math.max(0, e.heroHp - 0.3);
+                if (e.soldiers <= 0 && e.heroHp > 0 && e.invincibleTimer <= 0) e.heroHp = Math.max(0, e.heroHp - 0.3);
                 if (player.soldiers <= 0 && invincibleTimer <= 0 && player.heroHp > 0) player.heroHp = Math.max(0, player.heroHp - 0.3);
 
                 const mx = (player.x + e.x) / 2, my = (player.y + e.y) / 2;
                 spawnCombatSparks(mx, my);
                 if (frame - lastCombatSoundFrame > 9) { lastCombatSoundFrame = frame; Sfx.combatHit(); }
-                // ★ 擊劍金屬聲
                 if (frame - lastClashSoundFrame > 24) { lastClashSoundFrame = frame; Sfx.swordClash(); }
 
                 if (e.heroHp <= 0) {
@@ -1424,12 +1508,11 @@ canvas { display: block; background: #142410; }
                     if (a.invincibleTimer <= 0) a.soldiers = Math.max(0, a.soldiers - aLoss);
                     if (b.invincibleTimer <= 0) b.soldiers = Math.max(0, b.soldiers - bLoss);
 
-                    if (a.soldiers <= 0 && a.heroHp > 0) a.heroHp = Math.max(0, a.heroHp - 0.3);
-                    if (b.soldiers <= 0 && b.heroHp > 0) b.heroHp = Math.max(0, b.heroHp - 0.3);
+                    if (a.soldiers <= 0 && a.heroHp > 0 && a.invincibleTimer <= 0) a.heroHp = Math.max(0, a.heroHp - 0.3);
+                    if (b.soldiers <= 0 && b.heroHp > 0 && b.invincibleTimer <= 0) b.heroHp = Math.max(0, b.heroHp - 0.3);
 
                     const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
                     spawnCombatSparks(mx, my, '#ffaa66');
-                    // ★ 擊劍金屬聲
                     if (frame - lastClashSoundFrame > 24) { lastClashSoundFrame = frame; Sfx.swordClash(); }
 
                     if (a.heroHp <= 0 && !a._dead) {
@@ -1679,6 +1762,11 @@ canvas { display: block; background: #142410; }
                 ctx.beginPath(); ctx.arc(ex, ey, HERO_RADIUS + 16, 0, Math.PI * 2);
                 ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.setLineDash([4, 4]); ctx.lineDashOffset = -frame; ctx.stroke(); ctx.setLineDash([]);
             }
+            if (e.flyTimer > 0 || e.flyHold) {
+                ctx.beginPath(); ctx.arc(ex, ey, HERO_RADIUS + 20, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(170, 221, 255, 0.85)'; ctx.lineWidth = 3;
+                ctx.setLineDash([5, 7]); ctx.lineDashOffset = -frame * 1.5; ctx.stroke(); ctx.setLineDash([]);
+            }
             ctx.font = '44px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             if (e.soldiers <= 0 && e.heroHp <= 30) ctx.globalAlpha = 0.6;
             ctx.fillText(getDisplayHeroIcon(e), ex, ey);
@@ -1716,9 +1804,15 @@ canvas { display: block; background: #142410; }
                     ctx.beginPath(); ctx.arc(px, py, HERO_RADIUS + 18, 0, Math.PI * 2);
                     ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 4; ctx.setLineDash([4, 4]); ctx.lineDashOffset = -frame; ctx.stroke(); ctx.setLineDash([]);
                 }
+                if (player.flyTimer > 0 || player.flyHold) {
+                    ctx.beginPath(); ctx.arc(px, py, HERO_RADIUS + 22, 0, Math.PI * 2);
+                    ctx.strokeStyle = 'rgba(170, 221, 255, 0.9)'; ctx.lineWidth = 4;
+                    ctx.setLineDash([5, 7]); ctx.lineDashOffset = -frame * 1.5; ctx.stroke(); ctx.setLineDash([]);
+                }
                 if (player.soldiers > 0) drawSoldiersCircle(player);
                 ctx.font = '48px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                 if (player.hidden) ctx.globalAlpha = 0.55;
+                if (player.flyTimer > 0 || player.flyHold) ctx.globalAlpha = 0.85;
                 ctx.fillText(getDisplayHeroIcon(player), px, py);
                 ctx.globalAlpha = 1;
                 const num = Math.floor(player.soldiers);
@@ -1770,7 +1864,6 @@ canvas { display: block; background: #142410; }
             ctx.fillText('🌲 森林隱藏中', VIEW_W / 2, 56); ctx.shadowBlur = 0;
         }
 
-        // ★ 邊界受傷紅光閃爍
         if (edgeFlashIntensity > 0.01) {
             const pulse = 0.55 + 0.45 * Math.sin(frame * 0.4);
             const a = (0.5 * edgeFlashIntensity * pulse).toFixed(3);
@@ -1934,7 +2027,6 @@ canvas { display: block; background: #142410; }
         return shopGrid.scrollWidth / SHOP_COPIES;
     }
 
-    // ★ 修正：改用 getBoundingClientRect 換算內容座標，避免 offsetParent 造成偏移
     function centerShopOnSelected(behavior) {
         const items = shopGrid.querySelectorAll(`.shop-item[data-hero-id="${gameState.selectedHero}"]`);
         const target = items[MIDDLE_COPY];
@@ -1992,7 +2084,6 @@ canvas { display: block; background: #142410; }
         });
     }
 
-    // 循環滾動：離開中間份時跳回，達到無縫循環
     shopGrid.addEventListener('scroll', () => {
         if (isAdjustingShopScroll) return;
         const sw = getSingleShopWidth();
@@ -2017,7 +2108,6 @@ canvas { display: block; background: #142410; }
         shopScrollTimer = setTimeout(updateCenterSelection, 180);
     }, { passive: true });
 
-    // 電腦版滑鼠拖曳
     let shopDragging = false, shopDragStartX = 0, shopDragStartScroll = 0, shopDragMoved = false;
     shopGrid.addEventListener('pointerdown', (e) => {
         if (e.pointerType === 'touch') return;
@@ -2044,13 +2134,11 @@ canvas { display: block; background: #142410; }
     window.addEventListener('pointerup', endShopDrag);
     window.addEventListener('pointercancel', endShopDrag);
 
-    // 電腦版滾輪橫向滾動
     shopGrid.addEventListener('wheel', (e) => {
         e.preventDefault();
         shopGrid.scrollLeft += (e.deltaY + e.deltaX);
     }, { passive: false });
 
-    // 商店按鈕點擊（事件委派）
     shopGrid.addEventListener('click', (e) => {
         if (shopDragMoved) { shopDragMoved = false; return; }
         const btn = e.target.closest('.shop-action-btn');
