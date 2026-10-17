@@ -1,1 +1,3133 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>🎊寵物小精靈 City Walk</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden;background:#0d1117;
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei",sans-serif;
+    user-select:none}
 
+  #splash{position:fixed;inset:0;z-index:9000;
+    background:linear-gradient(180deg,#4a90e2 0%,#87CEEB 40%,#7ab648 100%);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden}
+  #splash::before{content:'';position:absolute;inset:0;
+    background:radial-gradient(circle at 50% 45%,rgba(255,255,255,.18),transparent 60%)}
+  .splash-frame{position:relative;
+    width:min(100vw, calc(100vh * 9 / 16));
+    height:min(100vh, calc(100vw * 16 / 9));
+    border-radius:16px;overflow:hidden;background:#0d1117;
+    box-shadow:0 22px 70px rgba(0,0,0,.65),0 0 0 2px rgba(255,255,255,.22);
+    z-index:1}
+  .splash-frame img{width:100%;height:100%;object-fit:cover;display:block}
+  .splash-text{position:absolute;left:50%;bottom:9%;transform:translateX(-50%);
+    color:#fff;font-size:17px;font-weight:900;letter-spacing:2px;
+    text-shadow:0 0 20px rgba(255,255,255,.7),0 2px 12px rgba(0,0,0,.95);
+    animation:splashBlink 1.4s ease-in-out infinite;white-space:nowrap;
+    padding:9px 20px;border-radius:999px;background:rgba(0,0,0,.32);
+    backdrop-filter:blur(4px)}
+  .splash-copyright{position:absolute;left:0;right:0;bottom:10px;text-align:center;
+    color:rgba(255,255,255,.9);font-size:11px;font-weight:700;letter-spacing:.5px;
+    text-shadow:0 1px 8px rgba(0,0,0,.9);z-index:3;padding:0 10px}
+  @keyframes splashBlink{0%,100%{opacity:.25}50%{opacity:1}}
+  #splash.fade{opacity:0;pointer-events:none;transition:opacity .55s}
+
+  #loadingScreen{position:fixed;inset:0;z-index:9500;
+    background:rgba(10,15,25,.92);backdrop-filter:blur(10px);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:18px;color:#fff;font-family:inherit}
+  #loadingScreen.hidden{display:none!important}
+  .load-title{font-size:20px;font-weight:900;letter-spacing:2px;
+    text-shadow:0 0 20px rgba(162,155,254,.7)}
+  .load-sub{font-size:13px;font-weight:700;color:rgba(255,255,255,.7);
+    min-height:20px;text-align:center;padding:0 20px;max-width:320px}
+  .load-bar-wrap{width:min(280px, 70vw);height:10px;border-radius:8px;
+    background:rgba(255,255,255,.12);overflow:hidden;
+    border:1px solid rgba(255,255,255,.2);box-shadow:0 4px 20px rgba(0,0,0,.4)}
+  #loadBar{height:100%;width:0%;border-radius:8px;
+    background:linear-gradient(90deg,#a29bfe,#6c5ce7,#4285f4);
+    transition:width .2s linear;box-shadow:0 0 16px rgba(108,92,231,.8)}
+  #loadPct{font-size:15px;font-weight:800;color:#ffd166;letter-spacing:1px}
+  .load-spinner{width:34px;height:34px;border-radius:50%;
+    border:4px solid rgba(255,255,255,.2);border-top-color:#a29bfe;
+    animation:spin 0.9s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  #map{position:absolute;inset:0;background:#9ec9a3;z-index:1}
+  .leaflet-tile-pane{filter:saturate(1.05) brightness(1.02)}
+  .leaflet-control-attribution{font-size:9px;background:rgba(255,255,255,.6)!important}
+
+  #nightTint{position:fixed;inset:0;pointer-events:none;z-index:2;
+    background:radial-gradient(circle at 50% 40%,rgba(20,30,70,.35),rgba(5,10,30,.62));
+    opacity:0;transition:opacity .8s}
+  #nightTint.on{opacity:1}
+
+  .player-wrap{position:relative;width:44px;height:44px}
+  .player-wrap .ring{position:absolute;inset:0;border-radius:50%;
+    background:rgba(66,133,244,.45);animation:pulse 2s ease-out infinite}
+  .player-wrap .dot{position:absolute;left:50%;top:50%;width:20px;height:20px;margin:-10px 0 0 -10px;
+    border-radius:50%;background:#4285f4;border:3px solid #fff;
+    box-shadow:0 2px 10px rgba(0,0,0,.5),0 0 18px #4285f4}
+  @keyframes pulse{0%{transform:scale(.35);opacity:.95}100%{transform:scale(1.7);opacity:0}}
+
+  .spawn{position:relative;width:64px;height:72px;cursor:pointer}
+  .spawn-gif{position:absolute;left:50%;bottom:14px;width:56px;height:56px;margin-left:-28px;
+    object-fit:contain;image-rendering:pixelated;z-index:2;
+    animation:bob 1.8s ease-in-out infinite;pointer-events:none}
+  .spawn-shadow{position:absolute;left:50%;bottom:4px;width:42px;height:11px;margin-left:-21px;
+    border-radius:50%;background:radial-gradient(ellipse at center,rgba(0,0,0,.5),rgba(0,0,0,0) 78%);
+    z-index:1;animation:shadowBob 1.8s ease-in-out infinite;pointer-events:none}
+  .spawn-fallback{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);
+    font-size:38px;line-height:1;z-index:2;animation:bob 1.8s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  @keyframes shadowBob{0%,100%{transform:scale(1);opacity:.55}50%{transform:scale(.82);opacity:.35}}
+
+  .spawn.shiny .spawn-gif{
+    filter:drop-shadow(0 0 10px #ffd166) drop-shadow(0 0 22px #ffb703);
+    animation:bob 1.8s ease-in-out infinite,shinyGlow 1.3s ease-in-out infinite alternate}
+  @keyframes shinyGlow{from{filter:drop-shadow(0 0 8px #ffd166) drop-shadow(0 0 18px #ffb703)}
+    to{filter:drop-shadow(0 0 16px #ffd166) drop-shadow(0 0 34px #ffb703) brightness(1.2)}}
+
+  /* ===== NPC 圖標 ===== */
+  .npc{position:relative;width:56px;height:64px;cursor:pointer}
+  .npc-emoji{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);
+    font-size:40px;line-height:1;z-index:2;
+    animation:bob 2s ease-in-out infinite;
+    filter:drop-shadow(0 3px 8px rgba(0,0,0,.55))}
+  .npc-ring{position:absolute;left:50%;bottom:2px;width:44px;height:10px;margin-left:-22px;
+    border-radius:50%;background:radial-gradient(ellipse at center,rgba(255,209,102,.55),rgba(255,209,102,0) 78%);
+    z-index:1;animation:npcRing 2.4s ease-in-out infinite}
+  @keyframes npcRing{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.3);opacity:.3}}
+  .npc-badge{position:absolute;left:50%;top:-4px;transform:translateX(-50%);
+    background:rgba(255,209,102,.95);color:#5a3d00;
+    font-size:9px;font-weight:900;padding:2px 7px;border-radius:999px;
+    white-space:nowrap;z-index:3;letter-spacing:.5px;
+    box-shadow:0 2px 8px rgba(0,0,0,.4)}
+
+  .stop{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-weight:900;font-size:20px;color:#fff;cursor:pointer;
+    background:conic-gradient(#6c5ce7 0 45deg,#a29bfe 45deg 90deg,#6c5ce7 90deg 135deg,#a29bfe 135deg 180deg,
+      #6c5ce7 180deg 225deg,#a29bfe 225deg 270deg,#6c5ce7 270deg 315deg,#a29bfe 315deg 360deg);
+    border:3px solid #fff;box-shadow:0 0 16px #6c5ce7;
+    animation:spinSlow 7s linear infinite}
+  @keyframes spinSlow{to{transform:rotate(360deg)}}
+  .stop.used{animation:none;background:rgba(120,120,140,.9);box-shadow:none;filter:grayscale(1);
+    opacity:.55;font-size:22px}
+
+  #hud{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:10px;right:62px;
+    display:flex;gap:8px;z-index:1000;pointer-events:none;flex-wrap:wrap}
+  .chip{background:rgba(15,20,32,.82);color:#fff;font-size:14px;font-weight:700;
+    padding:8px 14px;border-radius:999px;border:1.5px solid rgba(255,255,255,.18);
+    backdrop-filter:blur(8px);box-shadow:0 4px 14px rgba(0,0,0,.4);
+    display:inline-flex;align-items:center;gap:6px}
+  .chip-btn{pointer-events:auto;cursor:pointer;font-family:inherit;transition:transform .1s}
+  .chip-btn:active{transform:scale(.94)}
+
+  #fsBtn{position:fixed;
+    top:calc(env(safe-area-inset-top,0px) + 10px);right:10px;
+    width:44px;height:44px;border-radius:50%;z-index:1600;
+    background:rgba(15,20,32,.85);color:#fff;
+    border:1.5px solid rgba(255,255,255,.25);
+    font-size:19px;line-height:1;cursor:pointer;
+    backdrop-filter:blur(8px);
+    box-shadow:0 4px 14px rgba(0,0,0,.45);
+    display:flex;align-items:center;justify-content:center;
+    transition:transform .12s,background .2s}
+  #fsBtn:active{transform:scale(.9)}
+  #fsBtn.on{background:rgba(66,133,244,.9);border-color:#fff}
+
+  .ball-mini{display:inline-block;width:16px;height:16px;border-radius:50%;
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
+      linear-gradient(#ee1515 0 45%,#1a1a1a 45% 55%,#ffffff 55% 100%);
+    border:1.5px solid #1a1a1a;position:relative;flex:0 0 auto;
+    box-shadow:0 0 6px rgba(238,21,21,.5)}
+
+  .candy-mini{display:inline-block;width:14px;height:14px;border-radius:50%;
+    background:radial-gradient(circle at 32% 30%,#fff,#ffb703 70%);
+    border:1.5px solid #b37400;flex:0 0 auto;box-shadow:0 0 5px rgba(255,183,3,.6)}
+
+  #dpad{position:fixed;left:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);
+    display:grid;grid-template-columns:repeat(3,42px);grid-template-rows:repeat(3,42px);
+    gap:3px;z-index:1000;opacity:.92;transition:opacity .25s}
+  body.gps-live #dpad{display:none}
+  .dpad-btn{background:rgba(15,20,32,.85);border:2px solid rgba(255,255,255,.2);
+    color:#fff;border-radius:12px;font-size:16px;cursor:pointer;
+    backdrop-filter:blur(8px);box-shadow:0 4px 12px rgba(0,0,0,.4);
+    user-select:none;touch-action:none;display:flex;align-items:center;justify-content:center}
+  .dpad-btn[data-dir="up"]   {grid-area:1/2}
+  .dpad-btn[data-dir="left"] {grid-area:2/1}
+  .dpad-btn[data-dir="right"]{grid-area:2/3}
+  .dpad-btn[data-dir="down"] {grid-area:3/2}
+  .dpad-btn:active,.dpad-btn.on{background:rgba(66,133,244,.95);transform:scale(.94)}
+
+  #locateBtn{position:fixed;right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);
+    width:52px;height:52px;border-radius:50%;border:2px solid rgba(255,255,255,.25);
+    background:rgba(15,20,32,.85);color:#fff;font-size:24px;z-index:1000;cursor:pointer;
+    backdrop-filter:blur(8px);box-shadow:0 6px 18px rgba(0,0,0,.5)}
+  #locateBtn:active{transform:scale(.92)}
+  #locateBtn.manual{background:rgba(66,133,244,.9);border-color:#fff}
+
+  #toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 70px);
+    transform:translateX(-50%) translateY(-14px);
+    background:rgba(15,20,32,.92);color:#fff;padding:10px 20px;border-radius:999px;
+    font-size:14px;font-weight:600;border:1.5px solid rgba(255,255,255,.2);z-index:3000;
+    opacity:0;pointer-events:none;transition:.3s;white-space:nowrap;
+    box-shadow:0 6px 20px rgba(0,0,0,.5);max-width:90vw;overflow:hidden;text-overflow:ellipsis}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  .ball-bubble{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);
+    background:rgba(255,255,255,.96);color:#1a1a1a;font-weight:900;font-size:22px;
+    padding:14px 26px 14px 18px;border-radius:999px;
+    box-shadow:0 10px 40px rgba(0,0,0,.55),0 0 50px rgba(108,92,231,.65);
+    z-index:4000;display:flex;align-items:center;gap:12px;
+    animation:bubblePop 1.7s cubic-bezier(.3,1.4,.5,1) forwards;pointer-events:none}
+  .ball-bubble::before{content:'';width:30px;height:30px;border-radius:50%;flex:0 0 auto;
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
+      linear-gradient(#ee1515 0 45%,#1a1a1a 45% 55%,#fff 55% 100%);
+    border:2.5px solid #1a1a1a}
+  .ball-bubble .bub-txt{color:#6c5ce7;font-size:24px;font-weight:900}
+  @keyframes bubblePop{
+    0%{opacity:0;transform:translate(-50%,-30%) scale(.3)}
+    22%{opacity:1;transform:translate(-50%,-50%) scale(1.18)}
+    38%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+    72%{opacity:1;transform:translate(-50%,-78%) scale(1)}
+    100%{opacity:0;transform:translate(-50%,-150%) scale(.9)}}
+
+  .pokeball{border-radius:50%;
+    background:linear-gradient(#ee1515 0 45%,#1a1a1a 45% 55%,#ffffff 55% 100%);
+    border:3px solid #1a1a1a;position:relative}
+  .pokeball::after{content:'';position:absolute;left:50%;top:50%;width:28%;height:28%;border-radius:50%;
+    background:#fff;border:3px solid #1a1a1a;transform:translate(-50%,-50%)}
+
+  .overlay{position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;
+    padding:calc(env(safe-area-inset-top,0px) + 12px) 16px calc(env(safe-area-inset-bottom,0px) + 18px)}
+  .hidden{display:none!important}
+
+  #catchScreen{overflow:hidden}
+  #sceneBg{position:absolute;inset:0;z-index:0;pointer-events:none}
+  #sceneBg .sky{position:absolute;left:0;right:0;top:0;
+    height:var(--groundY,42%);transition:height .4s,background .4s}
+  #sceneBg .ground{position:absolute;left:0;right:0;
+    top:var(--groundY,42%);bottom:0;transition:top .4s,background .4s}
+
+  #catchScreen.day #sceneBg .sky{background:linear-gradient(180deg,#3d7fd6 0%,#6db3e8 45%,#b8e0f0 100%)}
+  #catchScreen.day #sceneBg .ground{background:linear-gradient(180deg,#a8d870 0%,#8fc850 12%,#7ab648 45%,#5a9a30 100%)}
+  #catchScreen.night #sceneBg .sky{background:linear-gradient(180deg,#050820 0%,#0f1838 50%,#1a2545 100%)}
+  #catchScreen.night #sceneBg .ground{background:linear-gradient(180deg,#2a4a2a 0%,#1a3520 30%,#0f2412 100%)}
+
+  #stars{position:absolute;left:0;right:0;top:0;height:var(--groundY,42%);
+    pointer-events:none;z-index:1;display:none;overflow:hidden}
+  #catchScreen.night #stars{display:block}
+  .star{position:absolute;background:#fff;border-radius:50%;
+    box-shadow:0 0 4px rgba(255,255,255,.9);animation:twinkle 2.4s ease-in-out infinite}
+  @keyframes twinkle{0%,100%{opacity:.25}50%{opacity:1}}
+
+  .catch-top{display:flex;justify-content:center;align-items:center;position:relative;
+    min-height:44px;z-index:3}
+  .catch-name{color:#fff;font-size:19px;font-weight:800;letter-spacing:1px;
+    text-shadow:0 2px 10px rgba(0,0,0,.7);text-align:center;padding:0 46px}
+  .catch-name.shiny{color:#ffd166;text-shadow:0 0 18px #ffb703,0 2px 10px rgba(0,0,0,.85)}
+  #fleeBtn{position:absolute;right:0;top:0;background:rgba(0,0,0,.32);color:#fff;
+    border:2px solid rgba(255,255,255,.3);
+    width:40px;height:40px;border-radius:50%;font-size:18px;cursor:pointer;backdrop-filter:blur(6px)}
+
+  .catch-stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center;
+    touch-action:none;overflow:hidden;z-index:3}
+
+  .wild{position:relative;z-index:2}
+  .mon{position:relative;width:190px;height:180px;
+    display:flex;align-items:flex-end;justify-content:center;padding-bottom:34px;
+    transition:transform .28s cubic-bezier(.4,0,.9,.4),opacity .28s}
+  .mon img{width:148px;height:148px;object-fit:contain;image-rendering:pixelated;
+    position:relative;z-index:2;pointer-events:none;
+    animation:floatY 2.1s ease-in-out infinite}
+  .mon-fallback{font-size:88px;line-height:1;position:relative;z-index:2;
+    animation:floatY 2.1s ease-in-out infinite}
+  .mon::after{content:'';position:absolute;left:50%;bottom:20px;width:130px;height:26px;
+    margin-left:-65px;border-radius:50%;
+    background:radial-gradient(ellipse at center,rgba(0,0,0,.5) 0%,rgba(0,0,0,.25) 48%,rgba(0,0,0,0) 76%);
+    z-index:1;pointer-events:none;
+    animation:shadowPulse 2.1s ease-in-out infinite}
+  @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+  @keyframes shadowPulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(.86);opacity:.6}}
+
+  .mon.shiny img{filter:drop-shadow(0 0 14px #ffd166) drop-shadow(0 0 30px #ffb703)
+    drop-shadow(0 0 48px rgba(255,183,3,.45))}
+  .mon.shiny::after{background:radial-gradient(ellipse at center,rgba(255,183,3,.55) 0%,rgba(255,183,3,.2) 50%,rgba(0,0,0,0) 78%)}
+
+  .wild.absorbed .mon{transform:scale(.08);opacity:0}
+  .wild.absorbed .mon img,
+  .wild.absorbed .mon-fallback{animation-play-state:paused}
+
+  #ballFly{position:absolute;left:0;top:0;width:56px;height:56px;
+    display:block;z-index:6;pointer-events:none;will-change:transform}
+
+  .catch-star{position:absolute;color:#ffd166;font-size:26px;font-weight:900;
+    pointer-events:none;z-index:10;opacity:0;
+    text-shadow:0 0 12px #ffd166,0 0 24px #ffb703,0 0 40px rgba(255,183,3,.6);
+    transform:translate(0,0) scale(.3);
+    animation:starPop 1.3s cubic-bezier(.25,1.3,.5,1) forwards}
+  @keyframes starPop{
+    0%{opacity:0;transform:translate(0,0) scale(.2) rotate(-30deg)}
+    18%{opacity:1;transform:translate(var(--dx,0),var(--dy,-30px)) scale(1.3) rotate(0deg)}
+    45%{opacity:1;transform:translate(var(--dx,0),var(--dy,-30px)) scale(1) rotate(20deg)}
+    75%{opacity:1;transform:translate(calc(var(--dx,0px)*1.15),calc(var(--dy,-30px)*1.15)) scale(.95) rotate(40deg)}
+    100%{opacity:0;transform:translate(calc(var(--dx,0px)*1.25),calc(var(--dy,-30px)*1.25 - 22px)) scale(.5) rotate(60deg)}}
+
+  #trail{position:absolute;height:5px;border-radius:5px;
+    background:linear-gradient(90deg,rgba(255,255,255,.2),rgba(255,255,255,.9));
+    transform-origin:0 50%;pointer-events:none;display:none;z-index:20}
+
+  .swipe-hint{position:absolute;bottom:88px;left:50%;transform:translateX(-50%);
+    color:rgba(255,255,255,.9);font-size:13px;font-weight:800;letter-spacing:1px;
+    pointer-events:none;white-space:nowrap;text-shadow:0 2px 8px rgba(0,0,0,.85);
+    animation:hintPulse 2s ease-in-out infinite;z-index:4}
+  @keyframes hintPulse{0%,100%{opacity:.5}50%{opacity:1}}
+
+  #powerWrap{position:absolute;bottom:62px;left:50%;transform:translateX(-50%);
+    width:180px;height:10px;border-radius:6px;background:rgba(0,0,0,.35);
+    overflow:hidden;display:none;z-index:15;border:1px solid rgba(255,255,255,.4)}
+  #powerFill{height:100%;width:0%;border-radius:6px;transition:width .05s linear;
+    background:linear-gradient(90deg,#4ade80,#facc15,#f87171)}
+
+  .catch-result{min-height:34px;text-align:center;color:#fff;font-size:19px;font-weight:800;
+    text-shadow:0 2px 12px rgba(0,0,0,.85);transition:.2s;z-index:3}
+
+  .catch-footer{display:flex;flex-direction:column;align-items:center;gap:6px;z-index:3}
+  .ball-tip{color:rgba(255,255,255,.92);font-size:14px;font-weight:800;
+    text-shadow:0 2px 8px rgba(0,0,0,.8);
+    display:inline-flex;align-items:center;gap:6px}
+  .ball-tip b{color:#ffd166;font-size:16px}
+  .ball-tip.sub{font-size:12px;color:rgba(255,255,255,.72);font-weight:700;letter-spacing:.5px}
+
+  /* ===== 補給站 ===== */
+  #stopScreen{background:radial-gradient(circle at 50% 35%,#3a2f6b 0%,#161229 60%,#080b12 100%);
+    justify-content:center;align-items:center;gap:18px}
+  .stop-title{color:#fff;font-size:20px;font-weight:800;letter-spacing:2px;
+    text-shadow:0 0 22px #a29bfe}
+
+  .stop-stage{display:flex;align-items:center;justify-content:center;padding:18px;
+    touch-action:none;cursor:grab;perspective:900px;perspective-origin:50% 50%}
+
+  .coin{width:200px;height:200px;position:relative;
+    transform-style:preserve-3d;will-change:transform;
+    transition:transform 1.7s cubic-bezier(.15,.85,.3,1)}
+  .coin-face{position:absolute;inset:0;border-radius:50%;
+    background:radial-gradient(circle at 34% 26%,#fff6c4 0%,#ffe066 22%,#ffcc1a 45%,#d9a800 70%,#8a6a00 100%);
+    border:7px solid #f2c800;
+    box-shadow:
+      0 0 55px rgba(255,200,40,.85),
+      0 0 110px rgba(255,180,0,.4),
+      inset 0 -12px 26px rgba(120,80,0,.45),
+      inset 0 8px 18px rgba(255,255,255,.55);
+    display:flex;align-items:center;justify-content:center;
+    backface-visibility:hidden;overflow:hidden}
+  .coin-face::before{content:'';position:absolute;inset:14px;border-radius:50%;
+    border:3px solid rgba(255,255,255,.55);
+    box-shadow:inset 0 0 22px rgba(255,255,255,.35)}
+  .coin-face::after{content:'';position:absolute;left:-10%;top:-40%;
+    width:60%;height:170%;border-radius:50%;
+    background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.55),rgba(255,255,255,0));
+    transform:rotate(18deg)}
+  .coin-face.back{transform:rotateY(180deg)}
+  .coin-core{width:76px;height:76px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,#fffbe0,#ffd93b 58%,#c99a00 100%);
+    border:4px solid rgba(140,100,0,.55);
+    display:flex;align-items:center;justify-content:center;
+    font-size:36px;font-weight:900;color:#8a6a00;
+    text-shadow:0 1px 0 rgba(255,255,255,.65);
+    box-shadow:inset 0 -7px 14px rgba(140,100,0,.42),0 5px 14px rgba(0,0,0,.35);
+    position:relative;z-index:2}
+
+  .stop-reward{display:flex;align-items:center;justify-content:center;gap:10px;
+    color:#ffd166;font-size:21px;font-weight:800;min-height:34px;
+    text-shadow:0 0 16px rgba(255,209,102,.6)}
+  .stop-reward .ball-mini{width:26px;height:26px;box-shadow:0 0 12px rgba(238,21,21,.75)}
+  @keyframes rewardIn{0%{transform:scale(.35);opacity:0}
+    60%{transform:scale(1.15);opacity:1}100%{transform:scale(1);opacity:1}}
+
+  .stop-footer{display:flex;flex-direction:column;gap:12px;align-items:center;width:100%;max-width:280px}
+  .stop-hint{color:rgba(255,255,255,.75);font-size:14px;font-weight:700;letter-spacing:1px;
+    animation:hintPulse 1.8s ease-in-out infinite;text-align:center}
+  .ghost{background:rgba(255,255,255,.1)!important;box-shadow:none!important;color:#ccc!important;
+    padding:11px!important;font-size:14px!important;width:100%;border-radius:999px;border:none;cursor:pointer}
+
+  /* ===== 圖鑑 ===== */
+  #dexScreen,#evoScreen{background:radial-gradient(circle at 50% 20%,#2a2140 0%,#120e22 60%,#07060e 100%)}
+  .dex-top{display:flex;justify-content:center;align-items:center;position:relative;min-height:44px;
+    margin-bottom:8px}
+  .dex-title{color:#fff;font-size:19px;font-weight:800;letter-spacing:2px;
+    text-shadow:0 0 18px rgba(162,155,254,.7)}
+  .closeX{position:absolute;right:0;top:0;background:rgba(255,255,255,.12);color:#fff;border:none;
+    width:40px;height:40px;border-radius:50%;font-size:18px;cursor:pointer;backdrop-filter:blur(6px)}
+
+  .dex-scroll{flex:1;overflow-y:auto;padding:6px 0 24px;-webkit-overflow-scrolling:touch}
+  .dex-progress{text-align:center;color:#ffd166;font-size:16px;font-weight:800;
+    margin-bottom:14px;letter-spacing:1px}
+  .dex-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px}
+  .dex-cell{background:rgba(255,255,255,.06);border-radius:16px;padding:12px 6px 10px;
+    text-align:center;border:2px solid rgba(255,255,255,.1);transition:.25s}
+  .dex-cell.caught{border-color:#ffd166;background:rgba(255,209,102,.13);
+    box-shadow:0 0 18px rgba(255,209,102,.22)}
+  .dex-cell.seen{opacity:.72}
+  .dex-cell.unknown{opacity:.3;filter:grayscale(1)}
+  .dex-icon{width:64px;height:64px;margin:0 auto 7px;position:relative;
+    display:flex;align-items:center;justify-content:center;font-size:30px}
+  .dex-icon img{width:58px;height:58px;object-fit:contain;image-rendering:pixelated;
+    position:relative;z-index:2;margin-bottom:4px}
+  .dex-fallback{font-size:30px;position:relative;z-index:2}
+  .dex-icon .dex-shadow{position:absolute;left:50%;bottom:0;width:44px;height:9px;margin-left:-22px;
+    border-radius:50%;background:radial-gradient(ellipse at center,rgba(0,0,0,.45),rgba(0,0,0,0) 76%)}
+  .dex-name{font-size:12px;color:#fff;font-weight:700;line-height:1.3}
+  .dex-count{font-size:10px;color:#ffd166;margin-top:3px;font-weight:700}
+  .dex-candy{font-size:10px;color:#ffd166;margin-top:3px;font-weight:800;
+    display:inline-flex;align-items:center;gap:3px}
+  .dex-shiny{font-size:9px;color:#ffb703;margin-top:2px;font-weight:800;
+    text-shadow:0 0 8px rgba(255,183,3,.8)}
+  .dex-evo-tag{font-size:9px;color:#7dd3fc;margin-top:2px;font-weight:700}
+
+  .evo-list{display:flex;flex-direction:column;gap:10px}
+  .evo-item{background:rgba(255,255,255,.06);border-radius:16px;padding:12px;
+    display:flex;align-items:center;gap:12px;border:2px solid rgba(255,255,255,.1)}
+  .evo-item.ready{border-color:#ffd166;background:rgba(255,209,102,.1);
+    box-shadow:0 0 16px rgba(255,209,102,.25)}
+  .evo-sprites{display:flex;align-items:center;gap:6px;flex:0 0 auto}
+  .evo-sprites img{width:48px;height:48px;object-fit:contain;image-rendering:pixelated}
+  .evo-arrow{color:#fff;font-size:18px;opacity:.7}
+  .evo-info{flex:1;min-width:0}
+  .evo-title{color:#fff;font-size:13px;font-weight:800;line-height:1.4}
+  .evo-candy-line{margin-top:4px;font-size:11px;color:#ffd166;font-weight:800;
+    display:flex;align-items:center;gap:5px}
+  .evo-candy-line.lack{color:#ff8a8a}
+  .evo-btn{background:linear-gradient(135deg,#a29bfe,#6c5ce7);color:#fff;border:none;
+    padding:10px 16px;border-radius:999px;font-size:13px;font-weight:800;cursor:pointer;
+    flex:0 0 auto;box-shadow:0 4px 14px rgba(108,92,231,.5)}
+  .evo-btn:disabled{background:rgba(120,120,140,.5);box-shadow:none;cursor:not-allowed;opacity:.6}
+  .evo-btn:active:not(:disabled){transform:scale(.94)}
+  .evo-empty{text-align:center;color:rgba(255,255,255,.5);font-size:14px;font-weight:700;
+    padding:40px 20px;line-height:1.7}
+
+  /* ===== NPC 交換畫面 ===== */
+  #npcScreen{background:radial-gradient(circle at 50% 30%,#2a2140 0%,#120e22 65%,#07060e 100%);
+    justify-content:center;align-items:center;gap:14px}
+  .npc-title{color:#ffd166;font-size:19px;font-weight:900;letter-spacing:2px;
+    text-shadow:0 0 22px rgba(255,209,102,.6)}
+  .npc-sub{color:rgba(255,255,255,.7);font-size:13px;font-weight:700;letter-spacing:1px}
+  .npc-stage{display:flex;align-items:center;justify-content:center;gap:16px;
+    padding:8px;min-height:180px;width:100%;max-width:380px}
+  .npc-card{background:rgba(255,255,255,.07);border-radius:20px;padding:14px 10px;
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;
+    border:2px solid rgba(255,255,255,.12);min-height:170px;justify-content:center;
+    transition:transform .3s,opacity .3s}
+  .npc-card.npc-side{border-color:rgba(255,209,102,.5);
+    background:rgba(255,209,102,.08)}
+  .npc-card.player-side{border-color:rgba(162,155,254,.45);
+    background:rgba(108,92,231,.08)}
+  .npc-card img{width:72px;height:72px;object-fit:contain;image-rendering:pixelated}
+  .npc-card .card-fallback{font-size:44px;line-height:1}
+  .npc-card-label{font-size:10px;font-weight:800;color:rgba(255,255,255,.55);
+    letter-spacing:1px;text-transform:uppercase}
+  .npc-card-name{font-size:15px;font-weight:900;color:#fff}
+  .npc-swap-icon{font-size:26px;color:rgba(255,255,255,.35);flex:0 0 auto;
+    animation:swapSpin 3s linear infinite}
+  @keyframes swapSpin{to{transform:rotate(360deg)}}
+
+  .npc-exchange-info{width:100%;max-width:340px;
+    background:rgba(15,20,32,.6);border-radius:16px;padding:12px 16px;
+    border:1.5px solid rgba(255,255,255,.1);display:flex;flex-direction:column;gap:8px}
+  .npc-exchange-line{display:flex;justify-content:space-between;align-items:center;
+    font-size:13px;font-weight:700;color:rgba(255,255,255,.8)}
+  .npc-exchange-line .val{font-weight:900;font-size:15px}
+  .npc-exchange-line .val.ok{color:#7CFC9A}
+  .npc-exchange-line .val.lack{color:#ff8a8a}
+
+  .npc-footer{display:flex;flex-direction:column;gap:10px;align-items:center;
+    width:100%;max-width:300px;margin-top:4px}
+  .npc-confirm-btn{width:100%;padding:14px;border-radius:999px;border:none;
+    background:linear-gradient(135deg,#ffd166,#ffb703);color:#5a3d00;
+    font-size:16px;font-weight:900;letter-spacing:1px;cursor:pointer;
+    box-shadow:0 6px 22px rgba(255,183,3,.45);font-family:inherit;
+    transition:transform .12s,opacity .2s}
+  .npc-confirm-btn:active:not(:disabled){transform:scale(.95)}
+  .npc-confirm-btn:disabled{background:rgba(120,120,140,.5);color:rgba(255,255,255,.4);
+    box-shadow:none;cursor:not-allowed}
+  .npc-cancel-btn{width:100%;padding:12px;border-radius:999px;border:none;
+    background:rgba(255,255,255,.1);color:#ccc;font-size:14px;font-weight:700;
+    cursor:pointer;font-family:inherit}
+
+  /* 交換動畫 */
+  #tradeAnimOverlay{position:fixed;inset:0;z-index:5200;pointer-events:none;
+    background:radial-gradient(circle at 50% 50%,rgba(20,30,55,.92),rgba(5,8,18,.97));
+    display:none;align-items:center;justify-content:center;flex-direction:column;gap:24px}
+  #tradeAnimOverlay.on{display:flex}
+  .trade-anim-stage{position:relative;width:260px;height:150px}
+  .trade-mon{position:absolute;top:50%;transform:translateY(-50%);
+    display:flex;flex-direction:column;align-items:center;gap:6px;
+    transition:left .85s cubic-bezier(.45,0,.25,1)}
+  .trade-mon img{width:80px;height:80px;object-fit:contain;image-rendering:pixelated}
+  .trade-mon .trade-fallback{font-size:48px;line-height:1}
+  .trade-mon .trade-label{font-size:12px;font-weight:800;color:rgba(255,255,255,.8);
+    white-space:nowrap}
+  .trade-mon.left{left:10px}
+  .trade-mon.right{left:calc(100% - 90px)}
+  .trade-mon.left.swapped{left:calc(100% - 90px)}
+  .trade-mon.right.swapped{left:10px}
+  .trade-flash{position:absolute;inset:0;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,255,255,.95),rgba(255,209,102,.4),transparent 70%);
+    opacity:0;pointer-events:none}
+  .trade-flash.flash{animation:tradeFlash 1s ease-out forwards}
+  @keyframes tradeFlash{0%{opacity:0;transform:scale(.3)}
+    40%{opacity:1;transform:scale(1.2)}100%{opacity:0;transform:scale(1.6)}}
+  #tradeAnimOverlay .trade-txt{color:#fff;font-size:20px;font-weight:900;letter-spacing:3px;
+    text-shadow:0 0 20px rgba(255,209,102,.7)}
+
+  /* 進化動畫 */
+  #evoOverlay{position:fixed;inset:0;z-index:5000;pointer-events:none;
+    background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.98),rgba(200,220,255,.6),rgba(0,0,0,.85));
+    display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;
+    animation:evoFlash 2.2s ease-in-out forwards;opacity:0}
+  #evoOverlay.on{display:flex}
+  @keyframes evoFlash{
+    0%{opacity:0}
+    15%{opacity:1;background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.98),rgba(180,200,255,.7),rgba(0,0,0,.85))}
+    50%{opacity:1;background:radial-gradient(circle at 50% 50%,rgba(255,255,255,1),rgba(255,220,120,.75),rgba(0,0,0,.9))}
+    85%{opacity:1;background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.95),rgba(120,220,255,.6),rgba(0,0,0,.8))}
+    100%{opacity:0}
+  }
+  #evoOverlay img{width:180px;height:180px;object-fit:contain;image-rendering:pixelated;
+    animation:evoShake .5s ease-in-out infinite;filter:drop-shadow(0 0 30px #fff)}
+  @keyframes evoShake{0%,100%{transform:scale(1) rotate(-3deg)}50%{transform:scale(1.06) rotate(3deg)}}
+  #evoOverlay .evo-txt{color:#fff;font-size:22px;font-weight:900;letter-spacing:3px;
+    text-shadow:0 0 20px rgba(255,255,255,.9),0 2px 14px rgba(0,0,0,.9)}
+</style>
+</head>
+<body>
+
+<div id="splash">
+  <div class="splash-frame">
+    <img src="pokemon_city_walk_title.jpg" alt="🎊寵物小精靈 City Walk"
+         onerror="this.style.display='none'">
+    <div class="splash-text">按下任意位置進入遊戲</div>
+    <div class="splash-copyright">v1.0 © <span id="copyrightYear"></span> ☕迪遜咖啡廳，版權所有。</div>
+  </div>
+</div>
+
+<div id="loadingScreen" class="hidden">
+  <div class="load-title">📖 正在載入全圖鑑</div>
+  <div class="load-sub" id="loadSub">準備連線至 PokeAPI…</div>
+  <div class="load-bar-wrap"><div id="loadBar"></div></div>
+  <div id="loadPct">0%</div>
+  <div class="load-spinner"></div>
+</div>
+
+<div id="map"></div>
+<div id="nightTint"></div>
+
+<button id="fsBtn" title="全螢幕">⛶</button>
+
+<div id="hud">
+  <div class="chip"><span class="ball-mini"></span> <span id="ballCount">20</span></div>
+  <div class="chip">🏆 <span id="caughtCount">0</span></div>
+  <div class="chip" id="envChip">☀️ 白天 · 晴朗</div>
+  <div class="chip" id="timerChip">⏱ 5:00</div>
+  <button class="chip chip-btn" id="dexBtn">📖 圖鑑</button>
+  <button class="chip chip-btn" id="evoBtn">🧬 進化</button>
+  <button class="chip chip-btn" id="saveBtn" title="匯出存檔 .txt">💾</button>
+  <button class="chip chip-btn" id="loadBtn" title="載入存檔 .txt">📂</button>
+  <button class="chip chip-btn" id="resetBtn" title="重設遊戲進度">🗑</button>
+</div>
+<input type="file" id="loadFileInput" accept=".txt,text/plain,application/json" hidden>
+
+<div id="dpad">
+  <button class="dpad-btn" data-dir="up">▲</button>
+  <button class="dpad-btn" data-dir="left">◀</button>
+  <button class="dpad-btn" data-dir="right">▶</button>
+  <button class="dpad-btn" data-dir="down">▼</button>
+</div>
+
+<button id="locateBtn">◎</button>
+<div id="toast"></div>
+
+<!-- ===== 捕捉畫面 ===== -->
+<div id="catchScreen" class="overlay hidden day">
+  <div id="sceneBg"><div class="sky"></div><div class="ground"></div></div>
+  <div id="stars"></div>
+
+  <div class="catch-top">
+    <div class="catch-name" id="catchName">野生的寶可夢</div>
+    <button id="fleeBtn">✕</button>
+  </div>
+
+  <div class="catch-stage" id="catchStage">
+    <div class="wild" id="wildMon"><div class="mon" id="monBody"></div></div>
+    <div id="ballFly" class="pokeball"></div>
+    <div id="trail"></div>
+    <div class="swipe-hint" id="swipeHint">↑ 向上滑動投球</div>
+    <div id="powerWrap"><div id="powerFill"></div></div>
+  </div>
+
+  <div class="catch-result" id="catchResult"></div>
+
+  <div class="catch-footer">
+    <div class="ball-tip"><span class="ball-mini"></span> 剩餘 <b id="catchBallCount">20</b> 顆精靈球</div>
+    <div class="ball-tip sub">上掃 = 直球 ｜ 斜掃 = 旋轉球</div>
+  </div>
+</div>
+
+<!-- ===== 補給站畫面 ===== -->
+<div id="stopScreen" class="overlay hidden">
+  <div class="stop-title">補 給 站</div>
+  <div class="stop-stage" id="stopStage">
+    <div class="coin" id="stopDisc">
+      <div class="coin-face front"><div class="coin-core">P</div></div>
+      <div class="coin-face back"><div class="coin-core">P</div></div>
+    </div>
+  </div>
+  <div class="stop-reward" id="stopReward"></div>
+  <div class="stop-footer">
+    <div class="stop-hint" id="stopHint">← 在硬幣上橫掃 →</div>
+    <button id="stopCloseBtn" class="ghost">關閉</button>
+  </div>
+</div>
+
+<!-- ===== NPC 交換畫面 ===== -->
+<div id="npcScreen" class="overlay hidden">
+  <div class="npc-title" id="npcTitle">🔄 交換進化</div>
+  <div class="npc-sub" id="npcSub">NPC 願意與你交換寶可夢</div>
+
+  <div class="npc-stage">
+    <div class="npc-card npc-side" id="npcCard">
+      <div class="npc-card-label">NPC 提供</div>
+      <img id="npcCardImg" src="" alt="">
+      <div class="card-fallback" id="npcCardFallback" style="display:none">❓</div>
+      <div class="npc-card-name" id="npcCardName">—</div>
+    </div>
+    <div class="npc-swap-icon">⇄</div>
+    <div class="npc-card player-side" id="playerCard">
+      <div class="npc-card-label">你的糖果</div>
+      <img id="playerCardImg" src="" alt="">
+      <div class="card-fallback" id="playerCardFallback" style="display:none">🍬</div>
+      <div class="npc-card-name" id="playerCardName">—</div>
+    </div>
+  </div>
+
+  <div class="npc-exchange-info">
+    <div class="npc-exchange-line">
+      <span>需要糖果</span>
+      <span class="val" id="npcCostLabel">—</span>
+    </div>
+    <div class="npc-exchange-line">
+      <span>你擁有</span>
+      <span class="val" id="npcOwnLabel">—</span>
+    </div>
+    <div class="npc-exchange-line">
+      <span>交換後進化為</span>
+      <span class="val ok" id="npcEvoLabel">—</span>
+    </div>
+  </div>
+
+  <div class="npc-footer">
+    <button class="npc-confirm-btn" id="npcConfirmBtn" disabled>確認交換</button>
+    <button class="npc-cancel-btn" id="npcCancelBtn">取消</button>
+  </div>
+</div>
+
+<!-- ===== 圖鑑畫面 ===== -->
+<div id="dexScreen" class="overlay hidden">
+  <div class="dex-top">
+    <div class="dex-title">寶 可 夢 圖 鑑</div>
+    <button class="closeX" id="dexCloseBtn">✕</button>
+  </div>
+  <div class="dex-scroll">
+    <div class="dex-progress" id="dexProgress">已捕獲 0 / 0</div>
+    <div class="dex-grid" id="dexGrid"></div>
+  </div>
+</div>
+
+<!-- ===== 進化畫面 ===== -->
+<div id="evoScreen" class="overlay hidden">
+  <div class="dex-top">
+    <div class="dex-title">進 化</div>
+    <button class="closeX" id="evoCloseBtn">✕</button>
+  </div>
+  <div class="dex-scroll">
+    <div class="dex-progress" id="evoProgress"></div>
+    <div class="evo-list" id="evoList"></div>
+  </div>
+</div>
+
+<!-- 交換動畫 -->
+<div id="tradeAnimOverlay">
+  <div class="trade-anim-stage">
+    <div class="trade-mon left" id="tradeMonA">
+      <img id="tradeImgA" src="" alt="">
+      <div class="trade-fallback" id="tradeFallbackA" style="display:none"></div>
+      <div class="trade-label" id="tradeLabelA"></div>
+    </div>
+    <div class="trade-mon right" id="tradeMonB">
+      <img id="tradeImgB" src="" alt="">
+      <div class="trade-fallback" id="tradeFallbackB" style="display:none"></div>
+      <div class="trade-label" id="tradeLabelB"></div>
+    </div>
+    <div class="trade-flash" id="tradeFlash"></div>
+  </div>
+  <div class="trade-txt">交 換 中…</div>
+</div>
+
+<!-- 進化動畫 -->
+<div id="evoOverlay" style="display:none">
+  <img id="evoAnimImg" src="" alt="">
+  <div class="evo-txt">進 化 中…</div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/* =========================================================
+   0. 全局數據
+   ========================================================= */
+let POKEDEX = [];
+let EVOLUTIONS = {};
+const dexState = {};
+const candyBag = {};
+const nameById = {};
+
+const TOTAL_POKEMON = 1020;
+const BATCH_SIZE = 40;
+
+/* =========================================================
+   1. PokeAPI 異步加載
+   ========================================================= */
+const API = 'https://pokeapi.co/api/v2';
+
+function updateProgress(loaded, total, msg) {
+  const pct = Math.min(100, Math.round((loaded / total) * 100));
+  document.getElementById('loadBar').style.width = pct + '%';
+  document.getElementById('loadPct').textContent = pct + '%';
+  if (msg) document.getElementById('loadSub').textContent = msg;
+}
+
+async function loadAllSpecies() {
+  const speciesList = new Array(TOTAL_POKEMON).fill(null);
+  const totalBatches = Math.ceil(TOTAL_POKEMON / BATCH_SIZE);
+
+  for (let batch = 0; batch < totalBatches; batch++) {
+    const start = batch * BATCH_SIZE + 1;
+    const end = Math.min(start + BATCH_SIZE - 1, TOTAL_POKEMON);
+    const urls = [];
+    for (let id = start; id <= end; id++) {
+      urls.push(`${API}/pokemon-species/${id}`);
+    }
+
+    const results = await Promise.allSettled(
+      urls.map(url => fetch(url).then(r => {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      }))
+    );
+
+    results.forEach((res, idx) => {
+      const id = start + idx;
+      if (res.status === 'fulfilled') {
+        speciesList[id - 1] = res.value;
+      } else {
+        console.warn(`Species #${id} failed:`, res.reason);
+      }
+    });
+
+    const loaded = Math.min(end, TOTAL_POKEMON);
+    updateProgress(loaded, TOTAL_POKEMON, `已載入 ${loaded} / ${TOTAL_POKEMON} 隻寶可夢資料…`);
+    await new Promise(r => setTimeout(r, 50));
+  }
+
+  return speciesList;
+}
+
+function extractChineseName(species) {
+  if (!species || !species.names) return null;
+  const zhHant = species.names.find(n => n.language.name === 'zh-hant');
+  if (zhHant) return zhHant.name;
+  const zhHans = species.names.find(n => n.language.name === 'zh-hans');
+  if (zhHans) return zhHans.name;
+  return null;
+}
+
+function buildEvolutionsFromChains(speciesList) {
+  const evolutions = {};
+  const parentMap = {};
+
+  speciesList.forEach(species => {
+    if (!species) return;
+    const childId = species.id;
+    const parent = species.evolves_from_species;
+    if (parent) {
+      const parentId = parseInt(parent.url.split('/').filter(Boolean).pop());
+      parentMap[childId] = parentId;
+    }
+  });
+
+  const idToName = {};
+  speciesList.forEach(species => {
+    if (!species) return;
+    const zh = extractChineseName(species);
+    if (zh) {
+      idToName[species.id] = zh;
+      nameById[species.id] = zh;
+    }
+  });
+
+  const childrenMap = {};
+  Object.entries(parentMap).forEach(([childId, parentId]) => {
+    if (!childrenMap[parentId]) childrenMap[parentId] = [];
+    childrenMap[parentId].push(parseInt(childId));
+  });
+
+  function isMiddleStage(id) {
+    return parentMap[id] !== undefined && childrenMap[id] && childrenMap[id].length > 0;
+  }
+
+  function isBaseStage(id) {
+    if (parentMap[id] !== undefined) return false;
+    if (!childrenMap[id] || childrenMap[id].length === 0) return false;
+    return childrenMap[id].some(childId => childrenMap[childId] && childrenMap[childId].length > 0);
+  }
+
+  function getCandyCount(parentId, childId) {
+    if ((parentId === 10 || parentId === 13 || parentId === 16) && childrenMap[parentId]?.includes(childId)) {
+      return 12;
+    }
+    if ((parentId === 11 || parentId === 14 || parentId === 17)) {
+      return 50;
+    }
+    if (parentId === 19) return 25;
+    if (parentId === 129) return 400;
+    if (parentId === 133) return 25;
+    if (isBaseStage(parentId)) return 25;
+    if (isMiddleStage(parentId)) return 100;
+    return 50;
+  }
+
+  Object.entries(parentMap).forEach(([childIdStr, parentId]) => {
+    const childId = parseInt(childIdStr);
+    const parentName = idToName[parentId];
+    const childName = idToName[childId];
+    if (!parentName || !childName) return;
+
+    if (!evolutions[parentName]) evolutions[parentName] = [];
+    evolutions[parentName].push({
+      to: childName,
+      candy: getCandyCount(parentId, childId)
+    });
+  });
+
+  return evolutions;
+}
+
+async function loadAllData() {
+  updateProgress(0, TOTAL_POKEMON, '正在獲取寶可夢圖鑑資料…');
+  const speciesList = await loadAllSpecies();
+
+  const pokedex = [];
+  speciesList.forEach((species, idx) => {
+    const id = idx + 1;
+    if (!species) return;
+    const zhName = extractChineseName(species) || `#${id}`;
+    nameById[id] = zhName;
+    pokedex.push({
+      id,
+      name: zhName,
+      emoji: '❓',
+      color: '#888',
+      rate: 0.35,
+      w: 0,
+      notWild: false,
+    });
+  });
+
+  updateProgress(TOTAL_POKEMON, TOTAL_POKEMON, '正在構建進化鏈…');
+  const evolutions = buildEvolutionsFromChains(speciesList);
+
+  const parentExists = {};
+  speciesList.forEach(species => {
+    if (species && species.evolves_from_species) {
+      parentExists[species.id] = true;
+    }
+  });
+
+  pokedex.forEach(p => {
+    if (parentExists[p.id]) {
+      p.notWild = true;
+      p.w = 0;
+    } else {
+      p.notWild = false;
+      p.w = 10;
+      if (p.id === 129) p.w = 12;
+      if (p.id === 10 || p.id === 13 || p.id === 16) p.w = 11;
+      if (p.id === 133) p.w = 6;
+      if (p.id === 147) p.w = 3;
+      if (p.id === 150) p.w = 1;
+      if (p.id === 151) p.w = 1;
+    }
+  });
+
+  POKEDEX = pokedex;
+  EVOLUTIONS = evolutions;
+
+  POKEDEX.forEach(p => {
+    dexState[p.name] = { seen: 0, caught: 0, shiny: 0 };
+    candyBag[p.name] = 0;
+  });
+
+  POKEDEX.forEach(p => { p.emoji = '❓'; });
+
+  console.log(`✅ 全圖鑑載入完成：${POKEDEX.length} 隻寶可夢，${Object.keys(EVOLUTIONS).length} 組進化鏈`);
+}
+
+function spriteUrl(p, shiny) {
+  const base = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/';
+  if (shiny) return `${base}shiny/${p.id}.png`;
+  return `${base}${p.id}.png`;
+}
+
+/* =========================================================
+   2. 背景音樂
+   ========================================================= */
+const audio = {
+  mapDay:null, mapNight:null, catchDay:null, catchNight:null, trade:null,
+  current:null, ready:false, inited:false,
+
+  init() {
+    if (this.inited) return;
+    this.inited = true;
+    try {
+      this.mapDay     = new Audio('Pokemon City Walk - Sun Walk.mp3');     this.mapDay.loop = true;     this.mapDay.volume = 1.0;
+      this.mapNight   = new Audio('Pokemon City Walk - Moon Walk.mp3');   this.mapNight.loop = true;   this.mapNight.volume = 1.0;
+      this.catchDay   = new Audio('Pokemon City Walk - Day Catch Piano.mp3');   this.catchDay.loop = true;   this.catchDay.volume = 1.0;
+      this.catchNight = new Audio('Pokemon City Walk - Night Catch Sax.mp3'); this.catchNight.loop = true; this.catchNight.volume = 1.0;
+      this.trade      = new Audio('Pokemon City Walk - Trade of the Day.mp3'); this.trade.loop = true; this.trade.volume = 1.0;
+      this.ready = true;
+    } catch (e) { console.warn('Audio init failed:', e); }
+  },
+
+  _stopAll() {
+    [this.mapDay, this.mapNight, this.catchDay, this.catchNight, this.trade].forEach(a => {
+      if (a) { try { a.pause(); a.currentTime = 0; } catch(_){} }
+    });
+    this.current = null;
+  },
+
+  playMap(time) {
+    if (!this.ready) return;
+    this._stopAll();
+    const track = (time === 'day') ? this.mapDay : this.mapNight;
+    if (track) { track.play().catch(()=>{}); this.current = track; }
+  },
+
+  playCatch(time) {
+    if (!this.ready) return;
+    this._stopAll();
+    const track = (time === 'day') ? this.catchDay : this.catchNight;
+    if (track) { track.play().catch(()=>{}); this.current = track; }
+  },
+
+  playTrade() {
+    if (!this.ready) return;
+    this._stopAll();
+    if (this.trade) { this.trade.play().catch(()=>{}); this.current = this.trade; }
+  },
+
+  stopCatch() {
+    if (!this.ready) return;
+    try { this.catchDay.pause(); this.catchDay.currentTime = 0; } catch(_){}
+    try { this.catchNight.pause(); this.catchNight.currentTime = 0; } catch(_){}
+    this.current = null;
+  },
+};
+
+/* =========================================================
+   2b. 操作音效
+   ========================================================= */
+const SFX = {
+  ctx:null, master:null, _nb:null,
+
+  init() {
+    if (this.ctx) { this.resume(); return; }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    try {
+      this.ctx = new AC();
+      this.master = this.ctx.createGain();
+      this.master.gain.value = 0.9;
+      this.master.connect(this.ctx.destination);
+    } catch(e) { console.warn('SFX init failed:', e); }
+  },
+
+  resume() {
+    if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume().catch(()=>{});
+  },
+
+  _noiseBuf() {
+    if (this._nb) return this._nb;
+    const ctx = this.ctx;
+    const len = Math.floor(ctx.sampleRate * 0.7);
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    this._nb = buf;
+    return buf;
+  },
+
+  tone(o) {
+    if (!this.ctx) return;
+    const ctx = this.ctx;
+    const t0 = ctx.currentTime + (o.delay || 0);
+    const dur = o.dur || 0.15;
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = o.type || 'sine';
+    osc.frequency.setValueAtTime(Math.max(1, o.freq), t0);
+    if (o.freq2) osc.frequency.exponentialRampToValueAtTime(Math.max(1, o.freq2), t0 + dur);
+    const peak = (o.gain == null) ? 0.2 : o.gain;
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(peak, t0 + Math.min(0.02, dur * 0.3));
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(g); g.connect(this.master);
+    osc.start(t0); osc.stop(t0 + dur + 0.05);
+  },
+
+  noise(o) {
+    if (!this.ctx) return;
+    const ctx = this.ctx;
+    const t0 = ctx.currentTime + (o.delay || 0);
+    const dur = o.dur || 0.2;
+    const src = ctx.createBufferSource();
+    src.buffer = this._noiseBuf();
+    const flt = ctx.createBiquadFilter();
+    flt.type = o.type || 'bandpass';
+    flt.Q.value = (o.q == null) ? 1 : o.q;
+    flt.frequency.setValueAtTime(Math.max(20, o.f0 || 800), t0);
+    if (o.f1) flt.frequency.exponentialRampToValueAtTime(Math.max(20, o.f1), t0 + dur);
+    const g = ctx.createGain();
+    const peak = (o.gain == null) ? 0.2 : o.gain;
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(peak, t0 + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    src.connect(flt); flt.connect(g); g.connect(this.master);
+    src.start(t0); src.stop(t0 + dur + 0.05);
+  },
+
+  throwBall() {
+    this.noise({ dur:0.22, gain:0.16, type:'bandpass', f0:500, f1:2600, q:1.2 });
+    this.tone({ freq:260, freq2:720, type:'triangle', dur:0.18, gain:0.07 });
+  },
+  hit() {
+    this.noise({ dur:0.10, gain:0.32, type:'lowpass', f0:1600, f1:260, q:0.8 });
+    this.tone({ freq:200, freq2:70, type:'sine', dur:0.16, gain:0.22 });
+  },
+  wobble(n) {
+    const base = 460 + (n || 0) * 70;
+    this.tone({ freq:base, freq2:base * 0.7, type:'triangle', dur:0.12, gain:0.14 });
+    this.tone({ freq:base * 2, type:'sine', dur:0.07, gain:0.05 });
+  },
+  caught() {
+    [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
+      this.tone({ freq:f, type:'triangle', dur:0.26, gain:0.16, delay:i * 0.10 });
+      this.tone({ freq:f * 2, type:'sine', dur:0.18, gain:0.05, delay:i * 0.10 });
+    });
+    this.noise({ dur:0.5, gain:0.05, type:'highpass', f0:3000, delay:0.32 });
+  },
+  catchFail() {
+    [392, 329.63, 246.94].forEach((f, i) => {
+      this.tone({ freq:f, freq2:f * 0.9, type:'sawtooth', dur:0.28, gain:0.10, delay:i * 0.13 });
+    });
+    this.tone({ freq:110, freq2:68, type:'sine', dur:0.5, gain:0.12, delay:0.26 });
+  },
+  spin() {
+    this.noise({ dur:0.85, gain:0.12, type:'bandpass', f0:350, f1:2400, q:2.2 });
+    this.tone({ freq:300, freq2:900, type:'triangle', dur:0.8, gain:0.06 });
+  },
+  reward() {
+    [880, 1174.66, 1567.98].forEach((f, i) => {
+      this.tone({ freq:f, type:'sine', dur:0.18, gain:0.12, delay:i * 0.07 });
+    });
+  },
+  evolve() {
+    this.noise({ dur:1.6, gain:0.10, type:'bandpass', f0:400, f1:4200, q:1.5 });
+    [261.63, 329.63, 392.0, 523.25, 659.25].forEach((f, i) => {
+      this.tone({ freq:f, type:'triangle', dur:0.5, gain:0.10, delay:0.22 + i * 0.18 });
+    });
+    this.noise({ dur:0.6, gain:0.08, type:'highpass', f0:5200, delay:1.3 });
+  },
+  bubble() {
+    this.tone({ freq:700, freq2:1500, type:'sine', dur:0.10, gain:0.16 });
+    this.tone({ freq:1400, freq2:2200, type:'sine', dur:0.08, gain:0.08, delay:0.06 });
+  },
+  npcAppear() {
+    this.tone({ freq:660, freq2:990, type:'sine', dur:0.12, gain:0.12 });
+    this.tone({ freq:990, freq2:1320, type:'sine', dur:0.10, gain:0.08, delay:0.10 });
+  },
+  tradeStart() {
+    this.noise({ dur:0.5, gain:0.10, type:'bandpass', f0:600, f1:1800, q:1.5 });
+    this.tone({ freq:523.25, type:'triangle', dur:0.2, gain:0.12 });
+    this.tone({ freq:783.99, type:'triangle', dur:0.2, gain:0.10, delay:0.15 });
+  },
+  tradeWhoosh() {
+    this.noise({ dur:0.6, gain:0.14, type:'bandpass', f0:300, f1:2800, q:2 });
+  },
+};
+
+/* =========================================================
+   3. 遊戲常量
+   ========================================================= */
+const REFRESH_MS      = 5 * 60 * 1000;
+const DEFAULT_CENTER  = [25.0330, 121.5654];
+const SHINY_RATE      = 0.06;
+const SWIPE_THRESHOLD = 70;
+const MOVE_RESPAWN_DIST = 250;
+const MOVE_RESPAWN_COOL = 6000;
+
+/* ===== 旋轉球平衡參數 ===== */
+const CURVE_SLIP_CHANCE  = 0.28;
+const CURVE_SUCCESS_MULT = 1.80;
+
+/* NPC 出現機率（每次刷新時） */
+const NPC_SPAWN_CHANCE = 0.22;
+
+/* 存檔 key */
+const SAVE_KEY = 'pokemonCityWalkSave_v1';
+
+const WEATHERS = [
+  { id:'clear',  name:'晴朗', icon:'☀️' },
+  { id:'cloudy', name:'多雲', icon:'☁️' },
+  { id:'rain',   name:'下雨', icon:'🌧️' },
+  { id:'snow',   name:'下雪', icon:'❄️' },
+  { id:'fog',    name:'起霧', icon:'🌫️' },
+];
+
+/* =========================================================
+   3b. NPC 交換進化數據
+   ========================================================= */
+const NPC_EMOJIS = ['😎','🤠','🏃‍♂️','🚴‍♀️','🏄‍♂️','🏊‍♂️','👮‍♂️','👨‍🚒','💂‍♂️','👨‍🍳','👨‍🌾','👨‍⚕️'];
+
+/*
+ * 交換進化映射：
+ *   npcName  — NPC 提供的寶可夢（交換進化前的形態）
+ *   to       — 交換後進化成的寶可夢
+ *   candyCost— 需要消耗的糖果數量（糖果來源為玩家隨機精靈，且排除 npcName 同名精靈）
+ */
+const TRADE_EVOLUTIONS = [
+  { npcName:'勇基拉',   to:'胡地',       candyCost:100 },
+  { npcName:'豪力',     to:'怪力',       candyCost:100 },
+  { npcName:'隆隆石',   to:'隆隆岩',     candyCost:100 },
+  { npcName:'阿羅拉隆隆石', to:'阿羅拉隆隆岩', candyCost:100 },
+  { npcName:'鬼斯通',   to:'耿鬼',       candyCost:100 },
+  { npcName:'地幔岩',   to:'龐岩怪',     candyCost:200 },
+  { npcName:'鐵骨土人', to:'修建老匠',   candyCost:200 },
+  { npcName:'蓋蓋蟲',   to:'騎士蝸牛',   candyCost:200 },
+  { npcName:'小嘴蝸',   to:'敏捷蟲',     candyCost:200 },
+  { npcName:'小木靈',   to:'朽木妖',     candyCost:200 },
+  { npcName:'南瓜精',   to:'南瓜怪人',   candyCost:200 },
+  { npcName:'粉香香',   to:'芳香精',     candyCost:50  },
+  { npcName:'綿綿泡芙', to:'胖甜妮',     candyCost:50  },
+];
+
+/* =========================================================
+   4. 全局狀態
+   ========================================================= */
+let map;
+let playerMarker = null;
+let playerLatLng = null;
+let spawnCenter = null;
+let spawnMarkers = [];
+let stopMarkers  = [];
+let npcMarker = null;
+let balls = 20;
+let caughtCount = 0;
+let nextRefreshAt = Date.now() + REFRESH_MS;
+let firstFix = true;
+let manualMode = false;
+let lastRespawnAt = 0;
+let gameStarted = false;
+
+let catchState = 'idle';
+let currentSpawn = null;
+
+let spinning = false;
+let discRot = 0;
+let currentStopMarker = null;
+
+let osmTileLayer = null;
+let fallbackLayer = null;
+let mapFallbackActive = false;
+let attributionCtrl = null;
+
+/* NPC 交換狀態 */
+let currentNPC = null;
+let npcExchangeLocked = false;
+
+const env = { time:'day', weather:'clear' };
+
+/* =========================================================
+   5. 工具
+   ========================================================= */
+function getTimeOfDay() {
+  const h = new Date().getHours();
+  return (h >= 6 && h < 18) ? 'day' : 'night';
+}
+
+function toast(msg, ms = 2200) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), ms);
+}
+
+function offsetLatLng(lat, lng, distM, bearingDeg) {
+  const R = 6371000;
+  const brng = bearingDeg * Math.PI / 180;
+  const lat1 = lat * Math.PI / 180;
+  const lng1 = lng * Math.PI / 180;
+  const lat2 = Math.asin(
+    Math.sin(lat1) * Math.cos(distM / R) +
+    Math.cos(lat1) * Math.sin(distM / R) * Math.cos(brng)
+  );
+  const lng2 = lng1 + Math.atan2(
+    Math.sin(brng) * Math.sin(distM / R) * Math.cos(lat1),
+    Math.cos(distM / R) - Math.sin(lat1) * Math.sin(lat2)
+  );
+  return [lat2 * 180 / Math.PI, lng2 * 180 / Math.PI];
+}
+
+function pickPokemon() {
+  const pool = POKEDEX.filter(p => {
+    if (p.notWild) return false;
+    if (p.w <= 0) return false;
+    if (p.time && p.time !== 'any' && p.time !== env.time) return false;
+    if (p.weather && p.weather !== 'any' && !p.weather.includes(env.weather)) return false;
+    return true;
+  });
+  const list = pool.length ? pool : POKEDEX.filter(p => !p.notWild && p.w > 0);
+  if (!list.length) return null;
+  const total = list.reduce((s, p) => s + p.w, 0);
+  let r = Math.random() * total;
+  for (const p of list) { r -= p.w; if (r <= 0) return p; }
+  return list[0];
+}
+
+function updateHUD() {
+  document.getElementById('ballCount').textContent = balls;
+  document.getElementById('caughtCount').textContent = caughtCount;
+  const c = document.getElementById('catchBallCount');
+  if (c) c.textContent = balls;
+}
+
+function getCandy(name) { return candyBag[name] || 0; }
+function addCandy(name, n) { candyBag[name] = (candyBag[name] || 0) + n; }
+
+/* =========================================================
+   5b. 存檔 / 讀檔 / 重設
+   ========================================================= */
+function collectSaveData() {
+  const dex = {};
+  Object.keys(dexState).forEach(k => {
+    const s = dexState[k];
+    if (s.seen || s.caught || s.shiny) {
+      dex[k] = { seen: s.seen, caught: s.caught, shiny: s.shiny };
+    }
+  });
+  const candy = {};
+  Object.keys(candyBag).forEach(k => {
+    if (candyBag[k] > 0) candy[k] = candyBag[k];
+  });
+  return {
+    version: 1,
+    savedAt: new Date().toISOString(),
+    balls,
+    caughtCount,
+    dexState: dex,
+    candyBag: candy,
+  };
+}
+
+function applySaveData(data) {
+  if (!data || typeof data !== 'object') return false;
+
+  if (typeof data.balls === 'number') balls = Math.max(0, data.balls | 0);
+  if (typeof data.caughtCount === 'number') caughtCount = Math.max(0, data.caughtCount | 0);
+
+  Object.keys(dexState).forEach(k => { dexState[k] = { seen:0, caught:0, shiny:0 }; });
+  if (data.dexState && typeof data.dexState === 'object') {
+    Object.keys(data.dexState).forEach(k => {
+      if (!dexState[k]) return;
+      const s = data.dexState[k] || {};
+      dexState[k].seen = s.seen || 0;
+      dexState[k].caught = s.caught || 0;
+      dexState[k].shiny = s.shiny || 0;
+    });
+  }
+
+  Object.keys(candyBag).forEach(k => { candyBag[k] = 0; });
+  if (data.candyBag && typeof data.candyBag === 'object') {
+    Object.keys(data.candyBag).forEach(k => {
+      if (k in candyBag && typeof data.candyBag[k] === 'number') {
+        candyBag[k] = Math.max(0, data.candyBag[k] | 0);
+      }
+    });
+  }
+
+  updateHUD();
+  return true;
+}
+
+function autoSave() {
+  if (!gameStarted) return;
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify(collectSaveData()));
+  } catch (e) {
+    console.warn('autoSave failed:', e);
+  }
+}
+
+function loadAutoSave() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    return applySaveData(data);
+  } catch (e) {
+    console.warn('loadAutoSave failed:', e);
+    return false;
+  }
+}
+
+function downloadSave() {
+  const data = collectSaveData();
+  const text = JSON.stringify(data, null, 2);
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const ts = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+  a.href = url;
+  a.download = `pokemon_city_walk_save_${ts}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+  autoSave();
+  toast('💾 已匯出存檔 .txt');
+}
+
+function handleLoadFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (!applySaveData(data)) {
+        toast('❌ 存檔格式錯誤');
+        return;
+      }
+      autoSave();
+      toast('📂 存檔已載入');
+      if (!dexScreen.classList.contains('hidden')) renderDex();
+      if (!evoScreen.classList.contains('hidden')) renderEvoList();
+      const center = playerLatLng || spawnCenter || DEFAULT_CENTER;
+      spawnWorld(center);
+    } catch (e) {
+      console.warn('load file failed:', e);
+      toast('❌ 無法讀取存檔');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function resetGame() {
+  if (!confirm('確定要重設所有遊戲進度嗎？此操作無法復原。')) return;
+  try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
+  balls = 20;
+  caughtCount = 0;
+  Object.keys(dexState).forEach(k => { dexState[k] = { seen:0, caught:0, shiny:0 }; });
+  Object.keys(candyBag).forEach(k => { candyBag[k] = 0; });
+  updateHUD();
+  const center = playerLatLng || spawnCenter || DEFAULT_CENTER;
+  spawnWorld(center);
+  toast('🗑 遊戲進度已重設');
+  autoSave();
+}
+
+/* =========================================================
+   6. 環境
+   ========================================================= */
+function rollWeather() {
+  const w = WEATHERS[Math.floor(Math.random() * WEATHERS.length)];
+  env.weather = w.id;
+}
+
+function renderEnvironment() {
+  const w = WEATHERS.find(x => x.id === env.weather) || WEATHERS[0];
+  const icon = env.time === 'day' ? '☀️' : '🌙';
+  const label = env.time === 'day' ? '白天' : '夜晚';
+  document.getElementById('envChip').textContent = `${icon} ${label} · ${w.icon}${w.name}`;
+  document.getElementById('nightTint').classList.toggle('on', env.time === 'night');
+
+  const cs = document.getElementById('catchScreen');
+  if (cs && !cs.classList.contains('hidden')) {
+    cs.classList.toggle('day', env.time === 'day');
+    cs.classList.toggle('night', env.time === 'night');
+    buildStars();
+  }
+}
+
+function buildStars() {
+  const box = document.getElementById('stars');
+  box.innerHTML = '';
+  if (env.time !== 'night') return;
+  for (let i = 0; i < 70; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = 1 + Math.random() * 2;
+    s.style.width = s.style.height = size + 'px';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top  = Math.random() * 96 + '%';
+    s.style.animationDelay = (Math.random() * 2.4) + 's';
+    s.style.opacity = 0.3 + Math.random() * 0.7;
+    box.appendChild(s);
+  }
+}
+
+function checkDeviceTime() {
+  const t = getTimeOfDay();
+  if (t !== env.time) {
+    env.time = t;
+    renderEnvironment();
+    if (gameStarted) {
+      const inCatch = !catchScreen.classList.contains('hidden');
+      const inNPC = !npcScreen.classList.contains('hidden');
+      if (inCatch) audio.playCatch(env.time);
+      else if (inNPC) audio.playTrade();
+      else audio.playMap(env.time);
+      toast(t === 'day' ? '☀️ 天亮了，白天來臨' : '🌙 天黑了，夜晚降臨');
+    }
+  }
+}
+
+/* =========================================================
+   7. 程序化地圖
+   ========================================================= */
+function _rand2(ix, iy, seed) {
+  let h = (Math.imul(ix | 0, 374761393)
+         + Math.imul(iy | 0, 668265263)
+         + Math.imul(seed | 0, 1013904223)) | 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  h = (h ^ (h >>> 16)) >>> 0;
+  return h / 4294967296;
+}
+
+function _vnoise(x, y, seed) {
+  const ix = Math.floor(x), iy = Math.floor(y);
+  const fx = x - ix, fy = y - iy;
+  const u = fx * fx * (3 - 2 * fx);
+  const v = fy * fy * (3 - 2 * fy);
+  const a = _rand2(ix, iy, seed);
+  const b = _rand2(ix + 1, iy, seed);
+  const c = _rand2(ix, iy + 1, seed);
+  const d = _rand2(ix + 1, iy + 1, seed);
+  return (a * (1 - u) + b * u) * (1 - v) + (c * (1 - u) + d * u) * v;
+}
+
+function _fbm(x, y, seed) {
+  let val = 0, amp = 0.5, freq = 1;
+  for (let i = 0; i < 4; i++) {
+    val += _vnoise(x * freq, y * freq, seed + i) * amp;
+    amp *= 0.5; freq *= 2;
+  }
+  return val;
+}
+
+const MAP_REF_ZOOM = 17;
+
+const ProgMapLayer = L.GridLayer.extend({
+  options: { tileSize: 256, keepBuffer: 4, updateWhenIdle: false, noWrap: true },
+  createTile: function(coords, done) {
+    const size = this.options.tileSize;
+    const canvas = document.createElement('canvas');
+    canvas.width = size; canvas.height = size;
+    const ctx = canvas.getContext('2d');
+
+    const N = 24;
+    const cell = size / N;
+    const scale = Math.pow(2, MAP_REF_ZOOM - coords.z);
+    const wx0 = coords.x * size * scale;
+    const wy0 = coords.y * size * scale;
+    const wcell = cell * scale;
+
+    const img = ctx.createImageData(N, N);
+
+    for (let j = 0; j < N; j++) {
+      for (let i = 0; i < N; i++) {
+        const wx = wx0 + (i + 0.5) * wcell;
+        const wy = wy0 + (j + 0.5) * wcell;
+
+        const elev = _fbm(wx / 700, wy / 700, 1);
+        let r, g, b;
+
+        if (elev < 0.42) {
+          const depth = _fbm(wx / 320, wy / 320, 5);
+          r = 46 + depth * 34;
+          g = 112 + depth * 44;
+          b = 172 + depth * 48;
+        } else {
+          const river = _fbm(wx / 380, wy / 380, 9);
+          const onRiver = Math.abs(river - 0.5) < 0.020;
+          const rx = ((wx % 768) + 768) % 768;
+          const ry = ((wy % 768) + 768) % 768;
+          const onRoadX = rx < 30;
+          const onRoadY = ry < 30;
+          const onRoad = onRoadX || onRoadY;
+
+          if (onRiver) {
+            r = 76; g = 158; b = 214;
+          } else if (onRoad) {
+            const isCenterX = rx < 5 || rx > 763;
+            const isCenterY = ry < 5 || ry > 763;
+            if (isCenterX || isCenterY) { r = 246; g = 214; b = 78; }
+            else { r = 232; g = 227; b = 214; }
+          } else {
+            const vary = (_fbm(wx / 150, wy / 150, 3) - 0.5) * 46;
+            r = 138 + vary;
+            g = 190 + vary;
+            b = 108 + vary;
+          }
+        }
+
+        const idx = (j * N + i) * 4;
+        img.data[idx]     = Math.max(0, Math.min(255, r));
+        img.data[idx + 1] = Math.max(0, Math.min(255, g));
+        img.data[idx + 2] = Math.max(0, Math.min(255, b));
+        img.data[idx + 3] = 255;
+      }
+    }
+
+    const tmp = document.createElement('canvas');
+    tmp.width = N; tmp.height = N;
+    tmp.getContext('2d').putImageData(img, 0, 0);
+
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(tmp, 0, 0, N, N, 0, 0, size, size);
+
+    if (typeof done === 'function') setTimeout(done, 0);
+    return canvas;
+  }
+});
+
+/* =========================================================
+   8. 地圖
+   ========================================================= */
+function initMap() {
+  map = L.map('map', {
+    zoomControl: false, attributionControl: false, tap: false,
+  }).setView(DEFAULT_CENTER, 17);
+
+  osmTileLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    opacity: 0,
+  }).addTo(map);
+
+  attributionCtrl = L.control.attribution({ position: 'bottomright', prefix: false })
+    .addTo(map)
+    .addAttribution('© OpenStreetMap');
+
+  let tileLoaded = 0;
+  let fallbackTriggered = false;
+
+  const triggerFallback = (reason) => {
+    if (fallbackTriggered) return;
+    fallbackTriggered = true;
+    console.warn('[map] fallback triggered:', reason || 'unknown');
+    enableFallbackMap();
+  };
+
+  osmTileLayer.on('tileload', () => { tileLoaded++; });
+  osmTileLayer.on('tileerror', () => triggerFallback('tileerror'));
+
+  const probeTile = async () => {
+    try {
+      const z = 17;
+      const n = Math.pow(2, z);
+      const latRad = DEFAULT_CENTER[0] * Math.PI / 180;
+      const tx = Math.floor((DEFAULT_CENTER[1] + 180) / 360 * n);
+      const ty = Math.floor((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2 * n);
+      const url = `https://tile.openstreetmap.org/${z}/${tx}/${ty}.png`;
+      const res = await fetch(url, { method: 'GET', cache: 'no-store' });
+      if (!res.ok) {
+        triggerFallback('HTTP ' + res.status);
+      } else if (osmTileLayer && !fallbackTriggered) {
+        osmTileLayer.setOpacity(1);
+      }
+    } catch (e) {
+      triggerFallback('fetch error');
+    }
+  };
+  probeTile();
+
+  setTimeout(() => {
+    if (tileLoaded === 0 && !fallbackTriggered) triggerFallback('timeout');
+  }, 8000);
+}
+
+function enableFallbackMap() {
+  if (mapFallbackActive || !map) return;
+  mapFallbackActive = true;
+
+  if (osmTileLayer) {
+    try { map.removeLayer(osmTileLayer); } catch(_) {}
+    osmTileLayer = null;
+  }
+
+  if (attributionCtrl) {
+    try {
+      attributionCtrl._attributions = {};
+      attributionCtrl.addAttribution('Procedural Map');
+    } catch(_) {}
+  }
+
+  fallbackLayer = new ProgMapLayer();
+  fallbackLayer.addTo(map);
+
+  toast('🗺️ 地圖載入失敗，已切換為隨機生成街道、河流與海洋', 3400);
+}
+
+const PLAYER_ICON = L.divIcon({
+  className: '',
+  html: '<div class="player-wrap"><div class="ring"></div><div class="dot"></div></div>',
+  iconSize: [44, 44], iconAnchor: [22, 22],
+});
+
+function placePlayer(latlng, recenter) {
+  playerLatLng = latlng;
+  if (!playerMarker) {
+    playerMarker = L.marker(latlng, { icon: PLAYER_ICON, zIndexOffset: 1000, interactive: false }).addTo(map);
+  } else {
+    playerMarker.setLatLng(latlng);
+  }
+  if (recenter) map.setView(latlng, 17, { animate: true });
+  checkMoveRespawn();
+}
+
+function checkMoveRespawn() {
+  if (!playerLatLng) return;
+  const now = Date.now();
+  if (now - lastRespawnAt < MOVE_RESPAWN_COOL) return;
+
+  const ref = spawnCenter || playerLatLng;
+  const dist = map.distance(L.latLng(ref), L.latLng(playerLatLng));
+  if (dist < MOVE_RESPAWN_DIST) return;
+
+  lastRespawnAt = now;
+  spawnCenter = playerLatLng;
+
+  spawnPokemon(spawnCenter);
+  spawnStops(spawnCenter);
+  maybeSpawnNPC(spawnCenter);
+
+  toast('🌿 來到新地方，出現了新的寶可夢與補給站！');
+}
+
+/* =========================================================
+   9. 生成寶可夢 / 補給站 / NPC
+   ========================================================= */
+function clearSpawns() { spawnMarkers.forEach(m => map.removeLayer(m)); spawnMarkers = []; }
+function clearStops()  { stopMarkers.forEach(m => map.removeLayer(m));  stopMarkers = []; }
+function clearNPC() {
+  if (npcMarker) { try { map.removeLayer(npcMarker); } catch(_) {} npcMarker = null; }
+  currentNPC = null;
+}
+
+function addSpawn(p, lat, lng) {
+  dexState[p.name].seen = 1;
+  const shiny = Math.random() < SHINY_RATE;
+
+  const icon = L.divIcon({
+    className: '',
+    html: `<div class="spawn ${shiny ? 'shiny' : ''}">
+             <div class="spawn-shadow"></div>
+             <img class="spawn-gif" src="${spriteUrl(p, shiny)}" alt="${p.name}" draggable="false"
+                  onerror="this.style.display='none';this.insertAdjacentHTML('afterend','<div class=&quot;spawn-fallback&quot;>❓</div>')">
+           </div>`,
+    iconSize: [64, 72], iconAnchor: [32, 66],
+  });
+
+  const marker = L.marker([lat, lng], { icon, riseOnHover: true }).addTo(map);
+  marker._shiny = shiny;
+  marker.on('click', () => openCatch(p, marker, shiny));
+  spawnMarkers.push(marker);
+}
+
+function spawnPokemon(center) {
+  clearSpawns();
+  const count = 4 + Math.floor(Math.random() * 4);
+  for (let i = 0; i < count; i++) {
+    const p = pickPokemon();
+    if (!p) continue;
+    const dist = 55 + Math.random() * 300;
+    const bearing = Math.random() * 360;
+    const [lat, lng] = offsetLatLng(center[0], center[1], dist, bearing);
+    addSpawn(p, lat, lng);
+  }
+}
+
+function spawnStops(center) {
+  clearStops();
+  for (let i = 0; i < 5; i++) {
+    const dist = 65 + Math.random() * 280;
+    const bearing = Math.random() * 360;
+    const [lat, lng] = offsetLatLng(center[0], center[1], dist, bearing);
+    const icon = L.divIcon({
+      className: '',
+      html: '<div class="stop">P</div>',
+      iconSize: [46, 46], iconAnchor: [23, 23],
+    });
+    const marker = L.marker([lat, lng], { icon }).addTo(map);
+    marker._used = false;
+    marker.on('click', () => openStop(marker));
+    stopMarkers.push(marker);
+  }
+}
+
+function resetStops() {
+  stopMarkers.forEach(marker => {
+    marker._used = false;
+    const el = marker.getElement();
+    if (el) {
+      const d = el.querySelector('.stop');
+      if (d) { d.classList.remove('used'); d.textContent = 'P'; }
+    }
+  });
+}
+
+/* ===== NPC 生成 ===== */
+function maybeSpawnNPC(center) {
+  if (npcScreen && !npcScreen.classList.contains('hidden')) return;
+  clearNPC();
+  if (Math.random() > NPC_SPAWN_CHANCE) return;
+
+  const emoji = NPC_EMOJIS[Math.floor(Math.random() * NPC_EMOJIS.length)];
+  const trade = TRADE_EVOLUTIONS[Math.floor(Math.random() * TRADE_EVOLUTIONS.length)];
+
+  const dist = 80 + Math.random() * 220;
+  const bearing = Math.random() * 360;
+  const [lat, lng] = offsetLatLng(center[0], center[1], dist, bearing);
+
+  const icon = L.divIcon({
+    className: '',
+    html: `<div class="npc">
+             <div class="npc-badge">交換</div>
+             <div class="npc-ring"></div>
+             <div class="npc-emoji">${emoji}</div>
+           </div>`,
+    iconSize: [56, 64], iconAnchor: [28, 56],
+  });
+
+  npcMarker = L.marker([lat, lng], { icon, zIndexOffset: 900 }).addTo(map);
+  currentNPC = { emoji, trade, candySource: null };
+
+  npcMarker.on('click', () => openNPCExchange(currentNPC));
+  SFX.npcAppear();
+}
+
+/* =========================================================
+   10. NPC 交換畫面
+   ========================================================= */
+const npcScreen      = document.getElementById('npcScreen');
+const npcTitle       = document.getElementById('npcTitle');
+const npcSub         = document.getElementById('npcSub');
+const npcCardImg     = document.getElementById('npcCardImg');
+const npcCardFallback= document.getElementById('npcCardFallback');
+const npcCardName    = document.getElementById('npcCardName');
+const playerCardImg  = document.getElementById('playerCardImg');
+const playerCardFallback = document.getElementById('playerCardFallback');
+const playerCardName = document.getElementById('playerCardName');
+const npcCostLabel   = document.getElementById('npcCostLabel');
+const npcOwnLabel    = document.getElementById('npcOwnLabel');
+const npcEvoLabel    = document.getElementById('npcEvoLabel');
+const npcConfirmBtn  = document.getElementById('npcConfirmBtn');
+const npcCancelBtn   = document.getElementById('npcCancelBtn');
+
+/* 從玩家擁有的糖果中，隨機挑一隻（排除與交換方同名的精靈） */
+function pickRandomCandySource(excludeName) {
+  const names = Object.keys(candyBag).filter(n => n !== excludeName && (candyBag[n] || 0) > 0);
+  if (!names.length) return null;
+  const name = names[Math.floor(Math.random() * names.length)];
+  return { name, amount: candyBag[name] };
+}
+
+function openNPCExchange(npc) {
+  if (catchState !== 'idle') return;
+  if (npcExchangeLocked) return;
+
+  const { emoji, trade } = npc;
+  const npcMon = POKEDEX.find(p => p.name === trade.npcName);
+  const candySource = pickRandomCandySource(trade.npcName);
+  npc.candySource = candySource;
+
+  npcTitle.textContent = `${emoji} 交換進化`;
+  npcSub.textContent = 'NPC 願意與你交換寶可夢（消耗隨機精靈的糖果）';
+
+  /* NPC 卡片 */
+  npcCardName.textContent = trade.npcName;
+  if (npcMon) {
+    npcCardImg.src = spriteUrl(npcMon, false);
+    npcCardImg.style.display = '';
+    npcCardFallback.style.display = 'none';
+    npcCardImg.onerror = () => {
+      npcCardImg.style.display = 'none';
+      npcCardFallback.style.display = '';
+      npcCardFallback.textContent = '❓';
+    };
+  } else {
+    npcCardImg.style.display = 'none';
+    npcCardFallback.style.display = '';
+    npcCardFallback.textContent = '❓';
+  }
+
+  /* 玩家糖果卡片（隨機精靈） */
+  if (candySource) {
+    const srcMon = POKEDEX.find(p => p.name === candySource.name);
+    playerCardName.textContent = `${candySource.name}糖果`;
+    if (srcMon) {
+      playerCardImg.src = spriteUrl(srcMon, false);
+      playerCardImg.style.display = '';
+      playerCardFallback.style.display = 'none';
+      playerCardImg.onerror = () => {
+        playerCardImg.style.display = 'none';
+        playerCardFallback.style.display = '';
+        playerCardFallback.textContent = '🍬';
+      };
+    } else {
+      playerCardImg.style.display = 'none';
+      playerCardFallback.style.display = '';
+      playerCardFallback.textContent = '🍬';
+    }
+    npcOwnLabel.textContent = `${candySource.amount} 顆`;
+    npcOwnLabel.classList.toggle('ok', candySource.amount >= trade.candyCost);
+    npcOwnLabel.classList.toggle('lack', candySource.amount < trade.candyCost);
+  } else {
+    playerCardName.textContent = '沒有可交換的糖果';
+    playerCardImg.style.display = 'none';
+    playerCardFallback.style.display = '';
+    playerCardFallback.textContent = '🍬';
+    npcOwnLabel.textContent = '0 顆';
+    npcOwnLabel.classList.remove('ok');
+    npcOwnLabel.classList.add('lack');
+  }
+
+  npcCostLabel.textContent = `${trade.candyCost} 顆`;
+  npcEvoLabel.textContent = trade.to;
+
+  const enough = !!candySource && candySource.amount >= trade.candyCost;
+  npcConfirmBtn.disabled = !enough;
+  npcConfirmBtn.textContent = enough
+    ? '確認交換'
+    : (candySource ? `糖果不足（需要 ${trade.candyCost} 顆）` : '沒有可交換的糖果');
+
+  npcScreen.classList.remove('hidden');
+  SFX.init();
+  audio.init();
+  audio.playTrade();
+}
+
+npcCancelBtn.addEventListener('click', () => {
+  npcScreen.classList.add('hidden');
+  if (gameStarted) audio.playMap(env.time);
+});
+
+npcConfirmBtn.addEventListener('click', () => {
+  if (!currentNPC) return;
+  const { trade, candySource } = currentNPC;
+  if (!candySource || candySource.amount < trade.candyCost) return;
+  if (npcExchangeLocked) return;
+
+  npcExchangeLocked = true;
+  npcScreen.classList.add('hidden');
+
+  const npcMon = POKEDEX.find(p => p.name === trade.npcName);
+  const playerMon = POKEDEX.find(p => p.name === candySource.name);
+
+  playTradeAnimation(npcMon, playerMon, trade, candySource, () => {
+    candyBag[candySource.name] -= trade.candyCost;
+    if (candyBag[candySource.name] < 0) candyBag[candySource.name] = 0;
+
+    clearNPC();
+
+    playNPCEvolutionAnimation(trade.to, () => {
+      if (dexState[trade.to]) {
+        dexState[trade.to].seen = 1;
+        dexState[trade.to].caught++;
+      }
+      if (dexState[trade.npcName]) {
+        dexState[trade.npcName].seen = 1;
+      }
+      caughtCount++;
+      updateHUD();
+      autoSave();
+
+      toast(`🔄 交換成功！${trade.npcName} 進化成 ${trade.to}！`, 3000);
+      npcExchangeLocked = false;
+
+      if (gameStarted) audio.playMap(env.time);
+    });
+  });
+});
+
+/* ===== 交換動畫 ===== */
+const tradeOverlay = document.getElementById('tradeAnimOverlay');
+const tradeMonA    = document.getElementById('tradeMonA');
+const tradeMonB    = document.getElementById('tradeMonB');
+const tradeImgA    = document.getElementById('tradeImgA');
+const tradeImgB    = document.getElementById('tradeImgB');
+const tradeFallbackA = document.getElementById('tradeFallbackA');
+const tradeFallbackB = document.getElementById('tradeFallbackB');
+const tradeLabelA  = document.getElementById('tradeLabelA');
+const tradeLabelB  = document.getElementById('tradeLabelB');
+const tradeFlash   = document.getElementById('tradeFlash');
+
+function setTradeMon(elImg, elFallback, elLabel, mon, labelText, fallbackText) {
+  elLabel.textContent = labelText;
+  if (mon) {
+    elImg.src = spriteUrl(mon, false);
+    elImg.style.display = '';
+    elFallback.style.display = 'none';
+    elImg.onerror = () => {
+      elImg.style.display = 'none';
+      elFallback.style.display = '';
+      elFallback.textContent = fallbackText;
+    };
+  } else {
+    elImg.style.display = 'none';
+    elFallback.style.display = '';
+    elFallback.textContent = fallbackText;
+  }
+}
+
+function playTradeAnimation(npcMon, playerMon, trade, candySource, onDone) {
+  tradeOverlay.classList.add('on');
+  tradeMonA.classList.remove('swapped');
+  tradeMonB.classList.remove('swapped');
+  tradeFlash.classList.remove('flash');
+
+  setTradeMon(tradeImgA, tradeFallbackA, tradeLabelA, npcMon, trade.npcName, '❓');
+
+  if (playerMon && candySource) {
+    setTradeMon(tradeImgB, tradeFallbackB, tradeLabelB, playerMon, `${candySource.name}糖果`, '🍬');
+  } else {
+    tradeImgB.style.display = 'none';
+    tradeFallbackB.style.display = '';
+    tradeFallbackB.textContent = '🍬';
+    tradeLabelB.textContent = candySource ? `${candySource.name}糖果` : '糖果';
+  }
+
+  SFX.tradeStart();
+
+  setTimeout(() => {
+    tradeFlash.classList.add('flash');
+    SFX.tradeWhoosh();
+    tradeMonA.classList.add('swapped');
+    tradeMonB.classList.add('swapped');
+  }, 200);
+
+  setTimeout(() => {
+    tradeOverlay.classList.remove('on');
+    tradeFlash.classList.remove('flash');
+    onDone();
+  }, 1400);
+}
+
+/* ===== NPC 進化動畫 ===== */
+function playNPCEvolutionAnimation(toName, onDone) {
+  const tgt = POKEDEX.find(p => p.name === toName);
+  if (!tgt) { onDone(); return; }
+
+  const ov = document.getElementById('evoOverlay');
+  const animImg = document.getElementById('evoAnimImg');
+  animImg.src = spriteUrl(tgt, false);
+  animImg.style.display = '';
+  animImg.onerror = () => { animImg.style.display = 'none'; };
+  ov.style.display = 'flex';
+
+  SFX.evolve();
+
+  setTimeout(() => {
+    ov.style.display = 'none';
+    animImg.style.display = '';
+    onDone();
+  }, 2200);
+}
+
+/* =========================================================
+   11. 捕捉
+   ========================================================= */
+const BALL_SIZE = 56;
+
+const catchScreen = document.getElementById('catchScreen');
+const catchStage  = document.getElementById('catchStage');
+const wildMon     = document.getElementById('wildMon');
+const monBody     = document.getElementById('monBody');
+const ballFly     = document.getElementById('ballFly');
+const trail       = document.getElementById('trail');
+const catchResult = document.getElementById('catchResult');
+const swipeHint   = document.getElementById('swipeHint');
+const powerWrap   = document.getElementById('powerWrap');
+const powerFill   = document.getElementById('powerFill');
+
+let ballHome = { x: 0, y: 0 };
+let ballFlying = false;
+let lastThrow = null;
+
+const swipe = {
+  active: false, pointerId: null,
+  startX: 0, startY: 0, curX: 0, curY: 0,
+};
+
+function resetBallPosition(animate) {
+  const w = catchStage.clientWidth;
+  const h = catchStage.clientHeight;
+  ballHome.x = w / 2 - BALL_SIZE / 2;
+  ballHome.y = h - 88;
+  ballFly.style.display = 'block';
+  ballFly.style.opacity = '1';
+  ballFly.style.filter = '';
+  ballFly.style.transition = animate
+    ? 'transform .28s cubic-bezier(.3,.8,.4,1), opacity .28s' : 'none';
+  ballFly.style.transform = `translate(${ballHome.x}px, ${ballHome.y}px) rotate(0deg)`;
+}
+
+function setBallTransform(x, y, rot) {
+  ballFly.style.transform = `translate(${x}px, ${y}px) rotate(${rot}deg)`;
+}
+
+function updateGroundLine() {
+  if (!catchStage || !catchScreen) return;
+  const stageH = catchStage.clientHeight;
+  if (!stageH) return;
+  const monH = 180;
+  const monTopInStage = (stageH - monH) / 2;
+  const pct = Math.max(22, Math.min(72, (monTopInStage / stageH) * 100));
+  catchScreen.style.setProperty('--groundY', pct + '%');
+}
+
+function openCatch(p, marker, shiny) {
+  if (catchState !== 'idle') return;
+  catchState = 'aim';
+  currentSpawn = { p, marker, shiny };
+
+  catchScreen.classList.toggle('day', env.time === 'day');
+  catchScreen.classList.toggle('night', env.time === 'night');
+  buildStars();
+
+  const nameEl = document.getElementById('catchName');
+  nameEl.textContent = shiny ? `✨ 異色 ${p.name} ✨` : `野生的 ${p.name}`;
+  nameEl.classList.toggle('shiny', !!shiny);
+
+  monBody.classList.toggle('shiny', !!shiny);
+  monBody.innerHTML = '';
+
+  const img = document.createElement('img');
+  img.src = spriteUrl(p, shiny);
+  img.alt = p.name;
+  img.draggable = false;
+  img.onerror = () => {
+    img.remove();
+    const s = document.createElement('span');
+    s.className = 'mon-fallback';
+    s.textContent = '❓';
+    monBody.appendChild(s);
+  };
+  monBody.appendChild(img);
+
+  wildMon.classList.remove('absorbed');
+
+  catchResult.textContent = '';
+  swipeHint.style.display = '';
+  powerWrap.style.display = 'none';
+  powerFill.style.width = '0%';
+  trail.style.display = 'none';
+  ballFlying = false;
+  lastThrow = null;
+
+  updateHUD();
+  catchScreen.classList.remove('hidden');
+
+  requestAnimationFrame(() => {
+    resetBallPosition(false);
+    updateGroundLine();
+  });
+
+  audio.init();
+  audio.playCatch(env.time);
+  SFX.init();
+}
+
+function closeCatch() {
+  catchScreen.classList.add('hidden');
+  catchState = 'idle';
+  currentSpawn = null;
+  ballFlying = false;
+  resetSwipe();
+
+  if (gameStarted) audio.playMap(env.time);
+}
+
+function resetSwipe() {
+  swipe.active = false;
+  swipe.pointerId = null;
+  trail.style.display = 'none';
+  powerWrap.style.display = 'none';
+  powerFill.style.width = '0%';
+}
+
+function showResult(text, color) {
+  catchResult.textContent = text;
+  catchResult.style.color = color || '#fff';
+}
+
+catchStage.addEventListener('pointerdown', onPointerDown);
+catchStage.addEventListener('pointermove', onPointerMove);
+catchStage.addEventListener('pointerup', onPointerUp);
+catchStage.addEventListener('pointercancel', onPointerUp);
+
+function onPointerDown(e) {
+  if (catchState !== 'aim' || ballFlying) return;
+  if (balls <= 0) { showResult('沒有精靈球了！去補給站橫掃補給', '#ff8a8a'); return; }
+
+  const rect = catchStage.getBoundingClientRect();
+  swipe.active = true;
+  swipe.pointerId = e.pointerId;
+  swipe.startX = e.clientX - rect.left;
+  swipe.startY = e.clientY - rect.top;
+  swipe.curX = swipe.startX;
+  swipe.curY = swipe.startY;
+
+  try { catchStage.setPointerCapture(e.pointerId); } catch(_) {}
+
+  swipeHint.style.display = 'none';
+  powerWrap.style.display = 'block';
+  powerFill.style.width = '0%';
+  ballFly.style.transition = 'none';
+  e.preventDefault();
+}
+
+function onPointerMove(e) {
+  if (!swipe.active || e.pointerId !== swipe.pointerId) return;
+  const rect = catchStage.getBoundingClientRect();
+  swipe.curX = e.clientX - rect.left;
+  swipe.curY = e.clientY - rect.top;
+
+  drawTrail();
+  updatePowerBar();
+
+  const dx = swipe.curX - swipe.startX;
+  const dy = swipe.curY - swipe.startY;
+  setBallTransform(ballHome.x + dx * 0.12, ballHome.y + dy * 0.12, dx * 0.25);
+  e.preventDefault();
+}
+
+function onPointerUp(e) {
+  if (!swipe.active || e.pointerId !== swipe.pointerId) return;
+  swipe.active = false;
+  trail.style.display = 'none';
+  powerWrap.style.display = 'none';
+  evaluateSwipe();
+}
+
+function drawTrail() {
+  const dx = swipe.curX - swipe.startX;
+  const dy = swipe.curY - swipe.startY;
+  const len = Math.hypot(dx, dy);
+  const ang = Math.atan2(dy, dx) * 180 / Math.PI;
+
+  trail.style.display = 'block';
+  trail.style.left = swipe.startX + 'px';
+  trail.style.top  = (swipe.startY - 2) + 'px';
+  trail.style.width = len + 'px';
+  trail.style.transform = `rotate(${ang}deg)`;
+
+  const absAng = Math.abs(ang + 90);
+  const isCurve = absAng > 22 && absAng < 62;
+  trail.style.background = isCurve
+    ? 'linear-gradient(90deg,rgba(162,155,254,.2),rgba(162,155,254,.95))'
+    : 'linear-gradient(90deg,rgba(255,255,255,.2),rgba(255,255,255,.9))';
+}
+
+function updatePowerBar() {
+  const dx = swipe.curX - swipe.startX;
+  const dy = swipe.curY - swipe.startY;
+  const len = Math.hypot(dx, dy);
+  const h = catchStage.clientHeight || 1;
+  const p = Math.min(1, len / (h * 0.75));
+  powerFill.style.width = (p * 100) + '%';
+}
+
+function evaluateSwipe() {
+  if (catchState !== 'aim') return;
+
+  const dx = swipe.curX - swipe.startX;
+  const dy = swipe.curY - swipe.startY;
+  const len = Math.hypot(dx, dy);
+
+  const goHome = (msg) => {
+    if (msg) showResult(msg, '#ffd166');
+    ballFly.style.transition = 'transform .28s cubic-bezier(.3,.8,.4,1)';
+    setBallTransform(ballHome.x, ballHome.y, 0);
+    ballFlying = false;
+  };
+
+  if (len < 24) { goHome(); return; }
+  if (dy >= -24) { goHome('請向上滑動投球 ↑'); return; }
+
+  const angle = Math.atan2(Math.abs(dx), -dy) * 180 / Math.PI;
+  if (angle > 62) { goHome('角度太斜了，請朝上方滑動'); return; }
+
+  const ballType = angle <= 22 ? 'straight' : 'curve';
+  const h = catchStage.clientHeight || 1;
+  const power = len / h;
+
+  let quality;
+  if (power < 0.18)       quality = 'low';
+  else if (power < 0.32)  quality = 'weak';
+  else if (power <= 0.55) quality = 'perfect';
+  else if (power <= 0.78) quality = 'strong';
+  else                    quality = 'high';
+
+  performThrow(ballType, quality, angle, power);
+}
+
+function performThrow(ballType, quality, angle, power) {
+  catchState = 'flying';
+  ballFlying = true;
+  balls--;
+  updateHUD();
+  swipeHint.style.display = 'none';
+
+  SFX.throwBall();
+
+  const stageRect = catchStage.getBoundingClientRect();
+  const monRect = wildMon.getBoundingClientRect();
+  const monCx = monRect.left - stageRect.left + monRect.width / 2;
+  const monCy = monRect.top  - stageRect.top  + monRect.height / 2 - 14;
+
+  const isMiss = (quality === 'low' || quality === 'high');
+
+  const curveSlip = (ballType === 'curve' && !isMiss && Math.random() < CURVE_SLIP_CHANCE);
+  const finalMiss = isMiss || curveSlip;
+
+  let targetCx = monCx;
+  let targetCy = monCy;
+
+  if (curveSlip) {
+    const side = Math.random() < 0.5 ? -1 : 1;
+    targetCx = monCx + side * (110 + Math.random() * 90);
+    targetCy = monCy + (Math.random() * 160 - 80);
+  } else if (quality === 'low')        { targetCy = monCy + 150; targetCx = monCx + (Math.random()*70-35); }
+  else if (quality === 'high')         { targetCy = monCy - 190; targetCx = monCx + (Math.random()*70-35); }
+  else if (quality === 'weak')         { targetCy = monCy + 38; }
+  else if (quality === 'strong')       { targetCy = monCy - 38; }
+
+  const targetX = targetCx - BALL_SIZE / 2;
+  const targetY = targetCy - BALL_SIZE / 2;
+
+  const dirSign = Math.sign(swipe.curX - swipe.startX) || 1;
+  let curveOffset = 0;
+  if (ballType === 'curve') {
+    const ddx = targetX - ballHome.x;
+    const ddy = targetY - ballHome.y;
+    const dist = Math.hypot(ddx, ddy) || 1;
+    curveOffset = dirSign * dist * 0.38;
+  }
+
+  const spinDir = dirSign;
+  const duration = 520;
+
+  lastThrow = { ballType, quality, angle, power, targetX, targetY, spinDir };
+
+  flyBall(targetX, targetY, spinDir, curveOffset, duration, () => {
+    SFX.hit();
+
+    if (finalMiss) {
+      ballFly.style.transition = 'transform .32s ease-in, opacity .32s';
+      setBallTransform(
+        targetX + dirSign * 70,
+        targetY + (curveSlip ? 130 : (quality === 'low' ? 140 : -140)),
+        spinDir * 1080
+      );
+      ballFly.style.opacity = '0';
+      showResult(
+        curveSlip ? '🌀 旋轉球失手，球飛歪了…'
+          : (quality === 'low' ? '力道太輕，球沒飛到…' : '力道過猛，球飛過頭了！'),
+        '#ff8a8a'
+      );
+      setTimeout(() => {
+        ballFlying = false;
+        if (catchState === 'flying') {
+          catchState = 'aim';
+          swipeHint.style.display = '';
+          resetBallPosition(true);
+        }
+      }, 340);
+      return;
+    }
+
+    wildMon.classList.add('absorbed');
+    setTimeout(() => {
+      wobbleBall(targetX, targetY, spinDir * 720, () => {
+        resolveCatch();
+      });
+    }, 240);
+  });
+}
+
+function flyBall(targetX, targetY, spinDir, curveOffset, duration, onDone) {
+  const startX = ballHome.x;
+  const startY = ballHome.y;
+
+  const midX = (startX + targetX) / 2;
+  const midY = (startY + targetY) / 2;
+  let cpX = midX, cpY = midY;
+
+  if (curveOffset !== 0) {
+    const dx = targetX - startX;
+    const dy = targetY - startY;
+    const len = Math.hypot(dx, dy) || 1;
+    const perpX = -dy / len;
+    const perpY =  dx / len;
+    cpX = midX + perpX * curveOffset;
+    cpY = midY + perpY * curveOffset;
+  }
+
+  ballFly.style.transition = 'none';
+  const startTime = performance.now();
+
+  function step(now) {
+    const t = Math.min(1, (now - startTime) / duration);
+    const ease = t * t * (3 - 2 * t);
+    const om = 1 - ease;
+
+    const x = om*om*startX + 2*om*ease*cpX + ease*ease*targetX;
+    const y = om*om*startY + 2*om*ease*cpY + ease*ease*targetY;
+    const rot = ease * 720 * spinDir;
+
+    setBallTransform(x, y, rot);
+
+    if (t < 1) requestAnimationFrame(step);
+    else onDone();
+  }
+  requestAnimationFrame(step);
+}
+
+function wobbleBall(baseX, baseY, baseRot, onDone) {
+  const TOTAL = 3;
+  const WOBBLE_DUR = 480;
+  const PAUSE_DUR  = 340;
+  let count = 0;
+
+  function doWobble() {
+    if (count >= TOTAL) { onDone(); return; }
+    SFX.wobble(count);
+
+    const startTime = performance.now();
+    const dir = (count % 2 === 0) ? 1 : -1;
+
+    function step(now) {
+      const t = Math.min(1, (now - startTime) / WOBBLE_DUR);
+      const phase = t * Math.PI * 2;
+      const damp = 1 - t * 0.4;
+
+      const wobbleX = Math.sin(phase) * 12 * damp * dir;
+      const tilt    = Math.sin(phase) * 18 * damp * dir;
+
+      setBallTransform(baseX + wobbleX, baseY, baseRot + tilt);
+
+      if (t < 1) requestAnimationFrame(step);
+      else {
+        setBallTransform(baseX, baseY, baseRot);
+        count++;
+        if (count < TOTAL) setTimeout(doWobble, PAUSE_DUR);
+        else setTimeout(onDone, PAUSE_DUR + 180);
+      }
+    }
+    requestAnimationFrame(step);
+  }
+  setTimeout(doWobble, 260);
+}
+
+function showCatchStars() {
+  const stageRect = catchStage.getBoundingClientRect();
+  const ballRect  = ballFly.getBoundingClientRect();
+
+  const baseX = ballRect.right - stageRect.left - 4;
+  const baseY = ballRect.top  - stageRect.top  + 4;
+
+  const offsets = [
+    { dx: 26, dy: -30 },
+    { dx: 54, dy: -54 },
+    { dx: 82, dy: -38 },
+  ];
+
+  offsets.forEach((o, i) => {
+    const star = document.createElement('div');
+    star.className = 'catch-star';
+    star.textContent = '✦';
+    star.style.left = baseX + 'px';
+    star.style.top  = baseY + 'px';
+    star.style.setProperty('--dx', o.dx + 'px');
+    star.style.setProperty('--dy', o.dy + 'px');
+    star.style.animationDelay = (i * 0.1) + 's';
+    catchStage.appendChild(star);
+    setTimeout(() => star.remove(), 1600);
+  });
+}
+
+function resolveCatch() {
+  if (!currentSpawn) return;
+  const { p, marker, shiny } = currentSpawn;
+  const info = lastThrow || { ballType:'straight', quality:'perfect', spinDir:1,
+                              targetX: ballHome.x, targetY: ballHome.y };
+
+  let mult = 1;
+  if (info.quality === 'perfect') mult *= 1.25;
+  else if (info.quality === 'weak' || info.quality === 'strong') mult *= 0.78;
+  if (info.ballType === 'curve') mult *= CURVE_SUCCESS_MULT;
+
+  const chance = Math.min(0.95, p.rate * mult);
+  const success = Math.random() < chance;
+
+  if (success) {
+    catchState = 'caught';
+    caughtCount++;
+    const firstTime = dexState[p.name].caught === 0;
+    dexState[p.name].caught++;
+    if (shiny) dexState[p.name].shiny++;
+
+    addCandy(p.name, 1);
+    updateHUD();
+    autoSave();
+
+    SFX.caught();
+    audio.stopCatch();
+    showCatchStars();
+
+    const candyMsg = `　🍬 +1 ${p.name} 糖果`;
+
+    if (firstTime) {
+      showResult(shiny
+        ? `✨ 首次捕獲異色 ${p.name}！${candyMsg}`
+        : `Gotcha！首次捕獲 ${p.name}！${candyMsg}`, '#ffd166');
+    } else {
+      showResult(shiny
+        ? `✨ 異色 ${p.name}！${candyMsg}`
+        : `Gotcha！${p.name}！${candyMsg}`, '#7CFC9A');
+    }
+
+    if (shiny) toast(`✨ 太幸運了！異色 ${p.name} 入手！`, 2800);
+
+    if (map.hasLayer(marker)) map.removeLayer(marker);
+    spawnMarkers = spawnMarkers.filter(m => m !== marker);
+
+    ballFly.style.filter = shiny
+      ? 'brightness(2) drop-shadow(0 0 20px #ffd166)'
+      : 'brightness(1.8) drop-shadow(0 0 16px #ffd166)';
+    setTimeout(() => { ballFly.style.filter = ''; }, 320);
+
+    setTimeout(closeCatch, 1900);
+  } else {
+    catchState = 'fail';
+    wildMon.classList.remove('absorbed');
+
+    SFX.catchFail();
+
+    if (Math.random() < 0.35) {
+      showResult(`可惜！${p.name} 逃走了…`, '#ff8a8a');
+      if (map.hasLayer(marker)) map.removeLayer(marker);
+      spawnMarkers = spawnMarkers.filter(m => m !== marker);
+      setTimeout(closeCatch, 1500);
+    } else {
+      showResult('差一點！再試一次', '#ffd166');
+      ballFly.style.transition = 'transform .32s ease-in, opacity .32s';
+      setBallTransform(info.targetX, info.targetY + 240, info.spinDir * 1080);
+      ballFly.style.opacity = '0';
+      setTimeout(() => {
+        ballFlying = false;
+        if (catchState === 'fail') {
+          catchState = 'aim';
+          swipeHint.style.display = '';
+          resetBallPosition(true);
+        }
+      }, 360);
+    }
+  }
+}
+
+document.getElementById('fleeBtn').addEventListener('click', () => {
+  if (catchState === 'flying') return;
+  closeCatch();
+});
+
+/* =========================================================
+   12. 補給站
+   ========================================================= */
+const stopScreen = document.getElementById('stopScreen');
+const stopStage  = document.getElementById('stopStage');
+const stopDisc   = document.getElementById('stopDisc');
+const stopHint   = document.getElementById('stopHint');
+const stopReward = document.getElementById('stopReward');
+
+const stopSwipe = { active:false, id:null, x0:0, y0:0, x:0, y:0 };
+
+function coinTransform(deg) {
+  return `rotateX(10deg) rotateY(${deg}deg)`;
+}
+
+function openStop(marker) {
+  if (catchState !== 'idle') return;
+  if (marker._used) { toast('這個補給站已經補給過了，等刷新吧'); return; }
+
+  currentStopMarker = marker;
+  stopReward.innerHTML = '';
+  stopHint.textContent = '← 在硬幣上橫掃 →';
+  stopHint.style.animation = '';
+  stopDisc.style.transition = 'none';
+  stopDisc.style.transform = coinTransform(discRot);
+  stopScreen.classList.remove('hidden');
+  SFX.init();
+}
+
+function markStopUsed(marker) {
+  marker._used = true;
+  const el = marker.getElement();
+  if (el) {
+    const d = el.querySelector('.stop');
+    if (d) { d.classList.add('used'); d.textContent = '✓'; }
+  }
+}
+
+function showBallBubble(gain) {
+  SFX.bubble();
+  const b = document.createElement('div');
+  b.className = 'ball-bubble';
+  b.innerHTML = `<span class="bub-txt">+${gain}</span>`;
+  document.body.appendChild(b);
+  setTimeout(() => b.remove(), 1750);
+}
+
+function spinStop() {
+  if (spinning) return;
+  const marker = currentStopMarker;
+  if (!marker || marker._used) return;
+
+  spinning = true;
+  stopHint.textContent = '補給中…';
+  SFX.spin();
+
+  discRot += 1080 + Math.floor(Math.random() * 720);
+  stopDisc.style.transition = 'transform 1.7s cubic-bezier(.15,.85,.3,1)';
+  stopDisc.style.transform = coinTransform(discRot);
+
+  setTimeout(() => {
+    const gain = 1 + Math.floor(Math.random() * 3);
+    balls += gain;
+    updateHUD();
+    autoSave();
+
+    stopReward.innerHTML = `<span class="ball-mini"></span><span>×${gain}</span>`;
+    stopReward.style.animation = 'none';
+    void stopReward.offsetWidth;
+    stopReward.style.animation = 'rewardIn .55s cubic-bezier(.3,1.4,.5,1) both';
+
+    stopHint.textContent = '此補給站已使用';
+    stopHint.style.animation = 'none';
+    markStopUsed(marker);
+    spinning = false;
+    currentStopMarker = null;
+
+    SFX.reward();
+    showBallBubble(gain);
+  }, 1700);
+}
+
+stopStage.addEventListener('pointerdown', e => {
+  if (spinning) return;
+  const marker = currentStopMarker;
+  if (!marker || marker._used) return;
+
+  stopSwipe.active = true;
+  stopSwipe.id = e.pointerId;
+  stopSwipe.x0 = e.clientX;
+  stopSwipe.y0 = e.clientY;
+  stopSwipe.x = e.clientX;
+  stopSwipe.y = e.clientY;
+
+  try { stopStage.setPointerCapture(e.pointerId); } catch(_) {}
+  stopDisc.style.transition = 'none';
+  e.preventDefault();
+});
+
+stopStage.addEventListener('pointermove', e => {
+  if (!stopSwipe.active || e.pointerId !== stopSwipe.id) return;
+  stopSwipe.x = e.clientX;
+  stopSwipe.y = e.clientY;
+  const dx = stopSwipe.x - stopSwipe.x0;
+  stopDisc.style.transform = coinTransform(discRot + dx * 0.85);
+  e.preventDefault();
+});
+
+function endStopSwipe(e) {
+  if (!stopSwipe.active || e.pointerId !== stopSwipe.id) return;
+  stopSwipe.active = false;
+  stopDisc.style.transition = '';
+
+  const dx = stopSwipe.x - stopSwipe.x0;
+  const dy = stopSwipe.y - stopSwipe.y0;
+
+  if (!spinning && Math.abs(dx) >= SWIPE_THRESHOLD && Math.abs(dx) > Math.abs(dy)) {
+    spinStop();
+  } else {
+    stopDisc.style.transform = coinTransform(discRot);
+    if (!spinning && (Math.abs(dx) > 18 || Math.abs(dy) > 18)) {
+      stopHint.textContent = '橫掃距離不夠，再試一次';
+      setTimeout(() => {
+        if (!spinning && currentStopMarker && !currentStopMarker._used)
+          stopHint.textContent = '← 在硬幣上橫掃 →';
+      }, 1400);
+    }
+  }
+}
+stopStage.addEventListener('pointerup', endStopSwipe);
+stopStage.addEventListener('pointercancel', endStopSwipe);
+
+document.getElementById('stopCloseBtn').addEventListener('click', () => {
+  if (spinning) return;
+  stopScreen.classList.add('hidden');
+  currentStopMarker = null;
+});
+
+/* =========================================================
+   13. 圖鑑
+   ========================================================= */
+const dexScreen = document.getElementById('dexScreen');
+const evoScreen = document.getElementById('evoScreen');
+
+function renderDex() {
+  const grid = document.getElementById('dexGrid');
+  let caughtTotal = 0;
+  let html = '';
+
+  POKEDEX.forEach(p => {
+    const st = dexState[p.name];
+    if (!st) return;
+    const isCaught = st.caught > 0;
+    const isSeen = st.seen > 0 || isCaught;
+    if (isCaught) caughtTotal++;
+
+    let cls = 'dex-cell';
+    if (isCaught) cls += ' caught';
+    else if (isSeen) cls += ' seen';
+    else cls += ' unknown';
+
+    const hasEvo = EVOLUTIONS[p.name] && isCaught;
+    const candy = getCandy(p.name);
+
+    html += `
+      <div class="${cls}">
+        <div class="dex-icon" data-id="${p.id}" data-seen="${isSeen?1:0}" data-shiny="${st.shiny>0?1:0}" style="--c:${p.color}">
+          <div class="dex-shadow"></div>
+          ${isSeen ? '' : `<span style="font-size:30px;z-index:2">❓</span>`}
+        </div>
+        <div class="dex-name">${isSeen ? p.name : '？？？'}</div>
+        ${isCaught ? `<div class="dex-count">捕獲 ${st.caught} 次</div>` : ''}
+        ${(isCaught && hasEvo) ? `<div class="dex-candy"><span class="candy-mini" style="width:10px;height:10px"></span>${candy}</div>` : ''}
+        ${st.shiny > 0 ? `<div class="dex-shiny">✨ 異色 ×${st.shiny}</div>` : ''}
+        ${p.notWild ? `<div class="dex-evo-tag">🧬 僅能進化獲得</div>` : ''}
+      </div>`;
+  });
+
+  grid.innerHTML = html;
+  document.getElementById('dexProgress').textContent =
+    `已捕獲 ${caughtTotal} / ${POKEDEX.length}`;
+
+  grid.querySelectorAll('.dex-icon').forEach(box => {
+    if (box.dataset.seen !== '1') return;
+    const id = parseInt(box.dataset.id, 10);
+    const p = POKEDEX.find(x => x.id === id);
+    if (!p) return;
+    const shiny = box.dataset.shiny === '1';
+
+    const img = document.createElement('img');
+    img.src = spriteUrl(p, shiny);
+    img.alt = p.name;
+    img.draggable = false;
+    img.onerror = () => {
+      img.remove();
+      const s = document.createElement('span');
+      s.className = 'dex-fallback';
+      s.textContent = '❓';
+      box.appendChild(s);
+    };
+    box.appendChild(img);
+    if (shiny) img.style.filter = 'drop-shadow(0 0 8px #ffd166) drop-shadow(0 0 16px #ffb703)';
+  });
+}
+
+document.getElementById('dexBtn').addEventListener('click', () => {
+  renderDex();
+  dexScreen.classList.remove('hidden');
+});
+document.getElementById('dexCloseBtn').addEventListener('click', () => {
+  dexScreen.classList.add('hidden');
+});
+
+/* =========================================================
+   14. 進化
+   ========================================================= */
+function canEvolve(name) {
+  const evos = EVOLUTIONS[name];
+  if (!evos) return false;
+  if (!dexState[name] || dexState[name].caught <= 0) return false;
+  const candy = getCandy(name);
+  return evos.some(e => candy >= e.candy);
+}
+
+function renderEvoList() {
+  const list = document.getElementById('evoList');
+  const prog = document.getElementById('evoProgress');
+
+  const sources = Object.keys(EVOLUTIONS).filter(n => dexState[n] && dexState[n].caught > 0);
+
+  if (sources.length === 0) {
+    list.innerHTML = `<div class="evo-empty">
+      還沒有可以進化的寶可夢<br>
+      先去捕捉寶可夢，收集足夠的糖果吧！
+    </div>`;
+    prog.textContent = '';
+    return;
+  }
+
+  let readyCount = 0;
+  let html = '';
+
+  sources.forEach(srcName => {
+    const evos = EVOLUTIONS[srcName];
+    const src = POKEDEX.find(p => p.name === srcName);
+    if (!src) return;
+
+    const candy = getCandy(srcName);
+
+    evos.forEach(evo => {
+      const tgt = POKEDEX.find(p => p.name === evo.to);
+      if (!tgt) return;
+
+      const enough = candy >= evo.candy;
+      if (enough) readyCount++;
+
+      const targetKnown = dexState[tgt.name] && (dexState[tgt.name].caught > 0 || dexState[tgt.name].seen > 0);
+
+      html += `
+        <div class="evo-item ${enough ? 'ready' : ''}">
+          <div class="evo-sprites">
+            <img src="${spriteUrl(src,false)}" alt="${src.name}"
+                 onerror="this.outerHTML='<span style=&quot;font-size:36px&quot;>❓</span>'">
+            <span class="evo-arrow">➜</span>
+            <img src="${spriteUrl(tgt,false)}" alt="${tgt.name}"
+                 onerror="this.outerHTML='<span style=&quot;font-size:36px&quot;>❓</span>'">
+          </div>
+          <div class="evo-info">
+            <div class="evo-title">${src.name} → ${tgt.name}${!targetKnown ? ' <span style="color:#7dd3fc">(新!)</span>' : ''}</div>
+            <div class="evo-candy-line ${enough ? '' : 'lack'}">
+              <span class="candy-mini" style="width:12px;height:12px"></span>
+              ${candy} / ${evo.candy} 糖果
+            </div>
+          </div>
+          <button class="evo-btn" ${enough ? '' : 'disabled'}
+                  data-src="${srcName}" data-to="${evo.to}">進化</button>
+        </div>`;
+    });
+  });
+
+  list.innerHTML = html;
+  prog.textContent = `可進化 ${readyCount} 個分支`;
+
+  list.querySelectorAll('.evo-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      tryEvolve(btn.dataset.src, btn.dataset.to);
+    });
+  });
+}
+
+function tryEvolve(srcName, toName) {
+  const evos = EVOLUTIONS[srcName];
+  if (!evos) return;
+  const evo = evos.find(e => e.to === toName);
+  if (!evo) return;
+  if (!dexState[srcName] || dexState[srcName].caught <= 0) return;
+  if (getCandy(srcName) < evo.candy) return;
+
+  const src = POKEDEX.find(p => p.name === srcName);
+  const tgt = POKEDEX.find(p => p.name === toName);
+  if (!src || !tgt) return;
+
+  const ov = document.getElementById('evoOverlay');
+  const animImg = document.getElementById('evoAnimImg');
+  animImg.src = spriteUrl(src, false);
+  animImg.style.display = '';
+  animImg.onerror = () => { animImg.style.display='none'; };
+  ov.style.display = 'flex';
+
+  SFX.evolve();
+
+  setTimeout(() => {
+    ov.style.display = 'none';
+    animImg.style.display = '';
+
+    candyBag[srcName] -= evo.candy;
+
+    dexState[tgt.name].seen = 1;
+    dexState[tgt.name].caught++;
+
+    caughtCount++;
+    updateHUD();
+    autoSave();
+
+    toast(`🧬 ${srcName} 進化成 ${tgt.name}！`, 2600);
+
+    renderEvoList();
+  }, 2200);
+}
+
+document.getElementById('evoBtn').addEventListener('click', () => {
+  renderEvoList();
+  evoScreen.classList.remove('hidden');
+});
+document.getElementById('evoCloseBtn').addEventListener('click', () => {
+  evoScreen.classList.add('hidden');
+});
+
+/* =========================================================
+   15. 全螢幕
+   ========================================================= */
+const fsBtn = document.getElementById('fsBtn');
+
+function isFullscreen() {
+  return !!(document.fullscreenElement || document.webkitFullscreenElement ||
+            document.mozFullScreenElement || document.msFullscreenElement);
+}
+
+function toggleFullscreen() {
+  const el = document.documentElement;
+  try {
+    if (!isFullscreen()) {
+      const req = el.requestFullscreen || el.webkitRequestFullscreen ||
+                  el.mozRequestFullScreen || el.msRequestFullscreen;
+      if (req) {
+        const p = req.call(el);
+        if (p && p.catch) p.catch(() => toast('此裝置不支援全螢幕'));
+      } else {
+        toast('此裝置不支援全螢幕');
+      }
+    } else {
+      const exit = document.exitFullscreen || document.webkitExitFullscreen ||
+                   document.mozCancelFullScreen || document.msExitFullscreen;
+      if (exit) {
+        const p = exit.call(document);
+        if (p && p.catch) p.catch(()=>{});
+      }
+    }
+  } catch (e) {
+    toast('此裝置不支援全螢幕');
+  }
+}
+
+fsBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  toggleFullscreen();
+});
+
+function syncFsBtn() {
+  fsBtn.classList.toggle('on', isFullscreen());
+  fsBtn.textContent = isFullscreen() ? '⤡' : '⛶';
+  setTimeout(() => { if (map) map.invalidateSize(); }, 260);
+}
+['fullscreenchange','webkitfullscreenchange','mozfullscreenchange','MSFullscreenChange']
+  .forEach(ev => document.addEventListener(ev, syncFsBtn));
+
+/* =========================================================
+   16. 計時器
+   ========================================================= */
+function startTimers() {
+  setInterval(() => {
+    const left = Math.max(0, Math.ceil((nextRefreshAt - Date.now()) / 1000));
+    const m = Math.floor(left / 60);
+    const s = left % 60;
+    document.getElementById('timerChip').textContent =
+      `⏱ ${m}:${String(s).padStart(2, '0')}`;
+
+    if (left <= 0) {
+      refreshSpawns();
+    }
+  }, 1000);
+
+  setInterval(checkDeviceTime, 20000);
+}
+
+function refreshSpawns() {
+  /* 先把計時器重置，避免任何例外導致卡在 0:00 */
+  nextRefreshAt = Date.now() + REFRESH_MS;
+
+  /* 交換介面開啟時不刷新世界，避免清掉正在交換的 NPC */
+  if (npcScreen && !npcScreen.classList.contains('hidden')) {
+    toast('交換進行中，稍後刷新');
+    return;
+  }
+
+  rollWeather();
+  renderEnvironment();
+
+  const center = playerLatLng || spawnCenter || DEFAULT_CENTER;
+  spawnCenter = center;
+  spawnPokemon(center);
+  if (stopMarkers.length === 0) spawnStops(center);
+  else resetStops();
+  maybeSpawnNPC(center);
+
+  const w = WEATHERS.find(x => x.id === env.weather) || WEATHERS[0];
+  const t = env.time === 'day' ? '☀️ 白天' : '🌙 夜晚';
+  toast(`${t} · ${w.icon}${w.name}　地圖已刷新！`);
+}
+
+/* =========================================================
+   17. 啟動
+   ========================================================= */
+function spawnWorld(center) {
+  spawnCenter = center;
+  spawnPokemon(center);
+  spawnStops(center);
+  maybeSpawnNPC(center);
+  nextRefreshAt = Date.now() + REFRESH_MS;
+}
+
+async function startGame() {
+  if (gameStarted) return;
+  gameStarted = true;
+
+  audio.init();
+  audio.playMap(env.time);
+  SFX.init();
+
+  initMap();
+  updateHUD();
+
+  rollWeather();
+  renderEnvironment();
+
+  placePlayer(DEFAULT_CENTER, false);
+  spawnWorld(DEFAULT_CENTER);
+
+  /* 嘗試自動恢復瀏覽器記住的進度 */
+  const restored = loadAutoSave();
+  if (restored) {
+    toast('📂 已恢復上次遊戲進度', 2600);
+  } else {
+    autoSave();
+  }
+
+  startTimers();
+  startGPS();
+
+  document.getElementById('locateBtn').addEventListener('click', () => {
+    if (manualMode) {
+      setManualMode(false);
+      toast('🛰 已切回 GPS 定位模式');
+      if (playerLatLng) map.setView(playerLatLng, 17, { animate: true });
+    } else if (document.body.classList.contains('gps-live')) {
+      setManualMode(true);
+      toast('🚶 已切換手動模式，可使用方向鍵移動');
+    } else {
+      if (playerLatLng) map.setView(playerLatLng, 17, { animate: true });
+      toast('📍 回到你的位置');
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    if (catchState === 'aim') {
+      resetBallPosition(false);
+      updateGroundLine();
+    }
+    if (map) map.invalidateSize();
+  });
+}
+
+async function boot() {
+  env.time = getTimeOfDay();
+
+  document.getElementById('copyrightYear').textContent = new Date().getFullYear();
+
+  const splash = document.getElementById('splash');
+  const loadingScreen = document.getElementById('loadingScreen');
+  let entered = false;
+
+  const enter = async () => {
+    if (entered) return;
+    entered = true;
+    splash.classList.add('fade');
+    setTimeout(() => splash.remove(), 600);
+
+    loadingScreen.classList.remove('hidden');
+
+    try {
+      await loadAllData();
+    } catch (e) {
+      console.error('加載失敗:', e);
+      document.getElementById('loadSub').textContent =
+        '加載失敗，請重新整理頁面。' + (e.message || '');
+      return;
+    }
+
+    loadingScreen.classList.add('hidden');
+    audio.init();
+    SFX.init();
+    SFX.resume();
+    await startGame();
+  };
+
+  splash.addEventListener('pointerdown', enter);
+  splash.addEventListener('click', enter);
+
+  document.addEventListener('gesturestart', e => e.preventDefault());
+  setInterval(checkDeviceTime, 20000);
+}
+
+/* =========================================================
+   GPS / 方向鍵
+   ========================================================= */
+function startGPS() {
+  if (!navigator.geolocation) { toast('此裝置不支援 GPS，請用方向鍵移動'); return; }
+  navigator.geolocation.watchPosition(onPos, onGeoError, {
+    enableHighAccuracy: true, maximumAge: 3000, timeout: 20000,
+  });
+}
+
+function onPos(pos) {
+  if (manualMode) return;
+  const ll = [pos.coords.latitude, pos.coords.longitude];
+  const recenter = firstFix;
+  placePlayer(ll, recenter);
+
+  document.body.classList.add('gps-live');
+
+  if (firstFix) {
+    firstFix = false;
+    if (!spawnCenter || map.distance(L.latLng(spawnCenter), L.latLng(ll)) > 800) spawnWorld(ll);
+    toast('📍 已定位到你的位置');
+  }
+}
+
+function onGeoError(err) {
+  if (firstFix) {
+    toast('⚠️ 無法取得 GPS，請使用左下方向鍵移動');
+    setManualMode(true);
+  }
+  document.body.classList.remove('gps-live');
+  console.warn('Geolocation error:', err.message);
+}
+
+function setManualMode(on) {
+  manualMode = on;
+  const btn = document.getElementById('locateBtn');
+  btn.classList.toggle('manual', on);
+  btn.title = on ? '手動模式中（點擊恢復 GPS）' : '回到 GPS 位置';
+  if (on) document.body.classList.remove('gps-live');
+}
+
+const dpad = { up:false, down:false, left:false, right:false };
+let dpadRaf = null;
+
+function startDpadLoop() {
+  if (dpadRaf) return;
+  let last = performance.now();
+  const SPEED = 28;
+
+  function tick(now) {
+    const dt = Math.min(0.1, (now - last) / 1000);
+    last = now;
+
+    let dx = 0, dy = 0;
+    if (dpad.up)    dy -= 1;
+    if (dpad.down)  dy += 1;
+    if (dpad.left)  dx -= 1;
+    if (dpad.right) dx += 1;
+
+    if ((dx || dy) && playerLatLng) {
+      const bearing = Math.atan2(dx, -dy) * 180 / Math.PI;
+      const move = SPEED * dt;
+      const [lat, lng] = offsetLatLng(playerLatLng[0], playerLatLng[1], move, bearing);
+      const ll = [lat, lng];
+      placePlayer(ll, false);
+      map.panTo(ll, { animate: false });
+    }
+    dpadRaf = requestAnimationFrame(tick);
+  }
+  dpadRaf = requestAnimationFrame(tick);
+}
+
+document.querySelectorAll('.dpad-btn').forEach(btn => {
+  const dir = btn.dataset.dir;
+  const press = (e) => {
+    e.preventDefault();
+    if (!manualMode) setManualMode(true);
+    dpad[dir] = true;
+    btn.classList.add('on');
+    startDpadLoop();
+  };
+  const release = (e) => {
+    e.preventDefault();
+    dpad[dir] = false;
+    btn.classList.remove('on');
+  };
+  btn.addEventListener('pointerdown', press);
+  btn.addEventListener('pointerup', release);
+  btn.addEventListener('pointerleave', release);
+  btn.addEventListener('pointercancel', release);
+  btn.addEventListener('contextmenu', e => e.preventDefault());
+});
+
+/* ===== 存檔按鈕事件 ===== */
+document.getElementById('saveBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  downloadSave();
+});
+document.getElementById('loadBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  document.getElementById('loadFileInput').click();
+});
+document.getElementById('loadFileInput').addEventListener('change', (e) => {
+  const file = e.target.files && e.target.files[0];
+  handleLoadFile(file);
+  e.target.value = '';
+});
+document.getElementById('resetBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  resetGame();
+});
+
+/* 頁面隱藏時自動儲存，避免進度丟失 */
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') autoSave();
+});
+
+window.addEventListener('load', boot);
+</script>
+</body>
+</html>
