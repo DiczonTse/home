@@ -4,6 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>🎊寵物小精靈 City Walk</title>
+<!-- PWA 核心 -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0d1117">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="🎊Pokemon City Walk">
+<!-- iOS 图标（至少提供一个 180×180 或 192×192） -->
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -74,20 +83,20 @@
   @keyframes pulse{0%{transform:scale(.35);opacity:.95}100%{transform:scale(1.7);opacity:0}}
 
   .spawn{position:relative;width:64px;height:72px;cursor:pointer}
-  .spawn-gif{position:absolute;left:50%;bottom:14px;width:56px;height:56px;margin-left:-28px;
-    object-fit:contain;image-rendering:pixelated;z-index:2;
-    animation:bob 1.8s ease-in-out infinite;pointer-events:none}
-  .spawn-shadow{position:absolute;left:50%;bottom:4px;width:42px;height:11px;margin-left:-21px;
-    border-radius:50%;background:radial-gradient(ellipse at center,rgba(0,0,0,.5),rgba(0,0,0,0) 78%);
-    z-index:1;animation:shadowBob 1.8s ease-in-out infinite;pointer-events:none}
-  .spawn-fallback{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);
-    font-size:38px;line-height:1;z-index:2;animation:bob 1.8s ease-in-out infinite}
-  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-  @keyframes shadowBob{0%,100%{transform:scale(1);opacity:.55}50%{transform:scale(.82);opacity:.35}}
+  .spawn-gif{position:absolute;left:50%;bottom:2px;width:56px;height:56px;margin-left:-28px;
+	object-fit:contain;image-rendering:pixelated;z-index:2;
+	animation:spawnIdle 2.6s ease-in-out infinite;pointer-events:none}
+  .spawn-shadow{position:absolute;left:50%;bottom:1px;width:42px;height:11px;margin-left:-21px;
+	border-radius:50%;background:radial-gradient(ellipse at center,rgba(0,0,0,.5),rgba(0,0,0,0) 78%);
+	z-index:1;animation:shadowIdle 2.6s ease-in-out infinite;pointer-events:none}
+  .spawn-fallback{position:absolute;left:50%;bottom:2px;transform:translateX(-50%);
+	font-size:38px;line-height:1;z-index:2;animation:spawnIdle 2.6s ease-in-out infinite}
+  @keyframes spawnIdle{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-2px) scale(1.02)}}
+  @keyframes shadowIdle{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(.95);opacity:.42}}
 
   .spawn.shiny .spawn-gif{
-    filter:drop-shadow(0 0 10px #ffd166) drop-shadow(0 0 22px #ffb703);
-    animation:bob 1.8s ease-in-out infinite,shinyGlow 1.3s ease-in-out infinite alternate}
+	filter:drop-shadow(0 0 10px #ffd166) drop-shadow(0 0 22px #ffb703);
+	animation:spawnIdle 2.6s ease-in-out infinite,shinyGlow 1.3s ease-in-out infinite alternate}
   @keyframes shinyGlow{from{filter:drop-shadow(0 0 8px #ffd166) drop-shadow(0 0 18px #ffb703)}
     to{filter:drop-shadow(0 0 16px #ffd166) drop-shadow(0 0 34px #ffb703) brightness(1.2)}}
 
@@ -164,12 +173,20 @@
   .dpad-btn[data-dir="down"] {grid-area:3/2}
   .dpad-btn:active,.dpad-btn.on{background:rgba(66,133,244,.95);transform:scale(.94)}
 
-  #locateBtn{position:fixed;right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);
-    width:52px;height:52px;border-radius:50%;border:2px solid rgba(255,255,255,.25);
-    background:rgba(15,20,32,.85);color:#fff;font-size:24px;z-index:1000;cursor:pointer;
-    backdrop-filter:blur(8px);box-shadow:0 6px 18px rgba(0,0,0,.5)}
-  #locateBtn:active{transform:scale(.92)}
+  #rightStack{position:fixed;right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);
+    display:flex;flex-direction:column;align-items:center;gap:10px;z-index:1000}
+  #rightStack button{border-radius:50%;border:2px solid rgba(255,255,255,.25);
+    background:rgba(15,20,32,.85);color:#fff;cursor:pointer;
+    backdrop-filter:blur(8px);box-shadow:0 6px 18px rgba(0,0,0,.5);
+    display:flex;align-items:center;justify-content:center;
+    transition:transform .12s,background .2s}
+  #rightStack button:active{transform:scale(.92)}
+  #locateBtn{width:52px;height:52px;font-size:24px}
   #locateBtn.manual{background:rgba(66,133,244,.9);border-color:#fff}
+  #mapModeBtn,#dpadToggleBtn{width:46px;height:46px;font-size:19px}
+  #mapModeBtn.on{background:rgba(122,182,72,.92);border-color:#fff}
+  #dpadToggleBtn.on{background:rgba(108,92,231,.92);border-color:#fff}
+  body.force-dpad #dpad{display:grid !important}
 
   #toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 70px);
     transform:translateX(-50%) translateY(-14px);
@@ -241,20 +258,20 @@
 
   .wild{position:relative;z-index:2}
   .mon{position:relative;width:190px;height:180px;
-    display:flex;align-items:flex-end;justify-content:center;padding-bottom:34px;
+    display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;
     transition:transform .28s cubic-bezier(.4,0,.9,.4),opacity .28s}
   .mon img{width:148px;height:148px;object-fit:contain;image-rendering:pixelated;
     position:relative;z-index:2;pointer-events:none;
-    animation:floatY 2.1s ease-in-out infinite}
+    animation:monIdle 2.4s ease-in-out infinite}
   .mon-fallback{font-size:88px;line-height:1;position:relative;z-index:2;
-    animation:floatY 2.1s ease-in-out infinite}
-  .mon::after{content:'';position:absolute;left:50%;bottom:20px;width:130px;height:26px;
+    animation:monIdle 2.4s ease-in-out infinite}
+  .mon::after{content:'';position:absolute;left:50%;bottom:16px;width:130px;height:26px;
     margin-left:-65px;border-radius:50%;
     background:radial-gradient(ellipse at center,rgba(0,0,0,.5) 0%,rgba(0,0,0,.25) 48%,rgba(0,0,0,0) 76%);
     z-index:1;pointer-events:none;
-    animation:shadowPulse 2.1s ease-in-out infinite}
-  @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
-  @keyframes shadowPulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(.86);opacity:.6}}
+    animation:monShadowIdle 2.4s ease-in-out infinite}
+  @keyframes monIdle{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-3px) scale(1.015)}}
+  @keyframes monShadowIdle{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(.96);opacity:.7}}
 
   .mon.shiny img{filter:drop-shadow(0 0 14px #ffd166) drop-shadow(0 0 30px #ffb703)
     drop-shadow(0 0 48px rgba(255,183,3,.45))}
@@ -263,6 +280,19 @@
   .wild.absorbed .mon{transform:scale(.08);opacity:0}
   .wild.absorbed .mon img,
   .wild.absorbed .mon-fallback{animation-play-state:paused}
+
+  /* ===== 精靈逃跑動畫 ===== */
+  .wild.fleeing .mon{
+    animation:monFlee .9s cubic-bezier(.4,0,.75,1) forwards;
+  }
+  @keyframes monFlee{
+    0%   {transform:translate(0,0) scale(1) rotate(0deg);opacity:1}
+    18%  {transform:translate(-12px,-10px) scale(1.06) rotate(-7deg);opacity:1}
+    36%  {transform:translate(14px,-18px) scale(1.08) rotate(7deg);opacity:1}
+    60%  {transform:translate(-8px,-32px) scale(1.05) rotate(-5deg);opacity:.95}
+    100% {transform:translate(64px,-124px) scale(.12) rotate(24deg);opacity:0}
+  }
+  .wild.fleeing .mon::after{animation:none;opacity:0}
 
   #ballFly{position:absolute;left:0;top:0;width:56px;height:56px;
     display:block;z-index:6;pointer-events:none;will-change:transform}
@@ -550,7 +580,11 @@
   <button class="dpad-btn" data-dir="down">▼</button>
 </div>
 
-<button id="locateBtn">◎</button>
+<div id="rightStack">
+  <button id="dpadToggleBtn" title="顯示／隱藏方向鍵">✥</button>
+  <button id="mapModeBtn" title="切換生成式地圖">🌐</button>
+  <button id="locateBtn" title="回到我的位置">◎</button>
+</div>
 <div id="toast"></div>
 
 <!-- ===== 捕捉畫面 ===== -->
@@ -961,7 +995,7 @@ const SFX = {
     try {
       this.ctx = new AC();
       this.master = this.ctx.createGain();
-      this.master.gain.value = 0.9;
+      this.master.gain.value = 1.0;
       this.master.connect(this.ctx.destination);
     } catch(e) { console.warn('SFX init failed:', e); }
   },
@@ -1021,8 +1055,8 @@ const SFX = {
   },
 
   throwBall() {
-    this.noise({ dur:0.22, gain:0.16, type:'bandpass', f0:500, f1:2600, q:1.2 });
-    this.tone({ freq:260, freq2:720, type:'triangle', dur:0.18, gain:0.07 });
+    this.noise({ dur:0.22, gain:1.0, type:'bandpass', f0:500, f1:2600, q:1.2 });
+    this.tone({ freq:260, freq2:720, type:'triangle', dur:0.18, gain:1.0 });
   },
   hit() {
     this.noise({ dur:0.10, gain:0.32, type:'lowpass', f0:1600, f1:260, q:0.8 });
@@ -1077,6 +1111,20 @@ const SFX = {
   },
   tradeWhoosh() {
     this.noise({ dur:0.6, gain:0.14, type:'bandpass', f0:300, f1:2800, q:2 });
+  },
+  coinSpin() {
+    [1318.5, 1567.98, 1760, 2093, 1567.98, 1318.5].forEach((f, i) => {
+      this.tone({ freq:f, type:'sine', dur:0.18, gain:0.055, delay:0.10 + i * 0.115 });
+      this.tone({ freq:f * 1.5, type:'sine', dur:0.10, gain:0.022, delay:0.10 + i * 0.115 });
+    });
+    this.noise({ dur:1.5, gain:0.04, type:'highpass', f0:4200 });
+  },
+  flee() {
+    this.noise({ dur:0.5, gain:0.15, type:'bandpass', f0:2200, f1:260, q:1.4 });
+    [988, 831, 698, 587].forEach((f, i) => {
+      this.tone({ freq:f, freq2:f * 0.55, type:'triangle', dur:0.14, gain:0.10, delay:i * 0.075 });
+    });
+    this.tone({ freq:170, freq2:70, type:'sine', dur:0.42, gain:0.11, delay:0.18 });
   },
 };
 
@@ -1164,6 +1212,8 @@ let osmTileLayer = null;
 let fallbackLayer = null;
 let mapFallbackActive = false;
 let attributionCtrl = null;
+let tileLoadCount = 0;
+let forceDpad = false;
 
 /* NPC 交換狀態 */
 let currentNPC = null;
@@ -1529,66 +1579,75 @@ const ProgMapLayer = L.GridLayer.extend({
 /* =========================================================
    8. 地圖
    ========================================================= */
+function createOsmLayer() {
+  if (osmTileLayer) return osmTileLayer;
+  osmTileLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    opacity: 1,
+  });
+  osmTileLayer.on('tileload', () => { tileLoadCount++; });
+  osmTileLayer.on('tileerror', (e) => {
+    const st = e && e.error && (e.error.status || e.error.code);
+    console.warn('[map] tileerror', st || '');
+    if (!mapFallbackActive) activateProcedural(false);
+  });
+  return osmTileLayer;
+}
+
 function initMap() {
   map = L.map('map', {
     zoomControl: false, attributionControl: false, tap: false,
   }).setView(DEFAULT_CENTER, 17);
 
-  osmTileLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    opacity: 0,
-  }).addTo(map);
+  createOsmLayer().addTo(map);
 
   attributionCtrl = L.control.attribution({ position: 'bottomright', prefix: false })
     .addTo(map)
     .addAttribution('© OpenStreetMap');
 
-  let tileLoaded = 0;
-  let fallbackTriggered = false;
-
-  const triggerFallback = (reason) => {
-    if (fallbackTriggered) return;
-    fallbackTriggered = true;
-    console.warn('[map] fallback triggered:', reason || 'unknown');
-    enableFallbackMap();
-  };
-
-  osmTileLayer.on('tileload', () => { tileLoaded++; });
-  osmTileLayer.on('tileerror', () => triggerFallback('tileerror'));
-
-  const probeTile = async () => {
-    try {
-      const z = 17;
-      const n = Math.pow(2, z);
-      const latRad = DEFAULT_CENTER[0] * Math.PI / 180;
-      const tx = Math.floor((DEFAULT_CENTER[1] + 180) / 360 * n);
-      const ty = Math.floor((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2 * n);
-      const url = `https://tile.openstreetmap.org/${z}/${tx}/${ty}.png`;
-      const res = await fetch(url, { method: 'GET', cache: 'no-store' });
-      if (!res.ok) {
-        triggerFallback('HTTP ' + res.status);
-      } else if (osmTileLayer && !fallbackTriggered) {
-        osmTileLayer.setOpacity(1);
-      }
-    } catch (e) {
-      triggerFallback('fetch error');
-    }
-  };
   probeTile();
 
+  /* 8 秒內完全沒有圖磚載入成功 → 視為被封鎖 */
   setTimeout(() => {
-    if (tileLoaded === 0 && !fallbackTriggered) triggerFallback('timeout');
+    if (!mapFallbackActive && tileLoadCount === 0) {
+      console.warn('[map] 逾時未載入任何圖磚');
+      activateProcedural(false);
+    }
   }, 8000);
+
+  updateMapModeBtn();
 }
 
-function enableFallbackMap() {
-  if (mapFallbackActive || !map) return;
+/* 用 <img> 探測，不受 CORS 影響，403 錯誤頁會觸發 onerror */
+function probeTile() {
+  const z = 17, n = Math.pow(2, z);
+  const latRad = DEFAULT_CENTER[0] * Math.PI / 180;
+  const tx = Math.floor((DEFAULT_CENTER[1] + 180) / 360 * n);
+  const ty = Math.floor((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2 * n);
+  const img = new Image();
+  img.onerror = () => {
+    console.warn('[map] 圖磚探測失敗（Access Blocked / 403）');
+    activateProcedural(false);
+  };
+  img.onload = () => {};
+  img.src = `https://tile.openstreetmap.org/${z}/${tx}/${ty}.png?probe=${Date.now()}`;
+}
+
+function activateProcedural(manual) {
+  if (!map) return;
+  if (mapFallbackActive) {
+    if (manual) toast('🗺️ 目前已是生成式地圖');
+    return;
+  }
   mapFallbackActive = true;
 
   if (osmTileLayer) {
     try { map.removeLayer(osmTileLayer); } catch(_) {}
     osmTileLayer = null;
   }
+
+  if (!fallbackLayer) fallbackLayer = new ProgMapLayer();
+  fallbackLayer.addTo(map);
 
   if (attributionCtrl) {
     try {
@@ -1597,10 +1656,45 @@ function enableFallbackMap() {
     } catch(_) {}
   }
 
-  fallbackLayer = new ProgMapLayer();
-  fallbackLayer.addTo(map);
+  updateMapModeBtn();
+  toast(manual
+    ? '🗺️ 已切換為生成式地圖'
+    : '🚫 地圖被阻擋（Access Blocked / 403），已自動切換為生成式地圖', 3400);
+}
 
-  toast('🗺️ 地圖載入失敗，已切換為隨機生成街道、河流與海洋', 3400);
+function activateOsm(manual) {
+  if (!map) return;
+  if (!mapFallbackActive) {
+    if (manual) toast('🌐 目前已是 OpenStreetMap');
+    return;
+  }
+  mapFallbackActive = false;
+
+  if (fallbackLayer) {
+    try { map.removeLayer(fallbackLayer); } catch(_) {}
+  }
+
+  tileLoadCount = 0;
+  createOsmLayer().addTo(map);
+  if (osmTileLayer) osmTileLayer.setOpacity(1);
+
+  if (attributionCtrl) {
+    try {
+      attributionCtrl._attributions = {};
+      attributionCtrl.addAttribution('© OpenStreetMap');
+    } catch(_) {}
+  }
+
+  updateMapModeBtn();
+  if (manual) toast('🌐 已切換回 OpenStreetMap', 2400);
+}
+
+function updateMapModeBtn() {
+  const btn = document.getElementById('mapModeBtn');
+  if (!btn) return;
+  btn.classList.toggle('on', mapFallbackActive);
+  btn.textContent = mapFallbackActive ? '🗺' : '🌐';
+  btn.title = mapFallbackActive ? '切換回 OpenStreetMap' : '切換為生成式地圖';
 }
 
 const PLAYER_ICON = L.divIcon({
@@ -2080,6 +2174,11 @@ function closeCatch() {
   ballFlying = false;
   resetSwipe();
 
+  wildMon.classList.remove('absorbed');
+  wildMon.classList.remove('fleeing');
+  ballFly.style.opacity = '1';
+  ballFly.style.filter = '';
+
   if (gameStarted) audio.playMap(env.time);
 }
 
@@ -2214,6 +2313,7 @@ function performThrow(ballType, quality, angle, power) {
   updateHUD();
   swipeHint.style.display = 'none';
 
+  SFX.resume();
   SFX.throwBall();
 
   const stageRect = catchStage.getBoundingClientRect();
@@ -2450,11 +2550,20 @@ function resolveCatch() {
 
     SFX.catchFail();
 
+    ballFly.style.transition = 'transform .3s ease-in, opacity .3s';
+    ballFly.style.opacity = '0';
+
     if (Math.random() < 0.35) {
+      /* ===== 逃跑動畫 ===== */
       showResult(`可惜！${p.name} 逃走了…`, '#ff8a8a');
-      if (map.hasLayer(marker)) map.removeLayer(marker);
-      spawnMarkers = spawnMarkers.filter(m => m !== marker);
-      setTimeout(closeCatch, 1500);
+      wildMon.classList.add('fleeing');
+      SFX.flee();
+      setTimeout(() => {
+        wildMon.classList.remove('fleeing');
+        if (map.hasLayer(marker)) map.removeLayer(marker);
+        spawnMarkers = spawnMarkers.filter(m => m !== marker);
+        closeCatch();
+      }, 900);
     } else {
       showResult('差一點！再試一次', '#ffd166');
       ballFly.style.transition = 'transform .32s ease-in, opacity .32s';
@@ -2532,6 +2641,7 @@ function spinStop() {
   spinning = true;
   stopHint.textContent = '補給中…';
   SFX.spin();
+  SFX.coinSpin();
 
   discRot += 1080 + Math.floor(Math.random() * 720);
   stopDisc.style.transition = 'transform 1.7s cubic-bezier(.15,.85,.3,1)';
@@ -2609,10 +2719,19 @@ function endStopSwipe(e) {
 stopStage.addEventListener('pointerup', endStopSwipe);
 stopStage.addEventListener('pointercancel', endStopSwipe);
 
-document.getElementById('stopCloseBtn').addEventListener('click', () => {
-  if (spinning) return;
+function closeStopScreen() {
   stopScreen.classList.add('hidden');
   currentStopMarker = null;
+
+  /* 關閉時重設金幣面向玩家（正面朝前） */
+  discRot = 0;
+  stopDisc.style.transition = 'none';
+  stopDisc.style.transform = coinTransform(0);
+}
+
+document.getElementById('stopCloseBtn').addEventListener('click', () => {
+  if (spinning) return;
+  closeStopScreen();
 });
 
 /* =========================================================
@@ -2960,6 +3079,22 @@ async function startGame() {
     }
   });
 
+  /* 右下角：切換生成式地圖 */
+  document.getElementById('mapModeBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (mapFallbackActive) activateOsm(true);
+    else activateProcedural(true);
+  });
+
+  /* 右下角：顯示／隱藏方向鍵 */
+  document.getElementById('dpadToggleBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    forceDpad = !forceDpad;
+    document.body.classList.toggle('force-dpad', forceDpad);
+    document.getElementById('dpadToggleBtn').classList.toggle('on', forceDpad);
+    toast(forceDpad ? '🕹 已顯示方向鍵（手動移動）' : '🕹 已隱藏方向鍵');
+  });
+
   window.addEventListener('resize', () => {
     if (catchState === 'aim') {
       resetBallPosition(false);
@@ -3128,6 +3263,16 @@ document.addEventListener('visibilitychange', () => {
 });
 
 window.addEventListener('load', boot);
+</script>
+<!-- ===== PWA Service Worker 註冊 ===== -->
+<script>
+window.addEventListener('load', function () {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch((err) => {
+      console.warn('SW 注册失败:', err);
+    });
+  }
+});
 </script>
 </body>
 </html>
