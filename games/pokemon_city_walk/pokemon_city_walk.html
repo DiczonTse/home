@@ -1,1 +1,1881 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>寶可夢 GO · 網頁版</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden;background:#0d1117;
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei",sans-serif;
+    user-select:none}
 
+  /* ===== 啟動畫面 ===== */
+  #splash{position:fixed;inset:0;z-index:9000;
+    background:linear-gradient(180deg,#4a90e2 0%,#87CEEB 40%,#7ab648 100%);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden}
+  #splash img{width:100%;height:100%;object-fit:cover;display:block}
+  .splash-text{position:absolute;left:50%;bottom:20%;transform:translateX(-50%);
+    color:#fff;font-size:20px;font-weight:900;letter-spacing:2px;
+    text-shadow:0 0 20px rgba(255,255,255,.7),0 2px 12px rgba(0,0,0,.95);
+    animation:splashBlink 1.4s ease-in-out infinite;white-space:nowrap;
+    padding:10px 22px;border-radius:999px;background:rgba(0,0,0,.28);
+    backdrop-filter:blur(4px)}
+  @keyframes splashBlink{0%,100%{opacity:.25}50%{opacity:1}}
+  #splash.fade{opacity:0;pointer-events:none;transition:opacity .55s}
+
+  /* ===== 地圖 ===== */
+  #map{position:absolute;inset:0;background:#9ec9a3;z-index:1}
+  .leaflet-tile-pane{filter:saturate(1.1) brightness(1.03)}
+  .leaflet-control-attribution{font-size:9px;background:rgba(255,255,255,.6)!important}
+
+  #nightTint{position:fixed;inset:0;pointer-events:none;z-index:2;
+    background:radial-gradient(circle at 50% 40%,rgba(20,30,70,.35),rgba(5,10,30,.62));
+    opacity:0;transition:opacity .8s}
+  #nightTint.on{opacity:1}
+
+  /* ===== 玩家 ===== */
+  .player-wrap{position:relative;width:44px;height:44px}
+  .player-wrap .ring{position:absolute;inset:0;border-radius:50%;
+    background:rgba(66,133,244,.45);animation:pulse 2s ease-out infinite}
+  .player-wrap .dot{position:absolute;left:50%;top:50%;width:20px;height:20px;margin:-10px 0 0 -10px;
+    border-radius:50%;background:#4285f4;border:3px solid #fff;
+    box-shadow:0 2px 10px rgba(0,0,0,.5),0 0 18px #4285f4}
+  @keyframes pulse{0%{transform:scale(.35);opacity:.95}100%{transform:scale(1.7);opacity:0}}
+
+  /* ===== 地圖上的寶可夢 ===== */
+  .spawn{position:relative;width:64px;height:72px;cursor:pointer}
+  .spawn-gif{position:absolute;left:50%;bottom:10px;width:56px;height:56px;margin-left:-28px;
+    object-fit:contain;image-rendering:pixelated;z-index:2;
+    animation:bob 1.8s ease-in-out infinite;pointer-events:none}
+  .spawn-shadow{position:absolute;left:50%;bottom:4px;width:42px;height:11px;margin-left:-21px;
+    border-radius:50%;background:radial-gradient(ellipse at center,rgba(0,0,0,.5),rgba(0,0,0,0) 78%);
+    z-index:1;animation:shadowBob 1.8s ease-in-out infinite;pointer-events:none}
+  .spawn-emoji{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);
+    font-size:42px;line-height:1;z-index:2;animation:bob 1.8s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  @keyframes shadowBob{0%,100%{transform:scale(1);opacity:.55}50%{transform:scale(.82);opacity:.35}}
+
+  .spawn.shiny .spawn-gif{
+    filter:drop-shadow(0 0 10px #ffd166) drop-shadow(0 0 22px #ffb703);
+    animation:bob 1.8s ease-in-out infinite,shinyGlow 1.3s ease-in-out infinite alternate}
+  @keyframes shinyGlow{from{filter:drop-shadow(0 0 8px #ffd166) drop-shadow(0 0 18px #ffb703)}
+    to{filter:drop-shadow(0 0 16px #ffd166) drop-shadow(0 0 34px #ffb703) brightness(1.2)}}
+
+  /* ===== 補給站 ===== */
+  .stop{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-weight:900;font-size:20px;color:#fff;cursor:pointer;
+    background:conic-gradient(#6c5ce7 0 45deg,#a29bfe 45deg 90deg,#6c5ce7 90deg 135deg,#a29bfe 135deg 180deg,
+      #6c5ce7 180deg 225deg,#a29bfe 225deg 270deg,#6c5ce7 270deg 315deg,#a29bfe 315deg 360deg);
+    border:3px solid #fff;box-shadow:0 0 16px #6c5ce7;
+    animation:spinSlow 7s linear infinite}
+  @keyframes spinSlow{to{transform:rotate(360deg)}}
+  .stop.used{animation:none;background:rgba(120,120,140,.9);box-shadow:none;filter:grayscale(1);
+    opacity:.55;font-size:22px}
+
+  /* ===== HUD ===== */
+  #hud{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:10px;right:10px;
+    display:flex;gap:8px;z-index:1000;pointer-events:none;flex-wrap:wrap}
+  .chip{background:rgba(15,20,32,.82);color:#fff;font-size:14px;font-weight:700;
+    padding:8px 14px;border-radius:999px;border:1.5px solid rgba(255,255,255,.18);
+    backdrop-filter:blur(8px);box-shadow:0 4px 14px rgba(0,0,0,.4);
+    display:inline-flex;align-items:center;gap:6px}
+  .chip-btn{pointer-events:auto;cursor:pointer;font-family:inherit;transition:transform .1s}
+  .chip-btn:active{transform:scale(.94)}
+
+  .ball-mini{display:inline-block;width:16px;height:16px;border-radius:50%;
+    background:linear-gradient(#ee1515 0 45%,#1a1a1a 45% 55%,#ffffff 55% 100%);
+    border:1.5px solid #1a1a1a;position:relative;flex:0 0 auto;
+    box-shadow:0 0 6px rgba(238,21,21,.5)}
+  .ball-mini::after{content:'';position:absolute;left:50%;top:50%;width:5px;height:5px;
+    margin:-2.5px 0 0 -2.5px;border-radius:50%;background:#fff;border:1px solid #1a1a1a}
+
+  .candy-mini{display:inline-block;width:14px;height:14px;border-radius:50%;
+    background:radial-gradient(circle at 32% 30%,#fff,#ffb703 70%);
+    border:1.5px solid #b37400;flex:0 0 auto;box-shadow:0 0 5px rgba(255,183,3,.6)}
+
+  /* ===== 方向鍵 ===== */
+  #dpad{position:fixed;left:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);
+    display:grid;grid-template-columns:repeat(3,42px);grid-template-rows:repeat(3,42px);
+    gap:3px;z-index:1000;opacity:.92}
+  .dpad-btn{background:rgba(15,20,32,.85);border:2px solid rgba(255,255,255,.2);
+    color:#fff;border-radius:12px;font-size:16px;cursor:pointer;
+    backdrop-filter:blur(8px);box-shadow:0 4px 12px rgba(0,0,0,.4);
+    user-select:none;touch-action:none;display:flex;align-items:center;justify-content:center}
+  .dpad-btn[data-dir="up"]   {grid-area:1/2}
+  .dpad-btn[data-dir="left"] {grid-area:2/1}
+  .dpad-btn[data-dir="right"]{grid-area:2/3}
+  .dpad-btn[data-dir="down"] {grid-area:3/2}
+  .dpad-btn:active,.dpad-btn.on{background:rgba(66,133,244,.95);transform:scale(.94)}
+
+  #locateBtn{position:fixed;right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);
+    width:52px;height:52px;border-radius:50%;border:2px solid rgba(255,255,255,.25);
+    background:rgba(15,20,32,.85);color:#fff;font-size:24px;z-index:1000;cursor:pointer;
+    backdrop-filter:blur(8px);box-shadow:0 6px 18px rgba(0,0,0,.5)}
+  #locateBtn:active{transform:scale(.92)}
+  #locateBtn.manual{background:rgba(66,133,244,.9);border-color:#fff}
+
+  /* ===== Toast ===== */
+  #toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 70px);
+    transform:translateX(-50%) translateY(-14px);
+    background:rgba(15,20,32,.92);color:#fff;padding:10px 20px;border-radius:999px;
+    font-size:14px;font-weight:600;border:1.5px solid rgba(255,255,255,.2);z-index:3000;
+    opacity:0;pointer-events:none;transition:.3s;white-space:nowrap;
+    box-shadow:0 6px 20px rgba(0,0,0,.5);max-width:90vw;overflow:hidden;text-overflow:ellipsis}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* ===== 泡泡 ===== */
+  .ball-bubble{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);
+    background:rgba(255,255,255,.96);color:#1a1a1a;font-weight:900;font-size:22px;
+    padding:14px 26px 14px 18px;border-radius:999px;
+    box-shadow:0 10px 40px rgba(0,0,0,.55),0 0 50px rgba(108,92,231,.65);
+    z-index:4000;display:flex;align-items:center;gap:12px;
+    animation:bubblePop 1.7s cubic-bezier(.3,1.4,.5,1) forwards;pointer-events:none}
+  .ball-bubble::before{content:'';width:30px;height:30px;border-radius:50%;flex:0 0 auto;
+    background:linear-gradient(#ee1515 0 45%,#1a1a1a 45% 55%,#fff 55% 100%);
+    border:2.5px solid #1a1a1a}
+  .ball-bubble .bub-txt{color:#6c5ce7;font-size:24px;font-weight:900}
+  .ball-bubble.candy::before{
+    background:radial-gradient(circle at 32% 30%,#fff,#ffb703 70%);
+    border-color:#b37400}
+  .ball-bubble.candy .bub-txt{color:#b37400}
+  @keyframes bubblePop{
+    0%{opacity:0;transform:translate(-50%,-30%) scale(.3)}
+    22%{opacity:1;transform:translate(-50%,-50%) scale(1.18)}
+    38%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+    72%{opacity:1;transform:translate(-50%,-78%) scale(1)}
+    100%{opacity:0;transform:translate(-50%,-150%) scale(.9)}}
+
+  /* ===== 通用 ===== */
+  .pokeball{border-radius:50%;
+    background:linear-gradient(#ee1515 0 45%,#1a1a1a 45% 55%,#ffffff 55% 100%);
+    border:3px solid #1a1a1a;position:relative}
+  .pokeball::after{content:'';position:absolute;left:50%;top:50%;width:28%;height:28%;border-radius:50%;
+    background:#fff;border:3px solid #1a1a1a;transform:translate(-50%,-50%)}
+
+  .overlay{position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;
+    padding:calc(env(safe-area-inset-top,0px) + 12px) 16px calc(env(safe-area-inset-bottom,0px) + 18px)}
+  .hidden{display:none!important}
+
+  /* ===== 捕捉畫面 ===== */
+  #catchScreen{overflow:hidden}
+  #sceneBg{position:absolute;inset:0;z-index:0;pointer-events:none}
+  #sceneBg .sky{position:absolute;left:0;right:0;top:0;
+    height:var(--groundY,42%);transition:height .4s,background .4s}
+  #sceneBg .ground{position:absolute;left:0;right:0;
+    top:var(--groundY,42%);bottom:0;transition:top .4s,background .4s}
+
+  #catchScreen.day #sceneBg .sky{background:linear-gradient(180deg,#3d7fd6 0%,#6db3e8 45%,#b8e0f0 100%)}
+  #catchScreen.day #sceneBg .ground{background:linear-gradient(180deg,#a8d870 0%,#8fc850 12%,#7ab648 45%,#5a9a30 100%)}
+  #catchScreen.night #sceneBg .sky{background:linear-gradient(180deg,#050820 0%,#0f1838 50%,#1a2545 100%)}
+  #catchScreen.night #sceneBg .ground{background:linear-gradient(180deg,#2a4a2a 0%,#1a3520 30%,#0f2412 100%)}
+
+  #stars{position:absolute;left:0;right:0;top:0;height:var(--groundY,42%);
+    pointer-events:none;z-index:1;display:none;overflow:hidden}
+  #catchScreen.night #stars{display:block}
+  .star{position:absolute;background:#fff;border-radius:50%;
+    box-shadow:0 0 4px rgba(255,255,255,.9);animation:twinkle 2.4s ease-in-out infinite}
+  @keyframes twinkle{0%,100%{opacity:.25}50%{opacity:1}}
+
+  .catch-top{display:flex;justify-content:center;align-items:center;position:relative;
+    min-height:44px;z-index:3}
+  .catch-name{color:#fff;font-size:19px;font-weight:800;letter-spacing:1px;
+    text-shadow:0 2px 10px rgba(0,0,0,.7);text-align:center;padding:0 46px}
+  .catch-name.shiny{color:#ffd166;text-shadow:0 0 18px #ffb703,0 2px 10px rgba(0,0,0,.85)}
+  #fleeBtn{position:absolute;right:0;top:0;background:rgba(0,0,0,.32);color:#fff;
+    border:2px solid rgba(255,255,255,.3);
+    width:40px;height:40px;border-radius:50%;font-size:18px;cursor:pointer;backdrop-filter:blur(6px)}
+
+  .catch-stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center;
+    touch-action:none;overflow:hidden;z-index:3}
+
+  .wild{position:relative;z-index:2}
+  .mon{position:relative;width:190px;height:180px;
+    display:flex;align-items:flex-end;justify-content:center;padding-bottom:34px;
+    transition:transform .28s cubic-bezier(.4,0,.9,.4),opacity .28s}
+  .mon img{width:148px;height:148px;object-fit:contain;image-rendering:pixelated;
+    position:relative;z-index:2;pointer-events:none;
+    animation:floatY 2.1s ease-in-out infinite}
+  .mon-emoji{font-size:88px;line-height:1;position:relative;z-index:2;
+    animation:floatY 2.1s ease-in-out infinite}
+  .mon::after{content:'';position:absolute;left:50%;bottom:20px;width:130px;height:26px;
+    margin-left:-65px;border-radius:50%;
+    background:radial-gradient(ellipse at center,rgba(0,0,0,.5) 0%,rgba(0,0,0,.25) 48%,rgba(0,0,0,0) 76%);
+    z-index:1;pointer-events:none;
+    animation:shadowPulse 2.1s ease-in-out infinite}
+  @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+  @keyframes shadowPulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(.86);opacity:.6}}
+
+  .mon.shiny img{filter:drop-shadow(0 0 14px #ffd166) drop-shadow(0 0 30px #ffb703)
+    drop-shadow(0 0 48px rgba(255,183,3,.45))}
+  .mon.shiny::after{background:radial-gradient(ellipse at center,rgba(255,183,3,.55) 0%,rgba(255,183,3,.2) 50%,rgba(0,0,0,0) 78%)}
+
+  .wild.absorbed .mon{transform:scale(.08);opacity:0}
+  .wild.absorbed .mon img,
+  .wild.absorbed .mon-emoji{animation-play-state:paused}
+
+  #ballFly{position:absolute;left:0;top:0;width:56px;height:56px;
+    display:block;z-index:6;pointer-events:none;will-change:transform}
+
+  .catch-star{position:absolute;color:#ffd166;font-size:26px;font-weight:900;
+    pointer-events:none;z-index:10;opacity:0;
+    text-shadow:0 0 12px #ffd166,0 0 24px #ffb703,0 0 40px rgba(255,183,3,.6);
+    transform:translate(0,0) scale(.3);
+    animation:starPop 1.3s cubic-bezier(.25,1.3,.5,1) forwards}
+  @keyframes starPop{
+    0%{opacity:0;transform:translate(0,0) scale(.2) rotate(-30deg)}
+    18%{opacity:1;transform:translate(var(--dx,0),var(--dy,-30px)) scale(1.3) rotate(0deg)}
+    45%{opacity:1;transform:translate(var(--dx,0),var(--dy,-30px)) scale(1) rotate(20deg)}
+    75%{opacity:1;transform:translate(calc(var(--dx,0px)*1.15),calc(var(--dy,-30px)*1.15)) scale(.95) rotate(40deg)}
+    100%{opacity:0;transform:translate(calc(var(--dx,0px)*1.25),calc(var(--dy,-30px)*1.25 - 22px)) scale(.5) rotate(60deg)}}
+
+  #trail{position:absolute;height:5px;border-radius:5px;
+    background:linear-gradient(90deg,rgba(255,255,255,.2),rgba(255,255,255,.9));
+    transform-origin:0 50%;pointer-events:none;display:none;z-index:20}
+
+  .swipe-hint{position:absolute;bottom:88px;left:50%;transform:translateX(-50%);
+    color:rgba(255,255,255,.9);font-size:13px;font-weight:800;letter-spacing:1px;
+    pointer-events:none;white-space:nowrap;text-shadow:0 2px 8px rgba(0,0,0,.85);
+    animation:hintPulse 2s ease-in-out infinite;z-index:4}
+  @keyframes hintPulse{0%,100%{opacity:.5}50%{opacity:1}}
+
+  #powerWrap{position:absolute;bottom:62px;left:50%;transform:translateX(-50%);
+    width:180px;height:10px;border-radius:6px;background:rgba(0,0,0,.35);
+    overflow:hidden;display:none;z-index:15;border:1px solid rgba(255,255,255,.4)}
+  #powerFill{height:100%;width:0%;border-radius:6px;transition:width .05s linear;
+    background:linear-gradient(90deg,#4ade80,#facc15,#f87171)}
+
+  .catch-result{min-height:34px;text-align:center;color:#fff;font-size:19px;font-weight:800;
+    text-shadow:0 2px 12px rgba(0,0,0,.85);transition:.2s;z-index:3}
+
+  .catch-footer{display:flex;flex-direction:column;align-items:center;gap:6px;z-index:3}
+  .ball-tip{color:rgba(255,255,255,.92);font-size:14px;font-weight:800;
+    text-shadow:0 2px 8px rgba(0,0,0,.8);
+    display:inline-flex;align-items:center;gap:6px}
+  .ball-tip b{color:#ffd166;font-size:16px}
+  .ball-tip.sub{font-size:12px;color:rgba(255,255,255,.72);font-weight:700;letter-spacing:.5px}
+
+  /* ===== 補給站畫面 ===== */
+  #stopScreen{background:radial-gradient(circle at 50% 35%,#3a2f6b 0%,#161229 60%,#080b12 100%);
+    justify-content:center;align-items:center;gap:18px}
+  .stop-title{color:#fff;font-size:20px;font-weight:800;letter-spacing:2px;
+    text-shadow:0 0 22px #a29bfe}
+  .stop-stage{display:flex;align-items:center;justify-content:center;padding:14px;
+    touch-action:none;cursor:grab}
+  .disc{width:210px;height:210px;border-radius:50%;position:relative;
+    background:conic-gradient(#6c5ce7 0 45deg,#a29bfe 45deg 90deg,#6c5ce7 90deg 135deg,#a29bfe 135deg 180deg,
+      #6c5ce7 180deg 225deg,#a29bfe 225deg 270deg,#6c5ce7 270deg 315deg,#a29bfe 315deg 360deg);
+    border:7px solid rgba(255,255,255,.85);
+    box-shadow:0 0 55px #6c5ce7,inset 0 0 45px rgba(0,0,0,.45);
+    transition:transform 1.7s cubic-bezier(.15,.85,.3,1);will-change:transform}
+  .disc::after{content:'P';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:74px;height:74px;border-radius:50%;background:#fff;color:#6c5ce7;
+    display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:900;
+    box-shadow:0 6px 18px rgba(0,0,0,.5)}
+  .stop-reward{color:#ffd166;font-size:20px;font-weight:800;min-height:28px;
+    text-shadow:0 0 16px rgba(255,209,102,.6)}
+  .stop-footer{display:flex;flex-direction:column;gap:12px;align-items:center;width:100%;max-width:280px}
+  .stop-hint{color:rgba(255,255,255,.75);font-size:14px;font-weight:700;letter-spacing:1px;
+    animation:hintPulse 1.8s ease-in-out infinite;text-align:center}
+  .ghost{background:rgba(255,255,255,.1)!important;box-shadow:none!important;color:#ccc!important;
+    padding:11px!important;font-size:14px!important;width:100%;border-radius:999px;border:none;cursor:pointer}
+
+  /* ===== 圖鑑／進化畫面 ===== */
+  #dexScreen,#evoScreen{background:radial-gradient(circle at 50% 20%,#2a2140 0%,#120e22 60%,#07060e 100%)}
+  .dex-top{display:flex;justify-content:center;align-items:center;position:relative;min-height:44px;
+    margin-bottom:8px}
+  .dex-title{color:#fff;font-size:19px;font-weight:800;letter-spacing:2px;
+    text-shadow:0 0 18px rgba(162,155,254,.7)}
+  .closeX{position:absolute;right:0;top:0;background:rgba(255,255,255,.12);color:#fff;border:none;
+    width:40px;height:40px;border-radius:50%;font-size:18px;cursor:pointer;backdrop-filter:blur(6px)}
+
+  .dex-scroll{flex:1;overflow-y:auto;padding:6px 0 24px;-webkit-overflow-scrolling:touch}
+  .dex-progress{text-align:center;color:#ffd166;font-size:16px;font-weight:800;
+    margin-bottom:14px;letter-spacing:1px}
+  .dex-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px}
+  .dex-cell{background:rgba(255,255,255,.06);border-radius:16px;padding:12px 6px 10px;
+    text-align:center;border:2px solid rgba(255,255,255,.1);transition:.25s}
+  .dex-cell.caught{border-color:#ffd166;background:rgba(255,209,102,.13);
+    box-shadow:0 0 18px rgba(255,209,102,.22)}
+  .dex-cell.seen{opacity:.72}
+  .dex-cell.unknown{opacity:.3;filter:grayscale(1)}
+  .dex-icon{width:64px;height:64px;margin:0 auto 7px;position:relative;
+    display:flex;align-items:center;justify-content:center;font-size:30px}
+  .dex-icon img{width:58px;height:58px;object-fit:contain;image-rendering:pixelated;
+    position:relative;z-index:2;margin-bottom:4px}
+  .dex-icon .dex-shadow{position:absolute;left:50%;bottom:0;width:44px;height:9px;margin-left:-22px;
+    border-radius:50%;background:radial-gradient(ellipse at center,rgba(0,0,0,.45),rgba(0,0,0,0) 76%)}
+  .dex-name{font-size:12px;color:#fff;font-weight:700;line-height:1.3}
+  .dex-count{font-size:10px;color:#ffd166;margin-top:3px;font-weight:700}
+  .dex-candy{font-size:10px;color:#ffd166;margin-top:3px;font-weight:800;
+    display:inline-flex;align-items:center;gap:3px}
+  .dex-shiny{font-size:9px;color:#ffb703;margin-top:2px;font-weight:800;
+    text-shadow:0 0 8px rgba(255,183,3,.8)}
+  .dex-evo-tag{font-size:9px;color:#7dd3fc;margin-top:2px;font-weight:700}
+
+  /* 進化列表 */
+  .evo-list{display:flex;flex-direction:column;gap:10px}
+  .evo-item{background:rgba(255,255,255,.06);border-radius:16px;padding:12px;
+    display:flex;align-items:center;gap:12px;border:2px solid rgba(255,255,255,.1)}
+  .evo-item.ready{border-color:#ffd166;background:rgba(255,209,102,.1);
+    box-shadow:0 0 16px rgba(255,209,102,.25)}
+  .evo-sprites{display:flex;align-items:center;gap:6px;flex:0 0 auto}
+  .evo-sprites img{width:48px;height:48px;object-fit:contain;image-rendering:pixelated}
+  .evo-arrow{color:#fff;font-size:18px;opacity:.7}
+  .evo-info{flex:1;min-width:0}
+  .evo-title{color:#fff;font-size:13px;font-weight:800;line-height:1.4}
+  .evo-candy-line{margin-top:4px;font-size:11px;color:#ffd166;font-weight:800;
+    display:flex;align-items:center;gap:5px}
+  .evo-candy-line.lack{color:#ff8a8a}
+  .evo-btn{background:linear-gradient(135deg,#a29bfe,#6c5ce7);color:#fff;border:none;
+    padding:10px 16px;border-radius:999px;font-size:13px;font-weight:800;cursor:pointer;
+    flex:0 0 auto;box-shadow:0 4px 14px rgba(108,92,231,.5)}
+  .evo-btn:disabled{background:rgba(120,120,140,.5);box-shadow:none;cursor:not-allowed;opacity:.6}
+  .evo-btn:active:not(:disabled){transform:scale(.94)}
+  .evo-empty{text-align:center;color:rgba(255,255,255,.5);font-size:14px;font-weight:700;
+    padding:40px 20px;line-height:1.7}
+
+  /* 進化動畫 */
+  #evoOverlay{position:fixed;inset:0;z-index:5000;pointer-events:none;
+    background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.98),rgba(200,220,255,.6),rgba(0,0,0,.85));
+    display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;
+    animation:evoFlash 2.2s ease-in-out forwards;opacity:0}
+  #evoOverlay.on{display:flex}
+  @keyframes evoFlash{
+    0%{opacity:0}
+    15%{opacity:1;background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.98),rgba(180,200,255,.7),rgba(0,0,0,.85))}
+    50%{opacity:1;background:radial-gradient(circle at 50% 50%,rgba(255,255,255,1),rgba(255,220,120,.75),rgba(0,0,0,.9))}
+    85%{opacity:1;background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.95),rgba(120,220,255,.6),rgba(0,0,0,.8))}
+    100%{opacity:0}
+  }
+  #evoOverlay img{width:180px;height:180px;object-fit:contain;image-rendering:pixelated;
+    animation:evoShake .5s ease-in-out infinite;filter:drop-shadow(0 0 30px #fff)}
+  @keyframes evoShake{0%,100%{transform:scale(1) rotate(-3deg)}50%{transform:scale(1.06) rotate(3deg)}}
+  #evoOverlay .evo-txt{color:#fff;font-size:22px;font-weight:900;letter-spacing:3px;
+    text-shadow:0 0 20px rgba(255,255,255,.9),0 2px 14px rgba(0,0,0,.9)}
+</style>
+</head>
+<body>
+
+<!-- ===== 啟動封面 ===== -->
+<div id="splash">
+  <img src="pokemon_city_walk_title.jpg" alt="Pokemon GO"
+       onerror="this.style.display='none'">
+  <div class="splash-text">按下任意位置進入遊戲</div>
+</div>
+
+<div id="map"></div>
+<div id="nightTint"></div>
+
+<div id="hud">
+  <div class="chip"><span class="ball-mini"></span> <span id="ballCount">20</span></div>
+  <div class="chip">🏆 <span id="caughtCount">0</span></div>
+  <div class="chip" id="envChip">☀️ 白天 · 晴朗</div>
+  <div class="chip" id="timerChip">⏱ 5:00</div>
+  <button class="chip chip-btn" id="dexBtn">📖 圖鑑</button>
+  <button class="chip chip-btn" id="evoBtn">🧬 進化</button>
+</div>
+
+<div id="dpad">
+  <button class="dpad-btn" data-dir="up">▲</button>
+  <button class="dpad-btn" data-dir="left">◀</button>
+  <button class="dpad-btn" data-dir="right">▶</button>
+  <button class="dpad-btn" data-dir="down">▼</button>
+</div>
+
+<button id="locateBtn">◎</button>
+<div id="toast"></div>
+
+<!-- ===== 捕捉畫面 ===== -->
+<div id="catchScreen" class="overlay hidden day">
+  <div id="sceneBg"><div class="sky"></div><div class="ground"></div></div>
+  <div id="stars"></div>
+
+  <div class="catch-top">
+    <div class="catch-name" id="catchName">野生的寶可夢</div>
+    <button id="fleeBtn">✕</button>
+  </div>
+
+  <div class="catch-stage" id="catchStage">
+    <div class="wild" id="wildMon"><div class="mon" id="monBody"></div></div>
+    <div id="ballFly" class="pokeball"></div>
+    <div id="trail"></div>
+    <div class="swipe-hint" id="swipeHint">↑ 向上滑動投球</div>
+    <div id="powerWrap"><div id="powerFill"></div></div>
+  </div>
+
+  <div class="catch-result" id="catchResult"></div>
+
+  <div class="catch-footer">
+    <div class="ball-tip"><span class="ball-mini"></span> 剩餘 <b id="catchBallCount">20</b> 顆精靈球</div>
+    <div class="ball-tip sub">上掃 = 直球 ｜ 斜掃 = 旋轉球</div>
+  </div>
+</div>
+
+<!-- ===== 補給站畫面 ===== -->
+<div id="stopScreen" class="overlay hidden">
+  <div class="stop-title">補 給 站</div>
+  <div class="stop-stage" id="stopStage"><div class="disc" id="stopDisc"></div></div>
+  <div class="stop-reward" id="stopReward"></div>
+  <div class="stop-footer">
+    <div class="stop-hint" id="stopHint">← 在轉盤上橫掃 →</div>
+    <button id="stopCloseBtn" class="ghost">關閉</button>
+  </div>
+</div>
+
+<!-- ===== 圖鑑畫面 ===== -->
+<div id="dexScreen" class="overlay hidden">
+  <div class="dex-top">
+    <div class="dex-title">寶 可 夢 圖 鑑</div>
+    <button class="closeX" id="dexCloseBtn">✕</button>
+  </div>
+  <div class="dex-scroll">
+    <div class="dex-progress" id="dexProgress">已捕獲 0 / 0</div>
+    <div class="dex-grid" id="dexGrid"></div>
+  </div>
+</div>
+
+<!-- ===== 進化畫面 ===== -->
+<div id="evoScreen" class="overlay hidden">
+  <div class="dex-top">
+    <div class="dex-title">進 化</div>
+    <button class="closeX" id="evoCloseBtn">✕</button>
+  </div>
+  <div class="dex-scroll">
+    <div class="dex-progress" id="evoProgress"></div>
+    <div class="evo-list" id="evoList"></div>
+  </div>
+</div>
+
+<!-- 進化動畫 -->
+<div id="evoOverlay" style="display:none">
+  <img id="evoAnimImg" src="" alt="">
+  <div class="evo-txt">進 化 中…</div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/* =========================================================
+   1. 寶可夢資料
+   ========================================================= */
+/*  - notWild:true → 不會在地圖出現（只能進化獲得）
+    - w:0 → 野外不會被抽到
+    - time/weather → 出現條件 */
+const POKEDEX = [
+  /* ---- 野外可遇見 ---- */
+  { id:1,   name:'妙蛙種子', emoji:'🌿', color:'#7ac74c', rate:0.72, w:9,  time:'any',  weather:'any' },
+  { id:4,   name:'小火龍',   emoji:'🔥', color:'#ee8130', rate:0.68, w:8,  time:'day',  weather:['clear','cloudy','fog'] },
+  { id:7,   name:'傑尼龜',   emoji:'💧', color:'#6390f0', rate:0.70, w:8,  time:'any',  weather:['rain','cloudy','snow'] },
+  { id:25,  name:'皮卡丘',   emoji:'⚡', color:'#f7d02c', rate:0.55, w:5,  time:'day',  weather:['clear','cloudy','rain'] },
+  { id:39,  name:'胖丁',     emoji:'🎈', color:'#f9a8d4', rate:0.78, w:8,  time:'night',weather:'any' },
+  { id:52,  name:'喵喵',     emoji:'🐱', color:'#e8d5a3', rate:0.74, w:8,  time:'any',  weather:'any' },
+  { id:54,  name:'可達鴨',   emoji:'🦆', color:'#f5d76e', rate:0.76, w:8,  time:'day',  weather:['clear','rain','cloudy'] },
+  { id:63,  name:'凱西',     emoji:'🥄', color:'#c9a227', rate:0.48, w:4,  time:'any',  weather:'any' },
+  { id:92,  name:'鬼斯',     emoji:'👻', color:'#7b62a3', rate:0.58, w:5,  time:'night',weather:['clear','fog','cloudy'] },
+  { id:129, name:'鯉魚王',   emoji:'🐟', color:'#e0503a', rate:0.88, w:12, time:'any',  weather:['rain','snow'] },
+  { id:133, name:'伊布',     emoji:'🦊', color:'#c8a06a', rate:0.62, w:6,  time:'day',  weather:'any' },
+  { id:143, name:'卡比獸',   emoji:'😴', color:'#3d6b8c', rate:0.33, w:2,  time:'any',  weather:'any' },
+  { id:147, name:'迷你龍',   emoji:'🐉', color:'#8fa8d4', rate:0.40, w:3,  time:'any',  weather:['rain','cloudy','snow','fog'] },
+  { id:150, name:'超夢',     emoji:'🔮', color:'#b28fd4', rate:0.13, w:1,  time:'night',weather:['clear','fog'] },
+
+  /* ---- 只能透過進化獲得 ---- */
+  { id:2,   name:'妙蛙草',   emoji:'🌿', color:'#6ab04c', rate:0, w:0, notWild:true },
+  { id:3,   name:'妙蛙花',   emoji:'🌸', color:'#5a9a30', rate:0, w:0, notWild:true },
+  { id:5,   name:'火恐龍',   emoji:'🦎', color:'#e07020', rate:0, w:0, notWild:true },
+  { id:6,   name:'噴火龍',   emoji:'🐲', color:'#d05010', rate:0, w:0, notWild:true },
+  { id:8,   name:'卡咪龜',   emoji:'🐢', color:'#5080e0', rate:0, w:0, notWild:true },
+  { id:9,   name:'水箭龜',   emoji:'🐢', color:'#4070d0', rate:0, w:0, notWild:true },
+  { id:26,  name:'雷丘',     emoji:'⚡', color:'#e0c020', rate:0, w:0, notWild:true },
+  { id:40,  name:'胖可丁',   emoji:'🎀', color:'#e898c8', rate:0, w:0, notWild:true },
+  { id:53,  name:'貓老大',   emoji:'🐱', color:'#d0b880', rate:0, w:0, notWild:true },
+  { id:55,  name:'哥達鴨',   emoji:'🦆', color:'#e0b850', rate:0, w:0, notWild:true },
+  { id:64,  name:'勇基拉',   emoji:'🥄', color:'#b89020', rate:0, w:0, notWild:true },
+  { id:65,  name:'胡地',     emoji:'🔱', color:'#a07810', rate:0, w:0, notWild:true },
+  { id:93,  name:'鬼斯通',   emoji:'👻', color:'#6a5293', rate:0, w:0, notWild:true },
+  { id:94,  name:'耿鬼',     emoji:'😈', color:'#5a4283', rate:0, w:0, notWild:true },
+  { id:130, name:'暴鯉龍',   emoji:'🐉', color:'#3a5ad0', rate:0, w:0, notWild:true },
+  { id:134, name:'水伊布',   emoji:'💙', color:'#4a90e2', rate:0, w:0, notWild:true },
+  { id:148, name:'哈克龍',   emoji:'🐍', color:'#7a98c4', rate:0, w:0, notWild:true },
+  { id:149, name:'快龍',     emoji:'🐲', color:'#e0a030', rate:0, w:0, notWild:true },
+  { id:151, name:'超級超夢', emoji:'🔮', color:'#9a70c4', rate:0, w:0, notWild:true, superForm:true },
+];
+
+/* 進化表：{ 來源: { to: 目標, candy: 需求糖果 } } */
+const EVOLUTIONS = {
+  '妙蛙種子': { to:'妙蛙草',   candy:25  },   // 御三家三段：25 + 100
+  '妙蛙草':   { to:'妙蛙花',   candy:100 },
+  '小火龍':   { to:'火恐龍',   candy:25  },
+  '火恐龍':   { to:'噴火龍',   candy:100 },
+  '傑尼龜':   { to:'卡咪龜',   candy:25  },
+  '卡咪龜':   { to:'水箭龜',   candy:100 },
+  '皮卡丘':   { to:'雷丘',     candy:50  },   // 二段一般：50
+  '胖丁':     { to:'胖可丁',   candy:50  },
+  '喵喵':     { to:'貓老大',   candy:50  },
+  '可達鴨':   { to:'哥達鴨',   candy:50  },
+  '凱西':     { to:'勇基拉',   candy:25  },
+  '勇基拉':   { to:'胡地',     candy:100 },
+  '鬼斯':     { to:'鬼斯通',   candy:25  },
+  '鬼斯通':   { to:'耿鬼',     candy:100 },
+  '鯉魚王':   { to:'暴鯉龍',   candy:400 },   // 特殊極端型
+  '伊布':     { to:'水伊布',   candy:25  },   // 基礎／萌系 25
+  '迷你龍':   { to:'哈克龍',   candy:25  },
+  '哈克龍':   { to:'快龍',     candy:100 },
+  '超夢':     { to:'超級超夢', candy:400 },   // 特殊極端型
+};
+
+const WEATHERS = [
+  { id:'clear',  name:'晴朗', icon:'☀️' },
+  { id:'cloudy', name:'多雲', icon:'☁️' },
+  { id:'rain',   name:'下雨', icon:'🌧️' },
+  { id:'snow',   name:'下雪', icon:'❄️' },
+  { id:'fog',    name:'起霧', icon:'🌫️' },
+];
+
+const REFRESH_MS      = 5 * 60 * 1000;
+const DEFAULT_CENTER  = [25.0330, 121.5654];
+const SHINY_RATE      = 0.06;
+const SWIPE_THRESHOLD = 70;
+const MOVE_RESPAWN_DIST = 250;
+const MOVE_RESPAWN_COOL = 6000;
+
+const SPRITE_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/';
+function spriteUrl(p, shiny) {
+  if (p.id === 151) return SPRITE_BASE + (shiny ? 'shiny/' : '') + '150.gif';
+  return SPRITE_BASE + (shiny ? 'shiny/' : '') + p.id + '.gif';
+}
+
+const dexState = {};
+POKEDEX.forEach(p => dexState[p.name] = { seen:0, caught:0, shiny:0 });
+
+/* 糖果袋 */
+const candyBag = {};
+
+function getCandy(name) { return candyBag[name] || 0; }
+function addCandy(name, n) { candyBag[name] = (candyBag[name] || 0) + n; }
+
+/* =========================================================
+   2. 音效系統
+   ========================================================= */
+const audio = {
+  mapDay:null, mapNight:null, catchDay:null, catchNight:null,
+  current:null, ready:false, inited:false,
+
+  init() {
+    if (this.inited) return;
+    this.inited = true;
+    try {
+      this.mapDay     = new Audio('map_day.mp3');     this.mapDay.loop = true;     this.mapDay.volume = 0.42;
+      this.mapNight   = new Audio('map_night.mp3');   this.mapNight.loop = true;   this.mapNight.volume = 0.42;
+      this.catchDay   = new Audio('catch_day.mp3');   this.catchDay.loop = true;   this.catchDay.volume = 0.55;
+      this.catchNight = new Audio('catch_night.mp3'); this.catchNight.loop = true; this.catchNight.volume = 0.55;
+      this.ready = true;
+    } catch (e) { console.warn('Audio init failed:', e); }
+  },
+
+  _stopAll() {
+    [this.mapDay, this.mapNight, this.catchDay, this.catchNight].forEach(a => {
+      if (a) { try { a.pause(); a.currentTime = 0; } catch(_){} }
+    });
+    this.current = null;
+  },
+
+  playMap(time) {
+    if (!this.ready) return;
+    this._stopAll();
+    const track = (time === 'day') ? this.mapDay : this.mapNight;
+    if (track) { track.play().catch(()=>{}); this.current = track; }
+  },
+
+  playCatch(time) {
+    if (!this.ready) return;
+    this._stopAll();
+    const track = (time === 'day') ? this.catchDay : this.catchNight;
+    if (track) { track.play().catch(()=>{}); this.current = track; }
+  },
+
+  stopCatch() {
+    if (!this.ready) return;
+    try { this.catchDay.pause(); this.catchDay.currentTime = 0; } catch(_){}
+    try { this.catchNight.pause(); this.catchNight.currentTime = 0; } catch(_){}
+    this.current = null;
+  },
+};
+
+/* =========================================================
+   3. 全局狀態
+   ========================================================= */
+let map;
+let playerMarker = null;
+let playerLatLng = null;
+let spawnCenter = null;
+let spawnMarkers = [];
+let stopMarkers  = [];
+let balls = 20;
+let caughtCount = 0;
+let nextRefreshAt = Date.now() + REFRESH_MS;
+let firstFix = true;
+let manualMode = false;
+let lastRespawnAt = 0;
+let gameStarted = false;
+
+let catchState = 'idle';
+let currentSpawn = null;
+
+let spinning = false;
+let discRot = 0;
+let currentStopMarker = null;
+
+const env = { time:'day', weather:'clear' };
+
+/* =========================================================
+   4. 工具
+   ========================================================= */
+function getTimeOfDay() {
+  const h = new Date().getHours();
+  return (h >= 6 && h < 18) ? 'day' : 'night';
+}
+
+function toast(msg, ms = 2200) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), ms);
+}
+
+function offsetLatLng(lat, lng, distM, bearingDeg) {
+  const R = 6371000;
+  const brng = bearingDeg * Math.PI / 180;
+  const lat1 = lat * Math.PI / 180;
+  const lng1 = lng * Math.PI / 180;
+  const lat2 = Math.asin(
+    Math.sin(lat1) * Math.cos(distM / R) +
+    Math.cos(lat1) * Math.sin(distM / R) * Math.cos(brng)
+  );
+  const lng2 = lng1 + Math.atan2(
+    Math.sin(brng) * Math.sin(distM / R) * Math.cos(lat1),
+    Math.cos(distM / R) - Math.sin(lat1) * Math.sin(lat2)
+  );
+  return [lat2 * 180 / Math.PI, lng2 * 180 / Math.PI];
+}
+
+function pickPokemon() {
+  const pool = POKEDEX.filter(p => {
+    if (p.notWild) return false;
+    if (p.time !== 'any' && p.time !== env.time) return false;
+    if (p.weather !== 'any' && !p.weather.includes(env.weather)) return false;
+    return true;
+  });
+  const list = pool.length ? pool : POKEDEX.filter(p => !p.notWild);
+  const total = list.reduce((s, p) => s + p.w, 0);
+  let r = Math.random() * total;
+  for (const p of list) { r -= p.w; if (r <= 0) return p; }
+  return list[0];
+}
+
+function updateHUD() {
+  document.getElementById('ballCount').textContent = balls;
+  document.getElementById('caughtCount').textContent = caughtCount;
+  const c = document.getElementById('catchBallCount');
+  if (c) c.textContent = balls;
+}
+
+/* =========================================================
+   5. 環境
+   ========================================================= */
+function rollWeather() {
+  const w = WEATHERS[Math.floor(Math.random() * WEATHERS.length)];
+  env.weather = w.id;
+}
+
+function renderEnvironment() {
+  const w = WEATHERS.find(x => x.id === env.weather) || WEATHERS[0];
+  const icon = env.time === 'day' ? '☀️' : '🌙';
+  const label = env.time === 'day' ? '白天' : '夜晚';
+  document.getElementById('envChip').textContent = `${icon} ${label} · ${w.icon}${w.name}`;
+
+  document.getElementById('nightTint').classList.toggle('on', env.time === 'night');
+
+  const cs = document.getElementById('catchScreen');
+  if (cs && !cs.classList.contains('hidden')) {
+    cs.classList.toggle('day', env.time === 'day');
+    cs.classList.toggle('night', env.time === 'night');
+    buildStars();
+  }
+}
+
+function buildStars() {
+  const box = document.getElementById('stars');
+  box.innerHTML = '';
+  if (env.time !== 'night') return;
+  for (let i = 0; i < 70; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = 1 + Math.random() * 2;
+    s.style.width = s.style.height = size + 'px';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top  = Math.random() * 96 + '%';
+    s.style.animationDelay = (Math.random() * 2.4) + 's';
+    s.style.opacity = 0.3 + Math.random() * 0.7;
+    box.appendChild(s);
+  }
+}
+
+/* 定期檢查裝置時間（每 20 秒） */
+function checkDeviceTime() {
+  const t = getTimeOfDay();
+  if (t !== env.time) {
+    env.time = t;
+    renderEnvironment();
+    if (gameStarted) {
+      const inCatch = !catchScreen.classList.contains('hidden');
+      if (inCatch) audio.playCatch(env.time);
+      else audio.playMap(env.time);
+      toast(t === 'day' ? '☀️ 天亮了，白天來臨' : '🌙 天黑了，夜晚降臨');
+    }
+  }
+}
+
+/* =========================================================
+   6. 地圖
+   ========================================================= */
+function initMap() {
+  map = L.map('map', {
+    zoomControl: false, attributionControl: false, tap: false,
+  }).setView(DEFAULT_CENTER, 17);
+
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+  L.control.attribution({ position: 'bottomright', prefix: false }).addTo(map)
+    .addAttribution('© OpenStreetMap');
+}
+
+const PLAYER_ICON = L.divIcon({
+  className: '',
+  html: '<div class="player-wrap"><div class="ring"></div><div class="dot"></div></div>',
+  iconSize: [44, 44], iconAnchor: [22, 22],
+});
+
+function placePlayer(latlng, recenter) {
+  playerLatLng = latlng;
+  if (!playerMarker) {
+    playerMarker = L.marker(latlng, { icon: PLAYER_ICON, zIndexOffset: 1000, interactive: false }).addTo(map);
+  } else {
+    playerMarker.setLatLng(latlng);
+  }
+  if (recenter) map.setView(latlng, 17, { animate: true });
+
+  checkMoveRespawn();
+}
+
+function checkMoveRespawn() {
+  if (!playerLatLng) return;
+  const now = Date.now();
+  if (now - lastRespawnAt < MOVE_RESPAWN_COOL) return;
+
+  const ref = spawnCenter || playerLatLng;
+  const dist = map.distance(L.latLng(ref), L.latLng(playerLatLng));
+  if (dist < MOVE_RESPAWN_DIST) return;
+
+  lastRespawnAt = now;
+  spawnCenter = playerLatLng;
+
+  spawnPokemon(spawnCenter);
+  spawnStops(spawnCenter);
+
+  toast('🌿 來到新地方，出現了新的寶可夢與補給站！');
+}
+
+/* =========================================================
+   7. 生成寶可夢 / 補給站
+   ========================================================= */
+function clearSpawns() { spawnMarkers.forEach(m => map.removeLayer(m)); spawnMarkers = []; }
+function clearStops()  { stopMarkers.forEach(m => map.removeLayer(m));  stopMarkers = []; }
+
+function addSpawn(p, lat, lng) {
+  dexState[p.name].seen = 1;
+  const shiny = Math.random() < SHINY_RATE;
+
+  const icon = L.divIcon({
+    className: '',
+    html: `<div class="spawn ${shiny ? 'shiny' : ''}">
+             <div class="spawn-shadow"></div>
+             <img class="spawn-gif" src="${spriteUrl(p, shiny)}" alt="${p.name}" draggable="false">
+           </div>`,
+    iconSize: [64, 72], iconAnchor: [32, 60],
+  });
+
+  const marker = L.marker([lat, lng], { icon, riseOnHover: true }).addTo(map);
+  marker._shiny = shiny;
+  marker.on('click', () => openCatch(p, marker, shiny));
+  spawnMarkers.push(marker);
+
+  requestAnimationFrame(() => {
+    const el = marker.getElement();
+    if (!el) return;
+    const img = el.querySelector('.spawn-gif');
+    if (!img) return;
+    const fallback = () => {
+      if (!img.parentNode) return;
+      const s = document.createElement('span');
+      s.className = 'spawn-emoji';
+      s.textContent = p.emoji;
+      img.replaceWith(s);
+    };
+    img.onerror = fallback;
+    if (img.complete && img.naturalWidth === 0) fallback();
+  });
+}
+
+function spawnPokemon(center) {
+  clearSpawns();
+  const count = 4 + Math.floor(Math.random() * 4);
+  for (let i = 0; i < count; i++) {
+    const p = pickPokemon();
+    const dist = 55 + Math.random() * 300;
+    const bearing = Math.random() * 360;
+    const [lat, lng] = offsetLatLng(center[0], center[1], dist, bearing);
+    addSpawn(p, lat, lng);
+  }
+}
+
+function spawnStops(center) {
+  clearStops();
+  for (let i = 0; i < 5; i++) {
+    const dist = 65 + Math.random() * 280;
+    const bearing = Math.random() * 360;
+    const [lat, lng] = offsetLatLng(center[0], center[1], dist, bearing);
+    const icon = L.divIcon({
+      className: '',
+      html: '<div class="stop">P</div>',
+      iconSize: [46, 46], iconAnchor: [23, 23],
+    });
+    const marker = L.marker([lat, lng], { icon }).addTo(map);
+    marker._used = false;
+    marker.on('click', () => openStop(marker));
+    stopMarkers.push(marker);
+  }
+}
+
+function resetStops() {
+  stopMarkers.forEach(m => {
+    m._used = false;
+    const el = m.getElement();
+    if (el) {
+      const d = el.querySelector('.stop');
+      if (d) { d.classList.remove('used'); d.textContent = 'P'; }
+    }
+  });
+}
+
+function spawnWorld(center) {
+  spawnCenter = center;
+  spawnPokemon(center);
+  spawnStops(center);
+  nextRefreshAt = Date.now() + REFRESH_MS;
+}
+
+function refreshSpawns() {
+  rollWeather();
+  renderEnvironment();
+
+  const center = playerLatLng || spawnCenter || DEFAULT_CENTER;
+  spawnCenter = center;
+  spawnPokemon(center);
+  if (stopMarkers.length === 0) spawnStops(center);
+  else resetStops();
+
+  const w = WEATHERS.find(x => x.id === env.weather) || WEATHERS[0];
+  const t = env.time === 'day' ? '☀️ 白天' : '🌙 夜晚';
+  toast(`${t} · ${w.icon}${w.name}　地圖已刷新！`);
+}
+
+/* =========================================================
+   8. GPS + 手動移動
+   ========================================================= */
+function startGPS() {
+  if (!navigator.geolocation) { toast('此裝置不支援 GPS，請用方向鍵移動'); return; }
+  navigator.geolocation.watchPosition(onPos, onGeoError, {
+    enableHighAccuracy: true, maximumAge: 3000, timeout: 20000,
+  });
+}
+
+function onPos(pos) {
+  if (manualMode) return;
+  const ll = [pos.coords.latitude, pos.coords.longitude];
+  const recenter = firstFix;
+  placePlayer(ll, recenter);
+  if (firstFix) {
+    firstFix = false;
+    if (!spawnCenter || map.distance(L.latLng(spawnCenter), L.latLng(ll)) > 800) spawnWorld(ll);
+    toast('📍 已定位到你的位置');
+  }
+}
+
+function onGeoError(err) {
+  if (firstFix) {
+    toast('⚠️ 無法取得 GPS，請使用左下方向鍵移動');
+    setManualMode(true);
+  }
+  console.warn('Geolocation error:', err.message);
+}
+
+function setManualMode(on) {
+  manualMode = on;
+  const btn = document.getElementById('locateBtn');
+  btn.classList.toggle('manual', on);
+  btn.title = on ? '手動模式中（點擊恢復 GPS）' : '回到 GPS 位置';
+}
+
+const dpad = { up:false, down:false, left:false, right:false };
+let dpadRaf = null;
+
+function startDpadLoop() {
+  if (dpadRaf) return;
+  let last = performance.now();
+  const SPEED = 28;
+
+  function tick(now) {
+    const dt = Math.min(0.1, (now - last) / 1000);
+    last = now;
+
+    let dx = 0, dy = 0;
+    if (dpad.up)    dy -= 1;
+    if (dpad.down)  dy += 1;
+    if (dpad.left)  dx -= 1;
+    if (dpad.right) dx += 1;
+
+    if ((dx || dy) && playerLatLng) {
+      const bearing = Math.atan2(dx, -dy) * 180 / Math.PI;
+      const move = SPEED * dt;
+      const [lat, lng] = offsetLatLng(playerLatLng[0], playerLatLng[1], move, bearing);
+      const ll = [lat, lng];
+      placePlayer(ll, false);
+      map.panTo(ll, { animate: false });
+    }
+    dpadRaf = requestAnimationFrame(tick);
+  }
+  dpadRaf = requestAnimationFrame(tick);
+}
+
+document.querySelectorAll('.dpad-btn').forEach(btn => {
+  const dir = btn.dataset.dir;
+  const press = (e) => {
+    e.preventDefault();
+    if (!manualMode) setManualMode(true);
+    dpad[dir] = true;
+    btn.classList.add('on');
+    startDpadLoop();
+  };
+  const release = (e) => {
+    e.preventDefault();
+    dpad[dir] = false;
+    btn.classList.remove('on');
+  };
+  btn.addEventListener('pointerdown', press);
+  btn.addEventListener('pointerup', release);
+  btn.addEventListener('pointerleave', release);
+  btn.addEventListener('pointercancel', release);
+  btn.addEventListener('contextmenu', e => e.preventDefault());
+});
+
+/* =========================================================
+   9. 捕捉 — 滑動投球
+   ========================================================= */
+const BALL_SIZE = 56;
+
+const catchScreen = document.getElementById('catchScreen');
+const catchStage  = document.getElementById('catchStage');
+const wildMon     = document.getElementById('wildMon');
+const monBody     = document.getElementById('monBody');
+const ballFly     = document.getElementById('ballFly');
+const trail       = document.getElementById('trail');
+const catchResult = document.getElementById('catchResult');
+const swipeHint   = document.getElementById('swipeHint');
+const powerWrap   = document.getElementById('powerWrap');
+const powerFill   = document.getElementById('powerFill');
+
+let ballHome = { x: 0, y: 0 };
+let ballFlying = false;
+let lastThrow = null;
+
+const swipe = {
+  active: false, pointerId: null,
+  startX: 0, startY: 0, curX: 0, curY: 0,
+};
+
+function resetBallPosition(animate) {
+  const w = catchStage.clientWidth;
+  const h = catchStage.clientHeight;
+  ballHome.x = w / 2 - BALL_SIZE / 2;
+  ballHome.y = h - 88;
+  ballFly.style.display = 'block';
+  ballFly.style.opacity = '1';
+  ballFly.style.filter = '';
+  ballFly.style.transition = animate
+    ? 'transform .28s cubic-bezier(.3,.8,.4,1), opacity .28s' : 'none';
+  ballFly.style.transform = `translate(${ballHome.x}px, ${ballHome.y}px) rotate(0deg)`;
+}
+
+function setBallTransform(x, y, rot) {
+  ballFly.style.transform = `translate(${x}px, ${y}px) rotate(${rot}deg)`;
+}
+
+function updateGroundLine() {
+  if (!catchStage || !catchScreen) return;
+  const stageH = catchStage.clientHeight;
+  if (!stageH) return;
+  const monH = 180;
+  const monTopInStage = (stageH - monH) / 2;
+  const pct = Math.max(22, Math.min(72, (monTopInStage / stageH) * 100));
+  catchScreen.style.setProperty('--groundY', pct + '%');
+}
+
+function openCatch(p, marker, shiny) {
+  if (catchState !== 'idle') return;
+  catchState = 'aim';
+  currentSpawn = { p, marker, shiny };
+
+  catchScreen.classList.toggle('day', env.time === 'day');
+  catchScreen.classList.toggle('night', env.time === 'night');
+  buildStars();
+
+  const nameEl = document.getElementById('catchName');
+  nameEl.textContent = shiny ? `✨ 異色 ${p.name} ✨` : `野生的 ${p.name}`;
+  nameEl.classList.toggle('shiny', !!shiny);
+
+  monBody.classList.toggle('shiny', !!shiny);
+  monBody.innerHTML = '';
+
+  const img = document.createElement('img');
+  img.src = spriteUrl(p, shiny);
+  img.alt = p.name;
+  img.draggable = false;
+  img.onerror = () => {
+    img.remove();
+    const s = document.createElement('span');
+    s.className = 'mon-emoji';
+    s.textContent = p.emoji;
+    monBody.appendChild(s);
+  };
+  monBody.appendChild(img);
+
+  wildMon.classList.remove('absorbed');
+
+  catchResult.textContent = '';
+  swipeHint.style.display = '';
+  powerWrap.style.display = 'none';
+  powerFill.style.width = '0%';
+  trail.style.display = 'none';
+  ballFlying = false;
+  lastThrow = null;
+
+  updateHUD();
+  catchScreen.classList.remove('hidden');
+
+  requestAnimationFrame(() => {
+    resetBallPosition(false);
+    updateGroundLine();
+  });
+
+  audio.init();
+  audio.playCatch(env.time);
+}
+
+function closeCatch() {
+  catchScreen.classList.add('hidden');
+  catchState = 'idle';
+  currentSpawn = null;
+  ballFlying = false;
+  resetSwipe();
+
+  if (gameStarted) audio.playMap(env.time);
+}
+
+function resetSwipe() {
+  swipe.active = false;
+  swipe.pointerId = null;
+  trail.style.display = 'none';
+  powerWrap.style.display = 'none';
+  powerFill.style.width = '0%';
+}
+
+function showResult(text, color) {
+  catchResult.textContent = text;
+  catchResult.style.color = color || '#fff';
+}
+
+catchStage.addEventListener('pointerdown', onPointerDown);
+catchStage.addEventListener('pointermove', onPointerMove);
+catchStage.addEventListener('pointerup', onPointerUp);
+catchStage.addEventListener('pointercancel', onPointerUp);
+
+function onPointerDown(e) {
+  if (catchState !== 'aim' || ballFlying) return;
+  if (balls <= 0) { showResult('沒有精靈球了！去補給站橫掃補給', '#ff8a8a'); return; }
+
+  const rect = catchStage.getBoundingClientRect();
+  swipe.active = true;
+  swipe.pointerId = e.pointerId;
+  swipe.startX = e.clientX - rect.left;
+  swipe.startY = e.clientY - rect.top;
+  swipe.curX = swipe.startX;
+  swipe.curY = swipe.startY;
+
+  try { catchStage.setPointerCapture(e.pointerId); } catch(_) {}
+
+  swipeHint.style.display = 'none';
+  powerWrap.style.display = 'block';
+  powerFill.style.width = '0%';
+  ballFly.style.transition = 'none';
+  e.preventDefault();
+}
+
+function onPointerMove(e) {
+  if (!swipe.active || e.pointerId !== swipe.pointerId) return;
+  const rect = catchStage.getBoundingClientRect();
+  swipe.curX = e.clientX - rect.left;
+  swipe.curY = e.clientY - rect.top;
+
+  drawTrail();
+  updatePowerBar();
+
+  const dx = swipe.curX - swipe.startX;
+  const dy = swipe.curY - swipe.startY;
+  setBallTransform(ballHome.x + dx * 0.12, ballHome.y + dy * 0.12, dx * 0.25);
+  e.preventDefault();
+}
+
+function onPointerUp(e) {
+  if (!swipe.active || e.pointerId !== swipe.pointerId) return;
+  swipe.active = false;
+  trail.style.display = 'none';
+  powerWrap.style.display = 'none';
+  evaluateSwipe();
+}
+
+function drawTrail() {
+  const dx = swipe.curX - swipe.startX;
+  const dy = swipe.curY - swipe.startY;
+  const len = Math.hypot(dx, dy);
+  const ang = Math.atan2(dy, dx) * 180 / Math.PI;
+
+  trail.style.display = 'block';
+  trail.style.left = swipe.startX + 'px';
+  trail.style.top  = (swipe.startY - 2) + 'px';
+  trail.style.width = len + 'px';
+  trail.style.transform = `rotate(${ang}deg)`;
+
+  const absAng = Math.abs(ang + 90);
+  const isCurve = absAng > 22 && absAng < 62;
+  trail.style.background = isCurve
+    ? 'linear-gradient(90deg,rgba(162,155,254,.2),rgba(162,155,254,.95))'
+    : 'linear-gradient(90deg,rgba(255,255,255,.2),rgba(255,255,255,.9))';
+}
+
+function updatePowerBar() {
+  const dx = swipe.curX - swipe.startX;
+  const dy = swipe.curY - swipe.startY;
+  const len = Math.hypot(dx, dy);
+  const h = catchStage.clientHeight || 1;
+  const p = Math.min(1, len / (h * 0.75));
+  powerFill.style.width = (p * 100) + '%';
+}
+
+function evaluateSwipe() {
+  if (catchState !== 'aim') return;
+
+  const dx = swipe.curX - swipe.startX;
+  const dy = swipe.curY - swipe.startY;
+  const len = Math.hypot(dx, dy);
+
+  const goHome = (msg) => {
+    if (msg) showResult(msg, '#ffd166');
+    ballFly.style.transition = 'transform .28s cubic-bezier(.3,.8,.4,1)';
+    setBallTransform(ballHome.x, ballHome.y, 0);
+    ballFlying = false;
+  };
+
+  if (len < 24) { goHome(); return; }
+  if (dy >= -24) { goHome('請向上滑動投球 ↑'); return; }
+
+  const angle = Math.atan2(Math.abs(dx), -dy) * 180 / Math.PI;
+  if (angle > 62) { goHome('角度太斜了，請朝上方滑動'); return; }
+
+  const ballType = angle <= 22 ? 'straight' : 'curve';
+  const h = catchStage.clientHeight || 1;
+  const power = len / h;
+
+  let quality;
+  if (power < 0.18)       quality = 'low';
+  else if (power < 0.32)  quality = 'weak';
+  else if (power <= 0.55) quality = 'perfect';
+  else if (power <= 0.78) quality = 'strong';
+  else                    quality = 'high';
+
+  performThrow(ballType, quality, angle, power);
+}
+
+function performThrow(ballType, quality, angle, power) {
+  catchState = 'flying';
+  ballFlying = true;
+  balls--;
+  updateHUD();
+  swipeHint.style.display = 'none';
+
+  const stageRect = catchStage.getBoundingClientRect();
+  const monRect = wildMon.getBoundingClientRect();
+  const monCx = monRect.left - stageRect.left + monRect.width / 2;
+  const monCy = monRect.top  - stageRect.top  + monRect.height / 2 - 14;
+
+  const isMiss = (quality === 'low' || quality === 'high');
+
+  let targetCx = monCx;
+  let targetCy = monCy;
+
+  if (quality === 'low')        { targetCy = monCy + 150; targetCx = monCx + (Math.random()*70-35); }
+  else if (quality === 'high')  { targetCy = monCy - 190; targetCx = monCx + (Math.random()*70-35); }
+  else if (quality === 'weak')  { targetCy = monCy + 38; }
+  else if (quality === 'strong'){ targetCy = monCy - 38; }
+
+  const targetX = targetCx - BALL_SIZE / 2;
+  const targetY = targetCy - BALL_SIZE / 2;
+
+  const dirSign = Math.sign(swipe.curX - swipe.startX) || 1;
+  let curveOffset = 0;
+  if (ballType === 'curve') {
+    const ddx = targetX - ballHome.x;
+    const ddy = targetY - ballHome.y;
+    const dist = Math.hypot(ddx, ddy) || 1;
+    curveOffset = dirSign * dist * 0.38;
+  }
+
+  const spinDir = dirSign;
+  const duration = 520;
+
+  lastThrow = { ballType, quality, angle, power, targetX, targetY, spinDir };
+
+  flyBall(targetX, targetY, spinDir, curveOffset, duration, () => {
+    if (isMiss) {
+      ballFly.style.transition = 'transform .32s ease-in, opacity .32s';
+      setBallTransform(
+        targetX + dirSign * 60,
+        targetY + (quality === 'low' ? 140 : -140),
+        spinDir * 1080
+      );
+      ballFly.style.opacity = '0';
+      showResult(
+        quality === 'low' ? '力道太輕，球沒飛到…' : '力道過猛，球飛過頭了！',
+        '#ff8a8a'
+      );
+      setTimeout(() => {
+        ballFlying = false;
+        if (catchState === 'flying') {
+          catchState = 'aim';
+          swipeHint.style.display = '';
+          resetBallPosition(true);
+        }
+      }, 340);
+      return;
+    }
+
+    wildMon.classList.add('absorbed');
+    setTimeout(() => {
+      wobbleBall(targetX, targetY, spinDir * 720, () => {
+        resolveCatch();
+      });
+    }, 240);
+  });
+}
+
+function flyBall(targetX, targetY, spinDir, curveOffset, duration, onDone) {
+  const startX = ballHome.x;
+  const startY = ballHome.y;
+
+  const midX = (startX + targetX) / 2;
+  const midY = (startY + targetY) / 2;
+  let cpX = midX, cpY = midY;
+
+  if (curveOffset !== 0) {
+    const dx = targetX - startX;
+    const dy = targetY - startY;
+    const len = Math.hypot(dx, dy) || 1;
+    const perpX = -dy / len;
+    const perpY =  dx / len;
+    cpX = midX + perpX * curveOffset;
+    cpY = midY + perpY * curveOffset;
+  }
+
+  ballFly.style.transition = 'none';
+  const startTime = performance.now();
+
+  function step(now) {
+    const t = Math.min(1, (now - startTime) / duration);
+    const ease = t * t * (3 - 2 * t);
+    const om = 1 - ease;
+
+    const x = om*om*startX + 2*om*ease*cpX + ease*ease*targetX;
+    const y = om*om*startY + 2*om*ease*cpY + ease*ease*targetY;
+    const rot = ease * 720 * spinDir;
+
+    setBallTransform(x, y, rot);
+
+    if (t < 1) requestAnimationFrame(step);
+    else onDone();
+  }
+  requestAnimationFrame(step);
+}
+
+/* 三段搖晃，中間停頓 */
+function wobbleBall(baseX, baseY, baseRot, onDone) {
+  const TOTAL = 3;
+  const WOBBLE_DUR = 480;
+  const PAUSE_DUR  = 340;
+  let count = 0;
+
+  function doWobble() {
+    if (count >= TOTAL) { onDone(); return; }
+
+    const startTime = performance.now();
+    const dir = (count % 2 === 0) ? 1 : -1;
+
+    function step(now) {
+      const t = Math.min(1, (now - startTime) / WOBBLE_DUR);
+      const phase = t * Math.PI * 2;
+      const damp = 1 - t * 0.4;
+
+      const wobbleX = Math.sin(phase) * 12 * damp * dir;
+      const tilt    = Math.sin(phase) * 18 * damp * dir;
+
+      setBallTransform(baseX + wobbleX, baseY, baseRot + tilt);
+
+      if (t < 1) requestAnimationFrame(step);
+      else {
+        setBallTransform(baseX, baseY, baseRot);
+        count++;
+        if (count < TOTAL) setTimeout(doWobble, PAUSE_DUR);
+        else setTimeout(onDone, PAUSE_DUR + 180);
+      }
+    }
+    requestAnimationFrame(step);
+  }
+  setTimeout(doWobble, 260);
+}
+
+function showCatchStars() {
+  const stageRect = catchStage.getBoundingClientRect();
+  const ballRect  = ballFly.getBoundingClientRect();
+
+  const baseX = ballRect.right - stageRect.left - 4;
+  const baseY = ballRect.top  - stageRect.top  + 4;
+
+  const offsets = [
+    { dx: 26, dy: -30 },
+    { dx: 54, dy: -54 },
+    { dx: 82, dy: -38 },
+  ];
+
+  offsets.forEach((o, i) => {
+    const star = document.createElement('div');
+    star.className = 'catch-star';
+    star.textContent = '✦';
+    star.style.left = baseX + 'px';
+    star.style.top  = baseY + 'px';
+    star.style.setProperty('--dx', o.dx + 'px');
+    star.style.setProperty('--dy', o.dy + 'px');
+    star.style.animationDelay = (i * 0.1) + 's';
+    catchStage.appendChild(star);
+    setTimeout(() => star.remove(), 1600);
+  });
+}
+
+function resolveCatch() {
+  if (!currentSpawn) return;
+  const { p, marker, shiny } = currentSpawn;
+  const info = lastThrow || { ballType:'straight', quality:'perfect', spinDir:1,
+                              targetX: ballHome.x, targetY: ballHome.y };
+
+  let mult = 1;
+  if (info.quality === 'perfect') mult *= 1.25;
+  else if (info.quality === 'weak' || info.quality === 'strong') mult *= 0.78;
+  if (info.ballType === 'curve') mult *= 1.12;
+
+  const chance = Math.min(0.95, p.rate * mult);
+  const success = Math.random() < chance;
+
+  if (success) {
+    /* ---- 捕獲成功 ---- */
+    catchState = 'caught';
+    caughtCount++;
+    const firstTime = dexState[p.name].caught === 0;
+    dexState[p.name].caught++;
+    if (shiny) dexState[p.name].shiny++;
+
+    // 捉到重覆精靈 → 1 粒對應糖果
+    addCandy(p.name, 1);
+
+    updateHUD();
+
+    audio.stopCatch();
+    showCatchStars();
+
+    const candyMsg = `　🍬 +1 ${p.name} 糖果`;
+
+    if (firstTime) {
+      showResult(shiny
+        ? `✨ 首次捕獲異色 ${p.name}！${candyMsg}`
+        : `Gotcha！首次捕獲 ${p.name}！${candyMsg}`, '#ffd166');
+    } else {
+      showResult(shiny
+        ? `✨ 異色 ${p.name}！${candyMsg}`
+        : `Gotcha！${p.name}！${candyMsg}`, '#7CFC9A');
+    }
+
+    if (shiny) toast(`✨ 太幸運了！異色 ${p.name} 入手！`, 2800);
+
+    if (map.hasLayer(marker)) map.removeLayer(marker);
+    spawnMarkers = spawnMarkers.filter(m => m !== marker);
+
+    ballFly.style.filter = shiny
+      ? 'brightness(2) drop-shadow(0 0 20px #ffd166)'
+      : 'brightness(1.8) drop-shadow(0 0 16px #ffd166)';
+    setTimeout(() => { ballFly.style.filter = ''; }, 320);
+
+    setTimeout(closeCatch, 1900);
+  } else {
+    /* ---- 捕獲失敗 ---- */
+    catchState = 'fail';
+    wildMon.classList.remove('absorbed');
+
+    if (Math.random() < 0.35) {
+      showResult(`可惜！${p.name} 逃走了…`, '#ff8a8a');
+      if (map.hasLayer(marker)) map.removeLayer(marker);
+      spawnMarkers = spawnMarkers.filter(m => m !== marker);
+      setTimeout(closeCatch, 1500);
+    } else {
+      showResult('差一點！再試一次', '#ffd166');
+      ballFly.style.transition = 'transform .32s ease-in, opacity .32s';
+      setBallTransform(info.targetX, info.targetY + 240, info.spinDir * 1080);
+      ballFly.style.opacity = '0';
+      setTimeout(() => {
+        ballFlying = false;
+        if (catchState === 'fail') {
+          catchState = 'aim';
+          swipeHint.style.display = '';
+          resetBallPosition(true);
+        }
+      }, 360);
+    }
+  }
+}
+
+document.getElementById('fleeBtn').addEventListener('click', () => {
+  if (catchState === 'flying') return;
+  closeCatch();
+});
+
+/* =========================================================
+   10. 補給站
+   ========================================================= */
+const stopScreen = document.getElementById('stopScreen');
+const stopStage  = document.getElementById('stopStage');
+const stopDisc   = document.getElementById('stopDisc');
+const stopHint   = document.getElementById('stopHint');
+
+const stopSwipe = { active:false, id:null, x0:0, y0:0, x:0, y:0 };
+
+function openStop(marker) {
+  if (catchState !== 'idle') return;
+  if (marker._used) { toast('這個補給站已經補給過了，等刷新吧'); return; }
+
+  currentStopMarker = marker;
+  document.getElementById('stopReward').textContent = '';
+  stopHint.textContent = '← 在轉盤上橫掃 →';
+  stopHint.style.animation = '';
+  stopDisc.style.transform = `rotate(${discRot}deg)`;
+  stopScreen.classList.remove('hidden');
+}
+
+function markStopUsed(marker) {
+  marker._used = true;
+  const el = marker.getElement();
+  if (el) {
+    const d = el.querySelector('.stop');
+    if (d) { d.classList.add('used'); d.textContent = '✓'; }
+  }
+}
+
+function showBallBubble(gain) {
+  const b = document.createElement('div');
+  b.className = 'ball-bubble';
+  b.innerHTML = `<span class="bub-txt">+${gain}</span>`;
+  document.body.appendChild(b);
+  setTimeout(() => b.remove(), 1750);
+}
+
+function spinStop() {
+  if (spinning) return;
+  const marker = currentStopMarker;
+  if (!marker || marker._used) return;
+
+  spinning = true;
+  stopHint.textContent = '補給中…';
+
+  discRot += 720 + Math.floor(Math.random() * 360);
+  stopDisc.style.transition = 'transform 1.7s cubic-bezier(.15,.85,.3,1)';
+  stopDisc.style.transform = `rotate(${discRot}deg)`;
+
+  setTimeout(() => {
+    const gain = 1 + Math.floor(Math.random() * 3);
+    balls += gain;
+    updateHUD();
+    document.getElementById('stopReward').textContent = `＋${gain} 顆精靈球！`;
+    stopHint.textContent = '此補給站已使用';
+    stopHint.style.animation = 'none';
+    markStopUsed(marker);
+    spinning = false;
+    currentStopMarker = null;
+    showBallBubble(gain);
+  }, 1700);
+}
+
+stopStage.addEventListener('pointerdown', e => {
+  if (spinning) return;
+  const marker = currentStopMarker;
+  if (!marker || marker._used) return;
+
+  stopSwipe.active = true;
+  stopSwipe.id = e.pointerId;
+  stopSwipe.x0 = e.clientX;
+  stopSwipe.y0 = e.clientY;
+  stopSwipe.x = e.clientX;
+  stopSwipe.y = e.clientY;
+
+  try { stopStage.setPointerCapture(e.pointerId); } catch(_) {}
+  stopDisc.style.transition = 'none';
+  e.preventDefault();
+});
+
+stopStage.addEventListener('pointermove', e => {
+  if (!stopSwipe.active || e.pointerId !== stopSwipe.id) return;
+  stopSwipe.x = e.clientX;
+  stopSwipe.y = e.clientY;
+  const dx = stopSwipe.x - stopSwipe.x0;
+  stopDisc.style.transform = `rotate(${discRot + dx * 0.85}deg)`;
+  e.preventDefault();
+});
+
+function endStopSwipe(e) {
+  if (!stopSwipe.active || e.pointerId !== stopSwipe.id) return;
+  stopSwipe.active = false;
+  stopDisc.style.transition = '';
+
+  const dx = stopSwipe.x - stopSwipe.x0;
+  const dy = stopSwipe.y - stopSwipe.y0;
+
+  if (!spinning && Math.abs(dx) >= SWIPE_THRESHOLD && Math.abs(dx) > Math.abs(dy)) {
+    spinStop();
+  } else {
+    stopDisc.style.transform = `rotate(${discRot}deg)`;
+    if (!spinning && (Math.abs(dx) > 18 || Math.abs(dy) > 18)) {
+      stopHint.textContent = '橫掃距離不夠，再試一次';
+      setTimeout(() => {
+        if (!spinning && currentStopMarker && !currentStopMarker._used)
+          stopHint.textContent = '← 在轉盤上橫掃 →';
+      }, 1400);
+    }
+  }
+}
+stopStage.addEventListener('pointerup', endStopSwipe);
+stopStage.addEventListener('pointercancel', endStopSwipe);
+
+document.getElementById('stopCloseBtn').addEventListener('click', () => {
+  if (spinning) return;
+  stopScreen.classList.add('hidden');
+  currentStopMarker = null;
+});
+
+/* =========================================================
+   11. 圖鑑
+   ========================================================= */
+const dexScreen = document.getElementById('dexScreen');
+const evoScreen = document.getElementById('evoScreen');
+
+function renderDex() {
+  const grid = document.getElementById('dexGrid');
+  let caughtTotal = 0;
+  let html = '';
+
+  POKEDEX.forEach(p => {
+    const st = dexState[p.name];
+    const isCaught = st.caught > 0;
+    const isSeen = st.seen > 0 || isCaught;
+    if (isCaught) caughtTotal++;
+
+    let cls = 'dex-cell';
+    if (isCaught) cls += ' caught';
+    else if (isSeen) cls += ' seen';
+    else cls += ' unknown';
+
+    const canEvolve = EVOLUTIONS[p.name] && isCaught;
+    const candy = getCandy(p.name);
+
+    html += `
+      <div class="${cls}">
+        <div class="dex-icon" data-id="${p.id}" data-seen="${isSeen?1:0}" data-shiny="${st.shiny>0?1:0}" data-super="${p.superForm?1:0}" style="--c:${p.color}">
+          <div class="dex-shadow"></div>
+          ${isSeen ? '' : `<span style="font-size:30px;z-index:2">❓</span>`}
+        </div>
+        <div class="dex-name">${isSeen ? p.name : '？？？'}</div>
+        ${isCaught ? `<div class="dex-count">捕獲 ${st.caught} 次</div>` : ''}
+        ${(isCaught && canEvolve) ? `<div class="dex-candy"><span class="candy-mini" style="width:10px;height:10px"></span>${candy}</div>` : ''}
+        ${st.shiny > 0 ? `<div class="dex-shiny">✨ 異色 ×${st.shiny}</div>` : ''}
+        ${p.notWild ? `<div class="dex-evo-tag">🧬 僅能進化獲得</div>` : ''}
+      </div>`;
+  });
+
+  grid.innerHTML = html;
+  document.getElementById('dexProgress').textContent =
+    `已捕獲 ${caughtTotal} / ${POKEDEX.length}`;
+
+  grid.querySelectorAll('.dex-icon').forEach(box => {
+    if (box.dataset.seen !== '1') return;
+    const id = parseInt(box.dataset.id, 10);
+    const p = POKEDEX.find(x => x.id === id);
+    if (!p) return;
+    const shiny = box.dataset.shiny === '1';
+
+    const img = document.createElement('img');
+    img.src = spriteUrl(p, shiny);
+    img.alt = p.name;
+    img.draggable = false;
+    img.onerror = () => {
+      img.remove();
+      const s = document.createElement('span');
+      s.textContent = p.emoji;
+      s.style.cssText = 'font-size:34px;z-index:2;position:relative';
+      box.appendChild(s);
+    };
+    box.appendChild(img);
+    if (shiny) img.style.filter = 'drop-shadow(0 0 8px #ffd166) drop-shadow(0 0 16px #ffb703)';
+    if (p.superForm) img.style.filter = (img.style.filter || '') + ' hue-rotate(230deg) saturate(1.4)';
+  });
+}
+
+document.getElementById('dexBtn').addEventListener('click', () => {
+  renderDex();
+  dexScreen.classList.remove('hidden');
+});
+document.getElementById('dexCloseBtn').addEventListener('click', () => {
+  dexScreen.classList.add('hidden');
+});
+
+/* =========================================================
+   12. 進化系統
+   ========================================================= */
+function canEvolve(name) {
+  const evo = EVOLUTIONS[name];
+  if (!evo) return false;
+  if (dexState[name].caught <= 0) return false;
+  return getCandy(name) >= evo.candy;
+}
+
+function renderEvoList() {
+  const list = document.getElementById('evoList');
+  const prog = document.getElementById('evoProgress');
+
+  // 收集所有可進化的來源
+  const sources = Object.keys(EVOLUTIONS).filter(n => dexState[n].caught > 0);
+
+  if (sources.length === 0) {
+    list.innerHTML = `<div class="evo-empty">
+      還沒有可以進化的寶可夢<br>
+      先去捕捉寶可夢，收集足夠的糖果吧！
+    </div>`;
+    prog.textContent = '';
+    return;
+  }
+
+  let readyCount = 0;
+  let html = '';
+
+  sources.forEach(srcName => {
+    const evo = EVOLUTIONS[srcName];
+    const src = POKEDEX.find(p => p.name === srcName);
+    const tgt = POKEDEX.find(p => p.name === evo.to);
+    if (!src || !tgt) return;
+
+    const candy = getCandy(srcName);
+    const enough = candy >= evo.candy;
+    if (enough) readyCount++;
+
+    const targetKnown = dexState[tgt.name].caught > 0 || dexState[tgt.name].seen > 0;
+
+    html += `
+      <div class="evo-item ${enough ? 'ready' : ''}">
+        <div class="evo-sprites">
+          <img src="${spriteUrl(src,false)}" alt="${src.name}"
+               onerror="this.outerHTML='<span style=&quot;font-size:36px&quot;>${src.emoji}</span>'">
+          <span class="evo-arrow">➜</span>
+          <img src="${spriteUrl(tgt,false)}" alt="${tgt.name}"
+               onerror="this.outerHTML='<span style=&quot;font-size:36px&quot;>${tgt.emoji}</span>'">
+        </div>
+        <div class="evo-info">
+          <div class="evo-title">${src.name} → ${tgt.name}${!targetKnown ? ' <span style="color:#7dd3fc">(新!)</span>' : ''}</div>
+          <div class="evo-candy-line ${enough ? '' : 'lack'}">
+            <span class="candy-mini" style="width:12px;height:12px"></span>
+            ${candy} / ${evo.candy} 糖果
+          </div>
+        </div>
+        <button class="evo-btn" ${enough ? '' : 'disabled'} data-src="${srcName}">進化</button>
+      </div>`;
+  });
+
+  list.innerHTML = html;
+  prog.textContent = `可進化 ${readyCount} 種`;
+
+  list.querySelectorAll('.evo-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const name = btn.dataset.src;
+      tryEvolve(name);
+    });
+  });
+}
+
+function tryEvolve(name) {
+  if (!canEvolve(name)) return;
+  const evo = EVOLUTIONS[name];
+  const src = POKEDEX.find(p => p.name === name);
+  const tgt = POKEDEX.find(p => p.name === evo.to);
+  if (!src || !tgt) return;
+
+  // 播放進化動畫
+  const ov = document.getElementById('evoOverlay');
+  const animImg = document.getElementById('evoAnimImg');
+  animImg.src = spriteUrl(src, false);
+  animImg.onerror = () => { animImg.style.display='none'; };
+  ov.style.display = 'flex';
+
+  // 動畫結束後更新資料
+  setTimeout(() => {
+    ov.style.display = 'none';
+    animImg.style.display = '';
+
+    // 扣除糖果
+    candyBag[name] -= evo.candy;
+
+    // 加入圖鑑
+    dexState[tgt.name].seen = 1;
+    dexState[tgt.name].caught++;
+
+    caughtCount++;   // 讓 HUD 也有感（進化也算一隻）
+    updateHUD();
+
+    toast(`🧬 ${name} 進化成 ${tgt.name}！`, 2600);
+
+    // 重新渲染進化列表（糖果已扣除）
+    renderEvoList();
+  }, 2200);
+}
+
+document.getElementById('evoBtn').addEventListener('click', () => {
+  renderEvoList();
+  evoScreen.classList.remove('hidden');
+});
+document.getElementById('evoCloseBtn').addEventListener('click', () => {
+  evoScreen.classList.add('hidden');
+});
+
+/* =========================================================
+   13. 計時器
+   ========================================================= */
+function startTimers() {
+  setInterval(() => {
+    const left = Math.max(0, Math.ceil((nextRefreshAt - Date.now()) / 1000));
+    const m = Math.floor(left / 60);
+    const s = left % 60;
+    document.getElementById('timerChip').textContent =
+      `⏱ ${m}:${String(s).padStart(2, '0')}`;
+
+    if (left <= 0) {
+      refreshSpawns();
+      nextRefreshAt = Date.now() + REFRESH_MS;
+    }
+  }, 1000);
+
+  // 每 20 秒檢查裝置時間
+  setInterval(checkDeviceTime, 20000);
+}
+
+/* =========================================================
+   14. 啟動
+   ========================================================= */
+function startGame() {
+  if (gameStarted) return;
+  gameStarted = true;
+
+  audio.init();
+  audio.playMap(env.time);
+
+  initMap();
+  updateHUD();
+
+  rollWeather();
+  renderEnvironment();
+
+  placePlayer(DEFAULT_CENTER, false);
+  spawnWorld(DEFAULT_CENTER);
+
+  startTimers();
+  startGPS();
+
+  document.getElementById('locateBtn').addEventListener('click', () => {
+    if (manualMode) {
+      setManualMode(false);
+      toast('🛰 已切回 GPS 定位模式');
+      if (playerLatLng) map.setView(playerLatLng, 17, { animate: true });
+    } else {
+      if (playerLatLng) {
+        map.setView(playerLatLng, 17, { animate: true });
+        toast('📍 回到你的位置');
+      } else {
+        toast('尚未取得定位');
+      }
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    if (catchState === 'aim') {
+      resetBallPosition(false);
+      updateGroundLine();
+    }
+  });
+}
+
+function boot() {
+  // 先設定初始時間（依裝置時間）
+  env.time = getTimeOfDay();
+
+  // 綁定啟動畫面
+  const splash = document.getElementById('splash');
+  const enter = () => {
+    if (splash.classList.contains('fade')) return;
+    splash.classList.add('fade');
+    setTimeout(() => splash.remove(), 600);
+    audio.init();
+    startGame();
+  };
+  splash.addEventListener('pointerdown', enter);
+  splash.addEventListener('click', enter);
+
+  // 防止雙指縮放
+  document.addEventListener('gesturestart', e => e.preventDefault());
+
+  // 更新裝置時間（每 20 秒）
+  setInterval(checkDeviceTime, 20000);
+}
+
+window.addEventListener('load', boot);
+</script>
+</body>
+</html>
