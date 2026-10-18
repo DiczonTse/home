@@ -14,6 +14,20 @@
 <!-- iOS 图标（至少提供一个 180×180 或 192×192） -->
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<!-- ===== Open Graph / Facebook / WhatsApp ===== -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://diczontse.github.io/home/games/pokemon_city_walk/pokemon_city_walk.html">
+<meta property="og:title" content="🎊寵物小精靈 City Walk">
+<meta property="og:description" content="帶著手機在城市中漫步，捕捉寶可夢！天氣與日夜會影響精靈出現，快來收集全圖鑑。">
+<meta property="og:image" content="https://diczontse.github.io/home/games/pokemon_city_walk/icons/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="寵物小精靈 City Walk 遊戲封面">
+<!-- ===== Twitter Card (提升 X/Twitter 分享效果，不影響 FB/WhatsApp) ===== -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="🎊寵物小精靈 City Walk">
+<meta name="twitter:description" content="帶著手機在城市中漫步，捕捉寶可夢！">
+<meta name="twitter:image" content="https://diczontse.github.io/home/games/pokemon_city_walk/icons/og-image.png">
 <style>
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%;overflow:hidden;background:#0d1117;
@@ -74,6 +88,17 @@
     opacity:0;transition:opacity .8s}
   #nightTint.on{opacity:1}
 
+  /* ===== 天氣粒子 / 霧層 ===== */
+  #weatherFx{position:fixed;inset:0;z-index:3;pointer-events:none;display:none}
+  #fogLayer{position:fixed;inset:0;z-index:3;pointer-events:none;opacity:0;
+    transition:opacity 1.2s;
+    background:linear-gradient(180deg,
+      rgba(206,218,232,.55) 0%,
+      rgba(190,205,222,.30) 38%,
+      rgba(178,196,216,.20) 62%,
+      rgba(206,218,232,.50) 100%)}
+  #fogLayer.on{opacity:1}
+
   .player-wrap{position:relative;width:44px;height:44px}
   .player-wrap .ring{position:absolute;inset:0;border-radius:50%;
     background:rgba(66,133,244,.45);animation:pulse 2s ease-out infinite}
@@ -82,15 +107,16 @@
     box-shadow:0 2px 10px rgba(0,0,0,.5),0 0 18px #4285f4}
   @keyframes pulse{0%{transform:scale(.35);opacity:.95}100%{transform:scale(1.7);opacity:0}}
 
-  .spawn{position:relative;width:64px;height:72px;cursor:pointer}
-  .spawn-gif{position:absolute;left:50%;bottom:2px;width:56px;height:56px;margin-left:-28px;
+  /* ===== 地圖上的精靈（已放大） ===== */
+  .spawn{position:relative;width:88px;height:96px;cursor:pointer}
+  .spawn-gif{position:absolute;left:50%;bottom:2px;width:80px;height:80px;margin-left:-40px;
 	object-fit:contain;image-rendering:pixelated;z-index:2;
 	animation:spawnIdle 2.6s ease-in-out infinite;pointer-events:none}
-  .spawn-shadow{position:absolute;left:50%;bottom:1px;width:42px;height:11px;margin-left:-21px;
+  .spawn-shadow{position:absolute;left:50%;bottom:1px;width:56px;height:14px;margin-left:-28px;
 	border-radius:50%;background:radial-gradient(ellipse at center,rgba(0,0,0,.5),rgba(0,0,0,0) 78%);
 	z-index:1;animation:shadowIdle 2.6s ease-in-out infinite;pointer-events:none}
   .spawn-fallback{position:absolute;left:50%;bottom:2px;transform:translateX(-50%);
-	font-size:38px;line-height:1;z-index:2;animation:spawnIdle 2.6s ease-in-out infinite}
+	font-size:48px;line-height:1;z-index:2;animation:spawnIdle 2.6s ease-in-out infinite}
   @keyframes spawnIdle{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-2px) scale(1.02)}}
   @keyframes shadowIdle{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(.95);opacity:.42}}
 
@@ -447,7 +473,8 @@
     justify-content:center;align-items:center;gap:14px}
   .npc-title{color:#ffd166;font-size:19px;font-weight:900;letter-spacing:2px;
     text-shadow:0 0 22px rgba(255,209,102,.6)}
-  .npc-sub{color:rgba(255,255,255,.7);font-size:13px;font-weight:700;letter-spacing:1px}
+  .npc-sub{color:rgba(255,255,255,.7);font-size:13px;font-weight:700;letter-spacing:1px;
+    text-align:center;padding:0 10px}
   .npc-stage{display:flex;align-items:center;justify-content:center;gap:16px;
     padding:8px;min-height:180px;width:100%;max-width:380px}
   .npc-card{background:rgba(255,255,255,.07);border-radius:20px;padding:14px 10px;
@@ -534,6 +561,44 @@
   @keyframes evoShake{0%,100%{transform:scale(1) rotate(-3deg)}50%{transform:scale(1.06) rotate(3deg)}}
   #evoOverlay .evo-txt{color:#fff;font-size:22px;font-weight:900;letter-spacing:3px;
     text-shadow:0 0 20px rgba(255,255,255,.9),0 2px 14px rgba(0,0,0,.9)}
+  /* ===== 自製確認視窗 ===== */
+  #confirmModal{position:fixed;inset:0;z-index:8000;
+    display:flex;align-items:center;justify-content:center;padding:20px}
+  #confirmModal.hidden{display:none!important}
+  .confirm-backdrop{position:absolute;inset:0;
+    background:rgba(0,0,0,.68);backdrop-filter:blur(7px);
+    -webkit-backdrop-filter:blur(7px);
+    animation:cfFadeIn .2s ease}
+  .confirm-box{position:relative;width:min(360px,90vw);
+    background:linear-gradient(160deg,#1e2438 0%,#141a28 100%);
+    border:2px solid rgba(255,255,255,.16);border-radius:22px;
+    padding:24px 22px 20px;text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,.7),
+               inset 0 1px 0 rgba(255,255,255,.06);
+    animation:cfPop .3s cubic-bezier(.3,1.4,.5,1)}
+  .confirm-icon{font-size:42px;line-height:1;margin-bottom:12px;
+    filter:drop-shadow(0 4px 16px rgba(255,150,80,.5))}
+  .confirm-title{color:#fff;font-size:19px;font-weight:900;
+    letter-spacing:2px;margin-bottom:10px;
+    text-shadow:0 0 18px rgba(162,155,254,.5)}
+  .confirm-msg{color:rgba(255,255,255,.78);font-size:14px;
+    font-weight:600;line-height:1.65;margin-bottom:22px;
+    white-space:pre-line}
+  .confirm-actions{display:flex;gap:10px}
+  .confirm-actions button{flex:1;padding:13px 10px;border:none;
+    border-radius:999px;font-family:inherit;font-size:15px;
+    font-weight:800;cursor:pointer;letter-spacing:1px;
+    transition:transform .12s,filter .15s;
+    -webkit-tap-highlight-color:transparent}
+  .confirm-actions button:active{transform:scale(.94)}
+  .confirm-cancel{background:rgba(255,255,255,.13);color:#cfd6e6}
+  .confirm-cancel:hover{background:rgba(255,255,255,.19)}
+  .confirm-ok{background:linear-gradient(135deg,#ff6b6b,#e63946);
+    color:#fff;box-shadow:0 6px 22px rgba(230,57,70,.5)}
+  .confirm-ok:hover{filter:brightness(1.08)}
+  @keyframes cfFadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes cfPop{from{opacity:0;transform:scale(.85) translateY(12px)}
+    to{opacity:1;transform:scale(1) translateY(0)}}
 </style>
 </head>
 <body>
@@ -557,6 +622,8 @@
 
 <div id="map"></div>
 <div id="nightTint"></div>
+<canvas id="weatherFx"></canvas>
+<div id="fogLayer"></div>
 
 <button id="fsBtn" title="全螢幕">⛶</button>
 
@@ -586,6 +653,19 @@
   <button id="locateBtn" title="回到我的位置">◎</button>
 </div>
 <div id="toast"></div>
+<!-- ===== 自製確認視窗 ===== -->
+<div id="confirmModal" class="hidden">
+  <div class="confirm-backdrop"></div>
+  <div class="confirm-box">
+    <div class="confirm-icon" id="confirmIcon">⚠️</div>
+    <div class="confirm-title" id="confirmTitle">確認</div>
+    <div class="confirm-msg" id="confirmMsg"></div>
+    <div class="confirm-actions">
+      <button class="confirm-cancel" id="confirmCancelBtn">取消</button>
+      <button class="confirm-ok" id="confirmOkBtn">確定</button>
+    </div>
+  </div>
+</div>
 
 <!-- ===== 捕捉畫面 ===== -->
 <div id="catchScreen" class="overlay hidden day">
@@ -593,7 +673,7 @@
   <div id="stars"></div>
 
   <div class="catch-top">
-    <div class="catch-name" id="catchName">野生的寶可夢</div>
+    <div class="catch-name" id="catchName">野生的精靈</div>
     <button id="fleeBtn">✕</button>
   </div>
 
@@ -631,8 +711,8 @@
 
 <!-- ===== NPC 交換畫面 ===== -->
 <div id="npcScreen" class="overlay hidden">
-  <div class="npc-title" id="npcTitle">🔄 交換進化</div>
-  <div class="npc-sub" id="npcSub">NPC 願意與你交換寶可夢</div>
+  <div class="npc-title" id="npcTitle">🔄 交換</div>
+  <div class="npc-sub" id="npcSub">NPC 願意與你交換精靈</div>
 
   <div class="npc-stage">
     <div class="npc-card npc-side" id="npcCard">
@@ -660,7 +740,7 @@
       <span class="val" id="npcOwnLabel">—</span>
     </div>
     <div class="npc-exchange-line">
-      <span>交換後進化為</span>
+      <span id="npcEvoLineLabel">交換後進化為</span>
       <span class="val ok" id="npcEvoLabel">—</span>
     </div>
   </div>
@@ -730,7 +810,7 @@ const dexState = {};
 const candyBag = {};
 const nameById = {};
 
-const TOTAL_POKEMON = 1020;
+const TOTAL_POKEMON = 1025;
 const BATCH_SIZE = 40;
 
 /* =========================================================
@@ -774,7 +854,7 @@ async function loadAllSpecies() {
     });
 
     const loaded = Math.min(end, TOTAL_POKEMON);
-    updateProgress(loaded, TOTAL_POKEMON, `已載入 ${loaded} / ${TOTAL_POKEMON} 隻寶可夢資料…`);
+    updateProgress(loaded, TOTAL_POKEMON, `已載入 ${loaded} / ${TOTAL_POKEMON} 隻精靈資料…`);
     await new Promise(r => setTimeout(r, 50));
   }
 
@@ -862,7 +942,7 @@ function buildEvolutionsFromChains(speciesList) {
 }
 
 async function loadAllData() {
-  updateProgress(0, TOTAL_POKEMON, '正在獲取寶可夢圖鑑資料…');
+  updateProgress(0, TOTAL_POKEMON, '正在獲取精靈圖鑑資料…');
   const speciesList = await loadAllSpecies();
 
   const pokedex = [];
@@ -908,6 +988,92 @@ async function loadAllData() {
     }
   });
 
+  /* 依 id 決定性分配「晝夜 / 天氣」偏好，讓環境真正影響生成種類 */
+  assignEnvPreferences(pokedex);
+  applyRareSpawnRules(pokedex);
+  /* ===== 追加地区形态（必须在 assign / applyRare 之后，避免被覆盖） ===== */
+  const REGIONAL_FORMS = [
+    /* ==================== 阿羅拉形態 (Alolan Forms) ==================== */
+    { id: 10091, name: '阿羅拉小拉達',   time: 'night', weather: ['clear'],  w: 3 },
+    { id: 10092, name: '阿羅拉拉達',     time: 'night', weather: ['clear'],  w: 2 },
+    { id: 10100, name: '阿羅拉雷丘',     time: 'day',   weather: ['rain'],   w: 2 },
+    { id: 10101, name: '阿羅拉穿山鼠',   time: 'night', weather: ['snow'],   w: 4 },
+    { id: 10102, name: '阿羅拉穿山王',   time: 'night', weather: ['snow'],   w: 3 },
+    { id: 10103, name: '阿羅拉六尾',     time: 'night', weather: ['snow'],   w: 4 },
+    { id: 10104, name: '阿羅拉九尾',     time: 'night', weather: ['snow'],   w: 2.5 },
+    { id: 10105, name: '阿羅拉地鼠',     time: 'day',   weather: ['clear'],  w: 4 },
+    { id: 10106, name: '阿羅拉三地鼠',   time: 'day',   weather: ['clear'],  w: 3 },
+    { id: 10107, name: '阿羅拉喵喵',     time: 'night', weather: ['fog'],    w: 4 },
+    { id: 10108, name: '阿羅拉貓老大',   time: 'night', weather: ['fog'],    w: 3 },
+    { id: 10109, name: '阿羅拉小拳石',   time: 'day',   weather: ['clear'],  w: 4 },
+    { id: 10110, name: '阿羅拉隆隆石',   time: 'day',   weather: ['clear'],  w: 3 },
+    { id: 10111, name: '阿羅拉隆隆岩',   time: 'day',   weather: ['clear'],  w: 2.5 },
+    { id: 10112, name: '阿羅拉臭泥',     time: 'night', weather: ['rain'],   w: 3 },
+    { id: 10113, name: '阿羅拉臭臭泥',   time: 'night', weather: ['rain'],   w: 2.5 },
+    { id: 10114, name: '阿羅拉椰蛋樹',   time: 'day',   weather: ['clear'],  w: 2 },
+    { id: 10115, name: '阿羅拉嘎啦嘎啦', time: 'night', weather: ['fog'],    w: 2 },
+
+    /* ==================== 伽勒爾形態 (Galarian Forms) ==================== */
+    { id: 10158, name: '伽勒爾喵喵',     time: 'night', weather: ['fog'],    w: 4 },
+    { id: 10159, name: '伽勒爾小火馬',   time: 'day',   weather: ['cloudy'], w: 3.5 },
+    { id: 10160, name: '伽勒爾烈焰馬',   time: 'day',   weather: ['cloudy'], w: 2.5 },
+    { id: 10161, name: '伽勒爾呆殼獸',   time: 'day',   weather: ['rain'],   w: 3 },
+    { id: 10162, name: '伽勒爾大蔥鴨',   time: 'day',   weather: ['clear'],  w: 3 },
+    { id: 10163, name: '伽勒爾雙彈瓦斯', time: 'night', weather: ['fog'],    w: 3 },
+    { id: 10164, name: '伽勒爾魔牆人偶', time: 'night', weather: ['snow'],   w: 3 },
+    { id: 10165, name: '伽勒爾太陽珊瑚', time: 'night', weather: ['fog'],    w: 3 },
+    { id: 10166, name: '伽勒爾蛇紋熊',   time: 'day',   weather: ['clear','cloudy'], w: 4 },
+    { id: 10167, name: '伽勒爾直衝熊',   time: 'day',   weather: ['clear','cloudy'], w: 3 },
+    { id: 10168, name: '伽勒爾火紅不倒翁', time: 'night', weather: ['snow'], w: 3 },
+    { id: 10169, name: '伽勒爾急凍鳥',   time: 'day',   weather: ['snow'],   w: 1.2 }, // 傳說
+    { id: 10170, name: '伽勒爾閃電鳥',   time: 'night', weather: ['rain'],   w: 1.2 }, // 傳說
+    { id: 10171, name: '伽勒爾火焰鳥',   time: 'night', weather: ['fog'],    w: 1.2 }, // 傳說
+
+    /* ==================== 洗翠形態 (Hisuian Forms) ==================== */
+    { id: 10229, name: '洗翠卡蒂狗',     time: 'day',   weather: ['clear'],  w: 3.5 },
+    { id: 10230, name: '洗翠風速狗',     time: 'day',   weather: ['clear'],  w: 2 },
+    { id: 10231, name: '洗翠霹靂電球',   time: 'night', weather: ['rain'],   w: 3.5 },
+    { id: 10232, name: '洗翠頑皮雷彈',   time: 'night', weather: ['rain'],   w: 2.5 },
+    { id: 10233, name: '洗翠火爆獸',     time: 'night', weather: ['fog'],    w: 1.5 },
+    { id: 10234, name: '洗翠大劍鬼',     time: 'night', weather: ['rain'],   w: 1.5 },
+    { id: 10235, name: '洗翠黏黏寶',     time: 'night', weather: ['rain'],   w: 2.5 },
+    { id: 10236, name: '洗翠黏美龍',     time: 'night', weather: ['rain'],   w: 1.5 },
+    { id: 10237, name: '洗翠狃拉',       time: 'night', weather: ['snow'],   w: 3 },
+    { id: 10238, name: '洗翠大狃拉',     time: 'night', weather: ['snow'],   w: 2 },
+    { id: 10239, name: '洗翠索羅亞克',   time: 'night', weather: ['fog'],    w: 1.0 },
+    { id: 10240, name: '洗翠勇士雄鷹',   time: 'day',   weather: ['cloudy'], w: 1.0 },
+    { id: 10241, name: '洗翠黏美兒',     time: 'night', weather: ['rain'],   w: 2 },
+    { id: 10242, name: '洗翠冰岩怪',     time: 'night', weather: ['snow'],   w: 1.5 },
+    { id: 10243, name: '洗翠詭角鹿',     time: 'night', weather: ['fog'],    w: 1.5 },
+    { id: 10244, name: '洗翠狙射樹梟',   time: 'night', weather: ['fog'],    w: 0.8 },
+
+    /* ==================== 帕底亞形態 (Paldean Forms) ==================== */
+    { id: 10250, name: '帕底亞烏波',     time: 'night', weather: ['rain'],   w: 3.5 },
+    { id: 10251, name: '帕底亞土王',     time: 'night', weather: ['rain'],   w: 2.5 },
+    { id: 10252, name: '帕底亞肯泰羅(鬥戰種)', time: 'day', weather: ['clear'], w: 2 },
+    { id: 10253, name: '帕底亞肯泰羅(火熾種)', time: 'day', weather: ['clear'], w: 2 },
+    { id: 10254, name: '帕底亞肯泰羅(水瀾種)', time: 'day', weather: ['rain'],  w: 2 },
+
+    /* ==================== 特殊 / 活動形態 (Special Forms) ==================== */
+    // 這些形態通常不作為常規野生寶可夢出現，以極低權重作為彩蛋加入
+    { id: 10061, name: '永恆之花的花葉蒂', time: 'day', weather: 'clear', w: 0.3 }, // 永恆之花
+    { id: 10116, name: '小智版甲賀忍蛙',   time: 'day', weather: 'rain', w: 0.2 }, // 羈絆變身
+    { id: 10117, name: '小智版甲賀忍蛙(Ash)', time: 'night', weather: 'rain', w: 0.2 }, // 另一種形態
+  ];
+  REGIONAL_FORMS.forEach(f => {
+    if (pokedex.some(p => p.id === f.id)) return;
+    pokedex.push({
+      id: f.id,
+      name: f.name,
+      emoji: '❓',
+      color: '#888',
+      rate: 0.35,
+      w: f.w,
+      notWild: false,
+      time: f.time,
+      weather: f.weather,
+    });
+  });
   POKEDEX = pokedex;
   EVOLUTIONS = evolutions;
 
@@ -918,13 +1084,40 @@ async function loadAllData() {
 
   POKEDEX.forEach(p => { p.emoji = '❓'; });
 
-  console.log(`✅ 全圖鑑載入完成：${POKEDEX.length} 隻寶可夢，${Object.keys(EVOLUTIONS).length} 組進化鏈`);
+  console.log(`✅ 全圖鑑載入完成：${POKEDEX.length} 隻精靈，${Object.keys(EVOLUTIONS).length} 組進化鏈`);
+}
+
+/* 依 id 產生穩定的環境偏好（同一隻精靈每次都是同樣偏好） */
+function assignEnvPreferences(pokedex) {
+  pokedex.forEach(p => {
+    if (p.notWild) {
+      p.time = 'any';
+      p.weather = 'any';
+      return;
+    }
+
+    const h = _hashInt(p.id * 2654435761 + 7);
+
+    /* 晝夜：25% 白天限定 / 25% 夜晚限定 / 50% 不限 */
+    const t = h % 100;
+    p.time = (t < 25) ? 'day' : (t < 50 ? 'night' : 'any');
+
+    /* 天氣：約 46% 有偏好，其餘不限 */
+    const w = (h >>> 8) % 100;
+    if (w < 12)       p.weather = ['clear'];
+    else if (w < 22)  p.weather = ['cloudy'];
+    else if (w < 32)  p.weather = ['rain'];
+    else if (w < 40)  p.weather = ['snow'];
+    else if (w < 46)  p.weather = ['fog'];
+    else              p.weather = 'any';
+  });
 }
 
 function spriteUrl(p, shiny) {
   const base = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/';
-  if (shiny) return `${base}shiny/${p.id}.png`;
-  return `${base}${p.id}.png`;
+  const sid = p.spriteId || p.id;
+  if (shiny) return `${base}shiny/${sid}.png`;
+  return `${base}${sid}.png`;
 }
 
 /* =========================================================
@@ -1142,7 +1335,7 @@ const MOVE_RESPAWN_COOL = 6000;
 const CURVE_SLIP_CHANCE  = 0.28;
 const CURVE_SUCCESS_MULT = 1.80;
 
-/* NPC 出現機率（每次刷新時） */
+/* NPC 出現機率（基礎值，會再受天氣 / 晝夜調整） */
 const NPC_SPAWN_CHANCE = 0.22;
 
 /* 存檔 key */
@@ -1157,31 +1350,220 @@ const WEATHERS = [
 ];
 
 /* =========================================================
+   3c. 稀有 / 神獸生成規則
+   ========================================================= */
+/*
+ * 每條規則：
+ *   id       — 全國圖鑑編號（基礎形態）
+ *   time     — 'day' / 'night' / 'any'
+ *   weather  — ['rain'] 等陣列，或 'any'
+ *   w        — 生成權重（普通精靈約 10，數字越小越稀有）
+ *
+ * 只有當 time 與 weather 同時匹配當前環境時，該精靈才會進入生成池。
+ * 想讓某隻精靈「任何時候都可能出現但極低機率」：
+ *   time: 'any', weather: 'any', w: 0.5 ~ 2
+ */
+/* =========================================================
+   3c. 稀有 / 神獸 / 御三家生成規則（完整列表）
+   ========================================================= */
+const RARE_SPAWN_RULES = [
+  /* ==================== 九代御三家 ==================== */
+  /* 第一世代 */
+  { id: 1,   time: 'day',   weather: ['clear','cloudy'], w: 5 },   // 妙蛙種子
+  { id: 4,   time: 'day',   weather: ['clear'],          w: 5 },   // 小火龍
+  { id: 7,   time: 'day',   weather: ['rain','cloudy'],  w: 5 },   // 傑尼龜
+  /* 第二世代 */
+  { id: 152, time: 'day',   weather: ['clear','cloudy'], w: 5 },   // 菊草葉
+  { id: 155, time: 'day',   weather: ['clear'],          w: 5 },   // 火球鼠
+  { id: 158, time: 'night', weather: ['rain'],           w: 5 },   // 小鋸鱷
+  /* 第三世代 */
+  { id: 252, time: 'day',   weather: ['clear','cloudy'], w: 5 },   // 木守宮
+  { id: 255, time: 'day',   weather: ['clear'],          w: 5 },   // 火稚雞
+  { id: 258, time: 'night', weather: ['rain'],           w: 5 },   // 水躍魚
+  /* 第四世代 */
+  { id: 387, time: 'day',   weather: ['clear','cloudy'], w: 5 },   // 草苗龜
+  { id: 390, time: 'night', weather: ['clear'],          w: 5 },   // 小火焰猴
+  { id: 393, time: 'day',   weather: ['snow','rain'],    w: 5 },   // 波加曼
+  /* 第五世代 */
+  { id: 495, time: 'day',   weather: ['clear','cloudy'], w: 5 },   // 藤藤蛇
+  { id: 498, time: 'day',   weather: ['clear'],          w: 5 },   // 暖暖豬
+  { id: 501, time: 'night', weather: ['rain'],           w: 5 },   // 水水獺
+  /* 第六世代 */
+  { id: 650, time: 'day',   weather: ['clear','cloudy'], w: 5 },   // 哈力栗
+  { id: 653, time: 'day',   weather: ['clear'],          w: 5 },   // 火狐狸
+  { id: 656, time: 'night', weather: ['rain'],           w: 5 },   // 呱呱泡蛙
+  /* 第七世代 */
+  { id: 722, time: 'night', weather: ['clear','fog'],    w: 5 },   // 木木梟
+  { id: 725, time: 'night', weather: ['clear'],          w: 5 },   // 火斑喵
+  { id: 728, time: 'day',   weather: ['rain','cloudy'],  w: 5 },   // 球球海獅
+  /* 第八世代 */
+  { id: 810, time: 'day',   weather: ['clear','cloudy'], w: 5 },   // 敲音猴
+  { id: 813, time: 'day',   weather: ['clear'],          w: 5 },   // 炎兔兒
+  { id: 816, time: 'night', weather: ['rain'],           w: 5 },   // 淚眼蜥
+  /* 第九世代 */
+  { id: 906, time: 'day',   weather: ['clear','cloudy'], w: 5 },   // 新葉喵
+  { id: 909, time: 'day',   weather: ['clear'],          w: 5 },   // 呆火鱷
+  { id: 912, time: 'night', weather: ['rain'],           w: 5 },   // 潤水鴨
+
+  /* ==================== 特定稀有精靈 ==================== */
+  { id: 25,  time: 'day',   weather: ['rain'],            w: 4 },   // 皮卡丘（雨天）
+  { id: 133, time: 'day',   weather: ['clear','cloudy'],  w: 3 },   // 伊布
+  { id: 147, time: 'night', weather: ['rain','fog'],      w: 2.5 }, // 迷你龍
+  { id: 131, time: 'night', weather: ['snow','fog'],      w: 2.5 }, // 拉普拉斯
+  { id: 246, time: 'night', weather: ['clear'],           w: 2.5 }, // 幼基拉斯
+  { id: 371, time: 'day',   weather: ['clear'],           w: 2.5 }, // 寶貝龍
+  { id: 443, time: 'night', weather: ['clear'],           w: 2 },   // 圓陸鯊
+  { id: 447, time: 'day',   weather: ['clear'],           w: 2.5 }, // 利歐路
+  { id: 633, time: 'night', weather: ['fog'],             w: 2 },   // 單首龍
+  { id: 704, time: 'night', weather: ['rain'],            w: 2.5 }, // 黏黏寶
+
+  /* ==================== 傳說寶可夢 / 幻之寶可夢 ==================== */
+  /* 第一世代 */
+  { id: 144, time: 'night', weather: ['snow'],            w: 2.0 }, // 急凍鳥
+  { id: 145, time: 'day',   weather: ['rain'],            w: 2.0 }, // 閃電鳥
+  { id: 146, time: 'day',   weather: ['clear'],           w: 2.0 }, // 火焰鳥
+  { id: 150, time: 'night', weather: ['fog'],             w: 1.2 }, // 超夢
+  { id: 151, time: 'any',   weather: 'any',               w: 0.6 }, // 夢幻（極低機率，任何時候）
+
+  /* 第二世代 */
+  { id: 243, time: 'night', weather: ['rain'],            w: 1.8 }, // 雷公
+  { id: 244, time: 'day',   weather: ['clear'],           w: 1.8 }, // 炎帝
+  { id: 245, time: 'night', weather: ['snow'],            w: 1.8 }, // 水君
+  { id: 249, time: 'day',   weather: ['cloudy'],          w: 1.2 }, // 洛奇亞
+  { id: 250, time: 'day',   weather: ['clear'],           w: 1.2 }, // 鳳王
+  { id: 251, time: 'night', weather: ['fog'],             w: 0.8 }, // 時拉比
+
+  /* 第三世代 */
+  { id: 377, time: 'day',   weather: ['clear'],           w: 1.5 }, // 雷吉洛克
+  { id: 378, time: 'night', weather: ['snow'],            w: 1.5 }, // 雷吉艾斯
+  { id: 379, time: 'day',   weather: ['cloudy'],          w: 1.5 }, // 雷吉斯奇魯
+  { id: 380, time: 'day',   weather: ['clear','cloudy'],  w: 1.0 }, // 拉帝亞斯
+  { id: 381, time: 'night', weather: ['clear'],           w: 1.0 }, // 拉帝歐斯
+  { id: 382, time: 'night', weather: ['rain'],            w: 1.2 }, // 蓋歐卡
+  { id: 383, time: 'day',   weather: ['clear'],           w: 1.2 }, // 固拉多
+  { id: 384, time: 'any',   weather: ['fog'],             w: 0.9 }, // 烈空坐
+  { id: 385, time: 'night', weather: ['clear'],           w: 0.7 }, // 基拉祈
+  { id: 386, time: 'night', weather: ['fog'],             w: 0.7 }, // 代歐奇希斯
+
+  /* 第四世代 */
+  { id: 480, time: 'day',   weather: ['cloudy'],          w: 1.2 }, // 由克希
+  { id: 481, time: 'day',   weather: ['clear'],           w: 1.2 }, // 艾姆利多
+  { id: 482, time: 'night', weather: ['fog'],             w: 1.2 }, // 亞克諾姆
+  { id: 483, time: 'day',   weather: ['clear'],           w: 1.0 }, // 帝牙盧卡
+  { id: 484, time: 'night', weather: ['rain'],            w: 1.0 }, // 帕路奇亞
+  { id: 485, time: 'day',   weather: ['clear'],           w: 1.2 }, // 席多藍恩
+  { id: 486, time: 'day',   weather: ['cloudy'],          w: 0.9 }, // 雷吉奇卡斯
+  { id: 487, time: 'night', weather: ['fog'],             w: 0.9 }, // 騎拉帝納
+  { id: 488, time: 'night', weather: ['clear'],           w: 1.0 }, // 克雷色利亞
+  { id: 489, time: 'day',   weather: ['rain'],            w: 0.7 }, // 霏歐納
+  { id: 490, time: 'night', weather: ['rain'],            w: 0.6 }, // 瑪納霏
+  { id: 491, time: 'night', weather: ['fog'],             w: 0.6 }, // 達克萊伊
+  { id: 492, time: 'day',   weather: ['clear'],           w: 0.7 }, // 謝米
+  { id: 493, time: 'any',   weather: 'any',               w: 0.4 }, // 阿爾宙斯（極低機率）
+
+  /* 第五世代 */
+  { id: 494, time: 'day',   weather: ['clear'],           w: 0.6 }, // 比克提尼
+  { id: 638, time: 'day',   weather: ['cloudy'],          w: 1.2 }, // 勾帕路翁
+  { id: 639, time: 'night', weather: ['clear'],           w: 1.2 }, // 代拉基翁
+  { id: 640, time: 'day',   weather: ['clear'],           w: 1.2 }, // 畢力吉翁
+  { id: 641, time: 'day',   weather: ['rain'],            w: 1.0 }, // 龍捲雲
+  { id: 642, time: 'night', weather: ['rain'],            w: 1.0 }, // 雷電雲
+  { id: 643, time: 'day',   weather: ['clear'],           w: 1.0 }, // 萊希拉姆
+  { id: 644, time: 'night', weather: ['clear'],           w: 1.0 }, // 捷克羅姆
+  { id: 645, time: 'day',   weather: ['cloudy'],          w: 1.0 }, // 土地雲
+  { id: 646, time: 'night', weather: ['snow'],            w: 0.9 }, // 酋雷姆
+  { id: 647, time: 'day',   weather: ['rain'],            w: 0.6 }, // 凱路迪歐
+  { id: 648, time: 'night', weather: ['fog'],             w: 0.6 }, // 美洛耶塔
+  { id: 649, time: 'day',   weather: ['cloudy'],          w: 0.5 }, // 蓋諾賽克特
+
+  /* 第六世代 */
+  { id: 716, time: 'day',   weather: ['clear'],           w: 0.9 }, // 哲爾尼亞斯
+  { id: 717, time: 'night', weather: ['fog'],             w: 0.9 }, // 伊裴爾塔爾
+  { id: 718, time: 'day',   weather: ['cloudy'],          w: 0.8 }, // 基格爾德
+  { id: 719, time: 'night', weather: ['clear'],           w: 0.5 }, // 蒂安希
+  { id: 720, time: 'night', weather: ['fog'],             w: 0.5 }, // 胡帕
+  { id: 721, time: 'day',   weather: ['rain'],            w: 0.5 }, // 波爾凱尼恩
+
+  /* 第七世代 */
+  { id: 785, time: 'day',   weather: ['rain'],            w: 1.0 }, // 卡璞・鳴鳴
+  { id: 786, time: 'day',   weather: ['clear'],           w: 1.0 }, // 卡璞・蝶蝶
+  { id: 787, time: 'night', weather: ['fog'],             w: 1.0 }, // 卡璞・哞哞
+  { id: 788, time: 'night', weather: ['rain'],            w: 1.0 }, // 卡璞・鰭鰭
+  { id: 789, time: 'night', weather: ['fog'],             w: 0.8 }, // 科斯莫古
+  { id: 790, time: 'day',   weather: ['cloudy'],          w: 0.6 }, // 科斯莫姆
+  { id: 791, time: 'day',   weather: ['clear'],           w: 0.9 }, // 索爾迦雷歐
+  { id: 792, time: 'night', weather: ['clear'],           w: 0.9 }, // 露奈雅拉
+  { id: 800, time: 'night', weather: ['fog'],             w: 0.8 }, // 奈克洛茲瑪
+  { id: 801, time: 'day',   weather: ['cloudy'],          w: 0.5 }, // 瑪機雅娜
+  { id: 802, time: 'night', weather: ['fog'],             w: 0.5 }, // 瑪夏多
+
+  /* 第八世代（伽勒爾） */
+  { id: 888, time: 'day',   weather: ['clear'],           w: 0.8 }, // 蒼響
+  { id: 889, time: 'night', weather: ['cloudy'],          w: 0.8 }, // 藏瑪然特
+  { id: 890, time: 'any',   weather: ['fog'],             w: 0.6 }, // 無極汰那
+  { id: 891, time: 'day',   weather: ['clear'],           w: 0.8 }, // 熊徒弟
+  { id: 892, time: 'night', weather: ['rain'],            w: 0.6 }, // 武道熊師
+  { id: 893, time: 'day',   weather: ['cloudy'],          w: 0.4 }, // 薩戮德
+  { id: 894, time: 'day',   weather: ['rain'],            w: 0.8 }, // 雷吉艾勒奇
+  { id: 895, time: 'night', weather: ['clear'],           w: 0.8 }, // 雷吉鐸拉戈
+  { id: 896, time: 'night', weather: ['snow'],            w: 0.8 }, // 雪暴馬
+  { id: 897, time: 'night', weather: ['fog'],             w: 0.8 }, // 靈幽馬
+  { id: 898, time: 'night', weather: ['clear','fog'],     w: 0.6 }, // 蕾冠王
+
+  /* 第九世代（帕底亞 / 北上 / 藍之圓盤） */
+  { id: 1001, time: 'night', weather: ['fog'],            w: 0.5 }, // 古簡蝸
+  { id: 1002, time: 'day',   weather: ['snow'],           w: 0.5 }, // 古劍豹
+  { id: 1003, time: 'night', weather: ['clear'],          w: 0.5 }, // 古鼎鹿
+  { id: 1004, time: 'day',   weather: ['rain'],           w: 0.5 }, // 古玉魚
+  { id: 1007, time: 'day',   weather: ['clear'],          w: 0.6 }, // 故勒頓
+  { id: 1008, time: 'night', weather: ['rain'],           w: 0.6 }, // 密勒頓
+  { id: 1014, time: 'day',   weather: ['cloudy'],         w: 0.4 }, // 夠讚狗
+  { id: 1015, time: 'night', weather: ['fog'],            w: 0.4 }, // 願增猿
+  { id: 1016, time: 'day',   weather: ['clear'],          w: 0.4 }, // 吉雉雞
+  { id: 1017, time: 'day',   weather: ['clear'],          w: 0.5 }, // 厄詭椪
+  { id: 1024, time: 'any',   weather: 'any',              w: 0.3 }, // 太樂巴戈斯（極低機率）
+  { id: 1025, time: 'night', weather: ['fog'],            w: 0.3 }, // 桃歹郎
+];
+
+function applyRareSpawnRules(pokedex) {
+  RARE_SPAWN_RULES.forEach(rule => {
+    const p = pokedex.find(x => x.id === rule.id);
+    if (!p) return;
+    if (p.notWild) return; // 進化形態不強制變成野生
+
+    p.time    = rule.time    || 'any';
+    p.weather = rule.weather || 'any';
+    p.w       = Math.max(0.1, rule.w);
+  });
+}
+
+/* =========================================================
    3b. NPC 交換進化數據
    ========================================================= */
 const NPC_EMOJIS = ['😎','🤠','🏃‍♂️','🚴‍♀️','🏄‍♂️','🏊‍♂️','👮‍♂️','👨‍🚒','💂‍♂️','👨‍🍳','👨‍🌾','👨‍⚕️'];
 
 /*
  * 交換進化映射：
- *   npcName  — NPC 提供的寶可夢（交換進化前的形態）
- *   to       — 交換後進化成的寶可夢
+ *   npcName  — NPC 提供的精靈（交換進化前的形態）
+ *   to       — 交換後進化成的精靈
  *   candyCost— 需要消耗的糖果數量（糖果來源為玩家隨機精靈，且排除 npcName 同名精靈）
  */
 const TRADE_EVOLUTIONS = [
-  { npcName:'勇基拉',   to:'胡地',       candyCost:100 },
-  { npcName:'豪力',     to:'怪力',       candyCost:100 },
-  { npcName:'隆隆石',   to:'隆隆岩',     candyCost:100 },
-  { npcName:'阿羅拉隆隆石', to:'阿羅拉隆隆岩', candyCost:100 },
-  { npcName:'鬼斯通',   to:'耿鬼',       candyCost:100 },
-  { npcName:'地幔岩',   to:'龐岩怪',     candyCost:200 },
-  { npcName:'鐵骨土人', to:'修建老匠',   candyCost:200 },
-  { npcName:'蓋蓋蟲',   to:'騎士蝸牛',   candyCost:200 },
-  { npcName:'小嘴蝸',   to:'敏捷蟲',     candyCost:200 },
-  { npcName:'小木靈',   to:'朽木妖',     candyCost:200 },
-  { npcName:'南瓜精',   to:'南瓜怪人',   candyCost:200 },
-  { npcName:'粉香香',   to:'芳香精',     candyCost:50  },
-  { npcName:'綿綿泡芙', to:'胖甜妮',     candyCost:50  },
+  { npcName:'勇基拉',   to:'胡地',       candyCost:1 },
+  { npcName:'豪力',     to:'怪力',       candyCost:1 },
+  { npcName:'隆隆石',   to:'隆隆岩',     candyCost:1 },
+  { npcName:'阿羅拉隆隆石', to:'阿羅拉隆隆岩', candyCost:1, spriteId:10110, evoSpriteId:10111 },
+  { npcName:'鬼斯通',   to:'耿鬼',       candyCost:1 },
+  { npcName:'地幔岩',   to:'龐岩怪',     candyCost:1 },
+  { npcName:'鐵骨土人', to:'修建老匠',   candyCost:1 },
+  { npcName:'蓋蓋蟲',   to:'騎士蝸牛',   candyCost:1 },
+  { npcName:'小嘴蝸',   to:'敏捷蟲',     candyCost:1 },
+  { npcName:'小木靈',   to:'朽木妖',     candyCost:1 },
+  { npcName:'南瓜精',   to:'南瓜怪人',   candyCost:1 },
 ];
+
+/* NPC 交換種類權重：45% 交換進化 / 55% 交換隨機精靈 */
+const NPC_EVO_TRADE_RATE = 0.45;
 
 /* =========================================================
    4. 全局狀態
@@ -1224,6 +1606,12 @@ const env = { time:'day', weather:'clear' };
 /* =========================================================
    5. 工具
    ========================================================= */
+function _hashInt(n) {
+  n = Math.imul(n ^ (n >>> 16), 2246822507);
+  n = Math.imul(n ^ (n >>> 13), 3266489909);
+  return (n ^ (n >>> 16)) >>> 0;
+}
+
 function getTimeOfDay() {
   const h = new Date().getHours();
   return (h >= 6 && h < 18) ? 'day' : 'night';
@@ -1235,6 +1623,49 @@ function toast(msg, ms = 2200) {
   el.classList.add('show');
   clearTimeout(el._t);
   el._t = setTimeout(() => el.classList.remove('show'), ms);
+}
+
+/* =========================================================
+   自製確認視窗（替代 confirm()）
+   ========================================================= */
+function showConfirm(opts = {}) {
+  return new Promise(resolve => {
+    const modal   = document.getElementById('confirmModal');
+    const iconEl  = document.getElementById('confirmIcon');
+    const titleEl = document.getElementById('confirmTitle');
+    const msgEl   = document.getElementById('confirmMsg');
+    const okBtn   = document.getElementById('confirmOkBtn');
+    const cancelBtn = document.getElementById('confirmCancelBtn');
+    const backdrop  = modal.querySelector('.confirm-backdrop');
+
+    iconEl.textContent  = opts.icon    || '⚠️';
+    titleEl.textContent = opts.title   || '確認';
+    msgEl.textContent   = opts.message || '';
+    okBtn.textContent   = opts.okText     || '確定';
+    cancelBtn.textContent = opts.cancelText || '取消';
+
+    modal.classList.remove('hidden');
+
+    const cleanup = (result) => {
+      modal.classList.add('hidden');
+      okBtn.removeEventListener('click', onOk);
+      cancelBtn.removeEventListener('click', onCancel);
+      backdrop.removeEventListener('click', onCancel);
+      document.removeEventListener('keydown', onKey);
+      resolve(result);
+    };
+    const onOk     = () => cleanup(true);
+    const onCancel = () => cleanup(false);
+    const onKey    = (e) => {
+      if (e.key === 'Escape') cleanup(false);
+      else if (e.key === 'Enter') cleanup(true);
+    };
+
+    okBtn.addEventListener('click', onOk);
+    cancelBtn.addEventListener('click', onCancel);
+    backdrop.addEventListener('click', onCancel);
+    document.addEventListener('keydown', onKey);
+  });
 }
 
 function offsetLatLng(lat, lng, distM, bearingDeg) {
@@ -1267,6 +1698,41 @@ function pickPokemon() {
   let r = Math.random() * total;
   for (const p of list) { r -= p.w; if (r <= 0) return p; }
   return list[0];
+}
+
+/* 天氣 / 晝夜 → 生成數量 */
+function getSpawnCount() {
+  const base = 4 + Math.floor(Math.random() * 4); // 4~7
+  let mult = 1;
+
+  switch (env.weather) {
+    case 'clear':  mult *= 1.30; break;
+    case 'cloudy': mult *= 1.10; break;
+    case 'rain':   mult *= 0.70; break;
+    case 'snow':   mult *= 0.60; break;
+    case 'fog':    mult *= 0.85; break;
+    default:       mult *= 1.00; break;
+  }
+  if (env.time === 'night') mult *= 0.75;
+
+  return Math.max(2, Math.min(12, Math.round(base * mult)));
+}
+
+/* 天氣 / 晝夜 → NPC 出現率 */
+function getNpcSpawnChance() {
+  let c = NPC_SPAWN_CHANCE;
+
+  switch (env.weather) {
+    case 'clear':  c *= 1.25; break;
+    case 'cloudy': c *= 1.05; break;
+    case 'rain':   c *= 0.65; break;
+    case 'snow':   c *= 0.55; break;
+    case 'fog':    c *= 0.85; break;
+    default:       c *= 1.00; break;
+  }
+  if (env.time === 'night') c *= 0.70;
+
+  return Math.max(0.03, Math.min(0.45, c));
 }
 
 function updateHUD() {
@@ -1396,8 +1862,16 @@ function handleLoadFile(file) {
   reader.readAsText(file);
 }
 
-function resetGame() {
-  if (!confirm('確定要重設所有遊戲進度嗎？此操作無法復原。')) return;
+async function resetGame() {
+  const ok = await showConfirm({
+    icon: '🗑',
+    title: '重設遊戲進度',
+    message: '確定要重設所有遊戲進度嗎？\n球數、圖鑑、糖果都會歸零，此操作無法復原。',
+    okText: '確定重設',
+    cancelText: '取消',
+  });
+  if (!ok) return;
+
   try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
   balls = 20;
   caughtCount = 0;
@@ -1424,6 +1898,11 @@ function renderEnvironment() {
   const label = env.time === 'day' ? '白天' : '夜晚';
   document.getElementById('envChip').textContent = `${icon} ${label} · ${w.icon}${w.name}`;
   document.getElementById('nightTint').classList.toggle('on', env.time === 'night');
+
+  /* 天氣粒子（雨 / 雪）與霧層 */
+  WeatherFX.setMode(env.weather === 'rain' ? 'rain' : (env.weather === 'snow' ? 'snow' : 'none'));
+  const fogEl = document.getElementById('fogLayer');
+  if (fogEl) fogEl.classList.toggle('on', env.weather === 'fog');
 
   const cs = document.getElementById('catchScreen');
   if (cs && !cs.classList.contains('hidden')) {
@@ -1467,6 +1946,145 @@ function checkDeviceTime() {
 }
 
 /* =========================================================
+   6b. 天氣粒子系統（粒子池重用，避免頻繁配置記憶體）
+   ========================================================= */
+const WeatherFX = {
+  canvas: null,
+  ctx: null,
+  pool: [],
+  MAX: 170,
+  active: 0,
+  mode: 'none',
+  running: false,
+  raf: null,
+  w: 0,
+  h: 0,
+  last: 0,
+
+  init() {
+    this.canvas = document.getElementById('weatherFx');
+    if (!this.canvas) return;
+    this.ctx = this.canvas.getContext('2d');
+
+    /* 一次性建立粒子池，之後只重用不重建 */
+    for (let i = 0; i < this.MAX; i++) {
+      this.pool.push({ x:0, y:0, vx:0, vy:0, len:0, r:0, sw:0, ph:0 });
+    }
+
+    this.resize();
+    window.addEventListener('resize', () => this.resize());
+  },
+
+  resize() {
+    if (!this.canvas || !this.ctx) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    this.w = window.innerWidth;
+    this.h = window.innerHeight;
+    this.canvas.width  = Math.floor(this.w * dpr);
+    this.canvas.height = Math.floor(this.h * dpr);
+    this.canvas.style.width  = this.w + 'px';
+    this.canvas.style.height = this.h + 'px';
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    if (this.active > 0) {
+      for (let i = 0; i < this.active; i++) this.spawn(this.pool[i], true);
+    }
+  },
+
+  setMode(mode) {
+    if (!this.ctx) return;
+    if (this.mode === mode) return;
+    this.mode = mode;
+
+    if (mode === 'rain' || mode === 'snow') {
+      this.active = (mode === 'rain') ? 160 : 110;
+      for (let i = 0; i < this.active; i++) this.spawn(this.pool[i], true);
+      this.canvas.style.display = 'block';
+      this.start();
+    } else {
+      this.active = 0;
+      this.stop();
+      this.ctx.clearRect(0, 0, this.w, this.h);
+      this.canvas.style.display = 'none';
+    }
+  },
+
+  spawn(p, spread) {
+    p.x = Math.random() * this.w;
+    p.y = spread ? Math.random() * this.h : (-30 - Math.random() * 80);
+
+    if (this.mode === 'rain') {
+      p.vy = 700 + Math.random() * 500;
+      p.vx = -110 - Math.random() * 90;
+      p.len = 9 + Math.random() * 15;
+    } else {
+      p.vy = 30 + Math.random() * 48;
+      p.vx = -16 + Math.random() * 32;
+      p.r  = 1.1 + Math.random() * 2.1;
+      p.ph = Math.random() * Math.PI * 2;
+      p.sw = 12 + Math.random() * 26;
+    }
+  },
+
+  start() {
+    if (this.running) return;
+    this.running = true;
+    this.last = performance.now();
+
+    const loop = (now) => {
+      if (!this.running) return;
+      const dt = Math.min(0.05, (now - this.last) / 1000);
+      this.last = now;
+      this.step(dt);
+      this.raf = requestAnimationFrame(loop);
+    };
+    this.raf = requestAnimationFrame(loop);
+  },
+
+  stop() {
+    this.running = false;
+    if (this.raf) { cancelAnimationFrame(this.raf); this.raf = null; }
+  },
+
+  step(dt) {
+    const ctx = this.ctx;
+    if (!ctx) return;
+    ctx.clearRect(0, 0, this.w, this.h);
+
+    if (this.mode === 'rain') {
+      /* 整批一次 stroke，成本固定 */
+      ctx.strokeStyle = 'rgba(174,214,255,0.62)';
+      ctx.lineWidth = 1.5;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      for (let i = 0; i < this.active; i++) {
+        const p = this.pool[i];
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        if (p.y > this.h + 30 || p.x < -60) { this.spawn(p, false); continue; }
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(p.x - p.vx * 0.016, p.y - p.len);
+      }
+      ctx.stroke();
+
+    } else if (this.mode === 'snow') {
+      ctx.fillStyle = 'rgba(255,255,255,0.88)';
+      ctx.beginPath();
+      for (let i = 0; i < this.active; i++) {
+        const p = this.pool[i];
+        p.ph += dt * 2.2;
+        p.x += (p.vx + Math.sin(p.ph) * p.sw) * dt;
+        p.y += p.vy * dt;
+        if (p.y > this.h + 20 || p.x < -40 || p.x > this.w + 40) { this.spawn(p, false); continue; }
+        ctx.moveTo(p.x + p.r, p.y);
+        ctx.arc(p.x, p.y, p.r, 0, 6.2832);
+      }
+      ctx.fill();
+    }
+  },
+};
+
+/* =========================================================
    7. 程序化地圖
    ========================================================= */
 function _rand2(ix, iy, seed) {
@@ -1499,7 +2117,7 @@ function _fbm(x, y, seed) {
   return val;
 }
 
-const MAP_REF_ZOOM = 17;
+const MAP_REF_ZOOM = 10;
 
 const ProgMapLayer = L.GridLayer.extend({
   options: { tileSize: 256, keepBuffer: 4, updateWhenIdle: false, noWrap: true },
@@ -1533,26 +2151,16 @@ const ProgMapLayer = L.GridLayer.extend({
           b = 172 + depth * 48;
         } else {
           const river = _fbm(wx / 380, wy / 380, 9);
-          const onRiver = Math.abs(river - 0.5) < 0.020;
-          const rx = ((wx % 768) + 768) % 768;
-          const ry = ((wy % 768) + 768) % 768;
-          const onRoadX = rx < 30;
-          const onRoadY = ry < 30;
-          const onRoad = onRoadX || onRoadY;
+		  const onRiver = Math.abs(river - 0.5) < 0.020;
 
-          if (onRiver) {
-            r = 76; g = 158; b = 214;
-          } else if (onRoad) {
-            const isCenterX = rx < 5 || rx > 763;
-            const isCenterY = ry < 5 || ry > 763;
-            if (isCenterX || isCenterY) { r = 246; g = 214; b = 78; }
-            else { r = 232; g = 227; b = 214; }
-          } else {
-            const vary = (_fbm(wx / 150, wy / 150, 3) - 0.5) * 46;
-            r = 138 + vary;
-            g = 190 + vary;
-            b = 108 + vary;
-          }
+		  if (onRiver) {
+			r = 76; g = 158; b = 214;
+		  } else {
+			const vary = (_fbm(wx / 150, wy / 150, 3) - 0.5) * 46;
+			r = 138 + vary;
+			g = 190 + vary;
+			b = 108 + vary;
+		  }
         }
 
         const idx = (j * N + i) * 4;
@@ -1730,11 +2338,11 @@ function checkMoveRespawn() {
   spawnStops(spawnCenter);
   maybeSpawnNPC(spawnCenter);
 
-  toast('🌿 來到新地方，出現了新的寶可夢與補給站！');
+  toast('🌿 來到新地方，出現了新的精靈與補給站！');
 }
 
 /* =========================================================
-   9. 生成寶可夢 / 補給站 / NPC
+   9. 生成精靈 / 補給站 / NPC
    ========================================================= */
 function clearSpawns() { spawnMarkers.forEach(m => map.removeLayer(m)); spawnMarkers = []; }
 function clearStops()  { stopMarkers.forEach(m => map.removeLayer(m));  stopMarkers = []; }
@@ -1754,7 +2362,7 @@ function addSpawn(p, lat, lng) {
              <img class="spawn-gif" src="${spriteUrl(p, shiny)}" alt="${p.name}" draggable="false"
                   onerror="this.style.display='none';this.insertAdjacentHTML('afterend','<div class=&quot;spawn-fallback&quot;>❓</div>')">
            </div>`,
-    iconSize: [64, 72], iconAnchor: [32, 66],
+    iconSize: [88, 96], iconAnchor: [44, 90],
   });
 
   const marker = L.marker([lat, lng], { icon, riseOnHover: true }).addTo(map);
@@ -1765,7 +2373,7 @@ function addSpawn(p, lat, lng) {
 
 function spawnPokemon(center) {
   clearSpawns();
-  const count = 4 + Math.floor(Math.random() * 4);
+  const count = getSpawnCount();
   for (let i = 0; i < count; i++) {
     const p = pickPokemon();
     if (!p) continue;
@@ -1809,10 +2417,10 @@ function resetStops() {
 function maybeSpawnNPC(center) {
   if (npcScreen && !npcScreen.classList.contains('hidden')) return;
   clearNPC();
-  if (Math.random() > NPC_SPAWN_CHANCE) return;
+  if (Math.random() > getNpcSpawnChance()) return;
 
   const emoji = NPC_EMOJIS[Math.floor(Math.random() * NPC_EMOJIS.length)];
-  const trade = TRADE_EVOLUTIONS[Math.floor(Math.random() * TRADE_EVOLUTIONS.length)];
+  const trade = buildNpcTrade();
 
   const dist = 80 + Math.random() * 220;
   const bearing = Math.random() * 360;
@@ -1835,6 +2443,35 @@ function maybeSpawnNPC(center) {
   SFX.npcAppear();
 }
 
+/* 建立 NPC 交換內容：交換進化 或 交換隨機精靈 */
+function buildNpcTrade() {
+  if (Math.random() < NPC_EVO_TRADE_RATE) {
+    const t = TRADE_EVOLUTIONS[Math.floor(Math.random() * TRADE_EVOLUTIONS.length)];
+    return {
+      kind: 'evo',
+      npcName: t.npcName,
+      to: t.to,
+      candyCost: t.candyCost,
+      spriteId: t.spriteId,
+      evoSpriteId: t.evoSpriteId,
+    };
+  }
+
+  /* 隨機精靈交換：NPC 隨機提供一隻野生精靈，玩家付 1 顆糖果 */
+  const pool = POKEDEX.filter(p => !p.notWild && p.w > 0);
+  const mon = pool.length
+    ? pool[Math.floor(Math.random() * pool.length)]
+    : POKEDEX[Math.floor(Math.random() * POKEDEX.length)];
+
+  return {
+    kind: 'random',
+    npcName: mon.name,
+    to: mon.name,
+    candyCost: 1,
+    spriteId: mon.id,
+  };
+}
+
 /* =========================================================
    10. NPC 交換畫面
    ========================================================= */
@@ -1849,6 +2486,7 @@ const playerCardFallback = document.getElementById('playerCardFallback');
 const playerCardName = document.getElementById('playerCardName');
 const npcCostLabel   = document.getElementById('npcCostLabel');
 const npcOwnLabel    = document.getElementById('npcOwnLabel');
+const npcEvoLineLabel= document.getElementById('npcEvoLineLabel');
 const npcEvoLabel    = document.getElementById('npcEvoLabel');
 const npcConfirmBtn  = document.getElementById('npcConfirmBtn');
 const npcCancelBtn   = document.getElementById('npcCancelBtn');
@@ -1870,13 +2508,18 @@ function openNPCExchange(npc) {
   const candySource = pickRandomCandySource(trade.npcName);
   npc.candySource = candySource;
 
-  npcTitle.textContent = `${emoji} 交換進化`;
-  npcSub.textContent = 'NPC 願意與你交換寶可夢（消耗隨機精靈的糖果）';
+  const isEvo = trade.kind === 'evo';
+
+  npcTitle.textContent = `${emoji} 交換`;
+  npcSub.textContent = isEvo
+    ? 'NPC 願意與你交換精靈（交換後會進化）'
+    : 'NPC 願意與你交換精靈（隨機精靈，消耗 1 顆糖果）';
 
   /* NPC 卡片 */
   npcCardName.textContent = trade.npcName;
-  if (npcMon) {
-    npcCardImg.src = spriteUrl(npcMon, false);
+  const spriteId = trade.spriteId || (npcMon && npcMon.id);
+  if (spriteId) {
+    npcCardImg.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${spriteId}.png`;
     npcCardImg.style.display = '';
     npcCardFallback.style.display = 'none';
     npcCardImg.onerror = () => {
@@ -1922,7 +2565,8 @@ function openNPCExchange(npc) {
   }
 
   npcCostLabel.textContent = `${trade.candyCost} 顆`;
-  npcEvoLabel.textContent = trade.to;
+  npcEvoLineLabel.textContent = isEvo ? '交換後進化為' : '交換後獲得';
+  npcEvoLabel.textContent = isEvo ? trade.to : trade.npcName;
 
   const enough = !!candySource && candySource.amount >= trade.candyCost;
   npcConfirmBtn.disabled = !enough;
@@ -1959,23 +2603,32 @@ npcConfirmBtn.addEventListener('click', () => {
 
     clearNPC();
 
-    playNPCEvolutionAnimation(trade.to, () => {
-      if (dexState[trade.to]) {
-        dexState[trade.to].seen = 1;
-        dexState[trade.to].caught++;
-      }
-      if (dexState[trade.npcName]) {
-        dexState[trade.npcName].seen = 1;
-      }
+    const finish = (msg) => {
       caughtCount++;
       updateHUD();
       autoSave();
-
-      toast(`🔄 交換成功！${trade.npcName} 進化成 ${trade.to}！`, 3000);
+      toast(msg, 3000);
       npcExchangeLocked = false;
-
       if (gameStarted) audio.playMap(env.time);
-    });
+    };
+
+    if (trade.kind === 'evo') {
+      playNPCEvolutionAnimation(trade.to, trade.evoSpriteId, () => {
+        if (dexState[trade.to]) {
+          dexState[trade.to].seen = 1;
+          dexState[trade.to].caught++;
+        }
+        if (dexState[trade.npcName]) dexState[trade.npcName].seen = 1;
+        finish(`🔄 交換成功！${trade.npcName} 進化成 ${trade.to}！`);
+      });
+    } else {
+      /* 隨機精靈交換：直接獲得 NPC 的精靈 */
+      if (dexState[trade.npcName]) {
+        dexState[trade.npcName].seen = 1;
+        dexState[trade.npcName].caught++;
+      }
+      finish(`🔄 交換成功！獲得 ${trade.npcName}！`);
+    }
   });
 });
 
@@ -2043,13 +2696,13 @@ function playTradeAnimation(npcMon, playerMon, trade, candySource, onDone) {
 }
 
 /* ===== NPC 進化動畫 ===== */
-function playNPCEvolutionAnimation(toName, onDone) {
+function playNPCEvolutionAnimation(toName, evoSpriteId, onDone) {
   const tgt = POKEDEX.find(p => p.name === toName);
-  if (!tgt) { onDone(); return; }
-
+  const sid = evoSpriteId || (tgt && tgt.id);
+  if (!sid) { onDone(); return; }
   const ov = document.getElementById('evoOverlay');
   const animImg = document.getElementById('evoAnimImg');
-  animImg.src = spriteUrl(tgt, false);
+  animImg.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${sid}.png`;
   animImg.style.display = '';
   animImg.onerror = () => { animImg.style.display = 'none'; };
   ov.style.display = 'flex';
@@ -2828,8 +3481,8 @@ function renderEvoList() {
 
   if (sources.length === 0) {
     list.innerHTML = `<div class="evo-empty">
-      還沒有可以進化的寶可夢<br>
-      先去捕捉寶可夢，收集足夠的糖果吧！
+      還沒有可以進化的精靈<br>
+      先去捕捉精靈，收集足夠的糖果吧！
     </div>`;
     prog.textContent = '';
     return;
@@ -3131,6 +3784,7 @@ async function boot() {
     }
 
     loadingScreen.classList.add('hidden');
+    WeatherFX.init();
     audio.init();
     SFX.init();
     SFX.resume();
