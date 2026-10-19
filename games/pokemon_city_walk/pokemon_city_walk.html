@@ -4,35 +4,33 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>🎊寵物小精靈 City Walk</title>
-<!-- PWA 核心 -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0d1117">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="🎊Pokemon City Walk">
-<!-- iOS 图标（至少提供一个 180×180 或 192×192） -->
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<!-- ===== Open Graph / Facebook / WhatsApp ===== -->
+
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://diczontse.github.io/home/games/pokemon_city_walk/pokemon_city_walk.html">
+<meta property="og:url" content="https://你的域名.com/">
 <meta property="og:title" content="🎊寵物小精靈 City Walk">
 <meta property="og:description" content="帶著手機在城市中漫步，捕捉寶可夢！天氣與日夜會影響精靈出現，快來收集全圖鑑。">
-<meta property="og:image" content="https://diczontse.github.io/home/games/pokemon_city_walk/icons/og-image.png">
+<meta property="og:image" content="https://你的域名.com/icons/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="寵物小精靈 City Walk 遊戲封面">
-<!-- ===== Twitter Card (提升 X/Twitter 分享效果，不影響 FB/WhatsApp) ===== -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="🎊寵物小精靈 City Walk">
 <meta name="twitter:description" content="帶著手機在城市中漫步，捕捉寶可夢！">
-<meta name="twitter:image" content="https://diczontse.github.io/home/games/pokemon_city_walk/icons/og-image.png">
+<meta name="twitter:image" content="https://你的域名.com/icons/og-image.png">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%;overflow:hidden;background:#0d1117;
     font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei",sans-serif;
-    user-select:none}
+    user-select:none;-webkit-touch-callout:none}
 
   #splash{position:fixed;inset:0;z-index:9000;
     background:linear-gradient(180deg,#4a90e2 0%,#87CEEB 40%,#7ab648 100%);
@@ -88,7 +86,6 @@
     opacity:0;transition:opacity .8s}
   #nightTint.on{opacity:1}
 
-  /* ===== 天氣粒子 / 霧層 ===== */
   #weatherFx{position:fixed;inset:0;z-index:3;pointer-events:none;display:none}
   #fogLayer{position:fixed;inset:0;z-index:3;pointer-events:none;opacity:0;
     transition:opacity 1.2s;
@@ -107,7 +104,6 @@
     box-shadow:0 2px 10px rgba(0,0,0,.5),0 0 18px #4285f4}
   @keyframes pulse{0%{transform:scale(.35);opacity:.95}100%{transform:scale(1.7);opacity:0}}
 
-  /* ===== 地圖上的精靈（已放大） ===== */
   .spawn{position:relative;width:88px;height:96px;cursor:pointer}
   .spawn-gif{position:absolute;left:50%;bottom:2px;width:80px;height:80px;margin-left:-40px;
 	object-fit:contain;image-rendering:pixelated;z-index:2;
@@ -126,7 +122,6 @@
   @keyframes shinyGlow{from{filter:drop-shadow(0 0 8px #ffd166) drop-shadow(0 0 18px #ffb703)}
     to{filter:drop-shadow(0 0 16px #ffd166) drop-shadow(0 0 34px #ffb703) brightness(1.2)}}
 
-  /* ===== NPC 圖標 ===== */
   .npc{position:relative;width:56px;height:64px;cursor:pointer}
   .npc-emoji{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);
     font-size:40px;line-height:1;z-index:2;
@@ -430,9 +425,10 @@
   .dex-cell.seen{opacity:.72}
   .dex-cell.unknown{opacity:.3;filter:grayscale(1)}
   .dex-icon{width:64px;height:64px;margin:0 auto 7px;position:relative;
-    display:flex;align-items:center;justify-content:center;font-size:30px}
+    display:flex;align-items:center;justify-content:center;font-size:30px;
+    touch-action:manipulation;-webkit-touch-callout:none}
   .dex-icon img{width:58px;height:58px;object-fit:contain;image-rendering:pixelated;
-    position:relative;z-index:2;margin-bottom:4px}
+    position:relative;z-index:2;margin-bottom:4px;pointer-events:none}
   .dex-fallback{font-size:30px;position:relative;z-index:2}
   .dex-icon .dex-shadow{position:absolute;left:50%;bottom:0;width:44px;height:9px;margin-left:-22px;
     border-radius:50%;background:radial-gradient(ellipse at center,rgba(0,0,0,.45),rgba(0,0,0,0) 76%)}
@@ -556,7 +552,6 @@
   #evoOverlay .evo-txt{color:#fff;font-size:22px;font-weight:900;letter-spacing:3px;
     text-shadow:0 0 20px rgba(255,255,255,.9),0 2px 14px rgba(0,0,0,.9)}
 
-  /* ===== 自製確認視窗 ===== */
   #confirmModal{position:fixed;inset:0;z-index:8000;
     display:flex;align-items:center;justify-content:center;padding:20px}
   #confirmModal.hidden{display:none!important}
@@ -649,7 +644,6 @@
 </div>
 <div id="toast"></div>
 
-<!-- ===== 自製確認視窗 ===== -->
 <div id="confirmModal" class="hidden">
   <div class="confirm-backdrop"></div>
   <div class="confirm-box">
@@ -663,7 +657,6 @@
   </div>
 </div>
 
-<!-- ===== 捕捉畫面 ===== -->
 <div id="catchScreen" class="overlay hidden day">
   <div id="sceneBg"><div class="sky"></div><div class="ground"></div></div>
   <div id="stars"></div>
@@ -689,7 +682,6 @@
   </div>
 </div>
 
-<!-- ===== 補給站畫面 ===== -->
 <div id="stopScreen" class="overlay hidden">
   <div class="stop-title">補 給 站</div>
   <div class="stop-stage" id="stopStage">
@@ -705,7 +697,6 @@
   </div>
 </div>
 
-<!-- ===== NPC 交換畫面 ===== -->
 <div id="npcScreen" class="overlay hidden">
   <div class="npc-title" id="npcTitle">🔄 交換</div>
   <div class="npc-sub" id="npcSub">NPC 願意與你交換精靈</div>
@@ -747,7 +738,6 @@
   </div>
 </div>
 
-<!-- ===== 圖鑑畫面 ===== -->
 <div id="dexScreen" class="overlay hidden">
   <div class="dex-top">
     <div class="dex-title">寶 可 夢 圖 鑑</div>
@@ -759,7 +749,6 @@
   </div>
 </div>
 
-<!-- ===== 進化畫面 ===== -->
 <div id="evoScreen" class="overlay hidden">
   <div class="dex-top">
     <div class="dex-title">進 化</div>
@@ -771,7 +760,6 @@
   </div>
 </div>
 
-<!-- 交換動畫 -->
 <div id="tradeAnimOverlay">
   <div class="trade-anim-stage">
     <div class="trade-mon left" id="tradeMonA">
@@ -789,7 +777,6 @@
   <div class="trade-txt">交 換 中…</div>
 </div>
 
-<!-- 進化動畫 -->
 <div id="evoOverlay" style="display:none">
   <img id="evoAnimImg" src="" alt="">
   <div class="evo-txt">進 化 中…</div>
@@ -806,7 +793,7 @@ const dexState = {};
 const candyBag = {};
 const nameById = {};
 
-const TOTAL_POKEMON = 1025;
+const TOTAL_POKEMON = 1370;
 const BATCH_SIZE = 40;
 
 /* =========================================================
@@ -984,12 +971,9 @@ async function loadAllData() {
     }
   });
 
-  /* 依 id 分配晝夜 / 天氣偏好 */
   assignEnvPreferences(pokedex);
-  /* 覆蓋稀有精靈規則 */
   applyRareSpawnRules(pokedex);
 
-  /* 追加地區形態 */
   REGIONAL_FORMS.forEach(f => {
     if (pokedex.some(p => p.id === f.id)) return;
     pokedex.push({
@@ -1005,10 +989,24 @@ async function loadAllData() {
     });
   });
 
-  /* 追加未知圖騰 28 種形態 */
   UNOWN_FORMS.forEach(f => {
     if (pokedex.some(p => p.id === f.id)) return;
     pokedex.push(f);
+  });
+
+  SPECIAL_FORMS.forEach(f => {
+    if (pokedex.some(p => p.id === f.id)) return;
+    pokedex.push({
+      id: f.id,
+      name: f.name,
+      emoji: '❓',
+      color: '#888',
+      rate: 0.35,
+      w: f.w,
+      notWild: false,
+      time: f.time || 'any',
+      weather: f.weather || 'any',
+    });
   });
 
   POKEDEX = pokedex;
@@ -1057,12 +1055,10 @@ function applyRareSpawnRules(pokedex) {
 }
 
 function spriteUrl(p, shiny) {
-  /* 1. 自訂路徑優先（未知圖騰、特殊形態） */
   if (p.spriteUrl) {
     if (shiny && p.shinySpriteUrl) return p.shinySpriteUrl;
     return p.spriteUrl;
   }
-  /* 2. PokeAPI sprites */
   const base = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/';
   const sid = p.spriteId || p.id;
   if (shiny) return `${base}shiny/${sid}.png`;
@@ -1073,7 +1069,6 @@ function spriteUrl(p, shiny) {
    3c. 稀有 / 神獸 / 御三家生成規則
    ========================================================= */
 const RARE_SPAWN_RULES = [
-  /* ===== 九代御三家 ===== */
   { id: 1,   time: 'day',   weather: ['clear','cloudy'], w: 5 },
   { id: 4,   time: 'day',   weather: ['clear'],          w: 5 },
   { id: 7,   time: 'day',   weather: ['rain','cloudy'],  w: 5 },
@@ -1102,7 +1097,6 @@ const RARE_SPAWN_RULES = [
   { id: 909, time: 'day',   weather: ['clear'],          w: 5 },
   { id: 912, time: 'night', weather: ['rain'],           w: 5 },
 
-  /* ===== 特定稀有精靈 ===== */
   { id: 25,  time: 'day',   weather: ['rain'],            w: 4 },
   { id: 133, time: 'day',   weather: ['clear','cloudy'],  w: 3 },
   { id: 147, time: 'night', weather: ['rain','fog'],      w: 2.5 },
@@ -1114,14 +1108,12 @@ const RARE_SPAWN_RULES = [
   { id: 633, time: 'night', weather: ['fog'],             w: 2 },
   { id: 704, time: 'night', weather: ['rain'],            w: 2.5 },
 
-  /* ===== 第一世代 ===== */
   { id: 144, time: 'night', weather: ['snow'],            w: 2.0 },
   { id: 145, time: 'day',   weather: ['rain'],            w: 2.0 },
   { id: 146, time: 'day',   weather: ['clear'],           w: 2.0 },
   { id: 150, time: 'night', weather: ['fog'],             w: 1.2 },
   { id: 151, time: 'any',   weather: 'any',               w: 0.6 },
 
-  /* ===== 第二世代 ===== */
   { id: 243, time: 'night', weather: ['rain'],            w: 1.8 },
   { id: 244, time: 'day',   weather: ['clear'],           w: 1.8 },
   { id: 245, time: 'night', weather: ['snow'],            w: 1.8 },
@@ -1129,7 +1121,6 @@ const RARE_SPAWN_RULES = [
   { id: 250, time: 'day',   weather: ['clear'],           w: 1.2 },
   { id: 251, time: 'night', weather: ['fog'],             w: 0.8 },
 
-  /* ===== 第三世代 ===== */
   { id: 377, time: 'day',   weather: ['clear'],           w: 1.5 },
   { id: 378, time: 'night', weather: ['snow'],            w: 1.5 },
   { id: 379, time: 'day',   weather: ['cloudy'],          w: 1.5 },
@@ -1141,7 +1132,6 @@ const RARE_SPAWN_RULES = [
   { id: 385, time: 'night', weather: ['clear'],           w: 0.7 },
   { id: 386, time: 'night', weather: ['fog'],             w: 0.7 },
 
-  /* ===== 第四世代 ===== */
   { id: 480, time: 'day',   weather: ['cloudy'],          w: 1.2 },
   { id: 481, time: 'day',   weather: ['clear'],           w: 1.2 },
   { id: 482, time: 'night', weather: ['fog'],             w: 1.2 },
@@ -1157,7 +1147,6 @@ const RARE_SPAWN_RULES = [
   { id: 492, time: 'day',   weather: ['clear'],           w: 0.7 },
   { id: 493, time: 'any',   weather: 'any',               w: 0.4 },
 
-  /* ===== 第五世代 ===== */
   { id: 494, time: 'day',   weather: ['clear'],           w: 0.6 },
   { id: 638, time: 'day',   weather: ['cloudy'],          w: 1.2 },
   { id: 639, time: 'night', weather: ['clear'],           w: 1.2 },
@@ -1172,7 +1161,6 @@ const RARE_SPAWN_RULES = [
   { id: 648, time: 'night', weather: ['fog'],             w: 0.6 },
   { id: 649, time: 'day',   weather: ['cloudy'],          w: 0.5 },
 
-  /* ===== 第六世代 ===== */
   { id: 716, time: 'day',   weather: ['clear'],           w: 0.9 },
   { id: 717, time: 'night', weather: ['fog'],             w: 0.9 },
   { id: 718, time: 'day',   weather: ['cloudy'],          w: 0.8 },
@@ -1180,7 +1168,6 @@ const RARE_SPAWN_RULES = [
   { id: 720, time: 'night', weather: ['fog'],             w: 0.5 },
   { id: 721, time: 'day',   weather: ['rain'],            w: 0.5 },
 
-  /* ===== 第七世代 ===== */
   { id: 772, time: 'any',   weather: 'any',               w: 0.5 },
   { id: 773, time: 'any',   weather: 'any',               w: 0.4 },
   { id: 785, time: 'day',   weather: ['rain'],            w: 1.0 },
@@ -1196,7 +1183,6 @@ const RARE_SPAWN_RULES = [
   { id: 802, time: 'night', weather: ['fog'],             w: 0.5 },
   { id: 807, time: 'night', weather: ['rain'],            w: 0.5 },
 
-  /* ===== 第八世代 ===== */
   { id: 888, time: 'day',   weather: ['clear'],           w: 0.8 },
   { id: 889, time: 'night', weather: ['cloudy'],          w: 0.8 },
   { id: 890, time: 'any',   weather: ['fog'],             w: 0.6 },
@@ -1209,7 +1195,6 @@ const RARE_SPAWN_RULES = [
   { id: 897, time: 'night', weather: ['fog'],             w: 0.8 },
   { id: 898, time: 'night', weather: ['clear','fog'],     w: 0.6 },
 
-  /* ===== 第九世代 ===== */
   { id: 1001, time: 'night', weather: ['fog'],            w: 0.5 },
   { id: 1002, time: 'day',   weather: ['snow'],           w: 0.5 },
   { id: 1003, time: 'night', weather: ['clear'],          w: 0.5 },
@@ -1248,21 +1233,25 @@ const REGIONAL_FORMS = [
   { id: 10114, name: '阿羅拉椰蛋樹',   time: 'day',   weather: ['clear'],  w: 2 },
   { id: 10115, name: '阿羅拉嘎啦嘎啦', time: 'night', weather: ['fog'],    w: 2 },
 
-  /* ===== 伽勒爾形態 ===== */
-  { id: 10158, name: '伽勒爾喵喵',     time: 'night', weather: ['fog'],    w: 4 },
-  { id: 10159, name: '伽勒爾小火馬',   time: 'day',   weather: ['cloudy'], w: 3.5 },
-  { id: 10160, name: '伽勒爾烈焰馬',   time: 'day',   weather: ['cloudy'], w: 2.5 },
-  { id: 10161, name: '伽勒爾呆殼獸',   time: 'day',   weather: ['rain'],   w: 3 },
-  { id: 10162, name: '伽勒爾大蔥鴨',   time: 'day',   weather: ['clear'],  w: 3 },
-  { id: 10163, name: '伽勒爾雙彈瓦斯', time: 'night', weather: ['fog'],    w: 3 },
-  { id: 10164, name: '伽勒爾魔牆人偶', time: 'night', weather: ['snow'],   w: 3 },
-  { id: 10165, name: '伽勒爾太陽珊瑚', time: 'night', weather: ['fog'],    w: 3 },
-  { id: 10166, name: '伽勒爾蛇紋熊',   time: 'day',   weather: ['clear','cloudy'], w: 4 },
-  { id: 10167, name: '伽勒爾直衝熊',   time: 'day',   weather: ['clear','cloudy'], w: 3 },
-  { id: 10168, name: '伽勒爾火紅不倒翁', time: 'night', weather: ['snow'], w: 3 },
-  { id: 10169, name: '伽勒爾急凍鳥',   time: 'day',   weather: ['snow'],   w: 1.2 },
+  /* ===== 伽勒爾形態（依使用者提供） ===== */
+  { id: 10161, name: '伽勒爾喵喵',     time: 'night', weather: ['fog'],    w: 4 },
+  { id: 10162, name: '伽勒爾小火馬',   time: 'day',   weather: ['clear'],  w: 3.5 },
+  { id: 10163, name: '伽勒爾烈焰馬',   time: 'day',   weather: ['clear'],  w: 2.5 },
+  { id: 10164, name: '伽勒爾呆呆獸',   time: 'day',   weather: ['rain'],   w: 3 },
+  { id: 10165, name: '伽勒爾呆殼獸',   time: 'day',   weather: ['rain'],   w: 2 },
+  { id: 10166, name: '伽勒爾大蔥鴨',   time: 'day',   weather: ['clear'],  w: 3 },
+  { id: 10167, name: '伽勒爾雙彈瓦斯', time: 'night', weather: ['fog'],    w: 3 },
+  { id: 10168, name: '伽勒爾魔牆人偶', time: 'night', weather: ['snow'],   w: 3 },
+  { id: 10169, name: '伽勒爾急凍鳥',   time: 'night', weather: ['snow'],   w: 1.2 },
   { id: 10170, name: '伽勒爾閃電鳥',   time: 'night', weather: ['rain'],   w: 1.2 },
   { id: 10171, name: '伽勒爾火焰鳥',   time: 'night', weather: ['fog'],    w: 1.2 },
+  { id: 10172, name: '伽勒爾呆呆王',   time: 'day',   weather: ['rain'],   w: 2 },
+  { id: 10173, name: '伽勒爾太陽珊瑚', time: 'night', weather: ['clear'],  w: 3 },
+  { id: 10174, name: '伽勒爾蛇紋熊',   time: 'day',   weather: ['clear','cloudy'], w: 4 },
+  { id: 10175, name: '伽勒爾直衝熊',   time: 'day',   weather: ['clear','cloudy'], w: 3 },
+  { id: 10176, name: '伽勒爾火紅不倒翁', time: 'night', weather: ['snow'], w: 3 },
+  { id: 10177, name: '伽勒爾達摩狒狒', time: 'night', weather: ['snow'],   w: 2 },
+  { id: 10178, name: '伽勒爾達摩狒狒(達摩模式)', time: 'night', weather: ['snow'], w: 2 },
 
   /* ===== 洗翠形態 ===== */
   { id: 10229, name: '洗翠卡蒂狗',     time: 'day',   weather: ['clear'],  w: 3.5 },
@@ -1270,29 +1259,292 @@ const REGIONAL_FORMS = [
   { id: 10231, name: '洗翠霹靂電球',   time: 'night', weather: ['rain'],   w: 3.5 },
   { id: 10232, name: '洗翠頑皮雷彈',   time: 'night', weather: ['rain'],   w: 2.5 },
   { id: 10233, name: '洗翠火爆獸',     time: 'night', weather: ['fog'],    w: 1.5 },
-  { id: 10234, name: '洗翠大劍鬼',     time: 'night', weather: ['rain'],   w: 1.5 },
-  { id: 10235, name: '洗翠黏黏寶',     time: 'night', weather: ['rain'],   w: 2.5 },
-  { id: 10236, name: '洗翠黏美兒',     time: 'night', weather: ['rain'],   w: 2 },
-  { id: 10237, name: '洗翠黏美龍',     time: 'night', weather: ['rain'],   w: 1.5 },
-  { id: 10238, name: '洗翠狃拉',       time: 'night', weather: ['snow'],   w: 3 },
-  { id: 10239, name: '洗翠大狃拉',     time: 'night', weather: ['snow'],   w: 2 },
-  { id: 10240, name: '洗翠索羅亞',     time: 'night', weather: ['fog'],    w: 2.5 },
-  { id: 10241, name: '洗翠索羅亞克',   time: 'night', weather: ['fog'],    w: 1.0 },
-  { id: 10242, name: '洗翠勇士雄鷹',   time: 'day',   weather: ['cloudy'], w: 1.0 },
+  { id: 10234, name: '洗翠千針魚',       time: 'night', weather: ['snow'],   w: 3 },
+  { id: 10235, name: '洗翠狃拉',       time: 'night', weather: ['snow'],   w: 3 },
+  { id: 10236, name: '洗翠大劍鬼',     time: 'night', weather: ['rain'],   w: 1.5 },
+  { id: 10237, name: '洗翠裙兒小姐',     time: 'day', weather: ['snow'],   w: 1.5 },
+  { id: 10238, name: '洗翠索羅亞',   time: 'night', weather: ['fog'],    w: 2 },
+  { id: 10239, name: '洗翠索羅亞克',   time: 'night', weather: ['fog'],    w: 1.0 },
+  { id: 10240, name: '洗翠勇士雄鷹',   time: 'day',   weather: ['cloudy'], w: 1.0 },
+  { id: 10241, name: '洗翠黏美兒',     time: 'night', weather: ['rain'],   w: 2 },
+  { id: 10242, name: '洗翠黏美龍',     time: 'night', weather: ['rain'],   w: 1.5 },
   { id: 10243, name: '洗翠冰岩怪',     time: 'night', weather: ['snow'],   w: 1.5 },
-  { id: 10244, name: '洗翠詭角鹿',     time: 'night', weather: ['fog'],    w: 1.5 },
-  { id: 10245, name: '洗翠狙射樹梟',   time: 'night', weather: ['fog'],    w: 0.8 },
-
-  /* ===== 帕底亞形態 ===== */
-  { id: 10250, name: '帕底亞烏波',     time: 'night', weather: ['rain'],   w: 3.5 },
-  { id: 10251, name: '帕底亞土王',     time: 'night', weather: ['rain'],   w: 2.5 },
-  { id: 10252, name: '帕底亞肯泰羅(鬥戰種)', time: 'day', weather: ['clear'], w: 2 },
-  { id: 10253, name: '帕底亞肯泰羅(火熾種)', time: 'day', weather: ['clear'], w: 2 },
-  { id: 10254, name: '帕底亞肯泰羅(水瀾種)', time: 'day', weather: ['rain'],  w: 2 },
+  { id: 10244, name: '洗翠狙射樹梟',   time: 'night', weather: ['fog'],    w: 0.8 },
 ];
 
 /* =========================================================
-   3e. 未知圖騰 28 種形態
+   3e. 特殊形態（10001–10032）
+   ========================================================= */
+const SPECIAL_FORMS = [
+  { id: 10001, name: '代歐奇希斯(攻擊形態)', time: 'any',   weather: 'any',      w: 0.8 },
+  { id: 10002, name: '代歐奇希斯(防禦形態)', time: 'any',   weather: 'any',      w: 0.8 },
+  { id: 10003, name: '代歐奇希斯(速度形態)', time: 'any',   weather: 'any',      w: 0.8 },
+  { id: 10004, name: '結草貴婦(砂土蓑衣)',   time: 'day',   weather: ['clear'],  w: 2.5 },
+  { id: 10005, name: '結草貴婦(垃圾蓑衣)',   time: 'night', weather: ['fog'],    w: 2.5 },
+  { id: 10006, name: '謝米(天空形態)',       time: 'day',   weather: ['clear'],  w: 1.5 },
+  { id: 10007, name: '騎拉帝納(起源形態)',   time: 'night', weather: ['fog'],    w: 1.2 },
+  { id: 10008, name: '洛托姆(加熱形態)',     time: 'day',   weather: ['clear'],  w: 3 },
+  { id: 10009, name: '洛托姆(清洗形態)',     time: 'day',   weather: ['rain'],   w: 3 },
+  { id: 10010, name: '洛托姆(結冰形態)',     time: 'night', weather: ['snow'],   w: 3 },
+  { id: 10011, name: '洛托姆(旋轉形態)',     time: 'day',   weather: ['cloudy'], w: 3 },
+  { id: 10012, name: '洛托姆(切割形態)',     time: 'day',   weather: ['clear'],  w: 3 },
+  { id: 10013, name: '飄浮泡泡(太陽形態)',   time: 'day',   weather: ['clear'],  w: 4 },
+  { id: 10014, name: '飄浮泡泡(雨水形態)',   time: 'any',   weather: ['rain'],   w: 4 },
+  { id: 10015, name: '飄浮泡泡(雪雲形態)',   time: 'any',   weather: ['snow'],   w: 4 },
+  { id: 10016, name: '野蠻鱸魚(藍條紋形態)', time: 'any',   weather: 'any',      w: 3 },
+  { id: 10017, name: '達摩狒狒(達摩模式)',   time: 'any',   weather: 'any',      w: 2.5 },
+  { id: 10018, name: '美洛耶塔(舞步形態)',   time: 'any',   weather: 'any',      w: 1.5 },
+  { id: 10019, name: '龍捲雲(靈獸形態)',     time: 'any',   weather: 'any',      w: 1.2 },
+  { id: 10020, name: '雷電雲(靈獸形態)',     time: 'any',   weather: 'any',      w: 1.2 },
+  { id: 10021, name: '土地雲(靈獸形態)',     time: 'any',   weather: 'any',      w: 1.2 },
+  { id: 10022, name: '酋雷姆(暗黑形態)',     time: 'night', weather: ['clear'],  w: 1.0 },
+  { id: 10023, name: '酋雷姆(焰白形態)',     time: 'day',   weather: ['clear'],  w: 1.0 },
+  { id: 10024, name: '凱路迪歐(覺悟形態)',   time: 'day',   weather: ['rain'],   w: 1.5 },
+  { id: 10025, name: '超能妙喵(雌性)',       time: 'any',   weather: 'any',      w: 3 },
+  { id: 10026, name: '堅盾劍怪(刀劍形態)',   time: 'any',   weather: 'any',      w: 2.5 },
+  { id: 10027, name: '南瓜精(小尺寸)',       time: 'night', weather: ['fog'],    w: 3 },
+  { id: 10028, name: '南瓜精(大尺寸)',       time: 'night', weather: ['fog'],    w: 2.5 },
+  { id: 10029, name: '南瓜精(特大尺寸)',     time: 'night', weather: ['fog'],    w: 1.5 },
+  { id: 10030, name: '南瓜怪人(小尺寸)',     time: 'night', weather: ['fog'],    w: 2 },
+  { id: 10031, name: '南瓜怪人(大尺寸)',     time: 'night', weather: ['fog'],    w: 1.5 },
+  { id: 10032, name: '南瓜怪人(特大尺寸)',   time: 'night', weather: ['fog'],    w: 1 },
+  { id: 10033, name: '妙蛙花(超級進化)',       time: 'day',   weather: ['clear'],  w: 0.6 },
+  { id: 10034, name: '噴火龍(超級進化X)',     time: 'day',   weather: ['clear'],  w: 0.6 },
+  { id: 10035, name: '噴火龍(超級進化Y)',     time: 'day',   weather: ['clear'],  w: 0.6 },
+  { id: 10036, name: '水箭龜(超級進化)',       time: 'day',   weather: ['rain'],   w: 0.6 },
+  { id: 10037, name: '胡地(超級進化)',         time: 'any',   weather: 'any',      w: 0.5 },
+  { id: 10038, name: '耿鬼(超級進化)',         time: 'night', weather: ['fog'],    w: 0.5 },
+  { id: 10039, name: '袋獸(超級進化)',         time: 'day',   weather: ['clear'],  w: 0.5 },
+  { id: 10040, name: '凱羅斯(超級進化)',       time: 'day',   weather: ['clear'],  w: 0.5 },
+  { id: 10041, name: '暴鯉龍(超級進化)',       time: 'night', weather: ['rain'],   w: 0.5 },
+  { id: 10042, name: '化石翼龍(超級進化)',     time: 'day',   weather: ['clear'],  w: 0.5 },
+  { id: 10043, name: '超夢(超級進化X)',       time: 'night', weather: ['fog'],    w: 0.4 },
+  { id: 10044, name: '超夢(超級進化Y)',       time: 'day',   weather: ['fog'],    w: 0.4 },
+  { id: 10045, name: '電龍(超級進化)',         time: 'day',   weather: ['cloudy'], w: 0.5 },
+  { id: 10046, name: '巨鉗螳螂(超級進化)',     time: 'day',   weather: ['clear'],  w: 0.5 },
+  { id: 10047, name: '赫拉克羅斯(超級進化)',   time: 'day',   weather: ['clear'],  w: 0.5 },
+  { id: 10048, name: '黑魯加(超級進化)',       time: 'night', weather: ['fog'],    w: 0.5 },
+  { id: 10049, name: '班基拉斯(超級進化)',     time: 'night', weather: ['clear'],  w: 0.5 },
+  { id: 10050, name: '火焰雞(超級進化)',       time: 'day',   weather: ['clear'],  w: 0.5 },
+  { id: 10051, name: '沙奈朵(超級進化)',       time: 'any',   weather: 'any',      w: 0.5 },
+  { id: 10052, name: '大嘴娃(超級進化)',       time: 'day',   weather: ['cloudy'], w: 0.5 },
+  { id: 10053, name: '波士可多拉(超級進化)',   time: 'day',   weather: ['clear'],  w: 0.5 },
+  { id: 10054, name: '恰雷姆(超級進化)',       time: 'day',   weather: ['clear'],  w: 0.5 },
+  { id: 10055, name: '雷電獸(超級進化)',       time: 'day',   weather: ['rain'],   w: 0.5 },
+  { id: 10056, name: '詛咒娃娃(超級進化)',     time: 'night', weather: ['fog'],    w: 0.5 },
+  { id: 10057, name: '阿勃梭魯(超級進化)',     time: 'night', weather: ['fog'],    w: 0.5 },
+  { id: 10058, name: '烈咬陸鯊(超級進化)',     time: 'day',   weather: ['clear'],  w: 0.5 },
+  { id: 10059, name: '路卡利歐(超級進化)',     time: 'day',   weather: ['clear'],  w: 0.5 },
+  { id: 10060, name: '暴雪王(超級進化)',       time: 'night', weather: ['snow'],   w: 0.5 },
+  { id: 10061, name: '永恆之花的花葉蒂',       time: 'any',   weather: 'any',      w: 0.3 },
+  { id: 10062, name: '拉帝亞斯(超級進化)',     time: 'day',   weather: ['clear','cloudy'], w: 0.4 },
+  { id: 10063, name: '拉帝歐斯(超級進化)',     time: 'night', weather: ['clear'],  w: 0.4 },
+  { id: 10064, name: '巨沼怪(超級進化)',       time: 'day',   weather: ['rain'],   w: 0.5 },
+  { id: 10065, name: '蜥蜴王(超級進化)',       time: 'day',   weather: ['clear'],  w: 0.5 },
+  { id: 10066, name: '勾魂眼(超級進化)',       time: 'night', weather: ['fog'],    w: 0.5 },
+  { id: 10067, name: '七夕青鳥(超級進化)',     time: 'day',   weather: ['cloudy'], w: 0.5 },
+  { id: 10068, name: '艾路雷朵(超級進化)',     time: 'day',   weather: ['clear'],  w: 0.5 },
+  { id: 10069, name: '差不多娃娃(超級進化)',   time: 'any',   weather: 'any',      w: 0.5 },
+  { id: 10070, name: '巨牙鯊(超級進化)',       time: 'night', weather: ['rain'],   w: 0.5 },
+  { id: 10071, name: '呆殼獸(超級進化)',       time: 'day',   weather: ['rain'],   w: 0.5 },
+  { id: 10072, name: '大鋼蛇(超級進化)',       time: 'day',   weather: ['clear'],  w: 0.5 },
+  { id: 10073, name: '大比鳥(超級進化)',       time: 'day',   weather: ['clear'],  w: 0.5 },
+  { id: 10074, name: '冰鬼護(超級進化)',       time: 'night', weather: ['snow'],   w: 0.5 },
+  { id: 10075, name: '蒂安希(超級進化)',       time: 'any',   weather: 'any',      w: 0.3 },
+  { id: 10076, name: '巨金怪(超級進化)',       time: 'day',   weather: ['cloudy'], w: 0.5 },
+  { id: 10077, name: '蓋歐卡(原始回歸)',       time: 'night', weather: ['rain'],   w: 0.4 },
+  { id: 10078, name: '固拉多(原始回歸)',       time: 'day',   weather: ['clear'],  w: 0.4 },
+  { id: 10079, name: '烈空坐(超級進化)',       time: 'any',   weather: ['fog'],    w: 0.4 },
+  { id: 10080, name: '皮卡丘(搖滾巨星形態)',   time: 'any',   weather: 'any',      w: 0.4 },
+  { id: 10081, name: '皮卡丘(貴婦形態)',       time: 'any',   weather: 'any',      w: 0.4 },
+  { id: 10082, name: '皮卡丘(流行偶像形態)',   time: 'any',   weather: 'any',      w: 0.4 },
+  { id: 10083, name: '皮卡丘(博士形態)',       time: 'any',   weather: 'any',      w: 0.4 },
+  { id: 10084, name: '皮卡丘(蒙面摔角形態)',   time: 'any',   weather: 'any',      w: 0.4 },
+  { id: 10085, name: '皮卡丘(換裝形態)',       time: 'any',   weather: 'any',      w: 0.4 },
+  { id: 10086, name: '胡帕(解放形態)',         time: 'night', weather: ['fog'],    w: 0.4 },
+  { id: 10087, name: '噴火駝(超級進化)',       time: 'day',   weather: ['clear'],  w: 0.5 },
+  { id: 10088, name: '長耳兔(超級進化)',       time: 'day',   weather: ['clear'],  w: 0.5 },
+  { id: 10089, name: '暴飛龍(超級進化)',       time: 'day',   weather: ['cloudy'], w: 0.5 },
+  { id: 10090, name: '大針蜂(超級進化)',       time: 'day',   weather: ['clear'],  w: 0.5 },
+  { id: 10093, name: '阿羅拉拉達(霸主形態)',   time: 'night', weather: ['clear'],  w: 0.5 },
+  { id: 10094, name: '皮卡丘(初始帽子)',       time: 'any',   weather: 'any',      w: 0.3 },
+  { id: 10095, name: '皮卡丘(豐緣帽子)',       time: 'any',   weather: 'any',      w: 0.3 },
+  { id: 10096, name: '皮卡丘(神奧帽子)',       time: 'any',   weather: 'any',      w: 0.3 },
+  { id: 10097, name: '皮卡丘(合眾帽子)',       time: 'any',   weather: 'any',      w: 0.3 },
+  { id: 10098, name: '皮卡丘(卡洛斯帽子)',     time: 'any',   weather: 'any',      w: 0.3 },
+  { id: 10099, name: '皮卡丘(阿羅拉帽子)',     time: 'any',   weather: 'any',      w: 0.3 },
+  { id: 10116, name: '甲賀忍蛙(羈絆變身)',       time: 'any',   weather: 'any',      w: 0.3 },
+  { id: 10117, name: '甲賀忍蛙(小智版)',         time: 'any',   weather: 'any',      w: 0.3 },
+  { id: 10118, name: '基格爾德(10%形態)',       time: 'any',   weather: 'any',      w: 0.4 },
+  { id: 10119, name: '基格爾德(50%形態)',       time: 'any',   weather: 'any',      w: 0.4 },
+  { id: 10120, name: '基格爾德(完全體形態)',     time: 'any',   weather: 'any',      w: 0.3 },
+  { id: 10121, name: '貓鼬探長(霸主形態)',       time: 'day',   weather: ['clear'],  w: 0.5 },
+  { id: 10122, name: '鍬農炮蟲(霸主形態)',       time: 'day',   weather: ['clear'],  w: 0.5 },
+  { id: 10123, name: '花舞鳥(啪滋啪滋風格)',     time: 'day',   weather: ['rain'],   w: 0.5 },
+  { id: 10124, name: '花舞鳥(呼拉呼拉風格)',     time: 'day',   weather: ['clear'],  w: 0.5 },
+  { id: 10125, name: '花舞鳥(輕飄飄風格)',       time: 'night', weather: ['fog'],    w: 0.5 },
+  { id: 10126, name: '鬃岩狼人(黑夜形態)',       time: 'night', weather: ['clear'],  w: 0.5 },
+  { id: 10127, name: '弱丁魚(魚群形態)',         time: 'day',   weather: ['rain'],   w: 0.4 },
+  { id: 10128, name: '偽螳草(霸主形態)',         time: 'day',   weather: ['clear'],  w: 0.5 },
+  { id: 10129, name: '焰后蜥(霸主形態)',         time: 'night', weather: ['clear'],  w: 0.5 },
+  { id: 10130, name: '小隕星(橙色隕石形態)',     time: 'night', weather: ['clear'],  w: 0.6 },
+  { id: 10131, name: '小隕星(黃色隕石形態)',     time: 'night', weather: ['clear'],  w: 0.6 },
+  { id: 10132, name: '小隕星(綠色隕石形態)',     time: 'night', weather: ['clear'],  w: 0.6 },
+  { id: 10133, name: '小隕星(藍色隕石形態)',     time: 'night', weather: ['clear'],  w: 0.6 },
+  { id: 10134, name: '小隕星(靛色隕石形態)',     time: 'night', weather: ['clear'],  w: 0.6 },
+  { id: 10135, name: '小隕星(紫色隕石形態)',     time: 'night', weather: ['clear'],  w: 0.6 },
+  { id: 10136, name: '小隕星(紅色核心形態)',     time: 'day',   weather: ['clear'],  w: 0.6 },
+  { id: 10137, name: '小隕星(橙色核心形態)',     time: 'day',   weather: ['clear'],  w: 0.6 },
+  { id: 10138, name: '小隕星(黃色核心形態)',     time: 'day',   weather: ['clear'],  w: 0.6 },
+  { id: 10139, name: '小隕星(綠色核心形態)',     time: 'day',   weather: ['clear'],  w: 0.6 },
+  { id: 10140, name: '小隕星(藍色核心形態)',     time: 'day',   weather: ['clear'],  w: 0.6 },
+  { id: 10141, name: '小隕星(靛色核心形態)',     time: 'day',   weather: ['clear'],  w: 0.6 },
+  { id: 10142, name: '小隕星(紫色核心形態)',     time: 'day',   weather: ['clear'],  w: 0.6 },
+  { id: 10143, name: '謎擬Q(現形形態)',         time: 'night', weather: ['fog'],    w: 0.5 },
+  { id: 10144, name: '謎擬Q(霸主形態)',         time: 'night', weather: ['fog'],    w: 0.5 },
+  { id: 10145, name: '謎擬Q(霸主現形形態)',     time: 'night', weather: ['fog'],    w: 0.5 },
+  { id: 10146, name: '杖尾鱗甲龍(霸主形態)',     time: 'day',   weather: ['cloudy'], w: 0.5 },
+  { id: 10147, name: '瑪機雅娜(原始形態)',       time: 'any',   weather: 'any',      w: 0.4 },
+  { id: 10148, name: '皮卡丘(搭檔帽子)',         time: 'any',   weather: 'any',      w: 0.3 },
+  { id: 10149, name: '嘎啦嘎啦(霸主形態)',       time: 'night', weather: ['fog'],    w: 0.5 },
+  { id: 10150, name: '蝶結萌虻(霸主形態)',       time: 'day',   weather: ['clear'],  w: 0.5 },
+  { id: 10151, name: '岩狗狗(我行我素)',         time: 'any',   weather: 'any',      w: 0.5 },
+  { id: 10152, name: '鬃岩狼人(黃昏形態)',       time: 'any',   weather: 'any',      w: 0.4 },
+  { id: 10153, name: '滴蛛霸(霸主形態)',         time: 'day',   weather: ['rain'],   w: 0.5 },
+  { id: 10154, name: '托戈德瑪爾(霸主形態)',     time: 'day',   weather: ['clear'],  w: 0.5 },
+  { id: 10155, name: '奈克洛茲瑪(黃昏之鬃)',     time: 'night', weather: ['clear'],  w: 0.3 },
+  { id: 10156, name: '奈克洛茲瑪(拂曉之翼)',     time: 'day',   weather: ['clear'],  w: 0.3 },
+  { id: 10157, name: '奈克洛茲瑪(究極形態)',     time: 'any',   weather: ['fog'],    w: 0.25 },
+  { id: 10158, name: '皮卡丘(搭檔)',   time: 'any',   weather: 'any',      w: 0.3 },
+  { id: 10159, name: '伊布(搭檔)',     time: 'any',   weather: 'any',      w: 0.3 },
+  { id: 10160, name: '皮卡丘(世界帽子)',         time: 'any',   weather: 'any',      w: 0.25 },
+  { id: 10179, name: '伽勒爾哭哭面具',             time: 'day',   weather: ['clear','cloudy'], w: 3 },
+  { id: 10180, name: '伽勒爾泥巴魚',             time: 'any',   weather: 'any',              w: 3 },
+  { id: 10182, name: '古月鳥(一口吞的樣子)',     time: 'day',   weather: ['rain'],           w: 2.5 },
+  { id: 10183, name: '古月鳥(大口吞的樣子)',     time: 'day',   weather: ['rain'],           w: 2.5 },
+  { id: 10184, name: '顫弦蠑螈(低調的樣子)',     time: 'any',   weather: 'any',              w: 2 },
+  { id: 10185, name: '冰砌鵝(解凍頭)',           time: 'night', weather: ['snow'],           w: 2.5 },
+  { id: 10186, name: '愛管侍(雌性)',             time: 'any',   weather: 'any',              w: 3 },
+  { id: 10187, name: '莫魯貝可(空腹花紋)',       time: 'night', weather: ['fog'],            w: 2.5 },
+  { id: 10188, name: '蒼響(劍之王)',             time: 'day',   weather: ['clear'],          w: 0.5 },
+  { id: 10189, name: '藏瑪然特(盾之王)',         time: 'night', weather: ['cloudy'],         w: 0.5 },
+  { id: 10190, name: '無極汰那(無極巨化)',       time: 'any',   weather: ['fog'],            w: 0.4 },
+  { id: 10191, name: '武道熊師(連擊流)',         time: 'night', weather: ['rain'],           w: 0.5 },
+  { id: 10192, name: '薩戮德(阿爸)',             time: 'day',   weather: ['cloudy'],         w: 0.4 },
+  { id: 10193, name: '蕾冠王(騎白馬的樣子)',     time: 'night', weather: ['snow'],           w: 0.4 },
+  { id: 10194, name: '蕾冠王(騎黑馬的樣子)',     time: 'night', weather: ['fog'],            w: 0.4 },
+  { id: 10195, name: '妙蛙花(超極巨化)',         time: 'day',   weather: ['clear'],          w: 0.4 },
+  { id: 10196, name: '噴火龍(超極巨化)',         time: 'day',   weather: ['clear'],          w: 0.4 },
+  { id: 10197, name: '水箭龜(超極巨化)',         time: 'day',   weather: ['rain'],           w: 0.4 },
+  { id: 10198, name: '巴大蝶(超極巨化)',         time: 'day',   weather: ['clear','cloudy'], w: 0.4 },
+  { id: 10199, name: '皮卡丘(超極巨化)',         time: 'any',   weather: 'any',              w: 0.4 },
+  { id: 10200, name: '喵喵(超極巨化)',           time: 'night', weather: ['fog'],            w: 0.4 },
+  { id: 10201, name: '怪力(超極巨化)',           time: 'day',   weather: ['clear'],          w: 0.4 },
+  { id: 10202, name: '耿鬼(超極巨化)',           time: 'night', weather: ['fog'],            w: 0.4 },
+  { id: 10203, name: '巨鉗蟹(超極巨化)',         time: 'day',   weather: ['rain'],           w: 0.4 },
+  { id: 10204, name: '拉普拉斯(超極巨化)',       time: 'night', weather: ['snow'],           w: 0.4 },
+  { id: 10205, name: '伊布(超極巨化)',           time: 'day',   weather: ['clear','cloudy'], w: 0.4 },
+  { id: 10206, name: '卡比獸(超極巨化)',         time: 'any',   weather: 'any',              w: 0.4 },
+  { id: 10207, name: '灰塵山(超極巨化)',         time: 'night', weather: ['fog'],            w: 0.4 },
+  { id: 10208, name: '美錄梅塔(超極巨化)',       time: 'any',   weather: 'any',              w: 0.4 },
+  { id: 10209, name: '轟擂金剛猩(超極巨化)',     time: 'day',   weather: ['clear','cloudy'], w: 0.4 },
+  { id: 10210, name: '閃焰王牌(超極巨化)',       time: 'day',   weather: ['clear'],          w: 0.4 },
+  { id: 10211, name: '千面避役(超極巨化)',       time: 'night', weather: ['rain'],           w: 0.4 },
+  { id: 10212, name: '鋼鎧鴉(超極巨化)',         time: 'day',   weather: ['cloudy'],         w: 0.4 },
+  { id: 10213, name: '以歐路普(超極巨化)',       time: 'night', weather: ['fog'],            w: 0.4 },
+  { id: 10214, name: '暴噬龜(超極巨化)',         time: 'day',   weather: ['rain'],           w: 0.4 },
+  { id: 10215, name: '巨炭山(超極巨化)',         time: 'day',   weather: ['clear'],          w: 0.4 },
+  { id: 10216, name: '蘋裹龍(超極巨化)',         time: 'day',   weather: ['clear'],          w: 0.4 },
+  { id: 10217, name: '豐蜜龍(超極巨化)',         time: 'day',   weather: ['clear','cloudy'], w: 0.4 },
+  { id: 10218, name: '沙螺蟒(超極巨化)',         time: 'day',   weather: ['clear'],          w: 0.4 },
+  { id: 10219, name: '顫弦蠑螈(高調超極巨化)',   time: 'any',   weather: 'any',              w: 0.4 },
+  { id: 10220, name: '焚焰蚣(超極巨化)',         time: 'day',   weather: ['clear'],          w: 0.4 },
+  { id: 10221, name: '布莉姆溫(超極巨化)',       time: 'night', weather: ['fog'],            w: 0.4 },
+  { id: 10222, name: '長毛巨魔(超極巨化)',       time: 'night', weather: ['fog'],            w: 0.4 },
+  { id: 10223, name: '霜奶仙(超極巨化)',         time: 'day',   weather: ['snow'],           w: 0.4 },
+  { id: 10224, name: '大王銅象(超極巨化)',       time: 'day',   weather: ['clear'],          w: 0.4 },
+  { id: 10225, name: '鋁鋼龍(超極巨化)',         time: 'day',   weather: ['cloudy'],         w: 0.4 },
+  { id: 10226, name: '武道熊師(一擊流超極巨化)', time: 'day',   weather: ['clear'],          w: 0.3 },
+  { id: 10227, name: '武道熊師(連擊流超極巨化)', time: 'night', weather: ['rain'],           w: 0.3 },
+  { id: 10228, name: '顫弦蠑螈(低調超極巨化)',   time: 'night', weather: ['fog'],            w: 0.4 },
+  { id: 10245, name: '帝牙盧卡(起源形態)', time: 'day',   weather: ['clear'],  w: 1.0 },
+  { id: 10246, name: '帕路奇亞(起源形態)', time: 'night', weather: ['rain'],   w: 1.0 },
+  { id: 10247, name: '野蠻鱸魚(白條紋形態)', time: 'any', weather: 'any',      w: 3 },
+  { id: 10248, name: '幽尾玄魚(雌性)',     time: 'night', weather: ['rain'],   w: 2 },
+  { id: 10249, name: '眷戀雲(靈獸形態)',   time: 'any',   weather: 'any',      w: 1.2 },
+  { id: 10250, name: '帕底亞肯泰羅(鬥戰種)', time: 'day', weather: ['clear'],  w: 2 },
+  { id: 10251, name: '帕底亞肯泰羅(火熾種)', time: 'day', weather: ['clear'],  w: 2 },
+  { id: 10252, name: '帕底亞肯泰羅(水瀾種)', time: 'day', weather: ['rain'],   w: 2 },
+  { id: 10253, name: '帕底亞烏波',         time: 'night', weather: ['rain'],   w: 3.5 },
+  { id: 10254, name: '飄香豚(雌性)',       time: 'day',   weather: ['clear','cloudy'], w: 3 },
+  { id: 10255, name: '土龍節節(三節形態)', time: 'any',   weather: 'any',      w: 2.5 },
+  { id: 10256, name: '海豚俠(英雄形態)',   time: 'day',   weather: ['rain'],   w: 2 },
+  { id: 10257, name: '一家鼠(三隻家庭)',   time: 'any',   weather: 'any',      w: 3 },
+  { id: 10258, name: '米立龍(下垂姿勢)',   time: 'any',   weather: 'any',      w: 3 },
+  { id: 10259, name: '米立龍(平挺姿勢)',   time: 'any',   weather: 'any',      w: 3 },
+  { id: 10260, name: '怒鸚哥(藍羽毛)',     time: 'day',   weather: ['clear','cloudy'], w: 3.5 },
+  { id: 10261, name: '怒鸚哥(黃羽毛)',     time: 'day',   weather: ['clear'],  w: 3.5 },
+  { id: 10262, name: '怒鸚哥(白羽毛)',     time: 'any',   weather: 'any',      w: 3.5 },
+  { id: 10263, name: '索財靈(徒步形態)',   time: 'night', weather: ['fog'],    w: 2.5 },
+  { id: 10272, name: '月月熊(赫月)',             time: 'night', weather: ['fog'],              w: 0.4 },
+  { id: 10273, name: '厄鬼椪(水井面具)',         time: 'night', weather: ['rain'],             w: 0.5 },
+  { id: 10274, name: '厄鬼椪(火灶面具)',         time: 'day',   weather: ['clear'],            w: 0.5 },
+  { id: 10275, name: '厄鬼椪(礎石面具)',         time: 'day',   weather: ['cloudy'],           w: 0.5 },
+  { id: 10276, name: '太樂巴戈斯(太晶形態)',     time: 'day',   weather: ['clear'],            w: 0.4 },
+  { id: 10277, name: '太樂巴戈斯(星晶形態)',     time: 'night', weather: ['fog'],              w: 0.3 },
+  { id: 10278, name: '皮可西(超級進化)',         time: 'any',   weather: 'any',                w: 0.4 },
+  { id: 10279, name: '大食花(超級進化)',         time: 'day',   weather: ['clear'],            w: 0.4 },
+  { id: 10280, name: '寶石海星(超級進化)',       time: 'night', weather: ['rain'],             w: 0.4 },
+  { id: 10281, name: '快龍(超級進化)',           time: 'day',   weather: ['cloudy'],           w: 0.4 },
+  { id: 10282, name: '大竺葵(超級進化)',         time: 'day',   weather: ['clear'],            w: 0.4 },
+  { id: 10283, name: '大力鱷(超級進化)',         time: 'day',   weather: ['rain'],             w: 0.4 },
+  { id: 10284, name: '盔甲鳥(超級進化)',         time: 'day',   weather: ['cloudy'],           w: 0.4 },
+  { id: 10285, name: '雪妖女(超級進化)',         time: 'night', weather: ['snow'],             w: 0.4 },
+  { id: 10286, name: '炎武王(超級進化)',         time: 'day',   weather: ['clear'],            w: 0.4 },
+  { id: 10287, name: '龍頭地鼠(超級進化)',       time: 'day',   weather: ['clear'],            w: 0.4 },
+  { id: 10288, name: '蜈蚣王(超級進化)',         time: 'night', weather: ['fog'],              w: 0.4 },
+  { id: 10289, name: '頭巾混混(超級進化)',       time: 'night', weather: ['clear'],            w: 0.4 },
+  { id: 10290, name: '電鰻王(超級進化)',         time: 'day',   weather: ['rain'],             w: 0.4 },
+  { id: 10291, name: '水晶燈火靈(超級進化)',     time: 'night', weather: ['fog'],              w: 0.4 },
+  { id: 10292, name: '布里卡隆(超級進化)',       time: 'day',   weather: ['clear'],            w: 0.4 },
+  { id: 10293, name: '妖火紅狐(超級進化)',       time: 'day',   weather: ['clear'],            w: 0.4 },
+  { id: 10294, name: '甲賀忍蛙(超級進化)',       time: 'night', weather: ['rain'],             w: 0.4 },
+  { id: 10295, name: '火炎獅(超級進化)',         time: 'day',   weather: ['clear'],            w: 0.4 },
+  { id: 10296, name: '花葉蒂(超級進化)',         time: 'any',   weather: 'any',                w: 0.3 },
+  { id: 10297, name: '烏賊王(超級進化)',         time: 'night', weather: ['fog'],              w: 0.4 },
+  { id: 10298, name: '龜足巨鎧(超級進化)',       time: 'day',   weather: ['rain'],             w: 0.4 },
+  { id: 10299, name: '毒藻龍(超級進化)',         time: 'night', weather: ['rain'],             w: 0.4 },
+  { id: 10300, name: '摔角鷹人(超級進化)',       time: 'day',   weather: ['clear'],            w: 0.4 },
+  { id: 10301, name: '基格爾德(超級進化)',       time: 'any',   weather: 'any',                w: 0.3 },
+  { id: 10302, name: '老翁龍(超級進化)',         time: 'day',   weather: ['cloudy'],           w: 0.4 },
+  { id: 10303, name: '列陣兵(超級進化)',         time: 'day',   weather: ['clear'],            w: 0.4 },
+  { id: 10304, name: '雷丘(超級進化X)',         time: 'day',   weather: ['rain'],             w: 0.4 },
+  { id: 10305, name: '雷丘(超級進化Y)',         time: 'day',   weather: ['clear'],            w: 0.4 },
+  { id: 10306, name: '風鈴鈴(超級進化)',         time: 'any',   weather: 'any',                w: 0.4 },
+  { id: 10307, name: '阿勃梭魯(超級進化Z)',     time: 'night', weather: ['fog'],              w: 0.3 },
+  { id: 10308, name: '姆克鷹(超級進化)',         time: 'day',   weather: ['clear'],            w: 0.4 },
+  { id: 10309, name: '烈咬陸鯊(超級進化Z)',     time: 'day',   weather: ['clear'],            w: 0.3 },
+  { id: 10310, name: '路卡利歐(超級進化Z)',     time: 'day',   weather: ['clear'],            w: 0.3 },
+  { id: 10311, name: '席多藍恩(超級進化)',       time: 'day',   weather: ['clear'],            w: 0.3 },
+  { id: 10312, name: '達克萊伊(超級進化)',       time: 'night', weather: ['fog'],              w: 0.3 },
+  { id: 10313, name: '泥偶巨人(超級進化)',       time: 'night', weather: ['clear'],            w: 0.4 },
+  { id: 10314, name: '超能妙喵(雄性超級進化)',   time: 'any',   weather: 'any',                w: 0.4 },
+  { id: 10315, name: '好勝毛蟹(超級進化)',       time: 'night', weather: ['snow'],             w: 0.4 },
+  { id: 10316, name: '具甲武者(超級進化)',       time: 'night', weather: ['rain'],             w: 0.4 },
+  { id: 10317, name: '瑪機雅娜(超級進化)',       time: 'any',   weather: 'any',                w: 0.3 },
+  { id: 10318, name: '瑪機雅娜(原始超級進化)',   time: 'any',   weather: 'any',                w: 0.3 },
+  { id: 10319, name: '捷拉奧拉(超級進化)',       time: 'night', weather: ['rain'],             w: 0.3 },
+  { id: 10320, name: '熱辣娃(超級進化)',         time: 'day',   weather: ['clear'],            w: 0.4 },
+  { id: 10321, name: '晶光花(超級進化)',         time: 'day',   weather: ['cloudy'],           w: 0.4 },
+  { id: 10322, name: '米立龍(平挺姿勢超級進化)', time: 'any',   weather: 'any',                w: 0.3 },
+  { id: 10323, name: '米立龍(下垂姿勢超級進化)', time: 'any',   weather: 'any',                w: 0.3 },
+  { id: 10324, name: '米立龍(伸長姿勢超級進化)', time: 'any',   weather: 'any',                w: 0.3 },
+  { id: 10325, name: '戟脊龍(超級進化)',         time: 'day',   weather: ['snow'],             w: 0.4 },
+  { id: 10326, name: '超能妙喵(雌性超級進化)',   time: 'any',   weather: 'any',                w: 0.4 },
+];
+
+/* =========================================================
+   3f. 未知圖騰 28 種形態
    ========================================================= */
 const UNOWN_SYMBOLS = [
   ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),
@@ -1305,7 +1557,8 @@ const UNOWN_FORMS = UNOWN_SYMBOLS.map((symbol, index) => {
   const displayName = isLetter
     ? symbol
     : (symbol === 'exclamation' ? '！' : '？');
-  const fileKey = (symbol === 'A') ? 'unown' : symbol.toLowerCase();
+  const fileKey = (symbol === 'A') ? 'unown' : `unown-${symbol.toLowerCase()}`;
+  const base = 'https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-gen8';
 
   return {
     id: 9201 + index,
@@ -1317,8 +1570,8 @@ const UNOWN_FORMS = UNOWN_SYMBOLS.map((symbol, index) => {
     notWild: false,
     time: 'any',
     weather: 'any',
-    spriteUrl: `https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-gen8/regular/unown-${fileKey}.png`,
-    shinySpriteUrl: `https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-gen8/shiny/unown-${fileKey}.png`,
+    spriteUrl: `${base}/regular/${fileKey}.png`,
+    shinySpriteUrl: `${base}/shiny/${fileKey}.png`,
   };
 });
 
@@ -2059,7 +2312,7 @@ const WeatherFX = {
 };
 
 /* =========================================================
-   7. 程序化地圖（已去掉公路）
+   7. 程序化地圖（無公路，MAP_REF_ZOOM = 10）
    ========================================================= */
 function _rand2(ix, iy, seed) {
   let h = (Math.imul(ix | 0, 374761393)
@@ -3338,7 +3591,7 @@ document.getElementById('stopCloseBtn').addEventListener('click', () => {
 });
 
 /* =========================================================
-   13. 圖鑑
+   13. 圖鑑（長按顯示異色）
    ========================================================= */
 const dexScreen = document.getElementById('dexScreen');
 const evoScreen = document.getElementById('evoScreen');
@@ -3386,10 +3639,13 @@ function renderDex() {
     const name = box.dataset.name;
     const p = POKEDEX.find(x => x.name === name);
     if (!p) return;
-    const shiny = box.dataset.shiny === '1';
+    const st = dexState[p.name];
+    const hasShiny = st && st.shiny > 0;
 
     const img = document.createElement('img');
-    img.src = spriteUrl(p, shiny);
+    const normalSrc = spriteUrl(p, false);
+    const shinySrc = hasShiny ? spriteUrl(p, true) : normalSrc;
+    img.src = normalSrc;
     img.alt = p.name;
     img.draggable = false;
     img.onerror = () => {
@@ -3400,7 +3656,25 @@ function renderDex() {
       box.appendChild(s);
     };
     box.appendChild(img);
-    if (shiny) img.style.filter = 'drop-shadow(0 0 8px #ffd166) drop-shadow(0 0 16px #ffb703)';
+
+    if (hasShiny) {
+      box.classList.add('has-shiny');
+      let pressing = false;
+      const showShiny = () => {
+        if (pressing) return;
+        pressing = true;
+        img.src = shinySrc;
+      };
+      const showNormal = () => {
+        pressing = false;
+        img.src = normalSrc;
+      };
+      box.addEventListener('pointerdown', showShiny);
+      box.addEventListener('pointerup', showNormal);
+      box.addEventListener('pointercancel', showNormal);
+      box.addEventListener('pointerleave', showNormal);
+      box.addEventListener('contextmenu', e => e.preventDefault());
+    }
   });
 }
 
@@ -3693,7 +3967,6 @@ async function startGame() {
     if (map) map.invalidateSize();
   });
 
-  /* 請求持久化儲存，減少離線精靈圖被清理的風險 */
   if (navigator.storage && navigator.storage.persist) {
     navigator.storage.persisted().then(already => {
       if (!already) navigator.storage.persist().catch(() => {});
@@ -3836,7 +4109,6 @@ document.querySelectorAll('.dpad-btn').forEach(btn => {
   btn.addEventListener('contextmenu', e => e.preventDefault());
 });
 
-/* ===== 存檔按鈕事件 ===== */
 document.getElementById('saveBtn').addEventListener('click', (e) => {
   e.stopPropagation();
   downloadSave();
@@ -3861,7 +4133,6 @@ document.addEventListener('visibilitychange', () => {
 
 window.addEventListener('load', boot);
 </script>
-<!-- ===== PWA Service Worker 註冊 ===== -->
 <script>
 window.addEventListener('load', function () {
   if ('serviceWorker' in navigator) {
