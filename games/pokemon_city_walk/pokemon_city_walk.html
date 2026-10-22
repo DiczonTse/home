@@ -23,7 +23,7 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="寵物小精靈 City Walk 遊戲封面">
-<!-- ===== Twitter Card (提升 X/Twitter 分享效果，不影響 FB/WhatsApp) ===== -->
+<!-- ===== Twitter Card ===== -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="🎊寵物小精靈 City Walk">
 <meta name="twitter:description" content="帶著手機在城市中漫步，捕捉寶可夢！">
@@ -1056,15 +1056,32 @@ function applyRareSpawnRules(pokedex) {
   });
 }
 
+/* ───── 精靈圖（Gen5 動態 GIF 優先，其餘靜態 PNG）───── */
+function staticSpriteUrl(p, shiny) {
+  if (p.spriteUrl) {
+    if (shiny && p.shinySpriteUrl) return p.shinySpriteUrl;
+    return p.spriteUrl;
+  }
+  const base = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/';
+  const sid = Number(p.spriteId || p.id);
+  if (shiny) return `${base}shiny/${sid}.png`;
+  return `${base}${sid}.png`;
+}
+
 function spriteUrl(p, shiny) {
   if (p.spriteUrl) {
     if (shiny && p.shinySpriteUrl) return p.shinySpriteUrl;
     return p.spriteUrl;
   }
   const base = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/';
-  const sid = p.spriteId || p.id;
-  if (shiny) return `${base}shiny/${sid}.png`;
-  return `${base}${sid}.png`;
+  const sid = Number(p.spriteId || p.id);
+
+  if (sid >= 1 && sid <= 649) {
+    return shiny
+      ? `${base}versions/generation-v/black-white/animated/shiny/${sid}.gif`
+      : `${base}versions/generation-v/black-white/animated/${sid}.gif`;
+  }
+  return shiny ? `${base}shiny/${sid}.png` : `${base}${sid}.png`;
 }
 
 /* =========================================================
@@ -1235,7 +1252,7 @@ const REGIONAL_FORMS = [
   { id: 10114, name: '阿羅拉椰蛋樹',   time: 'day',   weather: ['clear'],  w: 2 },
   { id: 10115, name: '阿羅拉嘎啦嘎啦', time: 'night', weather: ['fog'],    w: 2 },
 
-  /* ===== 伽勒爾形態（依使用者提供） ===== */
+  /* ===== 伽勒爾形態 ===== */
   { id: 10161, name: '伽勒爾喵喵',     time: 'night', weather: ['fog'],    w: 4 },
   { id: 10162, name: '伽勒爾小火馬',   time: 'day',   weather: ['clear'],  w: 3.5 },
   { id: 10163, name: '伽勒爾烈焰馬',   time: 'day',   weather: ['clear'],  w: 2.5 },
@@ -1261,11 +1278,11 @@ const REGIONAL_FORMS = [
   { id: 10231, name: '洗翠霹靂電球',   time: 'night', weather: ['rain'],   w: 3.5 },
   { id: 10232, name: '洗翠頑皮雷彈',   time: 'night', weather: ['rain'],   w: 2.5 },
   { id: 10233, name: '洗翠火爆獸',     time: 'night', weather: ['fog'],    w: 1.5 },
-  { id: 10234, name: '洗翠千針魚',       time: 'night', weather: ['snow'],   w: 3 },
+  { id: 10234, name: '洗翠千針魚',     time: 'night', weather: ['snow'],   w: 3 },
   { id: 10235, name: '洗翠狃拉',       time: 'night', weather: ['snow'],   w: 3 },
   { id: 10236, name: '洗翠大劍鬼',     time: 'night', weather: ['rain'],   w: 1.5 },
-  { id: 10237, name: '洗翠裙兒小姐',     time: 'day', weather: ['snow'],   w: 1.5 },
-  { id: 10238, name: '洗翠索羅亞',   time: 'night', weather: ['fog'],    w: 2 },
+  { id: 10237, name: '洗翠裙兒小姐',   time: 'day',   weather: ['snow'],   w: 1.5 },
+  { id: 10238, name: '洗翠索羅亞',     time: 'night', weather: ['fog'],    w: 2 },
   { id: 10239, name: '洗翠索羅亞克',   time: 'night', weather: ['fog'],    w: 1.0 },
   { id: 10240, name: '洗翠勇士雄鷹',   time: 'day',   weather: ['cloudy'], w: 1.0 },
   { id: 10241, name: '洗翠黏美兒',     time: 'night', weather: ['rain'],   w: 2 },
@@ -1275,7 +1292,7 @@ const REGIONAL_FORMS = [
 ];
 
 /* =========================================================
-   3e. 特殊形態（10001–10032）
+   3e. 特殊形態（10001–10032 與其他）
    ========================================================= */
 const SPECIAL_FORMS = [
   { id: 10001, name: '代歐奇希斯(攻擊形態)', time: 'any',   weather: 'any',      w: 0.8 },
@@ -2314,7 +2331,7 @@ const WeatherFX = {
 };
 
 /* =========================================================
-   7. 程序化地圖（無公路，MAP_REF_ZOOM = 10）
+   7. 程序化地圖
    ========================================================= */
 function _rand2(ix, iy, seed) {
   let h = (Math.imul(ix | 0, 374761393)
@@ -2572,13 +2589,15 @@ function clearNPC() {
 function addSpawn(p, lat, lng) {
   dexState[p.name].seen = 1;
   const shiny = Math.random() < SHINY_RATE;
+  const src = spriteUrl(p, shiny);
+  const fbSrc = staticSpriteUrl(p, shiny);
 
   const icon = L.divIcon({
     className: '',
     html: `<div class="spawn ${shiny ? 'shiny' : ''}">
              <div class="spawn-shadow"></div>
-             <img class="spawn-gif" src="${spriteUrl(p, shiny)}" alt="${p.name}" draggable="false"
-                  onerror="this.style.display='none';this.insertAdjacentHTML('afterend','<div class=&quot;spawn-fallback&quot;>❓</div>')">
+             <img class="spawn-gif" src="${src}" alt="${p.name}" draggable="false"
+                  onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='${fbSrc}';}else{this.style.display='none';this.insertAdjacentHTML('afterend','<div class=&quot;spawn-fallback&quot;>❓</div>');}">
            </div>`,
     iconSize: [88, 96], iconAnchor: [44, 90],
   });
@@ -2998,6 +3017,11 @@ function openCatch(p, marker, shiny) {
   img.alt = p.name;
   img.draggable = false;
   img.onerror = () => {
+    if (!img.dataset.fb) {
+      img.dataset.fb = '1';
+      img.src = staticSpriteUrl(p, shiny);
+      return;
+    }
     img.remove();
     const s = document.createElement('span');
     s.className = 'mon-fallback';
@@ -3651,6 +3675,11 @@ function renderDex() {
     img.alt = p.name;
     img.draggable = false;
     img.onerror = () => {
+      if (!img.dataset.fb) {
+        img.dataset.fb = '1';
+        img.src = staticSpriteUrl(p, false);
+        return;
+      }
       img.remove();
       const s = document.createElement('span');
       s.className = 'dex-fallback';
@@ -4029,16 +4058,27 @@ function startGPS() {
 
 function onPos(pos) {
   if (manualMode) return;
-  const ll = [pos.coords.latitude, pos.coords.longitude];
-  const recenter = firstFix;
-  placePlayer(ll, recenter);
 
+  const ll = [pos.coords.latitude, pos.coords.longitude];
+  const isFirst = firstFix;
+
+  placePlayer(ll, isFirst);
   document.body.classList.add('gps-live');
 
-  if (firstFix) {
+  if (isFirst) {
     firstFix = false;
-    if (!spawnCenter || map.distance(L.latLng(spawnCenter), L.latLng(ll)) > 800) spawnWorld(ll);
+    if (!spawnCenter || map.distance(L.latLng(spawnCenter), L.latLng(ll)) > 800) {
+      spawnWorld(ll);
+    }
     toast('📍 已定位到你的位置');
+  } else {
+    /* GPS 模式下，角色永遠保持畫面中央 */
+    map.panTo(ll, {
+      animate: true,
+      duration: 0.3,
+      easeLinearity: 0.25,
+      noMoveStart: true,
+    });
   }
 }
 
