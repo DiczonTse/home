@@ -76,6 +76,48 @@
   form button:hover { filter: brightness(1.08); }
   form button:active { transform: scale(.97); }
 
+  /* ---------- 警告條（file:// 時顯示） ---------- */
+  .warn {
+    margin-top: 16px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    border: 1px solid rgba(239,68,68,.5);
+    border-left: 4px solid #ef4444;
+    background: rgba(239,68,68,.1);
+    color: #fecaca;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .warn strong { color: #fca5a5; font-size: 15px; }
+  .warn p { margin: 6px 0; }
+  .warn code {
+    display: inline-block;
+    padding: 6px 12px;
+    margin: 4px 0;
+    font-family: "SF Mono", Consolas, "Courier New", monospace;
+    font-size: 13px;
+    color: #e6ecf7;
+    background: #0b1120;
+    border: 1px solid #26314d;
+    border-radius: 8px;
+    user-select: all;
+  }
+  .warn a { color: #93c5fd; }
+  .warn-actions {
+    display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;
+  }
+  .warn-actions button {
+    padding: 8px 14px;
+    font-size: 13px;
+    color: #fecaca;
+    background: rgba(239,68,68,.18);
+    border: 1px solid rgba(239,68,68,.5);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background .18s;
+  }
+  .warn-actions button:hover { background: rgba(239,68,68,.3); }
+
   /* ---------- 工具列 ---------- */
   .toolbar {
     display: flex;
@@ -271,6 +313,17 @@
     <button type="submit">加入</button>
   </form>
 
+  <div id="fileWarn" class="warn" hidden>
+    <strong>⚠️ 目前以 file:// 開啟，縮圖功能無法運作</strong>
+    <p>瀏覽器在 file:// 協議下會封鎖所有 CORS 代理請求，因此無法取得網頁的 og:image 縮圖。卡片仍會顯示 favicon，但縮圖不會出現。</p>
+    <p>請在檔案所在資料夾執行以下指令，改用本地 HTTP 伺服器開啟：</p>
+    <code id="serverCmd">python -m http.server 8000</code>
+    <p>然後瀏覽器打開 <a href="http://localhost:8000/book.html" target="_blank" rel="noopener">http://localhost:8000/book.html</a></p>
+    <div class="warn-actions">
+      <button type="button" id="btnCopyCmd">📋 複製指令</button>
+    </div>
+  </div>
+
   <div class="toolbar">
     <button type="button" id="btnExport" class="tool-btn">💾 儲存 .txt</button>
     <button type="button" id="btnImport" class="tool-btn">📂 載入 .txt</button>
@@ -286,6 +339,7 @@
   'use strict';
 
   var STORAGE_KEY = 'bookmark-cards-v1';
+  var IS_FILE_PROTOCOL = location.protocol === 'file:';
 
   /* ============================================================
      預設 3 個網頁 —— 想自訂預設書籤，改這裡就好
@@ -303,6 +357,9 @@
   var btnImport = document.getElementById('btnImport');
   var btnReset  = document.getElementById('btnReset');
   var fileInput = document.getElementById('fileInput');
+  var fileWarn  = document.getElementById('fileWarn');
+  var btnCopyCmd = document.getElementById('btnCopyCmd');
+  var serverCmd  = document.getElementById('serverCmd');
 
   var cards = [];
 
@@ -322,91 +379,159 @@
     return u.href;
   }
 
-  /* ============================================================
-     AllOrigins：抓取目標網頁 HTML，解析 og:image
-     ============================================================ */
-  var OG_CONCURRENCY = 3;        // 同時最多 3 個代理請求
-  var ogCache   = new Map();     // url -> imageUrl | null
-  var ogPending = new Map();     // url -> Promise
-  var ogQueue   = [];
-  var ogActive  = 0;
+  /* Promise.any 的簡易 polyfill（舊瀏覽器保險） */
+  function anyPromise(promises) {
+    if (typeof Promise.any === 'function') return Promise.any(promises);
+    return new Promise(function (resolve, reject) {
+      var errors = [];
+      var remaining = promises.length;
+      if (!remaining) return reject(new Error('No promises'));
+      promises.forEach(function (p, i) {
+        Promise.resolve(p).then(resolve, function (e) {
+          errors[i] = e;
+          if (--remaining === 0) reject(new Error('All promises failed'));
+        });
+      });
+    });
+  }
 
-  function pumpOgQueue() {
-    while (ogActive < OG_CONCURRENCY && ogQueue.length) {
-      (function (job) {
-        ogActive++;
-        fetchOgImage(job.url)
-          .then(function (img) { job.resolve(img); })
-          .catch(function ()    { job.resolve(null); })
-          .then(function () {
-            ogActive--;
-            pumpOgQueue();
-          });
-      })(ogQueue.shift());
+  /* ============================================================
+     OG 縮圖：多代理並發競速（Promise.any）
+     ============================================================ */
+  var OG_TIMEOUT = 8000;          // 每個代理 8 秒超時
+  var ogCache   = new Map();      // url -> imageUrl | null
+  var ogPending = new Map();      // url -> Promise
+
+  /* 代理池：並發全部，最快成功者勝出 */
+  var PROXIES = [
+    {
+      name: 'codetabs',
+      build: function (u) {
+        return 'https://api.codetabs.com/v1/proxy/?quest=' + encodeURIComponent(u);
+      }
+    },
+    {
+      name: 'allorigins-raw',
+      build: function (u) {
+        return 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u);
+      }
+    },
+    {
+      name: 'cors-x2u',
+      build: function (u) {
+        // cors.x2u.in 直接拼接目標網址，不需 encode
+        return 'https://cors.x2u.in/' + u;
+      }
+    },
+    {
+      name: 'cloudflare-worker',
+      build: function (u) {
+        return 'https://test.cors.workers.dev/?' + u;
+      }
+    },
+    {
+      name: 'corsproxy-io',
+      build: function (u) {
+        return 'https://corsproxy.io/?url=' + encodeURIComponent(u);
+      }
     }
+  ];
+
+  function fetchOneHtml(targetUrl, proxy) {
+    var controller = new AbortController();
+    var timer = setTimeout(function () { controller.abort(); }, OG_TIMEOUT);
+    var reqUrl = proxy.build(targetUrl);
+
+    return fetch(reqUrl, { signal: controller.signal })
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.text();
+      })
+      .then(function (html) {
+        clearTimeout(timer);
+        if (!html || html.length < 50) throw new Error('empty body');
+        return html;
+      })
+      .catch(function (err) {
+        clearTimeout(timer);
+        throw err;
+      });
+  }
+
+  function parseOgImage(html, baseUrl) {
+    var doc;
+    try {
+      doc = new DOMParser().parseFromString(html, 'text/html');
+    } catch (e) { return null; }
+
+    var candidates = [];
+    var metas = doc.querySelectorAll('meta');
+    for (var i = 0; i < metas.length; i++) {
+      var m = metas[i];
+      var prop = (m.getAttribute('property') || '').toLowerCase();
+      var name = (m.getAttribute('name') || '').toLowerCase();
+      var item = (m.getAttribute('itemprop') || '').toLowerCase();
+      var content = m.getAttribute('content');
+      if (!content) continue;
+      if (prop === 'og:image' || prop === 'og:image:url' || prop === 'og:image:secure_url' ||
+          name === 'twitter:image' || name === 'twitter:image:src' ||
+          item === 'image' || item === 'thumbnailurl') {
+        candidates.push(content.trim());
+      }
+    }
+
+    var link = doc.querySelector('link[rel="image_src"]');
+    if (link) {
+      var href = link.getAttribute('href');
+      if (href) candidates.push(href.trim());
+    }
+
+    for (var j = 0; j < candidates.length; j++) {
+      var c = candidates[j];
+      if (!c) continue;
+      if (/^data:/i.test(c)) continue;
+      try {
+        var abs = new URL(c, baseUrl).href;
+        if (/^https?:/i.test(abs)) return abs;
+      } catch (e) {}
+    }
+    return null;
+  }
+
+  function fetchOgImage(targetUrl) {
+    // file:// 下直接放棄，省去 8 秒無謂等待
+    if (IS_FILE_PROTOCOL) return Promise.resolve(null);
+
+    var attempts = PROXIES.map(function (proxy) {
+      return fetchOneHtml(targetUrl, proxy).then(function (html) {
+        var img = parseOgImage(html, targetUrl);
+        if (!img) throw new Error('no og:image');
+        return { proxy: proxy.name, image: img };
+      });
+    });
+
+    return anyPromise(attempts)
+      .then(function (result) {
+        console.log('[OG] ✓ ' + result.proxy + ' →', targetUrl, '→', result.image);
+        return result.image;
+      })
+      .catch(function () {
+        console.warn('[OG] ✗ 全部代理失敗或無 og:image：', targetUrl);
+        return null;
+      });
   }
 
   function getOgImage(url) {
     if (ogCache.has(url))   return Promise.resolve(ogCache.get(url));
     if (ogPending.has(url)) return ogPending.get(url);
 
-    var p = new Promise(function (resolve) {
-      ogQueue.push({
-        url: url,
-        resolve: function (img) {
-          ogCache.set(url, img);
-          ogPending.delete(url);
-          resolve(img);
-        }
-      });
-      pumpOgQueue();
+    var p = fetchOgImage(url).then(function (img) {
+      ogCache.set(url, img);
+      ogPending.delete(url);
+      return img;
     });
     ogPending.set(url, p);
     return p;
-  }
-
-  function fetchOgImage(targetUrl) {
-    // AllOrigins 的 /get 端點回傳 JSON：{ contents: "<html>", status: {...} }
-    var proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl);
-    var controller = new AbortController();
-    var timer = setTimeout(function () { controller.abort(); }, 12000);
-
-    return fetch(proxyUrl, { signal: controller.signal })
-      .then(function (res) {
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return res.json();
-      })
-      .then(function (data) {
-        if (!data || typeof data.contents !== 'string') return null;
-
-        var doc = new DOMParser().parseFromString(data.contents, 'text/html');
-        var og       = doc.querySelector('meta[property="og:image"]');
-        var ogSecure = doc.querySelector('meta[property="og:image:secure_url"]');
-        var tw       = doc.querySelector('meta[name="twitter:image"]');
-        var twSecure = doc.querySelector('meta[name="twitter:image:src"]');
-
-        var img =
-          (og       && og.getAttribute('content'))       ||
-          (ogSecure && ogSecure.getAttribute('content')) ||
-          (tw       && tw.getAttribute('content'))       ||
-          (twSecure && twSecure.getAttribute('content'));
-
-        if (!img) return null;
-        img = img.trim();
-        if (!img) return null;
-
-        // 相對路徑 → 絕對路徑
-        try {
-          return new URL(img, targetUrl).href;
-        } catch (e) {
-          return null;
-        }
-      })
-      .catch(function () { return null; })
-      .then(function (result) {
-        clearTimeout(timer);
-        return result;
-      });
   }
 
   /* ---------------- 存取（localStorage） ---------------- */
@@ -414,7 +539,6 @@
     var raw = null;
     try { raw = localStorage.getItem(STORAGE_KEY); } catch (e) { raw = null; }
 
-    // 首次使用：帶入預設 3 個網頁
     if (raw === null) {
       cards = PRESET_URLS.map(function (u) {
         return { id: uid(), url: normalizeUrl(u) || u };
@@ -459,7 +583,6 @@
     var bg = document.createElement('div');
     bg.className = 'bg';
 
-    // 佔位層：favicon 或 font icon
     var ph = document.createElement('div');
     ph.className = 'ph';
     ph.innerHTML =
@@ -472,7 +595,6 @@
     var fav = ph.querySelector('.fav');
     var fi  = ph.querySelector('.fi');
 
-    // 縮圖層
     var thumb = new Image();
     thumb.className = 'thumb';
     thumb.alt = '';
@@ -481,11 +603,9 @@
     bg.appendChild(ph);
     bg.appendChild(thumb);
 
-    /* --- 遮罩 --- */
     var shade = document.createElement('div');
     shade.className = 'shade';
 
-    /* --- 文字 --- */
     var info = document.createElement('div');
     info.className = 'info';
     var titleEl = document.createElement('div');
@@ -497,7 +617,6 @@
     info.appendChild(titleEl);
     info.appendChild(hostEl);
 
-    /* --- 刪除鈕 --- */
     var del = document.createElement('span');
     del.className = 'del';
     del.setAttribute('role', 'button');
@@ -520,16 +639,19 @@
     card.appendChild(info);
     card.appendChild(del);
 
-    /* ---------- 縮圖：AllOrigins → og:image ---------- */
+    /* ---------- 縮圖：多代理 og:image ---------- */
     var settled = false;
     var timer = setTimeout(function () {
-      // 保險絲：無論如何 15 秒後若仍未成功，移除縮圖層
-      if (!settled) { settled = true; thumb.remove(); }
-    }, 15000);
+      // 保險絲：OG 取得（最長 8 秒）+ 圖片下載（約 5 秒）= 13 秒，取 20 秒餘裕
+      if (!settled) {
+        settled = true;
+        console.warn('[OG] 圖片載入超時，移除縮圖層：', item.url);
+        thumb.remove();
+      }
+    }, 20000);
 
     thumb.addEventListener('load', function () {
       if (settled) return;
-      // 太小的圖（例如追蹤像素）視為失敗
       if (thumb.naturalWidth && thumb.naturalWidth < 100) {
         settled = true;
         clearTimeout(timer);
@@ -552,9 +674,8 @@
     getOgImage(item.url).then(function (ogUrl) {
       if (settled || !card.isConnected) return;
       if (ogUrl) {
-        thumb.src = ogUrl;   // 成功取得 og:image
+        thumb.src = ogUrl;
       } else {
-        // 沒有 og:image → 直接移除縮圖層，露出 favicon / font icon
         settled = true;
         clearTimeout(timer);
         thumb.remove();
@@ -571,7 +692,7 @@
 
     function tryNextFav() {
       if (favIdx >= favSources.length) {
-        fav.style.display = 'none';   // 全部失敗 → 顯示 font icon
+        fav.style.display = 'none';
         fi.classList.add('show');
         return;
       }
@@ -643,14 +764,13 @@
     var url = normalizeUrl(input.value);
     if (!url) {
       input.classList.remove('invalid');
-      void input.offsetWidth;          // 重新觸發動畫
+      void input.offsetWidth;
       input.classList.add('invalid');
       input.focus();
       return;
     }
     input.classList.remove('invalid');
 
-    // 重複檢查
     var dup = null;
     for (var i = 0; i < cards.length; i++) {
       if (cards[i].url === url) { dup = cards[i]; break; }
@@ -770,6 +890,38 @@
     save();
     renderAll();
   });
+
+  /* ---------------- file:// 警告條 ---------------- */
+  if (IS_FILE_PROTOCOL) {
+    fileWarn.hidden = false;
+    btnCopyCmd.addEventListener('click', function () {
+      var cmd = serverCmd.textContent || 'python -m http.server 8000';
+      var done = function () {
+        btnCopyCmd.textContent = '✓ 已複製';
+        setTimeout(function () { btnCopyCmd.textContent = '📋 複製指令'; }, 1500);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(cmd).then(done).catch(function () {
+          // 備援：選取文字
+          try {
+            var range = document.createRange();
+            range.selectNodeContents(serverCmd);
+            var sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+          } catch (e) {}
+        });
+      } else {
+        try {
+          var range = document.createRange();
+          range.selectNodeContents(serverCmd);
+          var sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+        } catch (e) {}
+      }
+    });
+  }
 
   /* ---------------- 初始化 ---------------- */
   load();
