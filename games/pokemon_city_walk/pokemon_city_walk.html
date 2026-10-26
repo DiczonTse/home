@@ -83,13 +83,44 @@
   .leaflet-tile-pane{filter:saturate(1.05) brightness(1.02)}
   .leaflet-control-attribution{font-size:9px;background:rgba(255,255,255,.6)!important}
 
-  #nightTint{position:fixed;inset:0;pointer-events:none;z-index:2;
+  #nightTint{
+    position:absolute;inset:0;pointer-events:none;z-index:450;
     background:radial-gradient(circle at 50% 40%,rgba(20,30,70,.35),rgba(5,10,30,.62));
-    opacity:0;transition:opacity .8s}
+    opacity:0;transition:opacity .8s;
+  }
   #nightTint.on{opacity:1}
+  
+  /* 夜晚玩家光晕 */
+  .player-wrap .glow{
+    position:absolute;left:50%;top:50%;
+    width:170px;height:170px;margin:-85px 0 0 -85px;
+    border-radius:50%;pointer-events:none;z-index:0;
+    background:radial-gradient(circle,
+      rgba(255,242,190,.62) 0%,
+      rgba(255,216,110,.30) 26%,
+      rgba(255,198,84,.12) 50%,
+      rgba(255,180,60,0) 72%);
+    opacity:0;transition:opacity .8s;
+  }
+  body.night .player-wrap .glow{
+    opacity:1;
+    animation:playerGlow 3.4s ease-in-out infinite;
+  }
+  @keyframes playerGlow{
+    0%,100%{transform:scale(1);opacity:.82}
+    50%{transform:scale(1.14);opacity:1}
+  }
+  body.night .player-wrap .dot{
+    box-shadow:0 2px 10px rgba(0,0,0,.5),
+               0 0 22px #ffd166,
+               0 0 46px rgba(255,183,3,.65);
+  }
+  body.night .player-wrap .ring{
+    background:rgba(255,209,102,.5);
+  }
 
   #weatherFx{position:fixed;inset:0;z-index:3;pointer-events:none;display:none}
-  #fogLayer{position:fixed;inset:0;z-index:3;pointer-events:none;opacity:0;
+  #fogLayer{position:absolute;inset:0;z-index:440;pointer-events:none;opacity:0;
     transition:opacity 1.2s;
     background:linear-gradient(180deg,
       rgba(206,218,232,.55) 0%,
@@ -255,8 +286,73 @@
   #sceneBg .ground{position:absolute;left:0;right:0;
     top:var(--groundY,42%);bottom:0;transition:top .4s,background .4s}
 
-  #catchScreen.day #sceneBg .sky{background:linear-gradient(180deg,#3d7fd6 0%,#6db3e8 45%,#b8e0f0 100%)}
-  #catchScreen.day #sceneBg .ground{background:linear-gradient(180deg,#a8d870 0%,#8fc850 12%,#7ab648 45%,#5a9a30 100%)}
+  /* ══════════════ 白天天空（加入暖色地平線光暈） ══════════════ */
+  #catchScreen.day #sceneBg .sky{
+    background:
+      radial-gradient(ellipse 75% 65% at 50% 100%, rgba(255,250,214,.60) 0%, rgba(255,250,214,0) 72%),
+      linear-gradient(180deg,#3d7fd6 0%,#6db3e8 45%,#b8e0f0 100%);
+  }
+
+  /* ══════════════ 精緻草地 ══════════════ */
+  #catchScreen.day #sceneBg .ground{
+    background-color:#6fae3f;
+    background-image:
+      /* 地平線暖光 */
+      radial-gradient(ellipse 135% 50% at 50% 0%, rgba(255,255,210,.62) 0%, rgba(255,255,210,0) 62%),
+      /* 草葉與小花（SVG 無縫圖案） */
+      url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='110'%20height='62'%3E%3Cg%20stroke='%233f6d1c'%20stroke-width='2'%20stroke-linecap='round'%20fill='none'%20opacity='0.26'%3E%3Cpath%20d='M12%2062%20Q10%2044%2015%2032'/%3E%3Cpath%20d='M18%2062%20Q18%2048%2022%2038'/%3E%3Cpath%20d='M40%2062%20Q37%2042%2042%2030'/%3E%3Cpath%20d='M46%2062%20Q45%2050%2049%2042'/%3E%3Cpath%20d='M70%2062%20Q68%2044%2073%2034'/%3E%3Cpath%20d='M76%2062%20Q77%2049%2081%2040'/%3E%3Cpath%20d='M97%2062%20Q95%2043%20100%2032'/%3E%3C/g%3E%3Cg%20fill='%23fff9cc'%20opacity='0.45'%3E%3Ccircle%20cx='28'%20cy='38'%20r='1.7'/%3E%3Ccircle%20cx='60'%20cy='28'%20r='1.5'/%3E%3Ccircle%20cx='88'%20cy='40'%20r='1.6'/%3E%3C/g%3E%3C/svg%3E"),
+      /* 底色漸層 */
+      linear-gradient(180deg,#b8e07a 0%,#9ad35c 16%,#79b647 48%,#4d8a28 100%);
+    background-repeat:no-repeat, repeat, no-repeat;
+    background-size:100% 100%, 110px 62px, 100% 100%;
+    background-position:0 0, 0 0, 0 0;
+  }
+  /* 草地邊緣暗角，增加景深 */
+  #catchScreen.day #sceneBg .ground::after{
+    content:'';position:absolute;inset:0;pointer-events:none;
+    background:
+      radial-gradient(ellipse 120% 60% at 50% 100%, rgba(20,45,5,.42) 0%, rgba(20,45,5,0) 72%),
+      linear-gradient(180deg, rgba(255,255,190,.22) 0%, rgba(255,255,190,0) 18%);
+  }
+
+  /* ══════════════ 飄動的雲 ══════════════ */
+  #clouds{
+    position:absolute;left:0;right:0;top:0;
+    height:var(--groundY,42%);
+    overflow:hidden;pointer-events:none;z-index:1;
+    display:none;
+  }
+  #catchScreen.day #clouds{display:block}
+
+  .cloud{
+    position:absolute;left:0;
+    background:rgba(255,255,255,.95);
+    border-radius:999px;
+    filter:blur(1.2px);
+    animation-name:cloudDrift;
+    animation-timing-function:linear;
+    animation-iteration-count:infinite;
+    will-change:transform;
+  }
+  .cloud::before,
+  .cloud::after{
+    content:'';position:absolute;border-radius:50%;background:inherit;
+  }
+  .cloud::before{width:58%;height:210%;left:14%;bottom:12%}
+  .cloud::after {width:42%;height:155%;left:48%;bottom:16%}
+
+  .cloud.c1{width:150px;height:28px;top:10%;animation-duration:82s; animation-delay:-24s}
+  .cloud.c2{width:96px; height:20px;top:24%;animation-duration:66s; animation-delay:-51s;opacity:.85}
+  .cloud.c3{width:190px;height:34px;top:4%; animation-duration:108s;animation-delay:-74s}
+  .cloud.c4{width:78px; height:17px;top:36%;animation-duration:58s; animation-delay:-13s;opacity:.80}
+  .cloud.c5{width:128px;height:24px;top:19%;animation-duration:94s; animation-delay:-63s}
+
+  @keyframes cloudDrift{
+    0%   { transform:translateX(105vw); }
+    100% { transform:translateX(-300px); }
+  }
+
+  /* ══════════════ 夜晚 ══════════════ */
   #catchScreen.night #sceneBg .sky{background:linear-gradient(180deg,#050820 0%,#0f1838 50%,#1a2545 100%)}
   #catchScreen.night #sceneBg .ground{background:linear-gradient(180deg,#2a4a2a 0%,#1a3520 30%,#0f2412 100%)}
 
@@ -612,10 +708,11 @@
   <div class="load-spinner"></div>
 </div>
 
-<div id="map"></div>
-<div id="nightTint"></div>
+<div id="map">
+  <div id="nightTint"></div>
+  <div id="fogLayer"></div>
+</div>
 <canvas id="weatherFx"></canvas>
-<div id="fogLayer"></div>
 
 <button id="fsBtn" title="全螢幕">⛶</button>
 
@@ -660,7 +757,17 @@
 </div>
 
 <div id="catchScreen" class="overlay hidden day">
-  <div id="sceneBg"><div class="sky"></div><div class="ground"></div></div>
+  <div id="sceneBg">
+    <div class="sky"></div>
+    <div id="clouds">
+      <div class="cloud c1"></div>
+      <div class="cloud c2"></div>
+      <div class="cloud c3"></div>
+      <div class="cloud c4"></div>
+      <div class="cloud c5"></div>
+    </div>
+    <div class="ground"></div>
+  </div>
   <div id="stars"></div>
 
   <div class="catch-top">
@@ -2163,6 +2270,7 @@ function renderEnvironment() {
   const label = env.time === 'day' ? '白天' : '夜晚';
   document.getElementById('envChip').textContent = `${icon} ${label} · ${w.icon}${w.name}`;
   document.getElementById('nightTint').classList.toggle('on', env.time === 'night');
+  document.body.classList.toggle('night', env.time === 'night');
 
   WeatherFX.setMode(env.weather === 'rain' ? 'rain' : (env.weather === 'snow' ? 'snow' : 'none'));
   const fogEl = document.getElementById('fogLayer');
@@ -2543,7 +2651,7 @@ function updateMapModeBtn() {
 
 const PLAYER_ICON = L.divIcon({
   className: '',
-  html: '<div class="player-wrap"><div class="ring"></div><div class="dot"></div></div>',
+  html: '<div class="player-wrap">' + '<div class="glow"></div>' + '<div class="ring"></div>' + '<div class="dot"></div>' + '</div>',
   iconSize: [44, 44], iconAnchor: [22, 22],
 });
 
@@ -2750,8 +2858,12 @@ function openNPCExchange(npc) {
 
   npcCardName.textContent = trade.npcName;
   const spriteId = trade.spriteId || (npcMon && npcMon.id);
-  if (spriteId) {
-    npcCardImg.src = spriteUrl({ id: spriteId }, false);
+  const spriteMon = npcMon
+    || (spriteId ? POKEDEX.find(x => x.id === spriteId) : null)
+    || (spriteId ? { id: spriteId } : null);
+
+  if (spriteMon) {
+    npcCardImg.src = spriteUrl(spriteMon, false);
     npcCardImg.style.display = '';
     npcCardFallback.style.display = 'none';
     npcCardImg.onerror = () => {
@@ -2930,7 +3042,12 @@ function playNPCEvolutionAnimation(toName, evoSpriteId, onDone) {
   if (!sid) { onDone(); return; }
   const ov = document.getElementById('evoOverlay');
   const animImg = document.getElementById('evoAnimImg');
-  animImg.src = spriteUrl({ id: sid }, false);
+
+  const evoMon = tgt
+    || POKEDEX.find(x => x.id === sid)
+    || { id: sid };
+
+  animImg.src = spriteUrl(evoMon, false);
   animImg.style.display = '';
   animImg.onerror = () => { animImg.style.display = 'none'; };
   ov.style.display = 'flex';
