@@ -1744,6 +1744,8 @@ const audio = {
 
   playTrade() {
     if (!this.ready) return;
+    // 若 Trade of the Day 已在播放（例如 NPC 交換流程中），不要重新開始
+    if (this.current === this.trade && this.trade && !this.trade.paused) return;
     this._stopAll();
     if (this.trade) { this.trade.play().catch(()=>{}); this.current = this.trade; }
   },
@@ -2956,7 +2958,7 @@ npcConfirmBtn.addEventListener('click', () => {
     };
 
     if (trade.kind === 'evo') {
-      playNPCEvolutionAnimation(trade.to, trade.evoSpriteId, () => {
+      playNPCEvolutionAnimation(trade.npcName, trade.to, trade.evoSpriteId, () => {
         if (dexState[trade.to]) {
           dexState[trade.to].seen = 1;
           dexState[trade.to].caught++;
@@ -3036,28 +3038,41 @@ function playTradeAnimation(npcMon, playerMon, trade, candySource, onDone) {
   }, 1400);
 }
 
-function playNPCEvolutionAnimation(toName, evoSpriteId, onDone) {
+/* 交換進化動畫：先顯示未進化，再變身為進化後 */
+function playNPCEvolutionAnimation(fromName, toName, evoSpriteId, onDone) {
+  const fromMon = POKEDEX.find(p => p.name === fromName);
   const tgt = POKEDEX.find(p => p.name === toName);
   const sid = evoSpriteId || (tgt && tgt.id);
   if (!sid) { onDone(); return; }
+
   const ov = document.getElementById('evoOverlay');
   const animImg = document.getElementById('evoAnimImg');
 
-  const evoMon = tgt
-    || POKEDEX.find(x => x.id === sid)
-    || { id: sid };
+  const evoMon = tgt || POKEDEX.find(x => x.id === sid) || { id: sid };
 
-  animImg.src = spriteUrl(evoMon, false);
+  const fromSrc = fromMon ? spriteUrl(fromMon, false) : spriteUrl(evoMon, false);
+  const toSrc   = spriteUrl(evoMon, false);
+
+  // 先顯示未進化的精靈
+  animImg.src = fromSrc;
   animImg.style.display = '';
   animImg.onerror = () => { animImg.style.display = 'none'; };
   ov.style.display = 'flex';
 
+  audio.init();
+  audio.playTrade();   // 🎵 交換進化播放 Trade of the Day
   SFX.evolve();
 
+  // 閃光最亮時切換為進化後的精靈
+  const swapTimer = setTimeout(() => {
+    animImg.src = toSrc;
+  }, 1100);
+
   setTimeout(() => {
+    clearTimeout(swapTimer);
     ov.style.display = 'none';
     animImg.style.display = '';
-    onDone();
+    onDone();  // 由 finish() 內恢復地圖音樂
   }, 2200);
 }
 
@@ -3917,14 +3932,27 @@ function tryEvolve(srcName, toName) {
 
   const ov = document.getElementById('evoOverlay');
   const animImg = document.getElementById('evoAnimImg');
-  animImg.src = spriteUrl(src, false);
+
+  const fromSrc = spriteUrl(src, false);
+  const toSrc   = spriteUrl(tgt, false);
+
+  // 先顯示未進化的精靈
+  animImg.src = fromSrc;
   animImg.style.display = '';
-  animImg.onerror = () => { animImg.style.display='none'; };
+  animImg.onerror = () => { animImg.style.display = 'none'; };
   ov.style.display = 'flex';
 
+  audio.init();
+  audio.playTrade();   // 🎵 進化畫面播放 Trade of the Day
   SFX.evolve();
 
+  // 閃光最亮時切換為進化後的精靈
+  const swapTimer = setTimeout(() => {
+    animImg.src = toSrc;
+  }, 1100);
+
   setTimeout(() => {
+    clearTimeout(swapTimer);
     ov.style.display = 'none';
     animImg.style.display = '';
 
@@ -3940,6 +3968,8 @@ function tryEvolve(srcName, toName) {
     toast(`🧬 ${srcName} 進化成 ${tgt.name}！`, 2600);
 
     renderEvoList();
+
+    if (gameStarted) audio.playMap(env.time); // 恢復地圖音樂
   }, 2200);
 }
 
