@@ -129,6 +129,17 @@
       rgba(206,218,232,.50) 100%)}
   #fogLayer.on{opacity:1}
 
+  /* ===== 捕捉介面天氣層 ===== */
+  #catchWeatherFx{position:absolute;inset:0;z-index:5;pointer-events:none;display:none}
+  #catchFogLayer{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:0;
+    transition:opacity 1.2s;
+    background:linear-gradient(180deg,
+      rgba(206,218,232,.55) 0%,
+      rgba(190,205,222,.30) 38%,
+      rgba(178,196,216,.20) 62%,
+      rgba(206,218,232,.50) 100%)}
+  #catchFogLayer.on{opacity:1}
+
   .player-wrap{position:relative;width:44px;height:44px}
   .player-wrap .ring{position:absolute;inset:0;border-radius:50%;
     background:rgba(66,133,244,.45);animation:pulse 2s ease-out infinite}
@@ -149,9 +160,19 @@
   @keyframes spawnIdle{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-2px) scale(1.02)}}
   @keyframes shadowIdle{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(.95);opacity:.42}}
 
+  /* PNG 精靈（Gen7 static sprite）放大補償 */
+  .spawn-gif.png-big{
+	transform:scale(1.35);transform-origin:center bottom;
+	animation:spawnIdleBig 2.6s ease-in-out infinite}
+  @keyframes spawnIdleBig{
+	0%,100%{transform:translateY(0) scale(1.35)}
+	50%{transform:translateY(-2px) scale(1.377)}}
+
   .spawn.shiny .spawn-gif{
 	filter:drop-shadow(0 0 10px #ffd166) drop-shadow(0 0 22px #ffb703);
 	animation:spawnIdle 2.6s ease-in-out infinite,shinyGlow 1.3s ease-in-out infinite alternate}
+  .spawn.shiny .spawn-gif.png-big{
+	animation:spawnIdleBig 2.6s ease-in-out infinite,shinyGlow 1.3s ease-in-out infinite alternate}
   @keyframes shinyGlow{from{filter:drop-shadow(0 0 8px #ffd166) drop-shadow(0 0 18px #ffb703)}
     to{filter:drop-shadow(0 0 16px #ffd166) drop-shadow(0 0 34px #ffb703) brightness(1.2)}}
 
@@ -354,7 +375,28 @@
 
   /* ══════════════ 夜晚 ══════════════ */
   #catchScreen.night #sceneBg .sky{background:linear-gradient(180deg,#050820 0%,#0f1838 50%,#1a2545 100%)}
-  #catchScreen.night #sceneBg .ground{background:linear-gradient(180deg,#2a4a2a 0%,#1a3520 30%,#0f2412 100%)}
+
+  /* ══════════════ 夜晚草地（草葉 + 露水，月光灑落） ══════════════ */
+  #catchScreen.night #sceneBg .ground{
+    background-color:#17301f;
+    background-image:
+      /* 地平線月光 */
+      radial-gradient(ellipse 135% 50% at 50% 0%, rgba(150,190,255,.22) 0%, rgba(150,190,255,0) 62%),
+      /* 草葉與露水（SVG 無縫圖案） */
+      url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='110'%20height='62'%3E%3Cg%20stroke='%230f2413'%20stroke-width='2'%20stroke-linecap='round'%20fill='none'%20opacity='0.55'%3E%3Cpath%20d='M12%2062%20Q10%2044%2015%2032'/%3E%3Cpath%20d='M18%2062%20Q18%2048%2022%2038'/%3E%3Cpath%20d='M40%2062%20Q37%2042%2042%2030'/%3E%3Cpath%20d='M46%2062%20Q45%2050%2049%2042'/%3E%3Cpath%20d='M70%2062%20Q68%2044%2073%2034'/%3E%3Cpath%20d='M76%2062%20Q77%2049%2081%2040'/%3E%3Cpath%20d='M97%2062%20Q95%2043%20100%2032'/%3E%3C/g%3E%3Cg%20fill='%23bcd6ff'%20opacity='0.22'%3E%3Ccircle%20cx='28'%20cy='38'%20r='1.7'/%3E%3Ccircle%20cx='60'%20cy='28'%20r='1.5'/%3E%3Ccircle%20cx='88'%20cy='40'%20r='1.6'/%3E%3C/g%3E%3C/svg%3E"),
+      /* 底色漸層 */
+      linear-gradient(180deg,#2c5233 0%,#22422a 18%,#17301f 50%,#08160d 100%);
+    background-repeat:no-repeat, repeat, no-repeat;
+    background-size:100% 100%, 110px 62px, 100% 100%;
+    background-position:0 0, 0 0, 0 0;
+  }
+  /* 夜晚草地暗角 */
+  #catchScreen.night #sceneBg .ground::after{
+    content:'';position:absolute;inset:0;pointer-events:none;
+    background:
+      radial-gradient(ellipse 120% 60% at 50% 100%, rgba(0,8,0,.55) 0%, rgba(0,8,0,0) 72%),
+      linear-gradient(180deg, rgba(140,175,255,.12) 0%, rgba(140,175,255,0) 18%);
+  }
 
   #stars{position:absolute;left:0;right:0;top:0;height:var(--groundY,42%);
     pointer-events:none;z-index:1;display:none;overflow:hidden}
@@ -392,9 +434,27 @@
   @keyframes monIdle{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-3px) scale(1.015)}}
   @keyframes monShadowIdle{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(.96);opacity:.7}}
 
-  .mon.shiny img{filter:drop-shadow(0 0 14px #ffd166) drop-shadow(0 0 30px #ffb703)
-    drop-shadow(0 0 48px rgba(255,183,3,.45))}
-  .mon.shiny::after{background:radial-gradient(ellipse at center,rgba(255,183,3,.55) 0%,rgba(255,183,3,.2) 50%,rgba(0,0,0,0) 78%)}
+  /* PNG 精靈放大補償 */
+  .mon img.png-big{
+    transform:scale(1.35);transform-origin:center bottom;
+    animation:monIdleBig 2.4s ease-in-out infinite}
+  @keyframes monIdleBig{
+    0%,100%{transform:translateY(0) scale(1.35)}
+    50%{transform:translateY(-3px) scale(1.373)}}
+
+  .mon.shiny img{
+    filter:drop-shadow(0 0 14px #ffd166) drop-shadow(0 0 30px #ffb703);
+    animation:monIdle 2.4s ease-in-out infinite, monShinyGlow 1.3s ease-in-out infinite alternate;
+  }
+  @keyframes monShinyGlow{
+    from{filter:drop-shadow(0 0 8px #ffd166) drop-shadow(0 0 18px #ffb703)}
+    to  {filter:drop-shadow(0 0 16px #ffd166) drop-shadow(0 0 34px #ffb703) brightness(1.2)}
+  }
+  .mon.shiny::after{background:radial-gradient(ellipse at center,rgba(0,0,0,.5) 0%, rgba(0,0,0,.25) 48%, rgba(0,0,0,0) 76%);}
+
+  .mon.shiny img.png-big{
+    animation:monIdleBig 2.4s ease-in-out infinite, monShinyGlow 1.3s ease-in-out infinite alternate;
+  }
 
   .wild.absorbed .mon{transform:scale(.08);opacity:0}
   .wild.absorbed .mon img,
@@ -430,6 +490,13 @@
   #trail{position:absolute;height:5px;border-radius:5px;
     background:linear-gradient(90deg,rgba(255,255,255,.2),rgba(255,255,255,.9));
     transform-origin:0 50%;pointer-events:none;display:none;z-index:20}
+
+  /* ===== 斜拉瞄準弧線 ===== */
+  #aimArc{position:absolute;left:0;top:0;width:100%;height:100%;
+    pointer-events:none;z-index:20;display:none;overflow:visible}
+  #aimArc.on{display:block}
+  #aimArcPath{animation:arcDash .85s linear infinite}
+  @keyframes arcDash{to{stroke-dashoffset:-42}}
 
   .swipe-hint{position:absolute;bottom:88px;left:50%;transform:translateX(-50%);
     color:rgba(255,255,255,.9);font-size:13px;font-weight:800;letter-spacing:1px;
@@ -635,7 +702,7 @@
   #evoOverlay{position:fixed;inset:0;z-index:5000;pointer-events:none;
     background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.98),rgba(200,220,255,.6),rgba(0,0,0,.85));
     display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;
-    animation:evoFlash 2.2s ease-in-out forwards;opacity:0}
+    animation:evoFlash 2.7s ease-in-out forwards;opacity:0}
   #evoOverlay.on{display:flex}
   @keyframes evoFlash{
     0%{opacity:0}
@@ -769,6 +836,8 @@
     <div class="ground"></div>
   </div>
   <div id="stars"></div>
+  <canvas id="catchWeatherFx"></canvas>
+  <div id="catchFogLayer"></div>
 
   <div class="catch-top">
     <div class="catch-name" id="catchName">野生的精靈</div>
@@ -779,6 +848,12 @@
     <div class="wild" id="wildMon"><div class="mon" id="monBody"></div></div>
     <div id="ballFly" class="pokeball"></div>
     <div id="trail"></div>
+    <svg id="aimArc" aria-hidden="true">
+      <path id="aimArcPath" fill="none"
+            stroke="rgba(180,170,255,.92)" stroke-width="4"
+            stroke-linecap="round" stroke-dasharray="12 9"/>
+      <polygon id="aimArrowHead" fill="rgba(190,182,255,.98)"/>
+    </svg>
     <div class="swipe-hint" id="swipeHint">↑ 向上滑動投球</div>
     <div id="powerWrap"><div id="powerFill"></div></div>
   </div>
@@ -1189,6 +1264,13 @@ function spriteUrl(p, shiny) {
       : `${base}versions/generation-v/black-white/animated/${sid}.gif`;
   }
   return shiny ? `${base}shiny/${sid}.png` : `${base}${sid}.png`;
+}
+
+/* 判斷是否為 PNG（Gen7 static sprite）；自訂 spriteUrl（pokesprite）不算 */
+function spriteIsPng(p) {
+  if (p.spriteUrl) return false;
+  const sid = Number(p.spriteId || p.id);
+  return !(sid >= 1 && sid <= 649);
 }
 
 /* =========================================================
@@ -2283,7 +2365,18 @@ function renderEnvironment() {
     cs.classList.toggle('day', env.time === 'day');
     cs.classList.toggle('night', env.time === 'night');
     buildStars();
+    syncCatchWeather();
   }
+}
+
+/* 同步捕捉畫面的天氣 */
+function syncCatchWeather() {
+  CatchWeatherFX.setMode(
+    env.weather === 'rain' ? 'rain' :
+    (env.weather === 'snow' ? 'snow' : 'none')
+  );
+  const fog = document.getElementById('catchFogLayer');
+  if (fog) fog.classList.toggle('on', env.weather === 'fog');
 }
 
 function buildStars() {
@@ -2320,125 +2413,130 @@ function checkDeviceTime() {
 }
 
 /* =========================================================
-   6b. 天氣粒子
+   6b. 天氣粒子（工廠函式，可生成多個實例）
    ========================================================= */
-const WeatherFX = {
-  canvas: null, ctx: null, pool: [], MAX: 170, active: 0,
-  mode: 'none', running: false, raf: null, w: 0, h: 0, last: 0,
+function createWeatherFX(canvasId) {
+  return {
+    canvas: null, ctx: null, pool: [], MAX: 170, active: 0,
+    mode: 'none', running: false, raf: null, w: 0, h: 0, last: 0,
 
-  init() {
-    this.canvas = document.getElementById('weatherFx');
-    if (!this.canvas) return;
-    this.ctx = this.canvas.getContext('2d');
-    for (let i = 0; i < this.MAX; i++) {
-      this.pool.push({ x:0, y:0, vx:0, vy:0, len:0, r:0, sw:0, ph:0 });
-    }
-    this.resize();
-    window.addEventListener('resize', () => this.resize());
-  },
+    init() {
+      this.canvas = document.getElementById(canvasId);
+      if (!this.canvas) return;
+      this.ctx = this.canvas.getContext('2d');
+      for (let i = 0; i < this.MAX; i++) {
+        this.pool.push({ x:0, y:0, vx:0, vy:0, len:0, r:0, sw:0, ph:0 });
+      }
+      this.resize();
+      window.addEventListener('resize', () => this.resize());
+    },
 
-  resize() {
-    if (!this.canvas || !this.ctx) return;
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
-    this.w = window.innerWidth;
-    this.h = window.innerHeight;
-    this.canvas.width  = Math.floor(this.w * dpr);
-    this.canvas.height = Math.floor(this.h * dpr);
-    this.canvas.style.width  = this.w + 'px';
-    this.canvas.style.height = this.h + 'px';
-    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    if (this.active > 0) {
-      for (let i = 0; i < this.active; i++) this.spawn(this.pool[i], true);
-    }
-  },
+    resize() {
+      if (!this.canvas || !this.ctx) return;
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      this.w = window.innerWidth;
+      this.h = window.innerHeight;
+      this.canvas.width  = Math.floor(this.w * dpr);
+      this.canvas.height = Math.floor(this.h * dpr);
+      this.canvas.style.width  = this.w + 'px';
+      this.canvas.style.height = this.h + 'px';
+      this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (this.active > 0) {
+        for (let i = 0; i < this.active; i++) this.spawn(this.pool[i], true);
+      }
+    },
 
-  setMode(mode) {
-    if (!this.ctx) return;
-    if (this.mode === mode) return;
-    this.mode = mode;
-    if (mode === 'rain' || mode === 'snow') {
-      this.active = (mode === 'rain') ? 160 : 110;
-      for (let i = 0; i < this.active; i++) this.spawn(this.pool[i], true);
-      this.canvas.style.display = 'block';
-      this.start();
-    } else {
-      this.active = 0;
-      this.stop();
-      this.ctx.clearRect(0, 0, this.w, this.h);
-      this.canvas.style.display = 'none';
-    }
-  },
+    setMode(mode) {
+      if (!this.ctx) return;
+      if (this.mode === mode) return;
+      this.mode = mode;
+      if (mode === 'rain' || mode === 'snow') {
+        this.active = (mode === 'rain') ? 160 : 110;
+        for (let i = 0; i < this.active; i++) this.spawn(this.pool[i], true);
+        this.canvas.style.display = 'block';
+        this.start();
+      } else {
+        this.active = 0;
+        this.stop();
+        this.ctx.clearRect(0, 0, this.w, this.h);
+        this.canvas.style.display = 'none';
+      }
+    },
 
-  spawn(p, spread) {
-    p.x = Math.random() * this.w;
-    p.y = spread ? Math.random() * this.h : (-30 - Math.random() * 80);
-    if (this.mode === 'rain') {
-      p.vy = 700 + Math.random() * 500;
-      p.vx = -110 - Math.random() * 90;
-      p.len = 9 + Math.random() * 15;
-    } else {
-      p.vy = 30 + Math.random() * 48;
-      p.vx = -16 + Math.random() * 32;
-      p.r  = 1.1 + Math.random() * 2.1;
-      p.ph = Math.random() * Math.PI * 2;
-      p.sw = 12 + Math.random() * 26;
-    }
-  },
+    spawn(p, spread) {
+      p.x = Math.random() * this.w;
+      p.y = spread ? Math.random() * this.h : (-30 - Math.random() * 80);
+      if (this.mode === 'rain') {
+        p.vy = 700 + Math.random() * 500;
+        p.vx = -110 - Math.random() * 90;
+        p.len = 9 + Math.random() * 15;
+      } else {
+        p.vy = 30 + Math.random() * 48;
+        p.vx = -16 + Math.random() * 32;
+        p.r  = 1.1 + Math.random() * 2.1;
+        p.ph = Math.random() * Math.PI * 2;
+        p.sw = 12 + Math.random() * 26;
+      }
+    },
 
-  start() {
-    if (this.running) return;
-    this.running = true;
-    this.last = performance.now();
-    const loop = (now) => {
-      if (!this.running) return;
-      const dt = Math.min(0.05, (now - this.last) / 1000);
-      this.last = now;
-      this.step(dt);
+    start() {
+      if (this.running) return;
+      this.running = true;
+      this.last = performance.now();
+      const loop = (now) => {
+        if (!this.running) return;
+        const dt = Math.min(0.05, (now - this.last) / 1000);
+        this.last = now;
+        this.step(dt);
+        this.raf = requestAnimationFrame(loop);
+      };
       this.raf = requestAnimationFrame(loop);
-    };
-    this.raf = requestAnimationFrame(loop);
-  },
+    },
 
-  stop() {
-    this.running = false;
-    if (this.raf) { cancelAnimationFrame(this.raf); this.raf = null; }
-  },
+    stop() {
+      this.running = false;
+      if (this.raf) { cancelAnimationFrame(this.raf); this.raf = null; }
+    },
 
-  step(dt) {
-    const ctx = this.ctx;
-    if (!ctx) return;
-    ctx.clearRect(0, 0, this.w, this.h);
+    step(dt) {
+      const ctx = this.ctx;
+      if (!ctx) return;
+      ctx.clearRect(0, 0, this.w, this.h);
 
-    if (this.mode === 'rain') {
-      ctx.strokeStyle = 'rgba(174,214,255,0.62)';
-      ctx.lineWidth = 1.5;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      for (let i = 0; i < this.active; i++) {
-        const p = this.pool[i];
-        p.x += p.vx * dt;
-        p.y += p.vy * dt;
-        if (p.y > this.h + 30 || p.x < -60) { this.spawn(p, false); continue; }
-        ctx.moveTo(p.x, p.y);
-        ctx.lineTo(p.x - p.vx * 0.016, p.y - p.len);
+      if (this.mode === 'rain') {
+        ctx.strokeStyle = 'rgba(174,214,255,0.62)';
+        ctx.lineWidth = 1.5;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        for (let i = 0; i < this.active; i++) {
+          const p = this.pool[i];
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          if (p.y > this.h + 30 || p.x < -60) { this.spawn(p, false); continue; }
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(p.x - p.vx * 0.016, p.y - p.len);
+        }
+        ctx.stroke();
+      } else if (this.mode === 'snow') {
+        ctx.fillStyle = 'rgba(255,255,255,0.88)';
+        ctx.beginPath();
+        for (let i = 0; i < this.active; i++) {
+          const p = this.pool[i];
+          p.ph += dt * 2.2;
+          p.x += (p.vx + Math.sin(p.ph) * p.sw) * dt;
+          p.y += p.vy * dt;
+          if (p.y > this.h + 20 || p.x < -40 || p.x > this.w + 40) { this.spawn(p, false); continue; }
+          ctx.moveTo(p.x + p.r, p.y);
+          ctx.arc(p.x, p.y, p.r, 0, 6.2832);
+        }
+        ctx.fill();
       }
-      ctx.stroke();
-    } else if (this.mode === 'snow') {
-      ctx.fillStyle = 'rgba(255,255,255,0.88)';
-      ctx.beginPath();
-      for (let i = 0; i < this.active; i++) {
-        const p = this.pool[i];
-        p.ph += dt * 2.2;
-        p.x += (p.vx + Math.sin(p.ph) * p.sw) * dt;
-        p.y += p.vy * dt;
-        if (p.y > this.h + 20 || p.x < -40 || p.x > this.w + 40) { this.spawn(p, false); continue; }
-        ctx.moveTo(p.x + p.r, p.y);
-        ctx.arc(p.x, p.y, p.r, 0, 6.2832);
-      }
-      ctx.fill();
-    }
-  },
-};
+    },
+  };
+}
+
+const WeatherFX      = createWeatherFX('weatherFx');       // 地圖層
+const CatchWeatherFX = createWeatherFX('catchWeatherFx');  // 捕捉介面層
 
 /* =========================================================
    7. 程序化地圖
@@ -2701,13 +2799,15 @@ function addSpawn(p, lat, lng) {
   const shiny = Math.random() < SHINY_RATE;
   const src = spriteUrl(p, shiny);
   const fbSrc = staticSpriteUrl(p, shiny);
+  const isPng = spriteIsPng(p);
+  const gifCls = 'spawn-gif' + (isPng ? ' png-big' : '');
 
   const icon = L.divIcon({
     className: '',
     html: `<div class="spawn ${shiny ? 'shiny' : ''}">
              <div class="spawn-shadow"></div>
-             <img class="spawn-gif" src="${src}" alt="${p.name}" draggable="false"
-                  onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='${fbSrc}';}else{this.style.display='none';this.insertAdjacentHTML('afterend','<div class=&quot;spawn-fallback&quot;>❓</div>');}">
+             <img class="${gifCls}" src="${src}" alt="${p.name}" draggable="false"
+                  onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='${fbSrc}';this.classList.add('png-big');}else{this.style.display='none';this.insertAdjacentHTML('afterend','<div class=&quot;spawn-fallback&quot;>❓</div>');}">
            </div>`,
     iconSize: [88, 96], iconAnchor: [44, 90],
   });
@@ -3073,7 +3173,7 @@ function playNPCEvolutionAnimation(fromName, toName, evoSpriteId, onDone) {
     ov.style.display = 'none';
     animImg.style.display = '';
     onDone();  // 由 finish() 內恢復地圖音樂
-  }, 2200);
+  }, 2700);
 }
 
 /* =========================================================
@@ -3091,6 +3191,10 @@ const catchResult = document.getElementById('catchResult');
 const swipeHint   = document.getElementById('swipeHint');
 const powerWrap   = document.getElementById('powerWrap');
 const powerFill   = document.getElementById('powerFill');
+
+const aimArc       = document.getElementById('aimArc');
+const aimArcPath   = document.getElementById('aimArcPath');
+const aimArrowHead = document.getElementById('aimArrowHead');
 
 let ballHome = { x: 0, y: 0 };
 let ballFlying = false;
@@ -3128,6 +3232,51 @@ function updateGroundLine() {
   catchScreen.style.setProperty('--groundY', pct + '%');
 }
 
+function hideAimArc() {
+  if (aimArc) aimArc.classList.remove('on');
+}
+
+function drawAimArc(dirSign) {
+  if (!aimArc) return;
+  const stageRect = catchStage.getBoundingClientRect();
+  const monRect   = wildMon.getBoundingClientRect();
+
+  // 目標＝精靈中心
+  const tx = monRect.left - stageRect.left + monRect.width  / 2;
+  const ty = monRect.top  - stageRect.top  + monRect.height / 2 - 14;
+  const sx = swipe.startX;
+  const sy = swipe.startY;
+
+  const dx = tx - sx;
+  const dy = ty - sy;
+  const len = Math.hypot(dx, dy) || 1;
+
+  // 往拖曳方向偏的控制點
+  const px = -dy / len;
+  const py =  dx / len;
+  const off = dirSign * Math.min(len * 0.34, 150);
+  const cx = (sx + tx) / 2 + px * off;
+  const cy = (sy + ty) / 2 + py * off;
+
+  aimArcPath.setAttribute('d', `M ${sx} ${sy} Q ${cx} ${cy} ${tx} ${ty}`);
+
+  // 箭頭：沿二次貝茲曲線終點切線方向
+  const ax = 2 * (tx - cx);
+  const ay = 2 * (ty - cy);
+  const al = Math.hypot(ax, ay) || 1;
+  const ux = ax / al;
+  const uy = ay / al;
+  const hl = 18, hw = 10;
+  const bx = tx - ux * hl;
+  const by = ty - uy * hl;
+  const nx = -uy, ny = ux;
+
+  aimArrowHead.setAttribute('points',
+    `${tx},${ty} ${bx + nx * hw},${by + ny * hw} ${bx - nx * hw},${by - ny * hw}`);
+
+  aimArc.classList.add('on');
+}
+
 function openCatch(p, marker, shiny) {
   if (catchState !== 'idle') return;
   catchState = 'aim';
@@ -3148,10 +3297,12 @@ function openCatch(p, marker, shiny) {
   img.src = spriteUrl(p, shiny);
   img.alt = p.name;
   img.draggable = false;
+  if (spriteIsPng(p)) img.classList.add('png-big');
   img.onerror = () => {
     if (!img.dataset.fb) {
       img.dataset.fb = '1';
       img.src = staticSpriteUrl(p, shiny);
+      img.classList.add('png-big');
       return;
     }
     img.remove();
@@ -3169,11 +3320,14 @@ function openCatch(p, marker, shiny) {
   powerWrap.style.display = 'none';
   powerFill.style.width = '0%';
   trail.style.display = 'none';
+  hideAimArc();
   ballFlying = false;
   lastThrow = null;
 
   updateHUD();
   catchScreen.classList.remove('hidden');
+
+  syncCatchWeather();
 
   requestAnimationFrame(() => {
     resetBallPosition(false);
@@ -3191,6 +3345,11 @@ function closeCatch() {
   currentSpawn = null;
   ballFlying = false;
   resetSwipe();
+  hideAimArc();
+
+  CatchWeatherFX.setMode('none');
+  const fogEl = document.getElementById('catchFogLayer');
+  if (fogEl) fogEl.classList.remove('on');
 
   wildMon.classList.remove('absorbed');
   wildMon.classList.remove('fleeing');
@@ -3204,6 +3363,7 @@ function resetSwipe() {
   swipe.active = false;
   swipe.pointerId = null;
   trail.style.display = 'none';
+  hideAimArc();
   powerWrap.style.display = 'none';
   powerFill.style.width = '0%';
 }
@@ -3258,6 +3418,7 @@ function onPointerUp(e) {
   if (!swipe.active || e.pointerId !== swipe.pointerId) return;
   swipe.active = false;
   trail.style.display = 'none';
+  hideAimArc();
   powerWrap.style.display = 'none';
   evaluateSwipe();
 }
@@ -3267,18 +3428,27 @@ function drawTrail() {
   const dy = swipe.curY - swipe.startY;
   const len = Math.hypot(dx, dy);
   const ang = Math.atan2(dy, dx) * 180 / Math.PI;
+  const absAng = Math.abs(ang + 90);
+
+  // 斜向拖曳（22°～62°）時改用弧線瞄準
+  const isCurve = dy < -12 && absAng > 22 && absAng < 62;
+
+  if (isCurve) {
+    trail.style.display = 'none';
+    drawAimArc(Math.sign(dx) || 1);
+    return;
+  }
+
+  hideAimArc();
+  if (len < 1) { trail.style.display = 'none'; return; }
 
   trail.style.display = 'block';
-  trail.style.left = swipe.startX + 'px';
-  trail.style.top  = (swipe.startY - 2) + 'px';
+  trail.style.left  = swipe.startX + 'px';
+  trail.style.top   = (swipe.startY - 2) + 'px';
   trail.style.width = len + 'px';
   trail.style.transform = `rotate(${ang}deg)`;
-
-  const absAng = Math.abs(ang + 90);
-  const isCurve = absAng > 22 && absAng < 62;
-  trail.style.background = isCurve
-    ? 'linear-gradient(90deg,rgba(162,155,254,.2),rgba(162,155,254,.95))'
-    : 'linear-gradient(90deg,rgba(255,255,255,.2),rgba(255,255,255,.9))';
+  trail.style.background =
+    'linear-gradient(90deg,rgba(255,255,255,.2),rgba(255,255,255,.9))';
 }
 
 function updatePowerBar() {
@@ -3970,7 +4140,7 @@ function tryEvolve(srcName, toName) {
     renderEvoList();
 
     if (gameStarted) audio.playMap(env.time); // 恢復地圖音樂
-  }, 2200);
+  }, 2700);
 }
 
 document.getElementById('evoBtn').addEventListener('click', () => {
@@ -4180,6 +4350,7 @@ async function boot() {
 
     loadingScreen.classList.add('hidden');
     WeatherFX.init();
+    CatchWeatherFX.init();
     audio.init();
     SFX.init();
     SFX.resume();
