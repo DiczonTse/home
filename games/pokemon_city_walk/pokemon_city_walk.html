@@ -4,17 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>🎊寵物小精靈 City Walk</title>
-<!-- PWA 核心 -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0d1117">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="🎊Pokemon City Walk">
-<!-- iOS 图标（至少提供一个 180×180 或 192×192） -->
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<!-- ===== Open Graph / Facebook / WhatsApp ===== -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://diczontse.github.io/home/games/pokemon_city_walk/pokemon_city_walk.html">
 <meta property="og:title" content="🎊寵物小精靈 City Walk">
@@ -23,7 +20,6 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="寵物小精靈 City Walk 遊戲封面">
-<!-- ===== Twitter Card ===== -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="🎊寵物小精靈 City Walk">
 <meta name="twitter:description" content="帶著手機在城市中漫步，捕捉寶可夢！">
@@ -83,32 +79,48 @@
   .leaflet-tile-pane{filter:saturate(1.05) brightness(1.02)}
   .leaflet-control-attribution{font-size:9px;background:rgba(255,255,255,.6)!important}
 
+  /* ═══ 香薰彩帶特效 ═══ */
+  #confettiLayer{position:fixed;inset:0;pointer-events:none;z-index:5;
+    display:none;overflow:hidden}
+  #confettiLayer.on{display:block}
+  .confetti-piece{
+    position:absolute;top:-24px;border-radius:2px;
+    animation-name:confettiFall;
+    animation-timing-function:linear;
+    animation-iteration-count:infinite;
+    will-change:transform;
+  }
+  @keyframes confettiFall{
+    0%{transform:translateY(-24px) rotate(0deg);opacity:1}
+    100%{transform:translateY(110vh) rotate(720deg);opacity:.7}
+  }
+
   #nightTint{
     position:absolute;inset:0;pointer-events:none;z-index:450;
     background:radial-gradient(circle at 50% 40%,rgba(20,30,70,.35),rgba(5,10,30,.62));
     opacity:0;transition:opacity .8s;
   }
   #nightTint.on{opacity:1}
-  
-  /* 夜晚玩家光晕 */
+
   .player-wrap .glow{
     position:absolute;left:50%;top:50%;
-    width:170px;height:170px;margin:-85px 0 0 -85px;
+    width:360px;height:360px;margin:-180px 0 0 -180px;
     border-radius:50%;pointer-events:none;z-index:0;
     background:radial-gradient(circle,
-      rgba(255,242,190,.62) 0%,
-      rgba(255,216,110,.30) 26%,
-      rgba(255,198,84,.12) 50%,
-      rgba(255,180,60,0) 72%);
+      rgba(255,242,190,.55) 0%,
+      rgba(255,220,120,.32) 18%,
+      rgba(255,205,90,.18) 36%,
+      rgba(255,190,70,.08) 56%,
+      rgba(255,180,60,0) 76%);
     opacity:0;transition:opacity .8s;
   }
   body.night .player-wrap .glow{
     opacity:1;
-    animation:playerGlow 3.4s ease-in-out infinite;
+    animation:playerGlow 4s ease-in-out infinite;
   }
   @keyframes playerGlow{
-    0%,100%{transform:scale(1);opacity:.82}
-    50%{transform:scale(1.14);opacity:1}
+    0%,100%{transform:scale(1);opacity:.85}
+    50%{transform:scale(1.08);opacity:1}
   }
   body.night .player-wrap .dot{
     box-shadow:0 2px 10px rgba(0,0,0,.5),
@@ -129,7 +141,6 @@
       rgba(206,218,232,.50) 100%)}
   #fogLayer.on{opacity:1}
 
-  /* ===== 捕捉介面天氣層 ===== */
   #catchWeatherFx{position:absolute;inset:0;z-index:5;pointer-events:none;display:none}
   #catchFogLayer{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:0;
     transition:opacity 1.2s;
@@ -160,7 +171,6 @@
   @keyframes spawnIdle{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-2px) scale(1.02)}}
   @keyframes shadowIdle{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(.95);opacity:.42}}
 
-  /* PNG 精靈（Gen7 static sprite）放大補償 */
   .spawn-gif.png-big{
 	transform:scale(1.35);transform-origin:center bottom;
 	animation:spawnIdleBig 2.6s ease-in-out infinite}
@@ -228,8 +238,34 @@
       radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
       linear-gradient(#ee1515 0 45%,#1a1a1a 45% 55%,#ffffff 55% 100%);
     border:1.5px solid #1a1a1a;position:relative;flex:0 0 auto;
-    box-shadow:0 0 6px rgba(238,21,21,.5)}
-
+    box-shadow:0 0 6px rgba(238,21,21,.5);overflow:hidden}
+  .ball-mini.ball-great{
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
+      linear-gradient(#3b6fd6 0 45%, #1a1a1a 45% 55%, #ffffff 55% 100%);
+    box-shadow:0 0 6px rgba(59,111,214,.6)}
+  .ball-mini.ball-ultra{
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
+      linear-gradient(#1a1a1a 0 40%, #ffcc00 40% 55%, #1a1a1a 55% 62%, #ffffff 62% 100%);
+    box-shadow:0 0 6px rgba(255,204,0,.65)}
+  .ball-mini.ball-master{
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
+      linear-gradient(#7b2fbe 0 45%, #1a1a1a 45% 55%, #ffffff 55% 100%);
+    box-shadow:0 0 6px rgba(123,47,190,.75)}
+  .ball-great::before{
+    content:'';
+    position:absolute;
+    pointer-events:none;
+    top:10%;
+    left:8%;
+    right:8%;
+    height:28%;
+    background:
+      linear-gradient(#ee1515, #ee1515) left top / 22% 100% no-repeat,
+      linear-gradient(#ee1515, #ee1515) right top / 22% 100% no-repeat;
+  }
   .candy-mini{display:inline-block;width:14px;height:14px;border-radius:50%;
     background:radial-gradient(circle at 32% 30%,#fff,#ffb703 70%);
     border:1.5px solid #b37400;flex:0 0 auto;box-shadow:0 0 5px rgba(255,183,3,.6)}
@@ -292,9 +328,21 @@
 
   .pokeball{border-radius:50%;
     background:linear-gradient(#ee1515 0 45%,#1a1a1a 45% 55%,#ffffff 55% 100%);
-    border:3px solid #1a1a1a;position:relative}
+    border:3px solid #1a1a1a;position:relative;overflow:hidden}
   .pokeball::after{content:'';position:absolute;left:50%;top:50%;width:28%;height:28%;border-radius:50%;
     background:#fff;border:3px solid #1a1a1a;transform:translate(-50%,-50%)}
+  .pokeball.ball-great{
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
+      linear-gradient(#3b6fd6 0 45%, #1a1a1a 45% 55%, #ffffff 55% 100%)}
+  .pokeball.ball-ultra{
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
+      linear-gradient(#1a1a1a 0 40%, #ffcc00 40% 55%, #1a1a1a 55% 62%, #ffffff 62% 100%)}
+  .pokeball.ball-master{
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
+      linear-gradient(#7b2fbe 0 45%, #1a1a1a 45% 55%, #ffffff 55% 100%)}
 
   .overlay{position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;
     padding:calc(env(safe-area-inset-top,0px) + 12px) 16px calc(env(safe-area-inset-bottom,0px) + 18px)}
@@ -307,28 +355,22 @@
   #sceneBg .ground{position:absolute;left:0;right:0;
     top:var(--groundY,42%);bottom:0;transition:top .4s,background .4s}
 
-  /* ══════════════ 白天天空（加入暖色地平線光暈） ══════════════ */
   #catchScreen.day #sceneBg .sky{
     background:
       radial-gradient(ellipse 75% 65% at 50% 100%, rgba(255,250,214,.60) 0%, rgba(255,250,214,0) 72%),
       linear-gradient(180deg,#3d7fd6 0%,#6db3e8 45%,#b8e0f0 100%);
   }
 
-  /* ══════════════ 精緻草地 ══════════════ */
   #catchScreen.day #sceneBg .ground{
     background-color:#6fae3f;
     background-image:
-      /* 地平線暖光 */
       radial-gradient(ellipse 135% 50% at 50% 0%, rgba(255,255,210,.62) 0%, rgba(255,255,210,0) 62%),
-      /* 草葉與小花（SVG 無縫圖案） */
       url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='110'%20height='62'%3E%3Cg%20stroke='%233f6d1c'%20stroke-width='2'%20stroke-linecap='round'%20fill='none'%20opacity='0.26'%3E%3Cpath%20d='M12%2062%20Q10%2044%2015%2032'/%3E%3Cpath%20d='M18%2062%20Q18%2048%2022%2038'/%3E%3Cpath%20d='M40%2062%20Q37%2042%2042%2030'/%3E%3Cpath%20d='M46%2062%20Q45%2050%2049%2042'/%3E%3Cpath%20d='M70%2062%20Q68%2044%2073%2034'/%3E%3Cpath%20d='M76%2062%20Q77%2049%2081%2040'/%3E%3Cpath%20d='M97%2062%20Q95%2043%20100%2032'/%3E%3C/g%3E%3Cg%20fill='%23fff9cc'%20opacity='0.45'%3E%3Ccircle%20cx='28'%20cy='38'%20r='1.7'/%3E%3Ccircle%20cx='60'%20cy='28'%20r='1.5'/%3E%3Ccircle%20cx='88'%20cy='40'%20r='1.6'/%3E%3C/g%3E%3C/svg%3E"),
-      /* 底色漸層 */
       linear-gradient(180deg,#b8e07a 0%,#9ad35c 16%,#79b647 48%,#4d8a28 100%);
     background-repeat:no-repeat, repeat, no-repeat;
     background-size:100% 100%, 110px 62px, 100% 100%;
     background-position:0 0, 0 0, 0 0;
   }
-  /* 草地邊緣暗角，增加景深 */
   #catchScreen.day #sceneBg .ground::after{
     content:'';position:absolute;inset:0;pointer-events:none;
     background:
@@ -336,7 +378,6 @@
       linear-gradient(180deg, rgba(255,255,190,.22) 0%, rgba(255,255,190,0) 18%);
   }
 
-  /* ══════════════ 飄動的雲 ══════════════ */
   #clouds{
     position:absolute;left:0;right:0;top:0;
     height:var(--groundY,42%);
@@ -373,24 +414,18 @@
     100% { transform:translateX(-300px); }
   }
 
-  /* ══════════════ 夜晚 ══════════════ */
   #catchScreen.night #sceneBg .sky{background:linear-gradient(180deg,#050820 0%,#0f1838 50%,#1a2545 100%)}
 
-  /* ══════════════ 夜晚草地（草葉 + 露水，月光灑落） ══════════════ */
   #catchScreen.night #sceneBg .ground{
     background-color:#17301f;
     background-image:
-      /* 地平線月光 */
       radial-gradient(ellipse 135% 50% at 50% 0%, rgba(150,190,255,.22) 0%, rgba(150,190,255,0) 62%),
-      /* 草葉與露水（SVG 無縫圖案） */
       url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='110'%20height='62'%3E%3Cg%20stroke='%230f2413'%20stroke-width='2'%20stroke-linecap='round'%20fill='none'%20opacity='0.55'%3E%3Cpath%20d='M12%2062%20Q10%2044%2015%2032'/%3E%3Cpath%20d='M18%2062%20Q18%2048%2022%2038'/%3E%3Cpath%20d='M40%2062%20Q37%2042%2042%2030'/%3E%3Cpath%20d='M46%2062%20Q45%2050%2049%2042'/%3E%3Cpath%20d='M70%2062%20Q68%2044%2073%2034'/%3E%3Cpath%20d='M76%2062%20Q77%2049%2081%2040'/%3E%3Cpath%20d='M97%2062%20Q95%2043%20100%2032'/%3E%3C/g%3E%3Cg%20fill='%23bcd6ff'%20opacity='0.22'%3E%3Ccircle%20cx='28'%20cy='38'%20r='1.7'/%3E%3Ccircle%20cx='60'%20cy='28'%20r='1.5'/%3E%3Ccircle%20cx='88'%20cy='40'%20r='1.6'/%3E%3C/g%3E%3C/svg%3E"),
-      /* 底色漸層 */
       linear-gradient(180deg,#2c5233 0%,#22422a 18%,#17301f 50%,#08160d 100%);
     background-repeat:no-repeat, repeat, no-repeat;
     background-size:100% 100%, 110px 62px, 100% 100%;
     background-position:0 0, 0 0, 0 0;
   }
-  /* 夜晚草地暗角 */
   #catchScreen.night #sceneBg .ground::after{
     content:'';position:absolute;inset:0;pointer-events:none;
     background:
@@ -417,6 +452,22 @@
   .catch-stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center;
     touch-action:none;overflow:hidden;z-index:3}
 
+  .catch-effects{
+    position:absolute;top:8px;left:50%;transform:translateX(-50%);
+    display:flex;gap:8px;z-index:5;pointer-events:none;flex-wrap:wrap;justify-content:center;
+    max-width:90%;
+  }
+  .catch-effect-badge{
+    background:rgba(124,252,154,.95);
+    color:#0a3d1a;
+    font-size:12px;font-weight:900;
+    padding:4px 10px;border-radius:999px;
+    box-shadow:0 2px 8px rgba(0,0,0,.4);
+    animation:badgeIn .3s ease;
+    white-space:nowrap;
+  }
+  @keyframes badgeIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+
   .wild{position:relative;z-index:2}
   .mon{position:relative;width:190px;height:180px;
     display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;
@@ -434,7 +485,6 @@
   @keyframes monIdle{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-3px) scale(1.015)}}
   @keyframes monShadowIdle{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(.96);opacity:.7}}
 
-  /* PNG 精靈放大補償 */
   .mon img.png-big{
     transform:scale(1.35);transform-origin:center bottom;
     animation:monIdleBig 2.4s ease-in-out infinite}
@@ -451,7 +501,6 @@
     to  {filter:drop-shadow(0 0 16px #ffd166) drop-shadow(0 0 34px #ffb703) brightness(1.2)}
   }
   .mon.shiny::after{background:radial-gradient(ellipse at center,rgba(0,0,0,.5) 0%, rgba(0,0,0,.25) 48%, rgba(0,0,0,0) 76%);}
-
   .mon.shiny img.png-big{
     animation:monIdleBig 2.4s ease-in-out infinite, monShinyGlow 1.3s ease-in-out infinite alternate;
   }
@@ -491,7 +540,6 @@
     background:linear-gradient(90deg,rgba(255,255,255,.2),rgba(255,255,255,.9));
     transform-origin:0 50%;pointer-events:none;display:none;z-index:20}
 
-  /* ===== 斜拉瞄準弧線 ===== */
   #aimArc{position:absolute;left:0;top:0;width:100%;height:100%;
     pointer-events:none;z-index:20;display:none;overflow:visible}
   #aimArc.on{display:block}
@@ -514,6 +562,105 @@
     text-shadow:0 2px 12px rgba(0,0,0,.85);transition:.2s;z-index:3}
 
   .catch-footer{display:flex;flex-direction:column;align-items:center;gap:6px;z-index:3}
+
+  .catch-items{
+    display:flex;gap:12px;justify-content:center;
+    margin-bottom:10px;z-index:4;
+  }
+  .catch-item-btn{
+    background:rgba(15,20,32,.82);
+    border:2px solid rgba(255,255,255,.3);
+    border-radius:50%;
+    width:52px;height:52px;
+    display:flex;align-items:center;justify-content:center;
+    position:relative;cursor:pointer;
+    transition:transform .12s,background .2s,border-color .2s;
+    padding:0;color:#fff;font-family:inherit;
+    backdrop-filter:blur(8px);
+    box-shadow:0 4px 14px rgba(0,0,0,.45);
+  }
+  .catch-item-btn .item-emoji{font-size:26px;line-height:1}
+  .catch-item-btn .item-count{
+    position:absolute;bottom:-4px;right:-6px;
+    background:#ffd166;color:#5a3d00;
+    font-size:10px;font-weight:900;
+    padding:1px 5px;border-radius:999px;
+    min-width:16px;text-align:center;
+    box-shadow:0 1px 4px rgba(0,0,0,.5);
+  }
+  .catch-item-btn:active:not(:disabled){transform:scale(.92)}
+  .catch-item-btn.active{
+    border-color:#7CFC9A;
+    background:rgba(124,252,154,.2);
+    box-shadow:0 0 14px rgba(124,252,154,.6);
+  }
+  .catch-item-btn:disabled{
+    opacity:.35;filter:grayscale(1);cursor:not-allowed;
+  }
+  .catch-balls{
+    display:flex;gap:10px;justify-content:center;
+    margin-bottom:8px;z-index:4;flex-wrap:wrap;
+    max-width:100%;
+  }
+  .catch-ball-btn{
+    background:rgba(15,20,32,.82);
+    border:2px solid rgba(255,255,255,.25);
+    border-radius:50%;
+    width:46px;height:46px;
+    position:relative;cursor:pointer;
+    padding:0;font-family:inherit;
+    backdrop-filter:blur(8px);
+    box-shadow:0 4px 14px rgba(0,0,0,.45);
+    transition:transform .12s,border-color .2s,background .2s;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .catch-ball-btn:active:not(:disabled){transform:scale(.9)}
+  .catch-ball-btn.active{
+    border-color:#ffd166;
+    background:rgba(255,209,102,.22);
+    box-shadow:0 0 16px rgba(255,209,102,.7);
+  }
+  .catch-ball-btn:disabled{
+    opacity:.35;filter:grayscale(1);cursor:not-allowed;
+  }
+  .catch-ball-btn .cb-icon{
+    width:30px;height:30px;border-radius:50%;
+    border:2px solid #1a1a1a;position:relative;flex:0 0 auto;overflow:hidden;
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
+      linear-gradient(#ee1515 0 45%,#1a1a1a 45% 55%,#ffffff 55% 100%);
+  }
+  .catch-ball-btn .cb-icon::after{
+    content:'';position:absolute;left:50%;top:50%;
+    width:28%;height:28%;border-radius:50%;
+    background:#fff;border:2px solid #1a1a1a;transform:translate(-50%,-50%);
+  }
+  .catch-ball-btn .cb-icon.ball-great{
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
+      linear-gradient(#3b6fd6 0 45%, #1a1a1a 45% 55%, #ffffff 55% 100%);
+  }
+  .catch-ball-btn .cb-icon.ball-ultra{
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
+      linear-gradient(#1a1a1a 0 40%, #ffcc00 40% 55%, #1a1a1a 55% 62%, #ffffff 62% 100%);
+  }
+  .catch-ball-btn .cb-icon.ball-master{
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
+      linear-gradient(#7b2fbe 0 45%, #1a1a1a 45% 55%, #ffffff 55% 100%);
+  }
+  .catch-ball-btn .cb-count{
+    position:absolute;bottom:-4px;right:-6px;
+    background:#ffd166;color:#5a3d00;
+    font-size:9px;font-weight:900;
+    padding:1px 5px;border-radius:999px;
+    min-width:16px;text-align:center;
+    box-shadow:0 1px 4px rgba(0,0,0,.5);
+  }
+  .catch-ball-btn.active .cb-count{
+    background:#ffb703;
+  }
   .ball-tip{color:rgba(255,255,255,.92);font-size:14px;font-weight:800;
     text-shadow:0 2px 8px rgba(0,0,0,.8);
     display:inline-flex;align-items:center;gap:6px}
@@ -559,7 +706,7 @@
     position:relative;z-index:2}
 
   .stop-reward{display:flex;align-items:center;justify-content:center;gap:10px;
-    color:#ffd166;font-size:21px;font-weight:800;min-height:34px;
+    color:#ffd166;font-size:21px;font-weight:800;min-height:34px;flex-wrap:wrap;
     text-shadow:0 0 16px rgba(255,209,102,.6)}
   .stop-reward .ball-mini{width:26px;height:26px;box-shadow:0 0 12px rgba(238,21,21,.75)}
   @keyframes rewardIn{0%{transform:scale(.35);opacity:0}
@@ -571,7 +718,7 @@
   .ghost{background:rgba(255,255,255,.1)!important;box-shadow:none!important;color:#ccc!important;
     padding:11px!important;font-size:14px!important;width:100%;border-radius:999px;border:none;cursor:pointer}
 
-  #dexScreen,#evoScreen{background:radial-gradient(circle at 50% 20%,#2a2140 0%,#120e22 60%,#07060e 100%)}
+  #dexScreen,#evoScreen,#bagScreen{background:radial-gradient(circle at 50% 20%,#2a2140 0%,#120e22 60%,#07060e 100%)}
   .dex-top{display:flex;justify-content:center;align-items:center;position:relative;min-height:44px;
     margin-bottom:8px}
   .dex-title{color:#fff;font-size:19px;font-weight:800;letter-spacing:2px;
@@ -604,6 +751,64 @@
   .dex-shiny{font-size:9px;color:#ffb703;margin-top:2px;font-weight:800;
     text-shadow:0 0 8px rgba(255,183,3,.8)}
   .dex-evo-tag{font-size:9px;color:#7dd3fc;margin-top:2px;font-weight:700}
+
+  .bag-section-title{color:#ffd166;font-size:14px;font-weight:800;letter-spacing:1px;
+    margin:8px 4px 12px}
+  .bag-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+  .bag-item{background:rgba(255,255,255,.06);border-radius:16px;padding:14px;
+    border:2px solid rgba(255,255,255,.1);cursor:pointer;transition:.2s;
+    display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+  .bag-item:active{transform:scale(.97)}
+  .bag-item.selected{border-color:#ffd166;background:rgba(255,209,102,.13);
+    box-shadow:0 0 18px rgba(255,209,102,.3)}
+  .bag-item.empty{opacity:.5}
+  .bag-ball-icon{width:52px;height:52px;border-radius:50%;
+    border:3px solid #1a1a1a;position:relative;flex:0 0 auto;overflow:hidden;
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
+      linear-gradient(#ee1515 0 45%,#1a1a1a 45% 55%,#ffffff 55% 100%)}
+  .bag-ball-icon::after{content:'';position:absolute;left:50%;top:50%;
+    width:28%;height:28%;border-radius:50%;
+    background:#fff;border:3px solid #1a1a1a;transform:translate(-50%,-50%)}
+  .bag-ball-icon.ball-great{
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
+      linear-gradient(#3b6fd6 0 45%, #1a1a1a 45% 55%, #ffffff 55% 100%)}
+  .bag-ball-icon.ball-ultra{
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
+      linear-gradient(#1a1a1a 0 40%, #ffcc00 40% 55%, #1a1a1a 55% 62%, #ffffff 62% 100%)}
+  .bag-ball-icon.ball-master{
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
+      linear-gradient(#7b2fbe 0 45%, #1a1a1a 45% 55%, #ffffff 55% 100%)}
+  .bag-ball-name{font-size:14px;font-weight:900;color:#fff}
+  .bag-ball-desc{font-size:10px;color:rgba(255,255,255,.55);font-weight:700}
+  .bag-ball-count{font-size:18px;font-weight:900;color:#ffd166}
+  .bag-ball-count::before{content:'×'}
+  .bag-ball-tag{font-size:10px;font-weight:800;color:#ffd166;letter-spacing:.5px;
+    padding:2px 8px;border-radius:999px;background:rgba(255,209,102,.15)}
+
+  .bag-item-emoji{font-size:40px;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4))}
+  .bag-item-use{
+    margin-top:6px;
+    background:linear-gradient(135deg,#a29bfe,#6c5ce7);
+    color:#fff;border:none;
+    padding:7px 16px;border-radius:999px;
+    font-size:12px;font-weight:800;
+    cursor:pointer;font-family:inherit;
+    box-shadow:0 4px 12px rgba(108,92,231,.5);
+    transition:transform .12s,background .2s;
+  }
+  .bag-item-use:active:not(:disabled){transform:scale(.94)}
+  .bag-item-use:disabled{
+    background:rgba(120,120,140,.5);
+    box-shadow:none;cursor:not-allowed;opacity:.7;
+  }
+  .bag-item-use.active-incense{
+    background:linear-gradient(135deg,#7CFC9A,#20a054);
+    color:#0a3d1a;
+  }
 
   .evo-list{display:flex;flex-direction:column;gap:10px}
   .evo-item{background:rgba(255,255,255,.06);border-radius:16px;padding:12px;
@@ -779,15 +984,17 @@
   <div id="nightTint"></div>
   <div id="fogLayer"></div>
 </div>
+<div id="confettiLayer"></div>
 <canvas id="weatherFx"></canvas>
 
 <button id="fsBtn" title="全螢幕">⛶</button>
 
 <div id="hud">
-  <div class="chip"><span class="ball-mini"></span> <span id="ballCount">20</span></div>
+  <div class="chip"><span class="ball-mini" id="hudBallIcon"></span> <span id="ballCount">20</span></div>
   <div class="chip">🏆 <span id="caughtCount">0</span></div>
   <div class="chip" id="envChip">☀️ 白天 · 晴朗</div>
   <div class="chip" id="timerChip">⏱ 5:00</div>
+  <button class="chip chip-btn" id="bagBtn">🎒 背包</button>
   <button class="chip chip-btn" id="dexBtn">📖 圖鑑</button>
   <button class="chip chip-btn" id="evoBtn">🧬 進化</button>
   <button class="chip chip-btn" id="saveBtn" title="匯出存檔 .txt">💾</button>
@@ -845,6 +1052,7 @@
   </div>
 
   <div class="catch-stage" id="catchStage">
+    <div class="catch-effects" id="catchEffects"></div>
     <div class="wild" id="wildMon"><div class="mon" id="monBody"></div></div>
     <div id="ballFly" class="pokeball"></div>
     <div id="trail"></div>
@@ -861,7 +1069,18 @@
   <div class="catch-result" id="catchResult"></div>
 
   <div class="catch-footer">
-    <div class="ball-tip"><span class="ball-mini"></span> 剩餘 <b id="catchBallCount">20</b> 顆精靈球</div>
+    <div class="catch-balls" id="catchBalls"></div>
+	<div class="catch-items" id="catchItems">
+      <button class="catch-item-btn" data-item="pineapple" title="菠蘿：捕獲糖果+1">
+        <span class="item-emoji">🍍</span>
+        <span class="item-count" id="itemCountPineapple">0</span>
+      </button>
+      <button class="catch-item-btn" data-item="grape" title="提子：降低逃跑機率">
+        <span class="item-emoji">🍇</span>
+        <span class="item-count" id="itemCountGrape">0</span>
+      </button>
+    </div>
+    <div class="ball-tip"><span class="ball-mini" id="catchBallIcon"></span> <span id="catchBallName">精靈球</span> · 剩餘 <b id="catchBallCount">20</b> 顆</div>
     <div class="ball-tip sub">上掃 = 直球 ｜ 斜掃 = 旋轉球</div>
   </div>
 </div>
@@ -919,6 +1138,19 @@
   <div class="npc-footer">
     <button class="npc-confirm-btn" id="npcConfirmBtn" disabled>確認交換</button>
     <button class="npc-cancel-btn" id="npcCancelBtn">取消</button>
+  </div>
+</div>
+
+<div id="bagScreen" class="overlay hidden">
+  <div class="dex-top">
+    <div class="dex-title">🎒 背包</div>
+    <button class="closeX" id="bagCloseBtn">✕</button>
+  </div>
+  <div class="dex-scroll">
+    <div class="bag-section-title">精靈球（點擊切換捕捉用球）</div>
+    <div class="bag-grid" id="bagGrid"></div>
+    <div class="bag-section-title" style="margin-top:22px">道具</div>
+    <div class="bag-grid" id="bagItemGrid"></div>
   </div>
 </div>
 
@@ -980,6 +1212,19 @@ const nameById = {};
 const TOTAL_POKEMON = 1370;
 const BATCH_SIZE = 40;
 
+const BALL_TYPES = {
+  poke:   { name: '精靈球',   catchMult: 1.0,  desc: '標準精靈球' },
+  great:  { name: '高級球',   catchMult: 1.5,  desc: '捕獲率 ×1.5' },
+  ultra:  { name: '超級球',   catchMult: 2.0,  desc: '捕獲率 ×2.0' },
+  master: { name: '大師球',   catchMult: 99,   desc: '必定捕獲' },
+};
+
+const ITEMS = {
+  pineapple: { name: '菠蘿', icon: '🍍', desc: '捕獲後 +1 糖果' },
+  grape:     { name: '提子', icon: '🍇', desc: '降低逃跑機率' },
+  incense:   { name: '香薰', icon: '🌀', desc: '精靈數量翻倍 15 分鐘' },
+};
+
 /* =========================================================
    1. PokeAPI 異步加載
    ========================================================= */
@@ -995,36 +1240,24 @@ function updateProgress(loaded, total, msg) {
 async function loadAllSpecies() {
   const speciesList = new Array(TOTAL_POKEMON).fill(null);
   const totalBatches = Math.ceil(TOTAL_POKEMON / BATCH_SIZE);
-
   for (let batch = 0; batch < totalBatches; batch++) {
     const start = batch * BATCH_SIZE + 1;
     const end = Math.min(start + BATCH_SIZE - 1, TOTAL_POKEMON);
     const urls = [];
-    for (let id = start; id <= end; id++) {
-      urls.push(`${API}/pokemon-species/${id}`);
-    }
-
-    const results = await Promise.allSettled(
-      urls.map(url => fetch(url).then(r => {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.json();
-      }))
-    );
-
+    for (let id = start; id <= end; id++) urls.push(`${API}/pokemon-species/${id}`);
+    const results = await Promise.allSettled(urls.map(url => fetch(url).then(r => {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })));
     results.forEach((res, idx) => {
       const id = start + idx;
-      if (res.status === 'fulfilled') {
-        speciesList[id - 1] = res.value;
-      } else {
-        console.warn(`Species #${id} failed:`, res.reason);
-      }
+      if (res.status === 'fulfilled') speciesList[id - 1] = res.value;
+      else console.warn(`Species #${id} failed:`, res.reason);
     });
-
     const loaded = Math.min(end, TOTAL_POKEMON);
     updateProgress(loaded, TOTAL_POKEMON, `已載入 ${loaded} / ${TOTAL_POKEMON} 隻精靈資料…`);
     await new Promise(r => setTimeout(r, 50));
   }
-
   return speciesList;
 }
 
@@ -1040,7 +1273,6 @@ function extractChineseName(species) {
 function buildEvolutionsFromChains(speciesList) {
   const evolutions = {};
   const parentMap = {};
-
   speciesList.forEach(species => {
     if (!species) return;
     const childId = species.id;
@@ -1050,40 +1282,28 @@ function buildEvolutionsFromChains(speciesList) {
       parentMap[childId] = parentId;
     }
   });
-
   const idToName = {};
   speciesList.forEach(species => {
     if (!species) return;
     const zh = extractChineseName(species);
-    if (zh) {
-      idToName[species.id] = zh;
-      nameById[species.id] = zh;
-    }
+    if (zh) { idToName[species.id] = zh; nameById[species.id] = zh; }
   });
-
   const childrenMap = {};
   Object.entries(parentMap).forEach(([childId, parentId]) => {
     if (!childrenMap[parentId]) childrenMap[parentId] = [];
     childrenMap[parentId].push(parseInt(childId));
   });
-
   function isMiddleStage(id) {
     return parentMap[id] !== undefined && childrenMap[id] && childrenMap[id].length > 0;
   }
-
   function isBaseStage(id) {
     if (parentMap[id] !== undefined) return false;
     if (!childrenMap[id] || childrenMap[id].length === 0) return false;
     return childrenMap[id].some(childId => childrenMap[childId] && childrenMap[childId].length > 0);
   }
-
   function getCandyCount(parentId, childId) {
-    if ((parentId === 10 || parentId === 13 || parentId === 16) && childrenMap[parentId]?.includes(childId)) {
-      return 12;
-    }
-    if ((parentId === 11 || parentId === 14 || parentId === 17)) {
-      return 50;
-    }
+    if ((parentId === 10 || parentId === 13 || parentId === 16) && childrenMap[parentId]?.includes(childId)) return 12;
+    if ((parentId === 11 || parentId === 14 || parentId === 17)) return 50;
     if (parentId === 19) return 25;
     if (parentId === 129) return 400;
     if (parentId === 133) return 25;
@@ -1091,61 +1311,38 @@ function buildEvolutionsFromChains(speciesList) {
     if (isMiddleStage(parentId)) return 100;
     return 50;
   }
-
   Object.entries(parentMap).forEach(([childIdStr, parentId]) => {
     const childId = parseInt(childIdStr);
     const parentName = idToName[parentId];
     const childName = idToName[childId];
     if (!parentName || !childName) return;
-
     if (!evolutions[parentName]) evolutions[parentName] = [];
-    evolutions[parentName].push({
-      to: childName,
-      candy: getCandyCount(parentId, childId)
-    });
+    evolutions[parentName].push({ to: childName, candy: getCandyCount(parentId, childId) });
   });
-
   return evolutions;
 }
 
 async function loadAllData() {
   updateProgress(0, TOTAL_POKEMON, '正在獲取精靈圖鑑資料…');
   const speciesList = await loadAllSpecies();
-
   const pokedex = [];
   speciesList.forEach((species, idx) => {
     const id = idx + 1;
     if (!species) return;
     const zhName = extractChineseName(species) || `#${id}`;
     nameById[id] = zhName;
-    pokedex.push({
-      id,
-      name: zhName,
-      emoji: '❓',
-      color: '#888',
-      rate: 0.35,
-      w: 0,
-      notWild: false,
-    });
+    pokedex.push({ id, name: zhName, emoji: '❓', color: '#888', rate: 0.35, w: 0, notWild: false });
   });
-
   updateProgress(TOTAL_POKEMON, TOTAL_POKEMON, '正在構建進化鏈…');
   const evolutions = buildEvolutionsFromChains(speciesList);
-
   const parentExists = {};
   speciesList.forEach(species => {
-    if (species && species.evolves_from_species) {
-      parentExists[species.id] = true;
-    }
+    if (species && species.evolves_from_species) parentExists[species.id] = true;
   });
-
   pokedex.forEach(p => {
-    if (parentExists[p.id]) {
-      p.notWild = true;
-      p.w = 0;
-    } else {
-      p.notWild = false;
-      p.w = 10;
+    if (parentExists[p.id]) { p.notWild = true; p.w = 0; }
+    else {
+      p.notWild = false; p.w = 10;
       if (p.id === 129) p.w = 12;
       if (p.id === 10 || p.id === 13 || p.id === 16) p.w = 11;
       if (p.id === 133) p.w = 6;
@@ -1154,69 +1351,38 @@ async function loadAllData() {
       if (p.id === 151) p.w = 1;
     }
   });
-
   assignEnvPreferences(pokedex);
   applyRareSpawnRules(pokedex);
-
   REGIONAL_FORMS.forEach(f => {
     if (pokedex.some(p => p.id === f.id)) return;
-    pokedex.push({
-      id: f.id,
-      name: f.name,
-      emoji: '❓',
-      color: '#888',
-      rate: 0.35,
-      w: f.w,
-      notWild: false,
-      time: f.time || 'any',
-      weather: f.weather || 'any',
-    });
+    pokedex.push({ id: f.id, name: f.name, emoji: '❓', color: '#888', rate: 0.35, w: f.w,
+      notWild: false, time: f.time || 'any', weather: f.weather || 'any' });
   });
-
   UNOWN_FORMS.forEach(f => {
     if (pokedex.some(p => p.id === f.id)) return;
     pokedex.push(f);
   });
-
   SPECIAL_FORMS.forEach(f => {
     if (pokedex.some(p => p.id === f.id)) return;
-    pokedex.push({
-      id: f.id,
-      name: f.name,
-      emoji: '❓',
-      color: '#888',
-      rate: 0.35,
-      w: f.w,
-      notWild: false,
-      time: f.time || 'any',
-      weather: f.weather || 'any',
-    });
+    pokedex.push({ id: f.id, name: f.name, emoji: '❓', color: '#888', rate: 0.35, w: f.w,
+      notWild: false, time: f.time || 'any', weather: f.weather || 'any' });
   });
-
   POKEDEX = pokedex;
   EVOLUTIONS = evolutions;
-
   POKEDEX.forEach(p => {
     dexState[p.name] = { seen: 0, caught: 0, shiny: 0 };
     candyBag[p.name] = 0;
   });
-
   POKEDEX.forEach(p => { p.emoji = '❓'; });
-
-  console.log(`✅ 全圖鑑載入完成：${POKEDEX.length} 個條目，${Object.keys(EVOLUTIONS).length} 組進化鏈`);
+  console.log(`✅ 全圖鑑載入完成：${POKEDEX.length} 個條目`);
 }
 
 function assignEnvPreferences(pokedex) {
   pokedex.forEach(p => {
-    if (p.notWild) {
-      p.time = 'any';
-      p.weather = 'any';
-      return;
-    }
+    if (p.notWild) { p.time = 'any'; p.weather = 'any'; return; }
     const h = _hashInt(p.id * 2654435761 + 7);
     const t = h % 100;
     p.time = (t < 25) ? 'day' : (t < 50 ? 'night' : 'any');
-
     const w = (h >>> 8) % 100;
     if (w < 12)       p.weather = ['clear'];
     else if (w < 22)  p.weather = ['cloudy'];
@@ -1238,7 +1404,6 @@ function applyRareSpawnRules(pokedex) {
   });
 }
 
-/* ───── 精靈圖（Gen5 動態 GIF 優先，其餘靜態 PNG）───── */
 function staticSpriteUrl(p, shiny) {
   if (p.spriteUrl) {
     if (shiny && p.shinySpriteUrl) return p.shinySpriteUrl;
@@ -1257,7 +1422,6 @@ function spriteUrl(p, shiny) {
   }
   const base = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/';
   const sid = Number(p.spriteId || p.id);
-
   if (sid >= 1 && sid <= 649) {
     return shiny
       ? `${base}versions/generation-v/black-white/animated/shiny/${sid}.gif`
@@ -1266,7 +1430,6 @@ function spriteUrl(p, shiny) {
   return shiny ? `${base}shiny/${sid}.png` : `${base}${sid}.png`;
 }
 
-/* 判斷是否為 PNG（Gen7 static sprite）；自訂 spriteUrl（pokesprite）不算 */
 function spriteIsPng(p) {
   if (p.spriteUrl) return false;
   const sid = Number(p.spriteId || p.id);
@@ -1304,7 +1467,6 @@ const RARE_SPAWN_RULES = [
   { id: 906, time: 'day',   weather: ['clear','cloudy'], w: 5 },
   { id: 909, time: 'day',   weather: ['clear'],          w: 5 },
   { id: 912, time: 'night', weather: ['rain'],           w: 5 },
-
   { id: 25,  time: 'day',   weather: ['rain'],            w: 4 },
   { id: 133, time: 'day',   weather: ['clear','cloudy'],  w: 3 },
   { id: 147, time: 'night', weather: ['rain','fog'],      w: 2.5 },
@@ -1315,20 +1477,17 @@ const RARE_SPAWN_RULES = [
   { id: 447, time: 'day',   weather: ['clear'],           w: 2.5 },
   { id: 633, time: 'night', weather: ['fog'],             w: 2 },
   { id: 704, time: 'night', weather: ['rain'],            w: 2.5 },
-
   { id: 144, time: 'night', weather: ['snow'],            w: 2.0 },
   { id: 145, time: 'day',   weather: ['rain'],            w: 2.0 },
   { id: 146, time: 'day',   weather: ['clear'],           w: 2.0 },
   { id: 150, time: 'night', weather: ['fog'],             w: 1.2 },
   { id: 151, time: 'any',   weather: 'any',               w: 0.6 },
-
   { id: 243, time: 'night', weather: ['rain'],            w: 1.8 },
   { id: 244, time: 'day',   weather: ['clear'],           w: 1.8 },
   { id: 245, time: 'night', weather: ['snow'],            w: 1.8 },
   { id: 249, time: 'day',   weather: ['cloudy'],          w: 1.2 },
   { id: 250, time: 'day',   weather: ['clear'],           w: 1.2 },
   { id: 251, time: 'night', weather: ['fog'],             w: 0.8 },
-
   { id: 377, time: 'day',   weather: ['clear'],           w: 1.5 },
   { id: 378, time: 'night', weather: ['snow'],            w: 1.5 },
   { id: 379, time: 'day',   weather: ['cloudy'],          w: 1.5 },
@@ -1339,7 +1498,6 @@ const RARE_SPAWN_RULES = [
   { id: 384, time: 'any',   weather: ['fog'],             w: 0.9 },
   { id: 385, time: 'night', weather: ['clear'],           w: 0.7 },
   { id: 386, time: 'night', weather: ['fog'],             w: 0.7 },
-
   { id: 480, time: 'day',   weather: ['cloudy'],          w: 1.2 },
   { id: 481, time: 'day',   weather: ['clear'],           w: 1.2 },
   { id: 482, time: 'night', weather: ['fog'],             w: 1.2 },
@@ -1354,7 +1512,6 @@ const RARE_SPAWN_RULES = [
   { id: 491, time: 'night', weather: ['fog'],             w: 0.6 },
   { id: 492, time: 'day',   weather: ['clear'],           w: 0.7 },
   { id: 493, time: 'any',   weather: 'any',               w: 0.4 },
-
   { id: 494, time: 'day',   weather: ['clear'],           w: 0.6 },
   { id: 638, time: 'day',   weather: ['cloudy'],          w: 1.2 },
   { id: 639, time: 'night', weather: ['clear'],           w: 1.2 },
@@ -1368,14 +1525,12 @@ const RARE_SPAWN_RULES = [
   { id: 647, time: 'day',   weather: ['rain'],            w: 0.6 },
   { id: 648, time: 'night', weather: ['fog'],             w: 0.6 },
   { id: 649, time: 'day',   weather: ['cloudy'],          w: 0.5 },
-
   { id: 716, time: 'day',   weather: ['clear'],           w: 0.9 },
   { id: 717, time: 'night', weather: ['fog'],             w: 0.9 },
   { id: 718, time: 'day',   weather: ['cloudy'],          w: 0.8 },
   { id: 719, time: 'night', weather: ['clear'],           w: 0.5 },
   { id: 720, time: 'night', weather: ['fog'],             w: 0.5 },
   { id: 721, time: 'day',   weather: ['rain'],            w: 0.5 },
-
   { id: 772, time: 'any',   weather: 'any',               w: 0.5 },
   { id: 773, time: 'any',   weather: 'any',               w: 0.4 },
   { id: 785, time: 'day',   weather: ['rain'],            w: 1.0 },
@@ -1390,7 +1545,6 @@ const RARE_SPAWN_RULES = [
   { id: 801, time: 'day',   weather: ['cloudy'],          w: 0.5 },
   { id: 802, time: 'night', weather: ['fog'],             w: 0.5 },
   { id: 807, time: 'night', weather: ['rain'],            w: 0.5 },
-
   { id: 888, time: 'day',   weather: ['clear'],           w: 0.8 },
   { id: 889, time: 'night', weather: ['cloudy'],          w: 0.8 },
   { id: 890, time: 'any',   weather: ['fog'],             w: 0.6 },
@@ -1402,7 +1556,6 @@ const RARE_SPAWN_RULES = [
   { id: 896, time: 'night', weather: ['snow'],            w: 0.8 },
   { id: 897, time: 'night', weather: ['fog'],             w: 0.8 },
   { id: 898, time: 'night', weather: ['clear','fog'],     w: 0.6 },
-
   { id: 1001, time: 'night', weather: ['fog'],            w: 0.5 },
   { id: 1002, time: 'day',   weather: ['snow'],           w: 0.5 },
   { id: 1003, time: 'night', weather: ['clear'],          w: 0.5 },
@@ -1418,10 +1571,9 @@ const RARE_SPAWN_RULES = [
 ];
 
 /* =========================================================
-   3d. 地區形態與特殊形態
+   3d. 地區形態
    ========================================================= */
 const REGIONAL_FORMS = [
-  /* ===== 阿羅拉形態 ===== */
   { id: 10091, name: '阿羅拉小拉達',   time: 'night', weather: ['clear'],  w: 3 },
   { id: 10092, name: '阿羅拉拉達',     time: 'night', weather: ['clear'],  w: 2 },
   { id: 10100, name: '阿羅拉雷丘',     time: 'day',   weather: ['rain'],   w: 2 },
@@ -1440,8 +1592,6 @@ const REGIONAL_FORMS = [
   { id: 10113, name: '阿羅拉臭臭泥',   time: 'night', weather: ['rain'],   w: 2.5 },
   { id: 10114, name: '阿羅拉椰蛋樹',   time: 'day',   weather: ['clear'],  w: 2 },
   { id: 10115, name: '阿羅拉嘎啦嘎啦', time: 'night', weather: ['fog'],    w: 2 },
-
-  /* ===== 伽勒爾形態 ===== */
   { id: 10161, name: '伽勒爾喵喵',     time: 'night', weather: ['fog'],    w: 4 },
   { id: 10162, name: '伽勒爾小火馬',   time: 'day',   weather: ['clear'],  w: 3.5 },
   { id: 10163, name: '伽勒爾烈焰馬',   time: 'day',   weather: ['clear'],  w: 2.5 },
@@ -1460,8 +1610,6 @@ const REGIONAL_FORMS = [
   { id: 10176, name: '伽勒爾火紅不倒翁', time: 'night', weather: ['snow'], w: 3 },
   { id: 10177, name: '伽勒爾達摩狒狒', time: 'night', weather: ['snow'],   w: 2 },
   { id: 10178, name: '伽勒爾達摩狒狒(達摩模式)', time: 'night', weather: ['snow'], w: 2 },
-
-  /* ===== 洗翠形態 ===== */
   { id: 10229, name: '洗翠卡蒂狗',     time: 'day',   weather: ['clear'],  w: 3.5 },
   { id: 10230, name: '洗翠風速狗',     time: 'day',   weather: ['clear'],  w: 2 },
   { id: 10231, name: '洗翠霹靂電球',   time: 'night', weather: ['rain'],   w: 3.5 },
@@ -1481,303 +1629,57 @@ const REGIONAL_FORMS = [
 ];
 
 /* =========================================================
-   3e. 特殊形態（10001–10032 與其他）
+   3e. 特殊形態
    ========================================================= */
 const SPECIAL_FORMS = [
   { id: 10001, name: '代歐奇希斯(攻擊形態)', time: 'any',   weather: 'any',      w: 0.8 },
   { id: 10002, name: '代歐奇希斯(防禦形態)', time: 'any',   weather: 'any',      w: 0.8 },
   { id: 10003, name: '代歐奇希斯(速度形態)', time: 'any',   weather: 'any',      w: 0.8 },
-  { id: 10004, name: '結草貴婦(砂土蓑衣)',   time: 'day',   weather: ['clear'],  w: 2.5 },
-  { id: 10005, name: '結草貴婦(垃圾蓑衣)',   time: 'night', weather: ['fog'],    w: 2.5 },
-  { id: 10006, name: '謝米(天空形態)',       time: 'day',   weather: ['clear'],  w: 1.5 },
   { id: 10007, name: '騎拉帝納(起源形態)',   time: 'night', weather: ['fog'],    w: 1.2 },
-  { id: 10008, name: '洛托姆(加熱形態)',     time: 'day',   weather: ['clear'],  w: 3 },
-  { id: 10009, name: '洛托姆(清洗形態)',     time: 'day',   weather: ['rain'],   w: 3 },
-  { id: 10010, name: '洛托姆(結冰形態)',     time: 'night', weather: ['snow'],   w: 3 },
-  { id: 10011, name: '洛托姆(旋轉形態)',     time: 'day',   weather: ['cloudy'], w: 3 },
-  { id: 10012, name: '洛托姆(切割形態)',     time: 'day',   weather: ['clear'],  w: 3 },
-  { id: 10013, name: '飄浮泡泡(太陽形態)',   time: 'day',   weather: ['clear'],  w: 4 },
-  { id: 10014, name: '飄浮泡泡(雨水形態)',   time: 'any',   weather: ['rain'],   w: 4 },
-  { id: 10015, name: '飄浮泡泡(雪雲形態)',   time: 'any',   weather: ['snow'],   w: 4 },
-  { id: 10016, name: '野蠻鱸魚(藍條紋形態)', time: 'any',   weather: 'any',      w: 3 },
-  { id: 10017, name: '達摩狒狒(達摩模式)',   time: 'any',   weather: 'any',      w: 2.5 },
   { id: 10018, name: '美洛耶塔(舞步形態)',   time: 'any',   weather: 'any',      w: 1.5 },
   { id: 10019, name: '龍捲雲(靈獸形態)',     time: 'any',   weather: 'any',      w: 1.2 },
   { id: 10020, name: '雷電雲(靈獸形態)',     time: 'any',   weather: 'any',      w: 1.2 },
   { id: 10021, name: '土地雲(靈獸形態)',     time: 'any',   weather: 'any',      w: 1.2 },
   { id: 10022, name: '酋雷姆(暗黑形態)',     time: 'night', weather: ['clear'],  w: 1.0 },
   { id: 10023, name: '酋雷姆(焰白形態)',     time: 'day',   weather: ['clear'],  w: 1.0 },
-  { id: 10024, name: '凱路迪歐(覺悟形態)',   time: 'day',   weather: ['rain'],   w: 1.5 },
-  { id: 10025, name: '超能妙喵(雌性)',       time: 'any',   weather: 'any',      w: 3 },
-  { id: 10026, name: '堅盾劍怪(刀劍形態)',   time: 'any',   weather: 'any',      w: 2.5 },
-  { id: 10027, name: '南瓜精(小尺寸)',       time: 'night', weather: ['fog'],    w: 3 },
-  { id: 10028, name: '南瓜精(大尺寸)',       time: 'night', weather: ['fog'],    w: 2.5 },
-  { id: 10029, name: '南瓜精(特大尺寸)',     time: 'night', weather: ['fog'],    w: 1.5 },
-  { id: 10030, name: '南瓜怪人(小尺寸)',     time: 'night', weather: ['fog'],    w: 2 },
-  { id: 10031, name: '南瓜怪人(大尺寸)',     time: 'night', weather: ['fog'],    w: 1.5 },
-  { id: 10032, name: '南瓜怪人(特大尺寸)',   time: 'night', weather: ['fog'],    w: 1 },
-  { id: 10033, name: '妙蛙花(超級進化)',       time: 'day',   weather: ['clear'],  w: 0.6 },
-  { id: 10034, name: '噴火龍(超級進化X)',     time: 'day',   weather: ['clear'],  w: 0.6 },
-  { id: 10035, name: '噴火龍(超級進化Y)',     time: 'day',   weather: ['clear'],  w: 0.6 },
-  { id: 10036, name: '水箭龜(超級進化)',       time: 'day',   weather: ['rain'],   w: 0.6 },
-  { id: 10037, name: '胡地(超級進化)',         time: 'any',   weather: 'any',      w: 0.5 },
-  { id: 10038, name: '耿鬼(超級進化)',         time: 'night', weather: ['fog'],    w: 0.5 },
-  { id: 10039, name: '袋獸(超級進化)',         time: 'day',   weather: ['clear'],  w: 0.5 },
-  { id: 10040, name: '凱羅斯(超級進化)',       time: 'day',   weather: ['clear'],  w: 0.5 },
-  { id: 10041, name: '暴鯉龍(超級進化)',       time: 'night', weather: ['rain'],   w: 0.5 },
-  { id: 10042, name: '化石翼龍(超級進化)',     time: 'day',   weather: ['clear'],  w: 0.5 },
   { id: 10043, name: '超夢(超級進化X)',       time: 'night', weather: ['fog'],    w: 0.4 },
   { id: 10044, name: '超夢(超級進化Y)',       time: 'day',   weather: ['fog'],    w: 0.4 },
-  { id: 10045, name: '電龍(超級進化)',         time: 'day',   weather: ['cloudy'], w: 0.5 },
-  { id: 10046, name: '巨鉗螳螂(超級進化)',     time: 'day',   weather: ['clear'],  w: 0.5 },
-  { id: 10047, name: '赫拉克羅斯(超級進化)',   time: 'day',   weather: ['clear'],  w: 0.5 },
-  { id: 10048, name: '黑魯加(超級進化)',       time: 'night', weather: ['fog'],    w: 0.5 },
-  { id: 10049, name: '班基拉斯(超級進化)',     time: 'night', weather: ['clear'],  w: 0.5 },
-  { id: 10050, name: '火焰雞(超級進化)',       time: 'day',   weather: ['clear'],  w: 0.5 },
-  { id: 10051, name: '沙奈朵(超級進化)',       time: 'any',   weather: 'any',      w: 0.5 },
-  { id: 10052, name: '大嘴娃(超級進化)',       time: 'day',   weather: ['cloudy'], w: 0.5 },
-  { id: 10053, name: '波士可多拉(超級進化)',   time: 'day',   weather: ['clear'],  w: 0.5 },
-  { id: 10054, name: '恰雷姆(超級進化)',       time: 'day',   weather: ['clear'],  w: 0.5 },
-  { id: 10055, name: '雷電獸(超級進化)',       time: 'day',   weather: ['rain'],   w: 0.5 },
-  { id: 10056, name: '詛咒娃娃(超級進化)',     time: 'night', weather: ['fog'],    w: 0.5 },
-  { id: 10057, name: '阿勃梭魯(超級進化)',     time: 'night', weather: ['fog'],    w: 0.5 },
   { id: 10058, name: '烈咬陸鯊(超級進化)',     time: 'day',   weather: ['clear'],  w: 0.5 },
   { id: 10059, name: '路卡利歐(超級進化)',     time: 'day',   weather: ['clear'],  w: 0.5 },
-  { id: 10060, name: '暴雪王(超級進化)',       time: 'night', weather: ['snow'],   w: 0.5 },
-  { id: 10061, name: '永恆之花的花葉蒂',       time: 'any',   weather: 'any',      w: 0.3 },
   { id: 10062, name: '拉帝亞斯(超級進化)',     time: 'day',   weather: ['clear','cloudy'], w: 0.4 },
   { id: 10063, name: '拉帝歐斯(超級進化)',     time: 'night', weather: ['clear'],  w: 0.4 },
-  { id: 10064, name: '巨沼怪(超級進化)',       time: 'day',   weather: ['rain'],   w: 0.5 },
-  { id: 10065, name: '蜥蜴王(超級進化)',       time: 'day',   weather: ['clear'],  w: 0.5 },
-  { id: 10066, name: '勾魂眼(超級進化)',       time: 'night', weather: ['fog'],    w: 0.5 },
-  { id: 10067, name: '七夕青鳥(超級進化)',     time: 'day',   weather: ['cloudy'], w: 0.5 },
-  { id: 10068, name: '艾路雷朵(超級進化)',     time: 'day',   weather: ['clear'],  w: 0.5 },
-  { id: 10069, name: '差不多娃娃(超級進化)',   time: 'any',   weather: 'any',      w: 0.5 },
-  { id: 10070, name: '巨牙鯊(超級進化)',       time: 'night', weather: ['rain'],   w: 0.5 },
-  { id: 10071, name: '呆殼獸(超級進化)',       time: 'day',   weather: ['rain'],   w: 0.5 },
-  { id: 10072, name: '大鋼蛇(超級進化)',       time: 'day',   weather: ['clear'],  w: 0.5 },
-  { id: 10073, name: '大比鳥(超級進化)',       time: 'day',   weather: ['clear'],  w: 0.5 },
-  { id: 10074, name: '冰鬼護(超級進化)',       time: 'night', weather: ['snow'],   w: 0.5 },
-  { id: 10075, name: '蒂安希(超級進化)',       time: 'any',   weather: 'any',      w: 0.3 },
-  { id: 10076, name: '巨金怪(超級進化)',       time: 'day',   weather: ['cloudy'], w: 0.5 },
-  { id: 10077, name: '蓋歐卡(原始回歸)',       time: 'night', weather: ['rain'],   w: 0.4 },
-  { id: 10078, name: '固拉多(原始回歸)',       time: 'day',   weather: ['clear'],  w: 0.4 },
   { id: 10079, name: '烈空坐(超級進化)',       time: 'any',   weather: ['fog'],    w: 0.4 },
-  { id: 10080, name: '皮卡丘(搖滾巨星形態)',   time: 'any',   weather: 'any',      w: 0.4 },
-  { id: 10081, name: '皮卡丘(貴婦形態)',       time: 'any',   weather: 'any',      w: 0.4 },
-  { id: 10082, name: '皮卡丘(流行偶像形態)',   time: 'any',   weather: 'any',      w: 0.4 },
-  { id: 10083, name: '皮卡丘(博士形態)',       time: 'any',   weather: 'any',      w: 0.4 },
-  { id: 10084, name: '皮卡丘(蒙面摔角形態)',   time: 'any',   weather: 'any',      w: 0.4 },
-  { id: 10085, name: '皮卡丘(換裝形態)',       time: 'any',   weather: 'any',      w: 0.4 },
-  { id: 10086, name: '胡帕(解放形態)',         time: 'night', weather: ['fog'],    w: 0.4 },
-  { id: 10087, name: '噴火駝(超級進化)',       time: 'day',   weather: ['clear'],  w: 0.5 },
-  { id: 10088, name: '長耳兔(超級進化)',       time: 'day',   weather: ['clear'],  w: 0.5 },
-  { id: 10089, name: '暴飛龍(超級進化)',       time: 'day',   weather: ['cloudy'], w: 0.5 },
-  { id: 10090, name: '大針蜂(超級進化)',       time: 'day',   weather: ['clear'],  w: 0.5 },
-  { id: 10093, name: '阿羅拉拉達(霸主形態)',   time: 'night', weather: ['clear'],  w: 0.5 },
-  { id: 10094, name: '皮卡丘(初始帽子)',       time: 'any',   weather: 'any',      w: 0.3 },
-  { id: 10095, name: '皮卡丘(豐緣帽子)',       time: 'any',   weather: 'any',      w: 0.3 },
-  { id: 10096, name: '皮卡丘(神奧帽子)',       time: 'any',   weather: 'any',      w: 0.3 },
-  { id: 10097, name: '皮卡丘(合眾帽子)',       time: 'any',   weather: 'any',      w: 0.3 },
-  { id: 10098, name: '皮卡丘(卡洛斯帽子)',     time: 'any',   weather: 'any',      w: 0.3 },
-  { id: 10099, name: '皮卡丘(阿羅拉帽子)',     time: 'any',   weather: 'any',      w: 0.3 },
-  { id: 10116, name: '甲賀忍蛙(羈絆變身)',       time: 'any',   weather: 'any',      w: 0.3 },
-  { id: 10117, name: '甲賀忍蛙(小智版)',         time: 'any',   weather: 'any',      w: 0.3 },
   { id: 10118, name: '基格爾德(10%形態)',       time: 'any',   weather: 'any',      w: 0.4 },
   { id: 10119, name: '基格爾德(50%形態)',       time: 'any',   weather: 'any',      w: 0.4 },
   { id: 10120, name: '基格爾德(完全體形態)',     time: 'any',   weather: 'any',      w: 0.3 },
-  { id: 10121, name: '貓鼬探長(霸主形態)',       time: 'day',   weather: ['clear'],  w: 0.5 },
-  { id: 10122, name: '鍬農炮蟲(霸主形態)',       time: 'day',   weather: ['clear'],  w: 0.5 },
-  { id: 10123, name: '花舞鳥(啪滋啪滋風格)',     time: 'day',   weather: ['rain'],   w: 0.5 },
-  { id: 10124, name: '花舞鳥(呼拉呼拉風格)',     time: 'day',   weather: ['clear'],  w: 0.5 },
-  { id: 10125, name: '花舞鳥(輕飄飄風格)',       time: 'night', weather: ['fog'],    w: 0.5 },
-  { id: 10126, name: '鬃岩狼人(黑夜形態)',       time: 'night', weather: ['clear'],  w: 0.5 },
-  { id: 10127, name: '弱丁魚(魚群形態)',         time: 'day',   weather: ['rain'],   w: 0.4 },
-  { id: 10128, name: '偽螳草(霸主形態)',         time: 'day',   weather: ['clear'],  w: 0.5 },
-  { id: 10129, name: '焰后蜥(霸主形態)',         time: 'night', weather: ['clear'],  w: 0.5 },
-  { id: 10130, name: '小隕星(橙色隕石形態)',     time: 'night', weather: ['clear'],  w: 0.6 },
-  { id: 10131, name: '小隕星(黃色隕石形態)',     time: 'night', weather: ['clear'],  w: 0.6 },
-  { id: 10132, name: '小隕星(綠色隕石形態)',     time: 'night', weather: ['clear'],  w: 0.6 },
-  { id: 10133, name: '小隕星(藍色隕石形態)',     time: 'night', weather: ['clear'],  w: 0.6 },
-  { id: 10134, name: '小隕星(靛色隕石形態)',     time: 'night', weather: ['clear'],  w: 0.6 },
-  { id: 10135, name: '小隕星(紫色隕石形態)',     time: 'night', weather: ['clear'],  w: 0.6 },
-  { id: 10136, name: '小隕星(紅色核心形態)',     time: 'day',   weather: ['clear'],  w: 0.6 },
-  { id: 10137, name: '小隕星(橙色核心形態)',     time: 'day',   weather: ['clear'],  w: 0.6 },
-  { id: 10138, name: '小隕星(黃色核心形態)',     time: 'day',   weather: ['clear'],  w: 0.6 },
-  { id: 10139, name: '小隕星(綠色核心形態)',     time: 'day',   weather: ['clear'],  w: 0.6 },
-  { id: 10140, name: '小隕星(藍色核心形態)',     time: 'day',   weather: ['clear'],  w: 0.6 },
-  { id: 10141, name: '小隕星(靛色核心形態)',     time: 'day',   weather: ['clear'],  w: 0.6 },
-  { id: 10142, name: '小隕星(紫色核心形態)',     time: 'day',   weather: ['clear'],  w: 0.6 },
-  { id: 10143, name: '謎擬Q(現形形態)',         time: 'night', weather: ['fog'],    w: 0.5 },
-  { id: 10144, name: '謎擬Q(霸主形態)',         time: 'night', weather: ['fog'],    w: 0.5 },
-  { id: 10145, name: '謎擬Q(霸主現形形態)',     time: 'night', weather: ['fog'],    w: 0.5 },
-  { id: 10146, name: '杖尾鱗甲龍(霸主形態)',     time: 'day',   weather: ['cloudy'], w: 0.5 },
-  { id: 10147, name: '瑪機雅娜(原始形態)',       time: 'any',   weather: 'any',      w: 0.4 },
-  { id: 10148, name: '皮卡丘(搭檔帽子)',         time: 'any',   weather: 'any',      w: 0.3 },
-  { id: 10149, name: '嘎啦嘎啦(霸主形態)',       time: 'night', weather: ['fog'],    w: 0.5 },
-  { id: 10150, name: '蝶結萌虻(霸主形態)',       time: 'day',   weather: ['clear'],  w: 0.5 },
-  { id: 10151, name: '岩狗狗(我行我素)',         time: 'any',   weather: 'any',      w: 0.5 },
-  { id: 10152, name: '鬃岩狼人(黃昏形態)',       time: 'any',   weather: 'any',      w: 0.4 },
-  { id: 10153, name: '滴蛛霸(霸主形態)',         time: 'day',   weather: ['rain'],   w: 0.5 },
-  { id: 10154, name: '托戈德瑪爾(霸主形態)',     time: 'day',   weather: ['clear'],  w: 0.5 },
   { id: 10155, name: '奈克洛茲瑪(黃昏之鬃)',     time: 'night', weather: ['clear'],  w: 0.3 },
   { id: 10156, name: '奈克洛茲瑪(拂曉之翼)',     time: 'day',   weather: ['clear'],  w: 0.3 },
   { id: 10157, name: '奈克洛茲瑪(究極形態)',     time: 'any',   weather: ['fog'],    w: 0.25 },
-  { id: 10158, name: '皮卡丘(搭檔)',   time: 'any',   weather: 'any',      w: 0.3 },
-  { id: 10159, name: '伊布(搭檔)',     time: 'any',   weather: 'any',      w: 0.3 },
-  { id: 10160, name: '皮卡丘(世界帽子)',         time: 'any',   weather: 'any',      w: 0.25 },
-  { id: 10179, name: '伽勒爾哭哭面具',             time: 'day',   weather: ['clear','cloudy'], w: 3 },
-  { id: 10180, name: '伽勒爾泥巴魚',             time: 'any',   weather: 'any',              w: 3 },
-  { id: 10182, name: '古月鳥(一口吞的樣子)',     time: 'day',   weather: ['rain'],           w: 2.5 },
-  { id: 10183, name: '古月鳥(大口吞的樣子)',     time: 'day',   weather: ['rain'],           w: 2.5 },
-  { id: 10184, name: '顫弦蠑螈(低調的樣子)',     time: 'any',   weather: 'any',              w: 2 },
-  { id: 10185, name: '冰砌鵝(解凍頭)',           time: 'night', weather: ['snow'],           w: 2.5 },
-  { id: 10186, name: '愛管侍(雌性)',             time: 'any',   weather: 'any',              w: 3 },
-  { id: 10187, name: '莫魯貝可(空腹花紋)',       time: 'night', weather: ['fog'],            w: 2.5 },
-  { id: 10188, name: '蒼響(劍之王)',             time: 'day',   weather: ['clear'],          w: 0.5 },
-  { id: 10189, name: '藏瑪然特(盾之王)',         time: 'night', weather: ['cloudy'],         w: 0.5 },
-  { id: 10190, name: '無極汰那(無極巨化)',       time: 'any',   weather: ['fog'],            w: 0.4 },
-  { id: 10191, name: '武道熊師(連擊流)',         time: 'night', weather: ['rain'],           w: 0.5 },
-  { id: 10192, name: '薩戮德(阿爸)',             time: 'day',   weather: ['cloudy'],         w: 0.4 },
-  { id: 10193, name: '蕾冠王(騎白馬的樣子)',     time: 'night', weather: ['snow'],           w: 0.4 },
-  { id: 10194, name: '蕾冠王(騎黑馬的樣子)',     time: 'night', weather: ['fog'],            w: 0.4 },
-  { id: 10195, name: '妙蛙花(超極巨化)',         time: 'day',   weather: ['clear'],          w: 0.4 },
-  { id: 10196, name: '噴火龍(超極巨化)',         time: 'day',   weather: ['clear'],          w: 0.4 },
-  { id: 10197, name: '水箭龜(超極巨化)',         time: 'day',   weather: ['rain'],           w: 0.4 },
-  { id: 10198, name: '巴大蝶(超極巨化)',         time: 'day',   weather: ['clear','cloudy'], w: 0.4 },
-  { id: 10199, name: '皮卡丘(超極巨化)',         time: 'any',   weather: 'any',              w: 0.4 },
-  { id: 10200, name: '喵喵(超極巨化)',           time: 'night', weather: ['fog'],            w: 0.4 },
-  { id: 10201, name: '怪力(超極巨化)',           time: 'day',   weather: ['clear'],          w: 0.4 },
-  { id: 10202, name: '耿鬼(超極巨化)',           time: 'night', weather: ['fog'],            w: 0.4 },
-  { id: 10203, name: '巨鉗蟹(超極巨化)',         time: 'day',   weather: ['rain'],           w: 0.4 },
-  { id: 10204, name: '拉普拉斯(超極巨化)',       time: 'night', weather: ['snow'],           w: 0.4 },
-  { id: 10205, name: '伊布(超極巨化)',           time: 'day',   weather: ['clear','cloudy'], w: 0.4 },
-  { id: 10206, name: '卡比獸(超極巨化)',         time: 'any',   weather: 'any',              w: 0.4 },
-  { id: 10207, name: '灰塵山(超極巨化)',         time: 'night', weather: ['fog'],            w: 0.4 },
-  { id: 10208, name: '美錄梅塔(超極巨化)',       time: 'any',   weather: 'any',              w: 0.4 },
-  { id: 10209, name: '轟擂金剛猩(超極巨化)',     time: 'day',   weather: ['clear','cloudy'], w: 0.4 },
-  { id: 10210, name: '閃焰王牌(超極巨化)',       time: 'day',   weather: ['clear'],          w: 0.4 },
-  { id: 10211, name: '千面避役(超極巨化)',       time: 'night', weather: ['rain'],           w: 0.4 },
-  { id: 10212, name: '鋼鎧鴉(超極巨化)',         time: 'day',   weather: ['cloudy'],         w: 0.4 },
-  { id: 10213, name: '以歐路普(超極巨化)',       time: 'night', weather: ['fog'],            w: 0.4 },
-  { id: 10214, name: '暴噬龜(超極巨化)',         time: 'day',   weather: ['rain'],           w: 0.4 },
-  { id: 10215, name: '巨炭山(超極巨化)',         time: 'day',   weather: ['clear'],          w: 0.4 },
-  { id: 10216, name: '蘋裹龍(超極巨化)',         time: 'day',   weather: ['clear'],          w: 0.4 },
-  { id: 10217, name: '豐蜜龍(超極巨化)',         time: 'day',   weather: ['clear','cloudy'], w: 0.4 },
-  { id: 10218, name: '沙螺蟒(超極巨化)',         time: 'day',   weather: ['clear'],          w: 0.4 },
-  { id: 10219, name: '顫弦蠑螈(高調超極巨化)',   time: 'any',   weather: 'any',              w: 0.4 },
-  { id: 10220, name: '焚焰蚣(超極巨化)',         time: 'day',   weather: ['clear'],          w: 0.4 },
-  { id: 10221, name: '布莉姆溫(超極巨化)',       time: 'night', weather: ['fog'],            w: 0.4 },
-  { id: 10222, name: '長毛巨魔(超極巨化)',       time: 'night', weather: ['fog'],            w: 0.4 },
-  { id: 10223, name: '霜奶仙(超極巨化)',         time: 'day',   weather: ['snow'],           w: 0.4 },
-  { id: 10224, name: '大王銅象(超極巨化)',       time: 'day',   weather: ['clear'],          w: 0.4 },
-  { id: 10225, name: '鋁鋼龍(超極巨化)',         time: 'day',   weather: ['cloudy'],         w: 0.4 },
-  { id: 10226, name: '武道熊師(一擊流超極巨化)', time: 'day',   weather: ['clear'],          w: 0.3 },
-  { id: 10227, name: '武道熊師(連擊流超極巨化)', time: 'night', weather: ['rain'],           w: 0.3 },
-  { id: 10228, name: '顫弦蠑螈(低調超極巨化)',   time: 'night', weather: ['fog'],            w: 0.4 },
+  { id: 10188, name: '蒼響(劍之王)',             time: 'day',   weather: ['clear'],  w: 0.5 },
+  { id: 10189, name: '藏瑪然特(盾之王)',         time: 'night', weather: ['cloudy'], w: 0.5 },
+  { id: 10193, name: '蕾冠王(騎白馬的樣子)',     time: 'night', weather: ['snow'],   w: 0.4 },
+  { id: 10194, name: '蕾冠王(騎黑馬的樣子)',     time: 'night', weather: ['fog'],    w: 0.4 },
   { id: 10245, name: '帝牙盧卡(起源形態)', time: 'day',   weather: ['clear'],  w: 1.0 },
   { id: 10246, name: '帕路奇亞(起源形態)', time: 'night', weather: ['rain'],   w: 1.0 },
-  { id: 10247, name: '野蠻鱸魚(白條紋形態)', time: 'any', weather: 'any',      w: 3 },
-  { id: 10248, name: '幽尾玄魚(雌性)',     time: 'night', weather: ['rain'],   w: 2 },
-  { id: 10249, name: '眷戀雲(靈獸形態)',   time: 'any',   weather: 'any',      w: 1.2 },
-  { id: 10250, name: '帕底亞肯泰羅(鬥戰種)', time: 'day', weather: ['clear'],  w: 2 },
-  { id: 10251, name: '帕底亞肯泰羅(火熾種)', time: 'day', weather: ['clear'],  w: 2 },
-  { id: 10252, name: '帕底亞肯泰羅(水瀾種)', time: 'day', weather: ['rain'],   w: 2 },
-  { id: 10253, name: '帕底亞烏波',         time: 'night', weather: ['rain'],   w: 3.5 },
-  { id: 10254, name: '飄香豚(雌性)',       time: 'day',   weather: ['clear','cloudy'], w: 3 },
-  { id: 10255, name: '土龍節節(三節形態)', time: 'any',   weather: 'any',      w: 2.5 },
-  { id: 10256, name: '海豚俠(英雄形態)',   time: 'day',   weather: ['rain'],   w: 2 },
-  { id: 10257, name: '一家鼠(三隻家庭)',   time: 'any',   weather: 'any',      w: 3 },
-  { id: 10258, name: '米立龍(下垂姿勢)',   time: 'any',   weather: 'any',      w: 3 },
-  { id: 10259, name: '米立龍(平挺姿勢)',   time: 'any',   weather: 'any',      w: 3 },
-  { id: 10260, name: '怒鸚哥(藍羽毛)',     time: 'day',   weather: ['clear','cloudy'], w: 3.5 },
-  { id: 10261, name: '怒鸚哥(黃羽毛)',     time: 'day',   weather: ['clear'],  w: 3.5 },
-  { id: 10262, name: '怒鸚哥(白羽毛)',     time: 'any',   weather: 'any',      w: 3.5 },
-  { id: 10263, name: '索財靈(徒步形態)',   time: 'night', weather: ['fog'],    w: 2.5 },
-  { id: 10272, name: '月月熊(赫月)',             time: 'night', weather: ['fog'],              w: 0.4 },
-  { id: 10273, name: '厄鬼椪(水井面具)',         time: 'night', weather: ['rain'],             w: 0.5 },
-  { id: 10274, name: '厄鬼椪(火灶面具)',         time: 'day',   weather: ['clear'],            w: 0.5 },
-  { id: 10275, name: '厄鬼椪(礎石面具)',         time: 'day',   weather: ['cloudy'],           w: 0.5 },
-  { id: 10276, name: '太樂巴戈斯(太晶形態)',     time: 'day',   weather: ['clear'],            w: 0.4 },
-  { id: 10277, name: '太樂巴戈斯(星晶形態)',     time: 'night', weather: ['fog'],              w: 0.3 },
-  { id: 10278, name: '皮可西(超級進化)',         time: 'any',   weather: 'any',                w: 0.4 },
-  { id: 10279, name: '大食花(超級進化)',         time: 'day',   weather: ['clear'],            w: 0.4 },
-  { id: 10280, name: '寶石海星(超級進化)',       time: 'night', weather: ['rain'],             w: 0.4 },
-  { id: 10281, name: '快龍(超級進化)',           time: 'day',   weather: ['cloudy'],           w: 0.4 },
-  { id: 10282, name: '大竺葵(超級進化)',         time: 'day',   weather: ['clear'],            w: 0.4 },
-  { id: 10283, name: '大力鱷(超級進化)',         time: 'day',   weather: ['rain'],             w: 0.4 },
-  { id: 10284, name: '盔甲鳥(超級進化)',         time: 'day',   weather: ['cloudy'],           w: 0.4 },
-  { id: 10285, name: '雪妖女(超級進化)',         time: 'night', weather: ['snow'],             w: 0.4 },
-  { id: 10286, name: '炎武王(超級進化)',         time: 'day',   weather: ['clear'],            w: 0.4 },
-  { id: 10287, name: '龍頭地鼠(超級進化)',       time: 'day',   weather: ['clear'],            w: 0.4 },
-  { id: 10288, name: '蜈蚣王(超級進化)',         time: 'night', weather: ['fog'],              w: 0.4 },
-  { id: 10289, name: '頭巾混混(超級進化)',       time: 'night', weather: ['clear'],            w: 0.4 },
-  { id: 10290, name: '電鰻王(超級進化)',         time: 'day',   weather: ['rain'],             w: 0.4 },
-  { id: 10291, name: '水晶燈火靈(超級進化)',     time: 'night', weather: ['fog'],              w: 0.4 },
-  { id: 10292, name: '布里卡隆(超級進化)',       time: 'day',   weather: ['clear'],            w: 0.4 },
-  { id: 10293, name: '妖火紅狐(超級進化)',       time: 'day',   weather: ['clear'],            w: 0.4 },
-  { id: 10294, name: '甲賀忍蛙(超級進化)',       time: 'night', weather: ['rain'],             w: 0.4 },
-  { id: 10295, name: '火炎獅(超級進化)',         time: 'day',   weather: ['clear'],            w: 0.4 },
-  { id: 10296, name: '花葉蒂(超級進化)',         time: 'any',   weather: 'any',                w: 0.3 },
-  { id: 10297, name: '烏賊王(超級進化)',         time: 'night', weather: ['fog'],              w: 0.4 },
-  { id: 10298, name: '龜足巨鎧(超級進化)',       time: 'day',   weather: ['rain'],             w: 0.4 },
-  { id: 10299, name: '毒藻龍(超級進化)',         time: 'night', weather: ['rain'],             w: 0.4 },
-  { id: 10300, name: '摔角鷹人(超級進化)',       time: 'day',   weather: ['clear'],            w: 0.4 },
-  { id: 10301, name: '基格爾德(超級進化)',       time: 'any',   weather: 'any',                w: 0.3 },
-  { id: 10302, name: '老翁龍(超級進化)',         time: 'day',   weather: ['cloudy'],           w: 0.4 },
-  { id: 10303, name: '列陣兵(超級進化)',         time: 'day',   weather: ['clear'],            w: 0.4 },
-  { id: 10304, name: '雷丘(超級進化X)',         time: 'day',   weather: ['rain'],             w: 0.4 },
-  { id: 10305, name: '雷丘(超級進化Y)',         time: 'day',   weather: ['clear'],            w: 0.4 },
-  { id: 10306, name: '風鈴鈴(超級進化)',         time: 'any',   weather: 'any',                w: 0.4 },
-  { id: 10307, name: '阿勃梭魯(超級進化Z)',     time: 'night', weather: ['fog'],              w: 0.3 },
-  { id: 10308, name: '姆克鷹(超級進化)',         time: 'day',   weather: ['clear'],            w: 0.4 },
-  { id: 10309, name: '烈咬陸鯊(超級進化Z)',     time: 'day',   weather: ['clear'],            w: 0.3 },
-  { id: 10310, name: '路卡利歐(超級進化Z)',     time: 'day',   weather: ['clear'],            w: 0.3 },
-  { id: 10311, name: '席多藍恩(超級進化)',       time: 'day',   weather: ['clear'],            w: 0.3 },
-  { id: 10312, name: '達克萊伊(超級進化)',       time: 'night', weather: ['fog'],              w: 0.3 },
-  { id: 10313, name: '泥偶巨人(超級進化)',       time: 'night', weather: ['clear'],            w: 0.4 },
-  { id: 10314, name: '超能妙喵(雄性超級進化)',   time: 'any',   weather: 'any',                w: 0.4 },
-  { id: 10315, name: '好勝毛蟹(超級進化)',       time: 'night', weather: ['snow'],             w: 0.4 },
-  { id: 10316, name: '具甲武者(超級進化)',       time: 'night', weather: ['rain'],             w: 0.4 },
-  { id: 10317, name: '瑪機雅娜(超級進化)',       time: 'any',   weather: 'any',                w: 0.3 },
-  { id: 10318, name: '瑪機雅娜(原始超級進化)',   time: 'any',   weather: 'any',                w: 0.3 },
-  { id: 10319, name: '捷拉奧拉(超級進化)',       time: 'night', weather: ['rain'],             w: 0.3 },
-  { id: 10320, name: '熱辣娃(超級進化)',         time: 'day',   weather: ['clear'],            w: 0.4 },
-  { id: 10321, name: '晶光花(超級進化)',         time: 'day',   weather: ['cloudy'],           w: 0.4 },
-  { id: 10322, name: '米立龍(平挺姿勢超級進化)', time: 'any',   weather: 'any',                w: 0.3 },
-  { id: 10323, name: '米立龍(下垂姿勢超級進化)', time: 'any',   weather: 'any',                w: 0.3 },
-  { id: 10324, name: '米立龍(伸長姿勢超級進化)', time: 'any',   weather: 'any',                w: 0.3 },
-  { id: 10325, name: '戟脊龍(超級進化)',         time: 'day',   weather: ['snow'],             w: 0.4 },
-  { id: 10326, name: '超能妙喵(雌性超級進化)',   time: 'any',   weather: 'any',                w: 0.4 },
+  { id: 10276, name: '太樂巴戈斯(太晶形態)',     time: 'day',   weather: ['clear'],   w: 0.4 },
+  { id: 10277, name: '太樂巴戈斯(星晶形態)',     time: 'night', weather: ['fog'],   w: 0.3 },
 ];
 
 /* =========================================================
-   3f. 未知圖騰 28 種形態
+   3f. 未知圖騰
    ========================================================= */
-const UNOWN_SYMBOLS = [
-  ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),
-  'exclamation',
-  'question',
-];
+const UNOWN_SYMBOLS = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''), 'exclamation', 'question'];
 
 const UNOWN_FORMS = UNOWN_SYMBOLS.map((symbol, index) => {
   const isLetter = /^[A-Z]$/.test(symbol);
-  const displayName = isLetter
-    ? symbol
-    : (symbol === 'exclamation' ? '！' : '？');
+  const displayName = isLetter ? symbol : (symbol === 'exclamation' ? '！' : '？');
   const fileKey = (symbol === 'A') ? 'unown' : `unown-${symbol.toLowerCase()}`;
   const base = 'https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-gen8';
-
   return {
     id: 9201 + index,
     name: `未知圖騰 ${displayName}`,
-    emoji: '❓',
-    color: '#888',
-    rate: 0.35,
-    w: 1.5,
-    notWild: false,
-    time: 'any',
-    weather: 'any',
+    emoji: '❓', color: '#888', rate: 0.35, w: 1.5, notWild: false,
+    time: 'any', weather: 'any',
     spriteUrl: `${base}/regular/${fileKey}.png`,
     shinySpriteUrl: `${base}/shiny/${fileKey}.png`,
   };
@@ -1789,7 +1691,6 @@ const UNOWN_FORMS = UNOWN_SYMBOLS.map((symbol, index) => {
 const audio = {
   mapDay:null, mapNight:null, catchDay:null, catchNight:null, trade:null,
   current:null, ready:false, inited:false,
-
   init() {
     if (this.inited) return;
     this.inited = true;
@@ -1802,36 +1703,30 @@ const audio = {
       this.ready = true;
     } catch (e) { console.warn('Audio init failed:', e); }
   },
-
   _stopAll() {
     [this.mapDay, this.mapNight, this.catchDay, this.catchNight, this.trade].forEach(a => {
       if (a) { try { a.pause(); a.currentTime = 0; } catch(_){} }
     });
     this.current = null;
   },
-
   playMap(time) {
     if (!this.ready) return;
     this._stopAll();
     const track = (time === 'day') ? this.mapDay : this.mapNight;
     if (track) { track.play().catch(()=>{}); this.current = track; }
   },
-
   playCatch(time) {
     if (!this.ready) return;
     this._stopAll();
     const track = (time === 'day') ? this.catchDay : this.catchNight;
     if (track) { track.play().catch(()=>{}); this.current = track; }
   },
-
   playTrade() {
     if (!this.ready) return;
-    // 若 Trade of the Day 已在播放（例如 NPC 交換流程中），不要重新開始
     if (this.current === this.trade && this.trade && !this.trade.paused) return;
     this._stopAll();
     if (this.trade) { this.trade.play().catch(()=>{}); this.current = this.trade; }
   },
-
   stopCatch() {
     if (!this.ready) return;
     try { this.catchDay.pause(); this.catchDay.currentTime = 0; } catch(_){}
@@ -1845,7 +1740,6 @@ const audio = {
    ========================================================= */
 const SFX = {
   ctx:null, master:null, _nb:null,
-
   init() {
     if (this.ctx) { this.resume(); return; }
     const AC = window.AudioContext || window.webkitAudioContext;
@@ -1857,11 +1751,7 @@ const SFX = {
       this.master.connect(this.ctx.destination);
     } catch(e) { console.warn('SFX init failed:', e); }
   },
-
-  resume() {
-    if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume().catch(()=>{});
-  },
-
+  resume() { if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume().catch(()=>{}); },
   _noiseBuf() {
     if (this._nb) return this._nb;
     const ctx = this.ctx;
@@ -1872,7 +1762,6 @@ const SFX = {
     this._nb = buf;
     return buf;
   },
-
   tone(o) {
     if (!this.ctx) return;
     const ctx = this.ctx;
@@ -1890,7 +1779,6 @@ const SFX = {
     osc.connect(g); g.connect(this.master);
     osc.start(t0); osc.stop(t0 + dur + 0.05);
   },
-
   noise(o) {
     if (!this.ctx) return;
     const ctx = this.ctx;
@@ -1911,7 +1799,6 @@ const SFX = {
     src.connect(flt); flt.connect(g); g.connect(this.master);
     src.start(t0); src.stop(t0 + dur + 0.05);
   },
-
   throwBall() {
     this.noise({ dur:0.22, gain:1.0, type:'bandpass', f0:500, f1:2600, q:1.2 });
     this.tone({ freq:260, freq2:720, type:'triangle', dur:0.18, gain:1.0 });
@@ -1984,21 +1871,30 @@ const SFX = {
     });
     this.tone({ freq:170, freq2:70, type:'sine', dur:0.42, gain:0.11, delay:0.18 });
   },
+  itemUse() {
+    this.tone({ freq:600, freq2:1200, type:'sine', dur:0.15, gain:0.14 });
+    this.tone({ freq:1200, freq2:1800, type:'sine', dur:0.10, gain:0.08, delay:0.08 });
+  },
+  incenseStart() {
+    [392, 523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
+      this.tone({ freq:f, type:'sine', dur:0.35, gain:0.10, delay:i * 0.10 });
+    });
+    this.noise({ dur:1.8, gain:0.04, type:'highpass', f0:3000 });
+  },
 };
 
 /* =========================================================
    3. 遊戲常量
    ========================================================= */
 const REFRESH_MS      = 5 * 60 * 1000;
+const INCENSE_MS      = 15 * 60 * 1000;
 const DEFAULT_CENTER  = [25.0330, 121.5654];
 const SHINY_RATE      = 0.06;
 const SWIPE_THRESHOLD = 70;
 const MOVE_RESPAWN_DIST = 250;
 const MOVE_RESPAWN_COOL = 6000;
-
 const CURVE_SLIP_CHANCE  = 0.28;
 const CURVE_SUCCESS_MULT = 1.80;
-
 const NPC_SPAWN_CHANCE = 0.22;
 const SAVE_KEY = 'pokemonCityWalkSave_v1';
 
@@ -2025,7 +1921,6 @@ const TRADE_EVOLUTIONS = [
   { npcName:'小木靈',   to:'朽木妖',     candyCost:1 },
   { npcName:'南瓜精',   to:'南瓜怪人',   candyCost:1 },
 ];
-
 const NPC_EVO_TRADE_RATE = 0.45;
 
 /* =========================================================
@@ -2038,7 +1933,14 @@ let spawnCenter = null;
 let spawnMarkers = [];
 let stopMarkers  = [];
 let npcMarker = null;
-let balls = 20;
+
+let ballInventory = { poke: 20, great: 0, ultra: 0, master: 0 };
+let currentBall = 'poke';
+
+let itemInventory = { pineapple: 0, grape: 0, incense: 0 };
+let incenseEndAt = 0;
+let catchEffect = { extraCandy: 0, fleeReduction: false };
+
 let caughtCount = 0;
 let nextRefreshAt = Date.now() + REFRESH_MS;
 let firstFix = true;
@@ -2119,6 +2021,10 @@ function pickPokemon() {
   return list[0];
 }
 
+function isIncenseActive() {
+  return incenseEndAt > 0 && Date.now() < incenseEndAt;
+}
+
 function getSpawnCount() {
   const base = 4 + Math.floor(Math.random() * 4);
   let mult = 1;
@@ -2131,7 +2037,8 @@ function getSpawnCount() {
     default:       mult *= 1.00; break;
   }
   if (env.time === 'night') mult *= 0.75;
-  return Math.max(2, Math.min(12, Math.round(base * mult)));
+  if (isIncenseActive()) mult *= 2;
+  return Math.max(2, Math.min(24, Math.round(base * mult)));
 }
 
 function getNpcSpawnChance() {
@@ -2148,18 +2055,59 @@ function getNpcSpawnChance() {
   return Math.max(0.03, Math.min(0.45, c));
 }
 
+function getTotalBalls() {
+  return (ballInventory.poke || 0) + (ballInventory.great || 0) +
+         (ballInventory.ultra || 0) + (ballInventory.master || 0);
+}
+
 function updateHUD() {
-  document.getElementById('ballCount').textContent = balls;
+  const totalAll = getTotalBalls();
+  const currentCount = ballInventory[currentBall] || 0;
+  const def = BALL_TYPES[currentBall] || BALL_TYPES.poke;
+
+  const hudIcon = document.getElementById('hudBallIcon');
+  if (hudIcon) hudIcon.className = 'ball-mini ball-' + currentBall;
+
+  document.getElementById('ballCount').textContent = totalAll;
   document.getElementById('caughtCount').textContent = caughtCount;
+
   const c = document.getElementById('catchBallCount');
-  if (c) c.textContent = balls;
+  if (c) c.textContent = currentCount;
+
+  const cn = document.getElementById('catchBallName');
+  if (cn) cn.textContent = def.name;
+
+  const ci = document.getElementById('catchBallIcon');
+  if (ci) ci.className = 'ball-mini ball-' + currentBall;
+
+  if (ballFly && !ballFlying) {
+    ballFly.className = 'pokeball ball-' + currentBall;
+    if (totalAll === 0) ballFly.style.display = 'none';
+    else ballFly.style.display = 'block';
+  }
+
+  updateCatchItemUI();
 }
 
 function getCandy(name) { return candyBag[name] || 0; }
 function addCandy(name, n) { candyBag[name] = (candyBag[name] || 0) + n; }
 
+function ensureUsableBall() {
+  if ((ballInventory[currentBall] || 0) > 0) return true;
+  const order = ['poke', 'great', 'ultra', 'master'];
+  for (const t of order) {
+    if ((ballInventory[t] || 0) > 0) {
+      currentBall = t;
+      if (ballFly) ballFly.className = 'pokeball ball-' + currentBall;
+      updateHUD();
+      return true;
+    }
+  }
+  return false;
+}
+
 /* =========================================================
-   5b. 自製確認視窗
+   5b. 確認視窗
    ========================================================= */
 function showConfirm(opts = {}) {
   return new Promise(resolve => {
@@ -2208,18 +2156,17 @@ function collectSaveData() {
   const dex = {};
   Object.keys(dexState).forEach(k => {
     const s = dexState[k];
-    if (s.seen || s.caught || s.shiny) {
-      dex[k] = { seen: s.seen, caught: s.caught, shiny: s.shiny };
-    }
+    if (s.seen || s.caught || s.shiny) dex[k] = { seen: s.seen, caught: s.caught, shiny: s.shiny };
   });
   const candy = {};
-  Object.keys(candyBag).forEach(k => {
-    if (candyBag[k] > 0) candy[k] = candyBag[k];
-  });
+  Object.keys(candyBag).forEach(k => { if (candyBag[k] > 0) candy[k] = candyBag[k]; });
   return {
-    version: 1,
+    version: 3,
     savedAt: new Date().toISOString(),
-    balls,
+    ballInventory: { ...ballInventory },
+    currentBall,
+    itemInventory: { ...itemInventory },
+    incenseEndAt: isIncenseActive() ? incenseEndAt : 0,
     caughtCount,
     dexState: dex,
     candyBag: candy,
@@ -2229,7 +2176,37 @@ function collectSaveData() {
 function applySaveData(data) {
   if (!data || typeof data !== 'object') return false;
 
-  if (typeof data.balls === 'number') balls = Math.max(0, data.balls | 0);
+  if (data.ballInventory && typeof data.ballInventory === 'object') {
+    ballInventory = { poke: 0, great: 0, ultra: 0, master: 0 };
+    ['poke','great','ultra','master'].forEach(t => {
+      const v = data.ballInventory[t];
+      if (typeof v === 'number') ballInventory[t] = Math.max(0, v | 0);
+    });
+  } else if (typeof data.balls === 'number') {
+    ballInventory = { poke: Math.max(0, data.balls | 0), great: 0, ultra: 0, master: 0 };
+  }
+
+  if (data.currentBall && BALL_TYPES[data.currentBall]) currentBall = data.currentBall;
+  if ((ballInventory[currentBall] || 0) <= 0) {
+    for (const t of ['poke','great','ultra','master']) {
+      if ((ballInventory[t] || 0) > 0) { currentBall = t; break; }
+    }
+  }
+
+  if (data.itemInventory && typeof data.itemInventory === 'object') {
+    itemInventory = { pineapple: 0, grape: 0, incense: 0 };
+    ['pineapple','grape','incense'].forEach(t => {
+      const v = data.itemInventory[t];
+      if (typeof v === 'number') itemInventory[t] = Math.max(0, v | 0);
+    });
+  }
+
+  if (typeof data.incenseEndAt === 'number' && data.incenseEndAt > Date.now()) {
+    incenseEndAt = data.incenseEndAt;
+  } else {
+    incenseEndAt = 0;
+  }
+
   if (typeof data.caughtCount === 'number') caughtCount = Math.max(0, data.caughtCount | 0);
 
   Object.keys(dexState).forEach(k => { dexState[k] = { seen:0, caught:0, shiny:0 }; });
@@ -2258,23 +2235,16 @@ function applySaveData(data) {
 
 function autoSave() {
   if (!gameStarted) return;
-  try {
-    localStorage.setItem(SAVE_KEY, JSON.stringify(collectSaveData()));
-  } catch (e) {
-    console.warn('autoSave failed:', e);
-  }
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(collectSaveData())); }
+  catch (e) { console.warn('autoSave failed:', e); }
 }
 
 function loadAutoSave() {
   try {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return false;
-    const data = JSON.parse(raw);
-    return applySaveData(data);
-  } catch (e) {
-    console.warn('loadAutoSave failed:', e);
-    return false;
-  }
+    return applySaveData(JSON.parse(raw));
+  } catch (e) { console.warn('loadAutoSave failed:', e); return false; }
 }
 
 function downloadSave() {
@@ -2300,14 +2270,12 @@ function handleLoadFile(file) {
   reader.onload = () => {
     try {
       const data = JSON.parse(reader.result);
-      if (!applySaveData(data)) {
-        toast('❌ 存檔格式錯誤');
-        return;
-      }
+      if (!applySaveData(data)) { toast('❌ 存檔格式錯誤'); return; }
       autoSave();
       toast('📂 存檔已載入');
       if (!dexScreen.classList.contains('hidden')) renderDex();
       if (!evoScreen.classList.contains('hidden')) renderEvoList();
+      if (!bagScreen.classList.contains('hidden')) renderBag();
       const center = playerLatLng || spawnCenter || DEFAULT_CENTER;
       spawnWorld(center);
     } catch (e) {
@@ -2322,17 +2290,23 @@ async function resetGame() {
   const ok = await showConfirm({
     icon: '🗑',
     title: '重設遊戲進度',
-    message: '確定要重設所有遊戲進度嗎？\n球數、圖鑑、糖果都會歸零，此操作無法復原。',
+    message: '確定要重設所有遊戲進度嗎？\n球數、圖鑑、糖果、道具都會歸零，此操作無法復原。',
     okText: '確定重設',
     cancelText: '取消',
   });
   if (!ok) return;
 
   try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
-  balls = 20;
+  ballInventory = { poke: 20, great: 0, ultra: 0, master: 0 };
+  currentBall = 'poke';
+  itemInventory = { pineapple: 0, grape: 0, incense: 0 };
+  incenseEndAt = 0;
+  catchEffect = { extraCandy: 0, fleeReduction: false };
+  stopConfetti();
   caughtCount = 0;
   Object.keys(dexState).forEach(k => { dexState[k] = { seen:0, caught:0, shiny:0 }; });
   Object.keys(candyBag).forEach(k => { candyBag[k] = 0; });
+  nextRefreshAt = Date.now() + REFRESH_MS;
   updateHUD();
   const center = playerLatLng || spawnCenter || DEFAULT_CENTER;
   spawnWorld(center);
@@ -2369,7 +2343,6 @@ function renderEnvironment() {
   }
 }
 
-/* 同步捕捉畫面的天氣 */
 function syncCatchWeather() {
   CatchWeatherFX.setMode(
     env.weather === 'rain' ? 'rain' :
@@ -2413,7 +2386,41 @@ function checkDeviceTime() {
 }
 
 /* =========================================================
-   6b. 天氣粒子（工廠函式，可生成多個實例）
+   6b. 香薰彩帶特效
+   ========================================================= */
+const CONFETTI_COLORS = ['#ff6b6b','#ffd166','#7CFC9A','#6c5ce7','#a29bfe','#f368e0','#00d2d3','#ff9f43','#74b9ff'];
+
+function startConfetti() {
+  const layer = document.getElementById('confettiLayer');
+  if (!layer || layer.classList.contains('on')) return;
+  layer.innerHTML = '';
+  layer.classList.add('on');
+
+  const count = 42;
+  for (let i = 0; i < count; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + '%';
+    piece.style.background = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
+    piece.style.width = (6 + Math.random() * 6) + 'px';
+    piece.style.height = (10 + Math.random() * 8) + 'px';
+    piece.style.animationDuration = (3 + Math.random() * 3.5) + 's';
+    piece.style.animationDelay = (-Math.random() * 5) + 's';
+    piece.style.opacity = (0.75 + Math.random() * 0.25).toFixed(2);
+    if (Math.random() < 0.4) piece.style.borderRadius = '50%';
+    layer.appendChild(piece);
+  }
+}
+
+function stopConfetti() {
+  const layer = document.getElementById('confettiLayer');
+  if (!layer) return;
+  layer.classList.remove('on');
+  layer.innerHTML = '';
+}
+
+/* =========================================================
+   6c. 天氣粒子
    ========================================================= */
 function createWeatherFX(canvasId) {
   return {
@@ -2430,7 +2437,6 @@ function createWeatherFX(canvasId) {
       this.resize();
       window.addEventListener('resize', () => this.resize());
     },
-
     resize() {
       if (!this.canvas || !this.ctx) return;
       const dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -2445,7 +2451,6 @@ function createWeatherFX(canvasId) {
         for (let i = 0; i < this.active; i++) this.spawn(this.pool[i], true);
       }
     },
-
     setMode(mode) {
       if (!this.ctx) return;
       if (this.mode === mode) return;
@@ -2462,7 +2467,6 @@ function createWeatherFX(canvasId) {
         this.canvas.style.display = 'none';
       }
     },
-
     spawn(p, spread) {
       p.x = Math.random() * this.w;
       p.y = spread ? Math.random() * this.h : (-30 - Math.random() * 80);
@@ -2478,7 +2482,6 @@ function createWeatherFX(canvasId) {
         p.sw = 12 + Math.random() * 26;
       }
     },
-
     start() {
       if (this.running) return;
       this.running = true;
@@ -2492,17 +2495,14 @@ function createWeatherFX(canvasId) {
       };
       this.raf = requestAnimationFrame(loop);
     },
-
     stop() {
       this.running = false;
       if (this.raf) { cancelAnimationFrame(this.raf); this.raf = null; }
     },
-
     step(dt) {
       const ctx = this.ctx;
       if (!ctx) return;
       ctx.clearRect(0, 0, this.w, this.h);
-
       if (this.mode === 'rain') {
         ctx.strokeStyle = 'rgba(174,214,255,0.62)';
         ctx.lineWidth = 1.5;
@@ -2510,8 +2510,7 @@ function createWeatherFX(canvasId) {
         ctx.beginPath();
         for (let i = 0; i < this.active; i++) {
           const p = this.pool[i];
-          p.x += p.vx * dt;
-          p.y += p.vy * dt;
+          p.x += p.vx * dt; p.y += p.vy * dt;
           if (p.y > this.h + 30 || p.x < -60) { this.spawn(p, false); continue; }
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(p.x - p.vx * 0.016, p.y - p.len);
@@ -2535,21 +2534,18 @@ function createWeatherFX(canvasId) {
   };
 }
 
-const WeatherFX      = createWeatherFX('weatherFx');       // 地圖層
-const CatchWeatherFX = createWeatherFX('catchWeatherFx');  // 捕捉介面層
+const WeatherFX      = createWeatherFX('weatherFx');
+const CatchWeatherFX = createWeatherFX('catchWeatherFx');
 
 /* =========================================================
    7. 程序化地圖
    ========================================================= */
 function _rand2(ix, iy, seed) {
-  let h = (Math.imul(ix | 0, 374761393)
-         + Math.imul(iy | 0, 668265263)
-         + Math.imul(seed | 0, 1013904223)) | 0;
+  let h = (Math.imul(ix | 0, 374761393) + Math.imul(iy | 0, 668265263) + Math.imul(seed | 0, 1013904223)) | 0;
   h = Math.imul(h ^ (h >>> 13), 1274126177);
   h = (h ^ (h >>> 16)) >>> 0;
   return h / 4294967296;
 }
-
 function _vnoise(x, y, seed) {
   const ix = Math.floor(x), iy = Math.floor(y);
   const fx = x - ix, fy = y - iy;
@@ -2561,7 +2557,6 @@ function _vnoise(x, y, seed) {
   const d = _rand2(ix + 1, iy + 1, seed);
   return (a * (1 - u) + b * u) * (1 - v) + (c * (1 - u) + d * u) * v;
 }
-
 function _fbm(x, y, seed) {
   let val = 0, amp = 0.5, freq = 1;
   for (let i = 0; i < 4; i++) {
@@ -2580,43 +2575,31 @@ const ProgMapLayer = L.GridLayer.extend({
     const canvas = document.createElement('canvas');
     canvas.width = size; canvas.height = size;
     const ctx = canvas.getContext('2d');
-
     const N = 24;
     const cell = size / N;
     const scale = Math.pow(2, MAP_REF_ZOOM - coords.z);
     const wx0 = coords.x * size * scale;
     const wy0 = coords.y * size * scale;
     const wcell = cell * scale;
-
     const img = ctx.createImageData(N, N);
-
     for (let j = 0; j < N; j++) {
       for (let i = 0; i < N; i++) {
         const wx = wx0 + (i + 0.5) * wcell;
         const wy = wy0 + (j + 0.5) * wcell;
-
         const elev = _fbm(wx / 700, wy / 700, 1);
         let r, g, b;
-
         if (elev < 0.42) {
           const depth = _fbm(wx / 320, wy / 320, 5);
-          r = 46 + depth * 34;
-          g = 112 + depth * 44;
-          b = 172 + depth * 48;
+          r = 46 + depth * 34; g = 112 + depth * 44; b = 172 + depth * 48;
         } else {
           const river = _fbm(wx / 380, wy / 380, 9);
           const onRiver = Math.abs(river - 0.5) < 0.020;
-
-          if (onRiver) {
-            r = 76; g = 158; b = 214;
-          } else {
+          if (onRiver) { r = 76; g = 158; b = 214; }
+          else {
             const vary = (_fbm(wx / 150, wy / 150, 3) - 0.5) * 46;
-            r = 138 + vary;
-            g = 190 + vary;
-            b = 108 + vary;
+            r = 138 + vary; g = 190 + vary; b = 108 + vary;
           }
         }
-
         const idx = (j * N + i) * 4;
         img.data[idx]     = Math.max(0, Math.min(255, r));
         img.data[idx + 1] = Math.max(0, Math.min(255, g));
@@ -2624,15 +2607,12 @@ const ProgMapLayer = L.GridLayer.extend({
         img.data[idx + 3] = 255;
       }
     }
-
     const tmp = document.createElement('canvas');
     tmp.width = N; tmp.height = N;
     tmp.getContext('2d').putImageData(img, 0, 0);
-
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(tmp, 0, 0, N, N, 0, 0, size, size);
-
     if (typeof done === 'function') setTimeout(done, 0);
     return canvas;
   }
@@ -2643,11 +2623,9 @@ const ProgMapLayer = L.GridLayer.extend({
    ========================================================= */
 function createOsmLayer() {
   if (osmTileLayer) return osmTileLayer;
-  osmTileLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19, opacity: 1,
-  });
+  osmTileLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, opacity: 1 });
   osmTileLayer.on('tileload', () => { tileLoadCount++; });
-  osmTileLayer.on('tileerror', (e) => {
+  osmTileLayer.on('tileerror', () => {
     console.warn('[map] tileerror');
     if (!mapFallbackActive) activateProcedural(false);
   });
@@ -2655,25 +2633,17 @@ function createOsmLayer() {
 }
 
 function initMap() {
-  map = L.map('map', {
-    zoomControl: false, attributionControl: false, tap: false,
-  }).setView(DEFAULT_CENTER, 17);
-
+  map = L.map('map', { zoomControl: false, attributionControl: false, tap: false }).setView(DEFAULT_CENTER, 17);
   createOsmLayer().addTo(map);
-
   attributionCtrl = L.control.attribution({ position: 'bottomright', prefix: false })
-    .addTo(map)
-    .addAttribution('© OpenStreetMap');
-
+    .addTo(map).addAttribution('© OpenStreetMap');
   probeTile();
-
   setTimeout(() => {
     if (!mapFallbackActive && tileLoadCount === 0) {
       console.warn('[map] 逾時未載入任何圖磚');
       activateProcedural(false);
     }
   }, 8000);
-
   updateMapModeBtn();
 }
 
@@ -2684,7 +2654,7 @@ function probeTile() {
   const ty = Math.floor((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2 * n);
   const img = new Image();
   img.onerror = () => {
-    console.warn('[map] 圖磚探測失敗（Access Blocked / 403）');
+    console.warn('[map] 圖磚探測失敗');
     activateProcedural(false);
   };
   img.onload = () => {};
@@ -2693,49 +2663,29 @@ function probeTile() {
 
 function activateProcedural(manual) {
   if (!map) return;
-  if (mapFallbackActive) {
-    if (manual) toast('🗺️ 目前已是生成式地圖');
-    return;
-  }
+  if (mapFallbackActive) { if (manual) toast('🗺️ 目前已是生成式地圖'); return; }
   mapFallbackActive = true;
-
-  if (osmTileLayer) {
-    try { map.removeLayer(osmTileLayer); } catch(_) {}
-    osmTileLayer = null;
-  }
+  if (osmTileLayer) { try { map.removeLayer(osmTileLayer); } catch(_) {} osmTileLayer = null; }
   if (!fallbackLayer) fallbackLayer = new ProgMapLayer();
   fallbackLayer.addTo(map);
-
   if (attributionCtrl) {
-    try {
-      attributionCtrl._attributions = {};
-      attributionCtrl.addAttribution('Procedural Map');
-    } catch(_) {}
+    try { attributionCtrl._attributions = {}; attributionCtrl.addAttribution('Procedural Map'); } catch(_) {}
   }
   updateMapModeBtn();
-  toast(manual
-    ? '🗺️ 已切換為生成式地圖'
+  toast(manual ? '🗺️ 已切換為生成式地圖'
     : '🚫 地圖被阻擋（Access Blocked / 403），已自動切換為生成式地圖', 3400);
 }
 
 function activateOsm(manual) {
   if (!map) return;
-  if (!mapFallbackActive) {
-    if (manual) toast('🌐 目前已是 OpenStreetMap');
-    return;
-  }
+  if (!mapFallbackActive) { if (manual) toast('🌐 目前已是 OpenStreetMap'); return; }
   mapFallbackActive = false;
-  if (fallbackLayer) {
-    try { map.removeLayer(fallbackLayer); } catch(_) {}
-  }
+  if (fallbackLayer) { try { map.removeLayer(fallbackLayer); } catch(_) {} }
   tileLoadCount = 0;
   createOsmLayer().addTo(map);
   if (osmTileLayer) osmTileLayer.setOpacity(1);
   if (attributionCtrl) {
-    try {
-      attributionCtrl._attributions = {};
-      attributionCtrl.addAttribution('© OpenStreetMap');
-    } catch(_) {}
+    try { attributionCtrl._attributions = {}; attributionCtrl.addAttribution('© OpenStreetMap'); } catch(_) {}
   }
   updateMapModeBtn();
   if (manual) toast('🌐 已切換回 OpenStreetMap', 2400);
@@ -2751,7 +2701,7 @@ function updateMapModeBtn() {
 
 const PLAYER_ICON = L.divIcon({
   className: '',
-  html: '<div class="player-wrap">' + '<div class="glow"></div>' + '<div class="ring"></div>' + '<div class="dot"></div>' + '</div>',
+  html: '<div class="player-wrap"><div class="glow"></div><div class="ring"></div><div class="dot"></div></div>',
   iconSize: [44, 44], iconAnchor: [22, 22],
 });
 
@@ -2780,12 +2730,12 @@ function checkMoveRespawn() {
   spawnPokemon(spawnCenter);
   spawnStops(spawnCenter);
   maybeSpawnNPC(spawnCenter);
-
+  nextRefreshAt = Date.now() + REFRESH_MS;
   toast('🌿 來到新地方，出現了新的精靈與補給站！');
 }
 
 /* =========================================================
-   9. 生成精靈 / 補給站 / NPC
+   9. 生成
    ========================================================= */
 function clearSpawns() { spawnMarkers.forEach(m => map.removeLayer(m)); spawnMarkers = []; }
 function clearStops()  { stopMarkers.forEach(m => map.removeLayer(m));  stopMarkers = []; }
@@ -2867,7 +2817,6 @@ function maybeSpawnNPC(center) {
 
   const emoji = NPC_EMOJIS[Math.floor(Math.random() * NPC_EMOJIS.length)];
   const trade = buildNpcTrade();
-
   const dist = 80 + Math.random() * 220;
   const bearing = Math.random() * 360;
   const [lat, lng] = offsetLatLng(center[0], center[1], dist, bearing);
@@ -2884,7 +2833,6 @@ function maybeSpawnNPC(center) {
 
   npcMarker = L.marker([lat, lng], { icon, zIndexOffset: 900 }).addTo(map);
   currentNPC = { emoji, trade, candySource: null };
-
   npcMarker.on('click', () => openNPCExchange(currentNPC));
   SFX.npcAppear();
 }
@@ -2892,32 +2840,16 @@ function maybeSpawnNPC(center) {
 function buildNpcTrade() {
   if (Math.random() < NPC_EVO_TRADE_RATE) {
     const t = TRADE_EVOLUTIONS[Math.floor(Math.random() * TRADE_EVOLUTIONS.length)];
-    return {
-      kind: 'evo',
-      npcName: t.npcName,
-      to: t.to,
-      candyCost: t.candyCost,
-      spriteId: t.spriteId,
-      evoSpriteId: t.evoSpriteId,
-    };
+    return { kind: 'evo', npcName: t.npcName, to: t.to, candyCost: t.candyCost,
+      spriteId: t.spriteId, evoSpriteId: t.evoSpriteId };
   }
-
   const pool = POKEDEX.filter(p => !p.notWild && p.w > 0);
-  const mon = pool.length
-    ? pool[Math.floor(Math.random() * pool.length)]
-    : POKEDEX[Math.floor(Math.random() * POKEDEX.length)];
-
-  return {
-    kind: 'random',
-    npcName: mon.name,
-    to: mon.name,
-    candyCost: 1,
-    spriteId: mon.spriteId || mon.id,
-  };
+  const mon = pool.length ? pool[Math.floor(Math.random() * pool.length)] : POKEDEX[Math.floor(Math.random() * POKEDEX.length)];
+  return { kind: 'random', npcName: mon.name, to: mon.name, candyCost: 1, spriteId: mon.spriteId || mon.id };
 }
 
 /* =========================================================
-   10. NPC 交換畫面
+   10. NPC 交換
    ========================================================= */
 const npcScreen      = document.getElementById('npcScreen');
 const npcTitle       = document.getElementById('npcTitle');
@@ -2950,7 +2882,6 @@ function openNPCExchange(npc) {
   const npcMon = POKEDEX.find(p => p.name === trade.npcName);
   const candySource = pickRandomCandySource(trade.npcName);
   npc.candySource = candySource;
-
   const isEvo = trade.kind === 'evo';
 
   npcTitle.textContent = `${emoji} 交換`;
@@ -2960,9 +2891,7 @@ function openNPCExchange(npc) {
 
   npcCardName.textContent = trade.npcName;
   const spriteId = trade.spriteId || (npcMon && npcMon.id);
-  const spriteMon = npcMon
-    || (spriteId ? POKEDEX.find(x => x.id === spriteId) : null)
-    || (spriteId ? { id: spriteId } : null);
+  const spriteMon = npcMon || (spriteId ? POKEDEX.find(x => x.id === spriteId) : null) || (spriteId ? { id: spriteId } : null);
 
   if (spriteMon) {
     npcCardImg.src = spriteUrl(spriteMon, false);
@@ -3045,7 +2974,6 @@ npcConfirmBtn.addEventListener('click', () => {
   playTradeAnimation(npcMon, playerMon, trade, candySource, () => {
     candyBag[candySource.name] -= trade.candyCost;
     if (candyBag[candySource.name] < 0) candyBag[candySource.name] = 0;
-
     clearNPC();
 
     const finish = (msg) => {
@@ -3112,7 +3040,6 @@ function playTradeAnimation(npcMon, playerMon, trade, candySource, onDone) {
   tradeFlash.classList.remove('flash');
 
   setTradeMon(tradeImgA, tradeFallbackA, tradeLabelA, npcMon, trade.npcName, '❓');
-
   if (playerMon && candySource) {
     setTradeMon(tradeImgB, tradeFallbackB, tradeLabelB, playerMon, `${candySource.name}糖果`, '🍬');
   } else {
@@ -3138,7 +3065,6 @@ function playTradeAnimation(npcMon, playerMon, trade, candySource, onDone) {
   }, 1400);
 }
 
-/* 交換進化動畫：先顯示未進化，再變身為進化後 */
 function playNPCEvolutionAnimation(fromName, toName, evoSpriteId, onDone) {
   const fromMon = POKEDEX.find(p => p.name === fromName);
   const tgt = POKEDEX.find(p => p.name === toName);
@@ -3147,32 +3073,27 @@ function playNPCEvolutionAnimation(fromName, toName, evoSpriteId, onDone) {
 
   const ov = document.getElementById('evoOverlay');
   const animImg = document.getElementById('evoAnimImg');
-
   const evoMon = tgt || POKEDEX.find(x => x.id === sid) || { id: sid };
 
   const fromSrc = fromMon ? spriteUrl(fromMon, false) : spriteUrl(evoMon, false);
   const toSrc   = spriteUrl(evoMon, false);
 
-  // 先顯示未進化的精靈
   animImg.src = fromSrc;
   animImg.style.display = '';
   animImg.onerror = () => { animImg.style.display = 'none'; };
   ov.style.display = 'flex';
 
   audio.init();
-  audio.playTrade();   // 🎵 交換進化播放 Trade of the Day
+  audio.playTrade();
   SFX.evolve();
 
-  // 閃光最亮時切換為進化後的精靈
-  const swapTimer = setTimeout(() => {
-    animImg.src = toSrc;
-  }, 1100);
+  const swapTimer = setTimeout(() => { animImg.src = toSrc; }, 1100);
 
   setTimeout(() => {
     clearTimeout(swapTimer);
     ov.style.display = 'none';
     animImg.style.display = '';
-    onDone();  // 由 finish() 內恢復地圖音樂
+    onDone();
   }, 2700);
 }
 
@@ -3195,22 +3116,28 @@ const powerFill   = document.getElementById('powerFill');
 const aimArc       = document.getElementById('aimArc');
 const aimArcPath   = document.getElementById('aimArcPath');
 const aimArrowHead = document.getElementById('aimArrowHead');
+const catchEffectsEl = document.getElementById('catchEffects');
 
 let ballHome = { x: 0, y: 0 };
 let ballFlying = false;
 let lastThrow = null;
 
-const swipe = {
-  active: false, pointerId: null,
-  startX: 0, startY: 0, curX: 0, curY: 0,
-};
+const swipe = { active: false, pointerId: null, startX: 0, startY: 0, curX: 0, curY: 0 };
 
 function resetBallPosition(animate) {
+  ensureUsableBall();
+  const totalAll = getTotalBalls();
+  ballFly.className = 'pokeball ball-' + currentBall;
+  if (totalAll === 0) {
+    ballFly.style.display = 'none';
+    return;
+  }
+  ballFly.style.display = 'block';
+
   const w = catchStage.clientWidth;
   const h = catchStage.clientHeight;
   ballHome.x = w / 2 - BALL_SIZE / 2;
   ballHome.y = h - 88;
-  ballFly.style.display = 'block';
   ballFly.style.opacity = '1';
   ballFly.style.filter = '';
   ballFly.style.transition = animate
@@ -3232,35 +3159,25 @@ function updateGroundLine() {
   catchScreen.style.setProperty('--groundY', pct + '%');
 }
 
-function hideAimArc() {
-  if (aimArc) aimArc.classList.remove('on');
-}
+function hideAimArc() { if (aimArc) aimArc.classList.remove('on'); }
 
 function drawAimArc(dirSign) {
   if (!aimArc) return;
   const stageRect = catchStage.getBoundingClientRect();
   const monRect   = wildMon.getBoundingClientRect();
-
-  // 目標＝精靈中心
   const tx = monRect.left - stageRect.left + monRect.width  / 2;
   const ty = monRect.top  - stageRect.top  + monRect.height / 2 - 14;
   const sx = swipe.startX;
   const sy = swipe.startY;
-
   const dx = tx - sx;
   const dy = ty - sy;
   const len = Math.hypot(dx, dy) || 1;
-
-  // 往拖曳方向偏的控制點
   const px = -dy / len;
   const py =  dx / len;
   const off = dirSign * Math.min(len * 0.34, 150);
   const cx = (sx + tx) / 2 + px * off;
   const cy = (sy + ty) / 2 + py * off;
-
   aimArcPath.setAttribute('d', `M ${sx} ${sy} Q ${cx} ${cy} ${tx} ${ty}`);
-
-  // 箭頭：沿二次貝茲曲線終點切線方向
   const ax = 2 * (tx - cx);
   const ay = 2 * (ty - cy);
   const al = Math.hypot(ax, ay) || 1;
@@ -3270,17 +3187,158 @@ function drawAimArc(dirSign) {
   const bx = tx - ux * hl;
   const by = ty - uy * hl;
   const nx = -uy, ny = ux;
-
   aimArrowHead.setAttribute('points',
     `${tx},${ty} ${bx + nx * hw},${by + ny * hw} ${bx - nx * hw},${by - ny * hw}`);
-
   aimArc.classList.add('on');
 }
+let confirmMasterPending = false;
+function renderCatchBallSelector() {
+  const box = document.getElementById('catchBalls');
+  if (!box) return;
+
+  const totalAll = getTotalBalls();
+  if (totalAll === 0) {
+    box.innerHTML = '';
+    return;
+  }
+
+  const order = ['poke', 'great', 'ultra', 'master'];
+  box.innerHTML = order.map(t => {
+    const n = ballInventory[t] || 0;
+    const active = (t === currentBall);
+    const disabled = (n <= 0) || !(catchState === 'aim' && !ballFlying);
+    return `
+      <button class="catch-ball-btn ${active ? 'active' : ''}"
+              data-ball="${t}"
+              ${disabled ? 'disabled' : ''}
+              title="${BALL_TYPES[t].name}${n > 0 ? ' ×' + n : ''}">
+        <span class="cb-icon ball-${t}"></span>
+        <span class="cb-count">${n}</span>
+      </button>`;
+  }).join('');
+
+  box.querySelectorAll('.catch-ball-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      const t = btn.dataset.ball;
+      switchCatchBall(t);
+    });
+  });
+}
+
+async function switchCatchBall(t) {
+  if (catchState !== 'aim' || ballFlying) return;
+  if (t === currentBall) return;
+  if ((ballInventory[t] || 0) <= 0) {
+    toast(`${BALL_TYPES[t].name}已用完`);
+    return;
+  }
+
+  /* 大師球二次確認 */
+  if (t === 'master' && !confirmMasterPending) {
+    confirmMasterPending = true;
+    const ok = await showConfirm({
+      icon: '🟣',
+      title: '使用大師球？',
+      message: `大師球必定捕獲，目前剩餘 ${ballInventory.master} 顆。\n確定要使用嗎？`,
+      okText: '使用',
+      cancelText: '取消',
+    });
+    confirmMasterPending = false;
+    if (!ok) return;
+  }
+
+  currentBall = t;
+  if (ballFly) ballFly.className = 'pokeball ball-' + currentBall;
+  updateHUD();
+  renderCatchBallSelector();
+  SFX.init();
+  SFX.bubble();
+  toast(`已切換為 ${BALL_TYPES[t].name}`);
+}
+function updateCatchItemUI() {
+  const pEl = document.getElementById('itemCountPineapple');
+  const gEl = document.getElementById('itemCountGrape');
+  if (pEl) pEl.textContent = itemInventory.pineapple || 0;
+  if (gEl) gEl.textContent = itemInventory.grape || 0;
+
+  const canUse = (catchState === 'aim') && !ballFlying;
+
+  document.querySelectorAll('.catch-item-btn').forEach(btn => {
+    const t = btn.dataset.item;
+    const n = itemInventory[t] || 0;
+    const active = (t === 'pineapple' && catchEffect.extraCandy > 0) ||
+                   (t === 'grape' && catchEffect.fleeReduction);
+    btn.classList.toggle('active', active);
+    btn.disabled = n === 0 || active || !canUse;
+  });
+  renderCatchBallSelector();
+}
+
+function showEffectBadge(text) {
+  if (!catchEffectsEl) return;
+  const b = document.createElement('div');
+  b.className = 'catch-effect-badge';
+  b.textContent = text;
+  catchEffectsEl.appendChild(b);
+}
+
+function clearEffectBadges() {
+  if (catchEffectsEl) catchEffectsEl.innerHTML = '';
+}
+
+function resetCatchEffect() {
+  catchEffect = { extraCandy: 0, fleeReduction: false };
+  clearEffectBadges();
+  updateCatchItemUI();
+}
+
+function useCatchItem(type) {
+  if (catchState !== 'aim') return;
+  if (!catchEffect) catchEffect = { extraCandy: 0, fleeReduction: false };
+  if ((itemInventory[type] || 0) <= 0) {
+    toast(`沒有${ITEMS[type].name}`);
+    return;
+  }
+
+  itemInventory[type]--;
+  if (type === 'pineapple') {
+    catchEffect.extraCandy = 1;
+    showEffectBadge('🍍 捕獲糖果+1');
+  } else if (type === 'grape') {
+    catchEffect.fleeReduction = true;
+    showEffectBadge('🍇 降低逃跑機率');
+  }
+
+  SFX.init();
+  SFX.itemUse();
+  updateHUD();
+  autoSave();
+  toast(`已使用${ITEMS[type].name}，變回手拿精靈球`);
+}
+
+document.querySelectorAll('.catch-item-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const t = btn.dataset.item;
+    useCatchItem(t);
+  });
+});
 
 function openCatch(p, marker, shiny) {
   if (catchState !== 'idle') return;
   catchState = 'aim';
   currentSpawn = { p, marker, shiny };
+  catchEffect = { extraCandy: 0, fleeReduction: false };
+  clearEffectBadges();
+
+  ensureUsableBall();
+  ballFly.className = 'pokeball ball-' + currentBall;
+  const totalAll = getTotalBalls();
+  if (totalAll === 0) ballFly.style.display = 'none';
+  else ballFly.style.display = 'block';
 
   catchScreen.classList.toggle('day', env.time === 'day');
   catchScreen.classList.toggle('night', env.time === 'night');
@@ -3325,8 +3383,8 @@ function openCatch(p, marker, shiny) {
   lastThrow = null;
 
   updateHUD();
+  renderCatchBallSelector();
   catchScreen.classList.remove('hidden');
-
   syncCatchWeather();
 
   requestAnimationFrame(() => {
@@ -3342,8 +3400,11 @@ function openCatch(p, marker, shiny) {
 function closeCatch() {
   catchScreen.classList.add('hidden');
   catchState = 'idle';
+  renderCatchBallSelector();
   currentSpawn = null;
   ballFlying = false;
+  catchEffect = { extraCandy: 0, fleeReduction: false };
+  clearEffectBadges();
   resetSwipe();
   hideAimArc();
 
@@ -3379,8 +3440,13 @@ catchStage.addEventListener('pointerup', onPointerUp);
 catchStage.addEventListener('pointercancel', onPointerUp);
 
 function onPointerDown(e) {
+  if (e.target.closest('.catch-item-btn')) return;
   if (catchState !== 'aim' || ballFlying) return;
-  if (balls <= 0) { showResult('沒有精靈球了！去補給站橫掃補給', '#ff8a8a'); return; }
+
+  if (!ensureUsableBall()) {
+    showResult('沒有精靈球了！去補給站補給或離開', '#ff8a8a');
+    return;
+  }
 
   const rect = catchStage.getBoundingClientRect();
   swipe.active = true;
@@ -3404,10 +3470,8 @@ function onPointerMove(e) {
   const rect = catchStage.getBoundingClientRect();
   swipe.curX = e.clientX - rect.left;
   swipe.curY = e.clientY - rect.top;
-
   drawTrail();
   updatePowerBar();
-
   const dx = swipe.curX - swipe.startX;
   const dy = swipe.curY - swipe.startY;
   setBallTransform(ballHome.x + dx * 0.12, ballHome.y + dy * 0.12, dx * 0.25);
@@ -3429,26 +3493,20 @@ function drawTrail() {
   const len = Math.hypot(dx, dy);
   const ang = Math.atan2(dy, dx) * 180 / Math.PI;
   const absAng = Math.abs(ang + 90);
-
-  // 斜向拖曳（22°～62°）時改用弧線瞄準
   const isCurve = dy < -12 && absAng > 22 && absAng < 62;
-
   if (isCurve) {
     trail.style.display = 'none';
     drawAimArc(Math.sign(dx) || 1);
     return;
   }
-
   hideAimArc();
   if (len < 1) { trail.style.display = 'none'; return; }
-
   trail.style.display = 'block';
   trail.style.left  = swipe.startX + 'px';
   trail.style.top   = (swipe.startY - 2) + 'px';
   trail.style.width = len + 'px';
   trail.style.transform = `rotate(${ang}deg)`;
-  trail.style.background =
-    'linear-gradient(90deg,rgba(255,255,255,.2),rgba(255,255,255,.9))';
+  trail.style.background = 'linear-gradient(90deg,rgba(255,255,255,.2),rgba(255,255,255,.9))';
 }
 
 function updatePowerBar() {
@@ -3462,42 +3520,35 @@ function updatePowerBar() {
 
 function evaluateSwipe() {
   if (catchState !== 'aim') return;
-
   const dx = swipe.curX - swipe.startX;
   const dy = swipe.curY - swipe.startY;
   const len = Math.hypot(dx, dy);
-
   const goHome = (msg) => {
     if (msg) showResult(msg, '#ffd166');
     ballFly.style.transition = 'transform .28s cubic-bezier(.3,.8,.4,1)';
     setBallTransform(ballHome.x, ballHome.y, 0);
     ballFlying = false;
   };
-
   if (len < 24) { goHome(); return; }
   if (dy >= -24) { goHome('請向上滑動投球 ↑'); return; }
-
   const angle = Math.atan2(Math.abs(dx), -dy) * 180 / Math.PI;
   if (angle > 62) { goHome('角度太斜了，請朝上方滑動'); return; }
-
   const ballType = angle <= 22 ? 'straight' : 'curve';
   const h = catchStage.clientHeight || 1;
   const power = len / h;
-
   let quality;
   if (power < 0.18)       quality = 'low';
   else if (power < 0.32)  quality = 'weak';
   else if (power <= 0.55) quality = 'perfect';
   else if (power <= 0.78) quality = 'strong';
   else                    quality = 'high';
-
   performThrow(ballType, quality, angle, power);
 }
 
 function performThrow(ballType, quality, angle, power) {
   catchState = 'flying';
   ballFlying = true;
-  balls--;
+  ballInventory[currentBall] = Math.max(0, (ballInventory[currentBall] || 0) - 1);
   updateHUD();
   swipeHint.style.display = 'none';
 
@@ -3539,7 +3590,6 @@ function performThrow(ballType, quality, angle, power) {
 
   const spinDir = dirSign;
   const duration = 520;
-
   lastThrow = { ballType, quality, angle, power, targetX, targetY, spinDir };
 
   flyBall(targetX, targetY, spinDir, curveOffset, duration, () => {
@@ -3564,6 +3614,7 @@ function performThrow(ballType, quality, angle, power) {
           catchState = 'aim';
           swipeHint.style.display = '';
           resetBallPosition(true);
+          updateCatchItemUI();
         }
       }, 340);
       return;
@@ -3581,11 +3632,9 @@ function performThrow(ballType, quality, angle, power) {
 function flyBall(targetX, targetY, spinDir, curveOffset, duration, onDone) {
   const startX = ballHome.x;
   const startY = ballHome.y;
-
   const midX = (startX + targetX) / 2;
   const midY = (startY + targetY) / 2;
   let cpX = midX, cpY = midY;
-
   if (curveOffset !== 0) {
     const dx = targetX - startX;
     const dy = targetY - startY;
@@ -3595,21 +3644,16 @@ function flyBall(targetX, targetY, spinDir, curveOffset, duration, onDone) {
     cpX = midX + perpX * curveOffset;
     cpY = midY + perpY * curveOffset;
   }
-
   ballFly.style.transition = 'none';
   const startTime = performance.now();
-
   function step(now) {
     const t = Math.min(1, (now - startTime) / duration);
     const ease = t * t * (3 - 2 * t);
     const om = 1 - ease;
-
     const x = om*om*startX + 2*om*ease*cpX + ease*ease*targetX;
     const y = om*om*startY + 2*om*ease*cpY + ease*ease*targetY;
     const rot = ease * 720 * spinDir;
-
     setBallTransform(x, y, rot);
-
     if (t < 1) requestAnimationFrame(step);
     else onDone();
   }
@@ -3621,24 +3665,18 @@ function wobbleBall(baseX, baseY, baseRot, onDone) {
   const WOBBLE_DUR = 480;
   const PAUSE_DUR  = 340;
   let count = 0;
-
   function doWobble() {
     if (count >= TOTAL) { onDone(); return; }
     SFX.wobble(count);
-
     const startTime = performance.now();
     const dir = (count % 2 === 0) ? 1 : -1;
-
     function step(now) {
       const t = Math.min(1, (now - startTime) / WOBBLE_DUR);
       const phase = t * Math.PI * 2;
       const damp = 1 - t * 0.4;
-
       const wobbleX = Math.sin(phase) * 12 * damp * dir;
       const tilt    = Math.sin(phase) * 18 * damp * dir;
-
       setBallTransform(baseX + wobbleX, baseY, baseRot + tilt);
-
       if (t < 1) requestAnimationFrame(step);
       else {
         setBallTransform(baseX, baseY, baseRot);
@@ -3655,16 +3693,9 @@ function wobbleBall(baseX, baseY, baseRot, onDone) {
 function showCatchStars() {
   const stageRect = catchStage.getBoundingClientRect();
   const ballRect  = ballFly.getBoundingClientRect();
-
   const baseX = ballRect.right - stageRect.left - 4;
   const baseY = ballRect.top  - stageRect.top  + 4;
-
-  const offsets = [
-    { dx: 26, dy: -30 },
-    { dx: 54, dy: -54 },
-    { dx: 82, dy: -38 },
-  ];
-
+  const offsets = [ { dx: 26, dy: -30 }, { dx: 54, dy: -54 }, { dx: 82, dy: -38 } ];
   offsets.forEach((o, i) => {
     const star = document.createElement('div');
     star.className = 'catch-star';
@@ -3685,12 +3716,22 @@ function resolveCatch() {
   const info = lastThrow || { ballType:'straight', quality:'perfect', spinDir:1,
                               targetX: ballHome.x, targetY: ballHome.y };
 
+  /* 讀取效果（不立即清除，等成功或逃走才消耗） */
+  const extraCandy = catchEffect.extraCandy || 0;
+  const fleeReduction = catchEffect.fleeReduction || false;
+
   let mult = 1;
   if (info.quality === 'perfect') mult *= 1.25;
   else if (info.quality === 'weak' || info.quality === 'strong') mult *= 0.78;
   if (info.ballType === 'curve') mult *= CURVE_SUCCESS_MULT;
 
-  const chance = Math.min(0.95, p.rate * mult);
+  let chance;
+  if (currentBall === 'master') {
+    chance = 1;
+  } else {
+    const ballMult = (BALL_TYPES[currentBall] && BALL_TYPES[currentBall].catchMult) || 1;
+    chance = Math.min(0.95, p.rate * mult * ballMult);
+  }
   const success = Math.random() < chance;
 
   if (success) {
@@ -3700,7 +3741,13 @@ function resolveCatch() {
     dexState[p.name].caught++;
     if (shiny) dexState[p.name].shiny++;
 
-    addCandy(p.name, 1);
+    const candyGain = 1 + extraCandy;
+    addCandy(p.name, candyGain);
+
+    /* 捕獲成功 → 消耗效果 */
+    catchEffect = { extraCandy: 0, fleeReduction: false };
+    clearEffectBadges();
+
     updateHUD();
     autoSave();
 
@@ -3708,16 +3755,18 @@ function resolveCatch() {
     audio.stopCatch();
     showCatchStars();
 
-    const candyMsg = `　🍬 +1 ${p.name} 糖果`;
+    const candyMsg = `　🍬 +${candyGain} ${p.name} 糖果`;
+    const usedName = BALL_TYPES[currentBall].name;
+    const itemMsg = extraCandy > 0 ? ' 🍍' : '';
 
     if (firstTime) {
       showResult(shiny
-        ? `✨ 首次捕獲異色 ${p.name}！${candyMsg}`
-        : `Gotcha！首次捕獲 ${p.name}！${candyMsg}`, '#ffd166');
+        ? `✨ 首次捕獲異色 ${p.name}！（${usedName}）${itemMsg}${candyMsg}`
+        : `Gotcha！首次捕獲 ${p.name}！（${usedName}）${itemMsg}${candyMsg}`, '#ffd166');
     } else {
       showResult(shiny
-        ? `✨ 異色 ${p.name}！${candyMsg}`
-        : `Gotcha！${p.name}！${candyMsg}`, '#7CFC9A');
+        ? `✨ 異色 ${p.name}！（${usedName}）${itemMsg}${candyMsg}`
+        : `Gotcha！${p.name}！（${usedName}）${itemMsg}${candyMsg}`, '#7CFC9A');
     }
 
     if (shiny) toast(`✨ 太幸運了！異色 ${p.name} 入手！`, 2800);
@@ -3734,13 +3783,18 @@ function resolveCatch() {
   } else {
     catchState = 'fail';
     wildMon.classList.remove('absorbed');
-
     SFX.catchFail();
 
     ballFly.style.transition = 'transform .3s ease-in, opacity .3s';
     ballFly.style.opacity = '0';
 
-    if (Math.random() < 0.35) {
+    const fleeChance = fleeReduction ? 0.10 : 0.35;
+
+    if (Math.random() < fleeChance) {
+      /* 精靈逃走 → 消耗效果 */
+      catchEffect = { extraCandy: 0, fleeReduction: false };
+      clearEffectBadges();
+
       showResult(`可惜！${p.name} 逃走了…`, '#ff8a8a');
       wildMon.classList.add('fleeing');
       SFX.flee();
@@ -3751,7 +3805,10 @@ function resolveCatch() {
         closeCatch();
       }, 900);
     } else {
-      showResult('差一點！再試一次', '#ffd166');
+      /* 精靈沒逃走 → 保留效果讓玩家再試 */
+      showResult(fleeReduction
+        ? '差一點！（🍇 提子生效，精靈沒逃走）'
+        : '差一點！再試一次', '#ffd166');
       ballFly.style.transition = 'transform .32s ease-in, opacity .32s';
       setBallTransform(info.targetX, info.targetY + 240, info.spinDir * 1080);
       ballFly.style.opacity = '0';
@@ -3761,6 +3818,7 @@ function resolveCatch() {
           catchState = 'aim';
           swipeHint.style.display = '';
           resetBallPosition(true);
+          updateCatchItemUI();
         }
       }, 360);
     }
@@ -3783,14 +3841,11 @@ const stopReward = document.getElementById('stopReward');
 
 const stopSwipe = { active:false, id:null, x0:0, y0:0, x:0, y:0 };
 
-function coinTransform(deg) {
-  return `rotateX(10deg) rotateY(${deg}deg)`;
-}
+function coinTransform(deg) { return `rotateX(10deg) rotateY(${deg}deg)`; }
 
 function openStop(marker) {
   if (catchState !== 'idle') return;
   if (marker._used) { toast('這個補給站已經補給過了，等刷新吧'); return; }
-
   currentStopMarker = marker;
   stopReward.innerHTML = '';
   stopHint.textContent = '← 在硬幣上橫掃 →';
@@ -3834,12 +3889,47 @@ function spinStop() {
   stopDisc.style.transform = coinTransform(discRot);
 
   setTimeout(() => {
-    const gain = 1 + Math.floor(Math.random() * 3);
-    balls += gain;
+    const gained = { poke: 0, great: 0, ultra: 0, master: 0 };
+    const itemsGained = { pineapple: 0, grape: 0, incense: 0 };
+
+    const base = 1 + Math.floor(Math.random() * 3);
+    gained.poke = base;
+
+    const r = Math.random();
+    if (r < 0.003)        gained.master = 1;
+    else if (r < 0.033)   gained.ultra  = 1;
+    else if (r < 0.133)   gained.great  = 1;
+
+    const ir = Math.random();
+    if (ir < 0.05)        itemsGained.incense = 1;
+    else if (ir < 0.17)   itemsGained.grape = 1;
+    else if (ir < 0.32)   itemsGained.pineapple = 1;
+
+    ['poke','great','ultra','master'].forEach(t => {
+      ballInventory[t] = (ballInventory[t] || 0) + gained[t];
+    });
+    ['pineapple','grape','incense'].forEach(t => {
+      itemInventory[t] = (itemInventory[t] || 0) + itemsGained[t];
+    });
     updateHUD();
     autoSave();
 
-    stopReward.innerHTML = `<span class="ball-mini"></span><span>×${gain}</span>`;
+    let html = '';
+    ['master','ultra','great','poke'].forEach(t => {
+      if (gained[t] > 0) {
+        html += `<span style="display:inline-flex;align-items:center;gap:5px;margin:0 4px">
+                   <span class="ball-mini ball-${t}"></span>×${gained[t]}
+                 </span>`;
+      }
+    });
+    ['incense','grape','pineapple'].forEach(t => {
+      if (itemsGained[t] > 0) {
+        html += `<span style="display:inline-flex;align-items:center;gap:5px;margin:0 4px">
+                   <span style="font-size:22px">${ITEMS[t].icon}</span>×${itemsGained[t]}
+                 </span>`;
+      }
+    });
+    stopReward.innerHTML = html;
     stopReward.style.animation = 'none';
     void stopReward.offsetWidth;
     stopReward.style.animation = 'rewardIn .55s cubic-bezier(.3,1.4,.5,1) both';
@@ -3851,7 +3941,17 @@ function spinStop() {
     currentStopMarker = null;
 
     SFX.reward();
-    showBallBubble(gain);
+
+    const totalBalls = gained.poke + gained.great + gained.ultra + gained.master;
+    if (totalBalls > 0) showBallBubble(totalBalls);
+
+    if (gained.master > 0)      toast('✨✨ 獲得了大師球！', 3200);
+    else if (gained.ultra > 0)  toast('✨ 獲得了超級球！', 2800);
+    else if (gained.great > 0)  toast('✨ 獲得了高級球！', 2600);
+
+    if (itemsGained.incense > 0)      toast('🌀 獲得了香薰！', 2600);
+    else if (itemsGained.grape > 0)   toast('🍇 獲得了提子！', 2400);
+    else if (itemsGained.pineapple > 0) toast('🍍 獲得了菠蘿！', 2400);
   }, 1700);
 }
 
@@ -3859,14 +3959,12 @@ stopStage.addEventListener('pointerdown', e => {
   if (spinning) return;
   const marker = currentStopMarker;
   if (!marker || marker._used) return;
-
   stopSwipe.active = true;
   stopSwipe.id = e.pointerId;
   stopSwipe.x0 = e.clientX;
   stopSwipe.y0 = e.clientY;
   stopSwipe.x = e.clientX;
   stopSwipe.y = e.clientY;
-
   try { stopStage.setPointerCapture(e.pointerId); } catch(_) {}
   stopDisc.style.transition = 'none';
   e.preventDefault();
@@ -3885,10 +3983,8 @@ function endStopSwipe(e) {
   if (!stopSwipe.active || e.pointerId !== stopSwipe.id) return;
   stopSwipe.active = false;
   stopDisc.style.transition = '';
-
   const dx = stopSwipe.x - stopSwipe.x0;
   const dy = stopSwipe.y - stopSwipe.y0;
-
   if (!spinning && Math.abs(dx) >= SWIPE_THRESHOLD && Math.abs(dx) > Math.abs(dy)) {
     spinStop();
   } else {
@@ -3919,7 +4015,124 @@ document.getElementById('stopCloseBtn').addEventListener('click', () => {
 });
 
 /* =========================================================
-   13. 圖鑑（長按顯示異色）
+   13. 背包
+   ========================================================= */
+const bagScreen = document.getElementById('bagScreen');
+
+function renderBag() {
+  const ballGrid = document.getElementById('bagGrid');
+  const order = ['poke', 'great', 'ultra', 'master'];
+  ballGrid.innerHTML = order.map(t => {
+    const d = BALL_TYPES[t];
+    const n = ballInventory[t] || 0;
+    const sel = (t === currentBall);
+    return `
+      <div class="bag-item ${sel ? 'selected' : ''} ${n === 0 ? 'empty' : ''}" data-ball="${t}">
+        <div class="bag-ball-icon ball-${t}"></div>
+        <div class="bag-ball-name">${d.name}</div>
+        <div class="bag-ball-desc">${d.desc}</div>
+        <div class="bag-ball-count">${n}</div>
+        ${sel ? '<div class="bag-ball-tag">✓ 使用中</div>' : ''}
+      </div>`;
+  }).join('');
+
+  ballGrid.querySelectorAll('.bag-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const t = el.dataset.ball;
+      if ((ballInventory[t] || 0) <= 0) { toast('這個精靈球已用完'); return; }
+      currentBall = t;
+      if (ballFly) ballFly.className = 'pokeball ball-' + currentBall;
+      updateHUD();
+      renderBag();
+      SFX.init();
+      SFX.bubble();
+      toast(`已切換為 ${BALL_TYPES[t].name}`);
+    });
+  });
+
+  const itemGrid = document.getElementById('bagItemGrid');
+  const itemOrder = ['pineapple', 'grape', 'incense'];
+  itemGrid.innerHTML = itemOrder.map(t => {
+    const d = ITEMS[t];
+    const n = itemInventory[t] || 0;
+    const isIncense = (t === 'incense');
+    const incenseActive = isIncense && isIncenseActive();
+
+    let useBtn = '';
+    if (isIncense) {
+      useBtn = n > 0
+        ? `<button class="bag-item-use ${incenseActive ? 'active-incense' : ''}" data-item="incense" ${incenseActive ? 'disabled' : ''}>${incenseActive ? '🌀 使用中' : '使用'}</button>`
+        : '';
+    }
+
+    return `
+      <div class="bag-item ${n === 0 ? 'empty' : ''}" data-item="${t}">
+        <div class="bag-item-emoji">${d.icon}</div>
+        <div class="bag-ball-name">${d.name}</div>
+        <div class="bag-ball-desc">${d.desc}</div>
+        <div class="bag-ball-count">${n}</div>
+        ${useBtn}
+      </div>`;
+  }).join('');
+
+  itemGrid.querySelectorAll('.bag-item-use').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      useIncense();
+    });
+  });
+}
+
+function useIncense() {
+  if (itemInventory.incense <= 0) { toast('沒有香薰'); return; }
+  if (isIncenseActive()) { toast('香薰已在作用中'); return; }
+
+  itemInventory.incense--;
+  incenseEndAt = Date.now() + INCENSE_MS;
+  nextRefreshAt = Date.now() + REFRESH_MS;
+
+  const center = playerLatLng || spawnCenter || DEFAULT_CENTER;
+  spawnCenter = center;
+  spawnPokemon(center);
+  spawnStops(center);
+  maybeSpawnNPC(center);
+
+  updateHUD();
+  renderBag();
+  autoSave();
+
+  startConfetti();
+  SFX.init();
+  SFX.incenseStart();
+  toast('🌀 香薰已使用，精靈數量翻倍！持續 15 分鐘', 3200);
+}
+
+function endIncense() {
+  incenseEndAt = 0;
+  nextRefreshAt = Date.now() + REFRESH_MS;
+
+  const center = playerLatLng || spawnCenter || DEFAULT_CENTER;
+  spawnCenter = center;
+  spawnPokemon(center);
+
+  updateHUD();
+  if (!bagScreen.classList.contains('hidden')) renderBag();
+  autoSave();
+
+  stopConfetti();
+  toast('🌀 香薰效果結束，精靈數量回復正常', 2600);
+}
+
+document.getElementById('bagBtn').addEventListener('click', () => {
+  renderBag();
+  bagScreen.classList.remove('hidden');
+});
+document.getElementById('bagCloseBtn').addEventListener('click', () => {
+  bagScreen.classList.add('hidden');
+});
+
+/* =========================================================
+   14. 圖鑑
    ========================================================= */
 const dexScreen = document.getElementById('dexScreen');
 const evoScreen = document.getElementById('evoScreen');
@@ -3959,8 +4172,7 @@ function renderDex() {
   });
 
   grid.innerHTML = html;
-  document.getElementById('dexProgress').textContent =
-    `已捕獲 ${caughtTotal} / ${POKEDEX.length}`;
+  document.getElementById('dexProgress').textContent = `已捕獲 ${caughtTotal} / ${POKEDEX.length}`;
 
   grid.querySelectorAll('.dex-icon').forEach(box => {
     if (box.dataset.seen !== '1') return;
@@ -3993,15 +4205,8 @@ function renderDex() {
     if (hasShiny) {
       box.classList.add('has-shiny');
       let pressing = false;
-      const showShiny = () => {
-        if (pressing) return;
-        pressing = true;
-        img.src = shinySrc;
-      };
-      const showNormal = () => {
-        pressing = false;
-        img.src = normalSrc;
-      };
+      const showShiny = () => { if (pressing) return; pressing = true; img.src = shinySrc; };
+      const showNormal = () => { pressing = false; img.src = normalSrc; };
       box.addEventListener('pointerdown', showShiny);
       box.addEventListener('pointerup', showNormal);
       box.addEventListener('pointercancel', showNormal);
@@ -4020,12 +4225,11 @@ document.getElementById('dexCloseBtn').addEventListener('click', () => {
 });
 
 /* =========================================================
-   14. 進化
+   15. 進化
    ========================================================= */
 function renderEvoList() {
   const list = document.getElementById('evoList');
   const prog = document.getElementById('evoProgress');
-
   const sources = Object.keys(EVOLUTIONS).filter(n => dexState[n] && dexState[n].caught > 0);
 
   if (sources.length === 0) {
@@ -4044,16 +4248,13 @@ function renderEvoList() {
     const evos = EVOLUTIONS[srcName];
     const src = POKEDEX.find(p => p.name === srcName);
     if (!src) return;
-
     const candy = getCandy(srcName);
 
     evos.forEach(evo => {
       const tgt = POKEDEX.find(p => p.name === evo.to);
       if (!tgt) return;
-
       const enough = candy >= evo.candy;
       if (enough) readyCount++;
-
       const targetKnown = dexState[tgt.name] && (dexState[tgt.name].caught > 0 || dexState[tgt.name].seen > 0);
 
       html += `
@@ -4102,24 +4303,19 @@ function tryEvolve(srcName, toName) {
 
   const ov = document.getElementById('evoOverlay');
   const animImg = document.getElementById('evoAnimImg');
-
   const fromSrc = spriteUrl(src, false);
   const toSrc   = spriteUrl(tgt, false);
 
-  // 先顯示未進化的精靈
   animImg.src = fromSrc;
   animImg.style.display = '';
   animImg.onerror = () => { animImg.style.display = 'none'; };
   ov.style.display = 'flex';
 
   audio.init();
-  audio.playTrade();   // 🎵 進化畫面播放 Trade of the Day
+  audio.playTrade();
   SFX.evolve();
 
-  // 閃光最亮時切換為進化後的精靈
-  const swapTimer = setTimeout(() => {
-    animImg.src = toSrc;
-  }, 1100);
+  const swapTimer = setTimeout(() => { animImg.src = toSrc; }, 1100);
 
   setTimeout(() => {
     clearTimeout(swapTimer);
@@ -4127,19 +4323,15 @@ function tryEvolve(srcName, toName) {
     animImg.style.display = '';
 
     candyBag[srcName] -= evo.candy;
-
     dexState[tgt.name].seen = 1;
     dexState[tgt.name].caught++;
-
     caughtCount++;
     updateHUD();
     autoSave();
 
     toast(`🧬 ${srcName} 進化成 ${tgt.name}！`, 2600);
-
     renderEvoList();
-
-    if (gameStarted) audio.playMap(env.time); // 恢復地圖音樂
+    if (gameStarted) audio.playMap(env.time);
   }, 2700);
 }
 
@@ -4152,7 +4344,7 @@ document.getElementById('evoCloseBtn').addEventListener('click', () => {
 });
 
 /* =========================================================
-   15. 全螢幕
+   16. 全螢幕
    ========================================================= */
 const fsBtn = document.getElementById('fsBtn');
 
@@ -4181,15 +4373,10 @@ function toggleFullscreen() {
         if (p && p.catch) p.catch(()=>{});
       }
     }
-  } catch (e) {
-    toast('此裝置不支援全螢幕');
-  }
+  } catch (e) { toast('此裝置不支援全螢幕'); }
 }
 
-fsBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  toggleFullscreen();
-});
+fsBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleFullscreen(); });
 
 function syncFsBtn() {
   fsBtn.classList.toggle('on', isFullscreen());
@@ -4200,15 +4387,36 @@ function syncFsBtn() {
   .forEach(ev => document.addEventListener(ev, syncFsBtn));
 
 /* =========================================================
-   16. 計時器
+   17. 計時器
    ========================================================= */
 function startTimers() {
   setInterval(() => {
-    const left = Math.max(0, Math.ceil((nextRefreshAt - Date.now()) / 1000));
+    const now = Date.now();
+
+    if (incenseEndAt > 0) {
+      if (now >= incenseEndAt) {
+        endIncense();
+        return;
+      }
+      const left = Math.ceil((incenseEndAt - now) / 1000);
+      const m = Math.floor(left / 60);
+      const s = left % 60;
+      const chip = document.getElementById('timerChip');
+      chip.textContent = `🌀 ${m}:${String(s).padStart(2, '0')}`;
+      chip.style.color = '#7CFC9A';
+
+      if (now >= nextRefreshAt) {
+        refreshSpawns();
+      }
+      return;
+    }
+
+    const chip = document.getElementById('timerChip');
+    chip.style.color = '';
+    const left = Math.max(0, Math.ceil((nextRefreshAt - now) / 1000));
     const m = Math.floor(left / 60);
     const s = left % 60;
-    document.getElementById('timerChip').textContent =
-      `⏱ ${m}:${String(s).padStart(2, '0')}`;
+    chip.textContent = `⏱ ${m}:${String(s).padStart(2, '0')}`;
 
     if (left <= 0) {
       refreshSpawns();
@@ -4238,11 +4446,12 @@ function refreshSpawns() {
 
   const w = WEATHERS.find(x => x.id === env.weather) || WEATHERS[0];
   const t = env.time === 'day' ? '☀️ 白天' : '🌙 夜晚';
-  toast(`${t} · ${w.icon}${w.name}　地圖已刷新！`);
+  const incTag = isIncenseActive() ? ' 🌀×2' : '';
+  toast(`${t} · ${w.icon}${w.name}　地圖已刷新！${incTag}`);
 }
 
 /* =========================================================
-   17. 啟動
+   18. 啟動
    ========================================================= */
 function spawnWorld(center) {
   spawnCenter = center;
@@ -4272,6 +4481,7 @@ async function startGame() {
   const restored = loadAutoSave();
   if (restored) {
     toast('📂 已恢復上次遊戲進度', 2600);
+    if (isIncenseActive()) startConfetti();
   } else {
     autoSave();
   }
@@ -4324,7 +4534,6 @@ async function startGame() {
 
 async function boot() {
   env.time = getTimeOfDay();
-
   document.getElementById('copyrightYear').textContent = new Date().getFullYear();
 
   const splash = document.getElementById('splash');
@@ -4376,10 +4585,8 @@ function startGPS() {
 
 function onPos(pos) {
   if (manualMode) return;
-
   const ll = [pos.coords.latitude, pos.coords.longitude];
   const isFirst = firstFix;
-
   placePlayer(ll, isFirst);
   document.body.classList.add('gps-live');
 
@@ -4390,12 +4597,8 @@ function onPos(pos) {
     }
     toast('📍 已定位到你的位置');
   } else {
-    /* GPS 模式下，角色永遠保持畫面中央 */
     map.panTo(ll, {
-      animate: true,
-      duration: 0.3,
-      easeLinearity: 0.25,
-      noMoveStart: true,
+      animate: true, duration: 0.3, easeLinearity: 0.25, noMoveStart: true,
     });
   }
 }
@@ -4424,17 +4627,14 @@ function startDpadLoop() {
   if (dpadRaf) return;
   let last = performance.now();
   const SPEED = 28;
-
   function tick(now) {
     const dt = Math.min(0.1, (now - last) / 1000);
     last = now;
-
     let dx = 0, dy = 0;
     if (dpad.up)    dy -= 1;
     if (dpad.down)  dy += 1;
     if (dpad.left)  dx -= 1;
     if (dpad.right) dx += 1;
-
     if ((dx || dy) && playerLatLng) {
       const bearing = Math.atan2(dx, -dy) * 180 / Math.PI;
       const move = SPEED * dt;
@@ -4470,12 +4670,10 @@ document.querySelectorAll('.dpad-btn').forEach(btn => {
 });
 
 document.getElementById('saveBtn').addEventListener('click', (e) => {
-  e.stopPropagation();
-  downloadSave();
+  e.stopPropagation(); downloadSave();
 });
 document.getElementById('loadBtn').addEventListener('click', (e) => {
-  e.stopPropagation();
-  document.getElementById('loadFileInput').click();
+  e.stopPropagation(); document.getElementById('loadFileInput').click();
 });
 document.getElementById('loadFileInput').addEventListener('change', (e) => {
   const file = e.target.files && e.target.files[0];
@@ -4483,8 +4681,7 @@ document.getElementById('loadFileInput').addEventListener('change', (e) => {
   e.target.value = '';
 });
 document.getElementById('resetBtn').addEventListener('click', (e) => {
-  e.stopPropagation();
-  resetGame();
+  e.stopPropagation(); resetGame();
 });
 
 document.addEventListener('visibilitychange', () => {
