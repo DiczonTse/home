@@ -1594,9 +1594,61 @@ async function loadAllData() {
   console.log(`✅ 全圖鑑載入完成：${POKEDEX.length} 個條目`);
 }
 
+const FORM_NAME_ZH = {
+  // ── 超極巨化（G-Max）──
+  'venusaur-gmax':              '妙蛙花（超極巨化的樣子）',
+  'charizard-gmax':             '噴火龍（超極巨化的樣子）',
+  'blastoise-gmax':             '水箭龜（超極巨化的樣子）',
+  'butterfree-gmax':            '巴大蝶（超極巨化的樣子）',
+  'pikachu-gmax':               '皮卡丘（超極巨化的樣子）',
+  'meowth-gmax':                '喵喵（超極巨化的樣子）',
+  'machamp-gmax':               '怪力（超極巨化的樣子）',
+  'gengar-gmax':                '耿鬼（超極巨化的樣子）',
+  'kingler-gmax':               '巨鉗蟹（超極巨化的樣子）',
+  'lapras-gmax':                '拉普拉斯（超極巨化的樣子）',
+  'eevee-gmax':                 '伊布（超極巨化的樣子）',
+  'snorlax-gmax':               '卡比獸（超極巨化的樣子）',
+  'garbodor-gmax':              '灰塵山（超極巨化的樣子）',
+  'melmetal-gmax':              '美錄梅塔（超極巨化的樣子）',
+  'corviknight-gmax':           '鋼鎧鴉（超極巨化的樣子）',
+  'orbeetle-gmax':              '以歐路普（超極巨化的樣子）',
+  'drednaw-gmax':               '暴噬龜（超極巨化的樣子）',
+  'coalossal-gmax':             '巨炭山（超極巨化的樣子）',
+  'flapple-gmax':               '蘋裹龍（超極巨化的樣子）',
+  'appletun-gmax':              '豐蜜龍（超極巨化的樣子）',
+  'sandaconda-gmax':            '沙螺蟒（超極巨化的樣子）',
+  'toxtricity-amped-gmax':      '顫弦蠑螈（超極巨化的樣子・高調的樣子）',
+  'toxtricity-low-key-gmax':    '顫弦蠑螈（超極巨化的樣子・低調的樣子）',
+  'centiskorch-gmax':           '焚焰蚣（超極巨化的樣子）',
+  'hatterene-gmax':             '布莉姆溫（超極巨化的樣子）',
+  'grimmsnarl-gmax':            '長毛巨魔（超極巨化的樣子）',
+  'alcremie-gmax':              '霜奶仙（超極巨化的樣子）',
+  'copperajah-gmax':            '大王銅象（超極巨化的樣子）',
+  'duraludon-gmax':             '鋁鋼龍（超極巨化的樣子）',
+  'rillaboom-gmax':             '轟擂金剛猩（超極巨化的樣子）',
+  'cinderace-gmax':             '閃焰王牌（超極巨化的樣子）',
+  'inteleon-gmax':              '千面避役（超極巨化的樣子）',
+  'urshifu-single-strike-gmax': '武道熊師（超極巨化的樣子・一擊流）',
+  'urshifu-rapid-strike-gmax':  '武道熊師（超極巨化的樣子・連擊流）',
+  'pikachu-cosplay':            '換裝皮卡丘',
+  'pikachu-rock-star':          '重搖滾皮卡丘',
+  'pikachu-belle':              '貴婦皮卡丘',
+  'pikachu-pop-star':           '偶像皮卡丘',
+  'pikachu-phd':                '博士皮卡丘',
+  'pikachu-libre':              '蒙面皮卡丘',
+  'pikachu-original-cap':       '初始帽子皮卡丘',
+  'pikachu-hoenn-cap':          '豐緣帽子皮卡丘',
+  'pikachu-sinnoh-cap':         '神奧帽子皮卡丘',
+  'pikachu-unova-cap':          '合眾帽子皮卡丘',
+  'pikachu-kalos-cap':          '卡洛斯帽子皮卡丘',
+  'pikachu-alola-cap':          '阿羅拉帽子皮卡丘',
+  'pikachu-partner-cap':        '搭檔帽子皮卡丘',
+  'pikachu-world-cap':          '世界帽子皮卡丘',
+};
+
 async function loadExtraForms(pokedex) {
   const FORM_START = 10001;
-  const FORM_END   = 10300; // 可視需要加大，PokeAPI 目前到 102xx
+  const FORM_END   = 10300;
 
   updateProgress(0, FORM_END - FORM_START, '正在載入特殊形態…');
 
@@ -1616,18 +1668,46 @@ async function loadExtraForms(pokedex) {
       }))
     );
 
+    // 第二階段：對有 forms 的結果，補抓 pokemon-form 取中文名
+    const formNamePromises = results.map((res) => {
+      if (res.status !== 'fulfilled') return Promise.resolve(null);
+      const d = res.value;
+      const formUrl = d.forms && d.forms[0] && d.forms[0].url;
+      if (!formUrl) return Promise.resolve(null);
+      return fetch(formUrl)
+        .then(r => (r.ok ? r.json() : null))
+        .catch(() => null);
+    });
+    const formResults = await Promise.allSettled(formNamePromises);
+
     results.forEach((res, idx) => {
       if (res.status !== 'fulfilled') return;
       const d = res.value;
       const id = chunk[idx];
 
-      const zhName = extractFormName(d, id);
+      let zhName = null;
+      const formRes = formResults[idx];
+      if (formRes.status === 'fulfilled' && formRes.value) {
+        const names = formRes.value.form_names || [];
+        const zh = names.find(n => n.language?.name === 'zh-hant')
+                || names.find(n => n.language?.name === 'zh-hans');
+        if (zh) zhName = zh.name;
+      }
+
+      // ← 新增：PokeAPI 缺中文時，用本地映射表補上（例如超極巨化）
+      if (!zhName) {
+        const key = String(d.name || '').toLowerCase();
+        zhName = FORM_NAME_ZH[key] || null;
+      }
+
+      const name = zhName || extractFormName(d, id);
+
       const spriteUrl = d.sprites?.front_default || null;
       const shinyUrl  = d.sprites?.front_shiny || null;
 
       pokedex.push({
         id,
-        name: zhName,
+        name,
         emoji: '❓',
         color: '#888',
         rate: 0.35,
