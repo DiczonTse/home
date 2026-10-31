@@ -15,14 +15,14 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://diczontse.github.io/home/games/pokemon_city_walk/pokemon_city_walk.html">
 <meta property="og:title" content="🎊寵物小精靈 City Walk">
-<meta property="og:description" content="帶著手機在城市中漫步，捕捉寶可夢！天氣與日夜會影響精靈出現，快來收集全圖鑑。">
+<meta property="og:description" content="帶著手機在城市中漫步，捕捉小精靈！天氣與日夜會影響小精靈出現，快來收集全圖鑑！配搭各類精靈球、水果及尋找及捕捉稀有或異色小精靈！">
 <meta property="og:image" content="https://diczontse.github.io/home/games/pokemon_city_walk/icons/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="寵物小精靈 City Walk 遊戲封面">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="🎊寵物小精靈 City Walk">
-<meta name="twitter:description" content="帶著手機在城市中漫步，捕捉寶可夢！">
+<meta name="twitter:description" content="帶著手機在城市中漫步，捕捉小精靈！">
 <meta name="twitter:image" content="https://diczontse.github.io/home/games/pokemon_city_walk/icons/og-image.png">
 <style>
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -186,17 +186,141 @@
   @keyframes shinyGlow{from{filter:drop-shadow(0 0 8px #ffd166) drop-shadow(0 0 18px #ffb703)}
     to{filter:drop-shadow(0 0 16px #ffd166) drop-shadow(0 0 34px #ffb703) brightness(1.2)}}
 
-  .npc{position:relative;width:56px;height:64px;cursor:pointer}
-  .npc-emoji{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);
-    font-size:40px;line-height:1;z-index:2;
+  .npc{position:relative;width:64px;height:72px;cursor:pointer}
+  .npc-emoji{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);
+    font-size:52px;line-height:1;z-index:2;
     animation:bob 2s ease-in-out infinite;
     filter:drop-shadow(0 3px 8px rgba(0,0,0,.55))}
+  @keyframes bob{
+    0%,100%{transform:translateX(-50%) translateY(0)}
+    50%{transform:translateX(-50%) translateY(-4px)}}
   .npc-ring{position:absolute;left:50%;bottom:2px;width:44px;height:10px;margin-left:-22px;
     border-radius:50%;background:radial-gradient(ellipse at center,rgba(255,209,102,.55),rgba(255,209,102,0) 78%);
     z-index:1;animation:npcRing 2.4s ease-in-out infinite}
   @keyframes npcRing{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.3);opacity:.3}}
   .npc-badge{position:absolute;left:50%;top:-4px;transform:translateX(-50%);
     background:rgba(255,209,102,.95);color:#5a3d00;
+    font-size:9px;font-weight:900;padding:2px 7px;border-radius:999px;
+    white-space:nowrap;z-index:3;letter-spacing:.5px;
+    box-shadow:0 2px 8px rgba(0,0,0,.4)}
+
+  .gym{position:relative;width:64px;height:72px;cursor:pointer}
+  .gym-emoji{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);
+    font-size:52px;line-height:1;z-index:2;
+    animation:bob 2s ease-in-out infinite;
+    filter:drop-shadow(0 3px 8px rgba(0,0,0,.55))}
+
+  #gymBattleOverlay{
+    position:fixed;inset:0;z-index:5500;pointer-events:none;overflow:hidden;
+    background:radial-gradient(circle at 50% 50%,rgba(30,20,60,.96),rgba(5,5,15,.98));
+    display:none;flex-direction:column;align-items:center;justify-content:center;
+    gap:24px;
+  }
+  #gymBattleOverlay.on{display:flex}
+
+  .gym-battle-stage{
+    position:relative;width:min(92vw,420px);height:240px;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 10px;
+  }
+  .gym-battle-stage.shake{animation:stageShake .4s ease-in-out}
+  @keyframes stageShake{
+    0%,100%{transform:translate(0,0)}
+    20%{transform:translate(-8px,4px)}
+    40%{transform:translate(8px,-4px)}
+    60%{transform:translate(-6px,3px)}
+    80%{transform:translate(6px,-3px)}
+  }
+
+  .gym-fighter{
+    position:relative;display:flex;flex-direction:column;align-items:center;
+    gap:6px;width:130px;
+    transition:transform .45s cubic-bezier(.4,0,.6,1);
+    z-index:2;
+  }
+  .gym-fighter img{
+    width:110px;height:110px;object-fit:contain;image-rendering:pixelated;
+    filter:drop-shadow(0 6px 16px rgba(0,0,0,.6));
+    transition:filter .25s;
+  }
+  .gym-fighter-name{
+    font-size:12px;font-weight:800;color:rgba(255,255,255,.85);
+    white-space:nowrap;text-shadow:0 2px 6px rgba(0,0,0,.8);
+  }
+
+  .gym-fighter.left{transform:translateX(-200px)}
+  .gym-fighter.right{transform:translateX(200px)}
+
+  .gym-fighter.left.entered{transform:translateX(0)}
+  .gym-fighter.right.entered{transform:translateX(0)}
+
+  .gym-fighter.charging{
+    transition:transform .35s cubic-bezier(.6,0,.8,1);
+  }
+  .gym-fighter.left.charging{transform:translateX(62px)}
+  .gym-fighter.right.charging{transform:translateX(-62px)}
+
+  .gym-fighter.left.knockback{transform:translateX(-58px)}
+  .gym-fighter.right.knockback{transform:translateX(58px)}
+
+  .gym-fighter.right.hit img{
+    animation:fighterHit .4s ease-in-out;
+  }
+  @keyframes fighterHit{
+    0%,100%{transform:translateX(0) rotate(0)}
+    30%{transform:translateX(-8px) rotate(-8deg);filter:brightness(1.8)}
+    60%{transform:translateX(8px) rotate(8deg);filter:brightness(1.3)}
+  }
+
+  .gym-fighter.right.defeated{
+    transition:transform .8s cubic-bezier(.5,0,.8,1),opacity .8s ease-in;
+    transform:translate(180px,-170px) rotate(540deg) scale(.2);
+    opacity:0;
+  }
+
+  .gym-vs{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(0);
+    font-size:34px;font-weight:900;color:#ffd166;
+    text-shadow:0 0 22px #ffb703,0 0 40px rgba(255,183,3,.6);
+    transition:transform .3s cubic-bezier(.3,1.5,.5,1);
+    z-index:4;letter-spacing:2px;
+  }
+  .gym-vs.show{transform:translate(-50%,-50%) scale(1)}
+
+  .gym-clash{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(0);
+    font-size:64px;z-index:5;pointer-events:none;opacity:0;
+  }
+  .gym-clash.show{animation:clashPop .5s ease-out forwards}
+  @keyframes clashPop{
+    0%{transform:translate(-50%,-50%) scale(.3);opacity:0}
+    30%{transform:translate(-50%,-50%) scale(1.6);opacity:1}
+    100%{transform:translate(-50%,-50%) scale(2.4);opacity:0}
+  }
+
+  .gym-battle-flash{
+    position:absolute;inset:0;background:#fff;opacity:0;
+    pointer-events:none;border-radius:12px;z-index:6;
+  }
+  .gym-battle-flash.on{animation:flashBang .35s ease-out forwards}
+  @keyframes flashBang{
+    0%{opacity:0}
+    20%{opacity:.92}
+    100%{opacity:0}
+  }
+
+  .gym-battle-msg{
+    font-size:18px;font-weight:900;color:#fff;letter-spacing:2px;
+    text-shadow:0 0 20px rgba(162,155,254,.85);
+    min-height:26px;opacity:0;transition:opacity .3s;
+    text-align:center;padding:0 20px;
+  }
+  .gym-battle-msg.show{opacity:1}
+  .gym-ring{position:absolute;left:50%;bottom:2px;width:50px;height:11px;margin-left:-25px;
+    border-radius:50%;background:radial-gradient(ellipse at center,rgba(162,155,254,.65),rgba(162,155,254,0) 78%);
+    z-index:1;animation:npcRing 2.4s ease-in-out infinite}
+  .gym-badge{position:absolute;left:50%;top:-4px;transform:translateX(-50%);
+    background:rgba(162,155,254,.96);color:#1a1440;
     font-size:9px;font-weight:900;padding:2px 7px;border-radius:999px;
     white-space:nowrap;z-index:3;letter-spacing:.5px;
     box-shadow:0 2px 8px rgba(0,0,0,.4)}
@@ -731,7 +855,7 @@
   .ghost{background:rgba(255,255,255,.1)!important;box-shadow:none!important;color:#ccc!important;
     padding:11px!important;font-size:14px!important;width:100%;border-radius:999px;border:none;cursor:pointer}
 
-  #dexScreen,#evoScreen,#bagScreen{background:radial-gradient(circle at 50% 20%,#2a2140 0%,#120e22 60%,#07060e 100%)}
+  #dexScreen,#evoScreen,#bagScreen,#gymSelectScreen{background:radial-gradient(circle at 50% 20%,#2a2140 0%,#120e22 60%,#07060e 100%)}
   .dex-top{display:flex;justify-content:center;align-items:center;position:relative;min-height:44px;
     margin-bottom:8px}
   .dex-title{color:#fff;font-size:19px;font-weight:800;letter-spacing:2px;
@@ -844,7 +968,7 @@
   .evo-empty{text-align:center;color:rgba(255,255,255,.5);font-size:14px;font-weight:700;
     padding:40px 20px;line-height:1.7}
 
-  #npcScreen{background:radial-gradient(circle at 50% 30%,#2a2140 0%,#120e22 65%,#07060e 100%);
+  #npcScreen,#gymScreen{background:radial-gradient(circle at 50% 30%,#2a2140 0%,#120e22 65%,#07060e 100%);
     justify-content:center;align-items:center;gap:14px}
   .npc-title{color:#ffd166;font-size:19px;font-weight:900;letter-spacing:2px;
     text-shadow:0 0 22px rgba(255,209,102,.6)}
@@ -1154,6 +1278,51 @@
   </div>
 </div>
 
+<div id="gymScreen" class="overlay hidden">
+  <div class="npc-title">🏯 道場</div>
+  <div class="npc-sub" id="gymSub">守館精靈正在等待挑戰</div>
+
+  <div class="npc-stage">
+    <div class="npc-card npc-side">
+      <div class="npc-card-label">守館精靈</div>
+      <img id="gymMonImg" src="" alt="">
+      <div class="card-fallback" id="gymMonFallback" style="display:none">❓</div>
+      <div class="npc-card-name" id="gymMonName">—</div>
+    </div>
+  </div>
+
+  <div class="npc-exchange-info">
+    <div class="npc-exchange-line">
+      <span>需要道具</span>
+      <span class="val">🧪 好傷藥 ×1</span>
+    </div>
+    <div class="npc-exchange-line">
+      <span>你擁有</span>
+      <span class="val" id="gymPotionOwn">0 瓶</span>
+    </div>
+    <div class="npc-exchange-line">
+      <span>挑戰獎勵</span>
+      <span class="val ok">所選精靈糖果 ×3</span>
+    </div>
+  </div>
+
+  <div class="npc-footer">
+    <button class="npc-confirm-btn" id="gymChallengeBtn" disabled>⚔ 挑戰</button>
+    <button class="npc-cancel-btn" id="gymCancelBtn">離開</button>
+  </div>
+</div>
+
+<div id="gymSelectScreen" class="overlay hidden">
+  <div class="dex-top">
+    <div class="dex-title">選擇出戰精靈</div>
+    <button class="closeX" id="gymSelectCloseBtn">✕</button>
+  </div>
+  <div class="dex-scroll">
+    <div class="dex-progress" id="gymSelectProgress"></div>
+    <div class="dex-grid" id="gymSelectGrid"></div>
+  </div>
+</div>
+
 <div id="bagScreen" class="overlay hidden">
   <div class="dex-top">
     <div class="dex-title">🎒 背包</div>
@@ -1189,6 +1358,26 @@
   </div>
 </div>
 
+<div id="gymBattleOverlay">
+  <div class="gym-battle-stage" id="gymBattleStage">
+    <div class="gym-fighter left" id="gymFighterLeft">
+      <div class="gym-fighter-name"></div>
+      <img alt="">
+    </div>
+
+    <div class="gym-vs" id="gymVs">VS</div>
+
+    <div class="gym-fighter right" id="gymFighterRight">
+      <div class="gym-fighter-name"></div>
+      <img alt="">
+    </div>
+
+    <div class="gym-clash" id="gymClash">💥</div>
+    <div class="gym-battle-flash" id="gymBattleFlash"></div>
+  </div>
+  <div class="gym-battle-msg" id="gymBattleMsg"></div>
+</div>
+
 <div id="tradeAnimOverlay">
   <div class="trade-anim-stage">
     <div class="trade-mon left" id="tradeMonA">
@@ -1222,7 +1411,7 @@ const dexState = {};
 const candyBag = {};
 const nameById = {};
 
-const TOTAL_POKEMON = 1370;
+const TOTAL_POKEMON = 1353;
 const BATCH_SIZE = 40;
 
 const BALL_TYPES = {
@@ -1233,6 +1422,7 @@ const BALL_TYPES = {
 };
 
 const ITEMS = {
+  goodPotion:{ name: '好傷藥', icon: '🧪', desc: '道場挑戰消耗 1 瓶' },
   pineapple: { name: '菠蘿', icon: '🍍', desc: '捕獲後 +1 糖果' },
   grape:     { name: '提子', icon: '🍇', desc: '降低逃跑機率' },
   incense:   { name: '香薰', icon: '🌀', desc: '精靈數量翻倍 15 分鐘' },
@@ -1380,6 +1570,7 @@ async function loadAllData() {
     pokedex.push({ id: f.id, name: f.name, emoji: '❓', color: '#888', rate: 0.35, w: f.w,
       notWild: false, time: f.time || 'any', weather: f.weather || 'any' });
   });
+  await loadExtraForms(pokedex);
   POKEDEX = pokedex;
   EVOLUTIONS = evolutions;
   POKEDEX.forEach(p => {
@@ -1388,6 +1579,71 @@ async function loadAllData() {
   });
   POKEDEX.forEach(p => { p.emoji = '❓'; });
   console.log(`✅ 全圖鑑載入完成：${POKEDEX.length} 個條目`);
+}
+
+async function loadExtraForms(pokedex) {
+  const FORM_START = 10001;
+  const FORM_END   = 10300; // 可視需要加大，PokeAPI 目前到 102xx
+
+  updateProgress(0, FORM_END - FORM_START, '正在載入特殊形態…');
+
+  const existingIds = new Set(pokedex.map(p => p.id));
+  const urls = [];
+  for (let id = FORM_START; id <= FORM_END; id++) {
+    if (!existingIds.has(id)) urls.push(id);
+  }
+
+  const BATCH = 40;
+  for (let i = 0; i < urls.length; i += BATCH) {
+    const chunk = urls.slice(i, i + BATCH);
+    const results = await Promise.allSettled(
+      chunk.map(id => fetch(`${API}/pokemon/${id}`).then(r => {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      }))
+    );
+
+    results.forEach((res, idx) => {
+      if (res.status !== 'fulfilled') return;
+      const d = res.value;
+      const id = chunk[idx];
+
+      const zhName = extractFormName(d, id);
+      const spriteUrl = d.sprites?.front_default || null;
+      const shinyUrl  = d.sprites?.front_shiny || null;
+
+      pokedex.push({
+        id,
+        name: zhName,
+        emoji: '❓',
+        color: '#888',
+        rate: 0.35,
+        w: 0.3,
+        notWild: false,
+        time: 'any',
+        weather: 'any',
+        spriteUrl,
+        shinySpriteUrl: shinyUrl,
+        isForm: true,
+      });
+    });
+
+    updateProgress(Math.min(i + BATCH, urls.length), urls.length,
+      `已載入 ${Math.min(i + BATCH, urls.length)} / ${urls.length} 個形態…`);
+    await new Promise(r => setTimeout(r, 50));
+  }
+}
+
+function extractFormName(pokemon, fallbackId) {
+  const forms = pokemon.forms || [];
+  for (const f of forms) {
+    const names = f.names || [];
+    const zh = names.find(n => n.language?.name === 'zh-hant' || n.language?.name === 'zh-hans');
+    if (zh) return zh.name;
+    const en = names.find(n => n.language?.name === 'en');
+    if (en) return en.name;
+  }
+  return pokemon.name.replace(/-/g, ' ') || `#${fallbackId}`;
 }
 
 function assignEnvPreferences(pokedex) {
@@ -1703,7 +1959,7 @@ const UNOWN_FORMS = UNOWN_SYMBOLS.map((symbol, index) => {
    ========================================================= */
 const audio = {
   mapDay:null, mapNight:null, catchDay:null, catchNight:null, trade:null,
-  current:null, ready:false, inited:false,
+  gymEncounter:null, current:null, ready:false, inited:false,
   init() {
     if (this.inited) return;
     this.inited = true;
@@ -1713,11 +1969,12 @@ const audio = {
       this.catchDay   = new Audio('Pokemon City Walk - Day Catch Piano.mp3');   this.catchDay.loop = true;   this.catchDay.volume = 1.0;
       this.catchNight = new Audio('Pokemon City Walk - Night Catch Sax.mp3'); this.catchNight.loop = true; this.catchNight.volume = 1.0;
       this.trade      = new Audio('Pokemon City Walk - Trade of the Day.mp3'); this.trade.loop = true; this.trade.volume = 1.0;
+	  this.gymEncounter = new Audio('Pokemon City Walk - Final Encounter.mp3'); this.gymEncounter.loop = true; this.gymEncounter.volume = 1.0;
       this.ready = true;
     } catch (e) { console.warn('Audio init failed:', e); }
   },
   _stopAll() {
-    [this.mapDay, this.mapNight, this.catchDay, this.catchNight, this.trade].forEach(a => {
+    [this.mapDay, this.mapNight, this.catchDay, this.catchNight, this.trade, this.gymEncounter].forEach(a => {
       if (a) { try { a.pause(); a.currentTime = 0; } catch(_){} }
     });
     this.current = null;
@@ -1739,6 +1996,14 @@ const audio = {
     if (this.current === this.trade && this.trade && !this.trade.paused) return;
     this._stopAll();
     if (this.trade) { this.trade.play().catch(()=>{}); this.current = this.trade; }
+  },
+  playGymEncounter() {
+    if (!this.ready) return;
+    this._stopAll();
+    if (this.gymEncounter) {
+      this.gymEncounter.play().catch(()=>{});
+      this.current = this.gymEncounter;
+    }
   },
   stopCatch() {
     if (!this.ready) return;
@@ -1946,11 +2211,13 @@ let spawnCenter = null;
 let spawnMarkers = [];
 let stopMarkers  = [];
 let npcMarker = null;
+let gymMarker = null;
+let currentGym = null;
 
 let ballInventory = { poke: 20, great: 0, ultra: 0, master: 0 };
 let currentBall = 'poke';
 
-let itemInventory = { pineapple: 0, grape: 0, incense: 0 };
+let itemInventory = { goodPotion: 0, pineapple: 0, grape: 0, incense: 0 };
 let incenseEndAt = 0;
 let catchEffect = { extraCandy: 0, fleeReduction: false };
 
@@ -2207,8 +2474,8 @@ function applySaveData(data) {
   }
 
   if (data.itemInventory && typeof data.itemInventory === 'object') {
-    itemInventory = { pineapple: 0, grape: 0, incense: 0 };
-    ['pineapple','grape','incense'].forEach(t => {
+    itemInventory = { goodPotion: 0, pineapple: 0, grape: 0, incense: 0 };
+    ['goodPotion','pineapple','grape','incense'].forEach(t => {
       const v = data.itemInventory[t];
       if (typeof v === 'number') itemInventory[t] = Math.max(0, v | 0);
     });
@@ -2312,7 +2579,7 @@ async function resetGame() {
   try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
   ballInventory = { poke: 20, great: 0, ultra: 0, master: 0 };
   currentBall = 'poke';
-  itemInventory = { pineapple: 0, grape: 0, incense: 0 };
+  itemInventory = { goodPotion: 0, pineapple: 0, grape: 0, incense: 0 };
   incenseEndAt = 0;
   catchEffect = { extraCandy: 0, fleeReduction: false };
   stopConfetti();
@@ -2743,6 +3010,7 @@ function checkMoveRespawn() {
   spawnPokemon(spawnCenter);
   spawnStops(spawnCenter);
   maybeSpawnNPC(spawnCenter);
+  maybeSpawnGym(spawnCenter);
   nextRefreshAt = Date.now() + REFRESH_MS;
   toast('🌿 來到新地方，出現了新的精靈與補給站！');
 }
@@ -2755,6 +3023,13 @@ function clearStops()  { stopMarkers.forEach(m => map.removeLayer(m));  stopMark
 function clearNPC() {
   if (npcMarker) { try { map.removeLayer(npcMarker); } catch(_) {} npcMarker = null; }
   currentNPC = null;
+}
+function clearGym() {
+  if (gymMarker) {
+    try { map.removeLayer(gymMarker); } catch(_) {}
+    gymMarker = null;
+  }
+  currentGym = null;
 }
 
 function addSpawn(p, lat, lng) {
@@ -2841,12 +3116,47 @@ function maybeSpawnNPC(center) {
              <div class="npc-ring"></div>
              <div class="npc-emoji">${emoji}</div>
            </div>`,
-    iconSize: [56, 64], iconAnchor: [28, 56],
+    iconSize: [64, 72], iconAnchor: [32, 64],
   });
 
   npcMarker = L.marker([lat, lng], { icon, zIndexOffset: 900 }).addTo(map);
   currentNPC = { emoji, trade, candySource: null };
   npcMarker.on('click', () => openNPCExchange(currentNPC));
+  SFX.npcAppear();
+}
+
+function maybeSpawnGym(center) {
+  if (gymScreen && !gymScreen.classList.contains('hidden')) return;
+  if (gymSelectScreen && !gymSelectScreen.classList.contains('hidden')) return;
+  clearGym();
+  if (Math.random() > getNpcSpawnChance()) return;
+
+  const pool = POKEDEX.filter(p => !p.notWild && p.w > 0);
+  const mon = pool.length
+    ? pool[Math.floor(Math.random() * pool.length)]
+    : POKEDEX[Math.floor(Math.random() * POKEDEX.length)];
+
+  const dist = 90 + Math.random() * 230;
+  const bearing = Math.random() * 360;
+  const [lat, lng] = offsetLatLng(center[0], center[1], dist, bearing);
+
+  const icon = L.divIcon({
+    className: '',
+    html: `<div class="gym">
+             <div class="gym-badge">道場</div>
+             <div class="gym-ring"></div>
+             <div class="gym-emoji">🏯</div>
+           </div>`,
+    iconSize: [64, 72], iconAnchor: [32, 64],
+  });
+
+  gymMarker = L.marker([lat, lng], { icon, zIndexOffset: 900 }).addTo(map);
+  currentGym = { pokemon: mon };
+
+  gymMarker.on('click', () => {
+    if (currentGym) openGym(currentGym);
+  });
+
   SFX.npcAppear();
 }
 
@@ -3016,6 +3326,233 @@ npcConfirmBtn.addEventListener('click', () => {
     }
   });
 });
+
+/* ===== 道場 ===== */
+const gymScreen = document.getElementById('gymScreen');
+const gymSelectScreen = document.getElementById('gymSelectScreen');
+const gymMonImg = document.getElementById('gymMonImg');
+const gymMonFallback = document.getElementById('gymMonFallback');
+const gymMonName = document.getElementById('gymMonName');
+const gymPotionOwn = document.getElementById('gymPotionOwn');
+const gymChallengeBtn = document.getElementById('gymChallengeBtn');
+const gymCancelBtn = document.getElementById('gymCancelBtn');
+const gymSelectCloseBtn = document.getElementById('gymSelectCloseBtn');
+const gymSelectProgress = document.getElementById('gymSelectProgress');
+const gymSelectGrid = document.getElementById('gymSelectGrid');
+const gymBattleOverlay  = document.getElementById('gymBattleOverlay');
+const gymBattleStage    = document.getElementById('gymBattleStage');
+const gymFighterLeft    = document.getElementById('gymFighterLeft');
+const gymFighterRight   = document.getElementById('gymFighterRight');
+const gymVs             = document.getElementById('gymVs');
+const gymClash          = document.getElementById('gymClash');
+const gymBattleFlash    = document.getElementById('gymBattleFlash');
+const gymBattleMsg      = document.getElementById('gymBattleMsg');
+
+function setBattleMon(fighterEl, mon) {
+  const img = fighterEl.querySelector('img');
+  const nameEl = fighterEl.querySelector('.gym-fighter-name');
+  nameEl.textContent = mon ? mon.name : '❓';
+  if (mon) {
+    img.src = spriteUrl(mon, false);
+    img.style.display = '';
+    img.onerror = () => { img.style.display = 'none'; };
+  } else {
+    img.style.display = 'none';
+  }
+}
+
+function setBattleMsg(text) {
+  gymBattleMsg.textContent = text || '';
+  gymBattleMsg.classList.toggle('show', !!text);
+}
+
+function playGymBattleAnimation(playerMon, gymMon, onDone) {
+  gymBattleOverlay.classList.add('on');
+  gymBattleStage.classList.remove('shake');
+  gymVs.classList.remove('show');
+  gymClash.classList.remove('show');
+  gymBattleFlash.classList.remove('on');
+  setBattleMsg('');
+
+  gymFighterLeft.className  = 'gym-fighter left';
+  gymFighterRight.className = 'gym-fighter right';
+
+  setBattleMon(gymFighterLeft,  playerMon);
+  setBattleMon(gymFighterRight, gymMon);
+
+  void gymBattleStage.offsetWidth;
+
+  requestAnimationFrame(() => {
+    gymFighterLeft.classList.add('entered');
+    gymFighterRight.classList.add('entered');
+  });
+
+  setTimeout(() => {
+    gymVs.classList.add('show');
+    SFX.init();
+    SFX.npcAppear();
+  }, 450);
+
+  setTimeout(() => {
+    setBattleMsg('對戰開始！');
+  }, 750);
+
+  setTimeout(() => {
+    gymVs.classList.remove('show');
+    gymFighterLeft.classList.add('charging');
+    gymFighterRight.classList.add('charging');
+    SFX.tradeWhoosh();
+  }, 1150);
+
+  setTimeout(() => {
+    gymClash.classList.add('show');
+    gymBattleStage.classList.add('shake');
+    gymBattleFlash.classList.add('on');
+    SFX.hit();
+    SFX.throwBall();
+  }, 1500);
+
+  setTimeout(() => {
+    gymFighterLeft.classList.remove('charging');
+    gymFighterRight.classList.remove('charging');
+    gymFighterLeft.classList.add('knockback');
+    gymFighterRight.classList.add('knockback');
+    gymFighterRight.classList.add('hit');
+  }, 1750);
+
+  setTimeout(() => {
+    gymFighterRight.classList.add('defeated');
+    setBattleMsg('挑戰成功！');
+    SFX.reward();
+  }, 2250);
+
+  setTimeout(() => {
+    gymBattleOverlay.classList.remove('on');
+    onDone();
+  }, 3100);
+}
+
+function updateGymUI() {
+  const n = itemInventory.goodPotion || 0;
+  gymPotionOwn.textContent = `${n} 瓶`;
+  gymPotionOwn.classList.toggle('ok', n >= 1);
+  gymPotionOwn.classList.toggle('lack', n < 1);
+
+  gymChallengeBtn.disabled = n < 1;
+  gymChallengeBtn.textContent = n >= 1 ? '⚔ 挑戰' : '🧪 好傷藥不足';
+}
+
+function openGym(gym) {
+  if (catchState !== 'idle') return;
+  if (!gym || !gym.pokemon) return;
+
+  currentGym = gym;
+  gymSelectScreen.classList.add('hidden');
+  gymMonName.textContent = gym.pokemon.name;
+
+  gymMonImg.src = spriteUrl(gym.pokemon, false);
+  gymMonImg.style.display = '';
+  gymMonFallback.style.display = 'none';
+  gymMonImg.onerror = () => {
+    gymMonImg.style.display = 'none';
+    gymMonFallback.style.display = '';
+    gymMonFallback.textContent = '❓';
+  };
+
+  updateGymUI();
+  gymScreen.classList.remove('hidden');
+
+  SFX.init();
+  audio.init();
+  audio.playGymEncounter();
+}
+
+gymCancelBtn.addEventListener('click', () => {
+  gymScreen.classList.add('hidden');
+  if (gameStarted) audio.playMap(env.time);
+});
+
+gymChallengeBtn.addEventListener('click', () => {
+  if (!currentGym) return;
+  if ((itemInventory.goodPotion || 0) <= 0) {
+    toast('🧪 好傷藥不足，先去補給站找找');
+    updateGymUI();
+    return;
+  }
+  renderGymSelect();
+  gymSelectScreen.classList.remove('hidden');
+});
+
+gymSelectCloseBtn.addEventListener('click', () => {
+  gymSelectScreen.classList.add('hidden');
+});
+
+function renderGymSelect() {
+  const owned = POKEDEX.filter(p => dexState[p.name] && dexState[p.name].caught > 0);
+
+  gymSelectProgress.textContent = `已捕獲可出戰 ${owned.length} 隻`;
+
+  if (!owned.length) {
+    gymSelectGrid.innerHTML = `<div class="evo-empty">
+      還沒有已捕獲的精靈<br>先去捕捉精靈再來挑戰道場吧！
+    </div>`;
+    return;
+  }
+
+  gymSelectGrid.innerHTML = owned.map(p => `
+    <div class="dex-cell caught gym-select-cell" data-name="${p.name}">
+      <div class="dex-icon">
+        <div class="dex-shadow"></div>
+        <img src="${spriteUrl(p, false)}" alt="${p.name}" draggable="false">
+      </div>
+      <div class="dex-name">${p.name}</div>
+      <div class="dex-count">🍬 ${getCandy(p.name)}</div>
+    </div>
+  `).join('');
+
+  gymSelectGrid.querySelectorAll('.gym-select-cell').forEach(cell => {
+    cell.addEventListener('click', () => {
+      chooseGymFighter(cell.dataset.name);
+    });
+  });
+}
+
+function chooseGymFighter(name) {
+  if (!currentGym) return;
+  if ((itemInventory.goodPotion || 0) <= 0) {
+    toast('🧪 好傷藥不足');
+    return;
+  }
+
+  const p = POKEDEX.find(x => x.name === name);
+  if (!p) return;
+
+  const gymMon = currentGym.pokemon;
+  itemInventory.goodPotion--;
+  updateHUD();
+  autoSave();
+
+  gymSelectScreen.classList.add('hidden');
+
+  playGymBattleAnimation(p, gymMon, () => {
+    addCandy(p.name, 3);
+    updateHUD();
+    autoSave();
+
+    gymScreen.classList.add('hidden');
+    clearGym();
+
+    SFX.init();
+    SFX.reward();
+    toast(`⚔ 道場挑戰成功！獲得 ${p.name} 糖果 ×3`, 3000);
+
+    if (!bagScreen.classList.contains('hidden')) renderBag();
+    if (!dexScreen.classList.contains('hidden')) renderDex();
+    if (!evoScreen.classList.contains('hidden')) renderEvoList();
+
+    if (gameStarted) audio.playMap(env.time);
+  });
+}
 
 const tradeOverlay = document.getElementById('tradeAnimOverlay');
 const tradeMonA    = document.getElementById('tradeMonA');
@@ -3903,7 +4440,7 @@ function spinStop() {
 
   setTimeout(() => {
     const gained = { poke: 0, great: 0, ultra: 0, master: 0 };
-    const itemsGained = { pineapple: 0, grape: 0, incense: 0 };
+    const itemsGained = { goodPotion: 0, pineapple: 0, grape: 0, incense: 0 };
 
     const base = 1 + Math.floor(Math.random() * 3);
     gained.poke = base;
@@ -3914,14 +4451,15 @@ function spinStop() {
     else if (r < 0.133)   gained.great  = 1;
 
     const ir = Math.random();
-    if (ir < 0.05)        itemsGained.incense = 1;
+    if (ir < 0.42)   itemsGained.goodPotion = 1;
+	else if (ir < 0.05)   itemsGained.incense = 1;
     else if (ir < 0.17)   itemsGained.grape = 1;
     else if (ir < 0.32)   itemsGained.pineapple = 1;
 
     ['poke','great','ultra','master'].forEach(t => {
       ballInventory[t] = (ballInventory[t] || 0) + gained[t];
     });
-    ['pineapple','grape','incense'].forEach(t => {
+    ['goodPotion','pineapple','grape','incense'].forEach(t => {
       itemInventory[t] = (itemInventory[t] || 0) + itemsGained[t];
     });
     updateHUD();
@@ -3935,7 +4473,7 @@ function spinStop() {
                  </span>`;
       }
     });
-    ['incense','grape','pineapple'].forEach(t => {
+    ['goodPotion','incense','grape','pineapple'].forEach(t => {
       if (itemsGained[t] > 0) {
         html += `<span style="display:inline-flex;align-items:center;gap:5px;margin:0 4px">
                    <span style="font-size:22px">${ITEMS[t].icon}</span>×${itemsGained[t]}
@@ -3962,9 +4500,10 @@ function spinStop() {
     else if (gained.ultra > 0)  toast('✨ 獲得了超級球！', 2800);
     else if (gained.great > 0)  toast('✨ 獲得了高級球！', 2600);
 
-    if (itemsGained.incense > 0)      toast('🌀 獲得了香薰！', 2600);
-    else if (itemsGained.grape > 0)   toast('🍇 獲得了提子！', 2400);
+	if (itemsGained.incense > 0) toast('🌀 獲得了香薰！', 2600);
+    else if (itemsGained.grape > 0) toast('🍇 獲得了提子！', 2400);
     else if (itemsGained.pineapple > 0) toast('🍍 獲得了菠蘿！', 2400);
+	else if (itemsGained.goodPotion > 0) toast('🧪 獲得了好傷藥！', 2400);
   }, 1700);
 }
 
@@ -4064,7 +4603,7 @@ function renderBag() {
   });
 
   const itemGrid = document.getElementById('bagItemGrid');
-  const itemOrder = ['pineapple', 'grape', 'incense'];
+  const itemOrder = ['goodPotion', 'pineapple', 'grape', 'incense'];
   itemGrid.innerHTML = itemOrder.map(t => {
     const d = ITEMS[t];
     const n = itemInventory[t] || 0;
@@ -4109,6 +4648,7 @@ function useIncense() {
   spawnPokemon(center);
   spawnStops(center);
   maybeSpawnNPC(center);
+  maybeSpawnGym(center);
 
   updateHUD();
   renderBag();
@@ -4456,6 +4996,7 @@ function refreshSpawns() {
   if (stopMarkers.length === 0) spawnStops(center);
   else resetStops();
   maybeSpawnNPC(center);
+  maybeSpawnGym(center);
 
   const w = WEATHERS.find(x => x.id === env.weather) || WEATHERS[0];
   const t = env.time === 'day' ? '☀️ 白天' : '🌙 夜晚';
@@ -4471,6 +5012,7 @@ function spawnWorld(center) {
   spawnPokemon(center);
   spawnStops(center);
   maybeSpawnNPC(center);
+  maybeSpawnGym(center);
   nextRefreshAt = Date.now() + REFRESH_MS;
 }
 
