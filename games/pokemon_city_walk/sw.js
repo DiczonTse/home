@@ -1,4 +1,4 @@
-const CACHE_NAME    = 'pokemon-city-walk-v2026-10-31-03';
+const CACHE_NAME    = 'pokemon-city-walk-v2026-10-31-04';
 const SPRITE_CACHE  = 'pokemon-city-walk-sprites-v1';
 const RUNTIME_CACHE = 'pokemon-city-walk-runtime-v1';
 
