@@ -877,6 +877,8 @@
     box-shadow:0 0 18px rgba(255,209,102,.22)}
   .dex-cell.seen{opacity:.72}
   .dex-cell.unknown{opacity:.3;filter:grayscale(1)}
+  .dex-cell.plant-able { cursor: pointer; }
+  .dex-cell.plant-able:active { transform: scale(.97); }
   .dex-icon{width:64px;height:64px;margin:0 auto 7px;position:relative;
     display:flex;align-items:center;justify-content:center;font-size:30px;
     touch-action:manipulation;-webkit-touch-callout:none}
@@ -1212,13 +1214,17 @@
   <div class="catch-footer">
     <div class="catch-balls" id="catchBalls"></div>
 	<div class="catch-items" id="catchItems">
-      <button class="catch-item-btn" data-item="pineapple" title="菠蘿：捕獲糖果+1">
+	  <button class="catch-item-btn" data-item="grape" title="提子：提高捕捉成功率">
+        <span class="item-emoji">🍇</span>
+        <span class="item-count" id="itemCountGrape">0</span>
+	  </button>
+	  <button class="catch-item-btn" data-item="pineapple" title="菠蘿：捕獲糖果+1">
         <span class="item-emoji">🍍</span>
         <span class="item-count" id="itemCountPineapple">0</span>
       </button>
-      <button class="catch-item-btn" data-item="grape" title="提子：降低逃跑機率">
-        <span class="item-emoji">🍇</span>
-        <span class="item-count" id="itemCountGrape">0</span>
+      <button class="catch-item-btn" data-item="banana" title="香蕉：降低逃跑機率">
+        <span class="item-emoji">🍌</span>
+        <span class="item-count" id="itemCountBanana">0</span>
       </button>
     </div>
     <div class="ball-tip"><span class="ball-mini" id="catchBallIcon"></span> <span id="catchBallName">精靈球</span> · 剩餘 <b id="catchBallCount">20</b> 顆</div>
@@ -1425,10 +1431,13 @@ const BALL_TYPES = {
   master: { name: '大師球',   catchMult: 99,   desc: '必定捕獲' },
 };
 
+const BALL_UPGRADE = { poke: 'great', great: 'ultra', ultra: 'master' };
+
 const ITEMS = {
   goodPotion:{ name: '好傷藥', icon: '🧪', desc: '道場挑戰消耗 1 瓶' },
+  grape:     { name: '提子', icon: '🍇', desc: '提高捕捉成功率 ×1.3' },
   pineapple: { name: '菠蘿', icon: '🍍', desc: '捕獲後 +1 糖果' },
-  grape:     { name: '提子', icon: '🍇', desc: '降低逃跑機率' },
+  banana:     { name: '香蕉', icon: '🍌', desc: '降低逃跑機率' },
   incense:   { name: '香薰', icon: '🌀', desc: '精靈數量翻倍 15 分鐘' },
 };
 
@@ -1621,8 +1630,8 @@ async function loadExtraForms(pokedex) {
         name: zhName,
         emoji: '❓',
         color: '#888',
-        rate: 0.02,
-        w: 0.02,
+        rate: 0.35,
+        w: 0.15,
         notWild: false,
         time: 'any',
         weather: 'any',
@@ -1713,134 +1722,145 @@ function spriteIsPng(p) {
    3c. 稀有 / 神獸 / 御三家生成規則
    ========================================================= */
 const RARE_SPAWN_RULES = [
-  { id: 1,   time: 'day',   weather: ['clear','cloudy'], w: 5 },
-  { id: 4,   time: 'day',   weather: ['clear'],          w: 5 },
-  { id: 7,   time: 'day',   weather: ['rain','cloudy'],  w: 5 },
-  { id: 152, time: 'day',   weather: ['clear','cloudy'], w: 5 },
-  { id: 155, time: 'day',   weather: ['clear'],          w: 5 },
-  { id: 158, time: 'night', weather: ['rain'],           w: 5 },
-  { id: 252, time: 'day',   weather: ['clear','cloudy'], w: 5 },
-  { id: 255, time: 'day',   weather: ['clear'],          w: 5 },
-  { id: 258, time: 'night', weather: ['rain'],           w: 5 },
-  { id: 387, time: 'day',   weather: ['clear','cloudy'], w: 5 },
-  { id: 390, time: 'night', weather: ['clear'],          w: 5 },
-  { id: 393, time: 'day',   weather: ['snow','rain'],    w: 5 },
-  { id: 495, time: 'day',   weather: ['clear','cloudy'], w: 5 },
-  { id: 498, time: 'day',   weather: ['clear'],          w: 5 },
-  { id: 501, time: 'night', weather: ['rain'],           w: 5 },
-  { id: 650, time: 'day',   weather: ['clear','cloudy'], w: 5 },
-  { id: 653, time: 'day',   weather: ['clear'],          w: 5 },
-  { id: 656, time: 'night', weather: ['rain'],           w: 5 },
-  { id: 722, time: 'night', weather: ['clear','fog'],    w: 5 },
-  { id: 725, time: 'night', weather: ['clear'],          w: 5 },
-  { id: 728, time: 'day',   weather: ['rain','cloudy'],  w: 5 },
-  { id: 810, time: 'day',   weather: ['clear','cloudy'], w: 5 },
-  { id: 813, time: 'day',   weather: ['clear'],          w: 5 },
-  { id: 816, time: 'night', weather: ['rain'],           w: 5 },
-  { id: 906, time: 'day',   weather: ['clear','cloudy'], w: 5 },
-  { id: 909, time: 'day',   weather: ['clear'],          w: 5 },
-  { id: 912, time: 'night', weather: ['rain'],           w: 5 },
-  { id: 25,  time: 'day',   weather: ['rain'],            w: 4 },
-  { id: 133, time: 'day',   weather: ['clear','cloudy'],  w: 3 },
-  { id: 147, time: 'night', weather: ['rain','fog'],      w: 2.5 },
-  { id: 131, time: 'night', weather: ['snow','fog'],      w: 2.5 },
-  { id: 246, time: 'night', weather: ['clear'],           w: 2.5 },
-  { id: 371, time: 'day',   weather: ['clear'],           w: 2.5 },
-  { id: 443, time: 'night', weather: ['clear'],           w: 2 },
-  { id: 447, time: 'day',   weather: ['clear'],           w: 2.5 },
-  { id: 633, time: 'night', weather: ['fog'],             w: 2 },
-  { id: 704, time: 'night', weather: ['rain'],            w: 2.5 },
-  { id: 144, time: 'night', weather: ['snow'],            w: 2.0 },
-  { id: 145, time: 'day',   weather: ['rain'],            w: 2.0 },
-  { id: 146, time: 'day',   weather: ['clear'],           w: 2.0 },
-  { id: 150, time: 'night', weather: ['fog'],             w: 1.2 },
-  { id: 151, time: 'any',   weather: 'any',               w: 0.6 },
-  { id: 243, time: 'night', weather: ['rain'],            w: 1.8 },
-  { id: 244, time: 'day',   weather: ['clear'],           w: 1.8 },
-  { id: 245, time: 'night', weather: ['snow'],            w: 1.8 },
-  { id: 249, time: 'day',   weather: ['cloudy'],          w: 1.2 },
-  { id: 250, time: 'day',   weather: ['clear'],           w: 1.2 },
-  { id: 251, time: 'night', weather: ['fog'],             w: 0.8 },
-  { id: 377, time: 'day',   weather: ['clear'],           w: 1.5 },
-  { id: 378, time: 'night', weather: ['snow'],            w: 1.5 },
-  { id: 379, time: 'day',   weather: ['cloudy'],          w: 1.5 },
-  { id: 380, time: 'day',   weather: ['clear','cloudy'],  w: 1.0 },
-  { id: 381, time: 'night', weather: ['clear'],           w: 1.0 },
-  { id: 382, time: 'night', weather: ['rain'],            w: 1.2 },
-  { id: 383, time: 'day',   weather: ['clear'],           w: 1.2 },
-  { id: 384, time: 'any',   weather: ['fog'],             w: 0.9 },
-  { id: 385, time: 'night', weather: ['clear'],           w: 0.7 },
-  { id: 386, time: 'night', weather: ['fog'],             w: 0.7 },
-  { id: 480, time: 'day',   weather: ['cloudy'],          w: 1.2 },
-  { id: 481, time: 'day',   weather: ['clear'],           w: 1.2 },
-  { id: 482, time: 'night', weather: ['fog'],             w: 1.2 },
-  { id: 483, time: 'day',   weather: ['clear'],           w: 1.0 },
-  { id: 484, time: 'night', weather: ['rain'],            w: 1.0 },
-  { id: 485, time: 'day',   weather: ['clear'],           w: 1.2 },
-  { id: 486, time: 'day',   weather: ['cloudy'],          w: 0.9 },
-  { id: 487, time: 'night', weather: ['fog'],             w: 0.9 },
-  { id: 488, time: 'night', weather: ['clear'],           w: 1.0 },
-  { id: 489, time: 'day',   weather: ['rain'],            w: 0.7 },
-  { id: 490, time: 'night', weather: ['rain'],            w: 0.6 },
-  { id: 491, time: 'night', weather: ['fog'],             w: 0.6 },
-  { id: 492, time: 'day',   weather: ['clear'],           w: 0.7 },
-  { id: 493, time: 'any',   weather: 'any',               w: 0.4 },
-  { id: 494, time: 'day',   weather: ['clear'],           w: 0.6 },
-  { id: 638, time: 'day',   weather: ['cloudy'],          w: 1.2 },
-  { id: 639, time: 'night', weather: ['clear'],           w: 1.2 },
-  { id: 640, time: 'day',   weather: ['clear'],           w: 1.2 },
-  { id: 641, time: 'day',   weather: ['rain'],            w: 1.0 },
-  { id: 642, time: 'night', weather: ['rain'],            w: 1.0 },
-  { id: 643, time: 'day',   weather: ['clear'],           w: 1.0 },
-  { id: 644, time: 'night', weather: ['clear'],           w: 1.0 },
-  { id: 645, time: 'day',   weather: ['cloudy'],          w: 1.0 },
-  { id: 646, time: 'night', weather: ['snow'],            w: 0.9 },
-  { id: 647, time: 'day',   weather: ['rain'],            w: 0.6 },
-  { id: 648, time: 'night', weather: ['fog'],             w: 0.6 },
-  { id: 649, time: 'day',   weather: ['cloudy'],          w: 0.5 },
-  { id: 716, time: 'day',   weather: ['clear'],           w: 0.9 },
-  { id: 717, time: 'night', weather: ['fog'],             w: 0.9 },
-  { id: 718, time: 'day',   weather: ['cloudy'],          w: 0.8 },
-  { id: 719, time: 'night', weather: ['clear'],           w: 0.5 },
-  { id: 720, time: 'night', weather: ['fog'],             w: 0.5 },
-  { id: 721, time: 'day',   weather: ['rain'],            w: 0.5 },
-  { id: 772, time: 'any',   weather: 'any',               w: 0.5 },
-  { id: 773, time: 'any',   weather: 'any',               w: 0.4 },
-  { id: 785, time: 'day',   weather: ['rain'],            w: 1.0 },
-  { id: 786, time: 'day',   weather: ['clear'],           w: 1.0 },
-  { id: 787, time: 'night', weather: ['fog'],             w: 1.0 },
-  { id: 788, time: 'night', weather: ['rain'],            w: 1.0 },
-  { id: 789, time: 'night', weather: ['fog'],             w: 0.8 },
-  { id: 790, time: 'day',   weather: ['cloudy'],          w: 0.6 },
-  { id: 791, time: 'day',   weather: ['clear'],           w: 0.9 },
-  { id: 792, time: 'night', weather: ['clear'],           w: 0.9 },
-  { id: 800, time: 'night', weather: ['fog'],             w: 0.8 },
-  { id: 801, time: 'day',   weather: ['cloudy'],          w: 0.5 },
-  { id: 802, time: 'night', weather: ['fog'],             w: 0.5 },
-  { id: 807, time: 'night', weather: ['rain'],            w: 0.5 },
-  { id: 888, time: 'day',   weather: ['clear'],           w: 0.8 },
-  { id: 889, time: 'night', weather: ['cloudy'],          w: 0.8 },
-  { id: 890, time: 'any',   weather: ['fog'],             w: 0.6 },
-  { id: 891, time: 'day',   weather: ['clear'],           w: 0.8 },
-  { id: 892, time: 'night', weather: ['rain'],            w: 0.6 },
-  { id: 893, time: 'day',   weather: ['cloudy'],          w: 0.4 },
-  { id: 894, time: 'day',   weather: ['rain'],            w: 0.8 },
-  { id: 895, time: 'night', weather: ['clear'],           w: 0.8 },
-  { id: 896, time: 'night', weather: ['snow'],            w: 0.8 },
-  { id: 897, time: 'night', weather: ['fog'],             w: 0.8 },
-  { id: 898, time: 'night', weather: ['clear','fog'],     w: 0.6 },
-  { id: 1001, time: 'night', weather: ['fog'],            w: 0.5 },
-  { id: 1002, time: 'day',   weather: ['snow'],           w: 0.5 },
-  { id: 1003, time: 'night', weather: ['clear'],          w: 0.5 },
-  { id: 1004, time: 'day',   weather: ['rain'],           w: 0.5 },
-  { id: 1007, time: 'day',   weather: ['clear'],          w: 0.6 },
-  { id: 1008, time: 'night', weather: ['rain'],           w: 0.6 },
-  { id: 1014, time: 'day',   weather: ['cloudy'],         w: 0.4 },
-  { id: 1015, time: 'night', weather: ['fog'],            w: 0.4 },
-  { id: 1016, time: 'day',   weather: ['clear'],          w: 0.4 },
-  { id: 1017, time: 'day',   weather: ['clear'],          w: 0.5 },
-  { id: 1024, time: 'any',   weather: 'any',              w: 0.3 },
-  { id: 1025, time: 'night', weather: ['fog'],            w: 0.3 },
+  { id: 1,   time: 'day',   weather: ['clear','cloudy'], w: 5 },  // 奇異種子
+  { id: 4,   time: 'day',   weather: ['clear'],          w: 5 },  // 小火龍
+  { id: 7,   time: 'day',   weather: ['rain','cloudy'],  w: 5 },  // 車厘龜
+  { id: 152, time: 'day',   weather: ['clear','cloudy'], w: 5 },  // 菊草葉
+  { id: 155, time: 'day',   weather: ['clear'],          w: 5 },  // 火球鼠
+  { id: 158, time: 'night', weather: ['rain'],           w: 5 },  // 小鋸鱷
+  { id: 252, time: 'day',   weather: ['clear','cloudy'], w: 5 },  // 木守宮
+  { id: 255, time: 'day',   weather: ['clear'],          w: 5 },  // 火稚雞
+  { id: 258, time: 'night', weather: ['rain'],           w: 5 },  // 水躍魚
+  { id: 387, time: 'day',   weather: ['clear','cloudy'], w: 5 },  // 草苗龜
+  { id: 390, time: 'night', weather: ['clear'],          w: 5 },  // 小火焰猴
+  { id: 393, time: 'day',   weather: ['snow','rain'],    w: 5 },  // 波加曼
+  { id: 495, time: 'day',   weather: ['clear','cloudy'], w: 5 },  // 藤藤蛇
+  { id: 498, time: 'day',   weather: ['clear'],          w: 5 },  // 暖暖豬
+  { id: 501, time: 'night', weather: ['rain'],           w: 5 },  // 水水獺
+  { id: 650, time: 'day',   weather: ['clear','cloudy'], w: 5 },  // 哈力栗
+  { id: 653, time: 'day',   weather: ['clear'],          w: 5 },  // 火狐狸
+  { id: 656, time: 'night', weather: ['rain'],           w: 5 },  // 呱呱泡蛙
+  { id: 722, time: 'night', weather: ['clear','fog'],    w: 5 },  // 木木梟
+  { id: 725, time: 'night', weather: ['clear'],          w: 5 },  // 火斑喵
+  { id: 728, time: 'day',   weather: ['rain','cloudy'],  w: 5 },  // 球球海獅
+  { id: 810, time: 'day',   weather: ['clear','cloudy'], w: 5 },  // 敲音猴
+  { id: 813, time: 'day',   weather: ['clear'],          w: 5 },  // 炎兔兒
+  { id: 816, time: 'night', weather: ['rain'],           w: 5 },  // 淚眼蜥
+  { id: 906, time: 'day',   weather: ['clear','cloudy'], w: 5 },  // 新葉喵
+  { id: 909, time: 'day',   weather: ['clear'],          w: 5 },  // 呆火鱷
+  { id: 912, time: 'night', weather: ['rain'],           w: 5 },  // 潤水鴨
+  { id: 25,  time: 'day',   weather: ['rain'],            w: 4 },  // 比卡超
+  { id: 133, time: 'day',   weather: ['clear','cloudy'],  w: 3 },  // 伊貝
+  { id: 147, time: 'night', weather: ['rain','fog'],      w: 2.5 },  // 迷你龍
+  { id: 131, time: 'night', weather: ['snow','fog'],      w: 2.5 },  // 背背龍
+  { id: 246, time: 'night', weather: ['clear'],           w: 2.5 },  // 幼基拉斯
+  { id: 371, time: 'day',   weather: ['clear'],           w: 2.5 },  // 寶貝龍
+  { id: 443, time: 'night', weather: ['clear'],           w: 2 },    // 圓陸鯊
+  { id: 447, time: 'day',   weather: ['clear'],           w: 2.5 },  // 利歐路
+  { id: 633, time: 'night', weather: ['fog'],             w: 2 },    // 單首龍
+  { id: 704, time: 'night', weather: ['rain'],            w: 2.5 },  // 黏黏寶
+  { id: 144, time: 'night', weather: ['snow'],            w: 2.0 },  // 急凍鳥
+  { id: 145, time: 'day',   weather: ['rain'],            w: 2.0 },  // 雷鳥
+  { id: 146, time: 'day',   weather: ['clear'],           w: 2.0 },  // 火鳥
+  { id: 150, time: 'night', weather: ['fog'],             w: 1.2 },  // 超夢夢
+  { id: 151, time: 'any',   weather: 'any',               w: 0.6 },  // 夢幻
+  { id: 243, time: 'night', weather: ['rain'],            w: 1.8 },  // 雷公
+  { id: 244, time: 'day',   weather: ['clear'],           w: 1.8 },  // 炎帝
+  { id: 245, time: 'night', weather: ['snow'],            w: 1.8 },  // 水君
+  { id: 249, time: 'day',   weather: ['cloudy'],          w: 1.2 },  // 洛奇亞
+  { id: 250, time: 'day',   weather: ['clear'],           w: 1.2 },  // 鳳凰
+  { id: 251, time: 'night', weather: ['fog'],             w: 0.8 },  // 時拉比
+  { id: 377, time: 'day',   weather: ['clear'],           w: 1.5 },  // 雷吉洛克
+  { id: 378, time: 'night', weather: ['snow'],            w: 1.5 },  // 雷吉艾斯
+  { id: 379, time: 'day',   weather: ['cloudy'],          w: 1.5 },  // 雷吉斯奇魯
+  { id: 380, time: 'day',   weather: ['clear','cloudy'],  w: 1.0 },  // 拉帝亞斯
+  { id: 381, time: 'night', weather: ['clear'],           w: 1.0 },  // 拉帝歐斯
+  { id: 382, time: 'night', weather: ['rain'],            w: 1.2 },  // 蓋歐卡
+  { id: 383, time: 'day',   weather: ['clear'],           w: 1.2 },  // 固拉多
+  { id: 384, time: 'any',   weather: ['fog'],             w: 0.9 },  // 烈空坐
+  { id: 385, time: 'night', weather: ['clear'],           w: 0.7 },  // 基拉祈
+  { id: 386, time: 'night', weather: ['fog'],             w: 0.7 },  // 代歐奇希斯
+  { id: 480, time: 'day',   weather: ['cloudy'],          w: 1.2 },  // 由克希
+  { id: 481, time: 'day',   weather: ['clear'],           w: 1.2 },  // 艾姆利多
+  { id: 482, time: 'night', weather: ['fog'],             w: 1.2 },  // 亞克諾姆
+  { id: 483, time: 'day',   weather: ['clear'],           w: 1.0 },  // 帝牙盧卡
+  { id: 484, time: 'night', weather: ['rain'],            w: 1.0 },  // 帕路奇亞
+  { id: 485, time: 'day',   weather: ['clear'],           w: 1.2 },  // 希特蘭
+  { id: 486, time: 'day',   weather: ['cloudy'],          w: 0.9 },  // 雷吉奇卡斯
+  { id: 487, time: 'night', weather: ['fog'],             w: 0.9 },  // 騎拉帝納
+  { id: 488, time: 'night', weather: ['clear'],           w: 1.0 },  // 克雷色利亞
+  { id: 489, time: 'day',   weather: ['rain'],            w: 0.7 },  // 霏歐納
+  { id: 490, time: 'night', weather: ['rain'],            w: 0.6 },  // 瑪納霏
+  { id: 491, time: 'night', weather: ['fog'],             w: 0.6 },  // 達克萊伊
+  { id: 492, time: 'day',   weather: ['clear'],           w: 0.7 },  // 謝米
+  { id: 493, time: 'any',   weather: 'any',               w: 0.4 },  // 阿爾宙斯
+  { id: 494, time: 'day',   weather: ['clear'],           w: 0.6 },  // 比克提尼
+  { id: 638, time: 'day',   weather: ['cloudy'],          w: 1.2 },  // 勾帕路翁
+  { id: 639, time: 'night', weather: ['clear'],           w: 1.2 },  // 代拉基翁
+  { id: 640, time: 'day',   weather: ['clear'],           w: 1.2 },  // 畢力吉翁
+  { id: 641, time: 'day',   weather: ['rain'],            w: 1.0 },  // 龍捲雲
+  { id: 642, time: 'night', weather: ['rain'],            w: 1.0 },  // 雷電雲
+  { id: 643, time: 'day',   weather: ['clear'],           w: 1.0 },  // 萊希拉姆
+  { id: 644, time: 'night', weather: ['clear'],           w: 1.0 },  // 捷克羅姆
+  { id: 645, time: 'day',   weather: ['cloudy'],          w: 1.0 },  // 土地雲
+  { id: 646, time: 'night', weather: ['snow'],            w: 0.9 },  // 酋雷姆
+  { id: 647, time: 'day',   weather: ['rain'],            w: 0.6 },  // 凱路迪歐
+  { id: 648, time: 'night', weather: ['fog'],             w: 0.6 },  // 美洛耶塔
+  { id: 649, time: 'day',   weather: ['cloudy'],          w: 0.5 },  // 蓋諾賽克特
+  { id: 716, time: 'day',   weather: ['clear'],           w: 0.9 },  // 哲爾尼亞斯
+  { id: 717, time: 'night', weather: ['fog'],             w: 0.9 },  // 伊裴爾塔爾
+  { id: 718, time: 'day',   weather: ['cloudy'],          w: 0.8 },  // 基格爾德
+  { id: 719, time: 'night', weather: ['clear'],           w: 0.5 },  // 蒂安希
+  { id: 720, time: 'night', weather: ['fog'],             w: 0.5 },  // 胡帕
+  { id: 721, time: 'day',   weather: ['rain'],            w: 0.5 },  // 波爾凱尼恩
+  { id: 772, time: 'any',   weather: 'any',               w: 0.5 },  // 屬性：空
+  { id: 773, time: 'any',   weather: 'any',               w: 0.4 },  // 銀伴戰獸
+  { id: 785, time: 'day',   weather: ['rain'],            w: 1.0 },  // 卡璞・鳴鳴
+  { id: 786, time: 'day',   weather: ['clear'],           w: 1.0 },  // 卡璞・蝶蝶
+  { id: 787, time: 'night', weather: ['fog'],             w: 1.0 },  // 卡璞・哞哞
+  { id: 788, time: 'night', weather: ['rain'],            w: 1.0 },  // 卡璞・鰭鰭
+  { id: 789, time: 'night', weather: ['fog'],             w: 0.8 },  // 科斯莫古
+  { id: 790, time: 'day',   weather: ['cloudy'],          w: 0.6 },  // 科斯莫姆
+  { id: 791, time: 'day',   weather: ['clear'],           w: 0.9 },  // 索爾迦雷歐
+  { id: 792, time: 'night', weather: ['clear'],           w: 0.9 },  // 露奈雅拉
+  { id: 800, time: 'night', weather: ['fog'],             w: 0.8 },  // 奈克洛茲瑪
+  { id: 801, time: 'day',   weather: ['cloudy'],          w: 0.5 },  // 瑪機雅娜
+  { id: 802, time: 'night', weather: ['fog'],             w: 0.5 },  // 瑪夏多
+  { id: 807, time: 'night', weather: ['rain'],            w: 0.5 },  // 捷拉奧拉
+  { id: 888, time: 'day',   weather: ['clear'],           w: 0.8 },  // 蒼響
+  { id: 889, time: 'night', weather: ['cloudy'],          w: 0.8 },  // 藏瑪然特
+  { id: 890, time: 'any',   weather: ['fog'],             w: 0.6 },  // 無極汰那
+  { id: 891, time: 'day',   weather: ['clear'],           w: 0.8 },  // 熊徒弟
+  { id: 892, time: 'night', weather: ['rain'],            w: 0.6 },  // 武道熊師
+  { id: 893, time: 'day',   weather: ['cloudy'],          w: 0.4 },  // 薩戮德
+  { id: 894, time: 'day',   weather: ['rain'],            w: 0.8 },  // 雷吉艾勒奇
+  { id: 895, time: 'night', weather: ['clear'],           w: 0.8 },  // 雷吉鐸拉戈
+  { id: 896, time: 'night', weather: ['snow'],            w: 0.8 },  // 雪暴馬
+  { id: 897, time: 'night', weather: ['fog'],             w: 0.8 },  // 靈幽馬
+  { id: 898, time: 'night', weather: ['clear','fog'],     w: 0.6 },  // 蕾冠王
+  { id: 1001, time: 'night', weather: ['fog'],            w: 0.5 },  // 蕪羅婆
+  { id: 1002, time: 'day',   weather: ['snow'],           w: 0.5 },  // 賽富豪
+  { id: 1003, time: 'night', weather: ['clear'],          w: 0.5 },  // 頂尖蟹
+  { id: 1004, time: 'day',   weather: ['rain'],           w: 0.5 },  // 躺躺龍
+  { id: 1007, time: 'day',   weather: ['clear'],          w: 0.6 },  // 故勒頓
+  { id: 1008, time: 'night', weather: ['rain'],           w: 0.6 },  // 密勒頓
+  { id: 1014, time: 'day',   weather: ['cloudy'],         w: 0.4 },  // 夠讚狗
+  { id: 1015, time: 'night', weather: ['fog'],            w: 0.4 },  // 願增猿
+  { id: 1016, time: 'day',   weather: ['clear'],          w: 0.4 },  // 吉雉雞
+  { id: 1017, time: 'day',   weather: ['clear'],          w: 0.5 },  // 厄鬼椪
+  { id: 1024, time: 'any',   weather: 'any',              w: 0.3 },  // 太樂巴戈斯
+  { id: 1025, time: 'night', weather: ['fog'],            w: 0.3 },  // 桃歹郎
+  { id: 793, time: 'night', weather: ['fog'],             w: 0.8 },  // 虛吾伊德
+  { id: 794, time: 'day',   weather: ['clear'],           w: 0.6 },  // 爆肌蚊
+  { id: 795, time: 'day',   weather: ['clear'],           w: 0.6 },  // 費洛美螂
+  { id: 796, time: 'night', weather: ['rain'],            w: 0.6 },  // 電束木
+  { id: 797, time: 'day',   weather: ['cloudy'],          w: 0.6 },  // 鐵火輝夜
+  { id: 798, time: 'day',   weather: ['clear'],           w: 0.6 },  // 紙御劍
+  { id: 799, time: 'night', weather: ['fog'],             w: 0.6 },  // 惡食大王
+  { id: 803, time: 'any',   weather: 'any',               w: 0.8 },  // 毒貝比
+  { id: 804, time: 'night', weather: ['fog'],             w: 0.4 },  // 四顎針龍
+  { id: 805, time: 'day',   weather: ['cloudy'],          w: 0.5 },  // 壘磊石
+  { id: 806, time: 'night', weather: ['fog'],             w: 0.4 },  // 砰頭小丑
 ];
 
 /* =========================================================
@@ -2222,9 +2242,9 @@ let currentGym = null;
 let ballInventory = { poke: 20, great: 0, ultra: 0, master: 0 };
 let currentBall = 'poke';
 
-let itemInventory = { goodPotion: 0, pineapple: 0, grape: 0, incense: 0 };
+let itemInventory = { goodPotion: 0, grape: 0, pineapple: 0, banana: 0, incense: 0 };
 let incenseEndAt = 0;
-let catchEffect = { extraCandy: 0, fleeReduction: false };
+let catchEffect = { catchBonus: 0, extraCandy: 0, fleeReduction: false };
 
 let caughtCount = 0;
 let nextRefreshAt = Date.now() + REFRESH_MS;
@@ -2479,8 +2499,8 @@ function applySaveData(data) {
   }
 
   if (data.itemInventory && typeof data.itemInventory === 'object') {
-    itemInventory = { goodPotion: 0, pineapple: 0, grape: 0, incense: 0 };
-    ['goodPotion','pineapple','grape','incense'].forEach(t => {
+    itemInventory = { goodPotion: 0, grape: 0, pineapple: 0, banana: 0, incense: 0 };
+    ['goodPotion','grape','pineapple','banana','incense'].forEach(t => {
       const v = data.itemInventory[t];
       if (typeof v === 'number') itemInventory[t] = Math.max(0, v | 0);
     });
@@ -2584,9 +2604,9 @@ async function resetGame() {
   try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
   ballInventory = { poke: 20, great: 0, ultra: 0, master: 0 };
   currentBall = 'poke';
-  itemInventory = { goodPotion: 0, pineapple: 0, grape: 0, incense: 0 };
+  itemInventory = { goodPotion: 0, grape: 0, pineapple: 0, banana: 0, incense: 0 };
   incenseEndAt = 0;
-  catchEffect = { extraCandy: 0, fleeReduction: false };
+  catchEffect = { catchBonus: 0, extraCandy: 0, fleeReduction: false };
   stopConfetti();
   caughtCount = 0;
   Object.keys(dexState).forEach(k => { dexState[k] = { seen:0, caught:0, shiny:0 }; });
@@ -2867,12 +2887,14 @@ const ProgMapLayer = L.GridLayer.extend({
     const wy0 = coords.y * size * scale;
     const wcell = cell * scale;
     const img = ctx.createImageData(N, N);
+    const grassMask = new Uint8Array(N * N);   // ← 新增：標記哪些格是草地
+
     for (let j = 0; j < N; j++) {
       for (let i = 0; i < N; i++) {
         const wx = wx0 + (i + 0.5) * wcell;
         const wy = wy0 + (j + 0.5) * wcell;
         const elev = _fbm(wx / 700, wy / 700, 1);
-        let r, g, b;
+        let r, g, b, isGrass = 0;
         if (elev < 0.42) {
           const depth = _fbm(wx / 320, wy / 320, 5);
           r = 46 + depth * 34; g = 112 + depth * 44; b = 172 + depth * 48;
@@ -2883,8 +2905,10 @@ const ProgMapLayer = L.GridLayer.extend({
           else {
             const vary = (_fbm(wx / 150, wy / 150, 3) - 0.5) * 46;
             r = 138 + vary; g = 190 + vary; b = 108 + vary;
+            isGrass = 1;                          // ← 標記草地
           }
         }
+        grassMask[j * N + i] = isGrass;
         const idx = (j * N + i) * 4;
         img.data[idx]     = Math.max(0, Math.min(255, r));
         img.data[idx + 1] = Math.max(0, Math.min(255, g));
@@ -2892,14 +2916,71 @@ const ProgMapLayer = L.GridLayer.extend({
         img.data[idx + 3] = 255;
       }
     }
+
     const tmp = document.createElement('canvas');
     tmp.width = N; tmp.height = N;
     tmp.getContext('2d').putImageData(img, 0, 0);
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(tmp, 0, 0, N, N, 0, 0, size, size);
+
+    this.drawGrass(ctx, coords, size, grassMask, N);   // ← 新增：畫草葉
+
     if (typeof done === 'function') setTimeout(done, 0);
     return canvas;
+  },
+
+  drawGrass: function(ctx, coords, size, grassMask, N) {
+    const z = coords.z;
+    if (z < 14) return;                    // LOD：縮太小不畫草，避免閃爍
+
+    const gpx0 = coords.x * size;          // tile 左上角的「全局像素座標」
+    const gpy0 = coords.y * size;
+    const CELL = z >= 17 ? 16 : (z >= 15 ? 24 : 36);
+    const seedBase = 9000 + z * 13;        // 每個 zoom 層固定草的分佈
+    const gx0 = Math.floor(gpx0 / CELL) * CELL;
+    const gy0 = Math.floor(gpy0 / CELL) * CELL;
+    const gxEnd = gpx0 + size;
+    const gyEnd = gpy0 + size;
+    ctx.save();
+    ctx.lineCap = 'round';
+
+    for (let gx = gx0 - CELL; gx < gxEnd + CELL; gx += CELL) {
+      for (let gy = gy0 - CELL; gy < gyEnd + CELL; gy += CELL) {
+        const ix = Math.round(gx / CELL);
+        const iy = Math.round(gy / CELL);
+        if (_rand2(ix, iy, seedBase) > 0.62) continue;   // 62% 的格有草
+        const px = gx - gpx0;
+        const py = gy - gpy0;
+        const ci = Math.floor(px / size * N);
+        const cj = Math.floor(py / size * N);
+        const mi = Math.max(0, Math.min(N - 1, ci));
+        const mj = Math.max(0, Math.min(N - 1, cj));
+        if (!grassMask[mj * N + mi]) continue;
+        const r2 = _rand2(ix, iy, seedBase + 7);
+        const r3 = _rand2(ix, iy, seedBase + 19);
+        const blades = 2 + Math.floor(r2 * 3);
+        const baseH = (z >= 17 ? 5.5 : 4) + r3 * 3;
+
+        // 深綠草葉，帶隨機色偏
+        ctx.strokeStyle = `rgba(${Math.round(48 + r2 * 28)},${Math.round(112 + r3 * 38)},${Math.round(38 + r2 * 18)},0.6)`;
+        ctx.lineWidth = z >= 17 ? 1.6 : 1.2;
+
+        for (let k = 0; k < blades; k++) {
+          const ra = _rand2(ix + k * 3, iy + k * 7, seedBase + 31);
+          const rb = _rand2(ix + k * 5, iy + k * 2, seedBase + 47);
+          const bx = px + (ra - 0.5) * CELL * 0.7;
+          const by = py + (rb - 0.5) * CELL * 0.7;
+          const lean = (ra - 0.5) * 3.2;
+          const h = baseH * (0.7 + rb * 0.6);
+          ctx.beginPath();
+          ctx.moveTo(bx, by);
+          ctx.quadraticCurveTo(bx + lean * 0.45, by - h * 0.65, bx + lean, by - h);
+          ctx.stroke();
+        }
+      }
+    }
+    ctx.restore();
   }
 });
 
@@ -3866,18 +3947,21 @@ async function switchCatchBall(t) {
   toast(`已切換為 ${BALL_TYPES[t].name}`);
 }
 function updateCatchItemUI() {
+  const grEl = document.getElementById('itemCountGrape');
   const pEl = document.getElementById('itemCountPineapple');
-  const gEl = document.getElementById('itemCountGrape');
+  const gEl = document.getElementById('itemCountBanana');
+  if (grEl) grEl.textContent = itemInventory.grape     || 0;
   if (pEl) pEl.textContent = itemInventory.pineapple || 0;
-  if (gEl) gEl.textContent = itemInventory.grape || 0;
+  if (gEl) gEl.textContent = itemInventory.banana || 0;
 
   const canUse = (catchState === 'aim') && !ballFlying;
 
   document.querySelectorAll('.catch-item-btn').forEach(btn => {
     const t = btn.dataset.item;
     const n = itemInventory[t] || 0;
-    const active = (t === 'pineapple' && catchEffect.extraCandy > 0) ||
-                   (t === 'grape' && catchEffect.fleeReduction);
+    const active = (t === 'grape'     && catchEffect.catchBonus > 1) ||
+	               (t === 'pineapple' && catchEffect.extraCandy > 0) ||
+                   (t === 'banana' && catchEffect.fleeReduction);
     btn.classList.toggle('active', active);
     btn.disabled = n === 0 || active || !canUse;
   });
@@ -3897,26 +3981,29 @@ function clearEffectBadges() {
 }
 
 function resetCatchEffect() {
-  catchEffect = { extraCandy: 0, fleeReduction: false };
+  catchEffect = { catchBonus: 0, extraCandy: 0, fleeReduction: false };
   clearEffectBadges();
   updateCatchItemUI();
 }
 
 function useCatchItem(type) {
   if (catchState !== 'aim') return;
-  if (!catchEffect) catchEffect = { extraCandy: 0, fleeReduction: false };
+  if (!catchEffect) catchEffect = { catchBonus: 0, extraCandy: 0, fleeReduction: false };
   if ((itemInventory[type] || 0) <= 0) {
     toast(`沒有${ITEMS[type].name}`);
     return;
   }
 
   itemInventory[type]--;
-  if (type === 'pineapple') {
+  if (type === 'grape') {
+    catchEffect.catchBonus = 1.3;
+    showEffectBadge('🍇 捕捉成功率 ×1.3');
+  } else if (type === 'pineapple') {
     catchEffect.extraCandy = 1;
     showEffectBadge('🍍 捕獲糖果+1');
-  } else if (type === 'grape') {
+  } else if (type === 'banana') {
     catchEffect.fleeReduction = true;
-    showEffectBadge('🍇 降低逃跑機率');
+    showEffectBadge('🍌 降低逃跑機率');
   }
 
   SFX.init();
@@ -3939,7 +4026,7 @@ function openCatch(p, marker, shiny) {
   if (catchState !== 'idle') return;
   catchState = 'aim';
   currentSpawn = { p, marker, shiny };
-  catchEffect = { extraCandy: 0, fleeReduction: false };
+  catchEffect = { catchBonus: 0, extraCandy: 0, fleeReduction: false };
   clearEffectBadges();
 
   ensureUsableBall();
@@ -4011,7 +4098,7 @@ function closeCatch() {
   renderCatchBallSelector();
   currentSpawn = null;
   ballFlying = false;
-  catchEffect = { extraCandy: 0, fleeReduction: false };
+  catchEffect = { catchBonus: 0, extraCandy: 0, fleeReduction: false };
   clearEffectBadges();
   resetSwipe();
   hideAimArc();
@@ -4325,6 +4412,7 @@ function resolveCatch() {
                               targetX: ballHome.x, targetY: ballHome.y };
 
   /* 讀取效果（不立即清除，等成功或逃走才消耗） */
+  const catchBonus   = catchEffect.catchBonus   || 1;
   const extraCandy = catchEffect.extraCandy || 0;
   const fleeReduction = catchEffect.fleeReduction || false;
 
@@ -4332,6 +4420,7 @@ function resolveCatch() {
   if (info.quality === 'perfect') mult *= 1.25;
   else if (info.quality === 'weak' || info.quality === 'strong') mult *= 0.78;
   if (info.ballType === 'curve') mult *= CURVE_SUCCESS_MULT;
+  mult *= catchBonus;
 
   let chance;
   if (currentBall === 'master') {
@@ -4353,7 +4442,7 @@ function resolveCatch() {
     addCandy(p.name, candyGain);
 
     /* 捕獲成功 → 消耗效果 */
-    catchEffect = { extraCandy: 0, fleeReduction: false };
+    catchEffect = { catchBonus: 0, extraCandy: 0, fleeReduction: false };
     clearEffectBadges();
 
     updateHUD();
@@ -4400,7 +4489,7 @@ function resolveCatch() {
 
     if (Math.random() < fleeChance) {
       /* 精靈逃走 → 消耗效果 */
-      catchEffect = { extraCandy: 0, fleeReduction: false };
+      catchEffect = { catchBonus: 0, extraCandy: 0, fleeReduction: false };
       clearEffectBadges();
 
       showResult(`可惜！${p.name} 逃走了…`, '#ff8a8a');
@@ -4415,7 +4504,7 @@ function resolveCatch() {
     } else {
       /* 精靈沒逃走 → 保留效果讓玩家再試 */
       showResult(fleeReduction
-        ? '差一點！（🍇 提子生效，精靈沒逃走）'
+        ? '差一點！（🍌 香蕉生效，精靈沒逃走）'
         : '差一點！再試一次', '#ffd166');
       ballFly.style.transition = 'transform .32s ease-in, opacity .32s';
       setBallTransform(info.targetX, info.targetY + 240, info.spinDir * 1080);
@@ -4498,7 +4587,7 @@ function spinStop() {
 
   setTimeout(() => {
     const gained = { poke: 0, great: 0, ultra: 0, master: 0 };
-    const itemsGained = { goodPotion: 0, pineapple: 0, grape: 0, incense: 0 };
+    const itemsGained = { goodPotion: 0, grape: 0, pineapple: 0, banana: 0, incense: 0 };
 
     const base = 1 + Math.floor(Math.random() * 3);
     gained.poke = base;
@@ -4509,15 +4598,16 @@ function spinStop() {
     else if (r < 0.133)   gained.great  = 1;
 
     const ir = Math.random();
-    if (ir < 0.42)   itemsGained.goodPotion = 1;
-	else if (ir < 0.05)   itemsGained.incense = 1;
-    else if (ir < 0.17)   itemsGained.grape = 1;
-    else if (ir < 0.32)   itemsGained.pineapple = 1;
+    if (ir < 0.05)   itemsGained.goodPotion = 1;
+	else if (ir < 0.17)   itemsGained.incense = 1;
+    else if (ir < 0.32)   itemsGained.banana = 1;
+    else if (ir < 0.42)   itemsGained.pineapple = 1;
+	else if (ir < 0.50) itemsGained.grape      = 1;
 
     ['poke','great','ultra','master'].forEach(t => {
       ballInventory[t] = (ballInventory[t] || 0) + gained[t];
     });
-    ['goodPotion','pineapple','grape','incense'].forEach(t => {
+    ['goodPotion','grape','pineapple','banana','incense'].forEach(t => {
       itemInventory[t] = (itemInventory[t] || 0) + itemsGained[t];
     });
     updateHUD();
@@ -4531,7 +4621,7 @@ function spinStop() {
                  </span>`;
       }
     });
-    ['goodPotion','incense','grape','pineapple'].forEach(t => {
+    ['goodPotion','grape','incense','banana','pineapple'].forEach(t => {
       if (itemsGained[t] > 0) {
         html += `<span style="display:inline-flex;align-items:center;gap:5px;margin:0 4px">
                    <span style="font-size:22px">${ITEMS[t].icon}</span>×${itemsGained[t]}
@@ -4559,8 +4649,9 @@ function spinStop() {
     else if (gained.great > 0)  toast('✨ 獲得了高級球！', 2600);
 
 	if (itemsGained.incense > 0) toast('🌀 獲得了香薰！', 2600);
-    else if (itemsGained.grape > 0) toast('🍇 獲得了提子！', 2400);
+    else if (itemsGained.banana > 0) toast('🍌 獲得了香蕉！', 2400);
     else if (itemsGained.pineapple > 0) toast('🍍 獲得了菠蘿！', 2400);
+	else if (itemsGained.grape > 0) toast('🍇 獲得了提子！', 2400);
 	else if (itemsGained.goodPotion > 0) toast('🧪 獲得了好傷藥！', 2400);
   }, 1700);
 }
@@ -4629,6 +4720,37 @@ document.getElementById('stopCloseBtn').addEventListener('click', () => {
    ========================================================= */
 const bagScreen = document.getElementById('bagScreen');
 
+function switchUseBall(t) {
+  if ((ballInventory[t] || 0) <= 0) { toast('這個精靈球已用完'); return; }
+  currentBall = t;
+  if (ballFly) ballFly.className = 'pokeball ball-' + currentBall;
+  updateHUD();
+  renderBag();
+  SFX.init();
+  SFX.bubble();
+  toast(`已切換為 ${BALL_TYPES[t].name}`);
+}
+
+function craftBall(t) {
+  const up = BALL_UPGRADE[t];
+  if (!up) { toast('大師球已是最高級'); return; }
+  const n = ballInventory[t] || 0;
+  if (n < 5) { toast(`${BALL_TYPES[t].name}不足 5 個（目前 ${n} 個）`); return; }
+
+  ballInventory[t] = n - 5;
+  ballInventory[up] = (ballInventory[up] || 0) + 1;
+
+  if ((ballInventory[currentBall] || 0) <= 0) ensureUsableBall();
+  if (ballFly) ballFly.className = 'pokeball ball-' + currentBall;
+
+  updateHUD();
+  renderBag();
+  autoSave();
+  SFX.init();
+  SFX.reward();
+  toast(`🔧 合成成功！獲得 1 個 ${BALL_TYPES[up].name}`, 2600);
+}
+
 function renderBag() {
   const ballGrid = document.getElementById('bagGrid');
   const order = ['poke', 'great', 'ultra', 'master'];
@@ -4636,32 +4758,67 @@ function renderBag() {
     const d = BALL_TYPES[t];
     const n = ballInventory[t] || 0;
     const sel = (t === currentBall);
+    const up = BALL_UPGRADE[t];
+    const canCraft = up && n >= 5;
+
+    let tag = '';
+    if (sel) tag += '<div class="bag-ball-tag">✓ 使用中</div>';
+    if (canCraft && sel) {
+      tag += `<div class="bag-ball-tag" style="background:rgba(124,252,154,.18);color:#7CFC9A">🔧 再按一次合成 → ${BALL_TYPES[up].name}</div>`;
+    } else if (canCraft) {
+      tag += `<div class="bag-ball-tag" style="background:rgba(124,252,154,.18);color:#7CFC9A">🔧 可合成 → ${BALL_TYPES[up].name}（先選中使用）</div>`;
+    }
+    if (!up) tag += '<div class="bag-ball-tag" style="background:rgba(162,155,254,.18);color:#a29bfe">最高級</div>';
+
     return `
       <div class="bag-item ${sel ? 'selected' : ''} ${n === 0 ? 'empty' : ''}" data-ball="${t}">
         <div class="bag-ball-icon ball-${t}"></div>
         <div class="bag-ball-name">${d.name}</div>
         <div class="bag-ball-desc">${d.desc}</div>
         <div class="bag-ball-count">${n}</div>
-        ${sel ? '<div class="bag-ball-tag">✓ 使用中</div>' : ''}
+        ${tag}
       </div>`;
   }).join('');
 
   ballGrid.querySelectorAll('.bag-item').forEach(el => {
-    el.addEventListener('click', () => {
+    el.addEventListener('click', async () => {
       const t = el.dataset.ball;
-      if ((ballInventory[t] || 0) <= 0) { toast('這個精靈球已用完'); return; }
-      currentBall = t;
-      if (ballFly) ballFly.className = 'pokeball ball-' + currentBall;
-      updateHUD();
-      renderBag();
-      SFX.init();
-      SFX.bubble();
-      toast(`已切換為 ${BALL_TYPES[t].name}`);
+      const n = ballInventory[t] || 0;
+      const up = BALL_UPGRADE[t];
+      const isCurrent = (t === currentBall);
+
+      if (n <= 0) { toast('這個精靈球已用完'); return; }
+
+      if (!isCurrent) {
+        switchUseBall(t);
+        return;
+      }
+
+      if (!up) {
+        toast(`${BALL_TYPES[t].name} 已是最高級，無法合成`);
+        return;
+      }
+      if (n < 5) {
+        toast(`${BALL_TYPES[t].name}不足 5 個（目前 ${n} 個），無法合成`);
+        return;
+      }
+
+      const ok = await showConfirm({
+        icon: '🔧',
+        title: '合成精靈球',
+        message:
+          `是否消耗 5 個 ${BALL_TYPES[t].name} 合成 1 個 ${BALL_TYPES[up].name}？\n\n` +
+          `${BALL_TYPES[t].name}：${n} → ${n - 5}\n` +
+          `${BALL_TYPES[up].name}：${ballInventory[up] || 0} → ${(ballInventory[up] || 0) + 1}`,
+        okText: '合成',
+        cancelText: '取消',
+      });
+      if (ok) craftBall(t);
     });
   });
 
   const itemGrid = document.getElementById('bagItemGrid');
-  const itemOrder = ['goodPotion', 'pineapple', 'grape', 'incense'];
+  const itemOrder = ['goodPotion', 'grape', 'pineapple', 'banana', 'incense'];
   itemGrid.innerHTML = itemOrder.map(t => {
     const d = ITEMS[t];
     const n = itemInventory[t] || 0;
@@ -4749,6 +4906,8 @@ const dexScreen = document.getElementById('dexScreen');
 const evoScreen = document.getElementById('evoScreen');
 
 function renderDex() {
+  const scrollEl   = document.querySelector('#dexScreen .dex-scroll');
+  const savedScroll = scrollEl ? scrollEl.scrollTop : 0;
   const grid = document.getElementById('dexGrid');
   let caughtTotal = 0;
   let html = '';
@@ -4769,7 +4928,7 @@ function renderDex() {
     const candy = getCandy(p.name);
 
     html += `
-      <div class="${cls}">
+      <div class="${cls}" data-name="${p.name}" data-candy="${candy}">
         <div class="dex-icon" data-id="${p.id}" data-name="${p.name}" data-seen="${isSeen?1:0}" data-shiny="${st.shiny>0?1:0}" style="--c:${p.color}">
           <div class="dex-shadow"></div>
           ${isSeen ? '' : `<span style="font-size:30px;z-index:2">❓</span>`}
@@ -4783,6 +4942,15 @@ function renderDex() {
   });
 
   grid.innerHTML = html;
+  grid.querySelectorAll('.dex-cell').forEach(cell => {
+    const name  = cell.dataset.name;
+    const candy = parseInt(cell.dataset.candy) || 0;
+    if (!name || candy <= 0) return;
+    cell.classList.add('plant-able');
+    cell.addEventListener('click', () => {
+      plantPineapple(name);
+    });
+  });
   document.getElementById('dexProgress').textContent = `已捕獲 ${caughtTotal} / ${POKEDEX.length}`;
 
   grid.querySelectorAll('.dex-icon').forEach(box => {
@@ -4815,16 +4983,54 @@ function renderDex() {
 
     if (hasShiny) {
       box.classList.add('has-shiny');
-      let pressing = false;
-      const showShiny = () => { if (pressing) return; pressing = true; img.src = shinySrc; };
-      const showNormal = () => { pressing = false; img.src = normalSrc; };
-      box.addEventListener('pointerdown', showShiny);
-      box.addEventListener('pointerup', showNormal);
-      box.addEventListener('pointercancel', showNormal);
-      box.addEventListener('pointerleave', showNormal);
+      let showingShiny = false;
+      box.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showingShiny = !showingShiny;
+        img.src = showingShiny ? shinySrc : normalSrc;
+      });
       box.addEventListener('contextmenu', e => e.preventDefault());
     }
   });
+  if (scrollEl) scrollEl.scrollTop = savedScroll;
+}
+
+async function plantPineapple(name) {
+  const candy = getCandy(name);
+  if (candy < 5) {
+    toast(`🍍 ${name} 的糖果不足 5 顆（目前 ${candy} 顆）`);
+    return;
+  }
+
+  const pineapples = Math.floor(candy / 5);
+  const used       = pineapples * 5;
+  const remain     = candy - used;
+  const ownedPine  = itemInventory.pineapple || 0;
+
+  const ok = await showConfirm({
+    icon: '🍍',
+    title: '種出菠蘿',
+    message:
+      `是否消耗 ${name} 的 ${used} 顆糖果，種出 ${pineapples} 個菠蘿？\n\n` +
+      `🍬 糖果：${candy} → ${remain}（保留 ${remain} 顆）\n` +
+      `🍍 菠蘿：${ownedPine} → ${ownedPine + pineapples}`,
+    okText: '種植',
+    cancelText: '取消',
+  });
+  if (!ok) return;
+
+  candyBag[name] -= used;
+  if (candyBag[name] < 0) candyBag[name] = 0;
+  itemInventory.pineapple = ownedPine + pineapples;
+
+  updateHUD();
+  autoSave();
+  SFX.init();
+  SFX.reward();
+  toast(`🍍 消耗 ${used} 顆糖果，獲得 ${pineapples} 個菠蘿！`, 2600);
+
+  renderDex(); // 刷新糖果與菠蘿數字
+  if (!bagScreen.classList.contains('hidden')) renderBag();
 }
 
 document.getElementById('dexBtn').addEventListener('click', () => {
