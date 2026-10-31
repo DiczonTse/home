@@ -1621,8 +1621,8 @@ async function loadExtraForms(pokedex) {
         name: zhName,
         emoji: '❓',
         color: '#888',
-        rate: 0.35,
-        w: 0.3,
+        rate: 0.02,
+        w: 0.02,
         notWild: false,
         time: 'any',
         weather: 'any',
@@ -3371,7 +3371,11 @@ function setBattleMsg(text) {
   gymBattleMsg.classList.toggle('show', !!text);
 }
 
-function playGymBattleAnimation(playerMon, gymMon, playerWins, onDone) {
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function playGymBattleAnimation(playerMon, gymMon, playerWins, onDone) {
   gymBattleOverlay.classList.add('on');
   gymBattleStage.classList.remove('shake');
   gymVs.classList.remove('show');
@@ -3392,56 +3396,81 @@ function playGymBattleAnimation(playerMon, gymMon, playerWins, onDone) {
     gymFighterRight.classList.add('entered');
   });
 
-  setTimeout(() => {
-    gymVs.classList.add('show');
-    SFX.init();
-    SFX.npcAppear();
-  }, 450);
+  // ── 開場 ──
+  await sleep(400);
+  gymVs.classList.add('show');
+  SFX.init();
+  SFX.npcAppear();
 
-  setTimeout(() => {
-    setBattleMsg('對戰開始！');
-  }, 750);
+  await sleep(300);
+  setBattleMsg('對戰開始！');
 
-  setTimeout(() => {
-    gymVs.classList.remove('show');
+  await sleep(300);
+  gymVs.classList.remove('show');
+
+  // ── 3 次對撞 ──
+  const ROUNDS = 3;
+
+  for (let i = 0; i < ROUNDS; i++) {
+    const isFinal = (i === ROUNDS - 1);
+
+    setBattleMsg(isFinal ? `第 ${i + 1} 次對撞 — 最後一擊！` : `第 ${i + 1} 次對撞！`);
+    await sleep(120);
+
+    // 雙方衝鋒
     gymFighterLeft.classList.add('charging');
     gymFighterRight.classList.add('charging');
     SFX.tradeWhoosh();
-  }, 1150);
+    await sleep(220);
 
-  setTimeout(() => {
+    // 碰撞！
     gymClash.classList.add('show');
     gymBattleStage.classList.add('shake');
     gymBattleFlash.classList.add('on');
     SFX.hit();
     SFX.throwBall();
-  }, 1500);
+    await sleep(170);
 
-  setTimeout(() => {
+    // 收招 + 彈開
     gymFighterLeft.classList.remove('charging');
     gymFighterRight.classList.remove('charging');
+    gymClash.classList.remove('show');
+    gymBattleFlash.classList.remove('on');
+    gymBattleStage.classList.remove('shake');
+
     gymFighterLeft.classList.add('knockback');
     gymFighterRight.classList.add('knockback');
-    // 輸的一方被擊中
-    (playerWins ? gymFighterRight : gymFighterLeft).classList.add('hit');
-  }, 1750);
 
-  setTimeout(() => {
-    // 輸的一方被打飛
-    (playerWins ? gymFighterRight : gymFighterLeft).classList.add('defeated');
-    setBattleMsg(playerWins ? '挑戰成功！' : '挑戰失敗…');
-    if (playerWins) {
-      SFX.reward();
+    if (isFinal) {
+      // 第 3 次：只有輸的一方被擊中並擊飛
+      const loser = playerWins ? gymFighterRight : gymFighterLeft;
+      await sleep(160);
+      loser.classList.add('hit');
+      await sleep(220);
+
+      loser.classList.add('defeated');
+      setBattleMsg(playerWins ? '挑戰成功！' : '挑戰失敗…');
+      if (playerWins) {
+        SFX.reward();
+      } else {
+        SFX.catchFail();
+        SFX.flee();
+      }
+      await sleep(700);
     } else {
-      SFX.catchFail();
-      SFX.flee();
-    }
-  }, 2250);
+      // 前 2 次：雙方彈開、勢均力敵
+      await sleep(160);
+      setBattleMsg(`第 ${i + 1} 次對撞 — 勢均力敵！`);
+      await sleep(300);
 
-  setTimeout(() => {
-    gymBattleOverlay.classList.remove('on');
-    onDone();
-  }, 3100);
+      gymFighterLeft.classList.remove('knockback');
+      gymFighterRight.classList.remove('knockback');
+      await sleep(450); // 等 .gym-fighter 的 .45s 回位過渡跑完
+    }
+  }
+
+  gymBattleOverlay.classList.remove('on');
+  onDone();
 }
 
 function updateGymUI() {
