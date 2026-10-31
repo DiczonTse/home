@@ -2414,14 +2414,14 @@ function getSpawnCount() {
   const base = 4 + Math.floor(Math.random() * 4);
   let mult = 1;
   switch (env.weather) {
-    case 'clear':  mult *= 1.30; break;
-    case 'cloudy': mult *= 1.10; break;
-    case 'rain':   mult *= 0.70; break;
-    case 'snow':   mult *= 0.60; break;
+    case 'clear':  mult *= 1.50; break;
+    case 'cloudy': mult *= 1.30; break;
+    case 'rain':   mult *= 0.90; break;
+    case 'snow':   mult *= 0.70; break;
     case 'fog':    mult *= 0.85; break;
     default:       mult *= 1.00; break;
   }
-  if (env.time === 'night') mult *= 0.75;
+  if (env.time === 'night') mult *= 1.20;
   if (isIncenseActive()) mult *= 2;
   return Math.max(2, Math.min(24, Math.round(base * mult)));
 }
