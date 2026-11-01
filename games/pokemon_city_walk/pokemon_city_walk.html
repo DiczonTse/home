@@ -170,11 +170,16 @@
   @keyframes shadowIdle{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(.95);opacity:.42}}
 
   .spawn-gif.png-big{
-	transform:scale(1.35);transform-origin:center bottom;
+	transform:scale(1.7);transform-origin:center bottom;
 	animation:spawnIdleBig 2.6s ease-in-out infinite}
   @keyframes spawnIdleBig{
-	0%,100%{transform:translateY(0) scale(1.35)}
-	50%{transform:translateY(-2px) scale(1.377)}}
+	0%,100%{transform:translateY(0) scale(1.7)}
+	50%{transform:translateY(-2px) scale(1.734)}}
+	
+  .spawn::before{
+    content:'';position:absolute;left:50%;bottom:0;
+    width:140px;height:140px;margin-left:-70px;
+  }
 
   .spawn.shiny .spawn-gif{
 	filter:drop-shadow(0 0 10px #ffd166) drop-shadow(0 0 22px #ffb703);
@@ -240,6 +245,13 @@
     width:110px;height:110px;object-fit:contain;image-rendering:pixelated;
     filter:drop-shadow(0 6px 16px rgba(0,0,0,.6));
     transition:filter .25s;
+  }
+  .gym-fighter-placeholder{
+    width:110px;height:110px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:60px;line-height:1;
+    color:rgba(255,255,255,.85);
+    text-shadow:0 2px 10px rgba(0,0,0,.7);
   }
   .gym-fighter-name{
     font-size:12px;font-weight:800;color:rgba(255,255,255,.85);
@@ -627,11 +639,11 @@
   @keyframes monShadowIdle{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(.96);opacity:.7}}
 
   .mon img.png-big{
-    transform:scale(1.35);transform-origin:center bottom;
+    transform:scale(1.7);transform-origin:center bottom;
     animation:monIdleBig 2.4s ease-in-out infinite}
   @keyframes monIdleBig{
-    0%,100%{transform:translateY(0) scale(1.35)}
-    50%{transform:translateY(-3px) scale(1.373)}}
+    0%,100%{transform:translateY(0) scale(1.7)}
+    50%{transform:translateY(-3px) scale(1.734)}}
 
   .mon.shiny img{
     filter:drop-shadow(0 0 14px #ffd166) drop-shadow(0 0 30px #ffb703);
@@ -878,7 +890,6 @@
   .dex-cell.seen{opacity:.72}
   .dex-cell.unknown{opacity:.3;filter:grayscale(1)}
   .dex-cell.plant-able { cursor: pointer; }
-  .dex-cell.plant-able:active { transform: scale(.97); }
   .dex-icon{width:64px;height:64px;margin:0 auto 7px;position:relative;
     display:flex;align-items:center;justify-content:center;font-size:30px;
     touch-action:manipulation;-webkit-touch-callout:none}
@@ -894,7 +905,13 @@
   .dex-shiny{font-size:9px;color:#ffb703;margin-top:2px;font-weight:800;
     text-shadow:0 0 8px rgba(255,183,3,.8)}
   .dex-evo-tag{font-size:9px;color:#7dd3fc;margin-top:2px;font-weight:700}
-
+  .gym-select-cell.shiny-cell{
+    border-color:#ffd166;
+    background:linear-gradient(160deg,rgba(255,209,102,.16),rgba(255,183,3,.06));
+    box-shadow:0 0 20px rgba(255,209,102,.3);}
+  .gym-select-cell.shiny-cell .dex-name{color:#ffd166}
+  .gym-select-cell.shiny-cell img{
+    filter:drop-shadow(0 0 6px #ffd166) drop-shadow(0 0 14px #ffb703);}
   .bag-section-title{color:#ffd166;font-size:14px;font-weight:800;letter-spacing:1px;
     margin:8px 4px 12px}
   .bag-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
@@ -1064,6 +1081,16 @@
   @keyframes evoShake{0%,100%{transform:scale(1) rotate(-3deg)}50%{transform:scale(1.06) rotate(3deg)}}
   #evoOverlay .evo-txt{color:#fff;font-size:22px;font-weight:900;letter-spacing:3px;
     text-shadow:0 0 20px rgba(255,255,255,.9),0 2px 14px rgba(0,0,0,.9)}
+  #evoOverlay.shiny{
+    background:radial-gradient(circle at 50% 50%,
+      rgba(255,255,255,1),
+      rgba(255,220,120,.8),
+      rgba(255,183,3,.5),
+      rgba(0,0,0,.88));
+  }
+  #evoOverlay.shiny img{
+    filter:drop-shadow(0 0 30px #ffd166) drop-shadow(0 0 60px #ffb703) brightness(1.15);
+  }
 
   #confirmModal{position:fixed;inset:0;z-index:8000;
     display:flex;align-items:center;justify-content:center;padding:20px}
@@ -1312,7 +1339,7 @@
     </div>
     <div class="npc-exchange-line">
       <span>挑戰獎勵</span>
-      <span class="val ok">所選精靈糖果 ×3</span>
+      <span class="val ok">所選精靈糖果 ×3 或 捕捉守館精靈</span>
     </div>
   </div>
 
@@ -1644,6 +1671,75 @@ const FORM_NAME_ZH = {
   'pikachu-alola-cap':          '阿羅拉帽子皮卡丘',
   'pikachu-partner-cap':        '搭檔帽子皮卡丘',
   'pikachu-world-cap':          '世界帽子皮卡丘',
+  // ── 花葉蒂 / 霸主 / 搭檔 / 小智版等特殊形態 ──
+  'floette-eternal':              '花葉蒂（永恆之花）',
+  'raticate-totem-alola':         '阿羅拉拉達（霸主）',
+  'greninja-battle-bond':         '甲賀忍蛙（小智版）',
+  'gumshoos-totem':               '貓鼬探長（霸主）',
+  'vikavolt-totem':               '鍬農炮蟲（霸主）',
+  'lurantis-totem':               '偽螳草（霸主）',
+  'salazzle-totem':               '焰后蜥（霸主）',
+  'mimikyu-totem-disguised':      '謎擬Q（霸主・化皮）',
+  'mimikyu-totem-busted':         '謎擬Q（霸主・現形）',
+  'kommo-o-totem':                '杖尾鱗甲龍（霸主）',
+  'marowak-totem':                '嘎啦嘎啦（霸主）',
+  'ribombee-totem':               '蝶結萌虻（霸主）',
+  'rockruff-own-tempo':           '岩狗狗（我行我素）',
+  'araquanid-totem':              '滴蛛霸（霸主）',
+  'togedemaru-totem':             '托戈德瑪爾（霸主）',
+  'pikachu-starter':              '皮卡丘（搭檔）',
+  'eevee-starter':                '伊布（搭檔）',
+  // ── 第九世代（帕底亞 / 北上 / 藍之圓盤）特殊形態 ──
+  'basculin-white-striped':       '野蠻鱸魚（白條紋）',
+  'basculegion-female':           '幽尾玄魚（雌性）',
+  'enamorus-therian':             '眷戀雲（靈獸形態）',
+  'tauros-paldea-combat-breed':   '肯泰羅（帕底亞・鬥牛）',
+  'tauros-paldea-blaze-breed':    '肯泰羅（帕底亞・火種）',
+  'tauros-paldea-aqua-breed':     '肯泰羅（帕底亞・水游）',
+  'wooper-paldea':                '烏波（帕底亞）',
+  'oinkologne-female':            '愛吃豚（雌性）',
+  'dudunsparce-three-segment':    '土龍節節（三段）',
+  'palafin-hero':                 '海豚俠（英雄形態）',
+  'maushold-family-of-three':     '一家鼠（三隻家庭）',
+  'tatsugiri-droopy':           '米立龍（下垂姿勢）',
+  'tatsugiri-stretchy':           '米立龍（伸展姿勢）',
+  'squawkabilly-blue-plumage':    '青鳥（藍羽）',
+  'squawkabilly-yellow-plumage':  '青鳥（黃羽）',
+  'squawkabilly-white-plumage':   '青鳥（白羽）',
+  'gimmighoul-roaming':           '索財靈（徒步）',
+  // ── 故勒頓 / 密勒頓 各模式 ──
+  'koraidon-limited-build':       '故勒頓（限制模式）',
+  'koraidon-sprinting-build':     '故勒頓（疾馳模式）',
+  'koraidon-swimming-build':      '故勒頓（破浪模式）',
+  'koraidon-gliding-build':       '故勒頓（滑翔模式）',
+  'miraidon-low-power-mode':      '密勒頓（低功耗模式）',
+  'miraidon-drive-mode':          '密勒頓（行駛模式）',
+  'miraidon-aquatic-mode':        '密勒頓（破浪模式）',
+  'miraidon-glide-mode':          '密勒頓（滑翔模式）',
+  // ── 《寶可夢傳說 Z-A》新增超級進化 ──
+  'clefable-mega':                '皮可西（超級進化）',
+  'victreebel-mega':              '大食花（超級進化）',
+  'starmie-mega':                 '寶石海星（超級進化）',
+  'dragonite-mega':               '快龍（超級進化）',
+  'meganium-mega':                '大竺葵（超級進化）',
+  'feraligatr-mega':              '大力鱷（超級進化）',
+  'skarmory-mega':                '盔甲鳥（超級進化）',
+  'froslass-mega':                '雪妖女（超級進化）',
+  'emboar-mega':                  '炎武王（超級進化）',
+  'excadrill-mega':               '龍頭地鼠（超級進化）',
+  'scolipede-mega':               '蜈蚣王（超級進化）',
+  'scrafty-mega':                 '流氓鱷（超級進化）',
+  'eelektross-mega':              '麻麻鰻魚王（超級進化）',
+  'chandelure-mega':              '水晶燈火靈（超級進化）',
+  'chesnaught-mega':              '布里卡隆（超級進化）',
+  'delphox-mega':                 '妖火紅狐（超級進化）',
+  'greninja-mega':                '甲賀忍蛙（超級進化）',
+  'pyroar-mega':                  '火炎獅（超級進化）',
+  'floette-mega':                 '花葉蒂（超級進化）',
+  'malamar-mega':                 '烏賊王（超級進化）',
+  'barbaracle-mega':              '龜足巨鎧（超級進化）',
+  'dragalge-mega':                '毒藻龍（超級進化）',
+  'hawlucha-mega':                '戰鬥飛鳥（超級進化）',
 };
 
 async function loadExtraForms(pokedex) {
@@ -1651,6 +1747,7 @@ async function loadExtraForms(pokedex) {
   const FORM_END   = 10300;
 
   updateProgress(0, FORM_END - FORM_START, '正在載入特殊形態…');
+  const missingNames = [];
 
   const existingIds = new Set(pokedex.map(p => p.id));
   const urls = [];
@@ -1693,11 +1790,18 @@ async function loadExtraForms(pokedex) {
                 || names.find(n => n.language?.name === 'zh-hans');
         if (zh) zhName = zh.name;
       }
-
-      // ← 新增：PokeAPI 缺中文時，用本地映射表補上（例如超極巨化）
+      // PokeAPI 缺中文時，用本地映射表補上（例如超極巨化）
       if (!zhName) {
         const key = String(d.name || '').toLowerCase();
         zhName = FORM_NAME_ZH[key] || null;
+        // ← 新增：兩邊都沒有 → 記錄下來，稍後印出
+        if (!zhName) {
+          missingNames.push({
+            id,
+            english: d.name,
+            label: (d.forms && d.forms[0] && d.forms[0].name) || d.name,
+          });
+        }
       }
 
       const name = zhName || extractFormName(d, id);
@@ -1724,6 +1828,15 @@ async function loadExtraForms(pokedex) {
     updateProgress(Math.min(i + BATCH, urls.length), urls.length,
       `已載入 ${Math.min(i + BATCH, urls.length)} / ${urls.length} 個形態…`);
     await new Promise(r => setTimeout(r, 50));
+  }
+  if (missingNames.length) {
+    console.warn(
+      `%c⚠️ 有 ${missingNames.length} 個形態缺少繁體中文名，請補進 FORM_NAME_ZH`,
+      'color:#ffb703;font-weight:900;font-size:13px'
+    );
+    console.table(missingNames);
+  } else {
+    console.log('%c✅ 所有特殊形態都有中文名', 'color:#7CFC9A;font-weight:900');
   }
 }
 
@@ -1759,7 +1872,10 @@ function applyRareSpawnRules(pokedex) {
   RARE_SPAWN_RULES.forEach(rule => {
     const p = pokedex.find(x => x.id === rule.id);
     if (!p) return;
-    if (p.notWild) return;
+    if (p.notWild) {
+      if (!rule.forceWild) return;
+      p.notWild = false;
+    }
     p.time    = rule.time    || 'any';
     p.weather = rule.weather || 'any';
     p.w       = Math.max(0.1, rule.w);
@@ -1793,7 +1909,8 @@ function spriteUrl(p, shiny) {
 }
 
 function spriteIsPng(p) {
-  if (p.spriteUrl) return false;
+  if (p.isForm) return true;
+  if (p.spriteUrl) return true;
   const sid = Number(p.spriteId || p.id);
   return !(sid >= 1 && sid <= 649);
 }
@@ -1829,8 +1946,12 @@ const RARE_SPAWN_RULES = [
   { id: 906, time: 'day',   weather: ['clear','cloudy'], w: 5 },  // 新葉喵
   { id: 909, time: 'day',   weather: ['clear'],          w: 5 },  // 呆火鱷
   { id: 912, time: 'night', weather: ['rain'],           w: 5 },  // 潤水鴨
-  { id: 25,  time: 'day',   weather: ['rain'],            w: 4 },  // 比卡超
+  { id: 25,  time: 'day',   weather: ['rain'], w: 4, forceWild: true },  // 比卡超
   { id: 133, time: 'day',   weather: ['clear','cloudy'],  w: 3 },  // 伊貝
+  { id: 35,  time: 'night', weather: ['clear','fog'],    w: 3,   forceWild: true },  // 皮皮
+  { id: 39,  time: 'day',   weather: ['clear','cloudy'], w: 3,   forceWild: true },  // 波波球
+  { id: 183, time: 'night', weather: ['rain'],           w: 3,   forceWild: true },  // 瑪力露
+  { id: 113, time: 'day',   weather: ['clear','cloudy'], w: 2.5, forceWild: true },  // 吉利蛋
   { id: 147, time: 'night', weather: ['rain','fog'],      w: 2.5 },  // 迷你龍
   { id: 131, time: 'night', weather: ['snow','fog'],      w: 2.5 },  // 背背龍
   { id: 246, time: 'night', weather: ['clear'],           w: 2.5 },  // 幼基拉斯
@@ -2043,20 +2164,23 @@ const SPECIAL_FORMS = [
    ========================================================= */
 const UNOWN_SYMBOLS = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''), 'exclamation', 'question'];
 
-const UNOWN_FORMS = UNOWN_SYMBOLS.map((symbol, index) => {
-  const isLetter = /^[A-Z]$/.test(symbol);
-  const displayName = isLetter ? symbol : (symbol === 'exclamation' ? '！' : '？');
-  const fileKey = (symbol === 'A') ? 'unown' : `unown-${symbol.toLowerCase()}`;
-  const base = 'https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-gen8';
-  return {
-    id: 9201 + index,
-    name: `未知圖騰 ${displayName}`,
-    emoji: '❓', color: '#888', rate: 0.35, w: 1.5, notWild: false,
-    time: 'any', weather: 'any',
-    spriteUrl: `${base}/regular/${fileKey}.png`,
-    shinySpriteUrl: `${base}/shiny/${fileKey}.png`,
-  };
-});
+const UNOWN_FORMS = UNOWN_SYMBOLS
+  .map((symbol, index) => {
+    if (symbol === 'A') return null;
+    const isLetter = /^[A-Z]$/.test(symbol);
+    const displayName = isLetter ? symbol : (symbol === 'exclamation' ? '！' : '？');
+    const fileKey = `unown-${symbol.toLowerCase()}`;
+    const base = 'https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-gen8';
+    return {
+      id: 9201 + index,
+      name: `未知圖騰 ${displayName}`,
+      emoji: '❓', color: '#888', rate: 0.35, w: 1.5, notWild: false,
+      time: 'any', weather: 'any',
+      spriteUrl: `${base}/regular/${fileKey}.png`,
+      shinySpriteUrl: `${base}/shiny/${fileKey}.png`,
+    };
+  })
+  .filter(Boolean);   // ← 過濾掉 null
 
 /* =========================================================
    2. 背景音樂
@@ -3459,6 +3583,8 @@ npcConfirmBtn.addEventListener('click', () => {
 
   const npcMon = POKEDEX.find(p => p.name === trade.npcName);
   const playerMon = POKEDEX.find(p => p.name === candySource.name);
+  const resultName = (trade.kind === 'evo') ? trade.to : trade.npcName;
+  const alreadyCaught = !!(dexState[resultName] && dexState[resultName].caught > 0);
 
   playTradeAnimation(npcMon, playerMon, trade, candySource, () => {
     candyBag[candySource.name] -= trade.candyCost;
@@ -3466,29 +3592,42 @@ npcConfirmBtn.addEventListener('click', () => {
     clearNPC();
 
     const finish = (msg) => {
-      caughtCount++;
       updateHUD();
       autoSave();
-      toast(msg, 3000);
+      if (!dexScreen.classList.contains('hidden')) renderDex();
+      if (!evoScreen.classList.contains('hidden')) renderEvoList();
+      toast(msg, 3200);
       npcExchangeLocked = false;
       if (gameStarted) audio.playMap(env.time);
     };
 
-    if (trade.kind === 'evo') {
-      playNPCEvolutionAnimation(trade.npcName, trade.to, trade.evoSpriteId, () => {
-        if (dexState[trade.to]) {
-          dexState[trade.to].seen = 1;
-          dexState[trade.to].caught++;
-        }
-        if (dexState[trade.npcName]) dexState[trade.npcName].seen = 1;
-        finish(`🔄 交換成功！${trade.npcName} 進化成 ${trade.to}！`);
-      });
-    } else {
-      if (dexState[trade.npcName]) {
+    const settle = () => {
+      if (trade.kind === 'evo' && dexState[trade.npcName]) {
         dexState[trade.npcName].seen = 1;
-        dexState[trade.npcName].caught++;
       }
-      finish(`🔄 交換成功！獲得 ${trade.npcName}！`);
+
+      if (alreadyCaught) {
+        addCandy(resultName, 1);
+        finish(`🔄 交換成功！已擁有 ${resultName}，改為獲得 🍬 +1 ${resultName} 糖果！`);
+      } else {
+        caughtCount++;
+        if (dexState[resultName]) {
+          dexState[resultName].seen = 1;
+          dexState[resultName].caught++;
+        }
+        if (trade.kind === 'evo' && dexState[trade.npcName]) {
+          dexState[trade.npcName].caught++;
+        }
+        finish(trade.kind === 'evo'
+          ? `🔄 交換成功！${trade.npcName} 進化成 ${trade.to}！`
+          : `🔄 交換成功！獲得 ${resultName}！`);
+      }
+    };
+
+    if (trade.kind === 'evo') {
+      playNPCEvolutionAnimation(trade.npcName, trade.to, trade.evoSpriteId, settle);
+    } else {
+      settle();
     }
   });
 });
@@ -3514,17 +3653,48 @@ const gymClash          = document.getElementById('gymClash');
 const gymBattleFlash    = document.getElementById('gymBattleFlash');
 const gymBattleMsg      = document.getElementById('gymBattleMsg');
 
-function setBattleMon(fighterEl, mon) {
-  const img = fighterEl.querySelector('img');
+function setBattleMon(fighterEl, mon, shiny) {
   const nameEl = fighterEl.querySelector('.gym-fighter-name');
-  nameEl.textContent = mon ? mon.name : '❓';
-  if (mon) {
-    img.src = spriteUrl(mon, false);
-    img.style.display = '';
-    img.onerror = () => { img.style.display = 'none'; };
-  } else {
-    img.style.display = 'none';
+  const isShiny = !!shiny;
+
+  // ★ 關鍵：每次都把舊 img 與舊占位符移除，讓瀏覽器重新載入
+  const oldImg = fighterEl.querySelector('img');
+  if (oldImg) oldImg.remove();
+  const oldPh = fighterEl.querySelector('.gym-fighter-placeholder');
+  if (oldPh) oldPh.remove();
+
+  if (!mon) {
+    nameEl.textContent = '❓';
+    return;
   }
+
+  nameEl.textContent = isShiny ? `✨ ${mon.name}` : mon.name;
+
+  const img = document.createElement('img');
+  img.alt = mon.name;
+
+  const primaryUrl  = spriteUrl(mon, isShiny);
+  const fallbackUrl = staticSpriteUrl(mon, isShiny);
+  let triedFallback = false;
+
+  img.onerror = () => {
+    // 只有 fallbackUrl 真的不同才切換，避免同 URL 無窮失敗
+    if (!triedFallback && fallbackUrl && fallbackUrl !== primaryUrl) {
+      triedFallback = true;
+      img.src = fallbackUrl;
+      return;
+    }
+    // 兩種都失敗 → 顯示 '❓'，讓玩家知道是「載入失敗」而不是「精靈不存在」
+    img.style.display = 'none';
+    img.onerror = null;
+    const ph = document.createElement('div');
+    ph.className = 'gym-fighter-placeholder';
+    ph.textContent = '❓';
+    fighterEl.appendChild(ph);
+  };
+
+  img.src = primaryUrl;
+  fighterEl.appendChild(img);
 }
 
 function setBattleMsg(text) {
@@ -3536,20 +3706,17 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function playGymBattleAnimation(playerMon, gymMon, playerWins, onDone) {
+async function playGymBattleAnimation(playerMon, gymMon, playerWins, playerShiny, onDone) {
   gymBattleOverlay.classList.add('on');
   gymBattleStage.classList.remove('shake');
   gymVs.classList.remove('show');
   gymClash.classList.remove('show');
   gymBattleFlash.classList.remove('on');
   setBattleMsg('');
-
   gymFighterLeft.className  = 'gym-fighter left';
   gymFighterRight.className = 'gym-fighter right';
-
-  setBattleMon(gymFighterLeft,  playerMon);
-  setBattleMon(gymFighterRight, gymMon);
-
+  setBattleMon(gymFighterLeft,  playerMon, playerShiny);
+  setBattleMon(gymFighterRight, gymMon, false);
   void gymBattleStage.offsetWidth;
 
   requestAnimationFrame(() => {
@@ -3692,7 +3859,12 @@ gymSelectCloseBtn.addEventListener('click', () => {
 function renderGymSelect() {
   const owned = POKEDEX.filter(p => dexState[p.name] && dexState[p.name].caught > 0);
 
-  gymSelectProgress.textContent = `已捕獲可出戰 ${owned.length} 隻`;
+  gymSelectProgress.innerHTML = `
+  已捕獲可出戰 ${owned.length} 隻<br>
+  <span style="font-size:11px;color:rgba(255,255,255,.6);font-weight:600;letter-spacing:.5px;line-height:1.55">
+    🧬 可進化精靈勝出 → 獲得糖果 ×3<br>
+    ⚔ 最終形態／無進化精靈勝出 → 可捕捉守館精靈
+  </span>`;
 
   if (!owned.length) {
     gymSelectGrid.innerHTML = `<div class="evo-empty">
@@ -3701,25 +3873,41 @@ function renderGymSelect() {
     return;
   }
 
-  gymSelectGrid.innerHTML = owned.map(p => `
-    <div class="dex-cell caught gym-select-cell" data-name="${p.name}">
-      <div class="dex-icon">
-        <div class="dex-shadow"></div>
-        <img src="${spriteUrl(p, false)}" alt="${p.name}" draggable="false">
-      </div>
-      <div class="dex-name">${p.name}</div>
-      <div class="dex-count">🍬 ${getCandy(p.name)}</div>
-    </div>
-  `).join('');
+  const makeCell = (p, shiny) => {
+    const candy = getCandy(p.name);
+    const st = dexState[p.name] || {};
+    const shinyCount = st.shiny || 0;
+    return `
+      <div class="dex-cell caught gym-select-cell ${shiny ? 'shiny-cell' : ''}"
+           data-name="${p.name}" data-shiny="${shiny ? 1 : 0}">
+        <div class="dex-icon">
+          <div class="dex-shadow"></div>
+          <img src="${spriteUrl(p, shiny)}" alt="${p.name}" draggable="false">
+        </div>
+        <div class="dex-name">${shiny ? '✨ ' : ''}${p.name}${shiny ? '（異色）' : ''}</div>
+        <div class="dex-count">🍬 ${candy}</div>
+        ${(!shiny && shinyCount > 0) ? `<div class="dex-shiny">✨ 異色 ×${shinyCount}</div>` : ''}
+      </div>`;
+  };
+
+  let html = '';
+  owned.forEach(p => {
+    html += makeCell(p, false);
+    if (dexState[p.name] && dexState[p.name].shiny > 0) {
+      html += makeCell(p, true);
+    }
+  });
+
+  gymSelectGrid.innerHTML = html;
 
   gymSelectGrid.querySelectorAll('.gym-select-cell').forEach(cell => {
     cell.addEventListener('click', () => {
-      chooseGymFighter(cell.dataset.name);
+      chooseGymFighter(cell.dataset.name, cell.dataset.shiny === '1');
     });
   });
 }
 
-function chooseGymFighter(name) {
+function chooseGymFighter(name, shiny) {
   if (!currentGym) return;
   if ((itemInventory.goodPotion || 0) <= 0) {
     toast('🧪 好傷藥不足');
@@ -3728,6 +3916,9 @@ function chooseGymFighter(name) {
 
   const p = POKEDEX.find(x => x.name === name);
   if (!p) return;
+
+  // 只有真的擁有異色時，才允許用異色出戰
+  const usingShiny = !!shiny && !!(dexState[p.name] && dexState[p.name].shiny > 0);
 
   const gymMon = currentGym.pokemon;
 
@@ -3743,30 +3934,54 @@ function chooseGymFighter(name) {
   const winChance = Math.min(0.9, Math.max(0.35, GYM_WIN_CHANCE + candy * 0.01));
   const playerWins = Math.random() < winChance;
 
-  playGymBattleAnimation(p, gymMon, playerWins, () => {
+  playGymBattleAnimation(p, gymMon, playerWins, usingShiny, () => {
     if (playerWins) {
-      addCandy(p.name, 3);
-      updateHUD();
-      autoSave();
+      // 判斷所選精靈是否還有可進化的分支
+      const hasEvolution = EVOLUTIONS[p.name] && EVOLUTIONS[p.name].length > 0;
 
-      gymScreen.classList.add('hidden');
-      clearGym();
-
-      SFX.init();
-      SFX.reward();
-      toast(`⚔ 道場挑戰成功！獲得 ${p.name} 糖果 ×3`, 3000);
-
-      if (gameStarted) audio.playMap(env.time);
+      if (hasEvolution) {
+        // ✅ 原有邏輯：可進化 → 獲得自身 3 顆糖果
+        addCandy(p.name, 3);
+        updateHUD();
+        autoSave();
+        gymScreen.classList.add('hidden');
+        clearGym();
+        SFX.init();
+        SFX.reward();
+        toast(`${usingShiny ? '✨ ' : ''}⚔ 道場挑戰成功！獲得 ${p.name} 糖果 ×3`, 3000);
+        if (gameStarted) audio.playMap(env.time);
+      } else if (getTotalBalls() === 0) {
+        // 最終/無進化，但身上沒球 → 退回糖果，避免卡死
+        addCandy(p.name, 3);
+        updateHUD();
+        autoSave();
+        gymScreen.classList.add('hidden');
+        clearGym();
+        SFX.init();
+        SFX.reward();
+        toast(`⚔ 道場挑戰成功！但沒有精靈球可捕捉，改獲得 ${p.name} 糖果 ×3`, 3200);
+        if (gameStarted) audio.playMap(env.time);
+      } else {
+       // ✅ 新邏輯：最終形態／無進化 → 捕捉守館精靈
+        const gymPoke = currentGym.pokemon;
+        const gymShiny = Math.random() < SHINY_RATE;
+        gymScreen.classList.add('hidden');
+        clearGym();
+        SFX.init();
+        SFX.reward();
+        const shinyTxt = gymShiny ? '✨ 異色 ' : '';
+        toast(`${usingShiny ? '✨ ' : ''}⚔ 道場挑戰成功！${shinyTxt}${gymPoke.name} 願意成為你的夥伴，快來捕捉！`, 3200);
+        setTimeout(() => {
+          openCatch(gymPoke, null, gymShiny);
+        }, 700);
+      }
     } else {
-      // 輸掉：道場保留，不 clearGym()，可立即再挑戰
+      // ❌ 失敗：原有邏輯
       gymScreen.classList.remove('hidden');
       updateGymUI();
-
       SFX.init();
-      toast(`💥 ${p.name} 被打飛了…挑戰失敗，道場仍然開放`, 3000);
-      // 音樂維持道場 BGM，不切回地圖
+      toast(`${usingShiny ? '✨ ' : ''}💥 ${p.name} 被打飛了…挑戰失敗，道場仍然開放`, 3000);
     }
-
     if (!bagScreen.classList.contains('hidden')) renderBag();
     if (!dexScreen.classList.contains('hidden')) renderDex();
     if (!evoScreen.classList.contains('hidden')) renderEvoList();
@@ -4548,8 +4763,8 @@ function resolveCatch() {
 
     if (shiny) toast(`✨ 太幸運了！異色 ${p.name} 入手！`, 2800);
 
-    if (map.hasLayer(marker)) map.removeLayer(marker);
-    spawnMarkers = spawnMarkers.filter(m => m !== marker);
+    if (marker && map.hasLayer(marker)) map.removeLayer(marker);
+    if (marker) spawnMarkers = spawnMarkers.filter(m => m !== marker);
 
     ballFly.style.filter = shiny
       ? 'brightness(2) drop-shadow(0 0 20px #ffd166)'
@@ -4577,8 +4792,8 @@ function resolveCatch() {
       SFX.flee();
       setTimeout(() => {
         wildMon.classList.remove('fleeing');
-        if (map.hasLayer(marker)) map.removeLayer(marker);
-        spawnMarkers = spawnMarkers.filter(m => m !== marker);
+        if (marker && map.hasLayer(marker)) map.removeLayer(marker);
+        if (marker) spawnMarkers = spawnMarkers.filter(m => m !== marker);
         closeCatch();
       }, 900);
     } else {
@@ -4678,11 +4893,11 @@ function spinStop() {
     else if (r < 0.133)   gained.great  = 1;
 
     const ir = Math.random();
-    if (ir < 0.05)   itemsGained.goodPotion = 1;
-	else if (ir < 0.17)   itemsGained.incense = 1;
-    else if (ir < 0.32)   itemsGained.banana = 1;
-    else if (ir < 0.42)   itemsGained.pineapple = 1;
-	else if (ir < 0.50) itemsGained.grape      = 1;
+    if (ir < 0.10)   itemsGained.goodPotion = 1;
+	else if (ir < 0.15)   itemsGained.incense = 1;
+    else if (ir < 0.26)   itemsGained.banana = 1;
+    else if (ir < 0.38)   itemsGained.pineapple = 1;
+	else if (ir < 0.50)   itemsGained.grape = 1;
 
     ['poke','great','ultra','master'].forEach(t => {
       ballInventory[t] = (ballInventory[t] || 0) + gained[t];
@@ -5146,10 +5361,18 @@ function renderEvoList() {
     const src = POKEDEX.find(p => p.name === srcName);
     if (!src) return;
     const candy = getCandy(srcName);
-
+    const srcHasShiny = !!(dexState[srcName] && dexState[srcName].shiny > 0);
     evos.forEach(evo => {
       const tgt = POKEDEX.find(p => p.name === evo.to);
       if (!tgt) return;
+
+      // ✅ 新增：目標的普通版與異色版都已獲得，就不再顯示此進化項
+      const tgtState = dexState[evo.to];
+      if (tgtState && tgtState.caught > 0 && tgtState.shiny > 0) return;
+      const isTradeEvo = TRADE_EVOLUTIONS.some(
+        t => t.npcName === srcName && t.to === evo.to
+      );
+      if (isTradeEvo && tgtState && tgtState.caught > 0) return;
       const enough = candy >= evo.candy;
       if (enough) readyCount++;
       const targetKnown = dexState[tgt.name] && (dexState[tgt.name].caught > 0 || dexState[tgt.name].seen > 0);
@@ -5157,14 +5380,16 @@ function renderEvoList() {
       html += `
         <div class="evo-item ${enough ? 'ready' : ''}">
           <div class="evo-sprites">
-            <img src="${spriteUrl(src,false)}" alt="${src.name}"
+            <img src="${spriteUrl(src, srcHasShiny)}" alt="${src.name}"
                  onerror="this.outerHTML='<span style=&quot;font-size:36px&quot;>❓</span>'">
             <span class="evo-arrow">➜</span>
-            <img src="${spriteUrl(tgt,false)}" alt="${tgt.name}"
+            <img src="${spriteUrl(tgt, srcHasShiny)}" alt="${tgt.name}"
                  onerror="this.outerHTML='<span style=&quot;font-size:36px&quot;>❓</span>'">
           </div>
           <div class="evo-info">
-            <div class="evo-title">${src.name} → ${tgt.name}${!targetKnown ? ' <span style="color:#7dd3fc">(新!)</span>' : ''}</div>
+            <div class="evo-title">
+              ${srcHasShiny ? '✨ ' : ''}${src.name} → ${srcHasShiny ? '✨ ' : ''}${tgt.name}${!targetKnown ? ' <span style="color:#7dd3fc">(新!)</span>' : ''}
+            </div>
             <div class="evo-candy-line ${enough ? '' : 'lack'}">
               <span class="candy-mini" style="width:12px;height:12px"></span>
               ${candy} / ${evo.candy} 糖果
@@ -5172,9 +5397,19 @@ function renderEvoList() {
           </div>
           <button class="evo-btn" ${enough ? '' : 'disabled'}
                   data-src="${srcName}" data-to="${evo.to}">進化</button>
-        </div>`;
+       </div>`;
     });
   });
+
+  // ✅ 新增：所有進化項都被隱藏時的空狀態
+  if (!html) {
+    list.innerHTML = `<div class="evo-empty">
+      所有可進化的目標（含異色版）都已獲得！<br>
+      繼續捕捉異色精靈吧！
+    </div>`;
+    prog.textContent = '';
+    return;
+  }
 
   list.innerHTML = html;
   prog.textContent = `可進化 ${readyCount} 個分支`;
@@ -5198,15 +5433,19 @@ function tryEvolve(srcName, toName) {
   const tgt = POKEDEX.find(p => p.name === toName);
   if (!src || !tgt) return;
 
+  // ← 新增：源精靈是否擁有異色版
+  const srcHasShiny = !!(dexState[srcName] && dexState[srcName].shiny > 0);
+
   const ov = document.getElementById('evoOverlay');
   const animImg = document.getElementById('evoAnimImg');
-  const fromSrc = spriteUrl(src, false);
-  const toSrc   = spriteUrl(tgt, false);
+  const fromSrc = spriteUrl(src, srcHasShiny);   // ← false → srcHasShiny
+  const toSrc   = spriteUrl(tgt, srcHasShiny);   // ← false → srcHasShiny
 
   animImg.src = fromSrc;
   animImg.style.display = '';
   animImg.onerror = () => { animImg.style.display = 'none'; };
   ov.style.display = 'flex';
+  ov.classList.toggle('shiny', srcHasShiny);
 
   audio.init();
   audio.playTrade();
@@ -5217,16 +5456,20 @@ function tryEvolve(srcName, toName) {
   setTimeout(() => {
     clearTimeout(swapTimer);
     ov.style.display = 'none';
+	ov.classList.remove('shiny');
     animImg.style.display = '';
 
     candyBag[srcName] -= evo.candy;
     dexState[tgt.name].seen = 1;
     dexState[tgt.name].caught++;
+    if (srcHasShiny) dexState[tgt.name].shiny++;   // ← 異色源 → 異色目標 +1
     caughtCount++;
     updateHUD();
     autoSave();
 
-    toast(`🧬 ${srcName} 進化成 ${tgt.name}！`, 2600);
+    toast(srcHasShiny
+      ? `✨🧬 異色 ${srcName} 進化成異色 ${tgt.name}！`
+      : `🧬 ${srcName} 進化成 ${tgt.name}！`, 2600);
     renderEvoList();
     if (gameStarted) audio.playMap(env.time);
   }, 2700);
@@ -5277,7 +5520,7 @@ fsBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleFullscreen()
 
 function syncFsBtn() {
   fsBtn.classList.toggle('on', isFullscreen());
-  fsBtn.textContent = isFullscreen() ? '⤡' : '⛶';
+  fsBtn.textContent = isFullscreen() ? '⛶' : '⛶';
   setTimeout(() => { if (map) map.invalidateSize(); }, 260);
 }
 ['fullscreenchange','webkitfullscreenchange','mozfullscreenchange','MSFullscreenChange']
