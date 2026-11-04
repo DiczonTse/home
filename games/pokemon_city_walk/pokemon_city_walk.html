@@ -388,6 +388,12 @@
       radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
       linear-gradient(#3b6fd6 0 45%, #1a1a1a 45% 55%, #ffffff 55% 100%);
     box-shadow:0 0 6px rgba(59,111,214,.6)}
+  .ball-mini.ball-premier{
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0 16%, #e63946 16% 27%, transparent 27%),
+      linear-gradient(#ffffff 0 45%, #e63946 45% 55%, #ffffff 55% 100%);
+    border-color:#e63946;
+    box-shadow:0 0 6px rgba(230,57,70,.55)}
   .ball-mini.ball-ultra{
     background:
       radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
@@ -500,7 +506,12 @@
     background:
       radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
       linear-gradient(#7b2fbe 0 45%, #1a1a1a 45% 55%, #ffffff 55% 100%)}
-
+  .pokeball.ball-premier{
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0 16%, #e63946 16% 27%, transparent 27%),
+      linear-gradient(#ffffff 0 45%, #e63946 45% 55%, #ffffff 55% 100%);
+    border-color:#e63946}
+  .pokeball.ball-premier::after{border-color:#e63946}
   .overlay{position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;
     padding:calc(env(safe-area-inset-top,0px) + 12px) 16px calc(env(safe-area-inset-bottom,0px) + 18px)}
   .hidden{display:none!important}
@@ -803,6 +814,12 @@
       radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
       linear-gradient(#7b2fbe 0 45%, #1a1a1a 45% 55%, #ffffff 55% 100%);
   }
+  .catch-ball-btn .cb-icon.ball-premier{
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0 16%, #e63946 16% 27%, transparent 27%),
+      linear-gradient(#ffffff 0 45%, #e63946 45% 55%, #ffffff 55% 100%);
+    border-color:#e63946}
+  .catch-ball-btn .cb-icon.ball-premier::after{border-color:#e63946}
   .catch-ball-btn .cb-count{
     position:absolute;bottom:-4px;right:-6px;
     background:#ffd166;color:#5a3d00;
@@ -939,6 +956,12 @@
     background:
       radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
       linear-gradient(#7b2fbe 0 45%, #1a1a1a 45% 55%, #ffffff 55% 100%)}
+  .bag-ball-icon.ball-premier{
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0 16%, #e63946 16% 27%, transparent 27%),
+      linear-gradient(#ffffff 0 45%, #e63946 45% 55%, #ffffff 55% 100%);
+    border-color:#e63946}
+  .bag-ball-icon.ball-premier::after{border-color:#e63946}
   .bag-ball-name{font-size:14px;font-weight:900;color:#fff}
   .bag-ball-desc{font-size:10px;color:rgba(255,255,255,.55);font-weight:700}
   .bag-ball-count{font-size:18px;font-weight:900;color:#ffd166}
@@ -1336,7 +1359,7 @@
     </div>
     <div class="npc-exchange-line">
       <span>挑戰獎勵</span>
-      <span class="val ok">所選精靈糖果 ×3 或 捕捉守館精靈</span>
+      <span class="val ok">所選精靈糖果 ×3 ／ 捕捉守館精靈</span>
     </div>
   </div>
 
@@ -1450,6 +1473,7 @@ const BATCH_SIZE = 40;
 
 const BALL_TYPES = {
   poke:   { name: '精靈球',   catchMult: 1.0,  desc: '標準精靈球' },
+  premier: { name: '紀念球',   catchMult: 1.0,  desc: '純紀念用途' },
   great:  { name: '高級球',   catchMult: 1.5,  desc: '捕獲率 ×1.5' },
   ultra:  { name: '超級球',   catchMult: 2.0,  desc: '捕獲率 ×2.0' },
   master: { name: '大師球',   catchMult: 99,   desc: '必定捕獲' },
@@ -1642,7 +1666,7 @@ const FORM_NAME_ZH = {
   'appletun-gmax':              '豐蜜龍（超極巨化的樣子）',
   'sandaconda-gmax':            '沙螺蟒（超極巨化的樣子）',
   'toxtricity-amped-gmax':      '顫弦蠑螈（超極巨化的樣子・高調的樣子）',
-  'toxtricity-low-key-gmax':    '顫弦蠑螈（超極巨化的樣子・低調的樣子）',
+  'toxtricity-low-key':         '顫弦蠑螈（超極巨化的樣子・低調的樣子）',
   'centiskorch-gmax':           '焚焰蚣（超極巨化的樣子）',
   'hatterene-gmax':             '布莉姆溫（超極巨化的樣子）',
   'grimmsnarl-gmax':            '長毛巨魔（超極巨化的樣子）',
@@ -1737,7 +1761,102 @@ const FORM_NAME_ZH = {
   'barbaracle-mega':              '龜足巨鎧（超級進化）',
   'dragalge-mega':                '毒藻龍（超級進化）',
   'hawlucha-mega':                '戰鬥飛鳥（超級進化）',
+  // ── 洛托姆各形態 ──
+  'rotom-heat':                   '洛托姆（加熱形態）',
+  'rotom-wash':                   '洛托姆（清洗形態）',
+  'rotom-frost':                  '洛托姆（結冰形態）',
+  'rotom-fan':                    '洛托姆（旋轉形態）',
+  'rotom-mow':                    '洛托姆（切割形態）',
+  // ── 潔咪 / 酋雷姆 / 美洛耶塔 / 凱路迪歐 ──
+  'shaymin-land':                 '潔咪（陸上形態）',
+  'shaymin-sky':                  '潔咪（天空形態）',
+  'kyurem-black':                 '酋雷姆（暗黑形態）',
+  'kyurem-white':                 '酋雷姆（焰白形態）',
+  'meloetta-aria':                '美洛耶塔（歌聲形態）',
+  'meloetta-pirouette':           '美洛耶塔（舞步形態）',
+  'keldeo-ordinary':              '凱路迪歐（平常形態）',
+  'keldeo-resolute':              '凱路迪歐（覺悟形態）',
+  // ── 達摩狒狒 / 野蠻鱸魚 ──
+  'darmanitan-standard':          '達摩狒狒（普通模式）',
+  'darmanitan-zen':               '達摩狒狒（達摩模式）',
+  'basculin-red-striped':         '野蠻鱸魚（紅條紋）',
+  'basculin-blue-striped':        '野蠻鱸魚（藍條紋）',
+  // ── 三雲化身形態（靈獸已在 SPECIAL_FORMS，這裡補化身形） ──
+  'tornadus-incarnate':           '龍捲雲（化身形態）',
+  'thundurus-incarnate':          '雷電雲（化身形態）',
+  'landorus-incarnate':           '土地雲（化身形態）',
+  // ── 超級進化（PokeAPI 偶爾返回只有「超級」兩字） ──
+  'venusaur-mega':                '妙蛙花（超級進化）',
+  'charizard-mega-x':             '噴火龍（超級進化X）',
+  'charizard-mega-y':             '噴火龍（超級進化Y）',
+  'blastoise-mega':               '水箭龜（超級進化）',
+  'alakazam-mega':                '胡地（超級進化）',
+  'gengar-mega':                  '耿鬼（超級進化）',
+  'kangaskhan-mega':              '袋獸（超級進化）',
+  'pinsir-mega':                  '凱羅斯（超級進化）',
+  'gyarados-mega':                '暴鯉龍（超級進化）',
+  'aerodactyl-mega':              '化石翼龍（超級進化）',
+  'ampharos-mega':                '電龍（超級進化）',
+  'scizor-mega':                  '巨鉗螳螂（超級進化）',
+  'heracross-mega':               '赫拉克羅斯（超級進化）',
+  'houndoom-mega':                '黑魯加（超級進化）',
+  'tyranitar-mega':               '班基拉斯（超級進化）',
+  'blaziken-mega':                '火焰雞（超級進化）',
+  'gardevoir-mega':               '沙奈朵（超級進化）',
+  'mawile-mega':                  '大嘴娃（超級進化）',
+  'aggron-mega':                  '波士可多拉（超級進化）',
+  'medicham-mega':                '恰雷姆（超級進化）',
+  'manectric-mega':               '雷電獸（超級進化）',
+  'banette-mega':                 '詛咒娃娃（超級進化）',
+  'absol-mega':                   '阿勃梭魯（超級進化）',
+  'abomasnow-mega':               '暴雪王（超級進化）',
+  'beedrill-mega':                '大針蜂（超級進化）',
+  'pidgeot-mega':                 '大比鳥（超級進化）',
+  'slowbro-mega':                 '呆殼獸（超級進化）',
+  'steelix-mega':                 '大鋼蛇（超級進化）',
+  'sceptile-mega':                '蜥蜴王（超級進化）',
+  'swampert-mega':                '巨沼怪（超級進化）',
+  'sableye-mega':                 '勾魂眼（超級進化）',
+  'sharpedo-mega':                '巨牙鯊（超級進化）',
+  'camerupt-mega':                '噴火駝（超級進化）',
+  'altaria-mega':                 '七夕青鳥（超級進化）',
+  'glalie-mega':                  '冰鬼護（超級進化）',
+  'salamence-mega':               '暴飛龍（超級進化）',
+  'metagross-mega':               '巨金怪（超級進化）',
+  'lopunny-mega':                 '長耳兔（超級進化）',
+  'gallade-mega':                 '艾路雷朵（超級進化）',
+  'audino-mega':                  '差不多娃娃（超級進化）',
+  'diancie-mega':                 '蒂安希（超級進化）',
+  'kyogre-primal':                '蓋歐卡（原始回歸）',
+  'groudon-primal':               '固拉多（原始回歸）',
+  // ── 第八世代（伽勒爾）特殊形態補全 ──
+  'yamask-galar':                '哭哭面具（伽勒爾的樣子）',   // 10179
+  'stunfisk-galar':               '泥巴魚（伽勒爾的樣子）',
+  'cramorant-gulping':           '古月鳥（一口吞的樣子）',     // 10182
+  'cramorant-gorging':           '古月鳥（大口吞的樣子）',     // 10183
+  'eiscue-noice':                '冰砌鵝（解凍頭）',           // 10185
+  'indeedee-female':             '愛管侍（雌性）',             // 10186
+  'morpeko-hangry':              '莫魯貝可（空腹花紋）',       // 10187
+  'eternatus-eternamax':         '無極汰那（無極巨化）',       // 10190
+  'urshifu-rapid-strike':        '武道熊師（連擊流）',         // 10191
+  'zarude-dada':                 '薩戮德（阿爸）',             // 10192
+  // ── 結草貴婦（蟲蓑衣） ──
+  'wormadam-plant':               '結草貴婦（草木蓑衣）',       // 10004
+  'wormadam-sandy':               '結草貴婦（砂土蓑衣）',       // 10005
+  // ── 南瓜精尺寸 ──
+  'pumpkaboo-small':              '南瓜精（小尺寸）',           // 10130
+  'pumpkaboo-large':            '南瓜精（大尺寸）',         // 10131
+  'pumpkaboo-super':              '南瓜精（特大尺寸）',           // 10132
+  'gourgeist-small':              '南瓜怪人（小尺寸）',         // 10133
+  'gourgeist-large':            '南瓜怪人（大尺寸）',       // 10134
+  'gourgeist-super':            '南瓜怪人（特大尺寸）',       // 10134
+  // ── 阿爾宙斯（龍／惡／妖精） ──
+  'arceus-dragon':                '阿爾宙斯（龍）',             // 10025
+  'arceus-dark':                  '阿爾宙斯（惡）',             // 10026
+  'arceus-fairy':                 '阿爾宙斯（妖精）',           // 10027
   // ── 其他 ──
+  'meowstic-female': '超能妙喵（雌性的樣子）',
+  'aegislash-blade': '堅盾劍怪（刀劍形態）',
   'wishiwashi-school': '弱丁魚（魚群的樣子）',
   'castform-sunny': '飄浮泡泡（太陽的樣子）',
   'castform-rainy': '飄浮泡泡（雨水的樣子）',
@@ -1753,6 +1872,12 @@ const FORM_NAME_ZH = {
   'lycanroc-midnight': '鬃岩狼人（黑夜的樣子）',
   'lycanroc-dusk': '鬃岩狼人（黃昏的樣子）',
   'minior-red-meteor': '小隕星（流星的樣子）',
+  'minior-orange-meteor':  '小隕星（橙色核心・流星形態）',   // 10030
+  'minior-yellow-meteor':  '小隕星（黃色核心・流星形態）',   // 10031
+  'minior-green-meteor':   '小隕星（綠色核心・流星形態）',   // 10032
+  'minior-blue-meteor':    '小隕星（藍色核心・流星形態）',   // 10033
+  'minior-indigo-meteor':  '小隕星（淺藍色核心・流星形態）', // 10034
+  'minior-violet-meteor':  '小隕星（紫色核心・流星形態）',   // 10035
   'minior-red': '小隕星（紅色核心）',
   'minior-orange': '小隕星（橙色核心）',
   'minior-yellow': '小隕星（黃色核心）',
@@ -1782,7 +1907,10 @@ const FORM_NAME_ZH = {
   'sinistea-antique': '來悲茶（真品形態）',
   'polteageist-phony': '怖思壺（贗品形態）',
   'polteageist-antique': '怖思壺（真品形態）',
+  'magearna-original': '瑪機雅娜（５００年前的顏色）',
 };
+
+const EXCLUDED_FORM_IDS = new Set([10181, 10228]);
 
 async function loadExtraForms(pokedex) {
   const FORM_START = 10001;
@@ -1794,7 +1922,9 @@ async function loadExtraForms(pokedex) {
   const existingIds = new Set(pokedex.map(p => p.id));
   const urls = [];
   for (let id = FORM_START; id <= FORM_END; id++) {
-    if (!existingIds.has(id)) urls.push(id);
+    if (existingIds.has(id)) continue;
+    if (EXCLUDED_FORM_IDS.has(id)) continue;
+    urls.push(id);
   }
 
   const BATCH = 40;
@@ -1823,27 +1953,24 @@ async function loadExtraForms(pokedex) {
       if (res.status !== 'fulfilled') return;
       const d = res.value;
       const id = chunk[idx];
-
-      let zhName = null;
-      const formRes = formResults[idx];
-      if (formRes.status === 'fulfilled' && formRes.value) {
-        const names = formRes.value.form_names || [];
-        const zh = names.find(n => n.language?.name === 'zh-hant')
-                || names.find(n => n.language?.name === 'zh-hans');
-        if (zh) zhName = zh.name;
-      }
-      // PokeAPI 缺中文時，用本地映射表補上（例如超極巨化）
+      const key = String(d.name || '').toLowerCase();
+      let zhName = FORM_NAME_ZH[key] || null;
       if (!zhName) {
-        const key = String(d.name || '').toLowerCase();
-        zhName = FORM_NAME_ZH[key] || null;
-        // ← 新增：兩邊都沒有 → 記錄下來，稍後印出
-        if (!zhName) {
-          missingNames.push({
-            id,
-            english: d.name,
-            label: (d.forms && d.forms[0] && d.forms[0].name) || d.name,
-          });
+        const formRes = formResults[idx];
+        if (formRes.status === 'fulfilled' && formRes.value) {
+          const names = formRes.value.form_names || [];
+          const zh = names.find(n => n.language?.name === 'zh-hant')
+                  || names.find(n => n.language?.name === 'zh-hans');
+          if (zh) zhName = zh.name;
         }
+      }
+      // 兩邊都沒有 → 記錄下來，稍後印出
+      if (!zhName) {
+        missingNames.push({
+          id,
+          english: d.name,
+          label: (d.forms && d.forms[0] && d.forms[0].name) || d.name,
+        });
       }
 
       const name = zhName || extractFormName(d, id);
@@ -2485,7 +2612,7 @@ let npcMarker = null;
 let gymMarker = null;
 let currentGym = null;
 
-let ballInventory = { poke: 20, great: 0, ultra: 0, master: 0 };
+let ballInventory = { poke: 20, premier: 0, great: 0, ultra: 0, master: 0 };
 let currentBall = 'poke';
 
 let itemInventory = { goodPotion: 0, grape: 0, pineapple: 0, banana: 0, incense: 0 };
@@ -2607,8 +2734,9 @@ function getNpcSpawnChance() {
 }
 
 function getTotalBalls() {
-  return (ballInventory.poke || 0) + (ballInventory.great || 0) +
-         (ballInventory.ultra || 0) + (ballInventory.master || 0);
+  return (ballInventory.poke || 0) + (ballInventory.premier || 0) +
+         (ballInventory.great || 0) + (ballInventory.ultra || 0) +
+         (ballInventory.master || 0);
 }
 
 function updateHUD() {
@@ -2645,7 +2773,7 @@ function addCandy(name, n) { candyBag[name] = (candyBag[name] || 0) + n; }
 
 function ensureUsableBall() {
   if ((ballInventory[currentBall] || 0) > 0) return true;
-  const order = ['poke', 'great', 'ultra', 'master'];
+  const order = ['poke', 'premier', 'great', 'ultra', 'master'];
   for (const t of order) {
     if ((ballInventory[t] || 0) > 0) {
       currentBall = t;
@@ -2728,18 +2856,18 @@ function applySaveData(data) {
   if (!data || typeof data !== 'object') return false;
 
   if (data.ballInventory && typeof data.ballInventory === 'object') {
-    ballInventory = { poke: 0, great: 0, ultra: 0, master: 0 };
-    ['poke','great','ultra','master'].forEach(t => {
+    ballInventory = { poke: 0, premier: 0, great: 0, ultra: 0, master: 0 };
+    ['poke','premier','great','ultra','master'].forEach(t => {
       const v = data.ballInventory[t];
       if (typeof v === 'number') ballInventory[t] = Math.max(0, v | 0);
     });
   } else if (typeof data.balls === 'number') {
-    ballInventory = { poke: Math.max(0, data.balls | 0), great: 0, ultra: 0, master: 0 };
+    ballInventory = { poke: Math.max(0, data.balls | 0), premier: 0, great: 0, ultra: 0, master: 0 };
   }
 
   if (data.currentBall && BALL_TYPES[data.currentBall]) currentBall = data.currentBall;
   if ((ballInventory[currentBall] || 0) <= 0) {
-    for (const t of ['poke','great','ultra','master']) {
+    for (const t of ['poke','premier','great','ultra','master']) {
       if ((ballInventory[t] || 0) > 0) { currentBall = t; break; }
     }
   }
@@ -2848,7 +2976,7 @@ async function resetGame() {
   if (!ok) return;
 
   try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
-  ballInventory = { poke: 20, great: 0, ultra: 0, master: 0 };
+  ballInventory = { poke: 20, premier: 0, great: 0, ultra: 0, master: 0 };
   currentBall = 'poke';
   itemInventory = { goodPotion: 0, grape: 0, pineapple: 0, banana: 0, incense: 0 };
   incenseEndAt = 0;
@@ -3905,7 +4033,7 @@ function renderGymSelect() {
   已捕獲可出戰 ${owned.length} 隻<br>
   <span style="font-size:11px;color:rgba(255,255,255,.6);font-weight:600;letter-spacing:.5px;line-height:1.55">
     🧬 可進化精靈勝出 → 獲得糖果 ×3<br>
-    ⚔ 最終形態／無進化精靈勝出 → 可捕捉守館精靈
+    ⚔ 最終形態／無進化精靈勝出 → 紀念球 ×3（有精靈球時可捕捉守館精靈）
   </span>`;
 
   if (!owned.length) {
@@ -3992,30 +4120,31 @@ function chooseGymFighter(name, shiny) {
         SFX.reward();
         toast(`${usingShiny ? '✨ ' : ''}⚔ 道場挑戰成功！獲得 ${p.name} 糖果 ×3`, 3000);
         if (gameStarted) audio.playMap(env.time);
-      } else if (getTotalBalls() === 0) {
-        // 最終/無進化，但身上沒球 → 退回糖果，避免卡死
-        addCandy(p.name, 3);
+      } else {
+        // ✅ 最終形態／無進化 → 先送紀念球 ×3
+        const hadBall  = getTotalBalls() > 0;      // 送球前先判斷
+        const gymPoke  = currentGym.pokemon;
+        const gymShiny = Math.random() < SHINY_RATE;
+
+        ballInventory.premier = (ballInventory.premier || 0) + 3;
         updateHUD();
         autoSave();
+
         gymScreen.classList.add('hidden');
         clearGym();
         SFX.init();
         SFX.reward();
-        toast(`⚔ 道場挑戰成功！但沒有精靈球可捕捉，改獲得 ${p.name} 糖果 ×3`, 3200);
-        if (gameStarted) audio.playMap(env.time);
-      } else {
-       // ✅ 新邏輯：最終形態／無進化 → 捕捉守館精靈
-        const gymPoke = currentGym.pokemon;
-        const gymShiny = Math.random() < SHINY_RATE;
-        gymScreen.classList.add('hidden');
-        clearGym();
-        SFX.init();
-        SFX.reward();
-        const shinyTxt = gymShiny ? '✨ 異色 ' : '';
-        toast(`${usingShiny ? '✨ ' : ''}⚔ 道場挑戰成功！${shinyTxt}${gymPoke.name} 願意成為你的夥伴，快來捕捉！`, 3200);
-        setTimeout(() => {
-          openCatch(gymPoke, null, gymShiny);
-        }, 700);
+
+        if (!hadBall) {
+          toast(`${usingShiny ? '✨ ' : ''}⚔ 道場挑戰成功！獲得紀念球 ×3（純紀念用途）`, 3200);
+          if (gameStarted) audio.playMap(env.time);
+        } else {
+          const shinyTxt = gymShiny ? '✨ 異色 ' : '';
+          toast(`${usingShiny ? '✨ ' : ''}⚔ 道場挑戰成功！獲得紀念球 ×3，${shinyTxt}${gymPoke.name} 願意成為你的夥伴，快來捕捉！`, 3400);
+          setTimeout(() => {
+            openCatch(gymPoke, null, gymShiny);
+          }, 700);
+        }
       }
     } else {
       // ❌ 失敗：原有邏輯
@@ -4228,7 +4357,7 @@ function renderCatchBallSelector() {
     return;
   }
 
-  const order = ['poke', 'great', 'ultra', 'master'];
+  const order = ['poke', 'premier', 'great', 'ultra', 'master'];
   box.innerHTML = order.map(t => {
     const n = ballInventory[t] || 0;
     const active = (t === currentBall);
@@ -5090,7 +5219,7 @@ function craftBall(t) {
 
 function renderBag() {
   const ballGrid = document.getElementById('bagGrid');
-  const order = ['poke', 'great', 'ultra', 'master'];
+  const order = ['poke', 'premier', 'great', 'ultra', 'master'];
   ballGrid.innerHTML = order.map(t => {
     const d = BALL_TYPES[t];
     const n = ballInventory[t] || 0;
@@ -5105,7 +5234,8 @@ function renderBag() {
     } else if (canCraft) {
       tag += `<div class="bag-ball-tag" style="background:rgba(124,252,154,.18);color:#7CFC9A">🔧 可合成 → ${BALL_TYPES[up].name}（先選中使用）</div>`;
     }
-    if (!up) tag += '<div class="bag-ball-tag" style="background:rgba(162,155,254,.18);color:#a29bfe">最高級</div>';
+    if (t === 'premier') tag += '<div class="bag-ball-tag" style="background:rgba(230,57,70,.18);color:#ff9aa2">純紀念用</div>';
+    else if (!up) tag += '<div class="bag-ball-tag" style="background:rgba(162,155,254,.18);color:#a29bfe">最高級</div>';
 
     return `
       <div class="bag-item ${sel ? 'selected' : ''} ${n === 0 ? 'empty' : ''}" data-ball="${t}">
@@ -5132,7 +5262,7 @@ function renderBag() {
       }
 
       if (!up) {
-        toast(`${BALL_TYPES[t].name} 已是最高級，無法合成`);
+        toast(t === 'premier' ? '純紀念用途，無法合成' : `${BALL_TYPES[t].name} 已是最高級，無法合成`);
         return;
       }
       if (n < 5) {
