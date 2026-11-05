@@ -159,13 +159,12 @@
     box-shadow:0 2px 10px rgba(0,0,0,.5),0 0 18px #4285f4}
   @keyframes pulse{0%{transform:scale(.35);opacity:.95}100%{transform:scale(1.7);opacity:0}}
 
-  .spawn{position:relative;width:88px;height:96px;cursor:pointer}
-  .spawn-gif{position:absolute;left:50%;bottom:2px;width:80px;height:80px;margin-left:-40px;
-	object-fit:contain;image-rendering:pixelated;z-index:2;
-	animation:spawnIdle 2.6s ease-in-out infinite;pointer-events:none}
-  .spawn-shadow{display:none}
-  .spawn-fallback{position:absolute;left:50%;bottom:2px;transform:translateX(-50%);
-	font-size:48px;line-height:1;z-index:2;animation:spawnIdle 2.6s ease-in-out infinite}
+  .spawn-marker{background:none; border:none; pointer-events:none;}
+  .spawn{position:relative; width:88px;height:96px; pointer-events:none;}
+  .spawn-gif{position:absolute;left:50%;bottom:2px; width:80px;height:80px;margin-left:-40px; object-fit:contain;
+    image-rendering:pixelated; z-index:2; animation:spawnIdle 2.6s ease-in-out infinite; pointer-events:auto; cursor:pointer;}
+  .spawn-fallback{position:absolute;left:50%;bottom:2px;transform:translateX(-50%); font-size:48px;line-height:1;z-index:2;
+    animation:spawnIdle 2.6s ease-in-out infinite; pointer-events:auto; cursor:pointer;}
   @keyframes spawnIdle{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-2px) scale(1.02)}}
   @keyframes shadowIdle{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(.95);opacity:.42}}
 
@@ -175,11 +174,6 @@
   @keyframes spawnIdleBig{
 	0%,100%{transform:translateY(0) scale(1.7)}
 	50%{transform:translateY(-2px) scale(1.734)}}
-	
-  .spawn::before{
-    content:'';position:absolute;left:50%;bottom:0;
-    width:140px;height:140px;margin-left:-70px;
-  }
 
   .spawn.shiny .spawn-gif{
 	filter:drop-shadow(0 0 10px #ffd166) drop-shadow(0 0 22px #ffb703);
@@ -404,6 +398,11 @@
       radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
       linear-gradient(#7b2fbe 0 45%, #1a1a1a 45% 55%, #ffffff 55% 100%);
     box-shadow:0 0 6px rgba(123,47,190,.75)}
+  .ball-mini.ball-rocket{
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
+      linear-gradient(#1a1a1a 0 45%, #1a1a1a 45% 55%, #ffffff 55% 100%);
+    box-shadow: 0 0 6px rgba(238,21,21,.5);}
   /* Great Ball 頂部左右兩個紅色斜條（短邊分別指向中央白色圓形） */
   .ball-great::before{
     content:'';
@@ -428,6 +427,14 @@
     inset:0;
     pointer-events:none;
     background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cellipse cx='12' cy='20' rx='16' ry='9' fill='%23ff7ec4' transform='rotate(-40 12 20)'/%3E%3Cellipse cx='88' cy='20' rx='16' ry='9' fill='%23ff7ec4' transform='rotate(40 88 20)'/%3E%3Cpath d='M 36 34 L 36 14 L 50 26 L 64 14 L 64 34' fill='none' stroke='%23ffffff' stroke-width='6' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  }
+  /* ═══ 火箭隊球：黑頂白底，黑頂中央紅色 R ═══ */
+  .ball-rocket::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='20' font-family='Arial Black,Arial,sans-serif' font-size='42' font-weight='900' fill='%23ee1515' text-anchor='middle' dominant-baseline='central'%3ER%3C/text%3E%3C/svg%3E") center / 100% 100% no-repeat;
   }
   .candy-mini{display:inline-block;width:14px;height:14px;border-radius:50%;
     background:radial-gradient(circle at 32% 30%,#fff,#ffb703 70%);
@@ -506,6 +513,10 @@
     background:
       radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
       linear-gradient(#7b2fbe 0 45%, #1a1a1a 45% 55%, #ffffff 55% 100%)}
+  .pokeball.ball-rocket{
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
+      linear-gradient(#1a1a1a 0 45%, #1a1a1a 45% 55%, #ffffff 55% 100%);}
   .pokeball.ball-premier{
     background:
       radial-gradient(circle at 50% 50%, #fff 0 16%, #e63946 16% 27%, transparent 27%),
@@ -814,6 +825,11 @@
       radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
       linear-gradient(#7b2fbe 0 45%, #1a1a1a 45% 55%, #ffffff 55% 100%);
   }
+  .catch-ball-btn .cb-icon.ball-rocket{
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
+      linear-gradient(#1a1a1a 0 45%, #1a1a1a 45% 55%, #ffffff 55% 100%);
+  }
   .catch-ball-btn .cb-icon.ball-premier{
     background:
       radial-gradient(circle at 50% 50%, #fff 0 16%, #e63946 16% 27%, transparent 27%),
@@ -956,6 +972,10 @@
     background:
       radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
       linear-gradient(#7b2fbe 0 45%, #1a1a1a 45% 55%, #ffffff 55% 100%)}
+  .bag-ball-icon.ball-rocket{
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0 16%, #1a1a1a 16% 27%, transparent 27%),
+      linear-gradient(#1a1a1a 0 45%, #1a1a1a 45% 55%, #ffffff 55% 100%);}
   .bag-ball-icon.ball-premier{
     background:
       radial-gradient(circle at 50% 50%, #fff 0 16%, #e63946 16% 27%, transparent 27%),
@@ -1473,7 +1493,8 @@ const BATCH_SIZE = 40;
 
 const BALL_TYPES = {
   poke:   { name: '精靈球',   catchMult: 1.0,  desc: '標準精靈球' },
-  premier: { name: '紀念球',   catchMult: 1.0,  desc: '純紀念用途' },
+  premier: { name: '紀念球',   catchMult: 1.0,  desc: '紀念用' },
+  rocket: { name: '火箭隊球',   catchMult: 1.0,  desc: '火箭隊專用' },
   great:  { name: '高級球',   catchMult: 1.5,  desc: '捕獲率 ×1.5' },
   ultra:  { name: '超級球',   catchMult: 2.0,  desc: '捕獲率 ×2.0' },
   master: { name: '大師球',   catchMult: 99,   desc: '必定捕獲' },
@@ -2568,7 +2589,7 @@ const SHINY_RATE      = 0.06;
 const SWIPE_THRESHOLD = 70;
 const MOVE_RESPAWN_DIST = 250;
 const MOVE_RESPAWN_COOL = 6000;
-const CURVE_SLIP_CHANCE  = 0.28;
+const CURVE_SLIP_CHANCE  = 0.15;
 const CURVE_SUCCESS_MULT = 1.80;
 const NPC_SPAWN_CHANCE = 0.22;
 const GYM_WIN_CHANCE = 0.35;
@@ -2612,7 +2633,7 @@ let npcMarker = null;
 let gymMarker = null;
 let currentGym = null;
 
-let ballInventory = { poke: 20, premier: 0, great: 0, ultra: 0, master: 0 };
+let ballInventory = { poke: 20, premier: 0, rocket: 0, great: 0, ultra: 0, master: 0 };
 let currentBall = 'poke';
 
 let itemInventory = { goodPotion: 0, grape: 0, pineapple: 0, banana: 0, incense: 0 };
@@ -2734,10 +2755,8 @@ function getNpcSpawnChance() {
 }
 
 function getTotalBalls() {
-  return (ballInventory.poke || 0) + (ballInventory.premier || 0) +
-         (ballInventory.great || 0) + (ballInventory.ultra || 0) +
-         (ballInventory.master || 0);
-}
+  return (ballInventory.poke || 0) + (ballInventory.premier || 0) + (ballInventory.rocket || 0) +
+         (ballInventory.great || 0) + (ballInventory.ultra || 0) + (ballInventory.master || 0);}
 
 function updateHUD() {
   const totalAll = getTotalBalls();
@@ -2773,7 +2792,7 @@ function addCandy(name, n) { candyBag[name] = (candyBag[name] || 0) + n; }
 
 function ensureUsableBall() {
   if ((ballInventory[currentBall] || 0) > 0) return true;
-  const order = ['poke', 'premier', 'great', 'ultra', 'master'];
+  const order = ['poke', 'premier', 'rocket', 'great', 'ultra', 'master'];
   for (const t of order) {
     if ((ballInventory[t] || 0) > 0) {
       currentBall = t;
@@ -2856,18 +2875,18 @@ function applySaveData(data) {
   if (!data || typeof data !== 'object') return false;
 
   if (data.ballInventory && typeof data.ballInventory === 'object') {
-    ballInventory = { poke: 0, premier: 0, great: 0, ultra: 0, master: 0 };
-    ['poke','premier','great','ultra','master'].forEach(t => {
+    ballInventory = { poke: 0, premier: 0, rocket: 0, great: 0, ultra: 0, master: 0 };
+    ['poke','premier','rocket','great','ultra','master'].forEach(t => {
       const v = data.ballInventory[t];
       if (typeof v === 'number') ballInventory[t] = Math.max(0, v | 0);
     });
   } else if (typeof data.balls === 'number') {
-    ballInventory = { poke: Math.max(0, data.balls | 0), premier: 0, great: 0, ultra: 0, master: 0 };
+    ballInventory = { poke: Math.max(0, data.balls | 0), premier: 0, rocket: 0, great: 0, ultra: 0, master: 0 };
   }
 
   if (data.currentBall && BALL_TYPES[data.currentBall]) currentBall = data.currentBall;
   if ((ballInventory[currentBall] || 0) <= 0) {
-    for (const t of ['poke','premier','great','ultra','master']) {
+    for (const t of ['poke','premier','rocket','great','ultra','master']) {
       if ((ballInventory[t] || 0) > 0) { currentBall = t; break; }
     }
   }
@@ -2976,7 +2995,7 @@ async function resetGame() {
   if (!ok) return;
 
   try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
-  ballInventory = { poke: 20, premier: 0, great: 0, ultra: 0, master: 0 };
+  ballInventory = { poke: 20, premier: 0, rocket: 0, great: 0, ultra: 0, master: 0 };
   currentBall = 'poke';
   itemInventory = { goodPotion: 0, grape: 0, pineapple: 0, banana: 0, incense: 0 };
   incenseEndAt = 0;
@@ -3501,7 +3520,7 @@ function addSpawn(p, lat, lng) {
   const gifCls = 'spawn-gif' + (isPng ? ' png-big' : '');
 
   const icon = L.divIcon({
-    className: '',
+    className: 'spawn-marker',
     html: `<div class="spawn ${shiny ? 'shiny' : ''}">
              <div class="spawn-shadow"></div>
              <img class="${gifCls}" src="${src}" alt="${p.name}" draggable="false"
@@ -3572,7 +3591,7 @@ function maybeSpawnNPC(center) {
   const icon = L.divIcon({
     className: '',
     html: `<div class="npc">
-             <div class="npc-badge">交換</div>
+             <div class="npc-badge">${trade.shiny ? '✨交換' : '交換'}</div>
              <div class="npc-ring"></div>
              <div class="npc-emoji">${emoji}</div>
            </div>`,
@@ -3621,14 +3640,15 @@ function maybeSpawnGym(center) {
 }
 
 function buildNpcTrade() {
+  const shiny = Math.random() < SHINY_RATE;
   if (Math.random() < NPC_EVO_TRADE_RATE) {
     const t = TRADE_EVOLUTIONS[Math.floor(Math.random() * TRADE_EVOLUTIONS.length)];
     return { kind: 'evo', npcName: t.npcName, to: t.to, candyCost: t.candyCost,
-      spriteId: t.spriteId, evoSpriteId: t.evoSpriteId };
+      spriteId: t.spriteId, evoSpriteId: t.evoSpriteId, shiny };
   }
   const pool = POKEDEX.filter(p => !p.notWild && p.w > 0);
   const mon = pool.length ? pool[Math.floor(Math.random() * pool.length)] : POKEDEX[Math.floor(Math.random() * POKEDEX.length)];
-  return { kind: 'random', npcName: mon.name, to: mon.name, candyCost: 1, spriteId: mon.spriteId || mon.id };
+  return { kind: 'random', npcName: mon.name, to: mon.name, candyCost: 1, spriteId: mon.spriteId || mon.id, shiny };
 }
 
 /* =========================================================
@@ -3668,16 +3688,17 @@ function openNPCExchange(npc) {
   const isEvo = trade.kind === 'evo';
 
   npcTitle.textContent = `${emoji} 交換`;
-  npcSub.textContent = isEvo
+  npcSub.textContent = (isEvo
     ? 'NPC 願意與你交換精靈（交換後會進化）'
-    : 'NPC 願意與你交換精靈（隨機精靈，消耗 1 顆糖果）';
+    : 'NPC 願意與你交換精靈（隨機精靈，消耗 1 顆糖果）')
+    + (trade.shiny ? '　✨ 異色精靈！' : '');
 
-  npcCardName.textContent = trade.npcName;
+  npcCardName.textContent = trade.shiny ? `✨ ${trade.npcName}` : trade.npcName;
   const spriteId = trade.spriteId || (npcMon && npcMon.id);
   const spriteMon = npcMon || (spriteId ? POKEDEX.find(x => x.id === spriteId) : null) || (spriteId ? { id: spriteId } : null);
 
   if (spriteMon) {
-    npcCardImg.src = spriteUrl(spriteMon, false);
+    npcCardImg.src = spriteUrl(spriteMon, !!trade.shiny);
     npcCardImg.style.display = '';
     npcCardFallback.style.display = 'none';
     npcCardImg.onerror = () => {
@@ -3723,7 +3744,7 @@ function openNPCExchange(npc) {
 
   npcCostLabel.textContent = `${trade.candyCost} 顆`;
   npcEvoLineLabel.textContent = isEvo ? '交換後進化為' : '交換後獲得';
-  npcEvoLabel.textContent = isEvo ? trade.to : trade.npcName;
+  npcEvoLabel.textContent = (trade.shiny ? '✨ ' : '') + (isEvo ? trade.to : trade.npcName);
 
   const enough = !!candySource && candySource.amount >= trade.candyCost;
   npcConfirmBtn.disabled = !enough;
@@ -3754,7 +3775,12 @@ npcConfirmBtn.addEventListener('click', () => {
   const npcMon = POKEDEX.find(p => p.name === trade.npcName);
   const playerMon = POKEDEX.find(p => p.name === candySource.name);
   const resultName = (trade.kind === 'evo') ? trade.to : trade.npcName;
-  const alreadyCaught = !!(dexState[resultName] && dexState[resultName].caught > 0);
+  const resultState = dexState[resultName];
+
+  const isShinyTrade  = !!trade.shiny;
+  const alreadyShiny  = !!(resultState && resultState.shiny > 0);
+  const alreadyCaught = !!(resultState && resultState.caught > 0);
+  const noGain = isShinyTrade ? alreadyShiny : alreadyCaught;
 
   playTradeAnimation(npcMon, playerMon, trade, candySource, () => {
     candyBag[candySource.name] -= trade.candyCost;
@@ -3776,26 +3802,33 @@ npcConfirmBtn.addEventListener('click', () => {
         dexState[trade.npcName].seen = 1;
       }
 
-      if (alreadyCaught) {
+      if (noGain) {
         addCandy(resultName, 1);
-        finish(`🔄 交換成功！已擁有 ${resultName}，改為獲得 🍬 +1 ${resultName} 糖果！`);
+        finish(isShinyTrade
+          ? `✨🔄 交換成功！已擁有異色 ${resultName}，改為獲得 🍬 +1 ${resultName} 糖果！`
+          : `🔄 交換成功！已擁有 ${resultName}，改為獲得 🍬 +1 ${resultName} 糖果！`);
       } else {
         caughtCount++;
-        if (dexState[resultName]) {
-          dexState[resultName].seen = 1;
-          dexState[resultName].caught++;
+        if (resultState) {
+          resultState.seen = 1;
+          resultState.caught++;
+          if (isShinyTrade) resultState.shiny++;      // ✨ 異色入帳
         }
         if (trade.kind === 'evo' && dexState[trade.npcName]) {
           dexState[trade.npcName].caught++;
         }
-        finish(trade.kind === 'evo'
-          ? `🔄 交換成功！${trade.npcName} 進化成 ${trade.to}！`
-          : `🔄 交換成功！獲得 ${resultName}！`);
+        finish(isShinyTrade
+          ? (trade.kind === 'evo'
+              ? `✨🔄 交換成功！異色 ${trade.npcName} 進化成異色 ${trade.to}！`
+              : `✨🔄 交換成功！獲得異色 ${resultName}！`)
+          : (trade.kind === 'evo'
+              ? `🔄 交換成功！${trade.npcName} 進化成 ${trade.to}！`
+              : `🔄 交換成功！獲得 ${resultName}！`));
       }
     };
 
     if (trade.kind === 'evo') {
-      playNPCEvolutionAnimation(trade.npcName, trade.to, trade.evoSpriteId, settle);
+      playNPCEvolutionAnimation(trade.npcName, trade.to, trade.evoSpriteId, isShinyTrade, settle);
     } else {
       settle();
     }
@@ -4027,7 +4060,9 @@ gymSelectCloseBtn.addEventListener('click', () => {
 });
 
 function renderGymSelect() {
-  const owned = POKEDEX.filter(p => dexState[p.name] && dexState[p.name].caught > 0);
+  const owned = POKEDEX
+  .filter(p => dexState[p.name] && dexState[p.name].caught > 0)
+  .sort((a, b) => getCandy(b.name) - getCandy(a.name));
 
   gymSelectProgress.innerHTML = `
   已捕獲可出戰 ${owned.length} 隻<br>
@@ -4120,32 +4155,34 @@ function chooseGymFighter(name, shiny) {
         SFX.reward();
         toast(`${usingShiny ? '✨ ' : ''}⚔ 道場挑戰成功！獲得 ${p.name} 糖果 ×3`, 3000);
         if (gameStarted) audio.playMap(env.time);
-      } else {
-        // ✅ 最終形態／無進化 → 先送紀念球 ×3
-        const hadBall  = getTotalBalls() > 0;      // 送球前先判斷
-        const gymPoke  = currentGym.pokemon;
-        const gymShiny = Math.random() < SHINY_RATE;
+	} else {
+	  // ✅ 最終形態／無進化 → 先送紀念球 ×3
+	  const gymPoke  = currentGym.pokemon;
+	  const gymShiny = Math.random() < SHINY_RATE;
 
-        ballInventory.premier = (ballInventory.premier || 0) + 3;
-        updateHUD();
-        autoSave();
+	  ballInventory.premier = (ballInventory.premier || 0) + 3;
+	  updateHUD();
+	  autoSave();
 
-        gymScreen.classList.add('hidden');
-        clearGym();
-        SFX.init();
-        SFX.reward();
+	  gymScreen.classList.add('hidden');
+	  clearGym();
+	  SFX.init();
+	  SFX.reward();
 
-        if (!hadBall) {
-          toast(`${usingShiny ? '✨ ' : ''}⚔ 道場挑戰成功！獲得紀念球 ×3（純紀念用途）`, 3200);
-          if (gameStarted) audio.playMap(env.time);
-        } else {
-          const shinyTxt = gymShiny ? '✨ 異色 ' : '';
-          toast(`${usingShiny ? '✨ ' : ''}⚔ 道場挑戰成功！獲得紀念球 ×3，${shinyTxt}${gymPoke.name} 願意成為你的夥伴，快來捕捉！`, 3400);
-          setTimeout(() => {
-            openCatch(gymPoke, null, gymShiny);
-          }, 700);
-        }
-      }
+	  // ← 送完球後再判斷，此時至少 3 顆紀念球
+	  const canCatch = getTotalBalls() > 0;
+
+	  if (!canCatch) {
+		toast(`${usingShiny ? '✨ ' : ''}⚔ 道場挑戰成功！獲得紀念球 ×3`, 3200);
+		if (gameStarted) audio.playMap(env.time);
+	  } else {
+		const shinyTxt = gymShiny ? '✨ 異色 ' : '';
+		toast(`${usingShiny ? '✨ ' : ''}⚔ 道場挑戰成功！獲得紀念球 ×3，${shinyTxt}${gymPoke.name} 願意成為你的夥伴，快來捕捉！`, 3400);
+		setTimeout(() => {
+		  openCatch(gymPoke, null, gymShiny);
+		}, 700);
+	  }
+	}
     } else {
       // ❌ 失敗：原有邏輯
       gymScreen.classList.remove('hidden');
@@ -4173,7 +4210,7 @@ const tradeFlash   = document.getElementById('tradeFlash');
 function setTradeMon(elImg, elFallback, elLabel, mon, labelText, fallbackText) {
   elLabel.textContent = labelText;
   if (mon) {
-    elImg.src = spriteUrl(mon, false);
+    elImg.src = spriteUrl(mon, !!shiny);
     elImg.style.display = '';
     elFallback.style.display = 'none';
     elImg.onerror = () => {
@@ -4194,7 +4231,9 @@ function playTradeAnimation(npcMon, playerMon, trade, candySource, onDone) {
   tradeMonB.classList.remove('swapped');
   tradeFlash.classList.remove('flash');
 
-  setTradeMon(tradeImgA, tradeFallbackA, tradeLabelA, npcMon, trade.npcName, '❓');
+  const shinyTag = trade.shiny ? '✨ ' : '';
+  setTradeMon(tradeImgA, tradeFallbackA, tradeLabelA, npcMon,
+              shinyTag + trade.npcName, '❓', trade.shiny);
   if (playerMon && candySource) {
     setTradeMon(tradeImgB, tradeFallbackB, tradeLabelB, playerMon, `${candySource.name}糖果`, '🍬');
   } else {
@@ -4220,7 +4259,7 @@ function playTradeAnimation(npcMon, playerMon, trade, candySource, onDone) {
   }, 1400);
 }
 
-function playNPCEvolutionAnimation(fromName, toName, evoSpriteId, onDone) {
+function playNPCEvolutionAnimation(fromName, toName, evoSpriteId, shiny, onDone) {
   const fromMon = POKEDEX.find(p => p.name === fromName);
   const tgt = POKEDEX.find(p => p.name === toName);
   const sid = evoSpriteId || (tgt && tgt.id);
@@ -4230,13 +4269,14 @@ function playNPCEvolutionAnimation(fromName, toName, evoSpriteId, onDone) {
   const animImg = document.getElementById('evoAnimImg');
   const evoMon = tgt || POKEDEX.find(x => x.id === sid) || { id: sid };
 
-  const fromSrc = fromMon ? spriteUrl(fromMon, false) : spriteUrl(evoMon, false);
-  const toSrc   = spriteUrl(evoMon, false);
+  const fromSrc = fromMon ? spriteUrl(fromMon, !!shiny) : spriteUrl(evoMon, !!shiny);
+  const toSrc   = spriteUrl(evoMon, !!shiny);
 
   animImg.src = fromSrc;
   animImg.style.display = '';
   animImg.onerror = () => { animImg.style.display = 'none'; };
   ov.style.display = 'flex';
+  ov.classList.toggle('shiny', !!shiny);      // ✨ 金光特效
 
   audio.init();
   audio.playTrade();
@@ -4247,6 +4287,7 @@ function playNPCEvolutionAnimation(fromName, toName, evoSpriteId, onDone) {
   setTimeout(() => {
     clearTimeout(swapTimer);
     ov.style.display = 'none';
+    ov.classList.remove('shiny');
     animImg.style.display = '';
     onDone();
   }, 2700);
@@ -4357,7 +4398,7 @@ function renderCatchBallSelector() {
     return;
   }
 
-  const order = ['poke', 'premier', 'great', 'ultra', 'master'];
+  const order = ['poke', 'premier', 'rocket', 'great', 'ultra', 'master'];
   box.innerHTML = order.map(t => {
     const n = ballInventory[t] || 0;
     const active = (t === currentBall);
@@ -4465,8 +4506,8 @@ function useCatchItem(type) {
     catchEffect.catchBonus = 1.3;
     showEffectBadge('🍇 捕捉成功率 ×1.3');
   } else if (type === 'pineapple') {
-    catchEffect.extraCandy = 1;
-    showEffectBadge('🍍 捕獲糖果+1');
+    catchEffect.extraCandy = 2;
+    showEffectBadge('🍍 捕獲糖果+2');
   } else if (type === 'banana') {
     catchEffect.fleeReduction = true;
     showEffectBadge('🍌 降低逃跑機率');
@@ -4752,7 +4793,8 @@ function performThrow(ballType, quality, angle, power) {
   const spinDir = dirSign;
   const duration = 520;
   lastThrow = { ballType, quality, angle, power, targetX, targetY, spinDir };
-
+  const isCurve = (ballType === 'curve');
+  const baseRot = isCurve ? spinDir * 720 : 0;     // 直球不帶初始旋轉
   flyBall(targetX, targetY, spinDir, curveOffset, duration, () => {
     SFX.hit();
 
@@ -4761,7 +4803,7 @@ function performThrow(ballType, quality, angle, power) {
       setBallTransform(
         targetX + dirSign * 70,
         targetY + (curveSlip ? 130 : (quality === 'low' ? 140 : -140)),
-        spinDir * 1080
+        isCurve ? spinDir * 1080 : 0          // ← 直球 miss 也不轉
       );
       ballFly.style.opacity = '0';
       showResult(
@@ -4783,14 +4825,16 @@ function performThrow(ballType, quality, angle, power) {
 
     wildMon.classList.add('absorbed');
     setTimeout(() => {
-      wobbleBall(targetX, targetY, spinDir * 720, () => {
-        resolveCatch();
+      bounceBall(targetX, targetY, baseRot, () => {       // ← 先彈一下
+        wobbleBall(targetX, targetY, baseRot, () => {     // ← 再落地搖
+          resolveCatch();
+        });
       });
     }, 240);
-  });
+  }, isCurve);
 }
 
-function flyBall(targetX, targetY, spinDir, curveOffset, duration, onDone) {
+function flyBall(targetX, targetY, spinDir, curveOffset, duration, onDone, rotate) {
   const startX = ballHome.x;
   const startY = ballHome.y;
   const midX = (startX + targetX) / 2;
@@ -4813,10 +4857,29 @@ function flyBall(targetX, targetY, spinDir, curveOffset, duration, onDone) {
     const om = 1 - ease;
     const x = om*om*startX + 2*om*ease*cpX + ease*ease*targetX;
     const y = om*om*startY + 2*om*ease*cpY + ease*ease*targetY;
-    const rot = ease * 720 * spinDir;
+    const rot = rotate ? ease * 720 * spinDir : 0;   // ← 直球不轉
     setBallTransform(x, y, rot);
     if (t < 1) requestAnimationFrame(step);
     else onDone();
+  }
+  requestAnimationFrame(step);
+}
+
+function bounceBall(baseX, baseY, baseRot, onDone) {
+  const DUR = 260;
+  const H   = 42;
+  const startTime = performance.now();
+  function step(now) {
+    const t = Math.min(1, (now - startTime) / DUR);
+    // 0 → 1 → 0 的拋物線，高度隨時間遞減一點點
+    const lift = Math.sin(t * Math.PI) * H * (1 - t * 0.3);
+    setBallTransform(baseX, baseY - lift, baseRot);
+    if (t < 1) requestAnimationFrame(step);
+    else {
+      setBallTransform(baseX, baseY, baseRot);
+      SFX.hit();                     // 落地輕響
+      onDone();
+    }
   }
   requestAnimationFrame(step);
 }
@@ -4973,7 +5036,11 @@ function resolveCatch() {
         ? '差一點！（🍌 香蕉生效，精靈沒逃走）'
         : '差一點！再試一次', '#ffd166');
       ballFly.style.transition = 'transform .32s ease-in, opacity .32s';
-      setBallTransform(info.targetX, info.targetY + 240, info.spinDir * 1080);
+      setBallTransform(
+        info.targetX,
+        info.targetY + 240,
+        info.ballType === 'curve' ? info.spinDir * 1080 : 0   // ← 直球不轉
+      );
       ballFly.style.opacity = '0';
       setTimeout(() => {
         ballFlying = false;
@@ -5037,7 +5104,7 @@ function showBallBubble(gain) {
   setTimeout(() => b.remove(), 1750);
 }
 
-function spinStop() {
+function spinStop(dir = 1) {
   if (spinning) return;
   const marker = currentStopMarker;
   if (!marker || marker._used) return;
@@ -5047,7 +5114,8 @@ function spinStop() {
   SFX.spin();
   SFX.coinSpin();
 
-  discRot += 1080 + Math.floor(Math.random() * 720);
+  // dir = 1 → 順時針；dir = -1 → 逆時針
+  discRot += dir * (1080 + Math.floor(Math.random() * 720));
   stopDisc.style.transition = 'transform 1.7s cubic-bezier(.15,.85,.3,1)';
   stopDisc.style.transform = coinTransform(discRot);
 
@@ -5062,15 +5130,17 @@ function spinStop() {
     if (r < 0.003)        gained.master = 1;
     else if (r < 0.033)   gained.ultra  = 1;
     else if (r < 0.133)   gained.great  = 1;
+	
+	if (Math.random() < 0.07) gained.rocket = 1;
 
     const ir = Math.random();
-    if (ir < 0.10)   itemsGained.goodPotion = 1;
-	else if (ir < 0.15)   itemsGained.incense = 1;
+    if (ir < 0.10)        itemsGained.goodPotion = 1;
+    else if (ir < 0.15)   itemsGained.incense = 1;
     else if (ir < 0.26)   itemsGained.banana = 1;
     else if (ir < 0.38)   itemsGained.pineapple = 1;
-	else if (ir < 0.50)   itemsGained.grape = 1;
+    else if (ir < 0.50)   itemsGained.grape = 1;
 
-    ['poke','great','ultra','master'].forEach(t => {
+    ['poke','rocket','great','ultra','master'].forEach(t => {
       ballInventory[t] = (ballInventory[t] || 0) + gained[t];
     });
     ['goodPotion','grape','pineapple','banana','incense'].forEach(t => {
@@ -5080,7 +5150,7 @@ function spinStop() {
     autoSave();
 
     let html = '';
-    ['master','ultra','great','poke'].forEach(t => {
+    ['master','ultra','great','rocket','poke'].forEach(t => {
       if (gained[t] > 0) {
         html += `<span style="display:inline-flex;align-items:center;gap:5px;margin:0 4px">
                    <span class="ball-mini ball-${t}"></span>×${gained[t]}
@@ -5110,15 +5180,16 @@ function spinStop() {
     const totalBalls = gained.poke + gained.great + gained.ultra + gained.master;
     if (totalBalls > 0) showBallBubble(totalBalls);
 
-    if (gained.master > 0)      toast('✨✨ 獲得了大師球！', 3200);
-    else if (gained.ultra > 0)  toast('✨ 獲得了超級球！', 2800);
-    else if (gained.great > 0)  toast('✨ 獲得了高級球！', 2600);
+    if (gained.master > 0)            toast('🟣 獲得了大師球！', 3200);
+    else if (gained.ultra > 0)        toast('⚫ 獲得了超級球！', 2800);
+    else if (gained.great > 0)        toast('🔵 獲得了高級球！', 2600);
+	else if (gained.rocket > 0)       toast('🚀 獲得了火箭隊球！', 2800);
 
-	if (itemsGained.incense > 0) toast('🌀 獲得了香薰！', 2600);
-    else if (itemsGained.banana > 0) toast('🍌 獲得了香蕉！', 2400);
+    if (itemsGained.incense > 0)      toast('🌀 獲得了香薰！', 2600);
+    else if (itemsGained.banana > 0)  toast('🍌 獲得了香蕉！', 2400);
     else if (itemsGained.pineapple > 0) toast('🍍 獲得了菠蘿！', 2400);
-	else if (itemsGained.grape > 0) toast('🍇 獲得了提子！', 2400);
-	else if (itemsGained.goodPotion > 0) toast('🧪 獲得了好傷藥！', 2400);
+    else if (itemsGained.grape > 0)   toast('🍇 獲得了提子！', 2400);
+    else if (itemsGained.goodPotion > 0) toast('🧪 獲得了好傷藥！', 2400);
   }, 1700);
 }
 
@@ -5150,11 +5221,18 @@ function endStopSwipe(e) {
   if (!stopSwipe.active || e.pointerId !== stopSwipe.id) return;
   stopSwipe.active = false;
   stopDisc.style.transition = '';
+
   const dx = stopSwipe.x - stopSwipe.x0;
   const dy = stopSwipe.y - stopSwipe.y0;
+  const dragOffset = dx * 0.85;   // 與 pointermove 使用的係數一致
+
   if (!spinning && Math.abs(dx) >= SWIPE_THRESHOLD && Math.abs(dx) > Math.abs(dy)) {
-    spinStop();
+    // 達標：先把拖曳偏移吸收進 discRot，避免回彈跳躍，再往同方向繼續轉
+    discRot += dragOffset;
+    stopDisc.style.transform = coinTransform(discRot);
+    spinStop(dx >= 0 ? 1 : -1);
   } else {
+    // 未達標：彈回不含拖曳偏移的原角度（CSS transition 會平滑補間）
     stopDisc.style.transform = coinTransform(discRot);
     if (!spinning && (Math.abs(dx) > 18 || Math.abs(dy) > 18)) {
       stopHint.textContent = '橫掃距離不夠，再試一次';
@@ -5219,7 +5297,7 @@ function craftBall(t) {
 
 function renderBag() {
   const ballGrid = document.getElementById('bagGrid');
-  const order = ['poke', 'premier', 'great', 'ultra', 'master'];
+  const order = ['poke', 'premier', 'rocket', 'great', 'ultra', 'master'];
   ballGrid.innerHTML = order.map(t => {
     const d = BALL_TYPES[t];
     const n = ballInventory[t] || 0;
@@ -5235,6 +5313,7 @@ function renderBag() {
       tag += `<div class="bag-ball-tag" style="background:rgba(124,252,154,.18);color:#7CFC9A">🔧 可合成 → ${BALL_TYPES[up].name}（先選中使用）</div>`;
     }
     if (t === 'premier') tag += '<div class="bag-ball-tag" style="background:rgba(230,57,70,.18);color:#ff9aa2">純紀念用</div>';
+	else if (t === 'rocket') tag += '<div class="bag-ball-tag" style="background:rgba(238,21,21,.18);color:#ff6b6b">火箭隊專用</div>';
     else if (!up) tag += '<div class="bag-ball-tag" style="background:rgba(162,155,254,.18);color:#a29bfe">最高級</div>';
 
     return `
@@ -5514,7 +5593,15 @@ document.getElementById('dexCloseBtn').addEventListener('click', () => {
 function renderEvoList() {
   const list = document.getElementById('evoList');
   const prog = document.getElementById('evoProgress');
-  const sources = Object.keys(EVOLUTIONS).filter(n => dexState[n] && dexState[n].caught > 0);
+  const sources = Object.keys(EVOLUTIONS)
+  .filter(n => dexState[n] && dexState[n].caught > 0)
+  .sort((a, b) => {
+    // 先比「是否已湊夠糖果可進化」，再比糖果數量
+    const aReady = EVOLUTIONS[a].some(e => getCandy(a) >= e.candy) ? 1 : 0;
+    const bReady = EVOLUTIONS[b].some(e => getCandy(b) >= e.candy) ? 1 : 0;
+    if (aReady !== bReady) return bReady - aReady;   // 可進化的排前
+    return getCandy(b) - getCandy(a);                 // 糖果多的排前
+  });
 
   if (sources.length === 0) {
     list.innerHTML = `<div class="evo-empty">
