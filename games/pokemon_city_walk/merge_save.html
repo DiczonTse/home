@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pokemon City Walk 存檔合併工具</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{min-height:100vh;background:radial-gradient(circle at 50% 20%,#2a2140 0%,#120e22 60%,#07060e 100%);
+    color:#fff;font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei",sans-serif;
+    padding:24px 16px;display:flex;flex-direction:column;align-items:center;gap:16px}
+  h1{font-size:19px;font-weight:900;letter-spacing:2px;text-shadow:0 0 18px rgba(162,155,254,.7);text-align:center}
+  .sub{font-size:12px;color:rgba(255,255,255,.55);font-weight:700;text-align:center;line-height:1.6;max-width:420px}
+  .slot{width:min(440px,100%);background:rgba(255,255,255,.06);border:2px dashed rgba(255,255,255,.18);
+    border-radius:18px;padding:18px;text-align:center;cursor:pointer;transition:.2s}
+  .slot:active{transform:scale(.98)}
+  .slot.loaded{border-style:solid;border-color:#7CFC9A;background:rgba(124,252,154,.08)}
+  .slot .label{font-size:12px;font-weight:800;color:rgba(255,255,255,.5);letter-spacing:1px;margin-bottom:8px}
+  .slot .name{font-size:14px;font-weight:800;color:#fff;word-break:break-all}
+  .slot .info{font-size:11px;color:#ffd166;font-weight:700;margin-top:6px;line-height:1.5}
+  input[type=file]{display:none}
+  button{width:min(440px,100%);padding:15px;border:none;border-radius:999px;
+    font-family:inherit;font-size:16px;font-weight:900;letter-spacing:1px;cursor:pointer;transition:.15s}
+  button:active{transform:scale(.96)}
+  #mergeBtn{background:linear-gradient(135deg,#a29bfe,#6c5ce7);color:#fff;
+    box-shadow:0 6px 22px rgba(108,92,231,.5)}
+  #mergeBtn:disabled{background:rgba(120,120,140,.5);box-shadow:none;cursor:not-allowed;opacity:.6}
+  #dlBtn{background:linear-gradient(135deg,#7CFC9A,#20a054);color:#0a3d1a;
+    box-shadow:0 6px 22px rgba(32,160,84,.45);display:none}
+  #dlBtn.show{display:block}
+  #log{width:min(440px,100%);background:rgba(0,0,0,.35);border-radius:14px;padding:14px;
+    font-size:12px;font-weight:700;line-height:1.75;color:rgba(255,255,255,.8);
+    white-space:pre-wrap;display:none;font-family:ui-monospace,Menlo,monospace}
+  #log.show{display:block}
+  #log .ok{color:#7CFC9A}
+  #log .err{color:#ff8a8a}
+</style>
+</head>
+<body>
+
+<h1>🔀 存檔合併工具</h1>
+<div class="sub">選擇兩個 <b>.txt</b> 存檔，合併後下載，再用遊戲的 📂 載入。</div>
+
+<label class="slot" id="slotA">
+  <input type="file" id="fileA" accept=".txt,text/plain,application/json">
+  <div class="label">存檔 A</div>
+  <div class="name" id="nameA">點擊選擇 .txt</div>
+  <div class="info" id="infoA"></div>
+</label>
+
+<label class="slot" id="slotB">
+  <input type="file" id="fileB" accept=".txt,text/plain,application/json">
+  <div class="label">存檔 B</div>
+  <div class="name" id="nameB">點擊選擇 .txt</div>
+  <div class="info" id="infoB"></div>
+</label>
+
+<button id="mergeBtn" disabled>合併存檔</button>
+<button id="dlBtn">下載合併存檔 .txt</button>
+<div id="log"></div>
+
+<script>
+const BALLS = ['poke','premier','rocket','great','ultra','master'];
+const ITEMS = ['goodPotion','grape','pineapple','banana','incense'];
+
+let saveA = null, saveB = null, merged = null;
+
+function summarize(d) {
+  const totalBalls = BALLS.reduce((s,t) => s + (d.ballInventory?.[t] || 0), 0);
+  const dexCaught = Object.values(d.dexState || {}).filter(s => (s.caught|0) > 0).length;
+  const shiny = Object.values(d.dexState || {}).reduce((s,x) => s + (x.shiny|0), 0);
+  return `🎯 球 ${totalBalls} ｜ 📖 圖鑑 ${dexCaught} 種 ｜ ✨ 異色 ${shiny} ｜ 🏆 捕獲 ${d.caughtCount|0}`;
+}
+
+function readFile(file, slotLetter) {
+  const nameEl = document.getElementById('name' + slotLetter);
+  const infoEl = document.getElementById('info' + slotLetter);
+  const slotEl = document.getElementById('slot' + slotLetter);
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (!data || typeof data !== 'object' || (!data.ballInventory && !data.dexState)) {
+        throw new Error('不是有效的遊戲存檔');
+      }
+      if (slotLetter === 'A') saveA = data; else saveB = data;
+      nameEl.textContent = file.name;
+      infoEl.textContent = summarize(data);
+      slotEl.classList.add('loaded');
+      updateMergeBtn();
+    } catch (e) {
+      nameEl.textContent = '❌ 讀取失敗';
+      infoEl.textContent = e.message;
+      slotEl.classList.remove('loaded');
+      if (slotLetter === 'A') saveA = null; else saveB = null;
+      updateMergeBtn();
+    }
+  };
+  reader.readAsText(file);
+}
+
+document.getElementById('fileA').addEventListener('change', e => readFile(e.target.files[0], 'A'));
+document.getElementById('fileB').addEventListener('change', e => readFile(e.target.files[0], 'B'));
+
+function updateMergeBtn() {
+  document.getElementById('mergeBtn').disabled = !(saveA && saveB);
+}
+
+function mergeSaves(a, b) {
+  const now = Date.now();
+  const out = { version: 3, savedAt: new Date().toISOString() };
+
+  // ── 精靈球：相加 ──
+  out.ballInventory = {};
+  BALLS.forEach(t => {
+    out.ballInventory[t] = (a.ballInventory?.[t] | 0) + (b.ballInventory?.[t] | 0);
+  });
+
+  // ── 使用中的球：取數量最多的 ──
+  let bestBall = 'poke', bestN = -1;
+  BALLS.forEach(t => {
+    if (out.ballInventory[t] > bestN) { bestN = out.ballInventory[t]; bestBall = t; }
+  });
+  out.currentBall = bestN > 0 ? bestBall : (a.currentBall || b.currentBall || 'poke');
+
+  // ── 道具：相加 ──
+  out.itemInventory = {};
+  ITEMS.forEach(t => {
+    out.itemInventory[t] = (a.itemInventory?.[t] | 0) + (b.itemInventory?.[t] | 0);
+  });
+
+  // ── 香薰：取較晚且未過期的結束時間 ──
+  const ea = (typeof a.incenseEndAt === 'number' && a.incenseEndAt > now) ? a.incenseEndAt : 0;
+  const eb = (typeof b.incenseEndAt === 'number' && b.incenseEndAt > now) ? b.incenseEndAt : 0;
+  out.incenseEndAt = Math.max(ea, eb);
+
+  // ── 捕獲總數：相加 ──
+  out.caughtCount = (a.caughtCount | 0) + (b.caughtCount | 0);
+
+  // ── 圖鑑：seen 取 max、caught/shiny 相加 ──
+  out.dexState = {};
+  const dexNames = new Set([
+    ...Object.keys(a.dexState || {}),
+    ...Object.keys(b.dexState || {}),
+  ]);
+  dexNames.forEach(n => {
+    const sa = a.dexState?.[n] || {};
+    const sb = b.dexState?.[n] || {};
+    out.dexState[n] = {
+      seen:   Math.max(sa.seen | 0, sb.seen | 0),
+      caught: (sa.caught | 0) + (sb.caught | 0),
+      shiny:  (sa.shiny  | 0) + (sb.shiny  | 0),
+    };
+  });
+
+  // ── 糖果：相加 ──
+  out.candyBag = {};
+  const candyNames = new Set([
+    ...Object.keys(a.candyBag || {}),
+    ...Object.keys(b.candyBag || {}),
+  ]);
+  candyNames.forEach(n => {
+    const v = (a.candyBag?.[n] | 0) + (b.candyBag?.[n] | 0);
+    if (v > 0) out.candyBag[n] = v;
+  });
+
+  return out;
+}
+
+document.getElementById('mergeBtn').addEventListener('click', () => {
+  const log = document.getElementById('log');
+  try {
+    merged = mergeSaves(saveA, saveB);
+  } catch (e) {
+    log.className = 'show';
+    log.innerHTML = `<span class="err">❌ 合併失敗：${e.message}</span>`;
+    return;
+  }
+
+  // 輸出合併報告
+  const lines = [];
+  lines.push('<span class="ok">✅ 合併完成</span>');
+  lines.push('');
+  lines.push('【精靈球】');
+  BALLS.forEach(t => {
+    const va = saveA.ballInventory?.[t] | 0;
+    const vb = saveB.ballInventory?.[t] | 0;
+    if (va + vb > 0) lines.push(`  ${t}: ${va} + ${vb} = ${merged.ballInventory[t]}`);
+  });
+  lines.push(`  使用中：${merged.currentBall}`);
+
+  lines.push('');
+  lines.push('【道具】');
+  ITEMS.forEach(t => {
+    const va = saveA.itemInventory?.[t] | 0;
+    const vb = saveB.itemInventory?.[t] | 0;
+    if (va + vb > 0) lines.push(`  ${t}: ${va} + ${vb} = ${merged.itemInventory[t]}`);
+  });
+
+  lines.push('');
+  const dexCount = Object.keys(merged.dexState).filter(n => merged.dexState[n].caught > 0).length;
+  const shinyTotal = Object.values(merged.dexState).reduce((s, x) => s + x.shiny, 0);
+  lines.push(`【圖鑑】捕獲 ${dexCount} 種，異色 ${shinyTotal} 隻`);
+  lines.push(`【捕獲總數】${merged.caughtCount}`);
+  lines.push(`【香薰剩餘】${merged.incenseEndAt > 0
+    ? Math.ceil((merged.incenseEndAt - Date.now()) / 60000) + ' 分鐘'
+    : '無'}`);
+
+  log.className = 'show';
+  log.innerHTML = lines.join('\n');
+  document.getElementById('dlBtn').classList.add('show');
+});
+
+document.getElementById('dlBtn').addEventListener('click', () => {
+  if (!merged) return;
+  const blob = new Blob([JSON.stringify(merged, null, 2)], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const ts = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+  a.href = url;
+  a.download = `pokemon_city_walk_merged_${ts}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+});
+</script>
+</body>
+</html>

@@ -1216,6 +1216,37 @@
   @keyframes cfFadeIn{from{opacity:0}to{opacity:1}}
   @keyframes cfPop{from{opacity:0;transform:scale(.85) translateY(12px)}
     to{opacity:1;transform:scale(1) translateY(0)}}
+  #exchangeScreen{background:radial-gradient(circle at 50% 20%,#2a2140 0%,#120e22 60%,#07060e 100%)}
+  .exchange-tabs{display:flex;gap:10px;margin-bottom:14px}
+  .exchange-tab{flex:1;padding:11px;border-radius:999px;border:2px solid rgba(255,255,255,.15);
+    background:rgba(255,255,255,.06);color:rgba(255,255,255,.7);font-family:inherit;
+    font-size:13px;font-weight:900;letter-spacing:1px;cursor:pointer;transition:.2s}
+  .exchange-tab.active{background:linear-gradient(135deg,#a29bfe,#6c5ce7);color:#fff;
+    border-color:#fff;box-shadow:0 4px 16px rgba(108,92,231,.5)}
+  .exchange-warn{background:rgba(255,138,138,.12);border:1.5px solid rgba(255,138,138,.3);
+    border-radius:12px;padding:10px 14px;margin-bottom:12px;
+    color:#ff8a8a;font-size:12px;font-weight:700;line-height:1.6;text-align:center}
+  .exchange-result{margin-top:16px;background:rgba(124,252,154,.08);
+    border:2px solid rgba(124,252,154,.3);border-radius:16px;padding:14px}
+  .exchange-result-title{color:#7CFC9A;font-size:14px;font-weight:900;letter-spacing:1px;
+    text-align:center;margin-bottom:10px}
+  .exchange-code-box{width:100%;min-height:76px;background:rgba(0,0,0,.45);
+    border:1.5px solid rgba(255,255,255,.15);border-radius:12px;
+    color:#ffd166;font-family:ui-monospace,Menlo,monospace;font-size:11px;
+    padding:10px;resize:none;word-break:break-all;line-height:1.5;
+    -webkit-user-select:text;user-select:text;outline:none}
+  .exchange-btn-row{display:flex;gap:8px;margin-top:10px}
+  .exchange-btn{flex:1;padding:11px;border-radius:999px;border:none;font-family:inherit;
+    font-size:13px;font-weight:900;cursor:pointer;transition:.15s;letter-spacing:.5px}
+  .exchange-btn:active{transform:scale(.95)}
+  .exchange-btn.copy{background:rgba(255,255,255,.14);color:#fff}
+  .exchange-btn.share{background:linear-gradient(135deg,#ffd166,#ffb703);color:#5a3d00}
+  .exchange-btn.redeem{width:100%;margin-top:12px;padding:14px;border-radius:999px;
+    background:linear-gradient(135deg,#a29bfe,#6c5ce7);color:#fff;font-size:15px;
+    box-shadow:0 6px 22px rgba(108,92,231,.5)}
+  .exchange-btn.redeem:active{transform:scale(.96)}
+  .exchange-hint{margin-top:10px;color:rgba(255,255,255,.55);font-size:11px;
+    font-weight:700;line-height:1.6;text-align:center;min-height:16px}
 </style>
 </head>
 <body>
@@ -1254,6 +1285,7 @@
   <button class="chip chip-btn" id="bagBtn">🎒 背包</button>
   <button class="chip chip-btn" id="dexBtn">📖 圖鑑</button>
   <button class="chip chip-btn" id="evoBtn">🧬 進化</button>
+  <button class="chip chip-btn" id="exchangeBtn">🔄 交換</button>
   <button class="chip chip-btn" id="saveBtn" title="匯出存檔 .txt">💾</button>
   <button class="chip chip-btn" id="loadBtn" title="載入存檔 .txt">📂</button>
   <button class="chip chip-btn" id="resetBtn" title="重設遊戲進度">🗑</button>
@@ -1481,7 +1513,39 @@
     <div class="evo-list" id="evoList"></div>
   </div>
 </div>
+<div id="exchangeScreen" class="overlay hidden">
+  <div class="dex-top">
+    <div class="dex-title">🔄 精靈交換</div>
+    <button class="closeX" id="exchangeCloseBtn">✕</button>
+  </div>
 
+  <div class="exchange-tabs">
+    <button class="exchange-tab active" data-tab="gen">📤 產生交換碼</button>
+    <button class="exchange-tab" data-tab="red">📥 輸入交換碼</button>
+  </div>
+
+  <div class="dex-scroll" id="exchangeGenPane">
+    <div class="dex-progress" id="exchangeGenProgress">選擇一隻精靈產生交換碼</div>
+    <div class="exchange-warn">⚠️ 產生交換碼會消耗 1 顆該精靈糖果（精靈本身保留）。朋友領取時，若未擁有該精靈則直接獲得精靈，若已擁有則獲得 1 顆糖果。</div>
+    <div class="dex-grid" id="exchangeGenGrid"></div>
+    <div class="exchange-result hidden" id="exchangeResult">
+      <div class="exchange-result-title">✅ 交換碼已產生</div>
+      <textarea class="exchange-code-box" id="exchangeCodeBox" readonly></textarea>
+      <div class="exchange-btn-row">
+        <button class="exchange-btn copy" id="exchangeCopyBtn">📋 複製碼</button>
+        <button class="exchange-btn share" id="exchangeShareBtn">📤 分享</button>
+      </div>
+      <div class="exchange-hint">把這串碼傳給朋友，他們在「輸入交換碼」貼上即可領取。</div>
+    </div>
+  </div>
+
+  <div class="dex-scroll hidden" id="exchangeRedPane">
+    <div class="dex-progress">貼上朋友給你的交換碼</div>
+    <textarea class="exchange-code-box" id="exchangeInputBox" placeholder="在此貼上交換碼…"></textarea>
+    <button class="exchange-btn redeem" id="exchangeRedeemBtn">🎁 領取精靈</button>
+    <div class="exchange-hint" id="exchangeRedeemHint"></div>
+  </div>
+</div>
 <div id="gymBattleOverlay">
   <div class="gym-battle-stage" id="gymBattleStage">
     <div class="gym-fighter left" id="gymFighterLeft">
@@ -4074,7 +4138,7 @@ async function playGymBattleAnimation(playerMon, gymMon, playerWins, playerShiny
     } else {
       // 前 2 次：雙方彈開、勢均力敵
       await sleep(160);
-      setBattleMsg(`第 ${i + 1} 次對撞 — 勢均力敵！`);
+      setBattleMsg(`第 ${i + 1} 回合 — 勢均力敵！`);
       await sleep(300);
 
       gymFighterLeft.classList.remove('knockback');
@@ -4635,7 +4699,12 @@ function openCatch(p, marker, shiny) {
   buildStars();
 
   const nameEl = document.getElementById('catchName');
-  nameEl.textContent = shiny ? `✨ 異色 ${p.name} ✨` : `野生的 ${p.name}`;
+  const st = dexState[p.name];
+  const alreadyCaught = !!st && (shiny ? (st.shiny || 0) > 0 : (st.caught || 0) > 0);
+  const caughtMark = alreadyCaught
+    ? '<span class="ball-mini" style="margin-left:8px;vertical-align:middle;box-shadow:0 0 10px rgba(238,21,21,.75)"></span>'
+    : '';
+  nameEl.innerHTML = (shiny ? `✨ 異色 ${p.name} ✨` : `野生的 ${p.name}`) + caughtMark;
   nameEl.classList.toggle('shiny', !!shiny);
 
   monBody.classList.toggle('shiny', !!shiny);
@@ -5281,9 +5350,9 @@ function spinStop(dir = 1) {
     const totalBalls = gained.poke + gained.great + gained.ultra + gained.master + gained.rocket;
     if (totalBalls > 0) showBallBubble(totalBalls);
 
-    if (gained.master > 0)            toast('✨✨ 獲得了大師球！', 3200);
-    else if (gained.ultra > 0)        toast('✨ 獲得了超級球！', 2800);
-    else if (gained.great > 0)        toast('✨ 獲得了高級球！', 2600);
+    if (gained.master > 0)            toast('🟣 獲得了大師球！', 3200);
+    else if (gained.ultra > 0)        toast('⚫ 獲得了超級球！', 2800);
+    else if (gained.great > 0)        toast('🔵 獲得了高級球！', 2600);
     else if (gained.rocket > 0)       toast('🚀 獲得了火箭隊球！', 2800);
 
     if (itemsGained.incense > 0)      toast('🌀 獲得了香薰！', 2600);
@@ -5855,7 +5924,343 @@ document.getElementById('evoBtn').addEventListener('click', () => {
 document.getElementById('evoCloseBtn').addEventListener('click', () => {
   evoScreen.classList.add('hidden');
 });
+/* =========================================================
+   15b. 精靈交換碼（方案 A：離線交換）
+   ========================================================= */
+const EXCHANGE_KEY = 'pokemonCityWalkExchange_v1';
+const EXCHANGE_CODE_VERSION = 1;
+const EXCHANGE_TTL = 7 * 24 * 60 * 60 * 1000;   // 交換碼 7 天有效期
 
+let exchangeData = { playerId: '', redeemed: [] };
+let exchangeTab = 'gen';
+
+function loadExchangeData() {
+  try {
+    const raw = localStorage.getItem(EXCHANGE_KEY);
+    if (raw) exchangeData = Object.assign({ playerId: '', redeemed: [] }, JSON.parse(raw));
+  } catch (_) {}
+  if (!exchangeData.playerId) {
+    exchangeData.playerId = randomHex(8);
+    saveExchangeData();
+  }
+  if (!Array.isArray(exchangeData.redeemed)) exchangeData.redeemed = [];
+}
+
+function saveExchangeData() {
+  try { localStorage.setItem(EXCHANGE_KEY, JSON.stringify(exchangeData)); } catch (_) {}
+}
+
+function randomHex(len) {
+  const bytes = new Uint8Array(len);
+  if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(bytes);
+  else for (let i = 0; i < len; i++) bytes[i] = Math.floor(Math.random() * 256);
+  return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function encodeTradeCode(payload) {
+  const bytes = new TextEncoder().encode(JSON.stringify(payload));
+  let bin = '';
+  bytes.forEach(b => bin += String.fromCharCode(b));
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function decodeTradeCode(code) {
+  let s = String(code || '').trim().replace(/\s+/g, '');
+  if (!s) throw new Error('交換碼為空');
+  s = s.replace(/-/g, '+').replace(/_/g, '/');
+  s += '='.repeat((4 - (s.length % 4)) % 4);
+  let bin;
+  try { bin = atob(s); } catch (_) { throw new Error('交換碼格式錯誤'); }
+  const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+  let obj;
+  try { obj = JSON.parse(new TextDecoder().decode(bytes)); }
+  catch (_) { throw new Error('交換碼內容損毀'); }
+  return obj;
+}
+
+const exchangeScreen    = document.getElementById('exchangeScreen');
+const exchangeGenPane   = document.getElementById('exchangeGenPane');
+const exchangeRedPane   = document.getElementById('exchangeRedPane');
+const exchangeGenGrid   = document.getElementById('exchangeGenGrid');
+const exchangeGenProg   = document.getElementById('exchangeGenProgress');
+const exchangeResult    = document.getElementById('exchangeResult');
+const exchangeCodeBox   = document.getElementById('exchangeCodeBox');
+const exchangeInputBox  = document.getElementById('exchangeInputBox');
+const exchangeRedeemBtn = document.getElementById('exchangeRedeemBtn');
+const exchangeRedeemHint= document.getElementById('exchangeRedeemHint');
+
+function openExchange() {
+  loadExchangeData();
+  switchExchangeTab('gen');
+  renderExchangeGen();
+  exchangeScreen.classList.remove('hidden');
+}
+
+function switchExchangeTab(tab) {
+  exchangeTab = tab;
+  document.querySelectorAll('.exchange-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tab);
+  });
+  exchangeGenPane.classList.toggle('hidden', tab !== 'gen');
+  exchangeRedPane.classList.toggle('hidden', tab !== 'red');
+}
+
+function renderExchangeGen() {
+  exchangeResult.classList.add('hidden');
+  exchangeCodeBox.value = '';
+
+  const owned = POKEDEX
+    .filter(p => dexState[p.name] && dexState[p.name].caught > 0)
+    .sort((a, b) => {
+      const sa = (dexState[a.name].shiny || 0) > 0 ? 1 : 0;
+      const sb = (dexState[b.name].shiny || 0) > 0 ? 1 : 0;
+      if (sa !== sb) return sb - sa;                       // 異色優先
+      return a.name.localeCompare(b.name, 'zh-Hant');
+    });
+
+  exchangeGenProg.innerHTML = owned.length
+    ? `可交換 ${owned.length} 種精靈<br><span style="font-size:11px;color:rgba(255,255,255,.6);font-weight:600;letter-spacing:.5px">點擊精靈產生交換碼（消耗 1 顆該精靈糖果）</span>`
+    : '還沒有已捕獲的精靈';
+
+  if (!owned.length) {
+    exchangeGenGrid.innerHTML = `<div class="evo-empty">還沒有已捕獲的精靈<br>先去捕捉精靈再來交換吧！</div>`;
+    return;
+  }
+
+  const makeCell = (p, shiny) => {
+    const st = dexState[p.name];
+    const count = st.caught || 0;
+    const shinyCount = st.shiny || 0;
+    return `
+      <div class="dex-cell caught gym-select-cell ${shiny ? 'shiny-cell' : ''}"
+           data-name="${p.name}" data-shiny="${shiny ? 1 : 0}">
+        <div class="dex-icon">
+          <div class="dex-shadow"></div>
+          <img src="${spriteUrl(p, shiny)}" alt="${p.name}" draggable="false">
+        </div>
+        <div class="dex-name">${shiny ? '✨ ' : ''}${p.name}${shiny ? '（異色）' : ''}</div>
+        <div class="dex-count">🐾 捕獲 ${count} 次</div>
+        ${(!shiny && shinyCount > 0) ? `<div class="dex-shiny">✨ 異色 ×${shinyCount}</div>` : ''}
+      </div>`;
+  };
+
+  let html = '';
+  owned.forEach(p => {
+    if ((dexState[p.name].shiny || 0) > 0) html += makeCell(p, true);
+    html += makeCell(p, false);
+  });
+  exchangeGenGrid.innerHTML = html;
+
+  exchangeGenGrid.querySelectorAll('.gym-select-cell').forEach(cell => {
+    cell.addEventListener('click', () => {
+      tryGenExchange(cell.dataset.name, cell.dataset.shiny === '1');
+    });
+  });
+}
+
+async function tryGenExchange(name, shiny) {
+  const p = POKEDEX.find(x => x.name === name);
+  if (!p) return;
+  const st = dexState[name];
+  if (!st || (st.caught || 0) <= 0) { toast('沒有可交換的此精靈'); return; }
+  if (shiny && (st.shiny || 0) <= 0) { toast('沒有異色此精靈'); return; }
+
+  // ★ 必須有糖果才能產生交換碼
+  const candy = candyBag[name] || 0;
+  if (candy < 1) {
+    toast(`🍬 ${name} 糖果不足（需要 1 顆才能交換）`);
+    return;
+  }
+
+  const ok = await showConfirm({
+    icon: '📤',
+    title: '產生交換碼',
+    message:
+      `將 ${shiny ? '✨ 異色 ' : ''}${name} 打包成交換碼？\n\n` +
+      `🍬 消耗 ${name} 糖果 ×1（你有 ${candy} 顆）\n` +
+      `🐾 精靈本身保留在你的圖鑑中\n\n` +
+      `🎁 朋友領取後：\n` +
+      `　・若還沒有此精靈 → 獲得精靈 ×1\n` +
+      `　・若已擁有 → 獲得糖果 ×1`,
+    okText: '產生',
+    cancelText: '取消',
+  });
+  if (!ok) return;
+
+  // ★ 只扣 1 顆糖果，caught 不動
+  candyBag[name] = Math.max(0, candy - 1);
+
+  const payload = {
+    v: EXCHANGE_CODE_VERSION,
+    p: p.id,
+    s: shiny ? 1 : 0,
+    i: randomHex(12),
+    t: Date.now(),
+    e: EXCHANGE_TTL,
+    g: exchangeData.playerId,
+    c: 1,
+  };
+
+  exchangeCodeBox.value = encodeTradeCode(payload);
+  exchangeResult.classList.remove('hidden');
+
+  updateHUD();
+  autoSave();
+  if (!dexScreen.classList.contains('hidden'))  renderDex();
+  if (!evoScreen.classList.contains('hidden'))  renderEvoList();
+  if (!bagScreen.classList.contains('hidden'))  renderBag();
+
+  SFX.init(); SFX.reward();
+  toast(`📤 已產生 ${shiny ? '✨ ' : ''}${name} 交換碼（🍬 -1）`, 2600);
+}
+
+function renderRedeemHint(text, type) {
+  exchangeRedeemHint.textContent = text || '';
+  exchangeRedeemHint.style.color = type === 'err' ? '#ff8a8a'
+    : type === 'ok' ? '#7CFC9A' : 'rgba(255,255,255,.55)';
+}
+
+async function redeemExchangeCode() {
+  renderRedeemHint('', '');
+  const raw = exchangeInputBox.value.trim();
+  if (!raw) { renderRedeemHint('請先貼上交換碼', 'err'); return; }
+
+  let payload;
+  try { payload = decodeTradeCode(raw); }
+  catch (e) { renderRedeemHint('❌ ' + e.message, 'err'); return; }
+
+  if (payload.v !== EXCHANGE_CODE_VERSION) {
+    renderRedeemHint('❌ 交換碼版本不相容', 'err'); return;
+  }
+  const ttl = typeof payload.e === 'number' ? payload.e : EXCHANGE_TTL;
+  if (typeof payload.t === 'number' && Date.now() - payload.t > ttl) {
+    renderRedeemHint('❌ 交換碼已過期', 'err'); return;
+  }
+  if (exchangeData.redeemed.some(r => r.i === payload.i)) {
+    renderRedeemHint('❌ 這個交換碼你已經兌換過了', 'err'); return;
+  }
+
+  const p = POKEDEX.find(x => x.id === payload.p);
+  if (!p) { renderRedeemHint('❌ 找不到該精靈（資料版本不符）', 'err'); return; }
+
+  const shiny = payload.s === 1;
+  const st = dexState[p.name];
+
+  // ★ 依「是否已擁有對應版本」決定結果
+  const alreadyHas = shiny
+    ? !!(st && (st.shiny || 0) > 0)      // 異色看 shiny 計數
+    : !!(st && (st.caught || 0) > 0);    // 普通看 caught 計數
+
+  const resultMsg = alreadyHas
+    ? `你已擁有${shiny ? '✨ 異色 ' : ''}${p.name}\n→ 將獲得 🍬 ${p.name} 糖果 ×1`
+    : `你還沒有${shiny ? '✨ 異色 ' : ''}${p.name}\n→ 將直接獲得精靈 ×1`;
+
+  const ok = await showConfirm({
+    icon: '🎁',
+    title: '領取交換碼',
+    message:
+      `${resultMsg}\n\n` +
+      `領取後此碼會記錄在你本機的兌換清單，無法重複兌換。`,
+    okText: '領取',
+    cancelText: '取消',
+  });
+  if (!ok) return;
+
+  // 記錄 nonce（防同一存檔重複兌換）
+  exchangeData.redeemed.push({ i: payload.i, n: p.name, s: shiny ? 1 : 0, at: Date.now() });
+  if (exchangeData.redeemed.length > 500) {
+    exchangeData.redeemed = exchangeData.redeemed.slice(-500);
+  }
+  saveExchangeData();
+
+  // ★ 入帳：二選一
+  let gained;
+  if (alreadyHas) {
+    // 已擁有 → 糖果 +1
+    addCandy(p.name, 1);
+    gained = 'candy';
+  } else {
+    // 未擁有 → 精靈 +1（異色則 shiny +1）
+    if (st) {
+      st.seen = 1;
+      st.caught = (st.caught || 0) + 1;
+      if (shiny) st.shiny = (st.shiny || 0) + 1;
+    }
+    caughtCount++;
+    gained = 'mon';
+  }
+
+  updateHUD();
+  autoSave();
+
+  // 播放交換動畫
+  const mon = { id: p.id, name: p.name, spriteId: p.spriteId };
+  const tradeLike = { npcName: p.name, to: p.name, candyCost: 0, shiny };
+  const candySource = { name: p.name, amount: 1 };
+
+  audio.init();
+  audio.playTrade();
+
+  playTradeAnimation(mon, mon, tradeLike, candySource, () => {
+    exchangeInputBox.value = '';
+    if (gained === 'candy') {
+      renderRedeemHint(`✅ 你已擁有此精靈，獲得 🍬 ${p.name} 糖果 ×1`, 'ok');
+      toast(`🍬 獲得 ${p.name} 糖果 ×1`, 2800);
+    } else {
+      renderRedeemHint(`✅ 已領取 ${shiny ? '✨ ' : ''}${p.name}！`, 'ok');
+      toast(`🎁 領取了 ${shiny ? '✨ ' : ''}${p.name}！`, 2800);
+    }
+    SFX.reward();
+    if (!dexScreen.classList.contains('hidden'))  renderDex();
+    if (!evoScreen.classList.contains('hidden'))  renderEvoList();
+    if (!bagScreen.classList.contains('hidden'))  renderBag();
+    if (gameStarted) audio.playMap(env.time);
+  });
+}
+
+/* ── 事件綁定 ── */
+document.getElementById('exchangeBtn').addEventListener('click', openExchange);
+document.getElementById('exchangeCloseBtn').addEventListener('click', () => {
+  exchangeScreen.classList.add('hidden');
+});
+document.querySelectorAll('.exchange-tab').forEach(b => {
+  b.addEventListener('click', () => {
+    switchExchangeTab(b.dataset.tab);
+    if (b.dataset.tab === 'gen') renderExchangeGen();
+  });
+});
+exchangeRedeemBtn.addEventListener('click', redeemExchangeCode);
+
+document.getElementById('exchangeCopyBtn').addEventListener('click', async () => {
+  const code = exchangeCodeBox.value;
+  if (!code) return;
+  try {
+    await navigator.clipboard.writeText(code);
+    toast('📋 交換碼已複製');
+  } catch (_) {
+    exchangeCodeBox.focus(); exchangeCodeBox.select();
+    try { document.execCommand('copy'); toast('📋 交換碼已複製'); }
+    catch (e) { toast('複製失敗，請長按選取'); }
+  }
+});
+
+document.getElementById('exchangeShareBtn').addEventListener('click', async () => {
+  const code = exchangeCodeBox.value;
+  if (!code) return;
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: '寵物小精靈 City Walk 交換碼', text: code });
+      return;
+    } catch (_) {}
+  }
+  try {
+    await navigator.clipboard.writeText(code);
+    toast('📋 已複製，請貼到聊天軟體分享');
+  } catch (_) {
+    exchangeCodeBox.focus(); exchangeCodeBox.select();
+    toast('請長按選取複製');
+  }
+});
 /* =========================================================
    16. 全螢幕
    ========================================================= */

@@ -1,4 +1,4 @@
-const CACHE_NAME    = 'pokemon-city-walk-v2026-11-07-02';
+const CACHE_NAME    = 'pokemon-city-walk-v2026-11-07-03';
 const SPRITE_CACHE  = 'pokemon-city-walk-sprites-v1';
 const RUNTIME_CACHE = 'pokemon-city-walk-runtime-v1';
 
@@ -11,10 +11,13 @@ const LOCAL_ASSETS = [
   './icons/icon-512.png',
   './icons/maskable-512.png',
   './icons/og-image.png',
-  './Pokemon City Walk - Day Catch Piano.mp3',
-  './Pokemon City Walk - Moon Walk.mp3',
-  './Pokemon City Walk - Night Catch Sax.mp3',
+  './merge_save.html',
+  './Pokemon City Walk - Holiday Daylight.mp3',
   './Pokemon City Walk - Sun Walk.mp3',
+  './Pokemon City Walk - Moon Walk.mp3',
+  './Pokemon City Walk - Holiday Midnight.mp3',
+  './Pokemon City Walk - Day Catch Piano.mp3',
+  './Pokemon City Walk - Night Catch Sax.mp3',
   './Pokemon City Walk - Trade of the Day.mp3',
   './Pokemon City Walk - Final Encounter.mp3',
 ];
