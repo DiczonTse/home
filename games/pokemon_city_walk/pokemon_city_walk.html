@@ -1318,6 +1318,120 @@
 	  text-shadow:0 0 20px rgba(124,252,154,.85),0 2px 12px rgba(0,0,0,.9);
 	}
 	#parkSelectScreen{background:radial-gradient(circle at 50% 20%,#2a2140 0%,#120e22 60%,#07060e 100%)}
+	#dailyRewardModal{
+	  position:fixed;inset:0;z-index:8500;
+	  display:flex;align-items:center;justify-content:center;
+	  padding:20px;
+	}
+	#dailyRewardModal.hidden{display:none!important}
+	.daily-backdrop{
+	  position:absolute;inset:0;
+	  background:rgba(0,0,0,.78);
+	  backdrop-filter:blur(8px);
+	  -webkit-backdrop-filter:blur(8px);
+	  animation:cfFadeIn .3s ease;
+	}
+	.daily-box{
+	  position:relative;
+	  width:min(400px,92vw);
+	  background:linear-gradient(160deg,#2a1f4a 0%,#16102a 60%,#0a0715 100%);
+	  border:2px solid rgba(255,209,102,.55);
+	  border-radius:28px;
+	  padding:26px 22px 22px;
+	  text-align:center;
+	  box-shadow:
+		0 20px 60px rgba(0,0,0,.85),
+		0 0 80px rgba(255,209,102,.28),
+		inset 0 1px 0 rgba(255,255,255,.08);
+	  animation:dailyPop .42s cubic-bezier(.3,1.5,.5,1);
+	  overflow:hidden;
+	}
+	@keyframes dailyPop{
+	  from{opacity:0;transform:scale(.82) translateY(24px)}
+	  to{opacity:1;transform:scale(1) translateY(0)}
+	}
+	.daily-box::before{
+	  content:'';
+	  position:absolute;inset:-60%;
+	  background:conic-gradient(
+		from 0deg,
+		transparent 0deg,
+		rgba(255,209,102,.14) 30deg,
+		transparent 65deg,
+		transparent 175deg,
+		rgba(255,209,102,.14) 210deg,
+		transparent 245deg,
+		transparent 360deg
+	  );
+	  animation:dailySpin 10s linear infinite;
+	  pointer-events:none;z-index:0;
+	}
+	@keyframes dailySpin{to{transform:rotate(360deg)}}
+
+	.daily-title{
+	  position:relative;z-index:1;
+	  color:#ffd166;font-size:22px;font-weight:900;letter-spacing:3px;
+	  margin-bottom:6px;
+	  text-shadow:0 0 24px rgba(255,183,3,.85);
+	}
+	.daily-sub{
+	  position:relative;z-index:1;
+	  color:rgba(255,255,255,.7);
+	  font-size:12px;font-weight:700;letter-spacing:1px;
+	  margin-bottom:18px;
+	}
+	.daily-reward-stage{
+	  position:relative;z-index:1;
+	  background:rgba(0,0,0,.45);
+	  border-radius:20px;
+	  padding:20px 14px;
+	  margin-bottom:18px;
+	  border:2px dashed rgba(255,209,102,.35);
+	  min-height:150px;
+	  display:flex;flex-direction:column;align-items:center;justify-content:center;
+	  gap:8px;
+	}
+	.daily-reward-icon{
+	  font-size:72px;line-height:1;
+	  display:flex;align-items:center;justify-content:center;
+	  min-height:76px;
+	  filter:drop-shadow(0 4px 18px rgba(255,209,102,.6));
+	}
+	.daily-reward-icon .ball-mini{
+	  width:72px;height:72px;
+	  border-width:5px;
+	  box-shadow:0 0 26px rgba(255,209,102,.65);
+	}
+	.daily-reward-stage.rolling .daily-reward-icon{
+	  animation:dailyRoll .1s linear infinite;
+	}
+	@keyframes dailyRoll{
+	  0%,100%{transform:scale(1)}
+	  50%{transform:scale(.84)}
+	}
+	.daily-reward-name{
+	  color:#fff;font-size:19px;font-weight:900;letter-spacing:2px;
+	  text-shadow:0 2px 12px rgba(0,0,0,.9);
+	}
+	.daily-reward-amount{
+	  color:#ffd166;font-size:26px;font-weight:900;letter-spacing:1px;
+	  text-shadow:0 0 20px rgba(255,183,3,.75);
+	  min-height:32px;
+	}
+	.daily-claim-btn{
+	  position:relative;z-index:1;
+	  width:100%;padding:15px;
+	  border:none;border-radius:999px;
+	  background:linear-gradient(135deg,#ffd166,#ffb703);
+	  color:#5a3d00;
+	  font-family:inherit;
+	  font-size:16px;font-weight:900;letter-spacing:2px;
+	  cursor:pointer;
+	  box-shadow:0 6px 24px rgba(255,183,3,.55);
+	  transition:transform .12s,filter .15s;
+	}
+	.daily-claim-btn:active{transform:scale(.96)}
+	.daily-claim-btn.hidden{display:none!important}
 </style>
 </head>
 <body>
@@ -1389,7 +1503,19 @@
     </div>
   </div>
 </div>
-
+<div id="dailyRewardModal" class="hidden">
+  <div class="daily-backdrop"></div>
+  <div class="daily-box">
+    <div class="daily-title">🎁 每 日 獎 勵</div>
+    <div class="daily-sub">每天登入一次，隨機獲得補給品</div>
+    <div class="daily-reward-stage" id="dailyRewardStage">
+      <div class="daily-reward-icon" id="dailyRewardIcon">🎁</div>
+      <div class="daily-reward-name" id="dailyRewardName">？？？</div>
+      <div class="daily-reward-amount" id="dailyRewardAmount">???</div>
+    </div>
+    <button class="daily-claim-btn hidden" id="dailyRewardClaimBtn">✨ 領 取 獎 勵 ✨</button>
+  </div>
+</div>
 <div id="catchScreen" class="overlay hidden day">
   <div id="sceneBg">
     <div class="sky"></div>
@@ -6731,7 +6857,119 @@ function refreshSpawns() {
   const incTag = isIncenseActive() ? ' 🌀×2' : '';
   toast(`${t} · ${w.icon}${w.name}　地圖已刷新！${incTag}`);
 }
+/* =========================================================
+   17b. 每日獎勵
+   ========================================================= */
+const DAILY_REWARD_KEY = 'pokemonCityWalkDailyReward_v1';
 
+const DAILY_REWARDS = [
+  { type: 'ball', key: 'poke',      amount: 5, name: '精靈球',   icon: '<span class="ball-mini ball-poke"></span>' },
+  { type: 'ball', key: 'premier',   amount: 5, name: '紀念球',   icon: '<span class="ball-mini ball-premier"></span>' },
+  { type: 'ball', key: 'rocket',    amount: 5, name: '火箭隊球', icon: '<span class="ball-mini ball-rocket"></span>' },
+  { type: 'item', key: 'grape',     amount: 5, name: '提子',     icon: '🍇' },
+  { type: 'item', key: 'pineapple', amount: 5, name: '菠蘿',     icon: '🍍' },
+  { type: 'item', key: 'banana',    amount: 5, name: '香蕉',     icon: '🍌' },
+  { type: 'item', key: 'goodPotion',amount: 5, name: '好傷藥',   icon: '🧪' },
+  { type: 'item', key: 'incense',   amount: 1, name: '香薰',     icon: '🌀' },
+];
+
+function getTodayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function getDailyRewardState() {
+  try {
+    const raw = localStorage.getItem(DAILY_REWARD_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (_) { return {}; }
+}
+
+function saveDailyRewardState(state) {
+  try { localStorage.setItem(DAILY_REWARD_KEY, JSON.stringify(state)); } catch (_) {}
+}
+
+function checkDailyReward() {
+  const state = getDailyRewardState();
+  if (state.lastClaimDate === getTodayKey()) return;   // 已領取，靜默跳過
+  showDailyReward(getTodayKey());
+}
+
+function showDailyReward(today) {
+  const modal   = document.getElementById('dailyRewardModal');
+  const iconEl  = document.getElementById('dailyRewardIcon');
+  const nameEl  = document.getElementById('dailyRewardName');
+  const amtEl   = document.getElementById('dailyRewardAmount');
+  const claimBtn= document.getElementById('dailyRewardClaimBtn');
+  const stage   = document.getElementById('dailyRewardStage');
+  if (!modal || !iconEl || !claimBtn) return;
+
+  const reward = DAILY_REWARDS[Math.floor(Math.random() * DAILY_REWARDS.length)];
+
+  // 初始化
+  claimBtn.classList.add('hidden');
+  stage.classList.add('rolling');
+  amtEl.textContent = '???';
+  const firstRoll = DAILY_REWARDS[Math.floor(Math.random() * DAILY_REWARDS.length)];
+  iconEl.innerHTML = firstRoll.icon;
+  nameEl.textContent = firstRoll.name;
+
+  modal.classList.remove('hidden');
+
+  audio.init();
+  SFX.init();
+  SFX.bubble();
+  if (gameStarted) audio.playTrade();
+
+  // 滾動抽獎
+  let rollCount = 0;
+  const rollInterval = setInterval(() => {
+    const r = DAILY_REWARDS[Math.floor(Math.random() * DAILY_REWARDS.length)];
+    iconEl.innerHTML = r.icon;
+    nameEl.textContent = r.name;
+    try { SFX.bubble(); } catch (_) {}
+    rollCount++;
+    if (rollCount >= 16) {
+      clearInterval(rollInterval);
+      iconEl.innerHTML = reward.icon;
+      nameEl.textContent = reward.name;
+      amtEl.textContent = `× ${reward.amount}`;
+      stage.classList.remove('rolling');
+      claimBtn.classList.remove('hidden');
+      try { SFX.reward(); } catch (_) {}
+    }
+  }, 90);
+
+  const onClaim = () => {
+    claimBtn.removeEventListener('click', onClaim);
+    if (rollInterval) clearInterval(rollInterval);
+
+    // 發放
+    if (reward.type === 'ball') {
+      ballInventory[reward.key] = (ballInventory[reward.key] || 0) + reward.amount;
+    } else {
+      itemInventory[reward.key] = (itemInventory[reward.key] || 0) + reward.amount;
+    }
+
+    // 記錄領取日期
+    const state = getDailyRewardState();
+    state.lastClaimDate = today;
+    state.lastReward = { name: reward.name, amount: reward.amount, at: Date.now() };
+    saveDailyRewardState(state);
+
+    updateHUD();
+    autoSave();
+
+    modal.classList.add('hidden');
+    try { SFX.reward(); } catch (_) {}
+    toast(`🎁 每日獎勵：${reward.name} ×${reward.amount}！`, 3200);
+
+    if (!bagScreen.classList.contains('hidden')) renderBag();
+    if (gameStarted) audio.playMap(env.time);
+  };
+
+  claimBtn.addEventListener('click', onClaim);
+}
 /* =========================================================
    18. 啟動
    ========================================================= */
@@ -6773,6 +7011,7 @@ async function startGame() {
 
   startTimers();
   startGPS();
+  setTimeout(() => checkDailyReward(), 900);
 
   document.getElementById('locateBtn').addEventListener('click', () => {
     if (manualMode) {
