@@ -346,6 +346,16 @@
     border:3px solid #fff;box-shadow:0 0 16px #6c5ce7;
     animation:spinSlow 7s linear infinite}
   @keyframes spinSlow{to{transform:rotate(360deg)}}
+  .stop.stop-rocket{
+    background:conic-gradient(#1a1a1a 0 45deg,#3a3a3a 45deg 90deg,#1a1a1a 90deg 135deg,#3a3a3a 135deg 180deg,
+      #1a1a1a 180deg 225deg,#3a3a3a 225deg 270deg,#1a1a1a 270deg 315deg,#3a3a3a 315deg 360deg);
+    border:3px solid #555;
+    box-shadow:0 0 16px #ee1515;
+    animation:spinSlow 7s linear infinite;
+    color:#ee1515;
+    font-family:'Arial Black',Arial,sans-serif;
+   text-shadow:0 0 8px rgba(238,21,21,.7);
+  }
   .stop.used{animation:none;background:rgba(120,120,140,.9);box-shadow:none;filter:grayscale(1);
     opacity:.55;font-size:22px}
 
@@ -857,6 +867,43 @@
     justify-content:center;align-items:center;gap:18px}
   .stop-title{color:#fff;font-size:20px;font-weight:800;letter-spacing:2px;
     text-shadow:0 0 22px #a29bfe}
+	#stopScreen.rocket{
+	  background:radial-gradient(circle at 50% 35%,#2a1414 0%,#140808 60%,#060404 100%);
+	}
+	#stopScreen.rocket .stop-title{
+	  color:#ff6b6b;
+	  text-shadow:0 0 22px #ee1515;
+	}
+	#stopScreen.rocket .coin-face{
+	  background:radial-gradient(circle at 34% 26%,#6a6a6a 0%,#3a3a3a 22%,#1e1e1e 45%,#0e0e0e 70%,#000 100%);
+	  border:7px solid #2a2a2a;
+	  box-shadow:
+		0 0 55px rgba(238,21,21,.55),
+		0 0 110px rgba(238,21,21,.22),
+		inset 0 -12px 26px rgba(0,0,0,.55),
+		inset 0 8px 18px rgba(150,150,150,.35);
+	}
+	#stopScreen.rocket .coin-face::before{
+	  border:3px solid rgba(238,21,21,.5);
+	  box-shadow:inset 0 0 22px rgba(238,21,21,.25);
+	}
+	#stopScreen.rocket .coin-face::after{
+	  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,180,180,.35),rgba(255,255,255,0));
+	}
+	#stopScreen.rocket .coin-core{
+	  background:radial-gradient(circle at 35% 30%,#555,#222 58%,#000 100%);
+	  border:4px solid rgba(238,21,21,.6);
+	  color:#ee1515;
+	  text-shadow:0 0 10px rgba(238,21,21,.85);
+	  box-shadow:inset 0 -7px 14px rgba(0,0,0,.6),0 5px 14px rgba(0,0,0,.55);
+	}
+	#stopScreen.rocket .stop-reward{
+	  color:#ff6b6b;
+	  text-shadow:0 0 16px rgba(238,21,21,.7);
+	}
+	#stopScreen.rocket .stop-hint{
+	  color:rgba(255,140,140,.8);
+	}
 
   .stop-stage{display:flex;align-items:center;justify-content:center;padding:18px;
     touch-action:none;cursor:grab;perspective:900px;perspective-origin:50% 50%}
@@ -2376,32 +2423,42 @@ const UNOWN_FORMS = UNOWN_SYMBOLS
    2. 背景音樂
    ========================================================= */
 const audio = {
-  mapDay:null, mapNight:null, catchDay:null, catchNight:null, trade:null,
+  mapDay:null, mapNight:null, holidayDay:null, holidayNight:null,
+  catchDay:null, catchNight:null, trade:null,
   gymEncounter:null, current:null, ready:false, inited:false,
   init() {
     if (this.inited) return;
     this.inited = true;
     try {
-      this.mapDay     = new Audio('Pokemon City Walk - Sun Walk.mp3');     this.mapDay.loop = true;     this.mapDay.volume = 1.0;
-      this.mapNight   = new Audio('Pokemon City Walk - Moon Walk.mp3');   this.mapNight.loop = true;   this.mapNight.volume = 1.0;
-      this.catchDay   = new Audio('Pokemon City Walk - Day Catch Piano.mp3');   this.catchDay.loop = true;   this.catchDay.volume = 1.0;
-      this.catchNight = new Audio('Pokemon City Walk - Night Catch Sax.mp3'); this.catchNight.loop = true; this.catchNight.volume = 1.0;
-      this.trade      = new Audio('Pokemon City Walk - Trade of the Day.mp3'); this.trade.loop = true; this.trade.volume = 1.0;
-	  this.gymEncounter = new Audio('Pokemon City Walk - Final Encounter.mp3'); this.gymEncounter.loop = true; this.gymEncounter.volume = 1.0;
+      this.mapDay       = new Audio('Pokemon City Walk - Sun Walk.mp3');            this.mapDay.loop = true;       this.mapDay.volume = 1.0;
+      this.mapNight     = new Audio('Pokemon City Walk - Moon Walk.mp3');           this.mapNight.loop = true;     this.mapNight.volume = 1.0;
+      this.holidayDay   = new Audio('Pokemon City Walk - Holiday Daylight.mp3');    this.holidayDay.loop = true;   this.holidayDay.volume = 1.0;
+      this.holidayNight = new Audio('Pokemon City Walk - Holiday Midnight.mp3');    this.holidayNight.loop = true; this.holidayNight.volume = 1.0;
+      this.catchDay     = new Audio('Pokemon City Walk - Day Catch Piano.mp3');     this.catchDay.loop = true;     this.catchDay.volume = 1.0;
+      this.catchNight   = new Audio('Pokemon City Walk - Night Catch Sax.mp3');     this.catchNight.loop = true;   this.catchNight.volume = 1.0;
+      this.trade        = new Audio('Pokemon City Walk - Trade of the Day.mp3');    this.trade.loop = true;        this.trade.volume = 1.0;
+      this.gymEncounter = new Audio('Pokemon City Walk - Final Encounter.mp3');     this.gymEncounter.loop = true; this.gymEncounter.volume = 1.0;
       this.ready = true;
     } catch (e) { console.warn('Audio init failed:', e); }
   },
   _stopAll() {
-    [this.mapDay, this.mapNight, this.catchDay, this.catchNight, this.trade, this.gymEncounter].forEach(a => {
+    [this.mapDay, this.mapNight, this.holidayDay, this.holidayNight,
+     this.catchDay, this.catchNight, this.trade, this.gymEncounter].forEach(a => {
       if (a) { try { a.pause(); a.currentTime = 0; } catch(_){} }
     });
     this.current = null;
   },
   playMap(time) {
     if (!this.ready) return;
+    const useHoliday = isWeekend() || isIncenseActive();
+    const track = useHoliday
+      ? (time === 'day' ? this.holidayDay : this.holidayNight)
+      : (time === 'day' ? this.mapDay     : this.mapNight);
+    if (!track) return;
+    if (this.current === track && !track.paused) return;
     this._stopAll();
-    const track = (time === 'day') ? this.mapDay : this.mapNight;
-    if (track) { track.play().catch(()=>{}); this.current = track; }
+    track.play().catch(()=>{});
+    this.current = track;
   },
   playCatch(time) {
     if (!this.ready) return;
@@ -2425,7 +2482,7 @@ const audio = {
   },
   stopCatch() {
     if (!this.ready) return;
-    try { this.catchDay.pause(); this.catchDay.currentTime = 0; } catch(_){}
+    try { this.catchDay.pause();   this.catchDay.currentTime   = 0; } catch(_){}
     try { this.catchNight.pause(); this.catchNight.currentTime = 0; } catch(_){}
     this.current = null;
   },
@@ -2592,6 +2649,7 @@ const MOVE_RESPAWN_COOL = 6000;
 const CURVE_SLIP_CHANCE  = 0.15;
 const CURVE_SUCCESS_MULT = 1.80;
 const NPC_SPAWN_CHANCE = 0.22;
+const ROCKET_STOP_CHANCE = 0.45;
 const GYM_WIN_CHANCE = 0.35;
 const SAVE_KEY = 'pokemonCityWalkSave_v1';
 
@@ -2678,6 +2736,11 @@ function _hashInt(n) {
 function getTimeOfDay() {
   const h = new Date().getHours();
   return (h >= 6 && h < 18) ? 'day' : 'night';
+}
+
+function isWeekend() {
+  const d = new Date().getDay();
+  return d === 0 || d === 6;
 }
 
 function toast(msg, ms = 2200) {
@@ -2876,10 +2939,10 @@ function applySaveData(data) {
 
   if (data.ballInventory && typeof data.ballInventory === 'object') {
     ballInventory = { poke: 0, premier: 0, rocket: 0, great: 0, ultra: 0, master: 0 };
-    ['poke','premier','rocket','great','ultra','master'].forEach(t => {
-      const v = data.ballInventory[t];
-      if (typeof v === 'number') ballInventory[t] = Math.max(0, v | 0);
-    });
+	  ['poke','premier','rocket','great','ultra','master'].forEach(t => {
+	    const v = data.ballInventory[t];
+	    ballInventory[t] = (Number.isFinite(v) && v > 0) ? Math.floor(v) : 0;
+	  });
   } else if (typeof data.balls === 'number') {
     ballInventory = { poke: Math.max(0, data.balls | 0), premier: 0, rocket: 0, great: 0, ultra: 0, master: 0 };
   }
@@ -3564,15 +3627,35 @@ function spawnStops(center) {
     marker.on('click', () => openStop(marker));
     stopMarkers.push(marker);
   }
+  if (Math.random() < ROCKET_STOP_CHANCE) {
+    spawnRocketStop(center);
+  }
 }
-
+function spawnRocketStop(center) {
+  const dist = 80 + Math.random() * 260;
+  const bearing = Math.random() * 360;
+  const [lat, lng] = offsetLatLng(center[0], center[1], dist, bearing);
+  const icon = L.divIcon({
+    className: '',
+    html: '<div class="stop stop-rocket">R</div>',
+    iconSize: [46, 46], iconAnchor: [23, 23],
+  });
+  const marker = L.marker([lat, lng], { icon }).addTo(map);
+  marker._used = false;
+  marker._isRocket = true;
+  marker.on('click', () => openStop(marker));
+  stopMarkers.push(marker);
+}
 function resetStops() {
   stopMarkers.forEach(marker => {
     marker._used = false;
     const el = marker.getElement();
     if (el) {
       const d = el.querySelector('.stop');
-      if (d) { d.classList.remove('used'); d.textContent = 'P'; }
+      if (d) {
+        d.classList.remove('used');
+        d.textContent = marker._isRocket ? 'R' : 'P';
+      }
     }
   });
 }
@@ -3939,13 +4022,13 @@ async function playGymBattleAnimation(playerMon, gymMon, playerWins, playerShiny
   await sleep(300);
   gymVs.classList.remove('show');
 
-  // ── 3 次對撞 ──
+  // ── 3 個回合 ──
   const ROUNDS = 3;
 
   for (let i = 0; i < ROUNDS; i++) {
     const isFinal = (i === ROUNDS - 1);
 
-    setBattleMsg(isFinal ? `第 ${i + 1} 次對撞 — 最後一擊！` : `第 ${i + 1} 次對撞！`);
+    setBattleMsg(isFinal ? `第 ${i + 1} 回合 — 最後一擊！` : `第 ${i + 1} 回合！`);
     await sleep(120);
 
     // 雙方衝鋒
@@ -4207,10 +4290,10 @@ const tradeLabelA  = document.getElementById('tradeLabelA');
 const tradeLabelB  = document.getElementById('tradeLabelB');
 const tradeFlash   = document.getElementById('tradeFlash');
 
-function setTradeMon(elImg, elFallback, elLabel, mon, labelText, fallbackText) {
+function setTradeMon(elImg, elFallback, elLabel, mon, labelText, fallbackText, shiny) {
   elLabel.textContent = labelText;
   if (mon) {
-    elImg.src = spriteUrl(mon, !!shiny);
+    elImg.src = spriteUrl(mon, !!shiny);      // ← 用參數，不再引用全域
     elImg.style.display = '';
     elFallback.style.display = 'none';
     elImg.onerror = () => {
@@ -4226,16 +4309,26 @@ function setTradeMon(elImg, elFallback, elLabel, mon, labelText, fallbackText) {
 }
 
 function playTradeAnimation(npcMon, playerMon, trade, candySource, onDone) {
+  let finished = false;
+  const finish = () => {
+    if (finished) return;
+    finished = true;
+    tradeOverlay.classList.remove('on');
+    tradeFlash.classList.remove('flash');
+    try { onDone(); } catch (e) { console.error('trade onDone error:', e); }
+  };
+
   tradeOverlay.classList.add('on');
   tradeMonA.classList.remove('swapped');
   tradeMonB.classList.remove('swapped');
   tradeFlash.classList.remove('flash');
-
   const shinyTag = trade.shiny ? '✨ ' : '';
   setTradeMon(tradeImgA, tradeFallbackA, tradeLabelA, npcMon,
-              shinyTag + trade.npcName, '❓', trade.shiny);
+              shinyTag + trade.npcName, '❓', !!trade.shiny);
+
   if (playerMon && candySource) {
-    setTradeMon(tradeImgB, tradeFallbackB, tradeLabelB, playerMon, `${candySource.name}糖果`, '🍬');
+    setTradeMon(tradeImgB, tradeFallbackB, tradeLabelB, playerMon,
+                `${candySource.name}糖果`, '🍬', false);
   } else {
     tradeImgB.style.display = 'none';
     tradeFallbackB.style.display = '';
@@ -4243,20 +4336,15 @@ function playTradeAnimation(npcMon, playerMon, trade, candySource, onDone) {
     tradeLabelB.textContent = candySource ? `${candySource.name}糖果` : '糖果';
   }
 
-  SFX.tradeStart();
+  try { SFX.tradeStart(); } catch (_) {}
 
   setTimeout(() => {
     tradeFlash.classList.add('flash');
-    SFX.tradeWhoosh();
+    try { SFX.tradeWhoosh(); } catch (_) {}
     tradeMonA.classList.add('swapped');
     tradeMonB.classList.add('swapped');
   }, 200);
-
-  setTimeout(() => {
-    tradeOverlay.classList.remove('on');
-    tradeFlash.classList.remove('flash');
-    onDone();
-  }, 1400);
+  setTimeout(finish, 1400);
 }
 
 function playNPCEvolutionAnimation(fromName, toName, evoSpriteId, shiny, onDone) {
@@ -4807,7 +4895,7 @@ function performThrow(ballType, quality, angle, power) {
       );
       ballFly.style.opacity = '0';
       showResult(
-        curveSlip ? '🌀 旋轉球失手，球飛歪了…'
+        curveSlip ? '💦 旋轉球失手，球飛歪了…'
           : (quality === 'low' ? '力道太輕，球沒飛到…' : '力道過猛，球飛過頭了！'),
         '#ff8a8a'
       );
@@ -5077,6 +5165,16 @@ function openStop(marker) {
   if (catchState !== 'idle') return;
   if (marker._used) { toast('這個補給站已經補給過了，等刷新吧'); return; }
   currentStopMarker = marker;
+
+  const isRocket = !!marker._isRocket;
+  stopScreen.classList.toggle('rocket', isRocket);
+
+  const titleEl = stopScreen.querySelector('.stop-title');
+  if (titleEl) titleEl.textContent = isRocket ? '火 箭 隊 據 點' : '補 給 站';
+  stopScreen.querySelectorAll('.coin-core').forEach(c => {
+    c.textContent = isRocket ? 'R' : 'P';
+  });
+
   stopReward.innerHTML = '';
   stopHint.textContent = '← 在硬幣上橫掃 →';
   stopHint.style.animation = '';
@@ -5120,18 +5218,24 @@ function spinStop(dir = 1) {
   stopDisc.style.transform = coinTransform(discRot);
 
   setTimeout(() => {
-    const gained = { poke: 0, great: 0, ultra: 0, master: 0 };
+    const isRocket = !!marker._isRocket;
+    const gained = { poke: 0, great: 0, ultra: 0, master: 0, rocket: 0 };
     const itemsGained = { goodPotion: 0, grape: 0, pineapple: 0, banana: 0, incense: 0 };
 
     const base = 1 + Math.floor(Math.random() * 3);
     gained.poke = base;
 
-    const r = Math.random();
-    if (r < 0.003)        gained.master = 1;
-    else if (r < 0.033)   gained.ultra  = 1;
-    else if (r < 0.133)   gained.great  = 1;
-	
-	if (Math.random() < 0.07) gained.rocket = 1;
+    if (isRocket) {
+      // 火箭隊據點：只有 1-3 顆火箭隊球。
+      gained.rocket = 1 + Math.floor(Math.random() * 3);
+    } else {
+      // 普通補給站：1-3 顆普通球 + 高級/超級/大師球機率
+      gained.poke = 1 + Math.floor(Math.random() * 3);
+      const r = Math.random();
+      if (r < 0.003)        gained.master = 1;
+      else if (r < 0.033)   gained.ultra  = 1;
+      else if (r < 0.133)   gained.great  = 1;
+    }
 
     const ir = Math.random();
     if (ir < 0.10)        itemsGained.goodPotion = 1;
@@ -5169,7 +5273,7 @@ function spinStop(dir = 1) {
     void stopReward.offsetWidth;
     stopReward.style.animation = 'rewardIn .55s cubic-bezier(.3,1.4,.5,1) both';
 
-    stopHint.textContent = '此補給站已使用';
+    stopHint.textContent = isRocket ? '此據點已被搗破' : '此補給站已使用';
     stopHint.style.animation = 'none';
     markStopUsed(marker);
     spinning = false;
@@ -5177,13 +5281,13 @@ function spinStop(dir = 1) {
 
     SFX.reward();
 
-    const totalBalls = gained.poke + gained.great + gained.ultra + gained.master;
+    const totalBalls = gained.poke + gained.great + gained.ultra + gained.master + gained.rocket;
     if (totalBalls > 0) showBallBubble(totalBalls);
 
-    if (gained.master > 0)            toast('🟣 獲得了大師球！', 3200);
-    else if (gained.ultra > 0)        toast('⚫ 獲得了超級球！', 2800);
-    else if (gained.great > 0)        toast('🔵 獲得了高級球！', 2600);
-	else if (gained.rocket > 0)       toast('🚀 獲得了火箭隊球！', 2800);
+    if (gained.master > 0)            toast('✨✨ 獲得了大師球！', 3200);
+    else if (gained.ultra > 0)        toast('✨ 獲得了超級球！', 2800);
+    else if (gained.great > 0)        toast('✨ 獲得了高級球！', 2600);
+    else if (gained.rocket > 0)       toast('🚀 獲得了火箭隊球！', 2800);
 
     if (itemsGained.incense > 0)      toast('🌀 獲得了香薰！', 2600);
     else if (itemsGained.banana > 0)  toast('🍌 獲得了香蕉！', 2400);
@@ -5248,6 +5352,7 @@ stopStage.addEventListener('pointercancel', endStopSwipe);
 
 function closeStopScreen() {
   stopScreen.classList.add('hidden');
+  stopScreen.classList.remove('rocket');
   currentStopMarker = null;
   discRot = 0;
   stopDisc.style.transition = 'none';
@@ -5419,6 +5524,12 @@ function useIncense() {
   SFX.init();
   SFX.incenseStart();
   toast('🌀 香薰已使用，精靈數量翻倍！持續 15 分鐘', 3200);
+  if (gameStarted) {
+    const inCatch = !catchScreen.classList.contains('hidden');
+    const inNPC   = !npcScreen.classList.contains('hidden');
+    const inGym   = !gymScreen.classList.contains('hidden');
+    if (!inCatch && !inNPC && !inGym) audio.playMap(env.time);
+  }
 }
 
 function endIncense() {
@@ -5435,6 +5546,12 @@ function endIncense() {
 
   stopConfetti();
   toast('🌀 香薰效果結束，精靈數量回復正常', 2600);
+  if (gameStarted) {
+    const inCatch = !catchScreen.classList.contains('hidden');
+    const inNPC   = !npcScreen.classList.contains('hidden');
+    const inGym   = !gymScreen.classList.contains('hidden');
+    if (!inCatch && !inNPC && !inGym) audio.playMap(env.time);
+  }
 }
 
 document.getElementById('bagBtn').addEventListener('click', () => {
