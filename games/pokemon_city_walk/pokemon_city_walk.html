@@ -1247,6 +1247,77 @@
   .exchange-btn.redeem:active{transform:scale(.96)}
   .exchange-hint{margin-top:10px;color:rgba(255,255,255,.55);font-size:11px;
     font-weight:700;line-height:1.6;text-align:center;min-height:16px}
+	.egg, .park { position:relative; width:64px; height:72px; cursor:pointer; }
+	.egg-emoji, .park-emoji {
+	  position:absolute; left:50%; bottom:6px; transform:translateX(-50%);
+	  font-size:52px; line-height:1; z-index:2;
+	  animation:bob 2s ease-in-out infinite;
+	  filter:drop-shadow(0 4px 8px rgba(0,0,0,.45));
+	}
+	.egg-ring, .park-ring {
+	  position:absolute; left:50%; bottom:2px; width:50px; height:11px;
+	  margin-left:-25px; border-radius:50%; z-index:1;
+	  animation:npcRing 2.4s ease-in-out infinite;
+	}
+	.egg-ring  { background:radial-gradient(ellipse at center,rgba(255,240,140,.7),rgba(255,240,140,0) 78%); }
+	.park-ring { background:radial-gradient(ellipse at center,rgba(124,252,154,.7),rgba(124,252,154,0) 78%); }
+	.egg-badge, .park-badge {
+	  position:absolute; left:50%; top:-4px; transform:translateX(-50%);
+	  font-size:9px; font-weight:900; padding:2px 7px; border-radius:999px;
+	  white-space:nowrap; z-index:3; letter-spacing:.5px;
+	  box-shadow:0 2px 8px rgba(0,0,0,.4);
+	}
+	.egg-badge  { background:rgba(255,240,140,.95); color:#5a3d00; }
+	.park-badge { background:rgba(124,252,154,.95); color:#0a3d1a; }
+	#hatchOverlay {
+	  position:fixed; inset:0; z-index:5500; display:none;
+	  flex-direction:column; align-items:center; justify-content:center; gap:24px;
+	  pointer-events:auto; overflow:hidden;
+	  background:radial-gradient(circle at 50% 50%,rgba(255,240,140,.35) 0%,rgba(20,15,30,.96) 70%);
+	}
+	#hatchOverlay.on { display:flex; }
+	.hatch-stage { position:relative; width:200px; height:200px; display:flex; align-items:center; justify-content:center; }
+	.hatch-egg {
+	  font-size:140px; line-height:1;
+	  animation:hatchShake .4s ease-in-out infinite;
+	  filter:drop-shadow(0 8px 30px rgba(255,200,80,.85));
+	}
+	@keyframes hatchShake { 0%,100%{transform:rotate(-6deg) scale(1)} 50%{transform:rotate(6deg) scale(1.05)} }
+	.hatch-img {
+	  width:160px; height:160px; object-fit:contain; image-rendering:pixelated;
+	  filter:drop-shadow(0 0 30px rgba(255,220,120,.95)) drop-shadow(0 0 60px rgba(255,180,60,.6));
+	  animation:hatchReveal .6s cubic-bezier(.3,1.5,.5,1);
+	}
+	@keyframes hatchReveal {
+	  0%{transform:scale(0) rotate(-180deg); opacity:0}
+	  60%{transform:scale(1.2) rotate(10deg); opacity:1}
+	  100%{transform:scale(1) rotate(0); opacity:1}
+	}
+	.hatch-text {
+	  color:#fff; font-size:20px; font-weight:900; letter-spacing:2px;
+	  text-align:center; padding:0 20px;
+	  text-shadow:0 0 20px rgba(255,220,120,.9),0 2px 12px rgba(0,0,0,.9);
+	}
+	#parkPlayOverlay {
+	  position:fixed; inset:0; z-index:5500; display:none;
+	  flex-direction:column; align-items:center; justify-content:center; gap:24px;
+	  pointer-events:auto; overflow:hidden;
+	  background:radial-gradient(circle at 50% 50%,rgba(124,252,154,.25) 0%,rgba(20,15,30,.96) 70%);
+	}
+	#parkPlayOverlay.on { display:flex; }
+	.park-play-stage { position:relative; width:200px; height:200px; display:flex; align-items:center; justify-content:center; }
+	.park-play-img {
+	  width:160px; height:160px; object-fit:contain; image-rendering:pixelated;
+	  animation:parkBounce .6s ease-in-out infinite;
+	  filter:drop-shadow(0 8px 24px rgba(124,252,154,.7));
+	}
+	@keyframes parkBounce { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-22px) scale(1.06)} }
+	.park-play-text {
+	  color:#fff; font-size:18px; font-weight:900; letter-spacing:1.5px;
+	  text-align:center; padding:0 20px;
+	  text-shadow:0 0 20px rgba(124,252,154,.85),0 2px 12px rgba(0,0,0,.9);
+	}
+	#parkSelectScreen{background:radial-gradient(circle at 50% 20%,#2a2140 0%,#120e22 60%,#07060e 100%)}
 </style>
 </head>
 <body>
@@ -1587,7 +1658,32 @@
   <img id="evoAnimImg" src="" alt="">
   <div class="evo-txt">進 化 中…</div>
 </div>
-
+<!-- ═══ 孵蛋 Overlay ═══ -->
+<div id="hatchOverlay">
+  <div class="hatch-stage">
+    <div class="hatch-egg" id="hatchEgg">🥚</div>
+    <img class="hatch-img" id="hatchImg" src="" alt="" style="display:none">
+  </div>
+  <div class="hatch-text" id="hatchText"></div>
+</div>
+<!-- ═══ 公園玩耍 Overlay ═══ -->
+<div id="parkPlayOverlay">
+  <div class="park-play-stage">
+    <img class="park-play-img" id="parkPlayImg" src="" alt="">
+  </div>
+  <div class="park-play-text" id="parkPlayText"></div>
+</div>
+<!-- ═══ 公園：選擇精靈 ═══ -->
+<div id="parkSelectScreen" class="overlay hidden">
+  <div class="dex-top">
+    <div class="dex-title">🛝 選擇去公園玩的精靈</div>
+    <button class="closeX" id="parkSelectCloseBtn">✕</button>
+  </div>
+  <div class="dex-scroll">
+    <div class="dex-progress" id="parkSelectProgress"></div>
+    <div class="dex-grid" id="parkSelectGrid"></div>
+  </div>
+</div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 /* =========================================================
@@ -3617,6 +3713,8 @@ function checkMoveRespawn() {
   spawnStops(spawnCenter);
   maybeSpawnNPC(spawnCenter);
   maybeSpawnGym(spawnCenter);
+  maybeSpawnEgg(spawnCenter);
+  maybeSpawnPark(spawnCenter);
   nextRefreshAt = Date.now() + REFRESH_MS;
   toast('🌿 來到新地方，出現了新的精靈與補給站！');
 }
@@ -3785,7 +3883,270 @@ function maybeSpawnGym(center) {
 
   SFX.npcAppear();
 }
+/* =========================================================
+   10b. 蛋 🥚 / 公園 🛝
+   ========================================================= */
+let eggMarker = null;
+let parkMarker = null;
+let currentPark = null;
+let hatchState = 'idle';
+let parkPlayState = 'idle';
 
+const EGG_SPAWN_CHANCE  = 0.15;   // 每次刷新 15% 機率出現蛋
+const PARK_SPAWN_CHANCE = 0.15;   // 每次刷新 15% 機率出現公園
+const HATCH_CANDY_GAIN  = 3;
+const PARK_CANDY_GAIN   = 3;
+
+function clearEgg() {
+  if (eggMarker) { try { map.removeLayer(eggMarker); } catch(_){} eggMarker = null; }
+}
+function clearPark() {
+  if (parkMarker) { try { map.removeLayer(parkMarker); } catch(_){} parkMarker = null; }
+  currentPark = null;
+}
+
+function maybeSpawnEgg(center) {
+  if (!map || !center) return;
+  if (hatchState !== 'idle') return;
+  clearEgg();
+  if (Math.random() > EGG_SPAWN_CHANCE) return;
+
+  const dist = 75 + Math.random() * 260;
+  const bearing = Math.random() * 360;
+  const [lat, lng] = offsetLatLng(center[0], center[1], dist, bearing);
+
+  const icon = L.divIcon({
+    className: '',
+    html: `<div class="egg">
+             <div class="egg-badge">蛋</div>
+             <div class="egg-ring"></div>
+             <div class="egg-emoji">🥚</div>
+           </div>`,
+    iconSize: [64, 72], iconAnchor: [32, 64],
+  });
+
+  eggMarker = L.marker([lat, lng], { icon, zIndexOffset: 900 }).addTo(map);
+  eggMarker.on('click', () => openEgg(eggMarker));
+  try { SFX.npcAppear(); } catch(_) {}
+}
+
+function maybeSpawnPark(center) {
+  if (!map || !center) return;
+  if (parkPlayState !== 'idle') return;
+  const selScr = document.getElementById('parkSelectScreen');
+  if (selScr && !selScr.classList.contains('hidden')) return;
+  clearPark();
+  if (Math.random() > PARK_SPAWN_CHANCE) return;
+
+  const dist = 75 + Math.random() * 260;
+  const bearing = Math.random() * 360;
+  const [lat, lng] = offsetLatLng(center[0], center[1], dist, bearing);
+
+  const icon = L.divIcon({
+    className: '',
+    html: `<div class="park">
+             <div class="park-badge">公園</div>
+             <div class="park-ring"></div>
+             <div class="park-emoji">🛝</div>
+           </div>`,
+    iconSize: [64, 72], iconAnchor: [32, 64],
+  });
+
+  parkMarker = L.marker([lat, lng], { icon, zIndexOffset: 900 }).addTo(map);
+  parkMarker.on('click', () => openPark(parkMarker));
+  try { SFX.npcAppear(); } catch(_) {}
+}
+
+/* 只有「擁有進化鏈」且是「第一形態」的精靈（皮丘、小卡比獸、利歐路…） */
+function pickBaseStagePokemon() {
+  const parentNames = new Set();
+  Object.values(EVOLUTIONS).forEach(list => list.forEach(e => parentNames.add(e.to)));
+  const candidates = POKEDEX.filter(p => {
+    const evo = EVOLUTIONS[p.name];
+    if (!evo || evo.length === 0) return false;
+    if (parentNames.has(p.name)) return false;
+    return true;
+  });
+  if (!candidates.length) return null;
+  return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
+function openEgg(marker) {
+  if (catchState !== 'idle') return;
+  if (hatchState !== 'idle') return;
+  if (!marker || marker._processing) return;
+  marker._processing = true;
+
+  const p = pickBaseStagePokemon();
+  if (!p) { marker._processing = false; toast('這顆蛋似乎沒有動靜…'); return; }
+
+  hatchState = 'hatching';
+  const eggEl   = document.getElementById('hatchEgg');
+  const imgEl   = document.getElementById('hatchImg');
+  const textEl  = document.getElementById('hatchText');
+  const overlay = document.getElementById('hatchOverlay');
+
+  eggEl.style.display = '';
+  imgEl.style.display = 'none';
+  imgEl.removeAttribute('src');
+  textEl.textContent = '🥚 蛋正在孵化…';
+  overlay.classList.add('on');
+
+  try { SFX.init(); } catch(_) {}
+  try { audio.init(); } catch(_) {}
+  try { SFX.npcAppear(); } catch(_) {}
+
+  // 破殼
+  setTimeout(() => {
+    try { SFX.reward(); } catch(_) {}
+    eggEl.style.display = 'none';
+
+    imgEl.classList.remove('hatch-img');
+    imgEl.src = spriteUrl(p, false);
+    void imgEl.offsetWidth;
+    imgEl.classList.add('hatch-img');
+    imgEl.style.display = '';
+
+    const st = dexState[p.name];
+    const firstTime = !st || st.caught === 0;
+    if (st) { st.seen = 1; st.caught = (st.caught || 0) + 1; }
+    caughtCount++;
+    addCandy(p.name, HATCH_CANDY_GAIN);
+    updateHUD();
+    autoSave();
+
+    textEl.textContent = firstTime
+      ? `✨ 孵出了 ${p.name}！🍬 +${HATCH_CANDY_GAIN}`
+      : `孵出了 ${p.name}！🍬 +${HATCH_CANDY_GAIN}`;
+
+    if (eggMarker && map && map.hasLayer(eggMarker)) map.removeLayer(eggMarker);
+    eggMarker = null;
+
+    if (!dexScreen.classList.contains('hidden')) renderDex();
+    if (!evoScreen.classList.contains('hidden')) renderEvoList();
+  }, 1600);
+
+  setTimeout(() => {
+    overlay.classList.remove('on');
+    hatchState = 'idle';
+    if (gameStarted) audio.playMap(env.time);
+  }, 3600);
+}
+
+function openPark(marker) {
+  if (catchState !== 'idle') return;
+  if (parkPlayState !== 'idle') return;
+  const selScr = document.getElementById('parkSelectScreen');
+  if (selScr && !selScr.classList.contains('hidden')) return;
+  if (!marker) return;
+
+  currentPark = { marker };
+  renderParkSelect();
+  selScr.classList.remove('hidden');
+  try { SFX.init(); } catch(_) {}
+  try { audio.init(); } catch(_) {}
+  try { audio.playTrade(); } catch(_) {}
+}
+
+function renderParkSelect() {
+  const owned = POKEDEX
+    .filter(p => dexState[p.name] && dexState[p.name].caught > 0)
+    .sort((a, b) => getCandy(b.name) - getCandy(a.name));
+
+  const progEl = document.getElementById('parkSelectProgress');
+  const gridEl = document.getElementById('parkSelectGrid');
+  progEl.innerHTML = `選擇一隻精靈去公園玩，玩耍後可獲得 🍬 ×${PARK_CANDY_GAIN}`;
+
+  if (!owned.length) {
+    gridEl.innerHTML = `<div class="evo-empty">還沒有已捕獲的精靈<br>先去捕捉精靈再來公園吧！</div>`;
+    return;
+  }
+
+  const makeCell = (p, shiny) => {
+    const st = dexState[p.name] || {};
+    const shinyCount = st.shiny || 0;
+    return `
+      <div class="dex-cell caught gym-select-cell ${shiny ? 'shiny-cell' : ''}"
+           data-name="${p.name}" data-shiny="${shiny ? 1 : 0}">
+        <div class="dex-icon">
+          <div class="dex-shadow"></div>
+          <img src="${spriteUrl(p, shiny)}" alt="${p.name}" draggable="false">
+        </div>
+        <div class="dex-name">${shiny ? '✨ ' : ''}${p.name}${shiny ? '（異色）' : ''}</div>
+        <div class="dex-count">🍬 ${getCandy(p.name)}</div>
+        ${(!shiny && shinyCount > 0) ? `<div class="dex-shiny">✨ 異色 ×${shinyCount}</div>` : ''}
+      </div>`;
+  };
+
+  let html = '';
+  owned.forEach(p => {
+    html += makeCell(p, false);
+    if (dexState[p.name] && dexState[p.name].shiny > 0) {
+      html += makeCell(p, true);
+    }
+  });
+  gridEl.innerHTML = html;
+
+  gridEl.querySelectorAll('.gym-select-cell').forEach(cell => {
+    cell.addEventListener('click', () => {
+      playWithParkPokemon(cell.dataset.name, cell.dataset.shiny === '1');
+    });
+  });
+}
+
+function playWithParkPokemon(name, shiny) {
+  if (!currentPark) return;
+  const p = POKEDEX.find(x => x.name === name);
+  if (!p) return;
+  if (!dexState[p.name] || dexState[p.name].caught <= 0) return;
+
+  const usingShiny = !!shiny && !!(dexState[p.name] && dexState[p.name].shiny > 0);
+
+  document.getElementById('parkSelectScreen').classList.add('hidden');
+  parkPlayState = 'playing';
+
+  const overlay = document.getElementById('parkPlayOverlay');
+  const imgEl   = document.getElementById('parkPlayImg');
+  const textEl  = document.getElementById('parkPlayText');
+
+  imgEl.src = spriteUrl(p, usingShiny);
+  textEl.textContent = `${usingShiny ? '✨ ' : ''}${p.name} 在公園玩得很開心…`;
+  overlay.classList.add('on');
+
+  try { SFX.init(); } catch(_) {}
+  try { SFX.reward(); } catch(_) {}
+
+  // 玩耍完成
+  setTimeout(() => {
+    addCandy(p.name, PARK_CANDY_GAIN);
+    updateHUD();
+    autoSave();
+
+    if (parkMarker && map && map.hasLayer(parkMarker)) map.removeLayer(parkMarker);
+    parkMarker = null;
+    currentPark = null;
+
+    textEl.textContent = `${usingShiny ? '✨ ' : ''}${p.name} 玩得好開心！🍬 +${PARK_CANDY_GAIN}`;
+    try { SFX.reward(); } catch(_) {}
+  }, 1800);
+
+  // 關閉 overlay
+  setTimeout(() => {
+    overlay.classList.remove('on');
+    parkPlayState = 'idle';
+    toast(`🛝 ${usingShiny ? '✨ ' : ''}${p.name} 在公園玩得很開心，獲得 🍬 ×${PARK_CANDY_GAIN}！`, 3000);
+    if (!dexScreen.classList.contains('hidden')) renderDex();
+    if (!evoScreen.classList.contains('hidden')) renderEvoList();
+    if (gameStarted) audio.playMap(env.time);
+  }, 3500);
+}
+
+// 公園選擇畫面關閉
+document.getElementById('parkSelectCloseBtn').addEventListener('click', () => {
+  document.getElementById('parkSelectScreen').classList.add('hidden');
+  currentPark = null;
+  if (gameStarted) audio.playMap(env.time);
+});
 function buildNpcTrade() {
   const shiny = Math.random() < SHINY_RATE;
   if (Math.random() < NPC_EVO_TRADE_RATE) {
@@ -6362,6 +6723,8 @@ function refreshSpawns() {
   else resetStops();
   maybeSpawnNPC(center);
   maybeSpawnGym(center);
+  maybeSpawnEgg(center);
+  maybeSpawnPark(center);
 
   const w = WEATHERS.find(x => x.id === env.weather) || WEATHERS[0];
   const t = env.time === 'day' ? '☀️ 白天' : '🌙 夜晚';
@@ -6378,6 +6741,8 @@ function spawnWorld(center) {
   spawnStops(center);
   maybeSpawnNPC(center);
   maybeSpawnGym(center);
+  maybeSpawnEgg(center);
+  maybeSpawnPark(center); 
   nextRefreshAt = Date.now() + REFRESH_MS;
 }
 
