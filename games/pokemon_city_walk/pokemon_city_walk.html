@@ -862,7 +862,54 @@
     display:inline-flex;align-items:center;gap:6px}
   .ball-tip b{color:#ffd166;font-size:16px}
   .ball-tip.sub{font-size:12px;color:rgba(255,255,255,.72);font-weight:700;letter-spacing:.5px}
+	#stopScreen.rocket #stopSky{ display:none; }
+	#stopSky{
+	  position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+	  border-radius:inherit;
+	}
+	#stopClouds{
+	  position:absolute; left:0; right:0; top:0; height:100%;
+	  overflow:hidden; display:none;
+	}
+	#stopStars{
+	  position:absolute; left:0; right:0; top:0; height:100%;
+	  overflow:hidden; display:none;
+	}
 
+	/* 白天：顯示雲、隱藏星星 */
+	#stopScreen.day #stopClouds{ display:block; }
+	#stopScreen.day #stopStars{ display:none; }
+
+	/* 夜晚：顯示星星、隱藏雲 */
+	#stopScreen.night #stopClouds{ display:none; }
+	#stopScreen.night #stopStars{ display:block; }
+
+	/* 讓補給站內容浮在天空之上 */
+	#stopScreen .stop-title,
+	#stopScreen .stop-stage,
+	#stopScreen .stop-reward,
+	#stopScreen .stop-footer{
+	  position:relative; z-index:2;
+	}
+
+	/* 白天天空漸層（可依喜好微調） */
+	#stopScreen.day #stopSky{
+	  background:
+		radial-gradient(ellipse 75% 65% at 50% 100%, rgba(255,250,214,.55) 0%, rgba(255,250,214,0) 72%),
+		linear-gradient(180deg,#3d7fd6 0%,#6db3e8 45%,#b8e0f0 100%);
+	}
+
+	/* 夜晚天空漸層 */
+	#stopScreen.night #stopSky{
+	  background: linear-gradient(180deg,#050820 0%,#0f1838 50%,#1a2545 100%);
+	}
+
+	/* 夜晚星星樣式（沿用捕捉畫面的 .star） */
+	#stopStars .star{
+	  position:absolute; background:#fff; border-radius:50%;
+	  box-shadow:0 0 4px rgba(255,255,255,.9);
+	  animation: twinkle 2.4s ease-in-out infinite;
+	}
   #stopScreen{background:radial-gradient(circle at 50% 35%,#3a2f6b 0%,#161229 60%,#080b12 100%);
     justify-content:center;align-items:center;gap:18px}
   .stop-title{color:#fff;font-size:20px;font-weight:800;letter-spacing:2px;
@@ -1576,6 +1623,16 @@
 </div>
 
 <div id="stopScreen" class="overlay hidden">
+  <div id="stopSky">
+    <div id="stopClouds">
+      <div class="cloud c1"></div>
+      <div class="cloud c2"></div>
+      <div class="cloud c3"></div>
+      <div class="cloud c4"></div>
+      <div class="cloud c5"></div>
+    </div>
+    <div id="stopStars"></div>
+  </div>
   <div class="stop-title">補 給 站</div>
   <div class="stop-stage" id="stopStage">
     <div class="coin" id="stopDisc">
@@ -3421,6 +3478,11 @@ function checkDeviceTime() {
   if (t !== env.time) {
     env.time = t;
     renderEnvironment();
+    if (!stopScreen.classList.contains('hidden')) {
+      stopScreen.classList.toggle('day', env.time === 'day');
+      stopScreen.classList.toggle('night', env.time === 'night');
+      buildStopStars();
+    }
     if (gameStarted) {
       const inCatch = !catchScreen.classList.contains('hidden');
       const inNPC = !npcScreen.classList.contains('hidden');
@@ -5717,6 +5779,24 @@ const stopSwipe = { active:false, id:null, x0:0, y0:0, x:0, y:0 };
 
 function coinTransform(deg) { return `rotateX(10deg) rotateY(${deg}deg)`; }
 
+function buildStopStars() {
+  const box = document.getElementById('stopStars');
+  if (!box) return;
+  box.innerHTML = '';
+  if (env.time !== 'night') return;
+  for (let i = 0; i < 70; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = 1 + Math.random() * 2;
+    s.style.width = s.style.height = size + 'px';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top  = Math.random() * 96 + '%';
+    s.style.animationDelay = (Math.random() * 2.4) + 's';
+    s.style.opacity = 0.3 + Math.random() * 0.7;
+    box.appendChild(s);
+  }
+}
+
 function openStop(marker) {
   if (catchState !== 'idle') return;
   if (marker._used) { toast('這個補給站已經補給過了，等刷新吧'); return; }
@@ -5724,6 +5804,9 @@ function openStop(marker) {
 
   const isRocket = !!marker._isRocket;
   stopScreen.classList.toggle('rocket', isRocket);
+  stopScreen.classList.toggle('day', env.time === 'day');
+  stopScreen.classList.toggle('night', env.time === 'night');
+  buildStopStars();
 
   const titleEl = stopScreen.querySelector('.stop-title');
   if (titleEl) titleEl.textContent = isRocket ? '火 箭 隊 據 點' : '補 給 站';
