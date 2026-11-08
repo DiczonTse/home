@@ -2015,8 +2015,18 @@
   </div>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script>
+  if (typeof QRCode === 'undefined') {
+    document.write('<script src="https://cdn.staticfile.org/qrcodejs/1.0.0/qrcode.min.js"><\/script>');
+  }
+</script>
+<script src="https://unpkg.com/jsqr@1.4.0/dist/jsQR.js"></script>
+<script>
+  if (typeof jsQR === 'undefined') {
+    document.write('<script src="https://cdn.staticfile.org/jsqr/1.4.0/jsQR.js"><\/script>');
+  }
+</script>
 <script>
 /* =========================================================
    0. 全局數據
