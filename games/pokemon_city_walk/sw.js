@@ -1,4 +1,4 @@
-const CACHE_NAME    = 'pokemon-city-walk-v2026-11-08-04';
+const CACHE_NAME    = 'pokemon-city-walk-v2026-11-08-05';
 const SPRITE_CACHE  = 'pokemon-city-walk-sprites-v1';
 const RUNTIME_CACHE = 'pokemon-city-walk-runtime-v1';
 
@@ -12,6 +12,8 @@ const LOCAL_ASSETS = [
   './icons/maskable-512.png',
   './icons/og-image.png',
   './merge_save.html',
+  './qrcode.min.js',
+  './jsQR.js',
   './Pokemon City Walk - Holiday Daylight.mp3',
   './Pokemon City Walk - Sun Walk.mp3',
   './Pokemon City Walk - Moon Walk.mp3',

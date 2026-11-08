@@ -2015,18 +2015,8 @@
   </div>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js"></script>
-<script>
-  if (typeof QRCode === 'undefined') {
-    document.write('<script src="https://cdn.staticfile.org/qrcodejs/1.0.0/qrcode.min.js"><\/script>');
-  }
-</script>
-<script src="https://unpkg.com/jsqr@1.4.0/dist/jsQR.js"></script>
-<script>
-  if (typeof jsQR === 'undefined') {
-    document.write('<script src="https://cdn.staticfile.org/jsqr/1.4.0/jsQR.js"><\/script>');
-  }
-</script>
+<script src="qrcode.min.js"></script>
+<script src="jsQR.js"></script>
 <script>
 /* =========================================================
    0. 全局數據
@@ -7028,21 +7018,63 @@ function renderExchangeQR(code) {
   if (!wrap || !box) return;
 
   box.innerHTML = '';
-  if (typeof QRCode === 'undefined') { wrap.style.display = 'none'; return; }
   wrap.style.display = 'block';
 
-  try {
-    QRCode.toDataURL(code, { width: 240, margin: 1, errorCorrectionLevel: 'M' }, (err, url) => {
-      if (err || !url) { wrap.style.display = 'none'; console.warn('QR gen failed:', err); return; }
-      const img = document.createElement('img');
-      img.src = url;
-      img.alt = '交換碼 QR Code';
-      box.appendChild(img);
-    });
-  } catch (e) {
-    wrap.style.display = 'none';
-    console.warn('QR gen failed:', e);
+  if (typeof QRCode === 'undefined') {
+    box.innerHTML = '<div style="color:#ff8a8a;font-size:12px;font-weight:800;padding:12px 8px;line-height:1.6">⚠️ QR 模組未載入，請改用「📋 複製碼」傳給朋友</div>';
+    return;
   }
+
+  /* ── 情況 A：soldair/node-qrcode（主 CDN，有 toCanvas）── */
+  if (typeof QRCode.toCanvas === 'function') {
+    const canvas = document.createElement('canvas');
+    canvas.style.display = 'block';
+    canvas.style.borderRadius = '6px';
+    box.appendChild(canvas);
+
+    const opts = { width: 240, margin: 1, errorCorrectionLevel: 'M' };
+    try {
+      const ret = QRCode.toCanvas(canvas, code, opts);
+      if (ret && typeof ret.then === 'function') {
+        ret.catch(err => {
+          console.warn('QR gen failed:', err);
+          box.innerHTML = '<div style="color:#ff8a8a;font-size:12px;font-weight:800;padding:12px 8px;line-height:1.6">⚠️ QR 生成失敗，請改用「📋 複製碼」</div>';
+        });
+      }
+    } catch (e) {
+      console.warn('QR gen exception:', e);
+      box.innerHTML = '<div style="color:#ff8a8a;font-size:12px;font-weight:800;padding:12px 8px;line-height:1.6">⚠️ QR 生成異常，請改用「📋 複製碼」</div>';
+    }
+    return;
+  }
+
+  /* ── 情況 B：davidshimjs/qrcodejs（備援，構造函數 API）── */
+  if (typeof QRCode === 'function') {
+    try {
+      new QRCode(box, {
+        text: code,
+        width: 240,
+        height: 240,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: (QRCode.CorrectLevel && QRCode.CorrectLevel.M != null)
+                        ? QRCode.CorrectLevel.M : 0,
+      });
+      /* qrcodejs 會往 box 裡塞 canvas + img，確保有白底（CSS 已有 #exchangeQrBox 白底，這裡保險） */
+      box.style.background = '#fff';
+      box.style.padding = '10px';
+      box.style.borderRadius = '12px';
+      box.style.display = 'inline-block';
+      box.style.lineHeight = '0';
+    } catch (e) {
+      console.warn('QRCodejs failed:', e);
+      box.innerHTML = '<div style="color:#ff8a8a;font-size:12px;font-weight:800;padding:12px 8px;line-height:1.6">⚠️ QR 生成失敗，請改用「📋 複製碼」</div>';
+    }
+    return;
+  }
+
+  /* ── 情況 C：未知 API ── */
+  box.innerHTML = '<div style="color:#ff8a8a;font-size:12px;font-weight:800;padding:12px 8px;line-height:1.6">⚠️ QR 模組 API 不兼容，請改用「📋 複製碼」</div>';
 }
 
 const qrScan = { active:false, stream:null, raf:null };
