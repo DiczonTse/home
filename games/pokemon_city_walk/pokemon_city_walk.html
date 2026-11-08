@@ -6817,6 +6817,9 @@ async function tryGenExchange(name, shiny) {
     renderExchangeQR(code);
     SFX.init(); SFX.reward();
     toast(`📤 已產生 ${shiny ? '✨ ' : ''}${name} 交換碼（🍬 -1）`, 2600);
+    setTimeout(() => {
+      exchangeResult.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 80);
   });
 }
 
