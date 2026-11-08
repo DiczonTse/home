@@ -1214,7 +1214,7 @@
   .exchange-anim-overlay.on{ display:flex; }
 
   .exchange-anim-stage{
-    position:relative; width:200px; height:260px;
+    position:relative; width:240px; height:300px;
     display:flex; align-items:center; justify-content:center; overflow:hidden;
   }
 
@@ -1223,39 +1223,40 @@
     filter:drop-shadow(0 0 20px #a29bfe); transform-origin:center center;
   }
 
-  /* 傳出：中間 → 上移 + 淡出 */
+  /* 傳出：中間 → 右移 + 淡出 */
   #exchangeSendOverlay.on .exchange-anim-img{
-    animation:exchangeSendUp 1.6s cubic-bezier(.4,0,.6,1) forwards;
+    animation:exchangeSendRight 1.6s cubic-bezier(.4,0,.6,1) forwards;
   }
-  @keyframes exchangeSendUp{
-    0%   { transform:translateY(0) scale(1);      opacity:1; filter:drop-shadow(0 0 20px #a29bfe) brightness(1); }
-    35%  { transform:translateY(-24px) scale(1.06); opacity:1; filter:drop-shadow(0 0 30px #ffd166) brightness(1.15); }
-    100% { transform:translateY(-160px) scale(.25); opacity:0; filter:drop-shadow(0 0 50px #fff) brightness(2); }
+  @keyframes exchangeSendRight{
+    0%   { transform:translateX(0) scale(1);      opacity:1; filter:drop-shadow(0 0 20px #a29bfe) brightness(1); }
+    35%  { transform:translateX(24px) scale(1.06); opacity:1; filter:drop-shadow(0 0 30px #ffd166) brightness(1.15); }
+    100% { transform:translateX(160px) scale(.25); opacity:0; filter:drop-shadow(0 0 50px #fff) brightness(2); }
   }
 
-  /* 接收：上方淡入 → 下移到中間 */
+  /* 接收：右側淡入 → 左移到中間 */
   #exchangeRecvOverlay.on .exchange-anim-img{
-    animation:exchangeRecvDown 1.6s cubic-bezier(.4,0,.6,1) forwards;
+    animation:exchangeRecvLeft 1.6s cubic-bezier(.4,0,.6,1) forwards;
   }
-  @keyframes exchangeRecvDown{
-    0%   { transform:translateY(-160px) scale(.25); opacity:0; filter:drop-shadow(0 0 50px #fff) brightness(2); }
-    35%  { transform:translateY(-24px) scale(1.06);  opacity:1; filter:drop-shadow(0 0 30px #ffd166) brightness(1.15); }
-    100% { transform:translateY(0) scale(1);          opacity:1; filter:drop-shadow(0 0 20px #a29bfe) brightness(1); }
+  @keyframes exchangeRecvLeft{
+    0%   { transform:translateX(160px) scale(.25); opacity:0; filter:drop-shadow(0 0 50px #fff) brightness(2); }
+    35%  { transform:translateX(24px) scale(1.06);  opacity:1; filter:drop-shadow(0 0 30px #ffd166) brightness(1.15); }
+    100% { transform:translateX(0) scale(1);          opacity:1; filter:drop-shadow(0 0 20px #a29bfe) brightness(1); }
   }
 
-  /* 傳出時的光柱 */
+  /* 傳出時的光束（橫向，由中間往右延伸） */
   .exchange-anim-beam{
-    position:absolute; left:50%; top:0; bottom:0; width:6px; margin-left:-3px;
+    position:absolute; left:50%; right:0; top:50%; height:6px; margin-top:-3px;
     border-radius:6px; opacity:0; pointer-events:none;
-    background:linear-gradient(0deg, rgba(162,155,254,0), rgba(162,155,254,.6), rgba(255,255,255,.95));
+    transform-origin:left center;
+    background:linear-gradient(90deg, rgba(162,155,254,.95), rgba(162,155,254,.6), rgba(255,255,255,0));
   }
   #exchangeSendOverlay.on .exchange-anim-beam{
-    animation:beamRise 1.6s cubic-bezier(.4,0,.6,1) forwards;
+    animation:beamRight 1.6s cubic-bezier(.4,0,.6,1) forwards;
   }
-  @keyframes beamRise{
-    0%   { opacity:0; transform:scaleY(.2); }
-    40%  { opacity:.9; transform:scaleY(1); }
-    100% { opacity:0; transform:scaleY(1.1); }
+  @keyframes beamRight{
+    0%   { opacity:0; transform:scaleX(.2); }
+    40%  { opacity:.9; transform:scaleX(1); }
+    100% { opacity:0; transform:scaleX(1.1); }
   }
 
   .exchange-anim-text{
@@ -1888,8 +1889,8 @@
   </div>
 
   <div class="exchange-tabs">
-    <button class="exchange-tab active" data-tab="gen">📤 產生交換碼</button>
-    <button class="exchange-tab" data-tab="red">📥 輸入交換碼</button>
+    <button class="exchange-tab active" data-tab="gen">📤 傳送</button>
+    <button class="exchange-tab" data-tab="red">📥 接收</button>
   </div>
 
   <div class="dex-scroll" id="exchangeGenPane">
