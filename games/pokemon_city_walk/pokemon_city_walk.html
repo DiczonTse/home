@@ -997,6 +997,12 @@
     animation:hintPulse 1.8s ease-in-out infinite;text-align:center}
   .ghost{background:rgba(255,255,255,.1)!important;box-shadow:none!important;color:#ccc!important;
     padding:11px!important;font-size:14px!important;width:100%;border-radius:999px;border:none;cursor:pointer}
+  /* ← 白天補給站關閉鈕改用深底白字，避免與天空融為一體 */
+  #stopScreen.day .ghost{
+    background:rgba(15,20,32,.72)!important;
+    color:#fff!important;
+    border:1.5px solid rgba(255,255,255,.35)!important;
+  }
 
   #dexScreen,#evoScreen,#bagScreen,#gymSelectScreen{background:radial-gradient(circle at 50% 20%,#2a2140 0%,#120e22 60%,#07060e 100%)}
   .dex-top{display:flex;justify-content:center;align-items:center;position:relative;min-height:44px;
@@ -1197,6 +1203,114 @@
     40%{opacity:1;transform:scale(1.2)}100%{opacity:0;transform:scale(1.6)}}
   #tradeAnimOverlay .trade-txt{color:#fff;font-size:20px;font-weight:900;letter-spacing:3px;
     text-shadow:0 0 20px rgba(255,209,102,.7)}
+
+  /* ═══ 交換傳出／接收動畫 overlay ═══ */
+  .exchange-anim-overlay{
+    position:fixed; inset:0; z-index:5300; display:none;
+    flex-direction:column; align-items:center; justify-content:center; gap:20px;
+    background:radial-gradient(circle at 50% 50%, rgba(30,20,60,.92), rgba(5,5,15,.97));
+    pointer-events:none;
+  }
+  .exchange-anim-overlay.on{ display:flex; }
+
+  .exchange-anim-stage{
+    position:relative; width:200px; height:260px;
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+  }
+
+  .exchange-anim-img{
+    width:140px; height:140px; object-fit:contain; image-rendering:pixelated;
+    filter:drop-shadow(0 0 20px #a29bfe); transform-origin:center center;
+  }
+
+  /* 傳出：中間 → 上移 + 淡出 */
+  #exchangeSendOverlay.on .exchange-anim-img{
+    animation:exchangeSendUp 1.6s cubic-bezier(.4,0,.6,1) forwards;
+  }
+  @keyframes exchangeSendUp{
+    0%   { transform:translateY(0) scale(1);      opacity:1; filter:drop-shadow(0 0 20px #a29bfe) brightness(1); }
+    35%  { transform:translateY(-24px) scale(1.06); opacity:1; filter:drop-shadow(0 0 30px #ffd166) brightness(1.15); }
+    100% { transform:translateY(-160px) scale(.25); opacity:0; filter:drop-shadow(0 0 50px #fff) brightness(2); }
+  }
+
+  /* 接收：上方淡入 → 下移到中間 */
+  #exchangeRecvOverlay.on .exchange-anim-img{
+    animation:exchangeRecvDown 1.6s cubic-bezier(.4,0,.6,1) forwards;
+  }
+  @keyframes exchangeRecvDown{
+    0%   { transform:translateY(-160px) scale(.25); opacity:0; filter:drop-shadow(0 0 50px #fff) brightness(2); }
+    35%  { transform:translateY(-24px) scale(1.06);  opacity:1; filter:drop-shadow(0 0 30px #ffd166) brightness(1.15); }
+    100% { transform:translateY(0) scale(1);          opacity:1; filter:drop-shadow(0 0 20px #a29bfe) brightness(1); }
+  }
+
+  /* 傳出時的光柱 */
+  .exchange-anim-beam{
+    position:absolute; left:50%; top:0; bottom:0; width:6px; margin-left:-3px;
+    border-radius:6px; opacity:0; pointer-events:none;
+    background:linear-gradient(0deg, rgba(162,155,254,0), rgba(162,155,254,.6), rgba(255,255,255,.95));
+  }
+  #exchangeSendOverlay.on .exchange-anim-beam{
+    animation:beamRise 1.6s cubic-bezier(.4,0,.6,1) forwards;
+  }
+  @keyframes beamRise{
+    0%   { opacity:0; transform:scaleY(.2); }
+    40%  { opacity:.9; transform:scaleY(1); }
+    100% { opacity:0; transform:scaleY(1.1); }
+  }
+
+  .exchange-anim-text{
+    color:#fff; font-size:17px; font-weight:900; letter-spacing:2px;
+    text-shadow:0 0 20px rgba(162,155,254,.9), 0 2px 12px rgba(0,0,0,.9);
+  }
+
+  /* ═══ QR 容器 ═══ */
+  #exchangeQrBox{
+    display:inline-block; padding:10px; background:#fff; border-radius:12px;
+    box-shadow:0 6px 20px rgba(0,0,0,.4);
+  }
+  #exchangeQrBox img{ display:block; border-radius:6px; }
+
+  /* ═══ 掃描按鈕 ═══ */
+  .exchange-scan-btn{
+    width:100%; margin-top:10px; padding:13px; border-radius:999px; border:none;
+    background:linear-gradient(135deg,#7CFC9A,#20a054); color:#0a3d1a;
+    font-family:inherit; font-size:15px; font-weight:900; letter-spacing:1px;
+    cursor:pointer; box-shadow:0 6px 22px rgba(32,160,84,.5);
+  }
+  .exchange-scan-btn:active{ transform:scale(.96); }
+
+  /* ═══ 掃描 overlay ═══ */
+  #exchangeScanOverlay{
+    position:fixed; inset:0; z-index:8600; display:none;
+    flex-direction:column; align-items:center; justify-content:center;
+    background:rgba(5,5,15,.96); padding:20px; gap:14px;
+  }
+  #exchangeScanOverlay.on{ display:flex; }
+  #exchangeScanVideoWrap{
+    position:relative; width:min(88vw,320px); aspect-ratio:1;
+    border-radius:18px; overflow:hidden; background:#000;
+    border:2px solid rgba(162,155,254,.6);
+    box-shadow:0 0 40px rgba(162,155,254,.4);
+  }
+  #exchangeScanVideo{ width:100%; height:100%; object-fit:cover; display:block; }
+  #exchangeScanVideoWrap::after{
+    content:''; position:absolute; inset:12%;
+    border:3px solid rgba(255,255,255,.55); border-radius:12px;
+    box-shadow:0 0 0 9999px rgba(0,0,0,.45); pointer-events:none;
+  }
+  .exchange-scan-title{
+    color:#fff; font-size:16px; font-weight:900; letter-spacing:2px;
+    text-shadow:0 0 16px rgba(162,155,254,.7);
+  }
+  .exchange-scan-hint{
+    color:rgba(255,255,255,.7); font-size:12px; font-weight:700;
+    text-align:center; line-height:1.5;
+  }
+  #exchangeScanCloseBtn{
+    margin-top:6px; padding:11px 28px; border-radius:999px; border:none;
+    background:rgba(255,255,255,.14); color:#fff; font-family:inherit;
+    font-size:14px; font-weight:900; cursor:pointer; letter-spacing:1px;
+  }
 
   #evoOverlay{position:fixed;inset:0;z-index:5000;pointer-events:none;
     background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.98),rgba(200,220,255,.6),rgba(0,0,0,.85));
@@ -1790,12 +1904,18 @@
         <button class="exchange-btn share" id="exchangeShareBtn">📤 分享</button>
       </div>
       <div class="exchange-hint">把這串碼傳給朋友，他們在「輸入交換碼」貼上即可領取。</div>
+      <!-- QR 容器 -->
+      <div id="exchangeQrWrap" style="display:none;margin-top:12px;text-align:center">
+        <div style="color:#7CFC9A;font-size:12px;font-weight:800;margin-bottom:8px">📱 讓朋友掃描此 QR Code</div>
+        <div id="exchangeQrBox"></div>
+      </div>
     </div>
   </div>
 
   <div class="dex-scroll hidden" id="exchangeRedPane">
     <div class="dex-progress">貼上朋友給你的交換碼</div>
     <textarea class="exchange-code-box" id="exchangeInputBox" placeholder="在此貼上交換碼…"></textarea>
+    <button class="exchange-scan-btn" id="exchangeScanBtn">📷 掃描 QR Code</button>
     <button class="exchange-btn redeem" id="exchangeRedeemBtn">🎁 領取精靈</button>
     <div class="exchange-hint" id="exchangeRedeemHint"></div>
   </div>
@@ -1837,6 +1957,33 @@
   <div class="trade-txt">交 換 中…</div>
 </div>
 
+<!-- ═══ 交換傳出動畫 ═══ -->
+<div id="exchangeSendOverlay" class="exchange-anim-overlay">
+  <div class="exchange-anim-stage">
+    <div class="exchange-anim-beam"></div>
+    <img id="exchangeSendImg" class="exchange-anim-img" src="" alt="">
+  </div>
+  <div class="exchange-anim-text" id="exchangeSendText">精靈傳出中…</div>
+</div>
+
+<!-- ═══ 交換接收動畫 ═══ -->
+<div id="exchangeRecvOverlay" class="exchange-anim-overlay">
+  <div class="exchange-anim-stage">
+    <img id="exchangeRecvImg" class="exchange-anim-img" src="" alt="">
+  </div>
+  <div class="exchange-anim-text" id="exchangeRecvText">精靈接收中…</div>
+</div>
+
+<!-- ═══ QR 掃描 overlay ═══ -->
+<div id="exchangeScanOverlay">
+  <div class="exchange-scan-title">📷 掃描交換碼 QR Code</div>
+  <div id="exchangeScanVideoWrap">
+    <video id="exchangeScanVideo" playsinline muted></video>
+  </div>
+  <div class="exchange-scan-hint" id="exchangeScanHint">正在開啟相機…</div>
+  <button id="exchangeScanCloseBtn">取消</button>
+</div>
+
 <div id="evoOverlay" style="display:none">
   <img id="evoAnimImg" src="" alt="">
   <div class="evo-txt">進 化 中…</div>
@@ -1868,6 +2015,8 @@
   </div>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 <script>
 /* =========================================================
    0. 全局數據
@@ -3401,6 +3550,7 @@ async function resetGame() {
   if (!ok) return;
 
   try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
+  try { localStorage.removeItem(DAILY_REWARD_KEY); } catch (e) {}
   ballInventory = { poke: 20, premier: 0, rocket: 0, great: 0, ultra: 0, master: 0 };
   currentBall = 'poke';
   itemInventory = { goodPotion: 0, grape: 0, pineapple: 0, banana: 0, incense: 0 };
@@ -4168,6 +4318,9 @@ function openEgg(marker) {
   const p = pickBaseStagePokemon();
   if (!p) { marker._processing = false; toast('這顆蛋似乎沒有動靜…'); return; }
 
+  // ★ 孵蛋異色判定
+  const shiny = Math.random() < SHINY_RATE;
+
   hatchState = 'hatching';
   const eggEl   = document.getElementById('hatchEgg');
   const imgEl   = document.getElementById('hatchImg');
@@ -4190,22 +4343,31 @@ function openEgg(marker) {
     eggEl.style.display = 'none';
 
     imgEl.classList.remove('hatch-img');
-    imgEl.src = spriteUrl(p, false);
+    imgEl.src = spriteUrl(p, shiny);
     void imgEl.offsetWidth;
     imgEl.classList.add('hatch-img');
     imgEl.style.display = '';
 
     const st = dexState[p.name];
     const firstTime = !st || st.caught === 0;
-    if (st) { st.seen = 1; st.caught = (st.caught || 0) + 1; }
+    const firstShiny = shiny && (!st || (st.shiny || 0) === 0);
+    if (st) {
+      st.seen = 1;
+      st.caught = (st.caught || 0) + 1;
+      if (shiny) st.shiny = (st.shiny || 0) + 1;
+    }
     caughtCount++;
     addCandy(p.name, HATCH_CANDY_GAIN);
     updateHUD();
     autoSave();
 
-    textEl.textContent = firstTime
-      ? `✨ 孵出了 ${p.name}！🍬 +${HATCH_CANDY_GAIN}`
-      : `孵出了 ${p.name}！🍬 +${HATCH_CANDY_GAIN}`;
+    textEl.textContent = shiny
+      ? (firstShiny
+          ? `✨ 孵出了異色 ${p.name}！🍬 +${HATCH_CANDY_GAIN}`
+          : `✨ 異色 ${p.name}！🍬 +${HATCH_CANDY_GAIN}`)
+      : (firstTime
+          ? `🆕 孵出了 ${p.name}！🍬 +${HATCH_CANDY_GAIN}`
+          : `孵出了 ${p.name}！🍬 +${HATCH_CANDY_GAIN}`);
 
     if (eggMarker && map && map.hasLayer(eggMarker)) map.removeLayer(eggMarker);
     eggMarker = null;
@@ -4340,7 +4502,7 @@ function buildNpcTrade() {
   if (Math.random() < NPC_EVO_TRADE_RATE) {
     const t = TRADE_EVOLUTIONS[Math.floor(Math.random() * TRADE_EVOLUTIONS.length)];
     return { kind: 'evo', npcName: t.npcName, to: t.to, candyCost: t.candyCost,
-      spriteId: t.spriteId, evoSpriteId: t.evoSpriteId, shiny };
+      spriteId: t.spriteId, evoSpriteId: t.evospriteId || t.evoSpriteId, shiny };
   }
   const pool = POKEDEX.filter(p => !p.notWild && p.w > 0);
   const mon = pool.length ? pool[Math.floor(Math.random() * pool.length)] : POKEDEX[Math.floor(Math.random() * POKEDEX.length)];
@@ -4508,7 +4670,7 @@ npcConfirmBtn.addEventListener('click', () => {
         if (resultState) {
           resultState.seen = 1;
           resultState.caught++;
-          if (isShinyTrade) resultState.shiny++;      // ✨ 異色入帳
+          if (isShinyTrade) resultState.shiny++;
         }
         if (trade.kind === 'evo' && dexState[trade.npcName]) {
           dexState[trade.npcName].caught++;
@@ -4556,7 +4718,6 @@ function setBattleMon(fighterEl, mon, shiny) {
   const nameEl = fighterEl.querySelector('.gym-fighter-name');
   const isShiny = !!shiny;
 
-  // ★ 關鍵：每次都把舊 img 與舊占位符移除，讓瀏覽器重新載入
   const oldImg = fighterEl.querySelector('img');
   if (oldImg) oldImg.remove();
   const oldPh = fighterEl.querySelector('.gym-fighter-placeholder');
@@ -4577,13 +4738,11 @@ function setBattleMon(fighterEl, mon, shiny) {
   let triedFallback = false;
 
   img.onerror = () => {
-    // 只有 fallbackUrl 真的不同才切換，避免同 URL 無窮失敗
     if (!triedFallback && fallbackUrl && fallbackUrl !== primaryUrl) {
       triedFallback = true;
       img.src = fallbackUrl;
       return;
     }
-    // 兩種都失敗 → 顯示 '❓'，讓玩家知道是「載入失敗」而不是「精靈不存在」
     img.style.display = 'none';
     img.onerror = null;
     const ph = document.createElement('div');
@@ -4623,7 +4782,6 @@ async function playGymBattleAnimation(playerMon, gymMon, playerWins, playerShiny
     gymFighterRight.classList.add('entered');
   });
 
-  // ── 開場 ──
   await sleep(400);
   gymVs.classList.add('show');
   SFX.init();
@@ -4635,7 +4793,6 @@ async function playGymBattleAnimation(playerMon, gymMon, playerWins, playerShiny
   await sleep(300);
   gymVs.classList.remove('show');
 
-  // ── 3 個回合 ──
   const ROUNDS = 3;
 
   for (let i = 0; i < ROUNDS; i++) {
@@ -4644,13 +4801,11 @@ async function playGymBattleAnimation(playerMon, gymMon, playerWins, playerShiny
     setBattleMsg(isFinal ? `第 ${i + 1} 回合 — 最後一擊！` : `第 ${i + 1} 回合！`);
     await sleep(120);
 
-    // 雙方衝鋒
     gymFighterLeft.classList.add('charging');
     gymFighterRight.classList.add('charging');
     SFX.tradeWhoosh();
     await sleep(220);
 
-    // 碰撞！
     gymClash.classList.add('show');
     gymBattleStage.classList.add('shake');
     gymBattleFlash.classList.add('on');
@@ -4658,7 +4813,6 @@ async function playGymBattleAnimation(playerMon, gymMon, playerWins, playerShiny
     SFX.throwBall();
     await sleep(170);
 
-    // 收招 + 彈開
     gymFighterLeft.classList.remove('charging');
     gymFighterRight.classList.remove('charging');
     gymClash.classList.remove('show');
@@ -4669,7 +4823,6 @@ async function playGymBattleAnimation(playerMon, gymMon, playerWins, playerShiny
     gymFighterRight.classList.add('knockback');
 
     if (isFinal) {
-      // 第 3 次：只有輸的一方被擊中並擊飛
       const loser = playerWins ? gymFighterRight : gymFighterLeft;
       await sleep(160);
       loser.classList.add('hit');
@@ -4685,14 +4838,13 @@ async function playGymBattleAnimation(playerMon, gymMon, playerWins, playerShiny
       }
       await sleep(700);
     } else {
-      // 前 2 次：雙方彈開、勢均力敵
       await sleep(160);
       setBattleMsg(`第 ${i + 1} 回合 — 勢均力敵！`);
       await sleep(300);
 
       gymFighterLeft.classList.remove('knockback');
       gymFighterRight.classList.remove('knockback');
-      await sleep(450); // 等 .gym-fighter 的 .45s 回位過渡跑完
+      await sleep(450);
     }
   }
 
@@ -4818,30 +4970,25 @@ function chooseGymFighter(name, shiny) {
   const p = POKEDEX.find(x => x.name === name);
   if (!p) return;
 
-  // 只有真的擁有異色時，才允許用異色出戰
   const usingShiny = !!shiny && !!(dexState[p.name] && dexState[p.name].shiny > 0);
 
   const gymMon = currentGym.pokemon;
 
-  // 開戰即消耗 1 瓶好傷藥（輸贏都消耗）
   itemInventory.goodPotion--;
   updateHUD();
   autoSave();
 
   gymSelectScreen.classList.add('hidden');
 
-  // 先判定勝負
   const candy = getCandy(p.name) || 0;
   const winChance = Math.min(0.9, Math.max(0.35, GYM_WIN_CHANCE + candy * 0.01));
   const playerWins = Math.random() < winChance;
 
   playGymBattleAnimation(p, gymMon, playerWins, usingShiny, () => {
     if (playerWins) {
-      // 判斷所選精靈是否還有可進化的分支
       const hasEvolution = EVOLUTIONS[p.name] && EVOLUTIONS[p.name].length > 0;
 
       if (hasEvolution) {
-        // ✅ 原有邏輯：可進化 → 獲得自身 3 顆糖果
         addCandy(p.name, 3);
         updateHUD();
         autoSave();
@@ -4852,7 +4999,6 @@ function chooseGymFighter(name, shiny) {
         toast(`${usingShiny ? '✨ ' : ''}⚔ 道場挑戰成功！獲得 ${p.name} 糖果 ×3`, 3000);
         if (gameStarted) audio.playMap(env.time);
 	} else {
-	  // ✅ 最終形態／無進化 → 先送紀念球 ×3
 	  const gymPoke  = currentGym.pokemon;
 	  const gymShiny = Math.random() < SHINY_RATE;
 
@@ -4865,7 +5011,6 @@ function chooseGymFighter(name, shiny) {
 	  SFX.init();
 	  SFX.reward();
 
-	  // ← 送完球後再判斷，此時至少 3 顆紀念球
 	  const canCatch = getTotalBalls() > 0;
 
 	  if (!canCatch) {
@@ -4880,7 +5025,6 @@ function chooseGymFighter(name, shiny) {
 	  }
 	}
     } else {
-      // ❌ 失敗：原有邏輯
       gymScreen.classList.remove('hidden');
       updateGymUI();
       SFX.init();
@@ -4906,7 +5050,7 @@ const tradeFlash   = document.getElementById('tradeFlash');
 function setTradeMon(elImg, elFallback, elLabel, mon, labelText, fallbackText, shiny) {
   elLabel.textContent = labelText;
   if (mon) {
-    elImg.src = spriteUrl(mon, !!shiny);      // ← 用參數，不再引用全域
+    elImg.src = spriteUrl(mon, !!shiny);
     elImg.style.display = '';
     elFallback.style.display = 'none';
     elImg.onerror = () => {
@@ -4977,7 +5121,7 @@ function playNPCEvolutionAnimation(fromName, toName, evoSpriteId, shiny, onDone)
   animImg.style.display = '';
   animImg.onerror = () => { animImg.style.display = 'none'; };
   ov.style.display = 'flex';
-  ov.classList.toggle('shiny', !!shiny);      // ✨ 金光特效
+  ov.classList.toggle('shiny', !!shiny);
 
   audio.init();
   audio.playTrade();
@@ -5132,7 +5276,6 @@ async function switchCatchBall(t) {
     return;
   }
 
-  /* 大師球二次確認 */
   if (t === 'master' && !confirmMasterPending) {
     confirmMasterPending = true;
     const ok = await showConfirm({
@@ -5500,7 +5643,7 @@ function performThrow(ballType, quality, angle, power) {
   const duration = 520;
   lastThrow = { ballType, quality, angle, power, targetX, targetY, spinDir };
   const isCurve = (ballType === 'curve');
-  const baseRot = isCurve ? spinDir * 720 : 0;     // 直球不帶初始旋轉
+  const baseRot = isCurve ? spinDir * 720 : 0;
   flyBall(targetX, targetY, spinDir, curveOffset, duration, () => {
     SFX.hit();
 
@@ -5509,7 +5652,7 @@ function performThrow(ballType, quality, angle, power) {
       setBallTransform(
         targetX + dirSign * 70,
         targetY + (curveSlip ? 130 : (quality === 'low' ? 140 : -140)),
-        isCurve ? spinDir * 1080 : 0          // ← 直球 miss 也不轉
+        isCurve ? spinDir * 1080 : 0
       );
       ballFly.style.opacity = '0';
       showResult(
@@ -5531,8 +5674,8 @@ function performThrow(ballType, quality, angle, power) {
 
     wildMon.classList.add('absorbed');
     setTimeout(() => {
-      bounceBall(targetX, targetY, baseRot, () => {       // ← 先彈一下
-        wobbleBall(targetX, targetY, baseRot, () => {     // ← 再落地搖
+      bounceBall(targetX, targetY, baseRot, () => {
+        wobbleBall(targetX, targetY, baseRot, () => {
           resolveCatch();
         });
       });
@@ -5563,7 +5706,7 @@ function flyBall(targetX, targetY, spinDir, curveOffset, duration, onDone, rotat
     const om = 1 - ease;
     const x = om*om*startX + 2*om*ease*cpX + ease*ease*targetX;
     const y = om*om*startY + 2*om*ease*cpY + ease*ease*targetY;
-    const rot = rotate ? ease * 720 * spinDir : 0;   // ← 直球不轉
+    const rot = rotate ? ease * 720 * spinDir : 0;
     setBallTransform(x, y, rot);
     if (t < 1) requestAnimationFrame(step);
     else onDone();
@@ -5577,13 +5720,12 @@ function bounceBall(baseX, baseY, baseRot, onDone) {
   const startTime = performance.now();
   function step(now) {
     const t = Math.min(1, (now - startTime) / DUR);
-    // 0 → 1 → 0 的拋物線，高度隨時間遞減一點點
     const lift = Math.sin(t * Math.PI) * H * (1 - t * 0.3);
     setBallTransform(baseX, baseY - lift, baseRot);
     if (t < 1) requestAnimationFrame(step);
     else {
       setBallTransform(baseX, baseY, baseRot);
-      SFX.hit();                     // 落地輕響
+      SFX.hit();
       onDone();
     }
   }
@@ -5646,7 +5788,6 @@ function resolveCatch() {
   const info = lastThrow || { ballType:'straight', quality:'perfect', spinDir:1,
                               targetX: ballHome.x, targetY: ballHome.y };
 
-  /* 讀取效果（不立即清除，等成功或逃走才消耗） */
   const catchBonus   = catchEffect.catchBonus   || 1;
   const extraCandy = catchEffect.extraCandy || 0;
   const fleeReduction = catchEffect.fleeReduction || false;
@@ -5676,7 +5817,6 @@ function resolveCatch() {
     const candyGain = 1 + extraCandy;
     addCandy(p.name, candyGain);
 
-    /* 捕獲成功 → 消耗效果 */
     catchEffect = { catchBonus: 0, extraCandy: 0, fleeReduction: false };
     clearEffectBadges();
 
@@ -5723,7 +5863,6 @@ function resolveCatch() {
     const fleeChance = fleeReduction ? 0.10 : 0.35;
 
     if (Math.random() < fleeChance) {
-      /* 精靈逃走 → 消耗效果 */
       catchEffect = { catchBonus: 0, extraCandy: 0, fleeReduction: false };
       clearEffectBadges();
 
@@ -5737,7 +5876,6 @@ function resolveCatch() {
         closeCatch();
       }, 900);
     } else {
-      /* 精靈沒逃走 → 保留效果讓玩家再試 */
       showResult(fleeReduction
         ? '差一點！（🍌 香蕉生效，精靈沒逃走）'
         : '差一點！再試一次', '#ffd166');
@@ -5745,7 +5883,7 @@ function resolveCatch() {
       setBallTransform(
         info.targetX,
         info.targetY + 240,
-        info.ballType === 'curve' ? info.spinDir * 1080 : 0   // ← 直球不轉
+        info.ballType === 'curve' ? info.spinDir * 1080 : 0
       );
       ballFly.style.opacity = '0';
       setTimeout(() => {
@@ -5851,7 +5989,6 @@ function spinStop(dir = 1) {
   SFX.spin();
   SFX.coinSpin();
 
-  // dir = 1 → 順時針；dir = -1 → 逆時針
   discRot += dir * (1080 + Math.floor(Math.random() * 720));
   stopDisc.style.transition = 'transform 1.7s cubic-bezier(.15,.85,.3,1)';
   stopDisc.style.transform = coinTransform(discRot);
@@ -5862,10 +5999,8 @@ function spinStop(dir = 1) {
     const itemsGained = { goodPotion: 0, grape: 0, pineapple: 0, banana: 0, incense: 0 };
 
     if (isRocket) {
-      // 火箭隊據點：只有 1-3 顆火箭隊球。
       gained.rocket = 1 + Math.floor(Math.random() * 3);
     } else {
-      // 普通補給站：1-3 顆普通球 + 高級/超級/大師球機率
       gained.poke = 1 + Math.floor(Math.random() * 3);
       const r = Math.random();
       if (r < 0.003)        gained.master = 1;
@@ -5964,15 +6099,13 @@ function endStopSwipe(e) {
 
   const dx = stopSwipe.x - stopSwipe.x0;
   const dy = stopSwipe.y - stopSwipe.y0;
-  const dragOffset = dx * 0.85;   // 與 pointermove 使用的係數一致
+  const dragOffset = dx * 0.85;
 
   if (!spinning && Math.abs(dx) >= SWIPE_THRESHOLD && Math.abs(dx) > Math.abs(dy)) {
-    // 達標：先把拖曳偏移吸收進 discRot，避免回彈跳躍，再往同方向繼續轉
     discRot += dragOffset;
     stopDisc.style.transform = coinTransform(discRot);
     spinStop(dx >= 0 ? 1 : -1);
   } else {
-    // 未達標：彈回不含拖曳偏移的原角度（CSS transition 會平滑補間）
     stopDisc.style.transform = coinTransform(discRot);
     if (!spinning && (Math.abs(dx) > 18 || Math.abs(dy) > 18)) {
       stopHint.textContent = '橫掃距離不夠，再試一次';
@@ -6328,7 +6461,7 @@ async function plantPineapple(name) {
   SFX.reward();
   toast(`🍍 消耗 ${used} 顆糖果，獲得 ${pineapples} 個菠蘿！`, 2600);
 
-  renderDex(); // 刷新糖果與菠蘿數字
+  renderDex();
   if (!bagScreen.classList.contains('hidden')) renderBag();
 }
 
@@ -6349,11 +6482,10 @@ function renderEvoList() {
   const sources = Object.keys(EVOLUTIONS)
   .filter(n => dexState[n] && dexState[n].caught > 0)
   .sort((a, b) => {
-    // 先比「是否已湊夠糖果可進化」，再比糖果數量
     const aReady = EVOLUTIONS[a].some(e => getCandy(a) >= e.candy) ? 1 : 0;
     const bReady = EVOLUTIONS[b].some(e => getCandy(b) >= e.candy) ? 1 : 0;
-    if (aReady !== bReady) return bReady - aReady;   // 可進化的排前
-    return getCandy(b) - getCandy(a);                 // 糖果多的排前
+    if (aReady !== bReady) return bReady - aReady;
+    return getCandy(b) - getCandy(a);
   });
 
   if (sources.length === 0) {
@@ -6378,7 +6510,6 @@ function renderEvoList() {
       const tgt = POKEDEX.find(p => p.name === evo.to);
       if (!tgt) return;
 
-      // ✅ 新增：目標的普通版與異色版都已獲得，就不再顯示此進化項
       const tgtState = dexState[evo.to];
       if (tgtState && tgtState.caught > 0 && tgtState.shiny > 0) return;
       const isTradeEvo = TRADE_EVOLUTIONS.some(
@@ -6413,7 +6544,6 @@ function renderEvoList() {
     });
   });
 
-  // ✅ 新增：所有進化項都被隱藏時的空狀態
   if (!html) {
     list.innerHTML = `<div class="evo-empty">
       所有可進化的目標（含異色版）都已獲得！<br>
@@ -6445,13 +6575,12 @@ function tryEvolve(srcName, toName) {
   const tgt = POKEDEX.find(p => p.name === toName);
   if (!src || !tgt) return;
 
-  // ← 新增：源精靈是否擁有異色版
   const srcHasShiny = !!(dexState[srcName] && dexState[srcName].shiny > 0);
 
   const ov = document.getElementById('evoOverlay');
   const animImg = document.getElementById('evoAnimImg');
-  const fromSrc = spriteUrl(src, srcHasShiny);   // ← false → srcHasShiny
-  const toSrc   = spriteUrl(tgt, srcHasShiny);   // ← false → srcHasShiny
+  const fromSrc = spriteUrl(src, srcHasShiny);
+  const toSrc   = spriteUrl(tgt, srcHasShiny);
 
   animImg.src = fromSrc;
   animImg.style.display = '';
@@ -6474,7 +6603,7 @@ function tryEvolve(srcName, toName) {
     candyBag[srcName] -= evo.candy;
     dexState[tgt.name].seen = 1;
     dexState[tgt.name].caught++;
-    if (srcHasShiny) dexState[tgt.name].shiny++;   // ← 異色源 → 異色目標 +1
+    if (srcHasShiny) dexState[tgt.name].shiny++;
     caughtCount++;
     updateHUD();
     autoSave();
@@ -6499,7 +6628,7 @@ document.getElementById('evoCloseBtn').addEventListener('click', () => {
    ========================================================= */
 const EXCHANGE_KEY = 'pokemonCityWalkExchange_v1';
 const EXCHANGE_CODE_VERSION = 1;
-const EXCHANGE_TTL = 7 * 24 * 60 * 60 * 1000;   // 交換碼 7 天有效期
+const EXCHANGE_TTL = 7 * 24 * 60 * 60 * 1000;
 
 let exchangeData = { playerId: '', redeemed: [] };
 let exchangeTab = 'gen';
@@ -6573,18 +6702,23 @@ function switchExchangeTab(tab) {
   });
   exchangeGenPane.classList.toggle('hidden', tab !== 'gen');
   exchangeRedPane.classList.toggle('hidden', tab !== 'red');
+  if (tab !== 'red') closeQRScanner();
 }
 
 function renderExchangeGen() {
   exchangeResult.classList.add('hidden');
   exchangeCodeBox.value = '';
+  const qrWrap = document.getElementById('exchangeQrWrap');
+  const qrBox  = document.getElementById('exchangeQrBox');
+  if (qrWrap) qrWrap.style.display = 'none';
+  if (qrBox)  qrBox.innerHTML = '';
 
   const owned = POKEDEX
     .filter(p => dexState[p.name] && dexState[p.name].caught > 0)
     .sort((a, b) => {
       const sa = (dexState[a.name].shiny || 0) > 0 ? 1 : 0;
       const sb = (dexState[b.name].shiny || 0) > 0 ? 1 : 0;
-      if (sa !== sb) return sb - sa;                       // 異色優先
+      if (sa !== sb) return sb - sa;
       return a.name.localeCompare(b.name, 'zh-Hant');
     });
 
@@ -6635,7 +6769,6 @@ async function tryGenExchange(name, shiny) {
   if (!st || (st.caught || 0) <= 0) { toast('沒有可交換的此精靈'); return; }
   if (shiny && (st.shiny || 0) <= 0) { toast('沒有異色此精靈'); return; }
 
-  // ★ 必須有糖果才能產生交換碼
   const candy = candyBag[name] || 0;
   if (candy < 1) {
     toast(`🍬 ${name} 糖果不足（需要 1 顆才能交換）`);
@@ -6657,7 +6790,6 @@ async function tryGenExchange(name, shiny) {
   });
   if (!ok) return;
 
-  // ★ 只扣 1 顆糖果，caught 不動
   candyBag[name] = Math.max(0, candy - 1);
 
   const payload = {
@@ -6671,8 +6803,7 @@ async function tryGenExchange(name, shiny) {
     c: 1,
   };
 
-  exchangeCodeBox.value = encodeTradeCode(payload);
-  exchangeResult.classList.remove('hidden');
+  const code = encodeTradeCode(payload);
 
   updateHUD();
   autoSave();
@@ -6680,8 +6811,13 @@ async function tryGenExchange(name, shiny) {
   if (!evoScreen.classList.contains('hidden'))  renderEvoList();
   if (!bagScreen.classList.contains('hidden'))  renderBag();
 
-  SFX.init(); SFX.reward();
-  toast(`📤 已產生 ${shiny ? '✨ ' : ''}${name} 交換碼（🍬 -1）`, 2600);
+  playExchangeSendAnimation(p, shiny, () => {
+    exchangeCodeBox.value = code;
+    exchangeResult.classList.remove('hidden');
+    renderExchangeQR(code);
+    SFX.init(); SFX.reward();
+    toast(`📤 已產生 ${shiny ? '✨ ' : ''}${name} 交換碼（🍬 -1）`, 2600);
+  });
 }
 
 function renderRedeemHint(text, type) {
@@ -6716,10 +6852,9 @@ async function redeemExchangeCode() {
   const shiny = payload.s === 1;
   const st = dexState[p.name];
 
-  // ★ 依「是否已擁有對應版本」決定結果
   const alreadyHas = shiny
-    ? !!(st && (st.shiny || 0) > 0)      // 異色看 shiny 計數
-    : !!(st && (st.caught || 0) > 0);    // 普通看 caught 計數
+    ? !!(st && (st.shiny || 0) > 0)
+    : !!(st && (st.caught || 0) > 0);
 
   const resultMsg = alreadyHas
     ? `你已擁有${shiny ? '✨ 異色 ' : ''}${p.name}\n→ 將獲得 🍬 ${p.name} 糖果 ×1`
@@ -6736,21 +6871,17 @@ async function redeemExchangeCode() {
   });
   if (!ok) return;
 
-  // 記錄 nonce（防同一存檔重複兌換）
   exchangeData.redeemed.push({ i: payload.i, n: p.name, s: shiny ? 1 : 0, at: Date.now() });
   if (exchangeData.redeemed.length > 500) {
     exchangeData.redeemed = exchangeData.redeemed.slice(-500);
   }
   saveExchangeData();
 
-  // ★ 入帳：二選一
   let gained;
   if (alreadyHas) {
-    // 已擁有 → 糖果 +1
     addCandy(p.name, 1);
     gained = 'candy';
   } else {
-    // 未擁有 → 精靈 +1（異色則 shiny +1）
     if (st) {
       st.seen = 1;
       st.caught = (st.caught || 0) + 1;
@@ -6763,15 +6894,10 @@ async function redeemExchangeCode() {
   updateHUD();
   autoSave();
 
-  // 播放交換動畫
-  const mon = { id: p.id, name: p.name, spriteId: p.spriteId };
-  const tradeLike = { npcName: p.name, to: p.name, candyCost: 0, shiny };
-  const candySource = { name: p.name, amount: 1 };
-
   audio.init();
   audio.playTrade();
 
-  playTradeAnimation(mon, mon, tradeLike, candySource, () => {
+  playExchangeRecvAnimation(p, shiny, () => {
     exchangeInputBox.value = '';
     if (gained === 'candy') {
       renderRedeemHint(`✅ 你已擁有此精靈，獲得 🍬 ${p.name} 糖果 ×1`, 'ok');
@@ -6788,9 +6914,9 @@ async function redeemExchangeCode() {
   });
 }
 
-/* ── 事件綁定 ── */
 document.getElementById('exchangeBtn').addEventListener('click', openExchange);
 document.getElementById('exchangeCloseBtn').addEventListener('click', () => {
+  closeQRScanner();
   exchangeScreen.classList.add('hidden');
 });
 document.querySelectorAll('.exchange-tab').forEach(b => {
@@ -6831,6 +6957,177 @@ document.getElementById('exchangeShareBtn').addEventListener('click', async () =
     toast('請長按選取複製');
   }
 });
+
+/* ═══════════════════════════════════════════════
+   交換動畫 + QR Code 產生 + QR 掃描
+   ═══════════════════════════════════════════════ */
+let exchangeAnimLocked = false;
+
+function playExchangeSendAnimation(p, shiny, onDone) {
+  if (exchangeAnimLocked) { onDone && onDone(); return; }
+  exchangeAnimLocked = true;
+
+  const ov = document.getElementById('exchangeSendOverlay');
+  const img = document.getElementById('exchangeSendImg');
+  const text = document.getElementById('exchangeSendText');
+
+  img.src = spriteUrl(p, shiny);
+  text.textContent = `精靈傳出中… ${shiny ? '✨ ' : ''}${p.name}`;
+  ov.classList.remove('on');
+  void ov.offsetWidth;
+  ov.classList.add('on');
+
+  try { SFX.init(); SFX.tradeWhoosh(); SFX.spin(); } catch(_){}
+
+  setTimeout(() => {
+    ov.classList.remove('on');
+    exchangeAnimLocked = false;
+    onDone && onDone();
+  }, 1700);
+}
+
+function playExchangeRecvAnimation(p, shiny, onDone) {
+  if (exchangeAnimLocked) { onDone && onDone(); return; }
+  exchangeAnimLocked = true;
+
+  const ov = document.getElementById('exchangeRecvOverlay');
+  const img = document.getElementById('exchangeRecvImg');
+  const text = document.getElementById('exchangeRecvText');
+
+  img.src = spriteUrl(p, shiny);
+  text.textContent = `精靈接收中… ${shiny ? '✨ ' : ''}${p.name}`;
+  ov.classList.remove('on');
+  void ov.offsetWidth;
+  ov.classList.add('on');
+
+  try { SFX.init(); SFX.tradeWhoosh(); SFX.reward(); } catch(_){}
+
+  setTimeout(() => {
+    ov.classList.remove('on');
+    exchangeAnimLocked = false;
+    onDone && onDone();
+  }, 1700);
+}
+
+function renderExchangeQR(code) {
+  const wrap = document.getElementById('exchangeQrWrap');
+  const box  = document.getElementById('exchangeQrBox');
+  if (!wrap || !box) return;
+
+  box.innerHTML = '';
+  if (typeof QRCode === 'undefined') { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+
+  try {
+    QRCode.toDataURL(code, { width: 240, margin: 1, errorCorrectionLevel: 'M' }, (err, url) => {
+      if (err || !url) { wrap.style.display = 'none'; console.warn('QR gen failed:', err); return; }
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = '交換碼 QR Code';
+      box.appendChild(img);
+    });
+  } catch (e) {
+    wrap.style.display = 'none';
+    console.warn('QR gen failed:', e);
+  }
+}
+
+const qrScan = { active:false, stream:null, raf:null };
+
+async function openQRScanner() {
+  if (typeof jsQR === 'undefined') {
+    toast('❌ 掃描模組載入失敗，請手動貼上交換碼');
+    return;
+  }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    toast('❌ 此裝置不支援相機掃描，請手動貼上');
+    return;
+  }
+
+  const ov      = document.getElementById('exchangeScanOverlay');
+  const video   = document.getElementById('exchangeScanVideo');
+  const hintEl  = document.getElementById('exchangeScanHint');
+  if (!ov || !video) return;
+
+  ov.classList.add('on');
+  hintEl.textContent = '正在開啟相機…';
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 1280 } },
+      audio: false,
+    });
+    qrScan.stream = stream;
+    video.srcObject = stream;
+    await video.play();
+    qrScan.active = true;
+    hintEl.textContent = '將 QR Code 對準框內，系統會自動辨識';
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const MAX = 720;
+
+    const tick = () => {
+      if (!qrScan.active) return;
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        const vw = video.videoWidth, vh = video.videoHeight;
+        if (vw && vh) {
+          const scale = Math.min(1, MAX / Math.max(vw, vh));
+          const cw = Math.round(vw * scale), ch = Math.round(vh * scale);
+          canvas.width = cw; canvas.height = ch;
+          ctx.drawImage(video, 0, 0, cw, ch);
+          const imageData = ctx.getImageData(0, 0, cw, ch);
+          const result = jsQR(imageData.data, cw, ch, { inversionAttempts: 'dontInvert' });
+          if (result && result.data) {
+            handleScanResult(result.data);
+            return;
+          }
+        }
+      }
+      qrScan.raf = requestAnimationFrame(tick);
+    };
+    qrScan.raf = requestAnimationFrame(tick);
+  } catch (err) {
+    console.warn('camera failed:', err);
+    toast('❌ 無法開啟相機：' + (err.message || '權限被拒'), 3200);
+    closeQRScanner();
+  }
+}
+
+function handleScanResult(text) {
+  const clean = String(text || '').trim();
+  if (!clean) return;
+
+  try { decodeTradeCode(clean); }
+  catch (e) {
+    const hintEl = document.getElementById('exchangeScanHint');
+    if (hintEl) hintEl.textContent = '⚠️ 這不是有效的交換碼，請對準遊戲的 QR Code';
+    return;
+  }
+
+  closeQRScanner();
+  document.getElementById('exchangeInputBox').value = clean;
+  try { SFX.init(); SFX.bubble(); } catch(_){}
+  toast('✅ 已辨識交換碼');
+
+  setTimeout(() => { redeemExchangeCode(); }, 300);
+}
+
+function closeQRScanner() {
+  qrScan.active = false;
+  if (qrScan.raf) { cancelAnimationFrame(qrScan.raf); qrScan.raf = null; }
+  if (qrScan.stream) {
+    qrScan.stream.getTracks().forEach(t => { try { t.stop(); } catch(_){} });
+    qrScan.stream = null;
+  }
+  const video = document.getElementById('exchangeScanVideo');
+  if (video) video.srcObject = null;
+  const ov = document.getElementById('exchangeScanOverlay');
+  if (ov) ov.classList.remove('on');
+}
+
+document.getElementById('exchangeScanBtn').addEventListener('click', openQRScanner);
+document.getElementById('exchangeScanCloseBtn').addEventListener('click', closeQRScanner);
 /* =========================================================
    16. 全螢幕
    ========================================================= */
@@ -6974,7 +7271,7 @@ function saveDailyRewardState(state) {
 
 function checkDailyReward() {
   const state = getDailyRewardState();
-  if (state.lastClaimDate === getTodayKey()) return;   // 已領取，靜默跳過
+  if (state.lastClaimDate === getTodayKey()) return;
   showDailyReward(getTodayKey());
 }
 
@@ -6989,7 +7286,6 @@ function showDailyReward(today) {
 
   const reward = DAILY_REWARDS[Math.floor(Math.random() * DAILY_REWARDS.length)];
 
-  // 初始化
   claimBtn.classList.add('hidden');
   stage.classList.add('rolling');
   amtEl.textContent = '???';
@@ -7004,7 +7300,6 @@ function showDailyReward(today) {
   SFX.bubble();
   if (gameStarted) audio.playTrade();
 
-  // 滾動抽獎
   let rollCount = 0;
   const rollInterval = setInterval(() => {
     const r = DAILY_REWARDS[Math.floor(Math.random() * DAILY_REWARDS.length)];
@@ -7027,14 +7322,12 @@ function showDailyReward(today) {
     claimBtn.removeEventListener('click', onClaim);
     if (rollInterval) clearInterval(rollInterval);
 
-    // 發放
     if (reward.type === 'ball') {
       ballInventory[reward.key] = (ballInventory[reward.key] || 0) + reward.amount;
     } else {
       itemInventory[reward.key] = (itemInventory[reward.key] || 0) + reward.amount;
     }
 
-    // 記錄領取日期
     const state = getDailyRewardState();
     state.lastClaimDate = today;
     state.lastReward = { name: reward.name, amount: reward.amount, at: Date.now() };
