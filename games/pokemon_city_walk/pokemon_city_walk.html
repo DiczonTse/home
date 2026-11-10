@@ -2049,7 +2049,35 @@ const ITEMS = {
   banana:     { name: '香蕉', icon: '🍌', desc: '降低逃跑機率' },
   incense:   { name: '香薰', icon: '🌀', desc: '精靈數量翻倍 15 分鐘' },
 };
+/* ═══════════════════════════════════════════
+   0a. Cache Storage 精靈圖預緩存（新增）
+   ═══════════════════════════════════════════ */
+const SPRITE_CACHE = 'pokemon-city-walk-sprites-v1';
 
+async function cacheSpriteToStorage(url) {
+  const cache = await caches.open(SPRITE_CACHE);
+  const hit = await cache.match(url);
+  if (hit) return;
+  const res = await fetch(url, { mode: 'cors' });   // 用 cors 拿真實狀態
+  if (!res.ok) return;
+  await cache.put(url, res);
+}
+
+async function precacheAllSprites() {
+  if (!POKEDEX || !POKEDEX.length) return;
+  const urls = [];
+  POKEDEX.forEach(p => {
+    if (p.spriteUrl)      urls.push(p.spriteUrl);
+    if (p.shinySpriteUrl) urls.push(p.shinySpriteUrl);
+  });
+  const BATCH = 20;
+  for (let i = 0; i < urls.length; i += BATCH) {
+    const chunk = urls.slice(i, i + BATCH);
+    await Promise.allSettled(chunk.map(u => cacheSpriteToStorage(u).catch(() => {})));
+    await new Promise(r => setTimeout(r, 120));
+  }
+  console.log(`✅ 精靈圖預緩存完成：${urls.length} 張`);
+}
 /* =========================================================
    1. PokeAPI 異步加載
    ========================================================= */

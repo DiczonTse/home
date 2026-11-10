@@ -1,4 +1,4 @@
-const CACHE_NAME    = 'pokemon-city-walk-v2026-11-09-01';
+const CACHE_NAME    = 'pokemon-city-walk-v2026-11-10-01';
 const SPRITE_CACHE  = 'pokemon-city-walk-sprites-v1';
 const RUNTIME_CACHE = 'pokemon-city-walk-runtime-v1';
 
@@ -173,9 +173,12 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 策略 D：PokeAPI → NetworkFirst
+  // 策略 D：PokeAPI → CacheFirst
   if (url.hostname.includes('pokeapi.co')) {
     event.respondWith((async () => {
+      const cached = await caches.match(request);
+      if (cached) return cached;          // 有缓存直接返回，不打网络
+
       try {
         const response = await fetch(request);
         if (isCacheable(response)) {
@@ -183,8 +186,7 @@ self.addEventListener('fetch', (event) => {
         }
         return response;
       } catch (e) {
-        const cached = await caches.match(request);
-        return cached || offlineJSON();
+        return offlineJSON();
       }
     })());
     return;
