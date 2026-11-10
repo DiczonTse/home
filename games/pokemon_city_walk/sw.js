@@ -23,11 +23,6 @@ const LOCAL_ASSETS = [
   './Pokemon City Walk - Trade of the Day.mp3',
   './Pokemon City Walk - Final Encounter.mp3',
 ];
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
-});
 // ===== 安装：缓存本地外壳 =====
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -49,7 +44,11 @@ self.addEventListener('activate', (event) => {
     ).then(() => self.clients.claim())
   );
 });
-
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
 // ===== 工具 =====
 function isCacheable(response) {
   // 同源/API：需要 ok；跨域 <img> 是 opaque（status 0），允许缓存
