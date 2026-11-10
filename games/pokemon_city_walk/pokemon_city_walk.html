@@ -7437,7 +7437,16 @@ function spawnWorld(center) {
 async function startGame() {
   if (gameStarted) return;
   gameStarted = true;
-
+  if ('caches' in window) {
+    caches.keys().then(keys => {
+      keys.filter(k =>
+        k.startsWith('pokemon-city-walk-') &&
+        !k.startsWith('pokemon-city-walk-sprites-v') &&
+        !k.startsWith('pokemon-city-walk-runtime-v') &&
+        k !== 'pokemon-city-walk-v2026-11-10-01'
+      ).forEach(k => caches.delete(k));
+    });
+  }
   audio.init();
   audio.playMap(env.time);
   SFX.init();
@@ -7450,7 +7459,7 @@ async function startGame() {
 
   placePlayer(DEFAULT_CENTER, false);
   spawnWorld(DEFAULT_CENTER);
-
+  precacheAllSprites().catch(() => {});
   const restored = loadAutoSave();
   if (restored) {
     toast('📂 已恢復上次遊戲進度', 2600);
@@ -7666,11 +7675,31 @@ window.addEventListener('load', boot);
 </script>
 <script>
 window.addEventListener('load', function () {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch((err) => {
-      console.warn('SW 注册失败:', err);
+  if (!('serviceWorker' in navigator)) return;
+
+  navigator.serviceWorker.register('sw.js').then((reg) => {
+    if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+
+    reg.addEventListener('updatefound', () => {
+      const newWorker = reg.installing;
+      newWorker.addEventListener('statechange', () => {
+        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          newWorker.postMessage({ type: 'SKIP_WAITING' });
+        }
+      });
     });
-  }
+  }).catch((err) => console.warn('SW 注册失败:', err));
+
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!window.__swReloaded) {
+      window.__swReloaded = true;
+      window.location.reload();
+    }
+  });
+
+  navigator.serviceWorker.ready.then(() => {
+    console.log('[SW] controller =', navigator.serviceWorker.controller ? 'YES' : 'NO');
+  });
 });
 </script>
 </body>

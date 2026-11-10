@@ -1,4 +1,4 @@
-const CACHE_NAME    = 'pokemon-city-walk-v2026-11-10-01';
+const CACHE_NAME    = 'pokemon-city-walk-v2026-11-10-02';
 const SPRITE_CACHE  = 'pokemon-city-walk-sprites-v1';
 const RUNTIME_CACHE = 'pokemon-city-walk-runtime-v1';
 
@@ -23,7 +23,11 @@ const LOCAL_ASSETS = [
   './Pokemon City Walk - Trade of the Day.mp3',
   './Pokemon City Walk - Final Encounter.mp3',
 ];
-
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
 // ===== 安装：缓存本地外壳 =====
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -142,6 +146,9 @@ self.addEventListener('fetch', (event) => {
     event.respondWith((async () => {
       const cache = await caches.open(cacheName);
       const cached = await cache.match(request, { ignoreVary: true });
+		if (cached && cached.type !== 'opaque' && cached.status === 200) {
+		  return cached;
+		}
 
       // 用 cors 模式重新请求，可拿到真实状态码（GitHub raw 支持 CORS）
       const networkPromise = (async () => {
