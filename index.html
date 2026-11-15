@@ -1860,16 +1860,123 @@
         <div class="settings-content" id="settingsContent"></div>
     </div>
 
-    <div class="modal-overlay" id="videoModalOverlay" onclick="closeVideo()"></div>
-    <div class="modal" id="videoModal" style="max-width:90vw;padding:0;background:transparent;box-shadow:none;border:none;overflow:visible;">
-        <div style="position:relative;width:100%;max-width:800px;margin:auto;background:#000;border-radius:12px;overflow:hidden;">
-            <button class="video-close-btn" onclick="closeVideo()" style="position:absolute;top:10px;right:14px;width:36px;height:36px;border:none;background:rgba(0,0,0,0.6);color:#fff;border-radius:50%;font-size:20px;cursor:pointer;z-index:20;">×</button>
-            <iframe class="video-iframe" allowfullscreen allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" style="width:100%;aspect-ratio:16/9;border:none;"></iframe>
-            <div style="padding:8px 16px;background:#1a1a2e;text-align:center;">
-                <a id="youtubeDirectLink" href="#" target="_blank" rel="noopener" style="color:#4CAF50;font-weight:500;font-size:14px;">▶️ 在 YouTube 中打開</a>
-            </div>
-        </div>
-    </div>
+	<div class="modal-overlay" id="videoModalOverlay" onclick="closeVideo()"></div>
+	<div class="modal" id="videoModal" style="max-width:90vw;padding:0;background:transparent;box-shadow:none;border:none;overflow:visible;">
+		<div style="position:relative;width:100%;max-width:800px;margin:auto;background:#000;border-radius:12px;overflow:hidden;">
+			<button class="video-close-btn" onclick="closeVideo()" style="position:absolute;top:10px;right:14px;width:36px;height:36px;border:none;background:rgba(0,0,0,0.6);color:#fff;border-radius:50%;font-size:20px;cursor:pointer;z-index:20;">×</button>
+			<iframe class="video-iframe" allowfullscreen allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" style="width:100%;aspect-ratio:16/9;border:none;"></iframe>
+			<div style="padding:8px 16px;background:#1a1a2e;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;">
+				<a id="youtubeDirectLink" href="#" target="_blank" rel="noopener" style="color:#4CAF50;font-weight:500;font-size:14px;">▶️ 在 YouTube 中打開</a>
+
+				<button type="button" id="ytCopyPlaylistBtn" class="yt-modal-btn" title="一鍵複製播放列表連結">📋 複製播放列表</button>
+
+				<a id="ytOpenPlayerLink" class="yt-modal-btn yt-modal-btn-player"
+				   href="https://diczon.infinityfreeapp.com/" target="_blank" rel="noopener"
+				   title="前往 ▶YouTube 播放器 即時播放">▶️ YouTube 播放器</a>
+			</div>
+		</div>
+	</div>
+
+	<style>
+	.yt-modal-btn{
+		display:inline-flex;align-items:center;justify-content:center;gap:4px;
+		padding:3px 10px;border-radius:16px;
+		border:1px solid rgba(76,175,80,.5);
+		background:rgba(76,175,80,.15);
+		color:#4CAF50;font-size:13px;font-weight:500;
+		cursor:pointer;text-decoration:none!important;white-space:nowrap;
+		transition:background .2s,color .2s,transform .15s;
+	}
+	.yt-modal-btn:hover{background:rgba(76,175,80,.3);color:#81C784;transform:translateY(-1px);}
+	.yt-modal-btn:active{transform:scale(.97);}
+	.yt-modal-btn.copied{background:#4CAF50;color:#fff;border-color:#4CAF50;}
+	.yt-modal-btn-player{border-color:rgba(33,150,243,.55);background:rgba(33,150,243,.15);color:#64B5F6;}
+	.yt-modal-btn-player:hover{background:rgba(33,150,243,.3);color:#90CAF9;}
+	@media (max-width:600px){
+		.yt-modal-btn{font-size:12px;padding:3px 8px;}
+	}
+	</style>
+
+	<script>
+	(function () {
+		'use strict';
+
+		const PLAYER_BASE = 'https://diczon.infinityfreeapp.com/';
+		const directLink = document.getElementById('youtubeDirectLink');
+		const copyBtn = document.getElementById('ytCopyPlaylistBtn');
+		const playerLink = document.getElementById('ytOpenPlayerLink');
+		if (!directLink || !copyBtn || !playerLink) return;
+
+		const defaultCopyText = copyBtn.textContent;
+
+		function getCurrentUrl() {
+			const h = (directLink.getAttribute('href') || '').trim();
+			if (!h || h === '#') return '';
+			try { return new URL(h, location.href).href; } catch (e) { return h; }
+		}
+
+		function getPlaylistId(url) {
+			try { return new URL(url, location.href).searchParams.get('list') || ''; } catch (e) { return ''; }
+		}
+
+		function buildPlayerUrl(url) {
+			if (!url) return PLAYER_BASE;
+			const id = getPlaylistId(url);
+			const params = new URLSearchParams();
+			if (id) params.set('list', id);
+			params.set('url', url);
+			return PLAYER_BASE + '?' + params.toString();
+		}
+
+		function syncPlayerLink() {
+			playerLink.href = buildPlayerUrl(getCurrentUrl());
+		}
+
+		syncPlayerLink();
+
+		if (window.MutationObserver) {
+			new MutationObserver(syncPlayerLink)
+				.observe(directLink, { attributes: true, attributeFilter: ['href'] });
+		}
+
+		playerLink.addEventListener('click', function () {
+			this.href = buildPlayerUrl(getCurrentUrl());
+		});
+
+		async function copyText(text) {
+			if (navigator.clipboard && window.isSecureContext) {
+				try { await navigator.clipboard.writeText(text); return true; } catch (e) {}
+			}
+			const ta = document.createElement('textarea');
+			ta.value = text;
+			ta.setAttribute('readonly', '');
+			ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;';
+			document.body.appendChild(ta);
+			ta.select();
+			ta.setSelectionRange(0, ta.value.length);
+			let ok = false;
+			try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+			document.body.removeChild(ta);
+			return ok;
+		}
+
+		copyBtn.addEventListener('click', async function () {
+			const url = getCurrentUrl();
+			if (!url) {
+				copyBtn.textContent = '⚠️ 無連結';
+				setTimeout(() => { copyBtn.textContent = defaultCopyText; }, 1500);
+				return;
+			}
+			const ok = await copyText(url);
+			copyBtn.textContent = ok ? '✅ 已複製' : '❌ 複製失敗';
+			copyBtn.classList.toggle('copied', ok);
+			setTimeout(() => {
+				copyBtn.textContent = defaultCopyText;
+				copyBtn.classList.remove('copied');
+			}, 1500);
+		});
+	})();
+	</script>
 
     <!-- ===== TOOL DIALOG ===== -->
     <dialog id="toolDialog">
