@@ -1910,13 +1910,15 @@
 		const defaultCopyText = copyBtn.textContent;
 
 		function getCurrentUrl() {
-			const h = (directLink.getAttribute('href') || '').trim();
+			let h = (directLink.getAttribute('href') || '').trim();
 			if (!h || h === '#') return '';
-			try { return new URL(h, location.href).href; } catch (e) { return h; }
-		}
 
-		function getPlaylistId(url) {
-			try { return new URL(url, location.href).searchParams.get('list') || ''; } catch (e) { return ''; }
+			// 若看起來是編碼過的絕對網址，先解碼
+			if (/^https?%3A/i.test(h)) {
+				try { h = decodeURIComponent(h); } catch (e) {}
+			}
+
+			try { return new URL(h, location.href).href; } catch (e) { return h; }
 		}
 
 		function buildPlayerUrl(url) {
@@ -36493,5 +36495,60 @@
 
         console.log('☕迪遜咖啡廳已載入 | 版本 5.4 (新增完整版 & 無效anchor彈窗)');
     </script>
+	<script>
+	(function () {
+	  'use strict';
+
+	  const IFRAME_SEL = '#videoModal .video-iframe';
+	  const getIframe = () => document.querySelector(IFRAME_SEL);
+
+	  // 1) 為 YouTube 嵌入網址補上 enablejsapi=1
+	  function ensureJsApi(iframe) {
+		if (!iframe) return;
+		const src = iframe.getAttribute('src') || '';
+		if (!/^https?:\/\/(www\.)?youtube(-nocookie)?\.com\/embed\//i.test(src)) return;
+		if (/[?&]enablejsapi=1/.test(src)) return;
+		iframe.src = src + (src.indexOf('?') === -1 ? '?' : '&') + 'enablejsapi=1';
+	  }
+
+	  // 2) 向 iframe 發送 pauseVideo 指令
+	  function pauseCurrentVideo() {
+		const iframe = getIframe();
+		if (!iframe || !iframe.contentWindow) return;
+		const src = iframe.getAttribute('src') || '';
+		if (!src) return;
+		const origin = src.indexOf('youtube-nocookie.com') !== -1
+		  ? 'https://www.youtube-nocookie.com'
+		  : 'https://www.youtube.com';
+		try {
+		  iframe.contentWindow.postMessage(
+			JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }),
+			origin
+		  );
+		} catch (e) { /* 忽略 */ }
+	  }
+
+	  // 3) 監聽 src 變化，自動補參數（若你直接改 openVideo 可省略這段）
+	  const iframe = getIframe();
+	  if (iframe && window.MutationObserver) {
+		new MutationObserver(() => ensureJsApi(iframe))
+		  .observe(iframe, { attributes: true, attributeFilter: ['src'] });
+	  }
+
+	  // 4) 點「YouTube 播放器」/「在 YouTube 中打開」時暫停
+	  ['ytOpenPlayerLink', 'youtubeDirectLink'].forEach(id => {
+		const el = document.getElementById(id);
+		if (!el) return;
+		el.addEventListener('click', pauseCurrentVideo);
+		el.addEventListener('auxclick', pauseCurrentVideo);     // 中鍵
+		el.addEventListener('contextmenu', pauseCurrentVideo);  // 右鍵「在新分頁開啟」
+	  });
+
+	  // 5)（選用）切到其他分頁時也自動暫停
+	  // document.addEventListener('visibilitychange', () => {
+	  //   if (document.hidden) pauseCurrentVideo();
+	  // });
+	})();
+	</script>
 </body>
 </html>
